@@ -6,7 +6,7 @@ describe "Member" do
   it "Create" do
     data = {
       'scoutid' => 1,
-      'sectionid0' => 2,
+      'sectionidO' => 2,
       'type' => '',
       'firstname' => 'First',
       'lastname' => 'Last',
@@ -36,8 +36,8 @@ describe "Member" do
       'age' => '06/07',
       'yrs' => 1,
       'patrol' => 'Blue',
-      'patrolid0' => '3',
-      'patrolleader0' => 0,
+      'patrolidO' => '3',
+      'patrolleaderO' => 0,
     }
     member = Osm::Member.new(data)
 
