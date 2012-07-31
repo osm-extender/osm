@@ -9,18 +9,18 @@ module Osm
     def initialize(data)
       data = {} unless data.is_a?(Hash)
 
-      @pending = (data['pending'] || {}).symbolize_keys
-      @descriptions = (data['description'] || {}).symbolize_keys
+      @pending = Osm::symbolize_hash(data['pending'] || {})
+      @descriptions = Osm::symbolize_hash(data['description'] || {})
 
       @pending.each_key do |key|
-        @pending[key].each do |item|
-          item.symbolize_keys!
+        @pending[key].each_with_index do |item, index|
+          @pending[key][index] = item = Osm::symbolize_hash(item)
           item[:sid] = item[:sid].to_i
           item[:completed] = item[:completed].to_i
         end
       end
       @descriptions.each_key do |key|
-        @descriptions[key].symbolize_keys!
+        @descriptions[key] = Osm::symbolize_hash(@descriptions[key])
         @descriptions[key][:section] = @descriptions[key][:section].to_sym
         @descriptions[key][:type] = @descriptions[key][:type].to_sym
       end

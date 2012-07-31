@@ -12,7 +12,7 @@ module Osm
       @group_id = Osm::to_i_or_nil(data['groupid'])
       @group_normalized = Osm::to_i_or_nil(data['groupNormalised'])
       @default = data['isDefault'].eql?('1') ? true : false
-      @permissions = (data['permissions'] || {}).symbolize_keys
+      @permissions = Osm::symbolize_hash(data['permissions'] || {})
 
       # Convert permission values to a number
       @permissions.each_key do |key|
