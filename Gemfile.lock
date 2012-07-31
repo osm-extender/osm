@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    osm (0.0.1.alpha)
+    osm (0.0.2.alpha)
       activesupport (>= 3.2)
       httparty
       rails (>= 3.2.5)
