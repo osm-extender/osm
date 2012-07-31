@@ -32,8 +32,8 @@ module Osm
       @school = data['school']
       @ethnicity = data['ethnicity']
       @subs = data['subs']
-      @grouping_id = Osm::to_i_or_nil(data['patrolid0'])
-      @grouping_leader = data['patrolleader0'] # 0 - No, 1 = seconder, 2 = sixer
+      @grouping_id = Osm::to_i_or_nil(data['patrolidO'])
+      @grouping_leader = data['patrolleaderO'] # 0 - No, 1 = seconder, 2 = sixer
       @joined = Osm::parse_date(data['joined'])
       @age = data['age'] # 'yy / mm'
       @joined_years = data['yrs'].to_i
