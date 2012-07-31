@@ -489,10 +489,10 @@ module Osm
 
       data = perform_query("users.php?action=registerStructure&sectionid=#{section_id}&termid=#{term_id}", api_data)
 
-      data.each do |item|
-        item.symbolize_keys!
-        item[:rows].each do |row|
-          row.symbolize_keys!
+      data.each_with_index do |item, item_index|
+        data[item_index] = item = Osm::symbolize_hash(item)
+        item[:rows].each_with_index do |row, row_index|
+          item[:rows][row_index] = row = Osm::symbolize_hash(row)
         end
       end
       self.user_can_access :register, section_id, api_data
@@ -521,7 +521,7 @@ module Osm
 
       data = data['items']
       data.each do |item|
-        item.symbolize_keys!
+        item = Osm::symbolize_hash(item)
         item[:scoutid] = item[:scoutid].to_i
         item[:sectionid] = item[:sectionid].to_i
         item[:patrolid] = item[:patrolid].to_i

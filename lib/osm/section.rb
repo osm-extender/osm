@@ -20,10 +20,10 @@ module Osm
       @has_badge_records = data['hasUsedBadgeRecords'].eql?('1') ? true : false
       @has_programme = data['hasProgramme']
       @wizard = (data['wizard'] || '').downcase.eql?('true') ? true : false
-      @column_names = (data['columnNames'] || {}).symbolize_keys
-      @fields = (data['fields'] || {}).symbolize_keys
-      @intouch_fields = (data['intouch'] || {}).symbolize_keys
-      @mobile_fields = (data['mobFields'] || {}).symbolize_keys
+      @column_names = Osm::symbolize_hash(data['columnNames'] || {})
+      @fields = Osm::symbolize_hash(data['fields'] || {})
+      @intouch_fields = Osm::symbolize_hash(data['intouch'] || {})
+      @mobile_fields = Osm::symbolize_hash(data['mobFields'] || {})
       @extra_records = data['extraRecords'] || []
       @role = role
 
@@ -32,9 +32,9 @@ module Osm
         # Expect item to be: {:name=>String, :extraid=>FixNum}
         # Sometimes get item as: [String, {"name"=>String, "extraid"=>FixNum}]
         if item.is_a?(Array)
-          item = item[1].symbolize_keys
+          item = Osm::symbolize_hash(item[1])
         else
-          item.symbolize_keys!
+          item = Osm::symbolize_hash(item)
         end
       end
     end
