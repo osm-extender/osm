@@ -8,7 +8,7 @@ module Osm
     # @param data the hash of data for the object returned by the API
     def initialize(data)
       @id = Osm::to_i_or_nil(data['scoutid'])
-      @section_id = Osm::to_i_or_nil(data['sectionid0'])
+      @section_id = Osm::to_i_or_nil(data['sectionidO'])
       @type = data['type']
       @first_name = data['firstname']
       @last_name = data['lastname']
