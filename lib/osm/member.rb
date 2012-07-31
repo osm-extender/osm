@@ -2,13 +2,13 @@ module Osm
 
   class Member
 
-    attr_reader :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started, :joined_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :grouping_id, :grouping_leader, :joined, :age, :joined_years, :patrol
+    attr_reader :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started, :joined_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :grouping_id, :grouping_leader, :joined, :age, :joined_years
 
     # Initialize a new Member using the hash returned by the API call
     # @param data the hash of data for the object returned by the API
     def initialize(data)
       @id = Osm::to_i_or_nil(data['scoutid'])
-      @section_id = Osm::to_i_or_nil(data['sectionid'])
+      @section_id = Osm::to_i_or_nil(data['sectionid0'])
       @type = data['type']
       @first_name = data['firstname']
       @last_name = data['lastname']
@@ -32,12 +32,11 @@ module Osm
       @school = data['school']
       @ethnicity = data['ethnicity']
       @subs = data['subs']
-      @grouping_id = Osm::to_i_or_nil(data['patrolid'])
-      @grouping_leader = data['patrolleader'] # 0 - No, 1 = seconder, 2 = sixer
+      @grouping_id = Osm::to_i_or_nil(data['patrolid0'])
+      @grouping_leader = data['patrolleader0'] # 0 - No, 1 = seconder, 2 = sixer
       @joined = Osm::parse_date(data['joined'])
       @age = data['age'] # 'yy / mm'
       @joined_years = data['yrs'].to_i
-      @patrol = data['patrol']
     end
 
     # Get the years element of this scout's age

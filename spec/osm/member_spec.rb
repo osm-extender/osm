@@ -6,7 +6,7 @@ describe "Member" do
   it "Create" do
     data = {
       'scoutid' => 1,
-      'sectionid' => 2,
+      'sectionid0' => 2,
       'type' => '',
       'firstname' => 'First',
       'lastname' => 'Last',
@@ -36,6 +36,8 @@ describe "Member" do
       'age' => '06/07',
       'yrs' => 1,
       'patrol' => 'Blue',
+      'patrolid0' => '3',
+      'patrolleader0' => 0,
     }
     member = Osm::Member.new(data)
 
@@ -69,7 +71,6 @@ describe "Member" do
     member.joined.should == Date.new(2006, 1, 7)
     member.age.should == '06/07'
     member.joined_years.should == 1
-    member.patrol.should == 'Blue'
   end
 
 

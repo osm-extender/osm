@@ -7,13 +7,15 @@ describe "Grouping" do
     data = {
       'patrolid' => 1,
       'name' => 'Patrol Name',
-      'active' => 1
+      'active' => 1,
+      'points' => '2',
     }
     patrol = Osm::Grouping.new(data)
 
     patrol.id.should == 1
     patrol.name.should == 'Patrol Name'
     patrol.active.should == true
+    patrol.points.should == 2
   end
 
 end
