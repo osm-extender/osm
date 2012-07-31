@@ -13,12 +13,14 @@ Staging [![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch
 Use the [Online Scout Manager](https://www.onlinescoutmanager.co.uk) API.
 
 
-## Installation
+## Installation / Documentation
 
 Add to your Gemfile and run the `bundle` command to install it.
 
 ```ruby
 gem 'osm'
 ```
-
 **Requires Ruby 1.9.2 or later.**
+
+
+Documentation can be found on [rubydoc.info](http://rubydoc.info/github/robertgauld/osm/master/frames)
