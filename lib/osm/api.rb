@@ -338,8 +338,8 @@ module Osm
     end
 
     # Get member details
-    # @section_id [FixNum] the section to get details for
-    # @term_id [FixNum] the term to get details for, if nil the current term is assumed
+    # @param [FixNum] section_id the section to get details for
+    # @param [FixNum] term_id the term to get details for, if nil the current term is assumed
     # @param [Hash] options a hash which may contain the following keys:
     #   * :no_cache - if true then the data will be retreived from OSM not the cache
     #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
@@ -421,7 +421,7 @@ module Osm
     end
 
     # Get events
-    # @section_id [FixNum] the section to get details for
+    # @param [FixNum] section_id the section to get details for
     # @param [Hash] options a hash which may contain the following keys:
     #   * :no_cache - if true then the data will be retreived from OSM not the cache
     #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
@@ -450,7 +450,7 @@ module Osm
     end
 
     # Get due badges
-    # @section_id [FixNum] the section to get details for
+    # @param [FixNum] section_id the section to get details for
     # @param [Hash] options a hash which may contain the following keys:
     #   * :no_cache - if true then the data will be retreived from OSM not the cache
     #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
@@ -476,7 +476,7 @@ module Osm
     end
 
     # Get register structure
-    # @section_id [FixNum] the section to get details for
+    # @param [FixNum] section_id the section to get details for
     # @param [Hash] options a hash which may contain the following keys:
     #   * :no_cache - if true then the data will be retreived from OSM not the cache
     #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
@@ -506,7 +506,7 @@ module Osm
     end
 
     # Get register
-    # @section_id [FixNum] the section to get details for
+    # @param [FixNum] section_id the section to get details for
     # @param [Hash] options a hash which may contain the following keys:
     #   * :no_cache - if true then the data will be retreived from OSM not the cache
     #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
