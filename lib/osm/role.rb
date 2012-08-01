@@ -22,14 +22,14 @@ module Osm
 
     # Determine if this role has read access for the provided permission
     # @param [Symbol] key the permission being queried
-    # @return [Boolean] if this role can read the passed permission, false otherwise
+    # @return [Boolean] if this role can read the passed permission
     def can_read?(key)
       return [10, 20, 100].include?(@permissions[key])
     end
 
     # Determine if this role has write access for the provided permission
     # @param [Symbol] key the permission being queried
-    # @return [Boolean] if this role can write the passed permission, false otherwise
+    # @return [Boolean] if this role can write the passed permission
     def can_write?(key)
       return [20, 100].include?(@permissions[key])
     end
