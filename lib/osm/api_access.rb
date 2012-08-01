@@ -3,6 +3,12 @@ module Osm
   class ApiAccess
 
     attr_reader :id, :name, :permissions
+    # @!attribute [r] id
+    #   @return [FixNum] the id for the API
+    # @!attribute [r] name
+    #   @return [String] the name of the API
+    # @!attribute [r] permissions
+    #   @return [Hash] the permissions assigned to this API by the user in OSM
 
     # Initialize a new API Access using the hash returned by the API call
     # @param data the hash of data for the object returned by the API
@@ -19,21 +25,21 @@ module Osm
     end
 
     # Determine if this API has read access for the provided permission
-    # @param key - the key for the permission being queried
-    # @returns - true if this API can read the passed permission, false otherwise
+    # @param [Symbol] key the permission being queried
+    # @return [Boolean] if this API can read the passed permission
     def can_read?(key)
       return [20, 10].include?(@permissions[key])
     end
 
     # Determine if this API has write access for the provided permission
-    # @param key - the key for the permission being queried
-    # @returns - true if this API can write the passed permission, false otherwise
+    # @param [Symbol] key the permission being queried
+    # @return [Boolean] if this API can write the passed permission
     def can_write?(key)
       return [20].include?(@permissions[key])
     end
 
     # Determine if this API is the API being used to make requests
-    # @returns - true if this is the API being used, false otherwise
+    # @return [Boolean] if this is the API being used
     def our_api?
       return @id == Osm::Api.api_id.to_i
     end

@@ -3,6 +3,22 @@ module Osm
   class Event
 
     attr_reader :id, :section_id, :name, :start, :end, :cost, :location, :notes
+    # @!attribute [r] id
+    #   @return [FixNum] the id for the event
+    # @!attribute [r] section_id
+    #   @return [FixNum] the id for the section
+    # @!attribute [r] name
+    #   @return [String] the name of the event
+    # @!attribute [r] start
+    #   @return [DateTime] when the event starts
+    # @!attribute [r] end
+    #   @return [DateTime] when the event ends
+    # @!attribute [r] cost
+    #   @return [?] the cost of the event
+    # @!attribute [r] location
+    #   @return [String] where the event is
+    # @!attribute [r] notes
+    #   @return [String] notes about the event
 
     # Initialize a new Event using the hash returned by the API call
     # @param data the hash of data for the object returned by the API

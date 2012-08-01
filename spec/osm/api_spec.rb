@@ -465,7 +465,7 @@ describe "API" do
       }
 
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"1":"Section 1"}'}) }
-      Osm::Api.new('1', '2').get_notepads(:api_data => {'userid'=>'user', 'secret'=>'secret'}).should == {1 => 'Section 1'}
+      Osm::Api.new('1', '2').get_notepads({}, {'userid'=>'user', 'secret'=>'secret'}).should == {1 => 'Section 1'}
     end
   end
 

@@ -3,6 +3,14 @@ module Osm
   class Grouping
 
     attr_reader :id, :name, :active, :points
+    # @!attribute [r] id
+    #   @return [FixNum] the id for grouping
+    # @!attribute [r] name
+    #   @return [String] the name of the grouping
+    # @!attribute [r] id
+    #   @return [Boolean] wether the grouping is active
+    # @!attribute [r] points
+    #   @return [FixNum] the points awarded to the grouping
 
     # Initialize a new Grouping using the hash returned by the API call
     # @param data the hash of data for the object returned by the API

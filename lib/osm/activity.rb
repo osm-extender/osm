@@ -3,6 +3,47 @@ module Osm
   class Activity
 
     attr_reader :id, :version, :group_id, :user_id, :title, :description, :resources, :instructions, :running_time, :location, :shared, :rating, :editable, :deletable, :used, :versions, :sections, :tags, :files, :badges
+    # @!attribute [r] id
+    #   @return [FixNum] the id for the activity
+    # @!attribute [r] version
+    #   @return [FixNum] the version of the activity
+    # @!attribute [r] group_id
+    #   @return [FixNum] the group_id
+    # @!attribute [r] user_id
+    #   @return [FixNum] the user_id of the creator of the activity
+    # @!attribute [r] title
+    #   @return [String] the activity's title
+    # @!attribute [r] description
+    #   @return [String] the description of the activity
+    # @!attribute [r] resources
+    #   @return [String] resources required to do the activity
+    # @!attribute [r] instructions
+    #   @return [String] instructions for doing the activity
+    # @!attribute [r] running_time
+    #   @return [FixNum] duration of the activity in minutes
+    # @!attribute [r] location
+    #   @return [Symbol] :indoors or :outdoors
+    # @!attribute [r] shared
+    #   @return [FixNum] ?
+    # @!attribute [r] rating
+    #   @return [FixNum] ?
+    # @!attribute [r] editable
+    #   @return [Boolean] ?
+    # @!attribute [r] deletable
+    #   @return [Boolean] ?
+    # @!attribute [r] used
+    #   @return [FixNum] ?
+    # @!attribute [r] versions
+    #   @return [Hash] ?
+    # @!attribute [r] sections
+    #   @return [Array<Symbol>] the sections the activity is appropriate for
+    # @!attribute [r] tags
+    #   @return [Array<String>] the tags attached to the activity
+    # @!attribute [r] files
+    #   @return [Array] ?
+    # @!attribute [r] badges
+    #   @return [Array] ?
+
 
     # Initialize a new Activity using the hash returned by the API call
     # @param data the hash of data for the object returned by the API

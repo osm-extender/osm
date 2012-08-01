@@ -3,6 +3,18 @@ module Osm
   class Role
 
     attr_reader :section, :group_name, :group_id, :group_normalized, :default, :permissions
+    # @!attribute [r] section
+    #   @return [Osm::Section] the section this role related to
+    # @!attribute [r] group_name
+    #   @return [String] the name of the group the section is in
+    # @!attribute [r] group_id
+    #   @return [FixNum] the group the section is in
+    # @!attribute [r] group_normalized
+    #   @return [FixNum] ?
+    # @!attribute [r] default
+    #   @return [Boolean] was this the last section this user used in OSM
+    # @!attribute [r] permissions
+    #   @return [Hash] the permissions the user has in this role
 
     # Initialize a new UserRole using the hash returned by the API call
     # @param data the hash of data for the object returned by the API
@@ -21,27 +33,27 @@ module Osm
     end
 
     # Determine if this role has read access for the provided permission
-    # @param key - the key for the permission being queried
-    # @returns - true if this role can read the passed permission, false otherwise
+    # @param [Symbol] key the permission being queried
+    # @return [Boolean] if this role can read the passed permission
     def can_read?(key)
       return [10, 20, 100].include?(@permissions[key])
     end
 
     # Determine if this role has write access for the provided permission
-    # @param key - the key for the permission being queried
-    # @returns - true if this role can write the passed permission, false otherwise
+    # @param [Symbol] key the permission being queried
+    # @return [Boolean] if this role can write the passed permission
     def can_write?(key)
       return [20, 100].include?(@permissions[key])
     end
 
-    # Get section's full name in a consistent format
-    # @returns a string e.g. "Scouts (1st Somewhere)"
+    # Get section's long name in a consistent format
+    # @return [String] e.g. "Scouts (1st Somewhere)"
     def long_name
       @group_name.blank? ? @section.name : "#{@section.name} (#{@group_name})"
     end
 
     # Get section's full name in a consistent format
-    # @returns a string e.g. "1st Somewhere Beavers"
+    # @return [String] e.g. "1st Somewhere Beavers"
     def full_name
       @group_name.blank? ? @section.name : "#{@group_name} #{@section.name}"
     end

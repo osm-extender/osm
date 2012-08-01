@@ -1,3 +1,13 @@
+# @!macro [new] options_get
+#   @param [Hash] options
+#   @option options [Boolean] :no_cache (optional) if true then the data will be retreived from OSM not the cache
+
+# @!macro [new] options_api_data
+#   @param [Hash] api_data
+#   @option api_data [String] 'userid' (optional) the OSM userid to make the request as
+#   @option api_data [String] 'secret' (optional) the OSM secret belonging to the above user
+
+
 module Osm
 
   class Api
@@ -11,9 +21,10 @@ module Osm
 
     # Initialize a new API connection
     # If passing user details then both must be passed
-    # @param userid (optional) osm userid of the user to act as
-    # @param secret (optional) osm secret of the user to act as
-    # @param site (optional) wether to use OSM (:scout) or OGM (:guide), defaults to the value set for the class
+    # @param [String] userid osm userid of the user to act as
+    # @param [String] secret osm secret of the user to act as
+    # @param [Symbol] site wether to use OSM (:scout) or OGM (:guide), defaults to the value set for the class
+    # @return nil
     def initialize(userid=nil, secret=nil, site=@@api_site)
       raise ArgumentError, 'You must pass a secret if you are passing a userid' if secret.nil? && !userid.nil?
       raise ArgumentError, 'You must pass a userid if you are passing a secret' if userid.nil? && !secret.nil?
@@ -22,15 +33,17 @@ module Osm
       @base_url = 'https://www.onlinescoutmanager.co.uk' if site == :scout
       @base_url = 'http://www.onlineguidemanager.co.uk' if site == :guide
       set_user(userid, secret)
+      nil
     end
 
     # Configure the API options used by all instances of the class
-    # @param options - a hash containing the following keys:
-    #   * :api_id - the apiid given to you for using the OSM id
-    #   * :api_token - the token which goes with the above api
-    #   * :api_name - the name displayed in the External Access tab of OSM
-    #   * :api_site - wether to use OSM (if :scout) or OGM (if :guide)
-    #   * :default_cache_ttl (optional, default = 30 minutes) - The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time.
+    # @param [Hash] options
+    # @option options [String] :api_id the apiid given to you for using the OSM id
+    # @option options [String] :api_token the token which goes with the above api
+    # @option options [String] :api_name the name displayed in the External Access tab of OSM
+    # @option options [Symbol] :api_sate wether to use OSM (if :scout) or OGM (if :guide)
+    # @option options [FixNum] :default_cache_ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds).
+    # @return nil
     def self.configure(options)
       raise ArgumentError, ':api_id does not exist in options hash' if options[:api_id].nil?
       raise ArgumentError, ':api_token does not exist in options hash' if options[:api_token].nil?
@@ -38,30 +51,31 @@ module Osm
       raise ArgumentError, ':api_site does not exist in options hash or is invalid, this should be set to either :scout or :guide' unless [:scout, :guide].include?(options[:api_site])
       raise ArgumentError, ':default_cache_ttl must be greater than 0' unless (options[:default_cache_ttl].nil? || options[:default_cache_ttl].to_i > 0)
 
-      @@api_id = options[:api_id]
-      @@api_token = options[:api_token]
-      @@api_name = options[:api_name]
+      @@api_id = options[:api_id].to_s
+      @@api_token = options[:api_token].to_s
+      @@api_name = options[:api_name].to_s
       @@api_site = options[:api_site]
       @@default_cache_ttl = options[:default_cache_ttl].to_i unless options[:default_cache_ttl].nil?
+      nil
     end
 
     # Get the API ID used in this class
-    # @returns the API ID
+    # @return [String] the API ID
     def self.api_id
       return @@api_id
     end
 
     # Get the API name displayed in the External Access tab of OSM
-    # @returns the API ID
+    # @return [String] the API name
     def self.api_name
       return @@api_name
     end
 
     # Get the userid and secret to be able to act as a certain user on the OSM system
     # Also set's the 'current user'
-    # @param email the login email address of the user on OSM
-    # @param password the login password of the user on OSM
-    # @returns hash containing the following keys:
+    # @param [String] email the login email address of the user on OSM
+    # @param [String] password the login password of the user on OSM
+    # @return [Hash] a hash containing the following keys:
     #   * 'userid' - the userid to use in future requests
     #   * 'secret' - the secret to use in future requests
     def authorize(email, password)
@@ -75,14 +89,10 @@ module Osm
     end
 
     # Get the user's roles
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an array of Osm::Role objects
-    def get_roles(options={})
-      api_data = options[:api_data] || {}
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Osm::Role>]
+    def get_roles(options={}, api_data={})
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-roles-#{api_data[:userid] || @userid}")
         return Rails.cache.read("OSMAPI-roles-#{api_data[:userid] || @userid}")
@@ -103,15 +113,10 @@ module Osm
     end
 
     # Get the user's notepads
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns a hash (keys are section IDs, values are a string)
-    def get_notepads(options={})
-      api_data = options[:api_data] || {}
-
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Hash] a hash (keys are section IDs, values are a string)
+    def get_notepads(options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-notepads-#{api_data[:userid] || @userid}")
         return Rails.cache.read("OSMAPI-notepads-#{api_data[:userid] || @userid}")
       end
@@ -130,22 +135,17 @@ module Osm
     end
 
     # Get the notepad for a specified section
-    # @param section_id the section id of the required section
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns nil if an error occured or the user does not have access to that section
-    # @returns a string otherwise
-    def get_notepad(section_id, options={})
-      api_data = options[:api_data] || {}
-
+    # @param [FixNum] section_id the section id of the required section
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return nil if an error occured or the user does not have access to that section
+    # @return [String] the content of the notepad otherwise
+    def get_notepad(section_id, options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-notepad-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
         return Rails.cache.read("OSMAPI-notepad-#{section_id}")
       end
 
-      notepads = get_notepads(options)
+      notepads = get_notepads(options, api_data)
       return nil unless notepads.is_a? Hash
 
       notepads.each_key do |key|
@@ -156,22 +156,18 @@ module Osm
     end
 
     # Get the section (and its configuration)
-    # @param section_id the section id of the required section
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns nil if an error occured or the user does not have access to that section
-    # @returns an Osm::SectionConfig object otherwise
-    def get_section(section_id, options={})
-      api_data = options[:api_data] || {}
+    # @param [FixNum] section_id the section id of the required section
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return nil if an error occured or the user does not have access to that section
+    # @return [Osm::Section]
+    def get_section(section_id, options={}, api_data={})
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-section-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
         return Rails.cache.read("OSMAPI-section-#{section_id}")
       end
 
-      roles = get_roles(options)
+      roles = get_roles(options, api_data)
       return nil unless roles.is_a? Array
 
       roles.each do |role|
@@ -182,16 +178,11 @@ module Osm
     end
 
     # Get the groupings (e.g. patrols, sixes, lodges) for a given section
-    # @param section_id the section to get the programme for
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an array of Osm::Patrol objects
-    def get_groupings(section_id, options={})
-      api_data = options[:api_data] || {}
-
+    # @param [FixNum] section_id the section to get the programme for
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Osm::Grouping>]
+    def get_groupings(section_id, options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-groupings-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
         return Rails.cache.read("OSMAPI-groupings-#{section_id}")
       end
@@ -211,15 +202,10 @@ module Osm
     end
 
     # Get the terms that the OSM user can access
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns  an array of Osm::Term objects
-    def get_terms(options={})
-      api_data = options[:api_data] || {}
-
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Osm::Term>]
+    def get_terms(options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-terms-#{api_data[:userid] || @userid}")
         return Rails.cache.read("OSMAPI-terms-#{api_data[:userid] || @userid}")
       end
@@ -241,17 +227,12 @@ module Osm
     end
 
     # Get a term
-    # @param term_id the id of the required term
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns nil if an error occured or the user does not have access to that term
-    # @returns an Osm::Term object otherwise
-    def get_term(term_id, options={})
-      api_data = options[:api_data] || {}
-
+    # @param [FixNum] term_id the id of the required term
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return nil if an error occured or the user does not have access to that term
+    # @return [Osm::Term]
+    def get_term(term_id, options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-term-#{term_id}") && self.user_can_access?(:term, term_id, api_data)
         return Rails.cache.read("OSMAPI-term-#{term_id}")
       end
@@ -267,17 +248,12 @@ module Osm
     end
 
     # Get the programme for a given term
-    # @param sectionid the section to get the programme for
-    # @param termid the term to get the programme for
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an array of Osm::ProgrammeItem objects
-    def get_programme(section_id, term_id, options={})
-      api_data = options[:api_data] || {}
-
+    # @param [FixNum] section_id the section to get the programme for
+    # @param [FixNum] term_id the term to get the programme for
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Osm::ProgrammeItem>]
+    def get_programme(section_id, term_id, options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-programme-#{section_id}-#{term_id}") && self.user_can_access?(:programme, section_id, api_data)
         return Rails.cache.read("OSMAPI-programme-#{section_id}-#{term_id}")
       end
@@ -303,17 +279,12 @@ module Osm
     end
 
     # Get activity details
-    # @param activity_id the activity ID
-    # @param version (optional) the version of the activity to retreive
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an Osm::Activity object
-    def get_activity(activity_id, version=nil, options={})
-      api_data = options[:api_data] || {}
-
+    # @param [FixNum] activity_id the activity ID
+    # @param [FixNum] version the version of the activity to retreive, if nil the latest version will be assumed
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Osm::Activity]
+    def get_activity(activity_id, version=nil, options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-activity-#{activity_id}-#{version}") && self.user_can_access?(:activity, activity_id, api_data)
         return Rails.cache.read("OSMAPI-activity-#{activity_id}-#{version}")
       end
@@ -334,16 +305,12 @@ module Osm
     end
 
     # Get member details
-    # @section_id the section to get details for
-    # @term_id (optional) the term to get details for, if it is omitted then the current term is used
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an array of Osm::Member objects
-    def get_members(section_id, term_id=nil, options={})
-      api_data = options[:api_data] || {}
+    # @param [FixNum] section_id the section to get details for
+    # @param [FixNum] term_id the term to get details for, if nil the current term is assumed
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Osm::Member>]
+    def get_members(section_id, term_id=nil, options={}, api_data={})
       term_id = Osm::find_current_term_id(self, section_id, api_data) if term_id.nil?
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-members-#{section_id}-#{term_id}") && self.user_can_access?(:member, section_id, api_data)
@@ -363,16 +330,11 @@ module Osm
     end
 
     # Get API access details for a given section
-    # @param section_id the section to get details for
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an array of Osm::ApiAccess objects
-    def get_api_access(section_id, options={})
-      api_data = options[:api_data] || {}
-
+    # @param [FixNum] section_id the section to get details for
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Osm::ApiAccess>]
+    def get_api_access(section_id, options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}")
         return Rails.cache.read("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}")
       end
@@ -393,16 +355,11 @@ module Osm
     end
 
     # Get our API access details for a given section
-    # @param section_id the section to get details for
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an Osm::ApiAccess objects
-    def get_our_api_access(section_id, options={})
-      api_data = options[:api_data] || {}
-
+    # @param [FixNum] section_id the section to get details for
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Osm::ApiAccess]
+    def get_our_api_access(section_id, options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}-#{Osm::Api.api_id}")
         return Rails.cache.read("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}-#{Osm::Api.api_id}")
       end
@@ -417,16 +374,11 @@ module Osm
     end
 
     # Get events
-    # @section_id the section to get details for
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an array of Osm::Event objects
-    def get_events(section_id, options={})
-      api_data = options[:api_data] || {}
-
+    # @param [FixNum] section_id the section to get details for
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Osm::Event>]
+    def get_events(section_id, options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-events-#{section_id}") && self.user_can_access?(:programme, section_id, api_data)
         return Rails.cache.read("OSMAPI-events-#{section_id}")
       end
@@ -446,15 +398,11 @@ module Osm
     end
 
     # Get due badges
-    # @section_id the section to get details for
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an Osm::DueBadges object
-    def get_due_badges(section_id, term_id=nil, options={})
-      api_data = options[:api_data] || {}
+    # @param [FixNum] section_id the section to get details for
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Osm::DueBadges]
+    def get_due_badges(section_id, term_id=nil, options={}, api_data={})
       term_id = Osm::find_current_term_id(self, section_id, api_data) if term_id.nil?
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-due_badges-#{section_id}-#{term_id}") && self.user_can_access?(:badge, section_id, api_data)
@@ -472,15 +420,11 @@ module Osm
     end
 
     # Get register structure
-    # @section_id the section to get details for
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an array of hashes representing the rows of the register
-    def get_register_structure(section_id, term_id=nil, options={})
-      api_data = options[:api_data] || {}
+    # @param [FixNum] section_id the section to get details for
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Hash>] representing the rows of the register
+    def get_register_structure(section_id, term_id=nil, options={}, api_data={})
       term_id = Osm::find_current_term_id(self, section_id, api_data) if term_id.nil?
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-register_structure-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
@@ -502,15 +446,11 @@ module Osm
     end
 
     # Get register
-    # @section_id the section to get details for
-    # @param options (optional) a hash which may contain the following keys:
-    #   * :no_cache - if true then the data will be retreived from OSM not the cache
-    #   * :api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #     * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #     * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns an array of hashes representing the attendance of each member
-    def get_register(section_id, term_id=nil, options={})
-      api_data = options[:api_data] || {}
+    # @param [FixNum] section_id the section to get details for
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Hash>] representing the attendance of each member
+    def get_register(section_id, term_id=nil, options={}, api_data={})
       term_id = Osm::find_current_term_id(self, section_id, api_data) if term_id.nil?
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-register-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
@@ -532,12 +472,10 @@ module Osm
     end
 
     # Create an evening in OSM
-    # @param section_id the id of the section to add the term to
-    # @param meeting_date the date of the meeting
-    # @param api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #   * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #   * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns a boolean representing if the operation suceeded or not
+    # @param [FixNum] section_id the id of the section to add the term to
+    # @param [Date] meeting_date the date of the meeting
+    # @!macro options_api_data
+    # @return [Boolean] if the operation suceeded or not
     def create_evening(section_id, meeting_date, api_data={})
       section_id = section_id.to_i
       evening_api_data = {
@@ -557,11 +495,9 @@ module Osm
     end
 
     # Update an evening in OSM
-    # @param programme_item is the Osm::ProgrammeItem object to update
-    # @param api_data (optional) a hash containing information to be sent to the server, it may contain the following keys:
-    #   * 'userid' (optional) the OSM userid to make the request as, this will override one provided using the set_user method
-    #   * 'secret' (optional) the OSM secret belonging to the above user
-    # @returns a boolean representing if the operation suceeded or not
+    # @param [Osm::ProgrammeItem] programme_item is the Osm::ProgrammeItem object to update
+    # @!macro options_api_data
+    # @return [Boolean] if the operation suceeded or not
     def update_evening(programme_item, api_data={})
       response = perform_query("programme.php?action=editEvening", api_data.merge({
         'eveningid' => programme_item.evening_id,
@@ -590,10 +526,11 @@ module Osm
 
     protected
     # Set access permission for the current user on a resource stored in the cache
-    # @param resource_type a symbol representing the resource type (:section, :grouping, :term, :activity, :programme, :member, :badge, :register)
-    # @param resource_id the id of the resource being checked
-    # @param api_data the data hash used in accessing the api
-    # @param permission (optional, default true) wether the user can access the resource
+    # @param [Symbol] resource_type a symbol representing the resource type (:section, :grouping, :term, :activity, :programme, :member, :badge, :register)
+    # @param [FixNum] resource_id the id of the resource being checked
+    # @param [Hash] api_data the data hash used in accessing the api
+    # @param [Boolean] permission wether the user can access the resource
+    # @return [Boolean] the permission which was set
     def user_can_access(resource_type, resource_id, api_data, permission=true)
       user = (api_data['userid'] || @userid).to_i
       resource_id = resource_id.to_i
@@ -606,12 +543,11 @@ module Osm
     end
 
     # Get access permission for the current user on a resource stored in the cache
-    # @param resource_type a symbol representing the resource type (:section, :grouping, :term, :activity, :programme, :member, :badge, :register)
-    # @param resource_id the id of the resource being checked
-    # @param api_data the data hash used in accessing the api
-    # @returns true if the user can access the resource
-    # @returns false if the user can not access the resource
-    # @returns nil if the combination of user and resource has not been seen
+    # @param [Symbol] resource_type a symbol representing the resource type (:section, :grouping, :term, :activity, :programme, :member, :badge, :register)
+    # @param [FixNum] resource_id the id of the resource being checked
+    # @param [Hash] api_data the data hash used in accessing the api
+    # @return nil if the combination of user and resource has not been set
+    # @return [Boolean] if the user can access the resource
     def user_can_access?(resource_type, resource_id, api_data)
       user = (api_data['userid'] || @userid).to_i
       resource_id = resource_id.to_i
@@ -625,17 +561,17 @@ module Osm
 
     private
     # Set the OSM user to make future requests as
-    # @param userid the OSM userid to use (get this using the authorize method)
-    # @param secret the OSM secret to use (get this using the authorize method)
+    # @param [String] userid the OSM userid to use (get this using the authorize method)
+    # @param [String] secret the OSM secret to use (get this using the authorize method)
     def set_user(userid, secret)
       @userid = userid
       @secret = secret
     end
 
     # Make the query to the OSM API
-    # @param url the script on the remote server to invoke
-    # @param api_data (optional) a hash containing the values to be sent to the server
-    # @returns the parsed JSON returned by OSM
+    # @param [String] url the script on the remote server to invoke
+    # @param [Hash] api_data a hash containing the values to be sent to the server
+    # @return [Hash, Array, String] the parsed JSON returned by OSM
     def perform_query(url, api_data={})
       api_data['apiid'] = @@api_id
       api_data['token'] = @@api_token
@@ -671,10 +607,17 @@ module Osm
       return decoded        
     end
 
+    # Check if text looks like it's JSON
+    # @param [String] text what to look at
+    # @return [Boolean]
     def looks_like_json?(text)
       (['[', '{'].include?(text[0]))
     end
 
+    # Get the error returned by OSM
+    # @param data what OSM gave us
+    # @return false if no error message was found
+    # @return [String] the error message
     def get_osm_error(data)
       return false unless data.is_a?(Hash)
       to_return = data['error'] || data['err'] || false
