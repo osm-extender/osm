@@ -42,7 +42,6 @@ module Osm
     end
 
 
-    protected
     # Get the JSON for the activitied to pass to the OSM API
     # @return [String]
     def activities_for_saving
