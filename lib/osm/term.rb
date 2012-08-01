@@ -3,6 +3,16 @@ module Osm
   class Term
 
     attr_reader :id, :section_id, :name, :start, :end
+    # @!attribute [r] id
+    #   @return [FixNum] the id for the term
+    # @!attribute [r] section_id
+    #   @return [FixNum] the section the term belongs to
+    # @!attribute [r] name
+    #   @return [FixNum] the name of the term
+    # @!attribute [r] start
+    #   @return [Date] when the term starts
+    # @!attribute [r] end
+    #   @return [Date] when the term ends
 
     # Initialize a new Term using the hash returned by the API call
     # @param data the hash of data for the object returned by the API

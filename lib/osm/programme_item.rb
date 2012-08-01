@@ -4,6 +4,32 @@ module Osm
 
     attr_accessor :evening_id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :meeting_date, :activities, :google_calendar
     attr_reader :start_time, :end_time
+    # @!attribute [rw] evening_id
+    #   @return [FixNum] the id of the evening
+    # @!attribute [rw] sectionid
+    #   @return [FixNum] the section the evening belongs to
+    # @!attribute [rw] title
+    #   @return [String] the title of the evening
+    # @!attribute [rw] notes_for_parents
+    #   @return [String] notes to be shared with parents
+    # @!attribute [rw] games
+    #   @return [String] games to be played during the evening
+    # @!attribute [rw] pre_notes
+    #   @return [String] notes for the start of the evening
+    # @!attribute [rw] post_notes
+    #   @return [String] notes for the end of the evening
+    # @!attribute [rw] leaders
+    #   @return [String] the leaders present at the evening
+    # @!attribute [rw] meeting_date
+    #   @return [Date] the date of the evening
+    # @!attribute [rw] activities
+    #   @return [Array<ProgrammeActivity>] tlist of activities being done during the evening
+    # @!attribute [rw] google_calendar
+    #   @return [String] ?
+    # @!attribute [rw] start_time
+    #   @return [String] the start time (hh:mm)
+    # @!attribute [rw] end_time
+    #   @return [String] the end time (hh:mm)
 
     # Initialize a new ProgrammeItem using the hash returned by the API call
     # @param data the hash of data for the object returned by the API

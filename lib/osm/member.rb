@@ -3,6 +3,67 @@ module Osm
   class Member
 
     attr_reader :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started, :joined_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :grouping_id, :grouping_leader, :joined, :age, :joined_years
+    # @!attribute [r] id
+    #   @return [FixNum] the id for the member
+    # @!attribute [r] section_id
+    #   @return [FixNum] the section the member belongs to
+    # @!attribute [r] type
+    #   @return [?] ?
+    # @!attribute [r] first_name
+    #   @return [String] the member's first name
+    # @!attribute [r] last_name
+    #   @return [String] the imember's last name
+    # @!attribute [r] email1
+    #   @return [String] the 1st email address for the member
+    # @!attribute [r] email2
+    #   @return [String] the 2nd email address for the member
+    # @!attribute [r] email3
+    #   @return [String] the 3rd email address for the member
+    # @!attribute [r] email4
+    #   @return [String] the 4th email address for the member
+    # @!attribute [r] phone1
+    #   @return [String] the 1st phone number for the member
+    # @!attribute [r] phone2
+    #   @return [String] the 2nd phone number for the member
+    # @!attribute [r] phone3
+    #   @return [String] the 3rd phone number for the member
+    # @!attribute [r] phone4
+    #   @return [String] the 4th phone number for the member
+    # @!attribute [r] address
+    #   @return [String] the member's address
+    # @!attribute [r] address2
+    #   @return [String] the member's 2nd address
+    # @!attribute [r] date_of_birth
+    #   @return [Date] the member's date of birth
+    # @!attribute [r] started
+    #   @return [Date] when the member started Scouting
+    # @!attribute [r] joined_in_years
+    #   @return [FixNum] thow many full years the member has been in Scouting
+    # @!attribute [r] parents
+    #   @return [String] the member's parent's names
+    # @!attribute [r] notes
+    #   @return [String] notes relating to the member
+    # @!attribute [r] medical
+    #   @return [String] the member's key medical details
+    # @!attribute [r] religion
+    #   @return [String] the member's religion
+    # @!attribute [r] school
+    #   @return [String] the school the member attends
+    # @!attribute [r] ethnicity
+    #   @return [String] the member's ethnicity
+    # @!attribute [r] subs
+    #   @return [String] details about the member's subs
+    # @!attribute [r] grouping_id
+    #   @return [FixNum] the grouping within the section that the member belongs to
+    # @!attribute [r] grouping_leader
+    #   @return [FixNum] wether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL)
+    # @!attribute [r] joined
+    #   @return [Date] when the member joined the section
+    # @!attribute [r] age
+    #   @return [String] the member's current age (yy/mm)
+    # @!attribute [r] joined_years
+    #   @return [FixNum] ?
+
 
     # Initialize a new Member using the hash returned by the API call
     # @param data the hash of data for the object returned by the API

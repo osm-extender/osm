@@ -3,6 +3,18 @@ module Osm
   class Role
 
     attr_reader :section, :group_name, :group_id, :group_normalized, :default, :permissions
+    # @!attribute [r] section
+    #   @return [Osm::Section] the section this role related to
+    # @!attribute [r] group_name
+    #   @return [String] the name of the group the section is in
+    # @!attribute [r] group_id
+    #   @return [FixNum] the group the section is in
+    # @!attribute [r] group_normalized
+    #   @return [FixNum] ?
+    # @!attribute [r] default
+    #   @return [Boolean] was this the last section this user used in OSM
+    # @!attribute [r] permissions
+    #   @return [Hash] the permissions the user has in this role
 
     # Initialize a new UserRole using the hash returned by the API call
     # @param data the hash of data for the object returned by the API

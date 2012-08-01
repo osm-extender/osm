@@ -3,6 +3,12 @@ module Osm
   class ApiAccess
 
     attr_reader :id, :name, :permissions
+    # @!attribute [r] id
+    #   @return [FixNum] the id for the API
+    # @!attribute [r] name
+    #   @return [String] the name of the API
+    # @!attribute [r] permissions
+    #   @return [Hash] the permissions assigned to this API by the user in OSM
 
     # Initialize a new API Access using the hash returned by the API call
     # @param data the hash of data for the object returned by the API

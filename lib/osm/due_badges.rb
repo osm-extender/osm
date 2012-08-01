@@ -3,6 +3,12 @@ module Osm
   class DueBadges
 
     attr_reader :descriptions, :by_member, :totals
+    # @!attribute [r] descriptions
+    #   @return [Hash] descriptions for each of the badges
+    # @!attribute [r] by_member
+    #   @return [Hash] the due badges grouped by member
+    # @!attribute [r] totals
+    #   @return [Hash] the total number of each nadge which is due
 
     # Initialize a new Event using the hash returned by the API call
     # @param data the hash of data for the object returned by the API
