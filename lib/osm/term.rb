@@ -15,40 +15,40 @@ module Osm
     end
 
     # Determine if the term is completly before the passed date
-    # @param date
-    # @returns true if the term is completly before the passed date
+    # @param [Date] date
+    # @return [Boolean] if the term is completly before the passed date
     def before?(date)
       return @end < date.to_date
     end
 
     # Determine if the term is completly after the passed date
-    # @param date
-    # @returns true if the term is completly after the passed date
+    # @param [Date] date
+    # @return [Boolean] if the term is completly after the passed date
     def after?(date)
       return @start > date.to_date
     end
 
     # Determine if the term is in the future
-    # @returns true if the term starts after today
+    # @return [Boolean] if the term starts after today
     def future?
       return @start > Date.today
     end
 
     # Determine if the term is in the past
-    # @returns true if the term finished before today
+    # @return [Boolean] if the term finished before today
     def past?
       return @end < Date.today
     end
 
     # Determine if the term is current
-    # @returns true if the term started before today and finishes after today
+    # @return [Boolean] if the term started before today and finishes after today
     def current?
       return (@start <= Date.today) && (@end >= Date.today)
     end
 
     # Determine if the provided date is within the term
-    # @param date the date to test
-    # @returns true if the term started before the date and finishes after the date
+    # @param [Date] date the date to test
+    # @return [Boolean] if the term started before the date and finishes after the date
     def contains_date?(date)
       return (@start <= date) && (@end >= date)
     end

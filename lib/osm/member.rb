@@ -40,20 +40,20 @@ module Osm
     end
 
     # Get the years element of this scout's age
-    # @returns the number of years this scout has been alive
+    # @return [FixNum] the number of years this scout has been alive
     def age_years
       return @age[0..1].to_i
     end
 
     # Get the months element of this scout's age
-    # @returns the number of months since this scout's last birthday
+    # @return [FixNum] the number of months since this scout's last birthday
     def age_months
       return @age[-2..-1].to_i
     end
 
     # Get the full name
-    # @param seperator (optional) what to split the scout's first name and last name with, defaults to a space
-    # @returns this scout's full name seperate by the optional seperator
+    # @param [String] seperator what to split the scout's first name and last name with
+    # @return [String] this scout's full name seperated by the optional seperator
     def name(seperator=' ')
       return "#{@first_name}#{seperator.to_s}#{@last_name}"
     end

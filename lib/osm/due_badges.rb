@@ -44,6 +44,8 @@ module Osm
       end
     end
 
+    # Check if there are no badges due
+    # @return [Boolean]
     def empty?
       return @by_member.empty?
     end

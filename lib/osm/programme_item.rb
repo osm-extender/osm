@@ -41,6 +41,10 @@ module Osm
       end
     end
 
+
+    protected
+    # Get the JSON for the activitied to pass to the OSM API
+    # @return [String]
     def activities_for_saving
       to_save = Array.new
       @activities.each do |activity|

@@ -39,6 +39,8 @@ module Osm
       end
     end
 
+    # Check if this section is one of the youth sections
+    # @return [Boolean]
     def youth_section?
       [:beavers, :cubs, :scouts, :explorers].include?(@type)
     end
