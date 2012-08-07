@@ -512,7 +512,6 @@ module Osm
         'games' => programme_item.games,
         'leaders' => programme_item.leaders,
         'activity' => programme_item.activities_for_saving,
-        'googlecalendar' => programme_item.google_calendar || '',
       }))
 
       # The cached programmes for the section will be out of date - remove them

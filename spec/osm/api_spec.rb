@@ -410,7 +410,7 @@ describe "API" do
         'secret' => 'secret',
         'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => nil, 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
-        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'googlecalendar' => '',
+        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
       api = Osm::Api.new('user', 'secret')
       api.stub(:get_terms) { [] }
@@ -429,7 +429,7 @@ describe "API" do
         'secret' => 'secret',
         'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => nil, 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
-        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'googlecalendar' => '',
+        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
       api = Osm::Api.new('user', 'secret')
       api.stub(:get_terms) { [] }

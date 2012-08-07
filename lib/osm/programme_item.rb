@@ -2,7 +2,7 @@ module Osm
 
   class ProgrammeItem
 
-    attr_accessor :evening_id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :meeting_date, :activities, :google_calendar
+    attr_accessor :evening_id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :meeting_date, :activities
     attr_reader :start_time, :end_time
     # @!attribute [rw] evening_id
     #   @return [FixNum] the id of the evening
@@ -24,8 +24,6 @@ module Osm
     #   @return [Date] the date of the evening
     # @!attribute [rw] activities
     #   @return [Array<ProgrammeActivity>] tlist of activities being done during the evening
-    # @!attribute [rw] google_calendar
-    #   @return [String] ?
     # @!attribute [rw] start_time
     #   @return [String] the start time (hh:mm)
     # @!attribute [rw] end_time
@@ -46,7 +44,6 @@ module Osm
       @start_time = data['starttime'].nil? ? nil : data['starttime'][0..4]
       @end_time = data['endtime'].nil? ? nil : data['endtime'][0..4]
       @meeting_date = Osm::parse_date(data['meetingdate'])
-      @google_calendar = data['googlecalendar']
 
       @activities = Array.new
       unless activities.nil?
