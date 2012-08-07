@@ -23,7 +23,7 @@ describe "Section" do
       'subscription_expires' => (Date.today + 60).strftime('%Y-%m-%d'),
       'sectionType' => 'cubs',
       'numscouts' => 10,
-      'hasUsedBadgeRecords' => '1',
+      'hasUsedBadgeRecords' => true,
       'hasProgramme' => true,
       'wizard' => 'False',
       'columnNames' => {},

@@ -48,7 +48,7 @@ module Osm
       @subscription_expires = data['subscription_expires'] ? Date.parse(data['subscription_expires'], 'yyyy-mm-dd') : nil
       @type = !data['sectionType'].nil? ? data['sectionType'].to_sym : :unknown
       @num_scouts = data['numscouts']
-      @has_badge_records = data['hasUsedBadgeRecords'].eql?('1') ? true : false
+      @has_badge_records = data['hasUsedBadgeRecords']
       @has_programme = data['hasProgramme']
       @wizard = (data['wizard'] || '').downcase.eql?('true') ? true : false
       @column_names = Osm::symbolize_hash(data['columnNames'] || {})
