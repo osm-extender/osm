@@ -1,3 +1,9 @@
+## version 0.0.7.dev
+
+  * Work on documentation:
+    * Clarify use of 'mystery' attributes
+  * Rename ProgrammeItem to Evening (and move ProgrammeActivity to Evening->EveningActivity)
+
 ## Version 0.0.6
 
   * Usage changes:
