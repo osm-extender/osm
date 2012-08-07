@@ -2,7 +2,7 @@ module Osm
 
   class Section
 
-    attr_reader :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :has_badge_records, :has_programme, :wizard, :column_names, :fields, :intouch_fields, :mobile_fields, :extra_records, :role
+    attr_reader :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :extra_records, :role
     # @!attribute [r] id
     #   @return [FixNum] the id for the section
     # @!attribute [r] name
@@ -15,12 +15,6 @@ module Osm
     #   @return [Symbol] the section type (:beavers, :cubs, :scouts, :exporers, :adults, :waiting, :unknown)
     # @!attribute [r] num_scouts
     #   @return [FixNum] how many members the section has
-    # @!attribute [r] has_badge_records
-    #   @return [Boolean] ?
-    # @!attribute [r] has_programme
-    #   @return [Boolean] ?
-    # @!attribute [r] wizard
-    #   @return [Boolean] ?
     # @!attribute [r] column_names
     #   @return [Hash] custom names to use for the data columns
     # @!attribute [r] fields
@@ -48,9 +42,6 @@ module Osm
       @subscription_expires = data['subscription_expires'] ? Date.parse(data['subscription_expires'], 'yyyy-mm-dd') : nil
       @type = !data['sectionType'].nil? ? data['sectionType'].to_sym : :unknown
       @num_scouts = data['numscouts']
-      @has_badge_records = data['hasUsedBadgeRecords']
-      @has_programme = data['hasProgramme']
-      @wizard = (data['wizard'] || '').downcase.eql?('true') ? true : false
       @column_names = Osm::symbolize_hash(data['columnNames'] || {})
       @fields = Osm::symbolize_hash(data['fields'] || {})
       @intouch_fields = Osm::symbolize_hash(data['intouch'] || {})

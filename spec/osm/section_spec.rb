@@ -23,9 +23,6 @@ describe "Section" do
       'subscription_expires' => (Date.today + 60).strftime('%Y-%m-%d'),
       'sectionType' => 'cubs',
       'numscouts' => 10,
-      'hasUsedBadgeRecords' => true,
-      'hasProgramme' => true,
-      'wizard' => 'False',
       'columnNames' => {},
       'fields' => {},
       'intouch' => {},
@@ -41,9 +38,6 @@ describe "Section" do
     section.subscription_expires.should == Date.today + 60
     section.type.should == :cubs
     section.num_scouts.should == 10
-    section.has_badge_records.should == true
-    section.has_programme.should == true
-    section.wizard.should == false
     section.column_names.should == {}
     section.fields.should == {}
     section.intouch_fields.should == {}
