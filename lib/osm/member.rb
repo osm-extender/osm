@@ -12,7 +12,7 @@ module Osm
     # @!attribute [r] first_name
     #   @return [String] the member's first name
     # @!attribute [r] last_name
-    #   @return [String] the imember's last name
+    #   @return [String] the member's last name
     # @!attribute [r] email1
     #   @return [String] the 1st email address for the member
     # @!attribute [r] email2
@@ -38,7 +38,7 @@ module Osm
     # @!attribute [r] started
     #   @return [Date] when the member started Scouting
     # @!attribute [r] joined_in_years
-    #   @return [FixNum] thow many full years the member has been in Scouting
+    #   @return [FixNum] ?
     # @!attribute [r] parents
     #   @return [String] the member's parent's names
     # @!attribute [r] notes
@@ -62,7 +62,7 @@ module Osm
     # @!attribute [r] age
     #   @return [String] the member's current age (yy/mm)
     # @!attribute [r] joined_years
-    #   @return [FixNum] ?
+    #   @return [FixNum] how many years the member has been in Scouting
 
 
     # Initialize a new Member using the hash returned by the API call
