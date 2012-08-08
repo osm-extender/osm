@@ -2,17 +2,13 @@ module Osm
 
   class Role
 
-    attr_reader :section, :group_name, :group_id, :group_normalized, :default, :permissions
+    attr_reader :section, :group_name, :group_id, :permissions
     # @!attribute [r] section
     #   @return [Osm::Section] the section this role related to
     # @!attribute [r] group_name
     #   @return [String] the name of the group the section is in
     # @!attribute [r] group_id
     #   @return [FixNum] the group the section is in
-    # @!attribute [r] group_normalized
-    #   @return [FixNum] ?
-    # @!attribute [r] default
-    #   @return [Boolean] was this the last section this user used in OSM
     # @!attribute [r] permissions
     #   @return [Hash] the permissions the user has in this role
 
@@ -22,8 +18,6 @@ module Osm
       @section = Osm::Section.new(data['sectionid'], data['sectionname'], ActiveSupport::JSON.decode(data['sectionConfig']), self)
       @group_name = data['groupname']
       @group_id = Osm::to_i_or_nil(data['groupid'])
-      @group_normalized = Osm::to_i_or_nil(data['groupNormalised'])
-      @default = data['isDefault'].eql?('1') ? true : false
       @permissions = Osm::symbolize_hash(data['permissions'] || {})
 
       # Convert permission values to a number

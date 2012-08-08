@@ -14,7 +14,7 @@ module Osm
     # @!attribute [r] end
     #   @return [DateTime] when the event ends
     # @!attribute [r] cost
-    #   @return [?] the cost of the event
+    #   @return [String] the cost of the event
     # @!attribute [r] location
     #   @return [String] where the event is
     # @!attribute [r] notes

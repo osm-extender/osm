@@ -188,7 +188,7 @@ describe "API" do
 
       programme = Osm::Api.new('1', '2').get_programme(3, 4)
       programme.size.should == 1
-      programme[0].is_a?(Osm::ProgrammeItem).should be_true
+      programme[0].is_a?(Osm::Evening).should be_true
       programme[0].activities.size.should == 2
     end
 
@@ -410,14 +410,14 @@ describe "API" do
         'secret' => 'secret',
         'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => nil, 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
-        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'googlecalendar' => '',
+        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
       api = Osm::Api.new('user', 'secret')
       api.stub(:get_terms) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
 
-      programme_item = Osm::ProgrammeItem.new({}, [])
-      api.update_evening(programme_item).should be_true
+      evening = Osm::Evening.new({}, [])
+      api.update_evening(evening).should be_true
     end
 
     it "Update an evening (failed)" do
@@ -429,14 +429,14 @@ describe "API" do
         'secret' => 'secret',
         'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => nil, 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
-        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'googlecalendar' => '',
+        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
       api = Osm::Api.new('user', 'secret')
       api.stub(:get_terms) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
 
-      programme_item = Osm::ProgrammeItem.new({}, [])
-      api.update_evening(programme_item).should be_false
+      evening = Osm::Evening.new({}, [])
+      api.update_evening(evening).should be_false
     end
   end
 

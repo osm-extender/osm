@@ -22,27 +22,27 @@ module Osm
     # @!attribute [r] running_time
     #   @return [FixNum] duration of the activity in minutes
     # @!attribute [r] location
-    #   @return [Symbol] :indoors or :outdoors
+    #   @return [Symbol] :indoors, :outdoors or :both
     # @!attribute [r] shared
-    #   @return [FixNum] ?
+    #   @return [FixNum] 2 - Public, 0 - Private
     # @!attribute [r] rating
     #   @return [FixNum] ?
     # @!attribute [r] editable
-    #   @return [Boolean] ?
+    #   @return [Boolean] Wether the current API user can edit this activity
     # @!attribute [r] deletable
-    #   @return [Boolean] ?
+    #   @return [Boolean] Wether the current API user can delete this activity
     # @!attribute [r] used
-    #   @return [FixNum] ?
+    #   @return [FixNum] How many times this activity has been used (total accross all of OSM)
     # @!attribute [r] versions
-    #   @return [Hash] ?
+    #   @return [Array<Hash>] ? (:value - version, :firstname - created by, :label - label, :user_id - OSM user ID of creator)
     # @!attribute [r] sections
     #   @return [Array<Symbol>] the sections the activity is appropriate for
     # @!attribute [r] tags
     #   @return [Array<String>] the tags attached to the activity
     # @!attribute [r] files
-    #   @return [Array] ?
+    #   @return [Array<Hash> ? ('fileid', 'filename', 'name')
     # @!attribute [r] badges
-    #   @return [Array] ?
+    #   @return [Array<Hash> ? ('section', 'badgetype', 'badge', 'columnname', 'label')
 
 
     # Initialize a new Activity using the hash returned by the API call
@@ -61,7 +61,7 @@ module Osm
       @shared = data['details']['shared'].to_i
       @rating = data['details']['rating'].to_i
       @editable = data['editable']
-      @deletable = data['deletable']
+      @deletable = data['deletable'] ? true : false
       @used = data['used'].to_i
       @versions = data['versions']
       @sections = Osm::make_array_of_symbols(data['sections'] || [])

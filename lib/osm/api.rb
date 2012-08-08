@@ -252,7 +252,7 @@ module Osm
     # @param [FixNum] term_id the term to get the programme for
     # @!macro options_get
     # @!macro options_api_data
-    # @return [Array<Osm::ProgrammeItem>]
+    # @return [Array<Osm::Evening>]
     def get_programme(section_id, term_id, options={}, api_data={})
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-programme-#{section_id}-#{term_id}") && self.user_can_access?(:programme, section_id, api_data)
         return Rails.cache.read("OSMAPI-programme-#{section_id}-#{term_id}")
@@ -267,9 +267,9 @@ module Osm
       activities = data['activities'] || {}
 
       items.each do |item|
-        programme_item = Osm::ProgrammeItem.new(item, activities[item['eveningid']])
-        result.push programme_item
-        programme_item.activities.each do |activity|
+        evening = Osm::Evening.new(item, activities[item['eveningid']])
+        result.push evening
+        evening.activities.each do |activity|
           self.user_can_access :activity, activity.activity_id, api_data
         end
       end
@@ -495,25 +495,11 @@ module Osm
     end
 
     # Update an evening in OSM
-    # @param [Osm::ProgrammeItem] programme_item is the Osm::ProgrammeItem object to update
+    # @param [Osm::Evening] evening the evening to update
     # @!macro options_api_data
     # @return [Boolean] if the operation suceeded or not
-    def update_evening(programme_item, api_data={})
-      response = perform_query("programme.php?action=editEvening", api_data.merge({
-        'eveningid' => programme_item.evening_id,
-        'sectionid' => programme_item.section_id,
-        'meetingdate' => programme_item.meeting_date.try(:strftime, '%Y-%m-%d'),
-        'starttime' => programme_item.start_time,
-        'endtime' => programme_item.end_time,
-        'title' => programme_item.title,
-        'notesforparents' => programme_item.notes_for_parents,
-        'prenotes' => programme_item.pre_notes,
-        'postnotes' => programme_item.post_notes,
-        'games' => programme_item.games,
-        'leaders' => programme_item.leaders,
-        'activity' => programme_item.activities_for_saving,
-        'googlecalendar' => programme_item.google_calendar || '',
-      }))
+    def update_evening(evening, api_data={})
+      response = perform_query("programme.php?action=editEvening", api_data.merge(evening.data_for_saving))
 
       # The cached programmes for the section will be out of date - remove them
       get_terms(api_data).each do |term|
