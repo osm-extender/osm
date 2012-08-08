@@ -503,7 +503,7 @@ module Osm
 
       # The cached programmes for the section will be out of date - remove them
       get_terms(api_data).each do |term|
-        Rails.cache.delete("OSMAPI-programme-#{term.section_id}-#{term.id}") if term.section_id == programme_item.section_id
+        Rails.cache.delete("OSMAPI-programme-#{term.section_id}-#{term.id}") if term.section_id == evening.section_id
       end
 
       return response.is_a?(Hash) && (response['result'] == 0)

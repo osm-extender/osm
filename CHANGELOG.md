@@ -1,4 +1,8 @@
-## version 0.0.7.dev
+## version 0.0.8
+
+  * Fix unknown variable when updating evening
+
+## version 0.0.7
 
   * Work on documentation:
     * Clarify use of 'mystery' attributes
