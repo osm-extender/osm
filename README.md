@@ -23,7 +23,7 @@ Add to your Gemfile and run the `bundle` command to install it.
 gem 'osm'
 ```
 
-Configure the gem during the initalization of the app (e.g. in config/initializers/osm.rb).
+Configure the gem during the initalization of the app (e.g. if using rails then config/initializers/osm.rb would look like):
 
 ```ruby
 ActionDispatch::Callbacks.to_prepare do
@@ -58,3 +58,34 @@ Documentation can be found on [rubydoc.info](http://rubydoc.info/github/robertga
 
 We follow the [Semantic Versioning](http://semver.org/) concept,
 however it should be noted that when the OSM API adds a feature it can be difficult to decide wether to bump the patch or minor version number up. A smaller change (such as adding score into the grouping object) will bump the patch whereas a larger change wil bump the minor version.
+
+
+## Parts of the OSM API Supported:
+
+### Read
+  * Activity
+  * API Access
+  * API Access for our app
+  * Due Badges
+  * Events
+  * Groupings (e.g. Sixes, Patrols)
+  * Members
+  * Notepad
+  * Notepads
+  * Programme
+  * Register
+  * Register Structure
+  * Roles
+  * Section
+  * Sections
+  * Term
+  * Terms
+
+### Update
+  * Evening
+
+### Create
+  * Evening
+
+### Actions
+  * Authorise an app to use the API on a user's behalf
