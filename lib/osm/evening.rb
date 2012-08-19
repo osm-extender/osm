@@ -5,9 +5,9 @@ module Osm
     attr_accessor :evening_id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :meeting_date, :activities
     attr_reader :start_time, :end_time
     # @!attribute [rw] evening_id
-    #   @return [FixNum] the id of the evening
+    #   @return [Fixnum] the id of the evening
     # @!attribute [rw] sectionid
-    #   @return [FixNum] the section the evening belongs to
+    #   @return [Fixnum] the section the evening belongs to
     # @!attribute [rw] title
     #   @return [String] the title of the evening
     # @!attribute [rw] notes_for_parents
@@ -105,7 +105,7 @@ module Osm
   
       attr_reader :activity_id, :title, :notes
       # @!attribute [r] activity_id
-      #   @return [FixNum] the activity being done
+      #   @return [Fixnum] the activity being done
       # @!attribute [r] title
       #   @return [String] the activity's title
       # @!attribute [r] notes

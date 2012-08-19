@@ -4,7 +4,7 @@ module Osm
 
     attr_reader :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :extra_records, :role
     # @!attribute [r] id
-    #   @return [FixNum] the id for the section
+    #   @return [Fixnum] the id for the section
     # @!attribute [r] name
     #   @return [String] the section name
     # @!attribute [r] subscription_level
@@ -14,7 +14,7 @@ module Osm
     # @!attribute [r] type
     #   @return [Symbol] the section type (:beavers, :cubs, :scouts, :exporers, :adults, :waiting, :unknown)
     # @!attribute [r] num_scouts
-    #   @return [FixNum] how many members the section has
+    #   @return [Fixnum] how many members the section has
     # @!attribute [r] column_names
     #   @return [Hash] custom names to use for the data columns
     # @!attribute [r] fields
@@ -31,7 +31,9 @@ module Osm
 
     # Initialize a new SectionConfig using the hash returned by the API call
     # @param id the section ID used by the API to refer to this section
+    # @param name the name given to the sction in OSM
     # @param data the hash of data for the object returned by the API
+    # @param role the Osm::Role linked with this section
     def initialize(id, name, data, role)
       subscription_levels = [:bronze, :silver, :gold]
       subscription_level = data['subscription_level'].to_i - 1
@@ -51,8 +53,8 @@ module Osm
 
       # Symbolise the keys in each hash of the extra_records array
       @extra_records.each do |item|
-        # Expect item to be: {:name=>String, :extraid=>FixNum}
-        # Sometimes get item as: [String, {"name"=>String, "extraid"=>FixNum}]
+        # Expect item to be: {:name=>String, :extraid=>Fixnum}
+        # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
         if item.is_a?(Array)
           item = Osm::symbolize_hash(item[1])
         else

@@ -8,7 +8,7 @@ module Osm
     # @!attribute [r] group_name
     #   @return [String] the name of the group the section is in
     # @!attribute [r] group_id
-    #   @return [FixNum] the group the section is in
+    #   @return [Fixnum] the group the section is in
     # @!attribute [r] permissions
     #   @return [Hash] the permissions the user has in this role
 

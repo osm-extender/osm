@@ -4,13 +4,13 @@ module Osm
 
     attr_reader :id, :version, :group_id, :user_id, :title, :description, :resources, :instructions, :running_time, :location, :shared, :rating, :editable, :deletable, :used, :versions, :sections, :tags, :files, :badges
     # @!attribute [r] id
-    #   @return [FixNum] the id for the activity
+    #   @return [Fixnum] the id for the activity
     # @!attribute [r] version
-    #   @return [FixNum] the version of the activity
+    #   @return [Fixnum] the version of the activity
     # @!attribute [r] group_id
-    #   @return [FixNum] the group_id
+    #   @return [Fixnum] the group_id
     # @!attribute [r] user_id
-    #   @return [FixNum] the user_id of the creator of the activity
+    #   @return [Fixnum] the user_id of the creator of the activity
     # @!attribute [r] title
     #   @return [String] the activity's title
     # @!attribute [r] description
@@ -20,19 +20,19 @@ module Osm
     # @!attribute [r] instructions
     #   @return [String] instructions for doing the activity
     # @!attribute [r] running_time
-    #   @return [FixNum] duration of the activity in minutes
+    #   @return [Fixnum] duration of the activity in minutes
     # @!attribute [r] location
     #   @return [Symbol] :indoors, :outdoors or :both
     # @!attribute [r] shared
-    #   @return [FixNum] 2 - Public, 0 - Private
+    #   @return [Fixnum] 2 - Public, 0 - Private
     # @!attribute [r] rating
-    #   @return [FixNum] ?
+    #   @return [Fixnum] ?
     # @!attribute [r] editable
     #   @return [Boolean] Wether the current API user can edit this activity
     # @!attribute [r] deletable
     #   @return [Boolean] Wether the current API user can delete this activity
     # @!attribute [r] used
-    #   @return [FixNum] How many times this activity has been used (total accross all of OSM)
+    #   @return [Fixnum] How many times this activity has been used (total accross all of OSM)
     # @!attribute [r] versions
     #   @return [Array<Hash>] ? (:value - version, :firstname - created by, :label - label, :user_id - OSM user ID of creator)
     # @!attribute [r] sections

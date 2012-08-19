@@ -4,9 +4,9 @@ module Osm
 
     attr_reader :id, :section_id, :name, :start, :end, :cost, :location, :notes
     # @!attribute [r] id
-    #   @return [FixNum] the id for the event
+    #   @return [Fixnum] the id for the event
     # @!attribute [r] section_id
-    #   @return [FixNum] the id for the section
+    #   @return [Fixnum] the id for the section
     # @!attribute [r] name
     #   @return [String] the name of the event
     # @!attribute [r] start

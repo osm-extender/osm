@@ -31,6 +31,7 @@ describe "API" do
       :api_token => 'API TOKEN',
       :api_name => 'API NAME',
       :api_site => :scout,
+      :cache => OsmTest::Cache,
     }.freeze
     Osm::Api.configure(@api_config)
   end
@@ -111,6 +112,17 @@ describe "API" do
     it "Fetch the notepad for a section" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1", "2" => "Section 2"}.to_json)
       Osm::Api.new('1', '2').get_notepad(1).should == 'Section 1'
+      Osm::Api.new('1', '2').get_notepad(Osm::Section.new(2, '', {}, nil)).should == 'Section 2'
+    end
+
+    it "Fetch the notepad for a section (invalid section/id)" do
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1"}.to_json)
+
+      expect{ Osm::Api.new('1', '2').get_notepad(-10) }.to raise_error(ArgumentError, 'Invalid section ID')
+      expect{ Osm::Api.new('1', '2').get_notepad(0) }.to raise_error(ArgumentError, 'Invalid section ID')
+
+      expect{ Osm::Api.new('1', '2').get_notepad(Osm::Section.new(-10, '', {}, nil)) }.to raise_error(ArgumentError, 'Invalid section ID')
+      expect{ Osm::Api.new('1', '2').get_notepad('1') }.to raise_error(ArgumentError, 'Invalid type for section')
     end
 
 
@@ -530,6 +542,18 @@ describe "API" do
       # Fetch second time
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"1":"New content."}'}) }
       Osm::Api.new('user', 'secret').get_notepad(1, {:no_cache => true}).should == 'New content.'
+    end
+
+
+    it "Uses the provided cache_prepend_to_key text" do
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1"}.to_json)
+
+      OsmTest::Cache.should_receive('exist?').with('OSMAPI-notepads-1')
+      Osm::Api.new('1', '2').get_notepads.should == {1 => 'Section 1'}
+
+      Osm::Api.configure(@api_config.merge(:cache_prepend_to_key => 'AB'))
+      OsmTest::Cache.should_receive('exist?').with('AB-notepads-1')
+      Osm::Api.new('1', '2').get_notepads.should == {1 => 'Section 1'}
     end
   end
 

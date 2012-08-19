@@ -4,7 +4,7 @@ module Osm
 
     attr_reader :id, :name, :permissions
     # @!attribute [r] id
-    #   @return [FixNum] the id for the API
+    #   @return [Fixnum] the id for the API
     # @!attribute [r] name
     #   @return [String] the name of the API
     # @!attribute [r] permissions
