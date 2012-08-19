@@ -1,3 +1,7 @@
+## Version 0.0.10
+
+  * 
+
 ## Version 0.0.9
 
   * Allow passing of Osm::Term objects as well as term IDs
