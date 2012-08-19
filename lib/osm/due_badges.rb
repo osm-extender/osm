@@ -8,7 +8,7 @@ module Osm
     # @!attribute [r] by_member
     #   @return [Hash] the due badges grouped by member
     # @!attribute [r] totals
-    #   @return [Hash] the total number of each nadge which is due
+    #   @return [Hash] the total number of each badge which is due
 
     # Initialize a new Event using the hash returned by the API call
     # @param data the hash of data for the object returned by the API
