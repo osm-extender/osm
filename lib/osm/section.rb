@@ -31,7 +31,9 @@ module Osm
 
     # Initialize a new SectionConfig using the hash returned by the API call
     # @param id the section ID used by the API to refer to this section
+    # @param name the name given to the sction in OSM
     # @param data the hash of data for the object returned by the API
+    # @param role the Osm::Role linked with this section
     def initialize(id, name, data, role)
       subscription_levels = [:bronze, :silver, :gold]
       subscription_level = data['subscription_level'].to_i - 1

@@ -1,3 +1,8 @@
+## Version 0.0.9
+
+  * Allow passing of Osm::Term objects as well as term IDs
+  * Allow passing of Osm::Section objects as well as section IDs
+
 ## version 0.0.8
 
   * Fix unknown variable when updating evening

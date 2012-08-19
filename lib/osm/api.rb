@@ -42,7 +42,7 @@ module Osm
     # @option options [String] :api_token the token which goes with the above api
     # @option options [String] :api_name the name displayed in the External Access tab of OSM
     # @option options [Symbol] :api_sate wether to use OSM (if :scout) or OGM (if :guide)
-    # @option options [FixNum] :default_cache_ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds).
+    # @option options [Fixnum] :default_cache_ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds).
     # @return nil
     def self.configure(options)
       raise ArgumentError, ':api_id does not exist in options hash' if options[:api_id].nil?
@@ -135,12 +135,14 @@ module Osm
     end
 
     # Get the notepad for a specified section
-    # @param [FixNum] section_id the section id of the required section
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the notepad for
     # @!macro options_get
     # @!macro options_api_data
     # @return nil if an error occured or the user does not have access to that section
     # @return [String] the content of the notepad otherwise
-    def get_notepad(section_id, options={}, api_data={})
+    def get_notepad(section, options={}, api_data={})
+      section_id = id_for_section(section)
+
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-notepad-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
         return Rails.cache.read("OSMAPI-notepad-#{section_id}")
       end
@@ -156,13 +158,12 @@ module Osm
     end
 
     # Get the section (and its configuration)
-    # @param [FixNum] section_id the section id of the required section
+    # @param [Fixnum] section_id the section id of the required section
     # @!macro options_get
     # @!macro options_api_data
     # @return nil if an error occured or the user does not have access to that section
     # @return [Osm::Section]
     def get_section(section_id, options={}, api_data={})
-
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-section-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
         return Rails.cache.read("OSMAPI-section-#{section_id}")
       end
@@ -178,11 +179,13 @@ module Osm
     end
 
     # Get the groupings (e.g. patrols, sixes, lodges) for a given section
-    # @param [FixNum] section_id the section to get the programme for
+    # @param [Osm::Section, Fixnum] section the section to get the groupings for
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::Grouping>]
-    def get_groupings(section_id, options={}, api_data={})
+    def get_groupings(section, options={}, api_data={})
+      section_id = id_for_section(section)
+
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-groupings-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
         return Rails.cache.read("OSMAPI-groupings-#{section_id}")
       end
@@ -227,7 +230,7 @@ module Osm
     end
 
     # Get a term
-    # @param [FixNum] term_id the id of the required term
+    # @param [Fixnum] term_id the id of the required term
     # @!macro options_get
     # @!macro options_api_data
     # @return nil if an error occured or the user does not have access to that term
@@ -248,12 +251,15 @@ module Osm
     end
 
     # Get the programme for a given term
-    # @param [FixNum] section_id the section to get the programme for
-    # @param [FixNum] term_id the term to get the programme for
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the programme for
+    # @param [Osm:term, Fixnum] term the term (or its ID) to get the programme for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::Evening>]
-    def get_programme(section_id, term_id, options={}, api_data={})
+    def get_programme(section, term, options={}, api_data={})
+      section_id = id_for_section(section)
+      term_id = id_for_term(term)
+
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-programme-#{section_id}-#{term_id}") && self.user_can_access?(:programme, section_id, api_data)
         return Rails.cache.read("OSMAPI-programme-#{section_id}-#{term_id}")
       end
@@ -279,8 +285,8 @@ module Osm
     end
 
     # Get activity details
-    # @param [FixNum] activity_id the activity ID
-    # @param [FixNum] version the version of the activity to retreive, if nil the latest version will be assumed
+    # @param [Fixnum] activity_id the activity ID
+    # @param [Fixnum] version the version of the activity to retreive, if nil the latest version will be assumed
     # @!macro options_get
     # @!macro options_api_data
     # @return [Osm::Activity]
@@ -304,14 +310,15 @@ module Osm
       return activity
     end
 
-    # Get member details
-    # @param [FixNum] section_id the section to get details for
-    # @param [FixNum] term_id the term to get details for, if nil the current term is assumed
+    # Get members
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the members for
+    # @param [Osm:Term, Fixnum] term the term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::Member>]
-    def get_members(section_id, term_id=nil, options={}, api_data={})
-      term_id = Osm::find_current_term_id(self, section_id, api_data) if term_id.nil?
+    def get_members(section, term=nil, options={}, api_data={})
+      section_id = id_for_section(section)
+      term_id = id_for_term(term)
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-members-#{section_id}-#{term_id}") && self.user_can_access?(:member, section_id, api_data)
         return Rails.cache.read("OSMAPI-members-#{section_id}-#{term_id}")
@@ -330,11 +337,13 @@ module Osm
     end
 
     # Get API access details for a given section
-    # @param [FixNum] section_id the section to get details for
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the details for
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::ApiAccess>]
-    def get_api_access(section_id, options={}, api_data={})
+    def get_api_access(section, options={}, api_data={})
+      section_id = id_for_section(section)
+
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}")
         return Rails.cache.read("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}")
       end
@@ -355,11 +364,13 @@ module Osm
     end
 
     # Get our API access details for a given section
-    # @param [FixNum] section_id the section to get details for
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the details for
     # @!macro options_get
     # @!macro options_api_data
     # @return [Osm::ApiAccess]
-    def get_our_api_access(section_id, options={}, api_data={})
+    def get_our_api_access(section, options={}, api_data={})
+      section_id = id_for_section(section)
+
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}-#{Osm::Api.api_id}")
         return Rails.cache.read("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}-#{Osm::Api.api_id}")
       end
@@ -374,11 +385,13 @@ module Osm
     end
 
     # Get events
-    # @param [FixNum] section_id the section to get details for
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the events for
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::Event>]
-    def get_events(section_id, options={}, api_data={})
+    def get_events(section, options={}, api_data={})
+      section_id = id_for_section(section)
+
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-events-#{section_id}") && self.user_can_access?(:programme, section_id, api_data)
         return Rails.cache.read("OSMAPI-events-#{section_id}")
       end
@@ -398,12 +411,13 @@ module Osm
     end
 
     # Get due badges
-    # @param [FixNum] section_id the section to get details for
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the due badges for
     # @!macro options_get
     # @!macro options_api_data
     # @return [Osm::DueBadges]
-    def get_due_badges(section_id, term_id=nil, options={}, api_data={})
-      term_id = Osm::find_current_term_id(self, section_id, api_data) if term_id.nil?
+    def get_due_badges(section, term=nil, options={}, api_data={})
+      section_id = id_for_section(section)
+      term_id = id_for_term(term)
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-due_badges-#{section_id}-#{term_id}") && self.user_can_access?(:badge, section_id, api_data)
         return Rails.cache.read("OSMAPI-due_badges-#{section_id}-#{term_id}")
@@ -420,12 +434,14 @@ module Osm
     end
 
     # Get register structure
-    # @param [FixNum] section_id the section to get details for
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the structure for
+    # @param [Osm:Term, Fixnum] section the term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Hash>] representing the rows of the register
-    def get_register_structure(section_id, term_id=nil, options={}, api_data={})
-      term_id = Osm::find_current_term_id(self, section_id, api_data) if term_id.nil?
+    def get_register_structure(section, term=nil, options={}, api_data={})
+      section_id = id_for_section(section)
+      term_id = id_for_term(term)
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-register_structure-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
         return Rails.cache.read("OSMAPI-register_structure-#{section_id}-#{term_id}")
@@ -446,12 +462,14 @@ module Osm
     end
 
     # Get register
-    # @param [FixNum] section_id the section to get details for
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the register for
+    # @param [Osm:Term, Fixnum] section the term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Hash>] representing the attendance of each member
-    def get_register(section_id, term_id=nil, options={}, api_data={})
-      term_id = Osm::find_current_term_id(self, section_id, api_data) if term_id.nil?
+    def get_register(section, term=nil, options={}, api_data={})
+      section_id = id_for_section(section)
+      term_id = id_for_term(term)
 
       if !options[:no_cache] && Rails.cache.exist?("OSMAPI-register-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
         return Rails.cache.read("OSMAPI-register-#{section_id}-#{term_id}")
@@ -472,12 +490,12 @@ module Osm
     end
 
     # Create an evening in OSM
-    # @param [FixNum] section_id the id of the section to add the term to
+    # @param [Fixnum] section_id the id of the section to add the term to
     # @param [Date] meeting_date the date of the meeting
     # @!macro options_api_data
     # @return [Boolean] if the operation suceeded or not
-    def create_evening(section_id, meeting_date, api_data={})
-      section_id = section_id.to_i
+    def create_evening(section, meeting_date, api_data={})
+      section_id = id_for_section(section)
       evening_api_data = {
         'meetingdate' => meeting_date.strftime('%Y-%m-%d'),
         'sectionid' => section_id,
@@ -513,7 +531,7 @@ module Osm
     protected
     # Set access permission for the current user on a resource stored in the cache
     # @param [Symbol] resource_type a symbol representing the resource type (:section, :grouping, :term, :activity, :programme, :member, :badge, :register)
-    # @param [FixNum] resource_id the id of the resource being checked
+    # @param [Fixnum] resource_id the id of the resource being checked
     # @param [Hash] api_data the data hash used in accessing the api
     # @param [Boolean] permission wether the user can access the resource
     # @return [Boolean] the permission which was set
@@ -530,7 +548,7 @@ module Osm
 
     # Get access permission for the current user on a resource stored in the cache
     # @param [Symbol] resource_type a symbol representing the resource type (:section, :grouping, :term, :activity, :programme, :member, :badge, :register)
-    # @param [FixNum] resource_id the id of the resource being checked
+    # @param [Fixnum] resource_id the id of the resource being checked
     # @param [Hash] api_data the data hash used in accessing the api
     # @return nil if the combination of user and resource has not been set
     # @return [Boolean] if the user can access the resource
@@ -610,6 +628,27 @@ module Osm
       to_return = false if to_return.blank?
       puts "OSM API ERROR: #{to_return}" if Rails.env.development? && to_return
       return to_return
+    end
+
+
+    # Get the ID from an object or fixnum
+    # @param cl the Class being used (e.g. Osm::Section)
+    # @param value the value to get the ID from
+    # @param [String] error_name the name of the class to use in error messages
+    # @param [String, Symbol] id_method the method to call on cl to get the ID
+    # @return [Fixnum] the ID
+    def id_for(cl, value, error_name, id_method=:id)
+      raise(ArgumentError, "Invalid type for #{error_name}") unless value.is_a?(cl) || value.is_a?(Fixnum)
+      id = value.is_a?(cl) ? value.send(id_method) : value
+      raise(ArgumentError, "Invalid #{error_name} ID") unless id > 0
+      return id
+    end
+
+    def id_for_section(section)
+      id_for(Osm::Section, section, 'section')
+    end
+    def id_for_term(term)
+      return term.nil? ? Osm::find_current_term_id(self, section_id, api_data) : id_for(Osm::Term, term, 'term')
     end
 
   end

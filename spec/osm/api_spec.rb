@@ -111,6 +111,17 @@ describe "API" do
     it "Fetch the notepad for a section" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1", "2" => "Section 2"}.to_json)
       Osm::Api.new('1', '2').get_notepad(1).should == 'Section 1'
+      Osm::Api.new('1', '2').get_notepad(Osm::Section.new(2, '', {}, nil)).should == 'Section 2'
+    end
+
+    it "Fetch the notepad for a section (invalid section/id)" do
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1"}.to_json)
+
+      expect{ Osm::Api.new('1', '2').get_notepad(-10) }.to raise_error(ArgumentError, 'Invalid section ID')
+      expect{ Osm::Api.new('1', '2').get_notepad(0) }.to raise_error(ArgumentError, 'Invalid section ID')
+
+      expect{ Osm::Api.new('1', '2').get_notepad(Osm::Section.new(-10, '', {}, nil)) }.to raise_error(ArgumentError, 'Invalid section ID')
+      expect{ Osm::Api.new('1', '2').get_notepad('1') }.to raise_error(ArgumentError, 'Invalid type for section')
     end
 
 
