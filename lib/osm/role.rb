@@ -18,7 +18,7 @@ module Osm
       @section = Osm::Section.new(data['sectionid'], data['sectionname'], ActiveSupport::JSON.decode(data['sectionConfig']), self)
       @group_name = data['groupname']
       @group_id = Osm::to_i_or_nil(data['groupid'])
-      @permissions = Osm::symbolize_hash(data['permissions'] || {})
+      @permissions = data['permissions'].is_a?(Hash) ? Osm::symbolize_hash(data['permissions']) : {}
 
       # Convert permission values to a number
       @permissions.each_key do |key|

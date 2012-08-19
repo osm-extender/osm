@@ -15,7 +15,7 @@ module Osm
     def initialize(data)
       @id = data['apiid'].to_i
       @name = data['name']
-      @permissions = data['permissions'] || {}
+      @permissions = data['permissions'].is_a?(Hash) ? data['permissions'] : {}
 
       # Rubyfy permissions hash
       @permissions.keys.each do |key|

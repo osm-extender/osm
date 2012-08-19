@@ -15,8 +15,8 @@ module Osm
     def initialize(data)
       data = {} unless data.is_a?(Hash)
 
-      @pending = Osm::symbolize_hash(data['pending'] || {})
-      @descriptions = Osm::symbolize_hash(data['description'] || {})
+      @pending = data['pending'].is_a?(Hash) ? Osm::symbolize_hash(data['pending']) : {}
+      @descriptions = data['description'].is_a?(Hash) ? Osm::symbolize_hash(data['description']) : {}
 
       @pending.each_key do |key|
         @pending[key].each_with_index do |item, index|
