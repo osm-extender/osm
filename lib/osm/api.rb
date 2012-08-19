@@ -590,22 +590,12 @@ module Osm
         end
       end
 
-      if Rails.env.development?
-        puts "Making OSM API request to #{url}"
-        puts api_data.to_s
-      end
-
       begin
         result = HTTParty.post("#{@base_url}/#{url}", {:body => api_data})
       rescue SocketError, TimeoutError, OpenSSL::SSL::SSLError
         raise ConnectionError.new('A problem occured on the internet.')
       end
       raise ConnectionError.new("HTTP Status code was #{result.response.code}") if !result.response.code.eql?('200')
-
-      if Rails.env.development?
-        puts "Result from OSM request to #{url}"
-        puts result.response.body
-      end
 
       raise Error.new(result.response.body) unless looks_like_json?(result.response.body)
       decoded = ActiveSupport::JSON.decode(result.response.body)
@@ -629,7 +619,6 @@ module Osm
       return false unless data.is_a?(Hash)
       to_return = data['error'] || data['err'] || false
       to_return = false if to_return.blank?
-      puts "OSM API ERROR: #{to_return}" if Rails.env.development? && to_return
       return to_return
     end
 

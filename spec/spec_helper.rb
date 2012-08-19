@@ -28,9 +28,6 @@ module Rails
   def self.cache
     @cache ||= Cache.new
   end
-  def self.env
-    Env.new
-  end
 
   class Env
     def development?
