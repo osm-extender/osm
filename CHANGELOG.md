@@ -1,3 +1,7 @@
+## Version 0.0.11
+
+  * 
+
 ## Version 0.0.10
 
   * Fix handling an empty array being returned from OSM for fields (presumably if not allowed to view)
