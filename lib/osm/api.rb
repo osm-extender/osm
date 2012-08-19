@@ -269,7 +269,7 @@ module Osm
     # @return [Array<Osm::Evening>]
     def get_programme(section, term, options={}, api_data={})
       section_id = id_for_section(section)
-      term_id = id_for_term(term, section)
+      term_id = id_for_term(term, section, api_data)
 
       if !options[:no_cache] && cache_exist?("programme-#{section_id}-#{term_id}") && self.user_can_access?(:programme, section_id, api_data)
         return cache_read("programme-#{section_id}-#{term_id}")
@@ -329,7 +329,7 @@ module Osm
     # @return [Array<Osm::Member>]
     def get_members(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
-      term_id = id_for_term(term, section)
+      term_id = id_for_term(term, section, api_data)
 
       if !options[:no_cache] && cache_exist?("members-#{section_id}-#{term_id}") && self.user_can_access?(:member, section_id, api_data)
         return cache_read("members-#{section_id}-#{term_id}")
@@ -428,7 +428,7 @@ module Osm
     # @return [Osm::DueBadges]
     def get_due_badges(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
-      term_id = id_for_term(term, section)
+      term_id = id_for_term(term, section, api_data)
 
       if !options[:no_cache] && cache_exist?("due_badges-#{section_id}-#{term_id}") && self.user_can_access?(:badge, section_id, api_data)
         return cache_read("due_badges-#{section_id}-#{term_id}")
@@ -452,7 +452,7 @@ module Osm
     # @return [Array<Hash>] representing the rows of the register
     def get_register_structure(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
-      term_id = id_for_term(term, section)
+      term_id = id_for_term(term, section, api_data)
 
       if !options[:no_cache] && cache_exist?("register_structure-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
         return cache_read("register_structure-#{section_id}-#{term_id}")
@@ -480,7 +480,7 @@ module Osm
     # @return [Array<Hash>] representing the attendance of each member
     def get_register(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
-      term_id = id_for_term(term, section)
+      term_id = id_for_term(term, section, api_data)
 
       if !options[:no_cache] && cache_exist?("register-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
         return cache_read("register-#{section_id}-#{term_id}")
@@ -664,7 +664,7 @@ module Osm
     def id_for_section(section)
       id_for(Osm::Section, section, 'section')
     end
-    def id_for_term(term, section)
+    def id_for_term(term, section, api_data)
       return term.nil? ? Osm::find_current_term_id(self, id_for_section(section), api_data) : id_for(Osm::Term, term, 'term')
     end
 

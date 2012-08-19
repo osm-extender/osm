@@ -1,6 +1,6 @@
 ## Version 0.0.11
 
-  * 
+  * Fix undefined variable in id\_for\_term
 
 ## Version 0.0.10
 
