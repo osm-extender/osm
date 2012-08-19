@@ -4,11 +4,11 @@ module Osm
 
     attr_reader :id, :section_id, :name, :start, :end
     # @!attribute [r] id
-    #   @return [FixNum] the id for the term
+    #   @return [Fixnum] the id for the term
     # @!attribute [r] section_id
-    #   @return [FixNum] the section the term belongs to
+    #   @return [Fixnum] the section the term belongs to
     # @!attribute [r] name
-    #   @return [FixNum] the name of the term
+    #   @return [Fixnum] the name of the term
     # @!attribute [r] start
     #   @return [Date] when the term starts
     # @!attribute [r] end
