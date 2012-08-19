@@ -19,37 +19,28 @@ RSpec.configure do |config|
 
   config.before(:each) do
     FakeWeb.clean_registry
-    Rails.cache.clear
+    OsmTest::Cache.clear
   end
 end
 
 
-module Rails
-  def self.cache
-    @cache ||= Cache.new
-  end
-
-  class Env
-    def development?
-      false
-    end
-  end
-
+module OsmTest
   class Cache
-    def initialize
-      @cache = {}
+    @@cache = {}
+    def self.write(key, data, options={})
+      @@cache[key] = data
     end
-    def write(key, data, options={})
-      @cache[key] = data
+    def self.read(key)
+      @@cache[key]
     end
-    def read(key)
-      @cache[key]
+    def self.exist?(key)
+      @@cache.include?(key)
     end
-    def exist?(key)
-      @cache.include?(key)
+    def self.delete(key)
+      @@cache.delete(key)
     end
-    def clear
-      @cache = {}
+    def self.clear
+      @@cache = {}
     end
   end
 end

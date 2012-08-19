@@ -31,6 +31,7 @@ describe "API" do
       :api_token => 'API TOKEN',
       :api_name => 'API NAME',
       :api_site => :scout,
+      :cache => OsmTest::Cache,
     }.freeze
     Osm::Api.configure(@api_config)
   end
@@ -547,11 +548,11 @@ describe "API" do
     it "Uses the provided cache_prepend_to_key text" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1"}.to_json)
 
-      Rails.cache.should_receive('exist?').with('OSMAPI-notepads-1')
+      OsmTest::Cache.should_receive('exist?').with('OSMAPI-notepads-1')
       Osm::Api.new('1', '2').get_notepads.should == {1 => 'Section 1'}
 
       Osm::Api.configure(@api_config.merge(:cache_prepend_to_key => 'AB'))
-      Rails.cache.should_receive('exist?').with('AB-notepads-1')
+      OsmTest::Cache.should_receive('exist?').with('AB-notepads-1')
       Osm::Api.new('1', '2').get_notepads.should == {1 => 'Section 1'}
     end
   end

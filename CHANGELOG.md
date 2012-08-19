@@ -2,7 +2,8 @@
 
   * Allow passing of Osm::Term objects as well as term IDs
   * Allow passing of Osm::Section objects as well as section IDs
-  * Allow configuration of text prepended to keys used in the cache
+  * Allow configuration of text prepended to keys used in the cache (:cache\_prepend\_to\_key option to configure method)
+  * Require setting of cache class to use caching (:cache option to configure method)
 
 ## version 0.0.8
 

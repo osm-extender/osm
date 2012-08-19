@@ -32,6 +32,7 @@ Osm::Api.configure(
   :api_token  => 'YOU WILL BE GIVEN THIS BY ED AT OSM',
   :api_name   => 'YOU WILL GIVE THIS TO ED AT OSM',
   :api_site   => :scout,
+  :cache      => Rails.cache
 )
 end
 ```

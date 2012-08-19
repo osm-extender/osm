@@ -19,6 +19,7 @@ module Osm
 
     @@user_access = Hash.new
     @@cache_prepend_to_key = 'OSMAPI'
+    @@cache = nil
 
     # Initialize a new API connection
     # If passing user details then both must be passed
@@ -43,6 +44,7 @@ module Osm
     # @option options [String] :api_token the token which goes with the above api
     # @option options [String] :api_name the name displayed in the External Access tab of OSM
     # @option options [Symbol] :api_sate wether to use OSM (if :scout) or OGM (if :guide)
+    # @option options [Class] :cache (optional) An instance of a cache class, must provide the methods (exist?, delete, write, read), for details see Rails.cache. Whilst this is optional you should remember that caching is required to use the OSM API.
     # @option options [Fixnum] :default_cache_ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
     # @option options [String] :cache_prepend_to_key (optional, default = 'OSMAPI') Text to prepend to the key used to store data in the cache
     # @return nil
@@ -52,6 +54,11 @@ module Osm
       raise ArgumentError, ':api_name does not exist in options hash' if options[:api_name].nil?
       raise ArgumentError, ':api_site does not exist in options hash or is invalid, this should be set to either :scout or :guide' unless [:scout, :guide].include?(options[:api_site])
       raise ArgumentError, ':default_cache_ttl must be greater than 0' unless (options[:default_cache_ttl].nil? || options[:default_cache_ttl].to_i > 0)
+      unless options[:cache].nil?
+        [:exist?, :delete, :write, :read].each do |method|
+          raise ArgumentError, ":cache must have a #{method} method" unless options[:cache].methods.include?(method)
+        end
+      end
 
       @@api_id = options[:api_id].to_s
       @@api_token = options[:api_token].to_s
@@ -59,6 +66,7 @@ module Osm
       @@api_site = options[:api_site]
       @@default_cache_ttl = options[:default_cache_ttl].to_i unless options[:default_cache_ttl].nil?
       @@cache_prepend_to_key = options[:cache_prepend_to_key].to_s unless options[:cache_prepend_to_key].nil?
+      @@cache = options[:cache]
       nil
     end
 
@@ -624,16 +632,16 @@ module Osm
 
     # Wrap cache calls
     def cache_read(key)
-      Rails.cache.read("#{@@cache_prepend_to_key}-#{key}")
+      return @@cache.nil? ? nil : @@cache.read("#{@@cache_prepend_to_key}-#{key}")
     end
     def cache_write(key, data, options={})
-      Rails.cache.write("#{@@cache_prepend_to_key}-#{key}", data, options)
+      return @@cache.nil? ? false : @@cache.write("#{@@cache_prepend_to_key}-#{key}", data, options)
     end
     def cache_exist?(key)
-      Rails.cache.exist?("#{@@cache_prepend_to_key}-#{key}")
+      return @@cache.nil? ? false : @@cache.exist?("#{@@cache_prepend_to_key}-#{key}")
     end
     def cache_delete(key)
-      Rails.cache.delete("#{@@cache_prepend_to_key}-#{key}")
+      return @@cache.nil? ? true : @@cache.delete("#{@@cache_prepend_to_key}-#{key}")
     end
 
     # Get the ID from an object or fixnum
