@@ -64,10 +64,10 @@ module Osm
       @deletable = data['deletable'] ? true : false
       @used = data['used'].to_i
       @versions = data['versions']
-      @sections = Osm::make_array_of_symbols(data['sections'] || [])
-      @tags = data['tags'] || []
-      @files = data['files'] || []
-      @badges = data['badges'] || []
+      @sections = data['sections'].is_a?(Array) ? Osm::make_array_of_symbols(data['sections']) : []
+      @tags = data['tags'].is_a?(Array) ? data['tags'] : []
+      @files = data['files'].is_a?(Array) ? data['files'] : []
+      @badges = data['badges'].is_a?(Array) ? data['badges'] : []
 
       # Clean versions hashes
       @versions.each do |version|

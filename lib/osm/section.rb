@@ -44,11 +44,11 @@ module Osm
       @subscription_expires = data['subscription_expires'] ? Date.parse(data['subscription_expires'], 'yyyy-mm-dd') : nil
       @type = !data['sectionType'].nil? ? data['sectionType'].to_sym : :unknown
       @num_scouts = data['numscouts']
-      @column_names = Osm::symbolize_hash(data['columnNames'] || {})
-      @fields = Osm::symbolize_hash(data['fields'] || {})
-      @intouch_fields = Osm::symbolize_hash(data['intouch'] || {})
-      @mobile_fields = Osm::symbolize_hash(data['mobFields'] || {})
-      @extra_records = data['extraRecords'] || []
+      @column_names = data['columnNames'].is_a?(Hash) ? Osm::symbolize_hash(data['columnNames']) : {}
+      @fields = data['fields'].is_a?(Hash) ? Osm::symbolize_hash(data['fields']) : {}
+      @intouch_fields = data['intouch'].is_a?(Hash) ? Osm::symbolize_hash(data['intouch']) : {}
+      @mobile_fields = data['mobFields'].is_a?(Hash) ? Osm::symbolize_hash(data['mobFields']) : {}
+      @extra_records = data['extraRecords'].is_a?(Array) ? data['extraRecords'] : []
       @role = role
 
       # Symbolise the keys in each hash of the extra_records array

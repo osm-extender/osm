@@ -1,3 +1,8 @@
+## Version 0.0.10
+
+  * Fix handling an empty array being returned from OSM for fields (presumably if not allowed to view)
+  * Fix undefined variable in id\_for\_term
+
 ## Version 0.0.9
 
   * Allow passing of Osm::Term objects as well as term IDs
