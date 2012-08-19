@@ -651,10 +651,14 @@ module Osm
     # @param [String, Symbol] id_method the method to call on cl to get the ID
     # @return [Fixnum] the ID
     def id_for(cl, value, error_name, id_method=:id)
-      raise(ArgumentError, "Invalid type for #{error_name}") unless value.is_a?(cl) || value.is_a?(Fixnum)
-      id = value.is_a?(cl) ? value.send(id_method) : value
-      raise(ArgumentError, "Invalid #{error_name} ID") unless id > 0
-      return id
+      if value.is_a?(cl)
+        value = value.send(id_method)
+      else
+        raise(ArgumentError, "Invalid type for #{error_name}") unless value.is_a?(Fixnum)
+      end
+
+      raise(ArgumentError, "Invalid #{error_name} ID") unless value > 0
+      return value
     end
 
     def id_for_section(section)
