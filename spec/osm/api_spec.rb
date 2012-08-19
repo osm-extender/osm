@@ -542,6 +542,18 @@ describe "API" do
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"1":"New content."}'}) }
       Osm::Api.new('user', 'secret').get_notepad(1, {:no_cache => true}).should == 'New content.'
     end
+
+
+    it "Uses the provided cache_prepend_to_key text" do
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1"}.to_json)
+
+      Rails.cache.should_receive('exist?').with('OSMAPI-notepads-1')
+      Osm::Api.new('1', '2').get_notepads.should == {1 => 'Section 1'}
+
+      Osm::Api.configure(@api_config.merge(:cache_prepend_to_key => 'AB'))
+      Rails.cache.should_receive('exist?').with('AB-notepads-1')
+      Osm::Api.new('1', '2').get_notepads.should == {1 => 'Section 1'}
+    end
   end
 
 

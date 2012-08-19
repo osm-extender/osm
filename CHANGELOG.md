@@ -2,6 +2,7 @@
 
   * Allow passing of Osm::Term objects as well as term IDs
   * Allow passing of Osm::Section objects as well as section IDs
+  * Allow configuration of text prepended to keys used in the cache
 
 ## version 0.0.8
 

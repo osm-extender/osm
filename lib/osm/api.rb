@@ -18,6 +18,7 @@ module Osm
                                       # Most items however will be cached for this time
 
     @@user_access = Hash.new
+    @@cache_prepend_to_key = 'OSMAPI'
 
     # Initialize a new API connection
     # If passing user details then both must be passed
@@ -42,7 +43,8 @@ module Osm
     # @option options [String] :api_token the token which goes with the above api
     # @option options [String] :api_name the name displayed in the External Access tab of OSM
     # @option options [Symbol] :api_sate wether to use OSM (if :scout) or OGM (if :guide)
-    # @option options [Fixnum] :default_cache_ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds).
+    # @option options [Fixnum] :default_cache_ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
+    # @option options [String] :cache_prepend_to_key (optional, default = 'OSMAPI') Text to prepend to the key used to store data in the cache
     # @return nil
     def self.configure(options)
       raise ArgumentError, ':api_id does not exist in options hash' if options[:api_id].nil?
@@ -56,6 +58,7 @@ module Osm
       @@api_name = options[:api_name].to_s
       @@api_site = options[:api_site]
       @@default_cache_ttl = options[:default_cache_ttl].to_i unless options[:default_cache_ttl].nil?
+      @@cache_prepend_to_key = options[:cache_prepend_to_key].to_s unless options[:cache_prepend_to_key].nil?
       nil
     end
 
@@ -94,8 +97,8 @@ module Osm
     # @return [Array<Osm::Role>]
     def get_roles(options={}, api_data={})
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-roles-#{api_data[:userid] || @userid}")
-        return Rails.cache.read("OSMAPI-roles-#{api_data[:userid] || @userid}")
+      if !options[:no_cache] && cache_exist?("roles-#{api_data[:userid] || @userid}")
+        return cache_read("roles-#{api_data[:userid] || @userid}")
       end
 
       data = perform_query('api.php?action=getUserRoles', api_data)
@@ -104,10 +107,10 @@ module Osm
       data.each do |item|
         role = Osm::Role.new(item)
         result.push role
-        Rails.cache.write("OSMAPI-section-#{role.section.id}", role.section, :expires_in => @@default_cache_ttl*2)
+        cache_write("section-#{role.section.id}", role.section, :expires_in => @@default_cache_ttl*2)
         self.user_can_access :section, role.section.id, api_data
       end
-      Rails.cache.write("OSMAPI-roles-#{api_data[:userid] || @userid}", result, :expires_in => @@default_cache_ttl*2)
+      cache_write("roles-#{api_data[:userid] || @userid}", result, :expires_in => @@default_cache_ttl*2)
 
       return result
     end
@@ -117,8 +120,8 @@ module Osm
     # @!macro options_api_data
     # @return [Hash] a hash (keys are section IDs, values are a string)
     def get_notepads(options={}, api_data={})
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-notepads-#{api_data[:userid] || @userid}")
-        return Rails.cache.read("OSMAPI-notepads-#{api_data[:userid] || @userid}")
+      if !options[:no_cache] && cache_exist?("notepads-#{api_data[:userid] || @userid}")
+        return cache_read("notepads-#{api_data[:userid] || @userid}")
       end
 
       notepads = perform_query('api.php?action=getNotepads', api_data)
@@ -127,10 +130,10 @@ module Osm
       data = {}
       notepads.each do |key, value|
         data[key.to_i] = value
-        Rails.cache.write("OSMAPI-notepad-#{key}", value, :expires_in => @@default_cache_ttl*2)
+        cache_write("notepad-#{key}", value, :expires_in => @@default_cache_ttl*2)
       end
 
-      Rails.cache.write("OSMAPI-notepads-#{api_data[:userid] || @userid}", data, :expires_in => @@default_cache_ttl*2)
+      cache_write("notepads-#{api_data[:userid] || @userid}", data, :expires_in => @@default_cache_ttl*2)
       return data
     end
 
@@ -143,8 +146,8 @@ module Osm
     def get_notepad(section, options={}, api_data={})
       section_id = id_for_section(section)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-notepad-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
-        return Rails.cache.read("OSMAPI-notepad-#{section_id}")
+      if !options[:no_cache] && cache_exist?("notepad-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
+        return cache_read("notepad-#{section_id}")
       end
 
       notepads = get_notepads(options, api_data)
@@ -164,8 +167,8 @@ module Osm
     # @return nil if an error occured or the user does not have access to that section
     # @return [Osm::Section]
     def get_section(section_id, options={}, api_data={})
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-section-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
-        return Rails.cache.read("OSMAPI-section-#{section_id}")
+      if !options[:no_cache] && cache_exist?("section-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
+        return cache_read("section-#{section_id}")
       end
 
       roles = get_roles(options, api_data)
@@ -186,8 +189,8 @@ module Osm
     def get_groupings(section, options={}, api_data={})
       section_id = id_for_section(section)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-groupings-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
-        return Rails.cache.read("OSMAPI-groupings-#{section_id}")
+      if !options[:no_cache] && cache_exist?("groupings-#{section_id}") && self.user_can_access?(:section, section_id, api_data)
+        return cache_read("groupings-#{section_id}")
       end
 
       data = perform_query("users.php?action=getPatrols&sectionid=#{section_id}", api_data)
@@ -196,10 +199,10 @@ module Osm
       data['patrols'].each do |item|
         grouping = Osm::Grouping.new(item)
         result.push grouping
-        Rails.cache.write("OSMAPI-grouping-#{grouping.id}", grouping, :expires_in => @@default_cache_ttl*2)
+        cache_write("grouping-#{grouping.id}", grouping, :expires_in => @@default_cache_ttl*2)
         self.user_can_access :grouping, grouping.id, api_data
       end
-      Rails.cache.write("OSMAPI-groupings-#{section_id}", result, :expires_in => @@default_cache_ttl*2)
+      cache_write("groupings-#{section_id}", result, :expires_in => @@default_cache_ttl*2)
 
       return result
     end
@@ -209,8 +212,8 @@ module Osm
     # @!macro options_api_data
     # @return [Array<Osm::Term>]
     def get_terms(options={}, api_data={})
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-terms-#{api_data[:userid] || @userid}")
-        return Rails.cache.read("OSMAPI-terms-#{api_data[:userid] || @userid}")
+      if !options[:no_cache] && cache_exist?("terms-#{api_data[:userid] || @userid}")
+        return cache_read("terms-#{api_data[:userid] || @userid}")
       end
 
       data = perform_query('api.php?action=getTerms', api_data)
@@ -220,12 +223,12 @@ module Osm
         data[key].each do |item|
           term = Osm::Term.new(item)
           result.push term
-          Rails.cache.write("OSMAPI-term-#{term.id}", term, :expires_in => @@default_cache_ttl*2)
+          cache_write("term-#{term.id}", term, :expires_in => @@default_cache_ttl*2)
           self.user_can_access :term, term.id, api_data
         end
       end
 
-      Rails.cache.write("OSMAPI-terms-#{api_data[:userid] || @userid}", result, :expires_in => @@default_cache_ttl*2)
+      cache_write("terms-#{api_data[:userid] || @userid}", result, :expires_in => @@default_cache_ttl*2)
       return result
     end
 
@@ -236,8 +239,8 @@ module Osm
     # @return nil if an error occured or the user does not have access to that term
     # @return [Osm::Term]
     def get_term(term_id, options={}, api_data={})
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-term-#{term_id}") && self.user_can_access?(:term, term_id, api_data)
-        return Rails.cache.read("OSMAPI-term-#{term_id}")
+      if !options[:no_cache] && cache_exist?("term-#{term_id}") && self.user_can_access?(:term, term_id, api_data)
+        return cache_read("term-#{term_id}")
       end
 
       terms = get_terms(options)
@@ -260,8 +263,8 @@ module Osm
       section_id = id_for_section(section)
       term_id = id_for_term(term)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-programme-#{section_id}-#{term_id}") && self.user_can_access?(:programme, section_id, api_data)
-        return Rails.cache.read("OSMAPI-programme-#{section_id}-#{term_id}")
+      if !options[:no_cache] && cache_exist?("programme-#{section_id}-#{term_id}") && self.user_can_access?(:programme, section_id, api_data)
+        return cache_read("programme-#{section_id}-#{term_id}")
       end
 
       data = perform_query("programme.php?action=getProgramme&sectionid=#{section_id}&termid=#{term_id}", api_data)
@@ -280,7 +283,7 @@ module Osm
         end
       end
 
-      Rails.cache.write("OSMAPI-programme-#{section_id}-#{term_id}", result, :expires_in => @@default_cache_ttl)
+      cache_write("programme-#{section_id}-#{term_id}", result, :expires_in => @@default_cache_ttl)
       return result
     end
 
@@ -291,8 +294,8 @@ module Osm
     # @!macro options_api_data
     # @return [Osm::Activity]
     def get_activity(activity_id, version=nil, options={}, api_data={})
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-activity-#{activity_id}-#{version}") && self.user_can_access?(:activity, activity_id, api_data)
-        return Rails.cache.read("OSMAPI-activity-#{activity_id}-#{version}")
+      if !options[:no_cache] && cache_exist?("activity-#{activity_id}-#{version}") && self.user_can_access?(:activity, activity_id, api_data)
+        return cache_read("activity-#{activity_id}-#{version}")
       end
 
       data = nil
@@ -303,8 +306,8 @@ module Osm
       end
 
       activity = Osm::Activity.new(data)
-      Rails.cache.write("OSMAPI-activity-#{activity_id}-#{nil}", activity, :expires_in => @@default_cache_ttl*2) if version.nil?
-      Rails.cache.write("OSMAPI-activity-#{activity_id}-#{activity.version}", activity, :expires_in => @@default_cache_ttl/2)
+      cache_write("activity-#{activity_id}-#{nil}", activity, :expires_in => @@default_cache_ttl*2) if version.nil?
+      cache_write("activity-#{activity_id}-#{activity.version}", activity, :expires_in => @@default_cache_ttl/2)
       self.user_can_access :activity, activity.id, api_data
 
       return activity
@@ -320,8 +323,8 @@ module Osm
       section_id = id_for_section(section)
       term_id = id_for_term(term)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-members-#{section_id}-#{term_id}") && self.user_can_access?(:member, section_id, api_data)
-        return Rails.cache.read("OSMAPI-members-#{section_id}-#{term_id}")
+      if !options[:no_cache] && cache_exist?("members-#{section_id}-#{term_id}") && self.user_can_access?(:member, section_id, api_data)
+        return cache_read("members-#{section_id}-#{term_id}")
       end
 
       data = perform_query("users.php?action=getUserDetails&sectionid=#{section_id}&termid=#{term_id}", api_data)
@@ -331,7 +334,7 @@ module Osm
         result.push Osm::Member.new(item)
       end
       self.user_can_access :member, section_id, api_data
-      Rails.cache.write("OSMAPI-members-#{section_id}-#{term_id}", result, :expires_in => @@default_cache_ttl)
+      cache_write("members-#{section_id}-#{term_id}", result, :expires_in => @@default_cache_ttl)
 
       return result
     end
@@ -344,8 +347,8 @@ module Osm
     def get_api_access(section, options={}, api_data={})
       section_id = id_for_section(section)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}")
-        return Rails.cache.read("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}")
+      if !options[:no_cache] && cache_exist?("api_access-#{api_data['userid'] || @userid}-#{section_id}")
+        return cache_read("api_access-#{api_data['userid'] || @userid}-#{section_id}")
       end
 
       data = perform_query("users.php?action=getAPIAccess&sectionid=#{section_id}", api_data)
@@ -357,7 +360,7 @@ module Osm
         self.user_can_access(:programme, section_id, api_data) if this_item.can_read?(:programme)
         self.user_can_access(:member, section_id, api_data) if this_item.can_read?(:member)
         self.user_can_access(:badge, section_id, api_data) if this_item.can_read?(:badge)
-        Rails.cache.write("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}-#{this_item.id}", this_item, :expires_in => @@default_cache_ttl*2)
+        cache_write("api_access-#{api_data['userid'] || @userid}-#{section_id}-#{this_item.id}", this_item, :expires_in => @@default_cache_ttl*2)
       end
 
       return result
@@ -371,8 +374,8 @@ module Osm
     def get_our_api_access(section, options={}, api_data={})
       section_id = id_for_section(section)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}-#{Osm::Api.api_id}")
-        return Rails.cache.read("OSMAPI-api_access-#{api_data['userid'] || @userid}-#{section_id}-#{Osm::Api.api_id}")
+      if !options[:no_cache] && cache_exist?("api_access-#{api_data['userid'] || @userid}-#{section_id}-#{Osm::Api.api_id}")
+        return cache_read("api_access-#{api_data['userid'] || @userid}-#{section_id}-#{Osm::Api.api_id}")
       end
 
       data = get_api_access(section_id, options)
@@ -392,8 +395,8 @@ module Osm
     def get_events(section, options={}, api_data={})
       section_id = id_for_section(section)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-events-#{section_id}") && self.user_can_access?(:programme, section_id, api_data)
-        return Rails.cache.read("OSMAPI-events-#{section_id}")
+      if !options[:no_cache] && cache_exist?("events-#{section_id}") && self.user_can_access?(:programme, section_id, api_data)
+        return cache_read("events-#{section_id}")
       end
 
       data = perform_query("events.php?action=getEvents&sectionid=#{section_id}", api_data)
@@ -405,7 +408,7 @@ module Osm
         end
       end
       self.user_can_access :programme, section_id, api_data
-      Rails.cache.write("OSMAPI-events-#{section_id}", result, :expires_in => @@default_cache_ttl)
+      cache_write("events-#{section_id}", result, :expires_in => @@default_cache_ttl)
 
       return result
     end
@@ -419,8 +422,8 @@ module Osm
       section_id = id_for_section(section)
       term_id = id_for_term(term)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-due_badges-#{section_id}-#{term_id}") && self.user_can_access?(:badge, section_id, api_data)
-        return Rails.cache.read("OSMAPI-due_badges-#{section_id}-#{term_id}")
+      if !options[:no_cache] && cache_exist?("due_badges-#{section_id}-#{term_id}") && self.user_can_access?(:badge, section_id, api_data)
+        return cache_read("due_badges-#{section_id}-#{term_id}")
       end
 
       section_type = get_section(section_id, api_data).type.to_s
@@ -428,7 +431,7 @@ module Osm
 
       data = Osm::DueBadges.new(data)
       self.user_can_access :badge, section_id, api_data
-      Rails.cache.write("OSMAPI-due_badges-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl*2)
+      cache_write("due_badges-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl*2)
 
       return data
     end
@@ -443,8 +446,8 @@ module Osm
       section_id = id_for_section(section)
       term_id = id_for_term(term)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-register_structure-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
-        return Rails.cache.read("OSMAPI-register_structure-#{section_id}-#{term_id}")
+      if !options[:no_cache] && cache_exist?("register_structure-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
+        return cache_read("register_structure-#{section_id}-#{term_id}")
       end
 
       data = perform_query("users.php?action=registerStructure&sectionid=#{section_id}&termid=#{term_id}", api_data)
@@ -456,7 +459,7 @@ module Osm
         end
       end
       self.user_can_access :register, section_id, api_data
-      Rails.cache.write("OSMAPI-register_structure-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
+      cache_write("register_structure-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
 
       return data
     end
@@ -471,8 +474,8 @@ module Osm
       section_id = id_for_section(section)
       term_id = id_for_term(term)
 
-      if !options[:no_cache] && Rails.cache.exist?("OSMAPI-register-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
-        return Rails.cache.read("OSMAPI-register-#{section_id}-#{term_id}")
+      if !options[:no_cache] && cache_exist?("register-#{section_id}-#{term_id}") && self.user_can_access?(:register, section_id, api_data)
+        return cache_read("register-#{section_id}-#{term_id}")
       end
 
       data = perform_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}", api_data)
@@ -485,7 +488,7 @@ module Osm
         item[:patrolid] = item[:patrolid].to_i
       end
       self.user_can_access :register, section_id, api_data
-      Rails.cache.write("OSMAPI-register-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
+      cache_write("register-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
       return data
     end
 
@@ -506,7 +509,7 @@ module Osm
 
       # The cached programmes for the section will be out of date - remove them
       get_terms(api_data).each do |term|
-        Rails.cache.delete("OSMAPI-programme-#{term.section_id}-#{term.id}") if term.section_id == section_id
+        cache_delete("programme-#{term.section_id}-#{term.id}") if term.section_id == section_id
       end
 
       return data.is_a?(Hash) && (data['result'] == 0)
@@ -521,7 +524,7 @@ module Osm
 
       # The cached programmes for the section will be out of date - remove them
       get_terms(api_data).each do |term|
-        Rails.cache.delete("OSMAPI-programme-#{term.section_id}-#{term.id}") if term.section_id == evening.section_id
+        cache_delete("programme-#{term.section_id}-#{term.id}") if term.section_id == evening.section_id
       end
 
       return response.is_a?(Hash) && (response['result'] == 0)
@@ -630,6 +633,19 @@ module Osm
       return to_return
     end
 
+    # Wrap cache calls
+    def cache_read(key)
+      Rails.cache.read("#{@@cache_prepend_to_key}-#{key}")
+    end
+    def cache_write(key, data, options={})
+      Rails.cache.write("#{@@cache_prepend_to_key}-#{key}", data, options)
+    end
+    def cache_exist?(key)
+      Rails.cache.exist?("#{@@cache_prepend_to_key}-#{key}")
+    end
+    def cache_delete(key)
+      Rails.cache.delete("#{@@cache_prepend_to_key}-#{key}")
+    end
 
     # Get the ID from an object or fixnum
     # @param cl the Class being used (e.g. Osm::Section)
