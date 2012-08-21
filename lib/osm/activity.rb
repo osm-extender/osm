@@ -34,15 +34,15 @@ module Osm
     # @!attribute [r] used
     #   @return [Fixnum] How many times this activity has been used (total accross all of OSM)
     # @!attribute [r] versions
-    #   @return [Array<Hash>] ? (:value - version, :firstname - created by, :label - label, :user_id - OSM user ID of creator)
+    #   @return [Array<Osm::Activity::Version>]
     # @!attribute [r] sections
     #   @return [Array<Symbol>] the sections the activity is appropriate for
     # @!attribute [r] tags
     #   @return [Array<String>] the tags attached to the activity
     # @!attribute [r] files
-    #   @return [Array<Hash> ? ('fileid', 'filename', 'name')
+    #   @return [Array<Osm::Activity::File>
     # @!attribute [r] badges
-    #   @return [Array<Hash> ? ('section', 'badgetype', 'badge', 'columnname', 'label')
+    #   @return [Array<Osm::Activity::Badge>
 
 
     # Initialize a new Activity using the hash returned by the API call
@@ -63,24 +63,97 @@ module Osm
       @editable = data['editable']
       @deletable = data['deletable'] ? true : false
       @used = data['used'].to_i
-      @versions = data['versions']
+      @versions = []
       @sections = data['sections'].is_a?(Array) ? Osm::make_array_of_symbols(data['sections']) : []
       @tags = data['tags'].is_a?(Array) ? data['tags'] : []
-      @files = data['files'].is_a?(Array) ? data['files'] : []
-      @badges = data['badges'].is_a?(Array) ? data['badges'] : []
+      @files = []
+      @badges = []
 
-      # Clean versions hashes
-      @versions.each do |version|
-        version.keys.each do |key|
-          version[(key.to_sym rescue key) || key] = version.delete(key)
-        end
-        version[:value] = version[:value].to_i
-        version[:user_id] = version[:userid].to_i
-        version.delete(:userid)
-        version[:selected] = (version[:selected] == 'selected')
+      # Populate Arrays
+      (data['files'].is_a?(Array) ? data['files'] : []).each do |file_data|
+        @files.push File.new(file_data)
+      end
+      (data['badges'].is_a?(Array) ? data['badges'] : []).each do |badge_data|
+        @badges.push Badge.new(badge_data)
+      end
+      (data['versions'].is_a?(Array) ? data['versions'] : []).each do |version_data|
+        @versions.push Version.new(version_data)
+      end
+      @files.freeze
+      @badges.freeze
+      @versions.freeze
+    end
+
+
+    private
+    class File
+      attr_reader :file_id, :activity_id, :file_name, :name
+      # @!attribute [r] file_id
+      #   @return [Fixnum] the OSM ID for the file
+      # @!attribute [r] activity_id
+      #   @return [Fixnum] the OSM ID for the activity
+      # @!attribute [r] file_name
+      #   @return [String] the file name of the file
+      # @!attribute [r] name
+      #   @return [String] the name of the file (more human readable than file_name)
+
+      # Initialize a new File using the hash returned by the API call
+      # @param data the hash of data for the object returned by the API
+      def initialize(data)
+        @file_id = data['fileid'].to_i
+        @activity_id = data['activityid'].to_i
+        @file_name = data['filename']
+        @name = data['name']
+      end
+    end
+
+    class Badge
+      attr_reader :activity_id, :section, :type, :badge, :requirement, :label
+      # @!attribute [r] activity_id
+      #   @return [Fixnum] the activity being done
+      # @!attribute [r] section
+      #   @return [Symbol] the section the badge 'belongs' to
+      # @!attribute [r] type
+      #   @return [Symbol] the type of badge
+      # @!attribute [r] badge
+      #   @return [String] short name of the badge
+      # @!attribute [r] requirement
+      #   @return [String] OSM reference to this badge requirement
+      # @!attribute [r] label
+      #   @return [String] human readable label for the requirement
+
+      # Initialize a new Badge using the hash returned by the API call
+      # @param data the hash of data for the object returned by the API
+      def initialize(data)
+        @activity_id = data['activityid'].to_i
+        @section = data['section'].to_sym
+        @type = data['badgetype'].to_sym
+        @badge = data['badge']
+        @requirement = data['columnname']
+        @label = data['label']
+      end
+    end
+
+    class Version
+      attr_reader :version, :created_by, :created_by_name, :label
+      # @!attribute [r] version
+      #   @return [Fixnum] the version of the activity
+      # @!attribute [r] created_by
+      #   @return [Fixnum] the OSM user ID of the person who created this version
+      # @!attribute [r] created_by_name
+      #   @return [String] the aname of the OSM user who created this version
+      # @!attribute [r] label
+      #   @return [String] the human readable label to use for this version
+
+      # Initialize a new Version using the hash returned by the API call
+      # @param data the hash of data for the object returned by the API
+      def initialize(data)
+        @version = data['value'].to_i
+        @created_by = data['userid'].to_i
+        @created_by_name = data['firstname']
+        @label = data['label']
       end
     end
 
   end
-
 end

@@ -1,6 +1,9 @@
 ## Version 0.0.12
 
   * EveningActivity class renamed to Evening::Activity
+  * Activity class - badges now returns an array of Osm::Activity::Badge objects
+  * Activity class - files now returns an array of Osm::Activity::File objects
+  * Activity class - versions now returns an array of Osm::Activity::Version objects
 
 ## Version 0.0.11
 

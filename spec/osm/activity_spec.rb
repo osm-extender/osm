@@ -34,8 +34,24 @@ describe "Activity" do
       ],
       'sections' => ['beavers', 'cubs'],
       'tags' => ['Tag 1', 'Tag2'],
-      'files' => [],
-      'badges' => []
+      'files' => [
+        {
+          'fileid' => '6',
+          'activityid' => '1',
+          'filename' => 'File Name',
+          'name' => 'Name',
+        }
+      ],
+      'badges' => [
+        {
+          'activityid' => '1',
+          'section' => 'section',
+          'badgetype' => 'type',
+          'badge' => 'badge',
+          'columnname' => 'col_name',
+          'label' => 'This is a label',
+        }
+      ]
     }
     activity = Osm::Activity.new(data)
 
@@ -54,11 +70,22 @@ describe "Activity" do
     activity.editable.should == true
     activity.deletable.should == false
     activity.used.should == 3
-    activity.versions.should == [{:value => 0, :user_id => 1, :firstname => 'Alice', :label => 'Current version - Alice', :selected => true}]
+    activity.versions[0].version.should == 0
+    activity.versions[0].created_by.should == 1
+    activity.versions[0].created_by_name.should == 'Alice'
+    activity.versions[0].label.should == 'Current version - Alice'
     activity.sections.should == [:beavers, :cubs]
     activity.tags.should == ['Tag 1', 'Tag2']
-    activity.files.should == []
-    activity.badges.should == []
+    activity.files[0].file_id.should == 6
+    activity.files[0].activity_id.should == 1
+    activity.files[0].file_name.should == 'File Name'
+    activity.files[0].name.should == 'Name'
+    activity.badges[0].activity_id.should == 1
+    activity.badges[0].section.should == :section
+    activity.badges[0].type.should == :type
+    activity.badges[0].badge.should == 'badge'
+    activity.badges[0].requirement.should == 'col_name'
+    activity.badges[0].label.should == 'This is a label'
   end
 
 end
