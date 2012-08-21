@@ -23,7 +23,7 @@ module Osm
     # @!attribute [rw] meeting_date
     #   @return [Date] the date of the evening
     # @!attribute [rw] activities
-    #   @return [Array<EveningActivity>] list of activities being done during the evening
+    #   @return [Array<Activity>] list of activities being done during the evening
     # @!attribute [rw] start_time
     #   @return [String] the start time (hh:mm)
     # @!attribute [rw] end_time
@@ -48,7 +48,7 @@ module Osm
       @activities = Array.new
       unless activities.nil?
         activities.each do |item|
-          @activities.push EveningActivity.new(item)
+          @activities.push Activity.new(item)
         end
       end
       @activities.freeze
@@ -86,7 +86,7 @@ module Osm
 
 
     private
-    # Get the JSON for the activitied to pass to the OSM API
+    # Get the JSON for the activities to pass to the OSM API
     # @return [String]
     def activities_for_saving
       to_save = Array.new
@@ -101,7 +101,7 @@ module Osm
     end
 
 
-    class EveningActivity
+    class Activity
   
       attr_reader :activity_id, :title, :notes
       # @!attribute [r] activity_id
@@ -111,7 +111,7 @@ module Osm
       # @!attribute [r] notes
       #   @return [String] notes relevant to doing this activity on this evening
   
-      # Initialize a new EveningActivity using the hash returned by the API call
+      # Initialize a new Activity using the hash returned by the API call
       # @param data the hash of data for the object returned by the API
       def initialize(data)
         @activity_id = Osm::to_i_or_nil(data['activityid'])

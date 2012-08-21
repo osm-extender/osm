@@ -1,6 +1,6 @@
 ## Version 0.0.12
 
-  * 
+  * EveningActivity class renamed to Evening::Activity
 
 ## Version 0.0.11
 
