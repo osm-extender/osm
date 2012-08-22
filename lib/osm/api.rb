@@ -449,7 +449,7 @@ module Osm
     # @param [Osm:Term, Fixnum] section the term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
-    # @return [Array<Hash>] representing the rows of the register
+    # @return [Array<Hash>] representing the fields of the register
     def get_register_structure(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
       term_id = id_for_term(term, section, api_data)
@@ -460,25 +460,25 @@ module Osm
 
       data = perform_query("users.php?action=registerStructure&sectionid=#{section_id}&termid=#{term_id}", api_data)
 
-      data.each_with_index do |item, item_index|
-        data[item_index] = item = Osm::symbolize_hash(item)
-        item[:rows].each_with_index do |row, row_index|
-          item[:rows][row_index] = row = Osm::symbolize_hash(row)
+      structure = []
+      data.each do |item|
+        item['rows'].each do |row|
+          structure.push Osm::RegisterField.new(row)
         end
       end
       self.user_can_access :register, section_id, api_data
-      cache_write("register_structure-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
+      cache_write("register_structure-#{section_id}-#{term_id}", structure, :expires_in => @@default_cache_ttl/2)
 
-      return data
+      return structure
     end
 
-    # Get register
+    # Get register data
     # @param [Osm:Section, Fixnum] section the section (or its ID) to get the register for
     # @param [Osm:Term, Fixnum] section the term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
-    # @return [Array<Hash>] representing the attendance of each member
-    def get_register(section, term=nil, options={}, api_data={})
+    # @return [Array<RegisterData>] representing the attendance of each member
+    def get_register_data(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
       term_id = id_for_term(term, section, api_data)
 
@@ -490,10 +490,7 @@ module Osm
 
       data = data['items']
       data.each do |item|
-        item = Osm::symbolize_hash(item)
-        item[:scoutid] = item[:scoutid].to_i
-        item[:sectionid] = item[:sectionid].to_i
-        item[:patrolid] = item[:patrolid].to_i
+        item = Osm::RegisterData.new(item)
       end
       self.user_can_access :register, section_id, api_data
       cache_write("register-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)

@@ -370,7 +370,7 @@ describe "API" do
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json)
 
-      register = Osm::Api.new('1', '2').get_register(1, 2)
+      register = Osm::Api.new('1', '2').get_register_data(1, 2)
       register.is_a?(Array).should be_true
     end
 
