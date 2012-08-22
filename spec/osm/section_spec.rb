@@ -27,7 +27,18 @@ describe "Section" do
       'fields' => {},
       'intouch' => {},
       'mobFields' => {},
-      'extraRecords' => [],
+      'extraRecords' => [
+        {
+          'name' => 'Name 1',
+          'extraid' => 1
+        }, [
+          '',
+          {
+            'name' => 'Name 2',
+            'extraid' => 2
+          }
+        ]
+      ]
     }
     role = DummyRole.new(1)
     section = Osm::Section.new(1, 'Name', data, role)
@@ -42,7 +53,10 @@ describe "Section" do
     section.fields.should == {}
     section.intouch_fields.should == {}
     section.mobile_fields.should == {}
-    section.extra_records.should == []
+    section.flexi_records[0].id.should == 1
+    section.flexi_records[0].name.should == 'Name 1'
+    section.flexi_records[1].id.should == 2
+    section.flexi_records[1].name.should == 'Name 2'
     section.role.should == role
   end
 
@@ -57,7 +71,7 @@ describe "Section" do
     section.fields.should == {}
     section.intouch_fields.should == {}
     section.mobile_fields.should == {}
-    section.extra_records.should == []
+    section.flexi_records.should == []
   end
 
 

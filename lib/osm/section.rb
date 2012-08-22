@@ -2,7 +2,7 @@ module Osm
 
   class Section
 
-    attr_reader :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :extra_records, :role
+    attr_reader :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records, :role
     # @!attribute [r] id
     #   @return [Fixnum] the id for the section
     # @!attribute [r] name
@@ -24,7 +24,7 @@ module Osm
     # @!attribute [r] mobile_fields
     #   @return [Hash] which columns are shown in the OSM mobile app
     # @!attribute [r] extraRecords
-    #   @return [Array<hash>] list of the extra records the section has
+    #   @return [Array<FlexiRecord>] list of the extra records the section has
     # @!attribute [r] role
     #   @return [Osm::Role] the role linking the user to this section
 
@@ -48,19 +48,15 @@ module Osm
       @fields = data['fields'].is_a?(Hash) ? Osm::symbolize_hash(data['fields']) : {}
       @intouch_fields = data['intouch'].is_a?(Hash) ? Osm::symbolize_hash(data['intouch']) : {}
       @mobile_fields = data['mobFields'].is_a?(Hash) ? Osm::symbolize_hash(data['mobFields']) : {}
-      @extra_records = data['extraRecords'].is_a?(Array) ? data['extraRecords'] : []
+      @flexi_records = []
       @role = role
 
-      # Symbolise the keys in each hash of the extra_records array
-      @extra_records.each do |item|
-        # Expect item to be: {:name=>String, :extraid=>Fixnum}
-        # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
-        if item.is_a?(Array)
-          item = Osm::symbolize_hash(item[1])
-        else
-          item = Osm::symbolize_hash(item)
-        end
+
+      # Populate arrays
+      (data['extraRecords'].is_a?(Array) ? data['extraRecords'] : []).each do |record_data|
+        @flexi_records.push FlexiRecord.new(record_data)
       end
+      @flexi_records.freeze
     end
 
     # Check if this section is one of the youth sections
@@ -100,6 +96,29 @@ module Osm
 
     def ==(another_section)
       self.id == another_section.try(:id)
+    end
+
+
+
+    private
+    class FlexiRecord
+
+      attr_reader :id, :name
+      # @!attribute [r] activity_id
+      #   @return [Fixnum] the aid of the flexi-record
+      # @!attribute [r] name
+      #   @return [String] the name given to the flexi-record
+  
+      # Initialize a new ExtraRecord using the hash returned by the API call
+      # @param data the hash of data for the object returned by the API
+      def initialize(data)
+        # Expect item to be: {:name=>String, :extraid=>Fixnum}
+        # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
+        data = data[1] if data.is_a?(Array) 
+
+        @id = Osm::to_i_or_nil(data['extraid'])
+        @name = data['name']
+      end
     end
 
   end
