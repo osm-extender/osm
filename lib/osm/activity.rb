@@ -49,7 +49,7 @@ module Osm
     # @param data the hash of data for the object returned by the API
     def initialize(data)
       @id = Osm::to_i_or_nil(data['details']['activityid'])
-      @version = Osm::to_i_or_nil(data['details']['version'])
+      @version = data['details']['version'].to_i
       @group_id = Osm::to_i_or_nil(data['details']['groupid'])
       @user_id = Osm::to_i_or_nil(data['details']['userid'])
       @title = data['details']['title']
@@ -59,10 +59,10 @@ module Osm
       @running_time = Osm::to_i_or_nil(data['details']['runningtime'])
       @location = data['details']['location'].to_sym
       @shared = Osm::to_i_or_nil(data['details']['shared'])
-      @rating = Osm::to_i_or_nil(data['details']['rating'])
+      @rating = data['details']['rating'].to_i
       @editable = data['editable']
       @deletable = data['deletable'] ? true : false
-      @used = Osm::to_i_or_nil(data['used'])
+      @used = data['used'].to_i
       @versions = []
       @sections = data['sections'].is_a?(Array) ? Osm::make_array_of_symbols(data['sections']) : []
       @tags = data['tags'].is_a?(Array) ? data['tags'] : []
