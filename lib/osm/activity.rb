@@ -48,21 +48,21 @@ module Osm
     # Initialize a new Activity using the hash returned by the API call
     # @param data the hash of data for the object returned by the API
     def initialize(data)
-      @id = data['details']['activityid'].to_i
-      @version = data['details']['version'].to_i
-      @group_id = data['details']['groupid'].to_i
-      @user_id = data['details']['userid'].to_i
+      @id = Osm::to_i_or_nil(data['details']['activityid'])
+      @version = Osm::to_i_or_nil(data['details']['version'])
+      @group_id = Osm::to_i_or_nil(data['details']['groupid'])
+      @user_id = Osm::to_i_or_nil(data['details']['userid'])
       @title = data['details']['title']
       @description = data['details']['description']
       @resources = data['details']['resources']
       @instructions = data['details']['instructions']
-      @running_time = data['details']['runningtime'].to_i
+      @running_time = Osm::to_i_or_nil(data['details']['runningtime'])
       @location = data['details']['location'].to_sym
-      @shared = data['details']['shared'].to_i
-      @rating = data['details']['rating'].to_i
+      @shared = Osm::to_i_or_nil(data['details']['shared'])
+      @rating = Osm::to_i_or_nil(data['details']['rating'])
       @editable = data['editable']
       @deletable = data['deletable'] ? true : false
-      @used = data['used'].to_i
+      @used = Osm::to_i_or_nil(data['used'])
       @versions = []
       @sections = data['sections'].is_a?(Array) ? Osm::make_array_of_symbols(data['sections']) : []
       @tags = data['tags'].is_a?(Array) ? data['tags'] : []
@@ -100,8 +100,8 @@ module Osm
       # Initialize a new File using the hash returned by the API call
       # @param data the hash of data for the object returned by the API
       def initialize(data)
-        @file_id = data['fileid'].to_i
-        @activity_id = data['activityid'].to_i
+        @file_id = Osm::to_i_or_nil(data['fileid'])
+        @activity_id = Osm::to_i_or_nil(data['activityid'])
         @file_name = data['filename']
         @name = data['name']
       end
@@ -125,7 +125,7 @@ module Osm
       # Initialize a new Badge using the hash returned by the API call
       # @param data the hash of data for the object returned by the API
       def initialize(data)
-        @activity_id = data['activityid'].to_i
+        @activity_id = Osm::to_i_or_nil(data['activityid'])
         @section = data['section'].to_sym
         @type = data['badgetype'].to_sym
         @badge = data['badge']
@@ -148,8 +148,8 @@ module Osm
       # Initialize a new Version using the hash returned by the API call
       # @param data the hash of data for the object returned by the API
       def initialize(data)
-        @version = data['value'].to_i
-        @created_by = data['userid'].to_i
+        @version = Osm::to_i_or_nil(data['value'])
+        @created_by = Osm::to_i_or_nil(data['userid'])
         @created_by_name = data['firstname']
         @label = data['label']
       end
