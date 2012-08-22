@@ -102,7 +102,7 @@ module Osm
 
 
     class Activity
-  
+
       attr_reader :activity_id, :title, :notes
       # @!attribute [r] activity_id
       #   @return [Fixnum] the activity being done
@@ -118,7 +118,7 @@ module Osm
         @title = data['title']
         @notes = data['notes']
       end
-  
+
     end
 
 
