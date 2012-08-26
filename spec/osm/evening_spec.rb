@@ -84,7 +84,7 @@ describe "Evening" do
       'notes' => 'Notes',
     }]
     e = Osm::Evening.new(data, activities)
-    e.data_for_saving.should == {
+    e.to_api.should == {
       'eveningid' => 1,
       'sectionid' => 2,
       'meetingdate' => '2000-01-02',

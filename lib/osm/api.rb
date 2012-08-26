@@ -525,7 +525,7 @@ module Osm
     # @!macro options_api_data
     # @return [Boolean] if the operation suceeded or not
     def update_evening(evening, api_data={})
-      response = perform_query("programme.php?action=editEvening", api_data.merge(evening.data_for_saving))
+      response = perform_query("programme.php?action=editEvening", api_data.merge(evening.to_api))
 
       # The cached programmes for the section will be out of date - remove them
       get_terms(api_data).each do |term|

@@ -67,7 +67,7 @@ module Osm
 
     # Get the evening's data for use with the API
     # @return [Hash]
-    def data_for_saving
+    def to_api
       {
         'eveningid' => evening_id,
         'sectionid' => section_id,
@@ -80,7 +80,7 @@ module Osm
         'postnotes' => post_notes,
         'games' => games,
         'leaders' => leaders,
-        'activity' => activities_for_saving,
+        'activity' => activities_for_to_api,
       }
     end
 
@@ -88,7 +88,7 @@ module Osm
     private
     # Get the JSON for the activities to pass to the OSM API
     # @return [String]
-    def activities_for_saving
+    def activities_for_to_api
       to_save = Array.new
       @activities.each do |activity|
         this_activity = {
