@@ -598,14 +598,14 @@ module Osm
       begin
         result = HTTParty.post("#{@base_url}/#{url}", {:body => api_data})
       rescue SocketError, TimeoutError, OpenSSL::SSL::SSLError
-        raise ConnectionError.new('A problem occured on the internet.')
+        raise ConnectionError, 'A problem occured on the internet.'
       end
-      raise ConnectionError.new("HTTP Status code was #{result.response.code}") if !result.response.code.eql?('200')
+      raise ConnectionError, "HTTP Status code was #{result.response.code}" if !result.response.code.eql?('200')
 
-      raise Error.new(result.response.body) unless looks_like_json?(result.response.body)
+      raise Error, result.response.body unless looks_like_json?(result.response.body)
       decoded = ActiveSupport::JSON.decode(result.response.body)
       osm_error = get_osm_error(decoded)
-      raise Error.new(osm_error) if osm_error
+      raise Error, osm_error if osm_error
       return decoded        
     end
 
@@ -651,10 +651,10 @@ module Osm
       if value.is_a?(cl)
         value = value.send(id_method)
       else
-        raise(ArgumentError, "Invalid type for #{error_name}") unless value.is_a?(Fixnum)
+        raise ArgumentError, "Invalid type for #{error_name}" unless value.is_a?(Fixnum)
       end
 
-      raise(ArgumentError, "Invalid #{error_name} ID") unless value > 0
+      raise ArgumentError, "Invalid #{error_name} ID" unless value > 0
       return value
     end
 

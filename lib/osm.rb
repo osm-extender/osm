@@ -27,7 +27,7 @@ module Osm
       end
     end
 
-    raise Error.new('There is no current term for the section.')
+    raise Error, 'There is no current term for the section.'
   end
 
   def self.make_datetime(date, time)
@@ -69,7 +69,7 @@ module Osm
   end
 
   def self.symbolize_hash(hash_in)
-    raise ArgumentError.new('You did not pass in a hash') unless hash_in.is_a?(Hash)
+    raise ArgumentError, 'You did not pass in a hash' unless hash_in.is_a?(Hash)
 
     hash_out = {}
     hash_in.each do |key, value|
