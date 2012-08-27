@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe "Activity" do
 
-  it "Create" do
+  it "Create from API data" do
     data = {
         'details' => {
         'activityid' => '1',
@@ -53,7 +53,7 @@ describe "Activity" do
         }
       ]
     }
-    activity = Osm::Activity.new(data)
+    activity = Osm::Activity.from_api(data)
 
     activity.id.should == 1
     activity.version.should == 0

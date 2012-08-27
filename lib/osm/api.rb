@@ -313,7 +313,7 @@ module Osm
         data = perform_query("programme.php?action=getActivity&id=#{activity_id}&version=#{version}", api_data)
       end
 
-      activity = Osm::Activity.new(data)
+      activity = Osm::Activity.from_api(data)
       cache_write("activity-#{activity_id}-#{nil}", activity, :expires_in => @@default_cache_ttl*2) if version.nil?
       cache_write("activity-#{activity_id}-#{activity.version}", activity, :expires_in => @@default_cache_ttl/2)
       self.user_can_access :activity, activity.id, api_data

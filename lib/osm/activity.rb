@@ -45,47 +45,90 @@ module Osm
     #   @return [Array<Osm::Activity::Badge>
 
 
-    # Initialize a new Activity using the hash returned by the API call
-    # @param data the hash of data for the object returned by the API
-    def initialize(data)
-      @id = Osm::to_i_or_nil(data['details']['activityid'])
-      @version = data['details']['version'].to_i
-      @group_id = Osm::to_i_or_nil(data['details']['groupid'])
-      @user_id = Osm::to_i_or_nil(data['details']['userid'])
-      @title = data['details']['title']
-      @description = data['details']['description']
-      @resources = data['details']['resources']
-      @instructions = data['details']['instructions']
-      @running_time = Osm::to_i_or_nil(data['details']['runningtime'])
-      @location = data['details']['location'].to_sym
-      @shared = Osm::to_i_or_nil(data['details']['shared'])
-      @rating = data['details']['rating'].to_i
-      @editable = data['editable']
-      @deletable = data['deletable'] ? true : false
-      @used = data['used'].to_i
-      @versions = []
-      @sections = data['sections'].is_a?(Array) ? Osm::make_array_of_symbols(data['sections']) : []
-      @tags = data['tags'].is_a?(Array) ? data['tags'] : []
-      @files = []
-      @badges = []
+    # Initialize a new Activity
+    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    def initialize(attributes={})
+      [:id, :group_id, :user_id].each do |attribute|
+        it = attributes[attribute]
+        raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless it.nil? || (it.is_a?(Fixnum) && it > 0)
+      end
+      [:version, :running_time, :shared].each do |attribute|
+        it = attributes[attribute]
+        raise ArgumentError, ":#{attribute} must be nil or a Fixnum >= 0" unless it.nil? || (it.is_a?(Fixnum) && it >= 0)
+      end
+
+      [:title, :description, :resources, :instructions].each do |attribute|
+        it = attributes[attribute]
+        raise ArgumentError, ":#{attribute} must be nil or a String" unless it.nil? || it.is_a?(String)
+      end
+
+      raise ArgumentError, ':location must be either :indoors, :outdoors or :both' unless [:indoors, :outdoors, :both].include?(attributes[:location])
+
+      raise ArgumentError, ':editable must be a Boolean' unless attributes[:editable].is_a?(TrueClass) || attributes[:editable].is_a?(FalseClass)
+      raise ArgumentError, ':deletable must be a Boolean' unless attributes[:deletable].is_a?(TrueClass) || attributes[:deletable].is_a?(FalseClass)
+
+      raise ArgumentError, ':rating must be a FixNum' unless attributes[:rating].is_a?(Fixnum)
+      raise ArgumentError, ':used must be a FixNum' unless attributes[:used].is_a?(Fixnum)
+
+      raise ArgumentError, ':sections must be an Array of Symbol' unless is_array_of?(attributes[:sections], Symbol)
+      raise ArgumentError, ':tags must be an Array of String' unless is_array_of?(attributes[:tags], String)
+      raise ArgumentError, ':versions must be an Array of Osm::Activity::Version' unless is_array_of?(attributes[:versions], Osm::Activity::Version)
+      raise ArgumentError, ':files must be an Array of Osm::Activity::File' unless is_array_of?(attributes[:files], Osm::Activity::File)
+      raise ArgumentError, ':badges must be an Array of Osm::Activity::Badge' unless is_array_of?(attributes[:badges], Osm::Activity::Badge)
+
+      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+    end
+
+    # Initialize a new Activity from api data
+    # @param [Hash] api_data the hash of data provided by the API
+    def self.from_api(data)
+      attributes = {}
+      attributes[:id] = Osm::to_i_or_nil(data['details']['activityid'])
+      attributes[:version] = data['details']['version'].to_i
+      attributes[:group_id] = Osm::to_i_or_nil(data['details']['groupid'])
+      attributes[:user_id] = Osm::to_i_or_nil(data['details']['userid'])
+      attributes[:title] = data['details']['title']
+      attributes[:description] = data['details']['description']
+      attributes[:resources] = data['details']['resources']
+      attributes[:instructions] = data['details']['instructions']
+      attributes[:running_time] = Osm::to_i_or_nil(data['details']['runningtime'])
+      attributes[:location] = data['details']['location'].to_sym
+      attributes[:shared] = Osm::to_i_or_nil(data['details']['shared'])
+      attributes[:rating] = data['details']['rating'].to_i
+      attributes[:editable] = data['editable']
+      attributes[:deletable] = data['deletable'] ? true : false
+      attributes[:used] = data['used'].to_i
+      attributes[:sections] = data['sections'].is_a?(Array) ? Osm::make_array_of_symbols(data['sections']) : []
+      attributes[:tags] = data['tags'].is_a?(Array) ? data['tags'] : []
+      attributes[:versions] = []
+      attributes[:files] = []
+      attributes[:badges] = []
 
       # Populate Arrays
       (data['files'].is_a?(Array) ? data['files'] : []).each do |file_data|
-        @files.push File.new(file_data)
+        attributes[:files].push File.new(file_data)
       end
       (data['badges'].is_a?(Array) ? data['badges'] : []).each do |badge_data|
-        @badges.push Badge.new(badge_data)
+        attributes[:badges].push Badge.new(badge_data)
       end
       (data['versions'].is_a?(Array) ? data['versions'] : []).each do |version_data|
-        @versions.push Version.new(version_data)
+        attributes[:versions].push Version.new(version_data)
       end
-      @files.freeze
-      @badges.freeze
-      @versions.freeze
+
+      return new(attributes)
     end
 
 
     private
+    def is_array_of?(ar, ty)
+      return false unless ar.is_a?(Array)
+      ar.each do |it|
+        return false unless it.is_a?(ty)
+      end
+      return true
+    end
+
+
     class File
       attr_reader :file_id, :activity_id, :file_name, :name
       # @!attribute [r] file_id
