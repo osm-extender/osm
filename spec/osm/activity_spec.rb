@@ -76,7 +76,7 @@ describe "Activity" do
     activity.versions[0].label.should == 'Current version - Alice'
     activity.sections.should == [:beavers, :cubs]
     activity.tags.should == ['Tag 1', 'Tag2']
-    activity.files[0].file_id.should == 6
+    activity.files[0].id.should == 6
     activity.files[0].activity_id.should == 1
     activity.files[0].file_name.should == 'File Name'
     activity.files[0].name.should == 'Name'

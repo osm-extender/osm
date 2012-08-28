@@ -5,7 +5,8 @@
   * Activity class - files now returns an array of Osm::Activity::File objects
   * Activity class - versions now returns an array of Osm::Activity::Version objects
   * Add from\_api method to Activity and sub classes
-  * Activity::Badge section becomes section\_type
+  * Activity::Badge section attribute becomes section\_type
+  * Activity::File file\_id attribute becomes id
   * Section class - rename extra\_records to flexi\_records
   * Section class - flexi_records now returns an array of Osm::Section::FlexiRecord objects
   * get\_register becomes get\_register\_data and now returns an array of RegisterData objects

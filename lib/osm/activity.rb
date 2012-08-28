@@ -130,8 +130,8 @@ module Osm
 
 
     class File
-      attr_reader :file_id, :activity_id, :file_name, :name
-      # @!attribute [r] file_id
+      attr_reader :id, :activity_id, :file_name, :name
+      # @!attribute [r] id
       #   @return [Fixnum] the OSM ID for the file
       # @!attribute [r] activity_id
       #   @return [Fixnum] the OSM ID for the activity
@@ -146,7 +146,7 @@ module Osm
         [:file_name, :name].each do |attribute|
           raise ArgumentError, ":#{attribute} must a String" unless attributes[attribute].is_a?(String)
         end
-        [:file_id, :activity_id].each do |attribute|
+        [:id, :activity_id].each do |attribute|
           it = attributes[attribute]
           raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless it.nil? || (it.is_a?(Fixnum) && it > 0)
         end
@@ -158,7 +158,7 @@ module Osm
       # @param [Hash] data the hash of data provided by the API
       def self.from_api(data)
         return new({
-          :file_id => Osm::to_i_or_nil(data['fileid']),
+          :id => Osm::to_i_or_nil(data['fileid']),
           :activity_id => Osm::to_i_or_nil(data['activityid']),
           :file_name => data['filename'],
           :name => data['name']
