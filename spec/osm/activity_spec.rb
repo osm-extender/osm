@@ -81,7 +81,7 @@ describe "Activity" do
     activity.files[0].file_name.should == 'File Name'
     activity.files[0].name.should == 'Name'
     activity.badges[0].activity_id.should == 1
-    activity.badges[0].section.should == :section
+    activity.badges[0].section_type.should == :section
     activity.badges[0].type.should == :type
     activity.badges[0].badge.should == 'badge'
     activity.badges[0].requirement.should == 'col_name'

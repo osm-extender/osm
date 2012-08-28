@@ -80,7 +80,7 @@ module Osm
     end
 
     # Initialize a new Activity from api data
-    # @param [Hash] api_data the hash of data provided by the API
+    # @param [Hash] data the hash of data provided by the API
     def self.from_api(data)
       attributes = {}
       attributes[:id] = Osm::to_i_or_nil(data['details']['activityid'])
@@ -106,13 +106,13 @@ module Osm
 
       # Populate Arrays
       (data['files'].is_a?(Array) ? data['files'] : []).each do |file_data|
-        attributes[:files].push File.new(file_data)
+        attributes[:files].push File.from_api(file_data)
       end
       (data['badges'].is_a?(Array) ? data['badges'] : []).each do |badge_data|
-        attributes[:badges].push Badge.new(badge_data)
+        attributes[:badges].push Badge.from_api(badge_data)
       end
       (data['versions'].is_a?(Array) ? data['versions'] : []).each do |version_data|
-        attributes[:versions].push Version.new(version_data)
+        attributes[:versions].push Version.from_api(version_data)
       end
 
       return new(attributes)
@@ -140,21 +140,38 @@ module Osm
       # @!attribute [r] name
       #   @return [String] the name of the file (more human readable than file_name)
 
-      # Initialize a new File using the hash returned by the API call
-      # @param data the hash of data for the object returned by the API
-      def initialize(data)
-        @file_id = Osm::to_i_or_nil(data['fileid'])
-        @activity_id = Osm::to_i_or_nil(data['activityid'])
-        @file_name = data['filename']
-        @name = data['name']
+      # Initialize a new File
+      # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      def initialize(attributes={})
+        [:file_name, :name].each do |attribute|
+          raise ArgumentError, ":#{attribute} must a String" unless attributes[attribute].is_a?(String)
+        end
+        [:file_id, :activity_id].each do |attribute|
+          it = attributes[attribute]
+          raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless it.nil? || (it.is_a?(Fixnum) && it > 0)
+        end
+
+        attributes.each { |k,v| instance_variable_set("@#{k}", v) }
       end
-    end
+
+      # Initialize a new File from api data
+      # @param [Hash] data the hash of data provided by the API
+      def self.from_api(data)
+        return new({
+          :file_id => Osm::to_i_or_nil(data['fileid']),
+          :activity_id => Osm::to_i_or_nil(data['activityid']),
+          :file_name => data['filename'],
+          :name => data['name']
+        })
+      end
+
+    end # Activity::File
 
     class Badge
-      attr_reader :activity_id, :section, :type, :badge, :requirement, :label
+      attr_reader :activity_id, :section_type, :type, :badge, :requirement, :label
       # @!attribute [r] activity_id
       #   @return [Fixnum] the activity being done
-      # @!attribute [r] section
+      # @!attribute [r] section_type
       #   @return [Symbol] the section the badge 'belongs' to
       # @!attribute [r] type
       #   @return [Symbol] the type of badge
@@ -165,17 +182,34 @@ module Osm
       # @!attribute [r] label
       #   @return [String] human readable label for the requirement
 
-      # Initialize a new Badge using the hash returned by the API call
-      # @param data the hash of data for the object returned by the API
-      def initialize(data)
-        @activity_id = Osm::to_i_or_nil(data['activityid'])
-        @section = data['section'].to_sym
-        @type = data['badgetype'].to_sym
-        @badge = data['badge']
-        @requirement = data['columnname']
-        @label = data['label']
+      # Initialize a new Badge
+      # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      def initialize(attributes={})
+        raise ArgumentError, ':activity_id must be nil or a Fixnum > 0' unless attributes[:activity_id].nil? || (attributes[:activity_id].is_a?(Fixnum) && attributes[:activity_id] > 0)
+        [:type, :section_type].each do |attribute|
+          raise ArgumentError, ":#{attribute} must be a Symbol" unless attributes[attribute].is_a?(Symbol)
+        end
+        [:label, :requirement, :badge].each do |attribute|
+          raise ArgumentError, ":#{attribute} must a String" unless attributes[attribute].is_a?(String)
+        end
+
+        attributes.each { |k,v| instance_variable_set("@#{k}", v) }
       end
-    end
+
+      # Initialize a new Badge from api data
+      # @param [Hash] data the hash of data provided by the API
+      def self.from_api(data)
+        return new({
+          :activity_id => Osm::to_i_or_nil(data['activityid']),
+          :section_type => data['section'].to_sym,
+          :type => data['badgetype'].to_sym,
+          :badge => data['badge'],
+          :requirement => data['columnname'],
+          :label => data['label']
+        })
+      end
+
+    end # Activity::Badge
 
     class Version
       attr_reader :version, :created_by, :created_by_name, :label
@@ -188,15 +222,30 @@ module Osm
       # @!attribute [r] label
       #   @return [String] the human readable label to use for this version
 
-      # Initialize a new Version using the hash returned by the API call
-      # @param data the hash of data for the object returned by the API
-      def initialize(data)
-        @version = Osm::to_i_or_nil(data['value'])
-        @created_by = Osm::to_i_or_nil(data['userid'])
-        @created_by_name = data['firstname']
-        @label = data['label']
-      end
-    end
+      # Initialize a new Version
+      # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      def initialize(attributes={})
+        raise ArgumentError, ':version must be nil or a Fixnum > 0' unless attributes[:version].nil? || (attributes[:version].is_a?(Fixnum) && attributes[:version] >= 0)
+        raise ArgumentError, ':created_by must be nil or a Fixnum >= 0' unless attributes[:created_by].nil? || (attributes[:created_by].is_a?(Fixnum) && attributes[:created_by] > 0)
+        raise ArgumentError, ':created_by_name must be nil or a String' unless attributes[:created_by_name].nil?  || attributes[:created_by_name].is_a?(String)
+        raise ArgumentError, ':label must be nil or a String' unless attributes[:label].nil?  || attributes[:label].is_a?(String)
 
-  end
-end
+        attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+      end
+
+      # Initialize a new Version from api data
+      # @param [Hash] data the hash of data provided by the API
+      def self.from_api(data)
+        return new({
+          :version => Osm::to_i_or_nil(data['value']),
+          :created_by => Osm::to_i_or_nil(data['userid']),
+          :created_by_name => data['firstname'],
+          :label => data['label']
+        })
+      end
+
+    end # Activity::Version
+
+  end # Activity
+
+end # Module
