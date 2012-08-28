@@ -363,7 +363,7 @@ module Osm
 
       result = Array.new
       data['apis'].each do |item|
-        this_item = Osm::ApiAccess.new(item)
+        this_item = Osm::ApiAccess.from_api(item)
         result.push this_item
         self.user_can_access(:programme, section_id, api_data) if this_item.can_read?(:programme)
         self.user_can_access(:member, section_id, api_data) if this_item.can_read?(:member)

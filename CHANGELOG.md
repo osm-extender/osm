@@ -11,6 +11,7 @@
   * Section class - flexi_records now returns an array of Osm::Section::FlexiRecord objects
   * get\_register becomes get\_register\_data and now returns an array of RegisterData objects
   * get\_register\_structure now returns an array of RegisterField objects
+  * Add from\_api method to ApiAccess
 
 ## Version 0.0.11
 
