@@ -449,7 +449,7 @@ module Osm
     # @param [Osm:Term, Fixnum] section the term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
-    # @return [Array<Hash>] representing the fields of the register
+    # @return [Array<Osm::RegisterField>] representing the fields of the register
     def get_register_structure(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
       term_id = id_for_term(term, section, api_data)
@@ -463,7 +463,7 @@ module Osm
       structure = []
       data.each do |item|
         item['rows'].each do |row|
-          structure.push Osm::RegisterField.new(row)
+          structure.push Osm::RegisterField.from_api(row)
         end
       end
       self.user_can_access :register, section_id, api_data
@@ -490,7 +490,7 @@ module Osm
 
       data = data['items']
       data.each do |item|
-        item = Osm::RegisterData.new(item)
+        item = Osm::RegisterData.from_api(item)
       end
       self.user_can_access :register, section_id, api_data
       cache_write("register-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)

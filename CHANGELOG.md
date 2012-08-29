@@ -21,6 +21,7 @@
     * Grouping
     * Member
     * RegisterData
+    * RegisterField
 
 ## Version 0.0.11
 

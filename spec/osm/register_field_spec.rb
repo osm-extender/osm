@@ -13,7 +13,7 @@ describe "Register Field" do
       'tooltip' => 'Tooltip'
     }
 
-    field = Osm::RegisterField.new(data)
+    field = Osm::RegisterField.from_api(data)
 
     field.id.should == 'machine_name'
     field.name.should == 'Human name'
