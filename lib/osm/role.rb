@@ -30,7 +30,7 @@ module Osm
     # @param [Hash] data the hash of data provided by the API
     def self.from_api(data)
       attributes = {}
-      attributes[:section] = Osm::Section.new(data['sectionid'], data['sectionname'], ActiveSupport::JSON.decode(data['sectionConfig']), self)
+      attributes[:section] = Osm::Section.from_api(data['sectionid'], data['sectionname'], ActiveSupport::JSON.decode(data['sectionConfig']), self)
       attributes[:group_name] = data['groupname']
       attributes[:group_id] = Osm::to_i_or_nil(data['groupid'])
 

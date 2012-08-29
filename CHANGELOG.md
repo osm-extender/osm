@@ -1,12 +1,13 @@
 ## Version 0.0.12
 
   * EveningActivity class renamed to Evening::Activity
-  * Activity class - badges now returns an array of Osm::Activity::Badge objects
-  * Activity class - files now returns an array of Osm::Activity::File objects
-  * Activity class - versions now returns an array of Osm::Activity::Version objects
-  * Section class - flexi_records now returns an array of Osm::Section::FlexiRecord objects
+  * Change of method return types
+    * Activity.badges now returns an array of Osm::Activity::Badge objects
+    * Activity.files now returns an array of Osm::Activity::File objects
+    * Activity.versions now returns an array of Osm::Activity::Version objects
+    * Section.flexi_records now returns an array of Osm::Section::FlexiRecord objects
+    * Api.get\_register\_structure now returns an array of RegisterField objects
   * Api.get\_register becomes Api.get\_register\_data and now returns an array of RegisterData objects
-  * get\_register\_structure now returns an array of RegisterField objects
   * Attribute name changes:
     * Activity::Badge.section becomes section\_type
     * Activity::File.file\_id becomes id
@@ -23,6 +24,7 @@
     * RegisterData
     * RegisterField
     * Role
+    * Section
 
 ## Version 0.0.11
 
