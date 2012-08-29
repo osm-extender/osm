@@ -25,6 +25,7 @@
     * RegisterField
     * Role
     * Section
+    * Term
 
 ## Version 0.0.11
 

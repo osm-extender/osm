@@ -14,14 +14,29 @@ module Osm
     # @!attribute [r] end
     #   @return [Date] when the term ends
 
-    # Initialize a new Term using the hash returned by the API call
-    # @param data the hash of data for the object returned by the API
-    def initialize(data)
-      @id = Osm::to_i_or_nil(data['termid'])
-      @section_id = Osm::to_i_or_nil(data['sectionid'])
-      @name = data['name']
-      @start = Osm::parse_date(data['startdate'])
-      @end = Osm::parse_date(data['enddate'])
+    # Initialize a new Term
+    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    def initialize(attributes={})
+      raise ArgumentError, ':id must be nil or a Fixnum > 0' unless attributes[:id].nil? || (attributes[:id].is_a?(Fixnum) && attributes[:id] > 0)
+      raise ArgumentError, ':section_id must be nil or a Fixnum > 0' unless attributes[:section_id].nil? || (attributes[:section_id].is_a?(Fixnum) && attributes[:section_id] > 0)
+      raise ArgumentError, ':name must be nil or a String' unless attributes[:name].nil? || attributes[:name].is_a?(String)
+      raise ArgumentError, ':start must be nil or a Date' unless attributes[:start].nil? || attributes[:start].is_a?(Date)
+      raise ArgumentError, ':end must be nil or a Date' unless attributes[:end].nil? || attributes[:end].is_a?(Date)
+
+      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+    end
+
+
+    # Initialize a new Term from api data
+    # @param [Hash] data the hash of data provided by the API
+    def self.from_api(data)
+      new(
+        :id => Osm::to_i_or_nil(data['termid']),
+        :section_id => Osm::to_i_or_nil(data['sectionid']),
+        :name => data['name'],
+        :start => Osm::parse_date(data['startdate']),
+        :end => Osm::parse_date(data['enddate']),
+      )
     end
 
     # Determine if the term is completly before the passed date

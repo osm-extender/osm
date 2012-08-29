@@ -229,7 +229,7 @@ module Osm
       result = Array.new
       data.each_key do |key|
         data[key].each do |item|
-          term = Osm::Term.new(item)
+          term = Osm::Term.from_api(item)
           result.push term
           cache_write("term-#{term.id}", term, :expires_in => @@default_cache_ttl*2)
           self.user_can_access :term, term.id, api_data
