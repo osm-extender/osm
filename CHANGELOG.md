@@ -5,19 +5,22 @@
   * Activity class - files now returns an array of Osm::Activity::File objects
   * Activity class - versions now returns an array of Osm::Activity::Version objects
   * Section class - flexi_records now returns an array of Osm::Section::FlexiRecord objects
-  * get\_register becomes get\_register\_data and now returns an array of RegisterData objects
+  * Api.get\_register becomes Api.get\_register\_data and now returns an array of RegisterData objects
   * get\_register\_structure now returns an array of RegisterField objects
-  * Activity::Badge section attribute becomes section\_type
-  * Activity::File file\_id attribute becomes id
-  * Section class - rename extra\_records to flexi\_records
-  * Member joined\_in\_years attribute is now joining\_in\_years
-  * Add from\_api method to Activity and sub classes
-  * Add from\_api method to ApiAccess
-  * Add from\_api method to DueBadges
-  * Add from\_api method to Evening and Evening::Activity
-  * Add from\_api method to Event
-  * Add from\_api method to Grouping
-  * Add from\_api method to Member
+  * Attribute name changes:
+    * Activity::Badge.section becomes section\_type
+    * Activity::File.file\_id becomes id
+    * Section.extra\_records becomes flexi\_records
+    * Member.joined\_in\_years attribute becomes joining\_in\_years
+  * from\_api method added to:
+    * Activity and sub classes
+    * ApiAccess
+    * DueBadges
+    * Evening and Evening::Activity
+    * Event
+    * Grouping
+    * Member
+    * RegisterData
 
 ## Version 0.0.11
 

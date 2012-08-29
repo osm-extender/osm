@@ -5,7 +5,7 @@ require 'date'
 
 describe "Register Data" do
 
-  it "Create" do
+  it "Create from API data" do
     data = {
       'scoutid' => '1',
       'firstname' => 'A',
@@ -17,7 +17,7 @@ describe "Register Data" do
       '2012-01-24' => 'No',
     }
 
-    rd = Osm::RegisterData.new(data)
+    rd = Osm::RegisterData.from_api(data)
 
     rd.member_id.should == 1
     rd.section_id.should == 2
