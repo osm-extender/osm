@@ -15,6 +15,7 @@
   * Add from\_api method to DueBadges
   * Add from\_api method to Evening and Evening::Activity
   * Add from\_api method to Event
+  * Add from\_api method to Grouping
 
 ## Version 0.0.11
 

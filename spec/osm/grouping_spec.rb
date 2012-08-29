@@ -10,7 +10,7 @@ describe "Grouping" do
       'active' => 1,
       'points' => '2',
     }
-    patrol = Osm::Grouping.new(data)
+    patrol = Osm::Grouping.from_api(data)
 
     patrol.id.should == 1
     patrol.name.should == 'Patrol Name'

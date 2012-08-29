@@ -205,7 +205,7 @@ module Osm
 
       result = Array.new
       data['patrols'].each do |item|
-        grouping = Osm::Grouping.new(item)
+        grouping = Osm::Grouping.from_api(item)
         result.push grouping
         cache_write("grouping-#{grouping.id}", grouping, :expires_in => @@default_cache_ttl*2)
         self.user_can_access :grouping, grouping.id, api_data
