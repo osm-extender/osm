@@ -13,6 +13,7 @@
   * get\_register\_structure now returns an array of RegisterField objects
   * Add from\_api method to ApiAccess
   * Add from\_api method to DueBadges
+  * Add from\_api method to Evening and Evening::Activity
 
 ## Version 0.0.11
 

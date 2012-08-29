@@ -284,7 +284,7 @@ module Osm
       activities = data['activities'] || {}
 
       items.each do |item|
-        evening = Osm::Evening.new(item, activities[item['eveningid']])
+        evening = Osm::Evening.from_api(item, activities[item['eveningid']])
         result.push evening
         evening.activities.each do |activity|
           self.user_can_access :activity, activity.activity_id, api_data

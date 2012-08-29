@@ -25,7 +25,7 @@ end
 
 describe "API" do
 
-  before(:each) do
+  before :each do
     @api_config = {
       :api_id => '1',
       :api_token => 'API TOKEN',
@@ -420,7 +420,7 @@ describe "API" do
         'token' => @api_config[:api_token],
         'userid' => 'user',
         'secret' => 'secret',
-        'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => nil, 'starttime' => nil,
+        'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
@@ -428,7 +428,7 @@ describe "API" do
       api.stub(:get_terms) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
 
-      evening = Osm::Evening.new({}, [])
+      evening = Osm::Evening.new({:meeting_date => Date.new(2000, 01, 02)})
       api.update_evening(evening).should be_true
     end
 
@@ -439,7 +439,7 @@ describe "API" do
         'token' => @api_config[:api_token],
         'userid' => 'user',
         'secret' => 'secret',
-        'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => nil, 'starttime' => nil,
+        'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
@@ -447,7 +447,7 @@ describe "API" do
       api.stub(:get_terms) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
 
-      evening = Osm::Evening.new({}, [])
+      evening = Osm::Evening.new({:meeting_date => Date.new(2000, 01, 02)})
       api.update_evening(evening).should be_false
     end
   end

@@ -70,11 +70,11 @@ module Osm
       raise ArgumentError, ':rating must be a FixNum' unless attributes[:rating].is_a?(Fixnum)
       raise ArgumentError, ':used must be a FixNum' unless attributes[:used].is_a?(Fixnum)
 
-      raise ArgumentError, ':sections must be an Array of Symbol' unless is_array_of?(attributes[:sections], Symbol)
-      raise ArgumentError, ':tags must be an Array of String' unless is_array_of?(attributes[:tags], String)
-      raise ArgumentError, ':versions must be an Array of Osm::Activity::Version' unless is_array_of?(attributes[:versions], Osm::Activity::Version)
-      raise ArgumentError, ':files must be an Array of Osm::Activity::File' unless is_array_of?(attributes[:files], Osm::Activity::File)
-      raise ArgumentError, ':badges must be an Array of Osm::Activity::Badge' unless is_array_of?(attributes[:badges], Osm::Activity::Badge)
+      raise ArgumentError, ':sections must be an Array of Symbol' unless Osm::is_array_of?(attributes[:sections], Symbol)
+      raise ArgumentError, ':tags must be an Array of String' unless Osm::is_array_of?(attributes[:tags], String)
+      raise ArgumentError, ':versions must be an Array of Osm::Activity::Version' unless Osm::is_array_of?(attributes[:versions], Osm::Activity::Version)
+      raise ArgumentError, ':files must be an Array of Osm::Activity::File' unless Osm::is_array_of?(attributes[:files], Osm::Activity::File)
+      raise ArgumentError, ':badges must be an Array of Osm::Activity::Badge' unless Osm::is_array_of?(attributes[:badges], Osm::Activity::Badge)
 
       attributes.each { |k,v| instance_variable_set("@#{k}", v) }
     end
@@ -120,15 +120,6 @@ module Osm
 
 
     private
-    def is_array_of?(ar, ty)
-      return false unless ar.is_a?(Array)
-      ar.each do |it|
-        return false unless it.is_a?(ty)
-      end
-      return true
-    end
-
-
     class File
       attr_reader :id, :activity_id, :file_name, :name
       # @!attribute [r] id
