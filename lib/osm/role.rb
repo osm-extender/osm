@@ -12,18 +12,35 @@ module Osm
     # @!attribute [r] permissions
     #   @return [Hash] the permissions the user has in this role
 
-    # Initialize a new UserRole using the hash returned by the API call
-    # @param data the hash of data for the object returned by the API
-    def initialize(data)
-      @section = Osm::Section.new(data['sectionid'], data['sectionname'], ActiveSupport::JSON.decode(data['sectionConfig']), self)
-      @group_name = data['groupname']
-      @group_id = Osm::to_i_or_nil(data['groupid'])
-      @permissions = data['permissions'].is_a?(Hash) ? Osm::symbolize_hash(data['permissions']) : {}
+    # Initialize a new ApiAccess
+    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    def initialize(attributes={})
+      raise ArgumentError, ':group_id must be nil or a Fixnum > 0' unless attributes[:group_id].nil? || (attributes[:group_id].is_a?(Fixnum) && attributes[:group_id] > 0)
+      raise ArgumentError, ':group_name must be nil or a String' unless attributes[:group_name].nil? || attributes[:group_name].is_a?(String)
+      raise ArgumentError, ':permissions must be nil or a Hash' unless attributes[:permissions].nil? || attributes[:permissions].is_a?(Hash)
+
+      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+
+      @name ||= ''
+      @permissions ||= {}
+    end
+
+
+    # Initialize a new ApiAccess from api data
+    # @param [Hash] data the hash of data provided by the API
+    def self.from_api(data)
+      attributes = {}
+      attributes[:section] = Osm::Section.new(data['sectionid'], data['sectionname'], ActiveSupport::JSON.decode(data['sectionConfig']), self)
+      attributes[:group_name] = data['groupname']
+      attributes[:group_id] = Osm::to_i_or_nil(data['groupid'])
 
       # Convert permission values to a number
-      @permissions.each_key do |key|
-        @permissions[key] = @permissions[key].to_i
+      permissions = data['permissions'].is_a?(Hash) ? Osm::symbolize_hash(data['permissions']) : {}
+      permissions.each_key do |key|
+        permissions[key] = permissions[key].to_i
       end
+
+      new(attributes.merge(:permissions => permissions))
     end
 
     # Determine if this role has read access for the provided permission

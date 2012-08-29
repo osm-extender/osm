@@ -113,7 +113,7 @@ module Osm
 
       result = Array.new
       data.each do |item|
-        role = Osm::Role.new(item)
+        role = Osm::Role.from_api(item)
         result.push role
         cache_write("section-#{role.section.id}", role.section, :expires_in => @@default_cache_ttl*2)
         self.user_can_access :section, role.section.id, api_data

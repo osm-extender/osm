@@ -22,6 +22,7 @@
     * Member
     * RegisterData
     * RegisterField
+    * Role
 
 ## Version 0.0.11
 
