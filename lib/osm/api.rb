@@ -339,7 +339,7 @@ module Osm
 
       result = Array.new
       data['items'].each do |item|
-        result.push Osm::Member.new(item)
+        result.push Osm::Member.from_api(item)
       end
       self.user_can_access :member, section_id, api_data
       cache_write("members-#{section_id}-#{term_id}", result, :expires_in => @@default_cache_ttl)
