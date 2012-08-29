@@ -72,7 +72,7 @@ module Osm
         raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] > 0)
       end
       [:joined_years, :grouping_leader].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a Fixnum >= 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] >= 0)
+        raise ArgumentError, ":#{attribute} must be nil or a Fixnum >= -1" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] >= -1)
       end
       raise ArgumentError, ':joining_in_years must be nil or a Fixnum' unless attributes[:joining_in_years].nil? || attributes[:joining_in_years].is_a?(Fixnum)
       [:type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :age].each do |attribute|
