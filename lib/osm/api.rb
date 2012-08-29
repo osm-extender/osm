@@ -437,7 +437,7 @@ module Osm
       section_type = get_section(section_id, api_data).type.to_s
       data = perform_query("challenges.php?action=outstandingBadges&section=#{section_type}&sectionid=#{section_id}&termid=#{term_id}", api_data)
 
-      data = Osm::DueBadges.new(data)
+      data = Osm::DueBadges.from_api(data)
       self.user_can_access :badge, section_id, api_data
       cache_write("due_badges-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl*2)
 

@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe "DueBadge" do
 
-  it "Create" do
+  it "Create from API data" do
     data = {
       'pending' => {
         'badge_name' => [
@@ -46,7 +46,7 @@ describe "DueBadge" do
         }
       }
     }
-    db = Osm::DueBadges.new(data)
+    db = Osm::DueBadges.from_api(data)
 
     db.empty?.should == false
     db.descriptions.should == {:badge_name=>{:name=>"Badge Name", :section=>:cubs, :type=>:activity, :badge=>"badge_name"}, :cubs_core_participation=>{:name=>"Participation", :section=>:cubs, :type=>:core, :badge=>"participation"}}
