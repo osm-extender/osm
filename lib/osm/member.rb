@@ -2,7 +2,7 @@ module Osm
 
   class Member
 
-    attr_reader :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started, :joined_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :grouping_id, :grouping_leader, :joined, :age, :joined_years
+    attr_reader :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started, :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :grouping_id, :grouping_leader, :joined, :age, :joined_years
     # @!attribute [r] id
     #   @return [Fixnum] the id for the member
     # @!attribute [r] section_id
@@ -37,7 +37,7 @@ module Osm
     #   @return [Date] the member's date of birth
     # @!attribute [r] started
     #   @return [Date] when the member started Scouting
-    # @!attribute [r] joined_in_years
+    # @!attribute [r] joining_in_years
     #   @return [Fixnum] ?
     # @!attribute [r] parents
     #   @return [String] the member's parent's names
@@ -61,43 +61,66 @@ module Osm
     #   @return [Date] when the member joined the section
     # @!attribute [r] age
     #   @return [String] the member's current age (yy/mm)
-    # @!attribute [r] joined_years
+    # @!attribute [r] joining_years
     #   @return [Fixnum] how many years the member has been in Scouting
 
 
-    # Initialize a new Member using the hash returned by the API call
-    # @param data the hash of data for the object returned by the API
-    def initialize(data)
-      @id = Osm::to_i_or_nil(data['scoutid'])
-      @section_id = Osm::to_i_or_nil(data['sectionidO'])
-      @type = data['type']
-      @first_name = data['firstname']
-      @last_name = data['lastname']
-      @email1 = data['email1']
-      @email2 = data['email2']
-      @email3 = data['email3']
-      @email4 = data['email4']
-      @phone1 = data['phone1']
-      @phone2 = data['phone2']
-      @phone3 = data['phone3']
-      @phone4 = data['phone4']
-      @address = data['address']
-      @address2 = data['address2']
-      @date_of_birth = Osm::parse_date(data['dob'])
-      @started = Osm::parse_date(data['started'])
-      @joined_in_years = data['joining_in_yrs'].to_i
-      @parents = data['parents']
-      @notes = data['notes']
-      @medical = data['medical']
-      @religion = data['religion']
-      @school = data['school']
-      @ethnicity = data['ethnicity']
-      @subs = data['subs']
-      @grouping_id = Osm::to_i_or_nil(data['patrolidO'])
-      @grouping_leader = data['patrolleaderO'] # 0 - No, 1 = seconder, 2 = sixer
-      @joined = Osm::parse_date(data['joined'])
-      @age = data['age'] # 'yy / mm'
-      @joined_years = data['yrs'].to_i
+    # Initialize a new Member
+    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    def initialize(attributes={})
+      [:id, :section_id, :grouping_id].each do |attribute|
+        raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] > 0)
+      end
+      [:joined_years, :grouping_leader].each do |attribute|
+        raise ArgumentError, ":#{attribute} must be nil or a Fixnum >= 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] >= 0)
+      end
+      raise ArgumentError, ':joining_in_years must be nil or a Fixnum' unless attributes[:joining_in_years].nil? || attributes[:joining_in_years].is_a?(Fixnum)
+      [:type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :age].each do |attribute|
+        raise ArgumentError, ":#{attribute} must be nil or a String" unless attributes[attribute].nil? || attributes[attribute].is_a?(String)
+      end
+      [:date_of_birth, :started, :joined].each do |attribute|
+        raise ArgumentError, ":#{attribute} must be nil or a Date" unless attributes[attribute].nil? || attributes[attribute].is_a?(Date)
+      end
+
+      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+    end
+
+
+    # Initialize a new Member from api data
+    # @param [Hash] data the hash of data provided by the API
+    def self.from_api(data)
+      new({
+        :id => Osm::to_i_or_nil(data['scoutid']),
+        :section_id => Osm::to_i_or_nil(data['sectionidO']),
+        :type => data['type'],
+        :first_name => data['firstname'],
+        :last_name => data['lastname'],
+        :email1 => data['email1'],
+        :email2 => data['email2'],
+        :email3 => data['email3'],
+        :email4 => data['email4'],
+        :phone1 => data['phone1'],
+        :phone2 => data['phone2'],
+        :phone3 => data['phone3'],
+        :phone4 => data['phone4'],
+        :address => data['address'],
+        :address2 => data['address2'],
+        :date_of_birth => Osm::parse_date(data['dob']),
+        :started => Osm::parse_date(data['started']),
+        :joining_in_years => data['joining_in_yrs'].to_i,
+        :parents => data['parents'],
+        :notes => data['notes'],
+        :medical => data['medical'],
+        :religion => data['religion'],
+        :school => data['school'],
+        :ethnicity => data['ethnicity'],
+        :subs => data['subs'],
+        :grouping_id => Osm::to_i_or_nil(data['patrolidO']),
+        :grouping_leader => data['patrolleaderO'],
+        :joined => Osm::parse_date(data['joined']),
+        :age => data['age'],
+        :joined_years => data['yrs'].to_i,
+      })
     end
 
     # Get the years element of this scout's age

@@ -4,13 +4,13 @@ require 'spec_helper'
 
 describe "API Access" do
 
-  it "Create" do
+  it "Create from API data" do
     data = {
       'apiid' => '1',
       'name' => 'Name',
       'permissions' => {'permission' => '100'},
     }
-    api_access = Osm::ApiAccess.new(data)
+    api_access = Osm::ApiAccess.from_api(data)
 
     api_access.id.should == 1
     api_access.name.should == 'Name'
@@ -20,11 +20,11 @@ describe "API Access" do
 
   it "Allows interegation of the permissions hash" do
     api_access = Osm::ApiAccess.new({
-      'apiid' => '1',
-      'name' => 'Name',
-      'permissions' => {
-        'read_only' => 10,
-        'read_write' => 20,
+      :id => 1,
+      :name => 'Name',
+      :permissions => {
+        :read_only => 10,
+        :read_write => 20,
       },
     })
 
@@ -43,8 +43,8 @@ describe "API Access" do
     Osm::Api.stub(:api_id) { '1' }
 
     apis = {
-      :ours => Osm::ApiAccess.new({'apiid' => '1', 'name' => 'Name', 'permissions' => {}}),
-      :not_ours => Osm::ApiAccess.new({'apiid' => '2', 'name' => 'Name', 'permissions' => {}}),
+      :ours => Osm::ApiAccess.new({:id => 1, :name => 'Name', :permissions => {}}),
+      :not_ours => Osm::ApiAccess.new({:id => 2, :name => 'Name', :permissions => {}}),
     }
 
     apis[:ours].our_api?.should == true

@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe "Member" do
 
-  it "Create" do
+  it "Create from API data" do
     data = {
       'scoutid' => 1,
       'sectionidO' => 2,
@@ -39,7 +39,7 @@ describe "Member" do
       'patrolidO' => '3',
       'patrolleaderO' => 0,
     }
-    member = Osm::Member.new(data)
+    member = Osm::Member.from_api(data)
 
     member.id.should == 1
     member.section_id.should == 2
@@ -58,7 +58,7 @@ describe "Member" do
     member.address2.should == ''
     member.date_of_birth.should == Date.new(2000, 1, 2)
     member.started.should == Date.new(2006, 1, 2)
-    member.joined_in_years.should == 2
+    member.joining_in_years.should == 2
     member.parents.should == 'John and Jane Doe'
     member.notes.should == 'None'
     member.medical.should == 'Nothing'
@@ -76,8 +76,8 @@ describe "Member" do
 
   it "Provides member's full name" do
     data = {
-      'firstname' => 'First',
-      'lastname' => 'Last',
+      :first_name => 'First',
+      :last_name => 'Last',
     }
     member = Osm::Member.new(data)
 
@@ -88,7 +88,7 @@ describe "Member" do
 
   it "Provides each part of age" do
     data = {
-      'age' => '06/07',
+      :age => '06/07',
     }
     member = Osm::Member.new(data)
 

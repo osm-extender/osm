@@ -113,7 +113,7 @@ module Osm
 
       result = Array.new
       data.each do |item|
-        role = Osm::Role.new(item)
+        role = Osm::Role.from_api(item)
         result.push role
         cache_write("section-#{role.section.id}", role.section, :expires_in => @@default_cache_ttl*2)
         self.user_can_access :section, role.section.id, api_data
@@ -205,7 +205,7 @@ module Osm
 
       result = Array.new
       data['patrols'].each do |item|
-        grouping = Osm::Grouping.new(item)
+        grouping = Osm::Grouping.from_api(item)
         result.push grouping
         cache_write("grouping-#{grouping.id}", grouping, :expires_in => @@default_cache_ttl*2)
         self.user_can_access :grouping, grouping.id, api_data
@@ -229,7 +229,7 @@ module Osm
       result = Array.new
       data.each_key do |key|
         data[key].each do |item|
-          term = Osm::Term.new(item)
+          term = Osm::Term.from_api(item)
           result.push term
           cache_write("term-#{term.id}", term, :expires_in => @@default_cache_ttl*2)
           self.user_can_access :term, term.id, api_data
@@ -284,7 +284,7 @@ module Osm
       activities = data['activities'] || {}
 
       items.each do |item|
-        evening = Osm::Evening.new(item, activities[item['eveningid']])
+        evening = Osm::Evening.from_api(item, activities[item['eveningid']])
         result.push evening
         evening.activities.each do |activity|
           self.user_can_access :activity, activity.activity_id, api_data
@@ -313,7 +313,7 @@ module Osm
         data = perform_query("programme.php?action=getActivity&id=#{activity_id}&version=#{version}", api_data)
       end
 
-      activity = Osm::Activity.new(data)
+      activity = Osm::Activity.from_api(data)
       cache_write("activity-#{activity_id}-#{nil}", activity, :expires_in => @@default_cache_ttl*2) if version.nil?
       cache_write("activity-#{activity_id}-#{activity.version}", activity, :expires_in => @@default_cache_ttl/2)
       self.user_can_access :activity, activity.id, api_data
@@ -339,7 +339,7 @@ module Osm
 
       result = Array.new
       data['items'].each do |item|
-        result.push Osm::Member.new(item)
+        result.push Osm::Member.from_api(item)
       end
       self.user_can_access :member, section_id, api_data
       cache_write("members-#{section_id}-#{term_id}", result, :expires_in => @@default_cache_ttl)
@@ -363,7 +363,7 @@ module Osm
 
       result = Array.new
       data['apis'].each do |item|
-        this_item = Osm::ApiAccess.new(item)
+        this_item = Osm::ApiAccess.from_api(item)
         result.push this_item
         self.user_can_access(:programme, section_id, api_data) if this_item.can_read?(:programme)
         self.user_can_access(:member, section_id, api_data) if this_item.can_read?(:member)
@@ -412,7 +412,7 @@ module Osm
       result = Array.new
       unless data['items'].nil?
         data['items'].each do |item|
-          result.push Osm::Event.new(item)
+          result.push Osm::Event.from_api(item)
         end
       end
       self.user_can_access :programme, section_id, api_data
@@ -437,7 +437,7 @@ module Osm
       section_type = get_section(section_id, api_data).type.to_s
       data = perform_query("challenges.php?action=outstandingBadges&section=#{section_type}&sectionid=#{section_id}&termid=#{term_id}", api_data)
 
-      data = Osm::DueBadges.new(data)
+      data = Osm::DueBadges.from_api(data)
       self.user_can_access :badge, section_id, api_data
       cache_write("due_badges-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl*2)
 
@@ -449,7 +449,7 @@ module Osm
     # @param [Osm:Term, Fixnum] section the term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
-    # @return [Array<Hash>] representing the rows of the register
+    # @return [Array<Osm::RegisterField>] representing the fields of the register
     def get_register_structure(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
       term_id = id_for_term(term, section, api_data)
@@ -460,25 +460,25 @@ module Osm
 
       data = perform_query("users.php?action=registerStructure&sectionid=#{section_id}&termid=#{term_id}", api_data)
 
-      data.each_with_index do |item, item_index|
-        data[item_index] = item = Osm::symbolize_hash(item)
-        item[:rows].each_with_index do |row, row_index|
-          item[:rows][row_index] = row = Osm::symbolize_hash(row)
+      structure = []
+      data.each do |item|
+        item['rows'].each do |row|
+          structure.push Osm::RegisterField.from_api(row)
         end
       end
       self.user_can_access :register, section_id, api_data
-      cache_write("register_structure-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
+      cache_write("register_structure-#{section_id}-#{term_id}", structure, :expires_in => @@default_cache_ttl/2)
 
-      return data
+      return structure
     end
 
-    # Get register
+    # Get register data
     # @param [Osm:Section, Fixnum] section the section (or its ID) to get the register for
     # @param [Osm:Term, Fixnum] section the term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
-    # @return [Array<Hash>] representing the attendance of each member
-    def get_register(section, term=nil, options={}, api_data={})
+    # @return [Array<RegisterData>] representing the attendance of each member
+    def get_register_data(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
       term_id = id_for_term(term, section, api_data)
 
@@ -490,10 +490,7 @@ module Osm
 
       data = data['items']
       data.each do |item|
-        item = Osm::symbolize_hash(item)
-        item[:scoutid] = item[:scoutid].to_i
-        item[:sectionid] = item[:sectionid].to_i
-        item[:patrolid] = item[:patrolid].to_i
+        item = Osm::RegisterData.from_api(item)
       end
       self.user_can_access :register, section_id, api_data
       cache_write("register-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
@@ -528,7 +525,7 @@ module Osm
     # @!macro options_api_data
     # @return [Boolean] if the operation suceeded or not
     def update_evening(evening, api_data={})
-      response = perform_query("programme.php?action=editEvening", api_data.merge(evening.data_for_saving))
+      response = perform_query("programme.php?action=editEvening", api_data.merge(evening.to_api))
 
       # The cached programmes for the section will be out of date - remove them
       get_terms(api_data).each do |term|
@@ -601,14 +598,14 @@ module Osm
       begin
         result = HTTParty.post("#{@base_url}/#{url}", {:body => api_data})
       rescue SocketError, TimeoutError, OpenSSL::SSL::SSLError
-        raise ConnectionError.new('A problem occured on the internet.')
+        raise ConnectionError, 'A problem occured on the internet.'
       end
-      raise ConnectionError.new("HTTP Status code was #{result.response.code}") if !result.response.code.eql?('200')
+      raise ConnectionError, "HTTP Status code was #{result.response.code}" if !result.response.code.eql?('200')
 
-      raise Error.new(result.response.body) unless looks_like_json?(result.response.body)
+      raise Error, result.response.body unless looks_like_json?(result.response.body)
       decoded = ActiveSupport::JSON.decode(result.response.body)
       osm_error = get_osm_error(decoded)
-      raise Error.new(osm_error) if osm_error
+      raise Error, osm_error if osm_error
       return decoded        
     end
 
@@ -654,10 +651,10 @@ module Osm
       if value.is_a?(cl)
         value = value.send(id_method)
       else
-        raise(ArgumentError, "Invalid type for #{error_name}") unless value.is_a?(Fixnum)
+        raise ArgumentError, "Invalid type for #{error_name}" unless value.is_a?(Fixnum)
       end
 
-      raise(ArgumentError, "Invalid #{error_name} ID") unless value > 0
+      raise ArgumentError, "Invalid #{error_name} ID" unless value > 0
       return value
     end
 

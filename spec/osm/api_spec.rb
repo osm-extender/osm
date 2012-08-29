@@ -25,7 +25,7 @@ end
 
 describe "API" do
 
-  before(:each) do
+  before :each do
     @api_config = {
       :api_id => '1',
       :api_token => 'API TOKEN',
@@ -112,7 +112,7 @@ describe "API" do
     it "Fetch the notepad for a section" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1", "2" => "Section 2"}.to_json)
       Osm::Api.new('1', '2').get_notepad(1).should == 'Section 1'
-      Osm::Api.new('1', '2').get_notepad(Osm::Section.new(2, '', {}, nil)).should == 'Section 2'
+      Osm::Api.new('1', '2').get_notepad(Osm::Section.new(:id => 2)).should == 'Section 2'
     end
 
     it "Fetch the notepad for a section (invalid section/id)" do
@@ -121,7 +121,6 @@ describe "API" do
       expect{ Osm::Api.new('1', '2').get_notepad(-10) }.to raise_error(ArgumentError, 'Invalid section ID')
       expect{ Osm::Api.new('1', '2').get_notepad(0) }.to raise_error(ArgumentError, 'Invalid section ID')
 
-      expect{ Osm::Api.new('1', '2').get_notepad(Osm::Section.new(-10, '', {}, nil)) }.to raise_error(ArgumentError, 'Invalid section ID')
       expect{ Osm::Api.new('1', '2').get_notepad('1') }.to raise_error(ArgumentError, 'Invalid type for section')
     end
 
@@ -370,7 +369,7 @@ describe "API" do
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json)
 
-      register = Osm::Api.new('1', '2').get_register(1, 2)
+      register = Osm::Api.new('1', '2').get_register_data(1, 2)
       register.is_a?(Array).should be_true
     end
 
@@ -420,7 +419,7 @@ describe "API" do
         'token' => @api_config[:api_token],
         'userid' => 'user',
         'secret' => 'secret',
-        'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => nil, 'starttime' => nil,
+        'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
@@ -428,7 +427,7 @@ describe "API" do
       api.stub(:get_terms) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
 
-      evening = Osm::Evening.new({}, [])
+      evening = Osm::Evening.new({:meeting_date => Date.new(2000, 01, 02)})
       api.update_evening(evening).should be_true
     end
 
@@ -439,7 +438,7 @@ describe "API" do
         'token' => @api_config[:api_token],
         'userid' => 'user',
         'secret' => 'secret',
-        'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => nil, 'starttime' => nil,
+        'eveningid' => nil, 'sectionid' => nil, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
@@ -447,7 +446,7 @@ describe "API" do
       api.stub(:get_terms) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
 
-      evening = Osm::Evening.new({}, [])
+      evening = Osm::Evening.new({:meeting_date => Date.new(2000, 01, 02)})
       api.update_evening(evening).should be_false
     end
   end

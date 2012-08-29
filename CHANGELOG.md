@@ -1,3 +1,32 @@
+## Version 0.0.12
+
+  * EveningActivity class renamed to Evening::Activity
+  * Change of method return types
+    * Activity.badges now returns an array of Osm::Activity::Badge objects
+    * Activity.files now returns an array of Osm::Activity::File objects
+    * Activity.versions now returns an array of Osm::Activity::Version objects
+    * Section.flexi_records now returns an array of Osm::Section::FlexiRecord objects
+    * Api.get\_register\_structure now returns an array of RegisterField objects
+  * Api.get\_register becomes Api.get\_register\_data and now returns an array of RegisterData objects
+  * Attribute name changes:
+    * Activity::Badge.section becomes section\_type
+    * Activity::File.file\_id becomes id
+    * Section.extra\_records becomes flexi\_records
+    * Member.joined\_in\_years attribute becomes joining\_in\_years
+  * from\_api method added to:
+    * Activity and sub classes
+    * ApiAccess
+    * DueBadges
+    * Evening and Evening::Activity
+    * Event
+    * Grouping
+    * Member
+    * RegisterData
+    * RegisterField
+    * Role
+    * Section
+    * Term
+
 ## Version 0.0.11
 
   * Fix undefined variable in id\_for\_term
