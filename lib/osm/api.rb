@@ -412,7 +412,7 @@ module Osm
       result = Array.new
       unless data['items'].nil?
         data['items'].each do |item|
-          result.push Osm::Event.new(item)
+          result.push Osm::Event.from_api(item)
         end
       end
       self.user_can_access :programme, section_id, api_data

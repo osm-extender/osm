@@ -4,7 +4,7 @@ require 'date'
 
 describe "Event" do
 
-  it "Create" do
+  it "Create from API data" do
     data = {
       'eventid' => 1,
       'sectionid' => 2,
@@ -17,7 +17,7 @@ describe "Event" do
       'location' => 'Somewhere',
       'notes' => 'None'
     }
-    event = Osm::Event.new(data)
+    event = Osm::Event.from_api(data)
 
     event.id.should == 1
     event.section_id.should == 2
