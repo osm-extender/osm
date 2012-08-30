@@ -3,7 +3,8 @@ module Osm
   class Role
 
     attr_reader :section, :group_name, :group_id, :permissions
-    # @!attribute [r] section
+    # @!attribute [rw] section
+    #   @param [Osm::Section] section the section this role is related to (can only be set once)
     #   @return [Osm::Section] the section this role related to
     # @!attribute [r] group_name
     #   @return [String] the name of the group the section is in
@@ -30,7 +31,6 @@ module Osm
     # @param [Hash] data the hash of data provided by the API
     def self.from_api(data)
       attributes = {}
-      attributes[:section] = Osm::Section.from_api(data['sectionid'], data['sectionname'], ActiveSupport::JSON.decode(data['sectionConfig']), self)
       attributes[:group_name] = data['groupname']
       attributes[:group_id] = Osm::to_i_or_nil(data['groupid'])
 
@@ -40,7 +40,14 @@ module Osm
         permissions[key] = permissions[key].to_i
       end
 
-      new(attributes.merge(:permissions => permissions))
+      role = new(attributes.merge(:permissions => permissions))
+      role.section = Osm::Section.from_api(data['sectionid'], data['sectionname'], ActiveSupport::JSON.decode(data['sectionConfig']), role)
+      return role
+    end
+
+    def section=(section)
+      raise ArgumentError, 'section must be an Osm::Section' unless section.is_a?(Osm::Section)
+      @section = section if @section.nil?
     end
 
     # Determine if this role has read access for the provided permission

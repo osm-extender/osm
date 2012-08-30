@@ -60,7 +60,7 @@ module Osm
     # @param [Fixnum] id the section ID used by the API to refer to this section
     # @param [String] name the name given to the sction in OSM
     # @param [Hash] data the hash of data for the object returned by the API
-    # @param {Osm::Role] role the Osm::Role linked with this section
+    # @param [Osm::Role] role the Osm::Role linked with this section
     def self.from_api(id, name, data, role)
       subscription_levels = [:bronze, :silver, :gold]
       subscription_level = data['subscription_level'].to_i - 1
