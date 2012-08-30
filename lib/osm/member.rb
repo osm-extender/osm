@@ -68,13 +68,11 @@ module Osm
     # Initialize a new Member
     # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
     def initialize(attributes={})
-      [:id, :section_id].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] > 0)
+      [:id, :section_id, :grouping_leader].each do |attribute|
+        raise ArgumentError, ":#{attribute} must be nil or a Fixnum >= 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] >= 0)
       end
       raise ArgumentError, ':grouping_id must be nil or a Fixnum >= -2' unless attributes[:grouping_id].nil? || (attributes[:grouping_id].is_a?(Fixnum) && attributes[:grouping_id] >= -2)
-      [:joined_years, :grouping_leader].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a Fixnum >= -1" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] >= -1)
-      end
+      raise ArgumentError, ':joined_years must be nil or a Fixnum >= -1' unless attributes[:joined_years].nil? || (attributes[:joined_years].is_a?(Fixnum) && attributes[:joined_years] >= -1)
       raise ArgumentError, ':joining_in_years must be nil or a Fixnum' unless attributes[:joining_in_years].nil? || attributes[:joining_in_years].is_a?(Fixnum)
       [:type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :age].each do |attribute|
         raise ArgumentError, ":#{attribute} must be nil or a String" unless attributes[attribute].nil? || attributes[attribute].is_a?(String)
@@ -117,7 +115,7 @@ module Osm
         :ethnicity => data['ethnicity'],
         :subs => data['subs'],
         :grouping_id => Osm::to_i_or_nil(data['patrolidO']),
-        :grouping_leader => data['patrolleaderO'],
+        :grouping_leader => Osm::to_i_or_nil(data['patrolleaderO']),
         :joined => Osm::parse_date(data['joined']),
         :age => data['age'],
         :joined_years => data['yrs'].to_i,

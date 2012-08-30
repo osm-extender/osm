@@ -32,7 +32,6 @@ module Osm
     # Initialize a new Section
     # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
     def initialize(attributes={})
-puts ":num_scouts = #{attributes[:num_scouts].inspect}"
       raise ArgumentError, ':id must be nil or a Fixnum > 0' unless attributes[:id].nil? || (attributes[:id].is_a?(Fixnum) && attributes[:id] > 0)
       raise ArgumentError, ':section_name must be nil or a String' unless attributes[:section_name].nil? || attributes[:section_name].is_a?(String)
       raise ArgumentError, ':num_scouts must be nil or a Fixnum >= 0' unless attributes[:num_scouts].nil? || (attributes[:num_scouts].is_a?(Fixnum) && attributes[:num_scouts] >= 0)
@@ -61,7 +60,7 @@ puts ":num_scouts = #{attributes[:num_scouts].inspect}"
     # @param [Fixnum] id the section ID used by the API to refer to this section
     # @param [String] name the name given to the sction in OSM
     # @param [Hash] data the hash of data for the object returned by the API
-    # @param {Osm::Role] role the Osm::Role linked with this section
+    # @param [Osm::Role] role the Osm::Role linked with this section
     def self.from_api(id, name, data, role)
       subscription_levels = [:bronze, :silver, :gold]
       subscription_level = data['subscription_level'].to_i - 1

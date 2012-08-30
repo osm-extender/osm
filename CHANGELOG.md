@@ -1,7 +1,12 @@
-## Version 0.0.14
+## Version 0.0.15
 
   * Add :debug option to Api.configure
   * -2 is a valid grouping\_id value
+  * Fix check of :section\_id in Member.initalize (apparently 0 is allowd in the API return data)
+  * Fix role's section not being set from API data
+
+## Version 0.0.14
+
   * Fix Api.get_register\_data\ returning wrong object
   * Fix check of :num\_scouts in Section.initalize
 
