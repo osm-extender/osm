@@ -8,6 +8,7 @@
   * -2 is a valid grouping\_id value
   * Fix Api.get_register\_data\ returning wrong object
   * Fix check of :num\_scouts in Section.initalize
+  * Fix check of :section\_id in Member.initalize (apparently 0 is allowd in the API return data)
 
 ## Version 0.0.13
 
