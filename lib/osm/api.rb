@@ -492,12 +492,13 @@ module Osm
       data = perform_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}", api_data)
 
       data = data['items']
+      to_return = []
       data.each do |item|
-        item = Osm::RegisterData.from_api(item)
+        to_return.push Osm::RegisterData.from_api(item)
       end
       self.user_can_access :register, section_id, api_data
       cache_write("register-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
-      return data
+      return to_return
     end
 
     # Create an evening in OSM

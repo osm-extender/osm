@@ -2,6 +2,7 @@
 
   * Add :debug option to Api.configure
   * -2 is a valid grouping\_id value
+  * Fix Api.get_register\_data\ returning wrong object
 
 ## Version 0.0.13
 
