@@ -20,6 +20,7 @@ module Osm
     @@user_access = Hash.new
     @@cache_prepend_to_key = 'OSMAPI'
     @@cache = nil
+    @@debug = false
 
     # Initialize a new API connection
     # If passing user details then both must be passed
@@ -47,6 +48,7 @@ module Osm
     # @option options [Class] :cache (optional) An instance of a cache class, must provide the methods (exist?, delete, write, read), for details see Rails.cache. Whilst this is optional you should remember that caching is required to use the OSM API.
     # @option options [Fixnum] :default_cache_ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
     # @option options [String] :cache_prepend_to_key (optional, default = 'OSMAPI') Text to prepend to the key used to store data in the cache
+    # @option options [Boolean] :debug if true debugging info is output (options, default = false)
     # @return nil
     def self.configure(options)
       raise ArgumentError, ':api_id does not exist in options hash' if options[:api_id].nil?
@@ -67,6 +69,7 @@ module Osm
       @@default_cache_ttl = options[:default_cache_ttl].to_i unless options[:default_cache_ttl].nil?
       @@cache_prepend_to_key = options[:cache_prepend_to_key].to_s unless options[:cache_prepend_to_key].nil?
       @@cache = options[:cache]
+      @@debug = !!options[:debug]
       nil
     end
 
@@ -489,12 +492,13 @@ module Osm
       data = perform_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}", api_data)
 
       data = data['items']
+      to_return = []
       data.each do |item|
-        item = Osm::RegisterData.from_api(item)
+        to_return.push Osm::RegisterData.from_api(item)
       end
       self.user_can_access :register, section_id, api_data
       cache_write("register-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
-      return data
+      return to_return
     end
 
     # Create an evening in OSM
@@ -595,12 +599,22 @@ module Osm
         end
       end
 
+      if @@debug
+        puts "Making OSM API request to #{url}"
+        puts api_data.to_s
+      end
+
       begin
         result = HTTParty.post("#{@base_url}/#{url}", {:body => api_data})
       rescue SocketError, TimeoutError, OpenSSL::SSL::SSLError
         raise ConnectionError, 'A problem occured on the internet.'
       end
       raise ConnectionError, "HTTP Status code was #{result.response.code}" if !result.response.code.eql?('200')
+
+      if @@debug
+        puts "Result from OSM request to #{url}"
+        puts result.response.body
+      end
 
       raise Error, result.response.body unless looks_like_json?(result.response.body)
       decoded = ActiveSupport::JSON.decode(result.response.body)

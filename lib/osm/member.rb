@@ -68,9 +68,10 @@ module Osm
     # Initialize a new Member
     # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
     def initialize(attributes={})
-      [:id, :section_id, :grouping_id].each do |attribute|
+      [:id, :section_id].each do |attribute|
         raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] > 0)
       end
+      raise ArgumentError, ':grouping_id must be nil or a Fixnum >= -2' unless attributes[:grouping_id].nil? || (attributes[:grouping_id].is_a?(Fixnum) && attributes[:grouping_id] >= -2)
       [:joined_years, :grouping_leader].each do |attribute|
         raise ArgumentError, ":#{attribute} must be nil or a Fixnum >= -1" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] >= -1)
       end

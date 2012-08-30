@@ -1,3 +1,10 @@
+## Version 0.0.14
+
+  * Add :debug option to Api.configure
+  * -2 is a valid grouping\_id value
+  * Fix Api.get_register\_data\ returning wrong object
+  * Fix check of :num\_scouts in Section.initalize
+
 ## Version 0.0.13
 
   * Fix bug - invalid grouping\_leader in member incorrectly risen for -1
