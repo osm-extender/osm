@@ -1,3 +1,7 @@
+## Version 0.0.15
+
+  * 
+
 ## Version 0.0.14
 
   * Add :debug option to Api.configure
