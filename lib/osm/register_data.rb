@@ -21,9 +21,10 @@ module Osm
     # Initialize a new RegisterData
     # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
     def initialize(attributes={})
-      [:member_id, :grouping_id, :section_id].each do |attribute|
+      [:member_id, :section_id].each do |attribute|
         raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] > 0)
       end
+      raise ArgumentError, ':grouping_id must be nil or a Fixnum >= -2' unless attributes[:grouping_id].nil? || (attributes[:grouping_id].is_a?(Fixnum) && attributes[:grouping_id] >= -2)
       raise ArgumentError, ':total must be a Fixnum >= 0' unless (attributes[:total].is_a?(Fixnum) && attributes[:total] >= 0)
       [:first_name, :last_name].each do |attribute|
         raise ArgumentError, "#{attribute} must be nil or a String" unless attributes[attribute].nil? || attributes[attribute].is_a?(String)
