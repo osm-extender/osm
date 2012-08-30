@@ -32,9 +32,10 @@ module Osm
     # Initialize a new Section
     # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
     def initialize(attributes={})
+puts ":num_scouts = #{attributes[:num_scouts].inspect}"
       raise ArgumentError, ':id must be nil or a Fixnum > 0' unless attributes[:id].nil? || (attributes[:id].is_a?(Fixnum) && attributes[:id] > 0)
       raise ArgumentError, ':section_name must be nil or a String' unless attributes[:section_name].nil? || attributes[:section_name].is_a?(String)
-      raise ArgumentError, ':num_scouts must be nil or a Fixnum >= 0' unless attributes[:num_scouts].nil? || (attributes[:num_scouts].is_a?(Fixnum) && attributes[:num_scouts] > 0)
+      raise ArgumentError, ':num_scouts must be nil or a Fixnum >= 0' unless attributes[:num_scouts].nil? || (attributes[:num_scouts].is_a?(Fixnum) && attributes[:num_scouts] >= 0)
       [:column_names, :fields, :intouch_fields, :mobile_fields].each do |attribute|
         raise ArgumentError, ":#{attribute} must be nil or a Hash" unless attributes[attribute].nil? || attributes[attribute].is_a?(Hash)
       end
