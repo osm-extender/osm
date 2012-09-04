@@ -15,7 +15,7 @@ module Osm
     # Initialize a new Grouping
     # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
     def initialize(attributes={})
-      raise ArgumentError, ':id must be a Fixnum > 0' unless (attributes[:id].is_a?(Fixnum) && attributes[:id] > 0)
+      raise ArgumentError, ':id must be a Fixnum >= -2' unless (attributes[:id].is_a?(Fixnum) && attributes[:id] >= -2)
       raise ArgumentError, ':name must be a String' unless attributes[:name].is_a?(String)
       raise ArgumentError, ':active must be nil or a Boolean' unless attributes[:active].nil? || [true, false].include?(attributes[:active])
       raise ArgumentError, ':points must be nil or a Fixnum >= 0' unless attributes[:points].nil? || (attributes[:points].is_a?(Fixnum) && attributes[:points] >= 0)

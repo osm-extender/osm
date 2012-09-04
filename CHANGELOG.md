@@ -1,3 +1,7 @@
+## Version 0.0.16
+
+  * -2 is a valid grouping\_id value (corrected in Grouping)
+
 ## Version 0.0.15
 
   * Add :debug option to Api.configure
