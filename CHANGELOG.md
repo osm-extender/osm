@@ -1,6 +1,6 @@
 ## Version 0.0.17
 
-  * 
+  * Fix try method is undefined
 
 ## Version 0.0.16
 

@@ -89,7 +89,11 @@ module Osm
     end
 
     def ==(another_term)
-      self.id == another_term.try(:id)
+      begin
+        self.id == another_term.id
+      rescue NoMethodError
+        return false
+      end
     end
 
   end

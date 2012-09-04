@@ -122,11 +122,19 @@ module Osm
     end
 
     def <=>(another_section)
-      self.role <=> another_section.try(:role)
+      begin
+        self.role <=> another_section.role
+      rescue NoMethodError
+        return false
+      end
     end
 
     def ==(another_section)
-      self.id == another_section.try(:id)
+      begin
+        self.id == another_section.id
+      rescue NoMethodError
+        return false
+      end
     end
 
 

@@ -88,7 +88,11 @@ module Osm
     end
 
     def ==(another_role)
-      self.section == another_role.try(:section)
+      begin
+        self.section == another_role.section
+      rescue NoMethodError
+        return false
+      end
     end
 
   end
