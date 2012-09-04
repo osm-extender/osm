@@ -77,18 +77,26 @@ module Osm
     end
 
     def <=>(another_role)
-      compare_group_name = self.group_name <=> another_role.group_name
-      return compare_group_name unless compare_group_name == 0
-
-      return 0 if self.section.type == another_role.section.type
-      [:beavers, :cubs, :scouts, :explorers, :waiting, :adults].each do |type|
-        return -1 if self.section.type == type
-        return 1 if another_role.section.type == type
+      begin
+        compare_group_name = self.group_name <=> another_role.group_name
+        return compare_group_name unless compare_group_name == 0
+  
+        return 0 if self.section.type == another_role.section.type
+        [:beavers, :cubs, :scouts, :explorers, :waiting, :adults].each do |type|
+          return -1 if self.section.type == type
+          return 1 if another_role.section.type == type
+        end
+      rescue NoMethodError
+        return false
       end
     end
 
     def ==(another_role)
-      self.section == another_role.try(:section)
+      begin
+        return self.section == another_role.section
+      rescue NoMethodError
+        return false
+      end
     end
 
   end

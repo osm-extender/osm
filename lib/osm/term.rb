@@ -79,17 +79,25 @@ module Osm
     end
 
     def <=>(another_term)
-      compare = self.section_id <=> another_term.try(:section_id)
-      return compare unless compare == 0
-
-      compare = self.start <=> another_term.try(:start)
-      return compare unless compare == 0
-
-      self.id <=> another_term.try(:id)
+      begin
+        compare = self.section_id <=> another_term.section_id
+        return compare unless compare == 0
+  
+        compare = self.start <=> another_term.start
+        return compare unless compare == 0
+  
+        return self.id <=> another_term.id
+      rescue NoMethodError
+        return false
+      end
     end
 
     def ==(another_term)
-      self.id == another_term.try(:id)
+      begin
+        return self.id == another_term.id
+      rescue NoMethodError
+        return false
+      end
     end
 
   end
