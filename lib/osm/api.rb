@@ -509,7 +509,7 @@ module Osm
     def create_evening(section, meeting_date, api_data={})
       section_id = id_for_section(section)
       evening_api_data = {
-        'meetingdate' => meeting_date.strftime('%Y-%m-%d'),
+        'meetingdate' => meeting_date.strftime(Osm::OSM_DATE_FORMAT),
         'sectionid' => section_id,
         'activityid' => -1
       }

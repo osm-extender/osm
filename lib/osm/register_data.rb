@@ -48,7 +48,7 @@ module Osm
 
       attributes[:attendance] = {}
       data.except('scoutid', 'patrolid', 'sectionid', 'firstname', 'lastname', 'total').keys.each do |key|
-        attributes[:attendance][Date.strptime(key, '%Y-%m-%d')] = data[key]
+        attributes[:attendance][Date.strptime(key, Osm::OSM_DATE_FORMAT)] = data[key]
       end
 
       new(attributes)

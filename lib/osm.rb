@@ -5,12 +5,15 @@ require 'date'
 
 
 module Osm
+  OSM_EPOCH_S = '1970-01-01'
+  OSM_DATE_FORMAT = '%Y-%m-%d'
+  OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
 
   class Error < Exception; end
   class ConnectionError < Error; end
 
 
-  private
+  private  
   def self.make_array_of_symbols(array)
     array.each_with_index do |item, index|
       array[index] = item.to_sym
@@ -30,18 +33,18 @@ module Osm
     raise Error, 'There is no current term for the section.'
   end
 
-  def self.make_datetime(date, time)
-    date = nil if date.nil? || date.empty?
+  def self.make_datetime(date, time, options={})
+    date = nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
     time = nil if time.nil? || time.empty?
     if (!date.nil? && !time.nil?)
       begin
-        return DateTime.strptime((date + ' ' + time), '%Y-%m-%d %H:%M:%S')
+        return DateTime.strptime((date + ' ' + time), OSM_DATETIME_FORMAT)
       rescue ArgumentError
         return nil
       end
     elsif !date.nil?
       begin
-        return DateTime.strptime(date, '%Y-%m-%d')
+        return DateTime.strptime(date, OSM_DATE_FORMAT)
       rescue ArgumentError
         return nil
       end
@@ -50,10 +53,10 @@ module Osm
     end
   end
 
-  def self.parse_date(date)
-    return nil if date.nil?
+  def self.parse_date(date, options={})
+    return nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
     begin
-      return Date.strptime(date, '%Y-%m-%d')
+      return Date.strptime(date, OSM_DATE_FORMAT)
     rescue ArgumentError
       return nil
     end

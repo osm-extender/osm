@@ -95,7 +95,7 @@ module Osm
       {
         'eveningid' => evening_id,
         'sectionid' => section_id,
-        'meetingdate' => meeting_date.strftime('%Y-%m-%d'),
+        'meetingdate' => meeting_date.strftime(Osm::OSM_DATE_FORMAT),
         'starttime' => start_time,
         'endtime' => end_time,
         'title' => title,

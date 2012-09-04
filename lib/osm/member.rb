@@ -104,7 +104,7 @@ module Osm
         :phone4 => data['phone4'],
         :address => data['address'],
         :address2 => data['address2'],
-        :date_of_birth => Osm::parse_date(data['dob']),
+        :date_of_birth => Osm::parse_date(data['dob'], :ignore_epoch => true),
         :started => Osm::parse_date(data['started']),
         :joining_in_years => data['joining_in_yrs'].to_i,
         :parents => data['parents'],

@@ -1,6 +1,7 @@
 ## Version 0.0.17
 
   * Fix try method is undefined
+  * Since 1/1/1970 is the epoch used by the OSM API, this date will be treated as nil (except member's date of birth)
 
 ## Version 0.0.16
 
