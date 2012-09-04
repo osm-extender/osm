@@ -123,7 +123,7 @@ module Osm
 
     def <=>(another_section)
       begin
-        self.role <=> another_section.role
+        return self.role <=> another_section.role
       rescue NoMethodError
         return false
       end
@@ -131,7 +131,7 @@ module Osm
 
     def ==(another_section)
       begin
-        self.id == another_section.id
+        return self.id == another_section.id
       rescue NoMethodError
         return false
       end
