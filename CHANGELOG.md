@@ -2,6 +2,7 @@
 
   * Fix try method is undefined
   * Since 1/1/1970 is the epoch used by the OSM API, this date will be treated as nil (except member's date of birth)
+  * DueBadges now calculates the totals in the initialize method (no need to pass it in anymore)
 
 ## Version 0.0.16
 

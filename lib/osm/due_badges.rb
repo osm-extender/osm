@@ -11,13 +11,25 @@ module Osm
     #   @return [Hash] the total number of each badge which is due
 
     # Initialize a new DueBadges
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key, exclude total as this is calculated for you)
     def initialize(attributes={})
-      [:descriptions, :by_member, :totals].each do |attribute|
+      [:descriptions, :by_member].each do |attribute|
         raise ArgumentError, ":#{attribute} must be a Hash" unless attributes[attribute].is_a?(Hash)
       end
 
       attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+
+      # Calculate totals
+      @totals = {}
+      @by_member.keys.each do |member_name|
+        @by_member[member_name].each do |badge_record|
+          badge_symbol = badge_record[:badge]
+          badge_extra = badge_record[:extra_information]
+          @totals[badge_record[:badge]] ||= {}
+          @totals[badge_symbol][badge_extra] ||= 0
+          @totals[badge_symbol][badge_extra] += 1
+        end
+      end
     end
 
 
@@ -45,19 +57,15 @@ module Osm
 
 
       attributes[:by_member] = {}
-      attributes[:totals] = {}
       attributes[:pending].each_key do |key|
         attributes[:pending][key].each do |item|
           name = "#{item[:firstname]} #{item[:lastname]}"
-          attributes[:by_member][name] = [] if attributes[:by_member][name].nil?
-
+          attributes[:by_member][name] ||= []
           badge = {
             :badge => key,
             :extra_information => item[:extra]
           }
           attributes[:by_member][name].push badge
-          attributes[:totals][key] = {} if attributes[:totals][key].nil?
-          attributes[:totals][key][item[:extra]] = attributes[:totals][key][item[:extra]].to_i + 1
         end
       end
       
