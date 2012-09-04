@@ -1,3 +1,7 @@
+## Version 0.0.17
+
+  * 
+
 ## Version 0.0.16
 
   * -2 is a valid grouping\_id value (corrected in Grouping)
