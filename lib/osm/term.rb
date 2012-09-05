@@ -100,6 +100,6 @@ module Osm
       end
     end
 
-  end
+  end # Class Term
 
-end
+end # Module

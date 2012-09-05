@@ -158,7 +158,6 @@ module Osm
 
     end
 
+  end # Class Evening
 
-  end
-
-end
+end # Module

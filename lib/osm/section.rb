@@ -170,8 +170,8 @@ module Osm
           :name => data['name'],
         })
       end
-    end # FlexiRecord
+    end # Class Section::FlexiRecord
 
-  end # Section
+  end # Class Section
 
 end # Module

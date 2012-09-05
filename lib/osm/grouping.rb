@@ -35,6 +35,6 @@ module Osm
       })
     end
 
-  end
+  end # Class Grouping
 
-end
+end # Module

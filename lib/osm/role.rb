@@ -99,6 +99,6 @@ module Osm
       end
     end
 
-  end
+  end # Class Role
 
-end
+end # Module

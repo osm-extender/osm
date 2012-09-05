@@ -89,4 +89,4 @@ module Osm
     return true
   end
 
-end
+end # Module

@@ -679,6 +679,6 @@ module Osm
       return term.nil? ? Osm::find_current_term_id(self, id_for_section(section), api_data) : id_for(Osm::Term, term, 'term')
     end
 
-  end
+  end # Class Api
 
-end
+end # Module

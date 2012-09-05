@@ -34,6 +34,6 @@ module Osm
       })
     end
 
-  end
+  end # Class RegisterField
 
-end
+end # Module

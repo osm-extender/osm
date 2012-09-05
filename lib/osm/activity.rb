@@ -235,8 +235,8 @@ module Osm
         })
       end
 
-    end # Activity::Version
+    end # Class Activity::Version
 
-  end # Activity
+  end # Class Activity
 
 end # Module

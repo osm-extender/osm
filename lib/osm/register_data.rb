@@ -54,6 +54,6 @@ module Osm
       new(attributes)
     end
 
-  end
+  end # Class RegisterData
 
-end
+end # Module

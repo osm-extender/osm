@@ -52,6 +52,6 @@ module Osm
       })
     end
 
-  end
+  end # Class Event
 
-end
+end # Module

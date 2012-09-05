@@ -141,6 +141,6 @@ module Osm
       return "#{@first_name}#{seperator.to_s}#{@last_name}"
     end
 
-  end
+  end # Class Member
 
-end
+end # Module

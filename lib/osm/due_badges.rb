@@ -78,6 +78,6 @@ module Osm
       return @by_member.empty?
     end
 
-  end # Class
+  end # Class DueBadges
 
 end # Module

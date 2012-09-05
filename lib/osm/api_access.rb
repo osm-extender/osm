@@ -59,6 +59,6 @@ module Osm
       return @id == Osm::Api.api_id.to_i
     end
 
-  end # Class
+  end # Class ApiAccess
 
 end # Module
