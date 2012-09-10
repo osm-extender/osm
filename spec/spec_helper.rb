@@ -1,6 +1,7 @@
 require 'fakeweb'
 require 'httparty'
 require 'active_support'
+require 'active_attr/rspec'
 
 require 'osm'
 

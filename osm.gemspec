@@ -20,6 +20,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'activesupport', '>= 3.2'  # Used to parse JSON from OSM
   s.add_runtime_dependency 'httparty'                 # Used to make web requests to the API
+  s.add_runtime_dependency 'active_attr'
 
   s.add_development_dependency 'rake'
   s.add_development_dependency 'rspec'

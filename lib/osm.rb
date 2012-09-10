@@ -1,7 +1,8 @@
+require 'active_attr'
+require 'date'
+
 require File.join(File.dirname(__FILE__), '..', 'version')
 Dir[File.join(File.dirname(__FILE__) , 'osm', '*.rb')].each {|file| require file }
-
-require 'date'
 
 
 module Osm
