@@ -29,6 +29,7 @@ describe "Term" do
     term.name.should == 'Term name'
     term.start.should == Date.new(2001, 1, 1)
     term.finish.should == Date.new(2001, 3, 31)
+    term.valid?.should be_true
   end
 
 

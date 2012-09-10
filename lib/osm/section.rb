@@ -1,59 +1,87 @@
 module Osm
 
   class Section
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
 
-    attr_reader :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records, :role
-    # @!attribute [r] id
+    # @!attribute [rw] id
     #   @return [Fixnum] the id for the section
-    # @!attribute [r] name
+    # @!attribute [rw] name
     #   @return [String] the section name
-    # @!attribute [r] subscription_level
+    # @!attribute [rw] subscription_level
     #   @return [Symbol] what subscription the section has to OSM (:bronze, :silver or :gold)
-    # @!attribute [r] subscription_expires
+    # @!attribute [rw] subscription_expires
     #   @return [Date] when the section's subscription to OSM expires
-    # @!attribute [r] type
+    # @!attribute [rw] type
     #   @return [Symbol] the section type (:beavers, :cubs, :scouts, :exporers, :adults, :waiting, :unknown)
-    # @!attribute [r] num_scouts
+    # @!attribute [rw] num_scouts
     #   @return [Fixnum] how many members the section has
-    # @!attribute [r] column_names
+    # @!attribute [rw] column_names
     #   @return [Hash] custom names to use for the data columns
-    # @!attribute [r] fields
+    # @!attribute [rw] fields
     #   @return [Hash] which columns are shown in OSM
-    # @!attribute [r] intouch_fields
+    # @!attribute [rw] intouch_fields
     #   @return [Hash] which columns are shown in OSM's in touch reports
-    # @!attribute [r] mobile_fields
+    # @!attribute [rw] mobile_fields
     #   @return [Hash] which columns are shown in the OSM mobile app
-    # @!attribute [r] flexi_records
+    # @!attribute [rw] flexi_records
     #   @return [Array<FlexiRecord>] list of the extra records the section has
-    # @!attribute [r] role
+    # @!attribute [rw] role
     #   @return [Osm::Role] the role linking the user to this section
 
+    attribute :id, :type => Integer
+    attribute :name, :type => String
+    attribute :subscription_level, :default => :unknown
+    attribute :subscription_expires, :type => Date
+    attribute :type, :default => :unknown
+    attribute :num_scouts, :type => Integer
+    attribute :column_names, :default => {}
+    attribute :fields, :default => {}
+    attribute :intouch_fields, :default => {}
+    attribute :mobile_fields, :default => {}
+    attribute :flexi_records, :default => []
+    attribute :role
 
-    # Initialize a new Section
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-    def initialize(attributes={})
-      raise ArgumentError, ':id must be nil or a Fixnum > 0' unless attributes[:id].nil? || (attributes[:id].is_a?(Fixnum) && attributes[:id] > 0)
-      raise ArgumentError, ':section_name must be nil or a String' unless attributes[:section_name].nil? || attributes[:section_name].is_a?(String)
-      raise ArgumentError, ':num_scouts must be nil or a Fixnum >= 0' unless attributes[:num_scouts].nil? || (attributes[:num_scouts].is_a?(Fixnum) && attributes[:num_scouts] >= 0)
-      [:column_names, :fields, :intouch_fields, :mobile_fields].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a Hash" unless attributes[attribute].nil? || attributes[attribute].is_a?(Hash)
+    attr_accessible :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records, :role
+
+    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :num_scouts, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_presence_of :subscription_level
+    validates_presence_of :subscription_expires
+    validates_presence_of :type
+    validates_presence_of :column_names, :unless => Proc.new { |a| a.column_names == {} }
+    validates_presence_of :fields, :unless => Proc.new { |a| a.fields == {} }
+    validates_presence_of :intouch_fields, :unless => Proc.new { |a| a.intouch_fields == {} }
+    validates_presence_of :mobile_fields, :unless => Proc.new { |a| a.mobile_fields == {} }
+    validates_presence_of :flexi_records
+    validates_presence_of :role
+
+    validates_inclusion_of :subscription_level, :in => [:bronze, :silver, :gold, :unknown], :message => 'is not a valid level'
+
+    validates_each :column_names, :fields, :intouch_fields, :mobile_fields do |record, attr, value|
+      record.errors.add(attr, 'must be a Hash') unless value.is_a?(Hash)
+      value.each do |k, v|
+        record.errors.add(attr, 'keys must be Symbols') unless k.is_a?(Symbol)
+        record.errors.add(attr, 'values must be Strings') unless v.is_a?(String)
       end
-      [:type, :subscription_level].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a Symbol" unless attributes[attribute].nil? || attributes[attribute].is_a?(Symbol)
-      end
-      raise ArgumentError, ':flexi_records must be nil or an Array' unless attributes[:flexi_records].nil? || attributes[:flexi_records].is_a?(Array)
-
-      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
-
-      @section_name ||= ''
-      @column_names ||= {}
-      @fields ||= {}
-      @intouch_fields ||= {}
-      @mobile_fields ||= {}
-      @flexi_records ||= []
-      @subscription_level ||= :unknown
-      @type ||= :unknown
     end
+
+    validates_each :flexi_records do |record, attr, value|
+      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
+      value.each do |v|
+        record.errors.add(attr, 'items in the Array must be Osm::Section::FlexiRecord') unless v.is_a?(Osm::Section::FlexiRecord)
+        record.errors.add(attr, 'contains an invalid item') unless v.valid?
+      end
+    end
+
+    validates_each :type, :subscription_level do |record, attr, value|
+      record.errors.add(attr, 'must be a Symbol') unless value.is_a?(Symbol)
+    end
+
+
+    # @!method initialize
+    #   Initialize a new Section
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Initialize a new Sections from api data
@@ -93,7 +121,7 @@ module Osm
     # Check if this section is one of the youth sections
     # @return [Boolean]
     def youth_section?
-      [:beavers, :cubs, :scouts, :explorers].include?(@type)
+      [:beavers, :cubs, :scouts, :explorers].include?(type)
     end
 
     # Custom section type checkers
@@ -117,7 +145,7 @@ module Osm
     #   @return (Boolean)
     [:beavers, :cubs, :scouts, :explorers, :adults, :waiting].each do |attribute|
       define_method "#{attribute}?" do
-        @type == attribute
+        type == attribute
       end
     end
 
@@ -141,24 +169,29 @@ module Osm
 
     private
     class FlexiRecord
+      include ::ActiveAttr::MassAssignmentSecurity
+      include ::ActiveAttr::Model
 
-      attr_reader :id, :name
-      # @!attribute [r] id
+      # @!attribute [rw] id
       #   @return [Fixnum] the aid of the flexi-record
-      # @!attribute [r] name
+      # @!attribute [rw] name
       #   @return [String] the name given to the flexi-record
-  
-      # Initialize a new ApiAccess
-      # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-      def initialize(attributes={})
-        raise ArgumentError, ':id must be a Fixnum > 0' unless (attributes[:id].is_a?(Fixnum) && attributes[:id] > 0)
-        raise ArgumentError, ':name must be a String' unless attributes[:name].is_a?(String)
-  
-        attributes.each { |k,v| instance_variable_set("@#{k}", v) }
-      end
-  
-  
-      # Initialize a new ApiAccess from api data
+
+      attribute :id, :type => Integer
+      attribute :name, :type => String
+
+      attr_accessible :id, :name
+
+      validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_presence_of :name
+
+
+      # @!method initialize
+      #   Initialize a new FlexiRecord
+      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+
+      # Initialize a new FlexiRecord from api data
       # @param [Hash] data the hash of data provided by the API
       def self.from_api(data)
         # Expect item to be: {:name=>String, :extraid=>Fixnum}
