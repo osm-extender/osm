@@ -1,6 +1,7 @@
 ## Version 0.0.18
 
-  * 
+  * Term now uses active\_attr
+  * Term's end attribute is now called finish
 
 ## Version 0.0.17
 

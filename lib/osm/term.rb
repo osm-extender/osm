@@ -1,30 +1,38 @@
 module Osm
 
   class Term
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
 
-    attr_reader :id, :section_id, :name, :start, :end
-    # @!attribute [r] id
+    # @!attribute [rw] id
     #   @return [Fixnum] the id for the term
-    # @!attribute [r] section_id
+    # @!attribute [rw] section_id
     #   @return [Fixnum] the section the term belongs to
-    # @!attribute [r] name
+    # @!attribute [rw] name
     #   @return [Fixnum] the name of the term
-    # @!attribute [r] start
+    # @!attribute [rw] start
     #   @return [Date] when the term starts
-    # @!attribute [r] end
-    #   @return [Date] when the term ends
+    # @!attribute [rw] finish
+    #   @return [Date] when the term finishes
 
-    # Initialize a new Term
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-    def initialize(attributes={})
-      raise ArgumentError, ':id must be nil or a Fixnum > 0' unless attributes[:id].nil? || (attributes[:id].is_a?(Fixnum) && attributes[:id] > 0)
-      raise ArgumentError, ':section_id must be nil or a Fixnum > 0' unless attributes[:section_id].nil? || (attributes[:section_id].is_a?(Fixnum) && attributes[:section_id] > 0)
-      raise ArgumentError, ':name must be nil or a String' unless attributes[:name].nil? || attributes[:name].is_a?(String)
-      raise ArgumentError, ':start must be nil or a Date' unless attributes[:start].nil? || attributes[:start].is_a?(Date)
-      raise ArgumentError, ':end must be nil or a Date' unless attributes[:end].nil? || attributes[:end].is_a?(Date)
+    attribute :id, :type => Integer
+    attribute :section_id, :type => Integer
+    attribute :name, :type => String
+    attribute :start, :type => Date
+    attribute :finish, :type => Date
 
-      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
-    end
+    attr_accessible :id, :section_id, :name, :start, :finish
+
+    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :section_id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_presence_of :name
+    validates_presence_of :start
+    validates_presence_of :finish
+
+
+    # @!method initialize
+    #   Initialize a new Term
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Initialize a new Term from api data
@@ -35,7 +43,7 @@ module Osm
         :section_id => Osm::to_i_or_nil(data['sectionid']),
         :name => data['name'],
         :start => Osm::parse_date(data['startdate']),
-        :end => Osm::parse_date(data['enddate']),
+        :finish => Osm::parse_date(data['enddate']),
       )
     end
 
@@ -43,39 +51,39 @@ module Osm
     # @param [Date] date
     # @return [Boolean] if the term is completly before the passed date
     def before?(date)
-      return @end < date.to_date
+      return finish < date.to_date
     end
 
     # Determine if the term is completly after the passed date
     # @param [Date] date
     # @return [Boolean] if the term is completly after the passed date
     def after?(date)
-      return @start > date.to_date
+      return start > date.to_date
     end
 
     # Determine if the term is in the future
     # @return [Boolean] if the term starts after today
     def future?
-      return @start > Date.today
+      return start > Date.today
     end
 
     # Determine if the term is in the past
     # @return [Boolean] if the term finished before today
     def past?
-      return @end < Date.today
+      return finish < Date.today
     end
 
     # Determine if the term is current
     # @return [Boolean] if the term started before today and finishes after today
     def current?
-      return (@start <= Date.today) && (@end >= Date.today)
+      return (start <= Date.today) && (finish >= Date.today)
     end
 
     # Determine if the provided date is within the term
     # @param [Date] date the date to test
     # @return [Boolean] if the term started before the date and finishes after the date
     def contains_date?(date)
-      return (@start <= date) && (@end >= date)
+      return (start <= date) && (finish >= date)
     end
 
     def <=>(another_term)
