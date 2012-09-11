@@ -15,6 +15,7 @@ describe "API Access" do
     api_access.id.should == 1
     api_access.name.should == 'Name'
     api_access.permissions.should == {:permission => 100}
+    api_access.valid?.should be_true
   end
 
 
