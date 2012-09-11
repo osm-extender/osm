@@ -1,13 +1,16 @@
 ## Version 0.0.18
 
   * Term's end attribute is now called finish
-  * Term now uses active\_attr
-  * Section and Section::FlexiRecord now uses active\_attr
-  * Role now uses active\_attr
-  * RegisterField now uses active\_attr
-  * RegisterData now uses active\_attr
-  * Member now uses active\_attr
-  * Grouping now uses active\_attr
+  * Event's end attribute is now called finish
+  * The following models now use active\_attr:
+    * Event
+    * Grouping
+    * Member
+    * RegisterData
+    * RegisterField
+    * Role
+    * Section
+    * Term
 
 ## Version 0.0.17
 

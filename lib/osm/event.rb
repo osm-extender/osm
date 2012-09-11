@@ -1,8 +1,9 @@
 module Osm
 
   class Event
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
 
-    attr_reader :id, :section_id, :name, :start, :end, :cost, :location, :notes
     # @!attribute [r] id
     #   @return [Fixnum] the id for the event
     # @!attribute [r] section_id
@@ -11,7 +12,7 @@ module Osm
     #   @return [String] the name of the event
     # @!attribute [r] start
     #   @return [DateTime] when the event starts
-    # @!attribute [r] end
+    # @!attribute [r] finish
     #   @return [DateTime] when the event ends
     # @!attribute [r] cost
     #   @return [String] the cost of the event
@@ -20,22 +21,25 @@ module Osm
     # @!attribute [r] notes
     #   @return [String] notes about the event
 
-    # Initialize a new Event
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-    def initialize(attributes={})
-      [:id, :section_id].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] > 0)
-      end
-      raise ArgumentError, ':name must be a String' unless attributes[:name].is_a?(String)
-      raise ArgumentError, ':start must be nil or a DateTime' unless attributes[:start].nil? || attributes[:start].is_a?(DateTime)
-      raise ArgumentError, ':end must be nil or a DateTime' unless attributes[:end].nil? || attributes[:end].is_a?(DateTime)
-      [:cost, :location, :notes].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a String" unless attributes[attribute].nil? || attributes[attribute].is_a?(String)
-      end
+    attribute :id, :type => Integer
+    attribute :section_id, :type => Integer
+    attribute :name, :type => String
+    attribute :start, :type => DateTime
+    attribute :finish, :type => DateTime
+    attribute :cost, :type => String, :default => ''
+    attribute :location, :type => String, :default => ''
+    attribute :notes, :type => String, :default => ''
 
-      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
-    end
+    attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes
 
+    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :section_id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_presence_of :name
+
+
+    # @!method initialize
+    #   Initialize a new Term
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     # Initialize a new Event from api data
     # @param [Hash] data the hash of data provided by the API
