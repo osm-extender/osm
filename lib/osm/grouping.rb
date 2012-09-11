@@ -1,27 +1,34 @@
 module Osm
 
   class Grouping
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
 
-    attr_reader :id, :name, :active, :points
-    # @!attribute [r] id
+    # @!attribute [rw] id
     #   @return [Fixnum] the id for grouping
-    # @!attribute [r] name
+    # @!attribute [rw] name
     #   @return [String] the name of the grouping
-    # @!attribute [r] active
+    # @!attribute [rw] active
     #   @return [Boolean] wether the grouping is active
-    # @!attribute [r] points
+    # @!attribute [rw] points
     #   @return [Fixnum] the points awarded to the grouping
 
-    # Initialize a new Grouping
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-    def initialize(attributes={})
-      raise ArgumentError, ':id must be a Fixnum >= -2' unless (attributes[:id].is_a?(Fixnum) && attributes[:id] >= -2)
-      raise ArgumentError, ':name must be a String' unless attributes[:name].is_a?(String)
-      raise ArgumentError, ':active must be nil or a Boolean' unless attributes[:active].nil? || [true, false].include?(attributes[:active])
-      raise ArgumentError, ':points must be nil or a Fixnum >= 0' unless attributes[:points].nil? || (attributes[:points].is_a?(Fixnum) && attributes[:points] >= 0)
+    attribute :id, :type => Integer
+    attribute :name, :type => String
+    attribute :active, :type => Boolean
+    attribute :points, :type => Integer
 
-      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
-    end
+    attr_accessible :id, :name, :active, :points
+
+    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>-2
+    validates_presence_of :name
+    validates_numericality_of :points, :only_integer=>true
+    validates_presence_of :active
+
+
+    # @!method initialize
+    #   Initialize a new Term
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Initialize a new Grouping from api data
