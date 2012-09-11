@@ -1,15 +1,18 @@
 ## Version 0.0.18
 
-  * Term's end attribute is now called finish
-  * Event's end attribute is now called finish
+  * Term's end attribute is now finish
+  * Event's end attribute is now finish
+  * Evening's evening\_id attribute is now id
+  * Added exception ArgumentIsInvalid (raised when argument.valid? is false when updating through the API)
   * The following models now use active\_attr:
+    * Evening and Evening::Activity
     * Event
     * Grouping
     * Member
     * RegisterData
     * RegisterField
     * Role
-    * Section
+    * Section and Section::FlexiRecord
     * Term
 
 ## Version 0.0.17

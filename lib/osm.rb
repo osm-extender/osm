@@ -12,7 +12,7 @@ module Osm
 
   class Error < Exception; end
   class ConnectionError < Error; end
-
+  class ArgumentIsInvalid < ArgumentError; end
 
   private  
   def self.make_array_of_symbols(array)
