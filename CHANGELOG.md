@@ -3,8 +3,10 @@
   * Term's end attribute is now finish
   * Event's end attribute is now finish
   * Evening's evening\_id attribute is now id
+  * DueBadge's totals attribute is now a method (totals are calculated each time rather than during initialization)
   * Added exception ArgumentIsInvalid (raised when argument.valid? is false when updating through the API)
   * The following models now use active\_attr:
+    * DueBadges
     * Evening and Evening::Activity
     * Event
     * Grouping

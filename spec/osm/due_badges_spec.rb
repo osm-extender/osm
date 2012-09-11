@@ -52,6 +52,7 @@ describe "DueBadge" do
     db.descriptions.should == {:badge_name=>{:name=>"Badge Name", :section=>:cubs, :type=>:activity, :badge=>"badge_name"}, :cubs_core_participation=>{:name=>"Participation", :section=>:cubs, :type=>:core, :badge=>"participation"}}
     db.by_member.should == {"John Doe"=>[{:badge=>:badge_name, :extra_information=>""}, {:badge=>:cubs_core_participation, :extra_information=>"Lvl 2"}], "Jane Doe"=>[{:badge=>:cubs_core_participation, :extra_information=>"Lvl 3"}]}
     db.totals.should == {:badge_name=>{""=>1}, :cubs_core_participation=>{"Lvl 3"=>1, "Lvl 2"=>1}}
+    db.valid?.should be_true
   end
 
 end
