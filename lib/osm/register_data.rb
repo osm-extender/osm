@@ -1,38 +1,53 @@
 module Osm
 
   class RegisterData
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
 
-    attr_reader :member_id, :first_name, :last_name, :section_id, :grouping_id, :total, :attendance
-    # @!attribute [r] member_id
+    # @!attribute [rw] member_id
     #   @return [Fixnum] The OSM ID for the member
-    # @!attribute [r] grouping_id
+    # @!attribute [rw] grouping_id
     #   @return [Fixnum] The OSM ID for the member's grouping
-    # @!attribute [r] section_id
+    # @!attribute [rw] section_id
     #   @return [Fixnum] The OSM ID for the member's section
-    # @!attribute [r] first_name
+    # @!attribute [rw] first_name
     #   @return [String] The member's first name
-    # @!attribute [r] last_name
+    # @!attribute [rw] last_name
     #   @return [String] The member's last name
-    # @!attribute [r] total
-    #   @return [FixNum] Tooltip for the field
-    # @!attribute [r] attendance
+    # @!attribute [rw] total
+    #   @return [FixNum] Total
+    # @!attribute [rw] attendance
     #   @return [Hash] The data for each field - keys are the date, values one of 'Yes' (present), 'No' (known absence) or nil (absent)
 
-    # Initialize a new RegisterData
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-    def initialize(attributes={})
-      [:member_id, :section_id].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] > 0)
-      end
-      raise ArgumentError, ':grouping_id must be nil or a Fixnum >= -2' unless attributes[:grouping_id].nil? || (attributes[:grouping_id].is_a?(Fixnum) && attributes[:grouping_id] >= -2)
-      raise ArgumentError, ':total must be a Fixnum >= 0' unless (attributes[:total].is_a?(Fixnum) && attributes[:total] >= 0)
-      [:first_name, :last_name].each do |attribute|
-        raise ArgumentError, "#{attribute} must be nil or a String" unless attributes[attribute].nil? || attributes[attribute].is_a?(String)
-      end
-      raise ArgumentError, ':attendance must be a Hash' unless attributes[:attendance].is_a?(Hash)
+    attribute :member_id, :type => Integer
+    attribute :grouping_id, :type => Integer
+    attribute :section_id, :type => Integer
+    attribute :first_name, :type => String
+    attribute :last_name, :type => String
+    attribute :total, :type => Integer
+    attribute :attendance, :default => {}
 
-      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+    attr_accessible :member_id, :first_name, :last_name, :section_id, :grouping_id, :total, :attendance
+
+    validates_numericality_of :member_id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
+    validates_numericality_of :section_id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :total, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_presence_of :first_name
+    validates_presence_of :last_name
+
+    validates_each :attendance do |record, attr, value|
+      record.errors.add(attr, 'must be a Hash') unless value.is_a?(Hash)
+      value.each do |k, v|
+        record.errors.add(attr, 'keys must be a Date') unless k.is_a?(Date)
+        record.errors.add(attr, 'values must be Strings') unless ['Yes', 'No', nil].include?(v)
+      end
     end
+
+
+    # @!method initialize
+    #   Initialize a new registerData
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Initialize a new RegisterData from api data

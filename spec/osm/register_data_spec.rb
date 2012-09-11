@@ -29,6 +29,7 @@ describe "Register Data" do
       Date.new(2012, 01, 10) => 'Yes',
       Date.new(2012, 01, 24) => 'No'
     }
+    rd.valid?.should be_true
   end
 
 end
