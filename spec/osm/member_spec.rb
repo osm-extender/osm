@@ -71,6 +71,7 @@ describe "Member" do
     member.joined.should == Date.new(2006, 1, 7)
     member.age.should == '06/07'
     member.joined_years.should == 1
+    member.valid?.should be_true
   end
 
 
