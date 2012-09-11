@@ -1,83 +1,132 @@
 module Osm
 
   class Activity
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
 
-    attr_reader :id, :version, :group_id, :user_id, :title, :description, :resources, :instructions, :running_time, :location, :shared, :rating, :editable, :deletable, :used, :versions, :sections, :tags, :files, :badges
-    # @!attribute [r] id
+    # @!attribute [rw] id
     #   @return [Fixnum] the id for the activity
-    # @!attribute [r] version
+    # @!attribute [rw] version
     #   @return [Fixnum] the version of the activity
-    # @!attribute [r] group_id
+    # @!attribute [rw] group_id
     #   @return [Fixnum] the group_id
-    # @!attribute [r] user_id
+    # @!attribute [rw] user_id
     #   @return [Fixnum] the user_id of the creator of the activity
-    # @!attribute [r] title
+    # @!attribute [rw] title
     #   @return [String] the activity's title
-    # @!attribute [r] description
+    # @!attribute [rw] description
     #   @return [String] the description of the activity
-    # @!attribute [r] resources
+    # @!attribute [rw] resources
     #   @return [String] resources required to do the activity
-    # @!attribute [r] instructions
+    # @!attribute [rw] instructions
     #   @return [String] instructions for doing the activity
-    # @!attribute [r] running_time
+    # @!attribute [rw] running_time
     #   @return [Fixnum] duration of the activity in minutes
-    # @!attribute [r] location
+    # @!attribute [rw] location
     #   @return [Symbol] :indoors, :outdoors or :both
-    # @!attribute [r] shared
+    # @!attribute [rw] shared
     #   @return [Fixnum] 2 - Public, 0 - Private
-    # @!attribute [r] rating
+    # @!attribute [rw] rating
     #   @return [Fixnum] ?
-    # @!attribute [r] editable
+    # @!attribute [rw] editable
     #   @return [Boolean] Wether the current API user can edit this activity
-    # @!attribute [r] deletable
+    # @!attribute [rw] deletable
     #   @return [Boolean] Wether the current API user can delete this activity
-    # @!attribute [r] used
+    # @!attribute [rw] used
     #   @return [Fixnum] How many times this activity has been used (total accross all of OSM)
-    # @!attribute [r] versions
+    # @!attribute [rw] versions
     #   @return [Array<Osm::Activity::Version>]
-    # @!attribute [r] sections
+    # @!attribute [rw] sections
     #   @return [Array<Symbol>] the sections the activity is appropriate for
-    # @!attribute [r] tags
+    # @!attribute [rw] tags
     #   @return [Array<String>] the tags attached to the activity
-    # @!attribute [r] files
+    # @!attribute [rw] files
     #   @return [Array<Osm::Activity::File>
-    # @!attribute [r] badges
+    # @!attribute [rw] badges
     #   @return [Array<Osm::Activity::Badge>
 
+    attribute :id, :type => Integer
+    attribute :version, :type => Integer
+    attribute :group_id, :type => Integer
+    attribute :user_id, :type => Integer
+    attribute :title, :type => String
+    attribute :description, :type => String
+    attribute :resources, :type => String
+    attribute :instructions, :type => String
+    attribute :running_time, :type => Integer
+    attribute :location
+    attribute :shared, :type => Integer
+    attribute :rating, :type => Integer
+    attribute :editable, :type => Boolean
+    attribute :deletable, :type => Boolean
+    attribute :used, :type => Integer
+    attribute :versions, :default => []
+    attribute :sections, :default => []
+    attribute :tags, :default => []
+    attribute :files, :default => []
+    attribute :badges, :default => []
 
-    # Initialize a new Activity
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-    def initialize(attributes={})
-      [:id, :group_id, :user_id].each do |attribute|
-        it = attributes[attribute]
-        raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless it.nil? || (it.is_a?(Fixnum) && it > 0)
+    attr_accessible :id, :version, :group_id, :user_id, :title, :description, :resources, :instructions, :running_time, :location, :shared, :rating, :editable, :deletable, :used, :versions, :sections, :tags, :files, :badges
+
+    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :user_id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :running_time, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :shared, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :rating, :only_integer=>true
+    validates_numericality_of :used, :only_integer=>true
+    validates_presence_of :title
+    validates_presence_of :description
+    validates_presence_of :resources
+    validates_presence_of :instructions
+    validates_inclusion_of :editable, :in => [true, false]
+    validates_inclusion_of :deletable, :in => [true, false]
+    validates_inclusion_of :location, :in => [:indoors, :outdoors, :both], :message => 'is not a valid location'
+
+    validates_each :sections do |record, attr, value|
+      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
+      value.each do |v|
+        record.errors.add(attr, 'values must be Symbols') unless v.is_a?(Symbol)
       end
-      [:version, :running_time, :shared].each do |attribute|
-        it = attributes[attribute]
-        raise ArgumentError, ":#{attribute} must be nil or a Fixnum >= 0" unless it.nil? || (it.is_a?(Fixnum) && it >= 0)
-      end
-
-      [:title, :description, :resources, :instructions].each do |attribute|
-        it = attributes[attribute]
-        raise ArgumentError, ":#{attribute} must be nil or a String" unless it.nil? || it.is_a?(String)
-      end
-
-      raise ArgumentError, ':location must be either :indoors, :outdoors or :both' unless [:indoors, :outdoors, :both].include?(attributes[:location])
-
-      raise ArgumentError, ':editable must be a Boolean' unless attributes[:editable].is_a?(TrueClass) || attributes[:editable].is_a?(FalseClass)
-      raise ArgumentError, ':deletable must be a Boolean' unless attributes[:deletable].is_a?(TrueClass) || attributes[:deletable].is_a?(FalseClass)
-
-      raise ArgumentError, ':rating must be a FixNum' unless attributes[:rating].is_a?(Fixnum)
-      raise ArgumentError, ':used must be a FixNum' unless attributes[:used].is_a?(Fixnum)
-
-      raise ArgumentError, ':sections must be an Array of Symbol' unless Osm::is_array_of?(attributes[:sections], Symbol)
-      raise ArgumentError, ':tags must be an Array of String' unless Osm::is_array_of?(attributes[:tags], String)
-      raise ArgumentError, ':versions must be an Array of Osm::Activity::Version' unless Osm::is_array_of?(attributes[:versions], Osm::Activity::Version)
-      raise ArgumentError, ':files must be an Array of Osm::Activity::File' unless Osm::is_array_of?(attributes[:files], Osm::Activity::File)
-      raise ArgumentError, ':badges must be an Array of Osm::Activity::Badge' unless Osm::is_array_of?(attributes[:badges], Osm::Activity::Badge)
-
-      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
     end
+
+    validates_each :tags do |record, attr, value|
+      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
+      value.each do |v|
+        record.errors.add(attr, 'values must be Strings') unless v.is_a?(String)
+      end
+    end
+
+    validates_each :versions do |record, attr, value|
+      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
+      value.each do |v|
+        record.errors.add(attr, 'values must be Osm::Activity::Version') unless v.is_a?(Osm::Activity::Version)
+        record.errors.add(attr, 'values must be valid') unless v.valid?
+      end
+    end
+
+    validates_each :files do |record, attr, value|
+      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
+      value.each do |v|
+        record.errors.add(attr, 'values must be Osm::Activity::File') unless v.is_a?(Osm::Activity::File)
+        record.errors.add(attr, 'values must be valid') unless v.valid?
+      end
+    end
+
+    validates_each :badges do |record, attr, value|
+      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
+      value.each do |v|
+        record.errors.add(attr, 'values must be Osm::Activity::Badge') unless v.is_a?(Osm::Activity::Badge)
+        record.errors.add(attr, 'values must be valid') unless v.valid?
+      end
+    end
+
+
+    # @!method initialize
+    #   Initialize a new Term
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
 
     # Initialize a new Activity from api data
     # @param [Hash] data the hash of data provided by the API
@@ -121,29 +170,35 @@ module Osm
 
     private
     class File
-      attr_reader :id, :activity_id, :file_name, :name
-      # @!attribute [r] id
+      include ::ActiveAttr::MassAssignmentSecurity
+      include ::ActiveAttr::Model
+
+      # @!attribute [rw] id
       #   @return [Fixnum] the OSM ID for the file
-      # @!attribute [r] activity_id
+      # @!attribute [rw] activity_id
       #   @return [Fixnum] the OSM ID for the activity
-      # @!attribute [r] file_name
+      # @!attribute [rw] file_name
       #   @return [String] the file name of the file
-      # @!attribute [r] name
+      # @!attribute [rw] name
       #   @return [String] the name of the file (more human readable than file_name)
 
-      # Initialize a new File
-      # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-      def initialize(attributes={})
-        [:file_name, :name].each do |attribute|
-          raise ArgumentError, ":#{attribute} must a String" unless attributes[attribute].is_a?(String)
-        end
-        [:id, :activity_id].each do |attribute|
-          it = attributes[attribute]
-          raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless it.nil? || (it.is_a?(Fixnum) && it > 0)
-        end
+      attribute :id, :type => Integer
+      attribute :activity_id, :type => Integer
+      attribute :file_name, :type => String
+      attribute :name, :type => String
 
-        attributes.each { |k,v| instance_variable_set("@#{k}", v) }
-      end
+      attr_accessible :id, :activity_id, :file_name, :name
+
+      validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
+      validates_presence_of :file_name
+      validates_presence_of :name
+
+
+      # @!method initialize
+      #   Initialize a new Term
+      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
 
       # Initialize a new File from api data
       # @param [Hash] data the hash of data provided by the API
@@ -156,36 +211,48 @@ module Osm
         })
       end
 
-    end # Activity::File
+    end # Class Activity::File
 
     class Badge
-      attr_reader :activity_id, :section_type, :type, :badge, :requirement, :label
-      # @!attribute [r] activity_id
+      include ::ActiveAttr::MassAssignmentSecurity
+      include ::ActiveAttr::Model
+
+      # @!attribute [rw] activity_id
       #   @return [Fixnum] the activity being done
-      # @!attribute [r] section_type
+      # @!attribute [rw] section_type
       #   @return [Symbol] the section the badge 'belongs' to
-      # @!attribute [r] type
+      # @!attribute [rw] type
       #   @return [Symbol] the type of badge
-      # @!attribute [r] badge
+      # @!attribute [rw] badge
       #   @return [String] short name of the badge
-      # @!attribute [r] requirement
+      # @!attribute [rw] requirement
       #   @return [String] OSM reference to this badge requirement
-      # @!attribute [r] label
+      # @!attribute [rw] label
       #   @return [String] human readable label for the requirement
 
-      # Initialize a new Badge
-      # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-      def initialize(attributes={})
-        raise ArgumentError, ':activity_id must be nil or a Fixnum > 0' unless attributes[:activity_id].nil? || (attributes[:activity_id].is_a?(Fixnum) && attributes[:activity_id] > 0)
-        [:type, :section_type].each do |attribute|
-          raise ArgumentError, ":#{attribute} must be a Symbol" unless attributes[attribute].is_a?(Symbol)
-        end
-        [:label, :requirement, :badge].each do |attribute|
-          raise ArgumentError, ":#{attribute} must a String" unless attributes[attribute].is_a?(String)
-        end
+      attribute :activity_id, :type => Integer
+      attribute :section_type
+      attribute :type
+      attribute :badge, :type => String
+      attribute :requirement, :type => String
+      attribute :label, :type => String
 
-        attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+      attr_accessible :activity_id, :section_type, :type, :badge, :requirement, :label
+
+      validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
+      validates_presence_of :badge
+      validates_presence_of :requirement
+      validates_presence_of :label
+
+      validates_each :type, :section_type do |record, attr, value|
+        record.errors.add(attr, 'must be a Symbol') unless value.is_a?(Symbol)
       end
+
+
+      # @!method initialize
+      #   Initialize a new Badge
+      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
 
       # Initialize a new Badge from api data
       # @param [Hash] data the hash of data provided by the API
@@ -200,29 +267,38 @@ module Osm
         })
       end
 
-    end # Activity::Badge
+    end # Class Activity::Badge
 
     class Version
-      attr_reader :version, :created_by, :created_by_name, :label
-      # @!attribute [r] version
+      include ::ActiveAttr::MassAssignmentSecurity
+      include ::ActiveAttr::Model
+
+      # @!attribute [rw] version
       #   @return [Fixnum] the version of the activity
-      # @!attribute [r] created_by
+      # @!attribute [rw] created_by
       #   @return [Fixnum] the OSM user ID of the person who created this version
-      # @!attribute [r] created_by_name
+      # @!attribute [rw] created_by_name
       #   @return [String] the aname of the OSM user who created this version
-      # @!attribute [r] label
+      # @!attribute [rw] label
       #   @return [String] the human readable label to use for this version
 
-      # Initialize a new Version
-      # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-      def initialize(attributes={})
-        raise ArgumentError, ':version must be nil or a Fixnum > 0' unless attributes[:version].nil? || (attributes[:version].is_a?(Fixnum) && attributes[:version] >= 0)
-        raise ArgumentError, ':created_by must be nil or a Fixnum >= 0' unless attributes[:created_by].nil? || (attributes[:created_by].is_a?(Fixnum) && attributes[:created_by] > 0)
-        raise ArgumentError, ':created_by_name must be nil or a String' unless attributes[:created_by_name].nil?  || attributes[:created_by_name].is_a?(String)
-        raise ArgumentError, ':label must be nil or a String' unless attributes[:label].nil?  || attributes[:label].is_a?(String)
+      attribute :version, :type => Integer
+      attribute :created_by, :type => Integer
+      attribute :created_by_name, :type => String
+      attribute :label, :type => String
 
-        attributes.each { |k,v| instance_variable_set("@#{k}", v) }
-      end
+      attr_accessible :version, :created_by, :created_by_name, :label
+
+      validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :created_by, :only_integer=>true, :greater_than=>0
+      validates_presence_of :created_by_name
+      validates_presence_of :label
+
+
+      # @!method initialize
+      #   Initialize a new Version
+      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
 
       # Initialize a new Version from api data
       # @param [Hash] data the hash of data provided by the API

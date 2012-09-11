@@ -82,12 +82,4 @@ module Osm
     hash_out
   end
 
-  def self.is_array_of?(ar, ty)
-    return false unless ar.is_a?(Array)
-    ar.each do |it|
-      return false unless it.is_a?(ty)
-    end
-    return true
-  end
-
 end # Module

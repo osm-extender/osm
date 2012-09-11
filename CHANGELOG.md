@@ -6,6 +6,7 @@
   * DueBadge's totals attribute is now a method (totals are calculated each time rather than during initialization)
   * Added exception ArgumentIsInvalid (raised when argument.valid? is false when updating through the API)
   * The following models now use active\_attr:
+    * Activity, Activity::File, Activity::Badge and Activity::Version
     * ApiAccess
     * DueBadges
     * Evening and Evening::Activity
