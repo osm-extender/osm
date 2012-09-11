@@ -18,6 +18,7 @@ describe "Register Field" do
     field.id.should == 'machine_name'
     field.name.should == 'Human name'
     field.tooltip.should == 'Tooltip'
+    field.valid?.should be_true
   end
 
 end
