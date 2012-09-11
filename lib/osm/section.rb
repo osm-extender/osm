@@ -44,7 +44,7 @@ module Osm
 
     attr_accessible :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records, :role
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil => true
     validates_numericality_of :num_scouts, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_presence_of :subscription_level
     validates_presence_of :subscription_expires
@@ -53,7 +53,7 @@ module Osm
     validates_presence_of :fields, :unless => Proc.new { |a| a.fields == {} }
     validates_presence_of :intouch_fields, :unless => Proc.new { |a| a.intouch_fields == {} }
     validates_presence_of :mobile_fields, :unless => Proc.new { |a| a.mobile_fields == {} }
-    validates_presence_of :flexi_records
+    validates_presence_of :flexi_records, :unless => Proc.new { |a| a.flexi_records == [] }
     validates_presence_of :role
 
     validates_inclusion_of :subscription_level, :in => [:bronze, :silver, :gold, :unknown], :message => 'is not a valid level'
@@ -72,10 +72,6 @@ module Osm
         record.errors.add(attr, 'items in the Array must be Osm::Section::FlexiRecord') unless v.is_a?(Osm::Section::FlexiRecord)
         record.errors.add(attr, 'contains an invalid item') unless v.valid?
       end
-    end
-
-    validates_each :type, :subscription_level do |record, attr, value|
-      record.errors.add(attr, 'must be a Symbol') unless value.is_a?(Symbol)
     end
 
 
@@ -108,12 +104,10 @@ module Osm
         :flexi_records => [],
       }
 
-
       # Populate arrays
       (data['extraRecords'].is_a?(Array) ? data['extraRecords'] : []).each do |record_data|
         attributes[:flexi_records].push FlexiRecord.from_api(record_data)
       end
-      attributes[:flexi_records].freeze
 
       new(attributes)
     end
@@ -164,10 +158,25 @@ module Osm
         return false
       end
     end
+    
+    def inspect
+      attribute_descriptions = attributes.merge('role' => role.inspect_without_section(self))
+      return_inspect(attribute_descriptions)
+    end
 
+    def inspect_without_role(exclude_role)
+      attribute_descriptions = (role == exclude_role) ? attributes.merge('role' => 'SET') : attributes
+      return_inspect(attribute_descriptions)
+    end
 
 
     private
+    def return_inspect(attribute_descriptions)
+      attribute_descriptions.sort.map { |key, value| "#{key}: #{key.eql?('role') ? value : value.inspect}" }.join(", ")
+      separator = " " unless attribute_descriptions.empty?
+      "#<#{self.class.name}#{separator}#{attribute_descriptions}>"
+    end
+
     class FlexiRecord
       include ::ActiveAttr::MassAssignmentSecurity
       include ::ActiveAttr::Model
