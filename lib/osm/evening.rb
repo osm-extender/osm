@@ -44,8 +44,8 @@ module Osm
 
     attr_accessible :id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :meeting_date, :activities, :start_time, :finish_time
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :title
     validates_presence_of :meeting_date
     validates_format_of :start_time, :with => /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
@@ -145,7 +145,7 @@ module Osm
 
       attr_accessible :activity_id, :title, :notes
 
-      validates_numericality_of :activity_id, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
       validates_presence_of :title
 
 

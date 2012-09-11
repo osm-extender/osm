@@ -98,10 +98,10 @@ module Osm
 
     attr_accessible :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started, :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :grouping_id, :grouping_leader, :joined, :age, :joined_years
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-    validates_numericality_of :grouping_leader, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :grouping_leader, :only_integer=>true, :greater_than_or_equal_to=>0, :less_than_or_equal_to=>2
     validates_numericality_of :joined_years, :only_integer=>true, :greater_than_or_equal_to=>-1
     validates_numericality_of :joining_in_years, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_presence_of :first_name

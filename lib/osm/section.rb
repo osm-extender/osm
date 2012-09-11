@@ -44,7 +44,7 @@ module Osm
 
     attr_accessible :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records, :role
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil => true
+    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :num_scouts, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_presence_of :subscription_level
     validates_presence_of :subscription_expires
@@ -191,7 +191,7 @@ module Osm
 
       attr_accessible :id, :name
 
-      validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :id, :only_integer=>true, :greater_than=>0
       validates_presence_of :name
 
 

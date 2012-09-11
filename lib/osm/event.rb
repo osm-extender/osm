@@ -32,8 +32,8 @@ module Osm
 
     attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :name
 
 

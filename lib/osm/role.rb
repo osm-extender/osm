@@ -24,7 +24,7 @@ module Osm
 
 
     validates_presence_of :section
-    validates_numericality_of :group_id, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :group_name
     validates_presence_of :permissions, :unless => Proc.new { |a| a.permissions == {} }
 
