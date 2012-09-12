@@ -86,6 +86,8 @@ describe "Activity" do
     activity.badges[0].badge.should == 'badge'
     activity.badges[0].requirement.should == 'col_name'
     activity.badges[0].label.should == 'This is a label'
+
+    activity.valid?.should be_true
   end
 
 end

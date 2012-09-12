@@ -529,6 +529,7 @@ module Osm
     # @!macro options_api_data
     # @return [Boolean] if the operation suceeded or not
     def update_evening(evening, api_data={})
+      raise ArgumentIsInvalid, 'evening is invalid' unless evening.valid?
       response = perform_query("programme.php?action=editEvening", api_data.merge(evening.to_api))
 
       # The cached programmes for the section will be out of date - remove them
@@ -679,6 +680,6 @@ module Osm
       return term.nil? ? Osm::find_current_term_id(self, id_for_section(section), api_data) : id_for(Osm::Term, term, 'term')
     end
 
-  end
+  end # Class Api
 
-end
+end # Module

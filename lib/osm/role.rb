@@ -1,33 +1,48 @@
 module Osm
 
   class Role
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
 
-    attr_reader :section, :group_name, :group_id, :permissions
+
     # @!attribute [rw] section
-    #   @param [Osm::Section] section the section this role is related to (can only be set once)
+    #   @param [Osm::Section] section the section this role is related to
     #   @return [Osm::Section] the section this role related to
-    # @!attribute [r] group_name
+    # @!attribute [rw] group_name
     #   @return [String] the name of the group the section is in
-    # @!attribute [r] group_id
+    # @!attribute [rw] group_id
     #   @return [Fixnum] the group the section is in
-    # @!attribute [r] permissions
+    # @!attribute [rw] permissions
     #   @return [Hash] the permissions the user has in this role
 
-    # Initialize a new ApiAccess
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-    def initialize(attributes={})
-      raise ArgumentError, ':group_id must be nil or a Fixnum > 0' unless attributes[:group_id].nil? || (attributes[:group_id].is_a?(Fixnum) && attributes[:group_id] > 0)
-      raise ArgumentError, ':group_name must be nil or a String' unless attributes[:group_name].nil? || attributes[:group_name].is_a?(String)
-      raise ArgumentError, ':permissions must be nil or a Hash' unless attributes[:permissions].nil? || attributes[:permissions].is_a?(Hash)
+    attribute :section, :type => Object
+    attribute :group_name, :type => String
+    attribute :group_id, :type => Integer
+    attribute :permissions, :default => {}
 
-      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+    attr_accessible :section, :group_name, :group_id, :permissions
 
-      @name ||= ''
-      @permissions ||= {}
+
+    validates_presence_of :section
+    validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0
+    validates_presence_of :group_name
+    validates_presence_of :permissions, :unless => Proc.new { |a| a.permissions == {} }
+
+    validates :permissions, :hash => {:key_type => Symbol, :value_in => [10, 20, 100]}
+
+    validates_each :section do |record, attr, value|
+      unless value.nil?
+        record.errors.add(attr, 'must also be valid') unless value.valid?
+      end
     end
 
 
-    # Initialize a new ApiAccess from api data
+    # @!method initialize
+    #   Initialize a new Role
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+
+    # Initialize a new Role from api data
     # @param [Hash] data the hash of data provided by the API
     def self.from_api(data)
       attributes = {}
@@ -42,48 +57,44 @@ module Osm
 
       role = new(attributes.merge(:permissions => permissions))
       role.section = Osm::Section.from_api(data['sectionid'], data['sectionname'], ActiveSupport::JSON.decode(data['sectionConfig']), role)
-      return role
-    end
 
-    def section=(section)
-      raise ArgumentError, 'section must be an Osm::Section' unless section.is_a?(Osm::Section)
-      @section = section if @section.nil?
+      return role
     end
 
     # Determine if this role has read access for the provided permission
     # @param [Symbol] key the permission being queried
     # @return [Boolean] if this role can read the passed permission
     def can_read?(key)
-      return [10, 20, 100].include?(@permissions[key])
+      return [10, 20, 100].include?(permissions[key])
     end
 
     # Determine if this role has write access for the provided permission
     # @param [Symbol] key the permission being queried
     # @return [Boolean] if this role can write the passed permission
     def can_write?(key)
-      return [20, 100].include?(@permissions[key])
+      return [20, 100].include?(permissions[key])
     end
 
     # Get section's long name in a consistent format
     # @return [String] e.g. "Scouts (1st Somewhere)"
     def long_name
-      @group_name.blank? ? @section.name : "#{@section.name} (#{@group_name})"
+      group_name.blank? ? section.name : "#{section.name} (#{group_name})"
     end
 
     # Get section's full name in a consistent format
     # @return [String] e.g. "1st Somewhere Beavers"
     def full_name
-      @group_name.blank? ? @section.name : "#{@group_name} #{@section.name}"
+      group_name.blank? ? section.name : "#{group_name} #{section.name}"
     end
 
     def <=>(another_role)
       begin
-        compare_group_name = self.group_name <=> another_role.group_name
+        compare_group_name = group_name <=> another_role.group_name
         return compare_group_name unless compare_group_name == 0
   
-        return 0 if self.section.type == another_role.section.type
+        return 0 if section.type == another_role.section.type
         [:beavers, :cubs, :scouts, :explorers, :waiting, :adults].each do |type|
-          return -1 if self.section.type == type
+          return -1 if section.type == type
           return 1 if another_role.section.type == type
         end
       rescue NoMethodError
@@ -93,12 +104,30 @@ module Osm
 
     def ==(another_role)
       begin
-        return self.section == another_role.section
+        return section == another_role.section
       rescue NoMethodError
         return false
       end
     end
 
-  end
+    def inspect
+      attribute_descriptions = attributes.merge('section' => section.inspect_without_role(self))
+      return_inspect(attribute_descriptions)
+    end
 
-end
+    def inspect_without_section(exclude_section)
+      attribute_descriptions = (section == exclude_section) ? attributes.merge('section' => 'SET') : attributes
+      return_inspect(attribute_descriptions)
+    end
+
+
+    private
+    def return_inspect(attribute_descriptions)
+      attribute_descriptions.sort.map { |key, value| "#{key}: #{key.eql?('section') ? value : value.inspect}" }.join(", ")
+      separator = " " unless attribute_descriptions.empty?
+      "#<#{self.class.name}#{separator}#{attribute_descriptions}>"
+    end
+
+  end # Class Role
+
+end # Module

@@ -10,7 +10,7 @@ describe "Term" do
       :section_id => 2,
       :name => 'Term name',
       :start => Date.new(2001, 01, 01),
-      :end => Date.new(2001, 03, 31)
+      :finish => Date.new(2001, 03, 31)
     }
   end
 
@@ -28,7 +28,8 @@ describe "Term" do
     term.section_id.should == 2
     term.name.should == 'Term name'
     term.start.should == Date.new(2001, 1, 1)
-    term.end.should == Date.new(2001, 3, 31)
+    term.finish.should == Date.new(2001, 3, 31)
+    term.valid?.should be_true
   end
 
 
@@ -46,11 +47,11 @@ describe "Term" do
 
 
   it "Sorts by Section ID, Start date and then Term ID" do
-    term1 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 11, :start => (Date.today - 60), :end => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 12, :start => (Date.today -  0), :end => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 13, :start => (Date.today +  1), :end => (Date.today + 60)))
-    term4 = Osm::Term.new(@attributes.merge(:section_id => 2, :term => 1, :start => (Date.today +  1), :end => (Date.today + 60)))
-    term5 = Osm::Term.new(@attributes.merge(:section_id => 2, :term => 2, :start => (Date.today +  1), :end => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 11, :start => (Date.today - 60), :finish => (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 12, :start => (Date.today -  0), :finish => (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 13, :start => (Date.today +  1), :finish => (Date.today + 60)))
+    term4 = Osm::Term.new(@attributes.merge(:section_id => 2, :term => 1, :start => (Date.today +  1), :finish => (Date.today + 60)))
+    term5 = Osm::Term.new(@attributes.merge(:section_id => 2, :term => 2, :start => (Date.today +  1), :finish => (Date.today + 60)))
 
     data = [term5, term3, term2, term4, term1]
     data.sort.should == [term1, term2, term3, term4, term5]
@@ -58,9 +59,9 @@ describe "Term" do
 
 
   it "Works out if it is completly before a date" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :end => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :end => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :end => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
     term1.before?(Date.today).should == true
     term2.before?(Date.today).should == false
@@ -69,9 +70,9 @@ describe "Term" do
 
 
   it "Works out if it is completly after a date" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :end => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :end => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :end => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
     term1.after?(Date.today).should == false
     term2.after?(Date.today).should == false
@@ -80,9 +81,9 @@ describe "Term" do
 
 
   it "Works out if it has passed" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :end => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :end => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :end => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
     term1.past?().should == true
     term2.past?().should == false
@@ -91,9 +92,9 @@ describe "Term" do
 
 
   it "Works out if it is in the future" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :end => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :end => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :end => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
     term1.future?().should == false
     term2.future?().should == false
@@ -102,9 +103,9 @@ describe "Term" do
 
 
   it "Works out if it is the current term" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :end => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start=> (Date.today -  0), :end => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :end => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(:start=> (Date.today -  0), :finish => (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
     term1.current?().should == false
     term2.current?().should == true
@@ -113,9 +114,9 @@ describe "Term" do
 
 
   it "Works out if it contains a date" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :end => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :end => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :end => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
     term1.contains_date?(Date.today).should == false
     term2.contains_date?(Date.today).should == true

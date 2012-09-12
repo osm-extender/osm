@@ -1,17 +1,22 @@
-require File.join(File.dirname(__FILE__), '..', 'version')
-Dir[File.join(File.dirname(__FILE__) , 'osm', '*.rb')].each {|file| require file }
-
+require 'active_attr'
 require 'date'
-
 
 module Osm
   OSM_EPOCH_S = '1970-01-01'
   OSM_DATE_FORMAT = '%Y-%m-%d'
   OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+  OSM_TIME_REGEX = /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/
+end
 
+require File.join(File.dirname(__FILE__), '..', 'version')
+Dir[File.join(File.dirname(__FILE__) , '*_validator.rb')].each {|file| require file }
+Dir[File.join(File.dirname(__FILE__) , 'osm', '*.rb')].each {|file| require file }
+
+
+module Osm
   class Error < Exception; end
   class ConnectionError < Error; end
-
+  class ArgumentIsInvalid < ArgumentError; end
 
   private  
   def self.make_array_of_symbols(array)
@@ -81,12 +86,4 @@ module Osm
     hash_out
   end
 
-  def self.is_array_of?(ar, ty)
-    return false unless ar.is_a?(Array)
-    ar.each do |it|
-      return false unless it.is_a?(ty)
-    end
-    return true
-  end
-
-end
+end # Module

@@ -1,10 +1,12 @@
 module Osm
 
   class Evening
+    class Activity; end # Ensure the constant exists for the validators
 
-    attr_accessor :evening_id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :meeting_date, :activities
-    attr_reader :start_time, :end_time
-    # @!attribute [rw] evening_id
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
+
+    # @!attribute [rw] id
     #   @return [Fixnum] the id of the evening
     # @!attribute [rw] section_id
     #   @return [Fixnum] the section the evening belongs to
@@ -26,29 +28,36 @@ module Osm
     #   @return [Array<Activity>] list of activities being done during the evening
     # @!attribute [rw] start_time
     #   @return [String] the start time (hh:mm)
-    # @!attribute [rw] end_time
+    # @!attribute [rw] finish_time
     #   @return [String] the end time (hh:mm)
 
-    # Initialize a new Evening
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-    def initialize(attributes={})
-      [:evening_id, :section_id].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a Fixnum > 0" unless attributes[attribute].nil? || (attributes[attribute].is_a?(Fixnum) && attributes[attribute] > 0)
-      end
-      [:title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be nil or a String" unless (attributes[attribute].nil? || attributes[attribute].is_a?(String))
-      end
-      raise ArgumentError, ':meeting_date must be a Date' unless attributes[:meeting_date].is_a?(Date)
-      raise ArgumentError, ':activities must be nil or an Array of Osm::Evening::Activity' unless (attributes[:activities].nil? || Osm::is_array_of?(attributes[:activities], Osm::Evening::Activity))
+    attribute :id, :type => Integer
+    attribute :section_id, :type => Integer
+    attribute :title, :type => String, :default => 'Unnamed meeting'
+    attribute :notes_for_parents, :type => String, :default => ''
+    attribute :games, :type => String, :default => ''
+    attribute :pre_notes, :type => String, :default => ''
+    attribute :post_notes, :type => String, :default => ''
+    attribute :leaders, :type => String, :default => ''
+    attribute :meeting_date, :type => Date
+    attribute :start_time, :type => String
+    attribute :finish_time, :type => String
+    attribute :activities, :default => []
 
-      attributes.each { |k,v| send("#{k}=", v) }
+    attr_accessible :id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :meeting_date, :activities, :start_time, :finish_time
 
-      @activities ||= []
-      @title ||= 'Unnamed meeting'
-      [:notes_for_parents, :games, :pre_notes, :post_notes, :leaders].each do |attribute|
-        instance_variable_set("@#{attribute}", '') if instance_variable_get("@#{attribute}").nil?
-      end
-    end
+    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
+    validates_presence_of :title
+    validates_presence_of :meeting_date
+    validates_format_of :start_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
+    validates_format_of :finish_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
+
+    validates :activities, :array_of => {:item_type => Osm::Evening::Activity, :item_valid => true}
+
+    # @!method initialize
+    #   Initialize a new Evening
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Initialize a new Evening from api data
@@ -56,7 +65,7 @@ module Osm
     # @param activities an array of hashes to generate the list of ProgrammeActivity objects
     def self.from_api(data, activities)
       attributes = {}
-      attributes[:evening_id] = Osm::to_i_or_nil(data['eveningid'])
+      attributes[:id] = Osm::to_i_or_nil(data['eveningid'])
       attributes[:section_id] = Osm::to_i_or_nil(data['sectionid'])
       attributes[:title] = data['title'] || 'Unnamed meeting'
       attributes[:notes_for_parents] = data['notesforparents'] || ''
@@ -65,7 +74,7 @@ module Osm
       attributes[:post_notes] = data['postnotes'] || ''
       attributes[:leaders] = data['leaders'] || ''
       attributes[:start_time] = data['starttime'].nil? ? nil : data['starttime'][0..4]
-      attributes[:end_time] = data['endtime'].nil? ? nil : data['endtime'][0..4]
+      attributes[:finish_time] = data['endtime'].nil? ? nil : data['endtime'][0..4]
       attributes[:meeting_date] = Osm::parse_date(data['meetingdate'])
 
       attributes[:activities] = Array.new
@@ -78,26 +87,15 @@ module Osm
       new(attributes)
     end
 
-    # Custom setters for times
-    [:start, :end].each do |attribute|
-      define_method "#{attribute}_time=" do |value|
-        unless value.nil?
-          value = value.strftime('%H:%M') unless value.is_a?(String)
-          raise ArgumentError, 'invalid time' unless /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/.match(value)
-        end
-        instance_variable_set("@#{attribute}_time", value)
-      end
-    end
-
     # Get the evening's data for use with the API
     # @return [Hash]
     def to_api
       {
-        'eveningid' => evening_id,
+        'eveningid' => id,
         'sectionid' => section_id,
         'meetingdate' => meeting_date.strftime(Osm::OSM_DATE_FORMAT),
         'starttime' => start_time,
-        'endtime' => end_time,
+        'endtime' => finish_time,
         'title' => title,
         'notesforparents' => notes_for_parents,
         'prenotes' => pre_notes,
@@ -114,7 +112,7 @@ module Osm
     # @return [String]
     def activities_for_to_api
       to_save = Array.new
-      @activities.each do |activity|
+      activities.each do |activity|
         this_activity = {
           'activityid' => activity.activity_id,
           'notes' => activity.notes,
@@ -126,26 +124,31 @@ module Osm
 
 
     class Activity
+      include ::ActiveAttr::MassAssignmentSecurity
+      include ::ActiveAttr::Model
 
-      attr_reader :activity_id, :title, :notes
-      # @!attribute [r] activity_id
+      # @!attribute [rw] activity_id
       #   @return [Fixnum] the activity being done
-      # @!attribute [r] title
+      # @!attribute [rw] title
       #   @return [String] the activity's title
-      # @!attribute [r] notes
+      # @!attribute [rw] notes
       #   @return [String] notes relevant to doing this activity on this evening
-  
-      # Initialize a new Evening::Activity
-      # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-      def initialize(attributes={})
-        raise ArgumentError, ':activity_id must be a Fixnum > 0' unless (attributes[:activity_id].is_a?(Fixnum) && attributes[:activity_id] > 0)
-        raise ArgumentError, ':title must be nil or a String' unless (attributes[:title].nil? || attributes[:title].is_a?(String))
-        raise ArgumentError, ':notes must be nil or a String' unless (attributes[:notes].nil? || attributes[:notes].is_a?(String))
-  
-        attributes.each { |k,v| instance_variable_set("@#{k}", v) }
-      end
+
+      attribute :activity_id, :type => Integer
+      attribute :title, :type => String
+      attribute :notes, :type => String, :default => ''
+
+      attr_accessible :activity_id, :title, :notes
+
+      validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
+      validates_presence_of :title
 
 
+      # @!method initialize
+      #   Initialize a new Evening::Activity
+      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+  
       # Initialize a new Evening::Activity from api data
       # @param [Hash] data the hash of data provided by the API
       def self.from_api(data)
@@ -156,9 +159,8 @@ module Osm
         })
       end
 
-    end
+    end # Class Evening::Activity
 
+  end # Class Evening
 
-  end
-
-end
+end # Module

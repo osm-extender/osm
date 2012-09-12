@@ -23,10 +23,11 @@ describe "Event" do
     event.section_id.should == 2
     event.name.should == 'Event name'
     event.start.should == DateTime.new(2001, 1, 2, 12, 0, 0)
-    event.end.should == nil
+    event.finish.should == nil
     event.cost.should == 'Free'
     event.location.should == 'Somewhere'
     event.notes.should == 'None'
+    event.valid?.should be_true
   end
 
 end

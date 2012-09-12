@@ -1,36 +1,49 @@
 module Osm
 
   class DueBadges
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
 
-    attr_reader :descriptions, :by_member, :totals
-    # @!attribute [r] descriptions
+    # @!attribute [rw] descriptions
     #   @return [Hash] descriptions for each of the badges
-    # @!attribute [r] by_member
+    # @!attribute [rw] by_member
     #   @return [Hash] the due badges grouped by member
-    # @!attribute [r] totals
-    #   @return [Hash] the total number of each badge which is due
 
-    # Initialize a new DueBadges
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key, exclude total as this is calculated for you)
-    def initialize(attributes={})
-      [:descriptions, :by_member].each do |attribute|
-        raise ArgumentError, ":#{attribute} must be a Hash" unless attributes[attribute].is_a?(Hash)
-      end
+    attribute :descriptions, :default => {}
+    attribute :by_member, :default => {}
 
-      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+    attr_accessible :descriptions, :by_member
 
-      # Calculate totals
-      @totals = {}
-      @by_member.keys.each do |member_name|
-        @by_member[member_name].each do |badge_record|
-          badge_symbol = badge_record[:badge]
-          badge_extra = badge_record[:extra_information]
-          @totals[badge_record[:badge]] ||= {}
-          @totals[badge_symbol][badge_extra] ||= 0
-          @totals[badge_symbol][badge_extra] += 1
+    validates_each :descriptions do |record, attr, value|
+      record.errors.add(attr, 'must be a Hash') unless value.is_a?(Hash)
+      value.each do |k, v|
+        record.errors.add(attr, 'keys must be Symbols') unless k.is_a?(Symbol)
+        record.errors.add(attr, 'values must be Hashes') unless v.is_a?(Hash)
+        [:name, :section, :type, :badge].each do |key|
+          record.errors.add(attr, "values must include the key #{key}") unless v.keys.include?(key)
         end
       end
     end
+
+    validates_each :by_member do |record, attr, value|
+      record.errors.add(attr, 'must be a Hash') unless value.is_a?(Hash)
+      value.each do |k, v|
+        record.errors.add(attr, 'keys must be String') unless k.is_a?(String)
+        record.errors.add(attr, 'values must be Arrays') unless v.is_a?(Array)
+        v.each do |vv|
+          record.errors.add(attr, 'internal values must be Hashes') unless vv.is_a?(Hash)
+          record.errors.add(attr, 'internal values must include the key :badge') unless vv.keys.include?(:badge)
+          record.errors.add(attr, 'internal values :badge value must be a Symbol') unless vv[:badge].is_a?(Symbol)
+          record.errors.add(attr, 'internal values must include the key :extra_information') unless vv.keys.include?(:extra_information)
+          record.errors.add(attr, 'internal values :extra_information value must be a String') unless vv[:extra_information].is_a?(String)
+        end
+      end
+    end
+
+
+    # @!method initialize
+    #   Initialize a new Term
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Initialize a new DueBadges from api data
@@ -75,9 +88,25 @@ module Osm
     # Check if there are no badges due
     # @return [Boolean]
     def empty?
-      return @by_member.empty?
+      return by_member.empty?
     end
 
-  end # Class
+    # Calculate the total number of badges needed
+    # @return [Hash] the total number of each badge which is due
+    def totals(attributes={})
+      totals = {}
+      by_member.keys.each do |member_name|
+        by_member[member_name].each do |badge_record|
+          badge_symbol = badge_record[:badge]
+          badge_extra = badge_record[:extra_information]
+          totals[badge_record[:badge]] ||= {}
+          totals[badge_symbol][badge_extra] ||= 0
+          totals[badge_symbol][badge_extra] += 1
+        end
+      end
+      return totals
+    end
+
+  end # Class DueBadges
 
 end # Module

@@ -78,6 +78,8 @@ describe "Section" do
     section.flexi_records[1].id.should == 2
     section.flexi_records[1].name.should == 'Name 2'
     section.role.should == role
+
+    section.valid?.should be_true
   end
 
   it "Create has sensible defaults" do

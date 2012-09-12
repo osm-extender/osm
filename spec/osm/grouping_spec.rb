@@ -16,6 +16,7 @@ describe "Grouping" do
     patrol.name.should == 'Patrol Name'
     patrol.active.should == true
     patrol.points.should == 2
+    patrol.valid?.should be_true
   end
 
 end

@@ -8,6 +8,9 @@ class DummySection
   def initialize(options={})
     options.each { |k,v| instance_variable_set("@#{k}", v) }
   end
+  def valid?
+    true
+  end
 end
 
 
@@ -17,12 +20,12 @@ describe "Role" do
     data = {
       'sectionid' => 1,
       'sectionname' => 'A Section',
-      'sectionConfig' => '{}',
+      'sectionConfig' => '{"subscription_expires":"2000-01-02","numscouts":0}',
       'groupname' => 'A Group',
       'groupid' => '2',
       'groupNormalised' => '3',
       'isDefault' => '1',
-      'permissions' => {}
+      'permissions' => {'something' => 100}
     }
     role = Osm::Role.from_api(data)
 
@@ -30,6 +33,7 @@ describe "Role" do
     role.section.name.should == 'A Section'
     role.group_id.should == 2
     role.group_name.should == 'A Group'
+    role.valid?.should be_true
   end
 
 

@@ -1,27 +1,30 @@
 module Osm
 
   class RegisterField
+    include ::ActiveAttr::MassAssignmentSecurity
+    include ::ActiveAttr::Model
 
-    attr_reader :id, :name, :tooltip
-    # @!attribute [r] id
+    # @!attribute [rw] id
     #   @return [String] OSM identifier for the field
-    # @!attribute [r] name
+    # @!attribute [rw] name
     #   @return [String] Human readable name for the field
-    # @!attribute [r] tooltip
+    # @!attribute [rw] tooltip
     #   @return [String] Tooltip for the field
 
-    # Initialize a new RegisterField
-    # @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-    def initialize(attributes={})
-      [:id, :name].each do |attribute|
-        raise ArgumentError, "#{attribute} must be a String" unless attributes[attribute].is_a?(String)
-      end
-      raise ArgumentError, ':tooltip must be a String' unless attributes[:tooltip].nil? || attributes[:tooltip].is_a?(String)
+    attribute :id, :type => String
+    attribute :name, :type => String
+    attribute :tooltip, :type => String, :default => ''
 
-      attributes.each { |k,v| instance_variable_set("@#{k}", v) }
+    attr_accessible :id, :name, :tooltip
 
-      @tooltip ||= ''
-    end
+    validates_presence_of :id
+    validates_presence_of :name
+    validates_presence_of :tooltip, :allow_blank => true
+
+
+    # @!method initialize
+    #   Initialize a new RegisterField
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Initialize a new RegisterField from api data
@@ -34,6 +37,6 @@ module Osm
       })
     end
 
-  end
+  end # Class RegisterField
 
-end
+end # Module
