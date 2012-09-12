@@ -9,7 +9,7 @@ Staging [![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch
 
 This project also uses gemnasium to help ensure that the current version of libraries are being used.
 
-Master {<img src="https://gemnasium.com/robertgauld/osm.png" alt="Dependency Status" />}[https://gemnasium.com/robertgauld/osm]
+Master [![Dependency Status](https://gemnasium.com/robertgauld/osm.png)](https://gemnasium.com/robertgauld/osm)
 
 
 ## OSM
