@@ -1,3 +1,7 @@
+## Version 0.0.20
+
+  * 
+
 ## Version 0.0.19
 
   * Fix caching error in Api.get\_register\_data
