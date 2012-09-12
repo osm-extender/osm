@@ -497,7 +497,7 @@ module Osm
         to_return.push Osm::RegisterData.from_api(item)
       end
       self.user_can_access :register, section_id, api_data
-      cache_write("register-#{section_id}-#{term_id}", data, :expires_in => @@default_cache_ttl/2)
+      cache_write("register-#{section_id}-#{term_id}", to_return, :expires_in => @@default_cache_ttl/2)
       return to_return
     end
 

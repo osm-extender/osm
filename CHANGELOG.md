@@ -1,3 +1,7 @@
+## Version 0.0.19
+
+  * Fix caching error in Api.get\_register\_data
+
 ## Version 0.0.18
 
   * Term's end attribute is now finish
