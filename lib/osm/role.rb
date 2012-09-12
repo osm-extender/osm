@@ -28,13 +28,7 @@ module Osm
     validates_presence_of :group_name
     validates_presence_of :permissions, :unless => Proc.new { |a| a.permissions == {} }
 
-    validates_each :permissions do |record, attr, value|
-      record.errors.add(attr, 'must be a Hash') unless value.is_a?(Hash)
-      value.each do |k, v|
-        record.errors.add(attr, 'keys must be Symbols') unless k.is_a?(Symbol)
-        record.errors.add(attr, 'values must be 10, 20 or 100') unless [10, 20, 100].include?(v)
-      end
-    end
+    validates :permissions, :hash => {:key_type => Symbol, :value_in => [10, 20, 100]}
 
     validates_each :section do |record, attr, value|
       unless value.nil?

@@ -60,15 +60,10 @@ module Osm
 
     validates_inclusion_of :subscription_level, :in => [:bronze, :silver, :gold, :unknown], :message => 'is not a valid level'
 
-    validates_each :column_names, :fields, :intouch_fields, :mobile_fields do |record, attr, value|
-      record.errors.add(attr, 'must be a Hash') unless value.is_a?(Hash)
-      value.each do |k, v|
-        record.errors.add(attr, 'keys must be Symbols') unless k.is_a?(Symbol)
-        record.errors.add(attr, 'values must be Strings') unless v.is_a?(String)
-      end
-    end
-
-    validates :flexi_records, :array_of => {:item_type => Osm::Section::FlexiRecord, :item_valid => true}
+    validates :column_names, :hash => {:key_type => Symbol, :value_type => String}
+    validates :fields, :hash => {:key_type => Symbol, :value_type => String}
+    validates :intouch_fields, :hash => {:key_type => Symbol, :value_type => String}
+    validates :mobile_fields, :hash => {:key_type => Symbol, :value_type => String}
 
 
     # @!method initialize

@@ -8,13 +8,13 @@ describe "API Access" do
     data = {
       'apiid' => '1',
       'name' => 'Name',
-      'permissions' => {'permission' => '100'},
+      'permissions' => {'permission' => '10'},
     }
     api_access = Osm::ApiAccess.from_api(data)
 
     api_access.id.should == 1
     api_access.name.should == 'Name'
-    api_access.permissions.should == {:permission => 100}
+    api_access.permissions.should == {:permission => 10}
     api_access.valid?.should be_true
   end
 

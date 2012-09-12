@@ -20,13 +20,7 @@ module Osm
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_presence_of :name
 
-    validates_each :permissions do |record, attr, value|
-      record.errors.add(attr, 'must be a Hash') unless value.is_a?(Hash)
-      value.each do |k, v|
-        record.errors.add(attr, 'keys must be Symbols') unless k.is_a?(Symbol)
-        record.errors.add(attr, 'values must be Fixnums') unless v.is_a?(Fixnum)
-      end
-    end
+    validates :permissions, :hash => {:key_type => Symbol, :value_in => [10, 20]}
 
 
     # @!method initialize

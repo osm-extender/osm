@@ -36,13 +36,7 @@ module Osm
     validates_presence_of :first_name
     validates_presence_of :last_name
 
-    validates_each :attendance do |record, attr, value|
-      record.errors.add(attr, 'must be a Hash') unless value.is_a?(Hash)
-      value.each do |k, v|
-        record.errors.add(attr, 'keys must be a Date') unless k.is_a?(Date)
-        record.errors.add(attr, 'values must be Strings') unless ['Yes', 'No', nil].include?(v)
-      end
-    end
+    validates :attendance, :hash => {:key_type => Date, :value_in => ['Yes', 'No', nil]}
 
 
     # @!method initialize
