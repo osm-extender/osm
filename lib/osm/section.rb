@@ -1,6 +1,8 @@
 module Osm
 
   class Section
+    class FlexiRecord; end # Ensure the constant exists for the validators
+
     include ::ActiveAttr::MassAssignmentSecurity
     include ::ActiveAttr::Model
 
@@ -66,13 +68,7 @@ module Osm
       end
     end
 
-    validates_each :flexi_records do |record, attr, value|
-      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
-      value.each do |v|
-        record.errors.add(attr, 'items in the Array must be Osm::Section::FlexiRecord') unless v.is_a?(Osm::Section::FlexiRecord)
-        record.errors.add(attr, 'contains an invalid item') unless v.valid?
-      end
-    end
+    validates :flexi_records, :array_of => {:item_type => Osm::Section::FlexiRecord, :item_valid => true}
 
 
     # @!method initialize

@@ -1,6 +1,10 @@
 module Osm
 
   class Activity
+    class Badge; end # Ensure the constant exists for the validators
+    class File; end # Ensure the constant exists for the validators
+    class Version; end # Ensure the constant exists for the validators
+
     include ::ActiveAttr::MassAssignmentSecurity
     include ::ActiveAttr::Model
 
@@ -84,43 +88,12 @@ module Osm
     validates_inclusion_of :deletable, :in => [true, false]
     validates_inclusion_of :location, :in => [:indoors, :outdoors, :both], :message => 'is not a valid location'
 
-    validates_each :sections do |record, attr, value|
-      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
-      value.each do |v|
-        record.errors.add(attr, 'values must be Symbols') unless v.is_a?(Symbol)
-      end
-    end
 
-    validates_each :tags do |record, attr, value|
-      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
-      value.each do |v|
-        record.errors.add(attr, 'values must be Strings') unless v.is_a?(String)
-      end
-    end
-
-    validates_each :versions do |record, attr, value|
-      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
-      value.each do |v|
-        record.errors.add(attr, 'values must be Osm::Activity::Version') unless v.is_a?(Osm::Activity::Version)
-        record.errors.add(attr, 'values must be valid') unless v.valid?
-      end
-    end
-
-    validates_each :files do |record, attr, value|
-      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
-      value.each do |v|
-        record.errors.add(attr, 'values must be Osm::Activity::File') unless v.is_a?(Osm::Activity::File)
-        record.errors.add(attr, 'values must be valid') unless v.valid?
-      end
-    end
-
-    validates_each :badges do |record, attr, value|
-      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
-      value.each do |v|
-        record.errors.add(attr, 'values must be Osm::Activity::Badge') unless v.is_a?(Osm::Activity::Badge)
-        record.errors.add(attr, 'values must be valid') unless v.valid?
-      end
-    end
+    validates :sections, :array_of => {:item_type => Symbol}
+    validates :tags, :array_of => {:item_type => String}
+    validates :badges, :array_of => {:item_type => Osm::Activity::Badge, :item_valid => true}
+    validates :files, :array_of => {:item_type => Osm::Activity::File, :item_valid => true}
+    validates :versions, :array_of => {:item_type => Osm::Activity::Version, :item_valid => true}
 
 
     # @!method initialize

@@ -1,6 +1,8 @@
 module Osm
 
   class Evening
+    class Activity; end # Ensure the constant exists for the validators
+
     include ::ActiveAttr::MassAssignmentSecurity
     include ::ActiveAttr::Model
 
@@ -51,14 +53,7 @@ module Osm
     validates_format_of :start_time, :with => /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
     validates_format_of :finish_time, :with => /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
 
-    validates_each :activities do |record, attr, value|
-      record.errors.add(attr, 'must be an Array') unless value.is_a?(Array)
-      value.each do |v|
-        record.errors.add(attr, 'items in the Array must be Osm::Evening::Activity') unless v.is_a?(Osm::Evening::Activity)
-        record.errors.add(attr, 'contains an invalid item') unless v.valid?
-      end
-    end
-
+    validates :activities, :array_of => {:item_type => Osm::Evening::Activity, :item_valid => true}
 
     # @!method initialize
     #   Initialize a new Evening

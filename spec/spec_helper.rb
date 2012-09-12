@@ -2,6 +2,7 @@ require 'fakeweb'
 require 'httparty'
 require 'active_support'
 require 'active_attr/rspec'
+require 'active_model'
 
 require 'osm'
 
