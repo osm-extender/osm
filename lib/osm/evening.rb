@@ -50,8 +50,8 @@ module Osm
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :title
     validates_presence_of :meeting_date
-    validates_format_of :start_time, :with => /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
-    validates_format_of :finish_time, :with => /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
+    validates_format_of :start_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
+    validates_format_of :finish_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
 
     validates :activities, :array_of => {:item_type => Osm::Evening::Activity, :item_valid => true}
 
