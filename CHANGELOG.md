@@ -1,6 +1,7 @@
 ## Version 0.0.20
 
-  * Hide sesitive information when printing data sent to API in debug mode
+  * Hide sesitive information when printing data sent to OSM in debug mode
+  * Add archived attribute to Event
 
 ## Version 0.0.19
 

@@ -15,7 +15,8 @@ describe "Event" do
       'endtime' => '',
       'cost' => 'Free',
       'location' => 'Somewhere',
-      'notes' => 'None'
+      'notes' => 'None',
+      'archived' => '0'
     }
     event = Osm::Event.from_api(data)
 
@@ -27,6 +28,7 @@ describe "Event" do
     event.cost.should == 'Free'
     event.location.should == 'Somewhere'
     event.notes.should == 'None'
+    event.archived.should be_false
     event.valid?.should be_true
   end
 
