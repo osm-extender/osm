@@ -602,7 +602,9 @@ module Osm
 
       if @@debug
         puts "Making OSM API request to #{url}"
-        puts api_data.to_s
+        hide_values_for = ['secret', 'token']
+        api_data_as_string = api_data.sort.map{ |key, value| "#{key} => #{hide_values_for.include?(key) ? 'PRESENT' : value.inspect}" }.join(', ')
+        puts "{#{api_data_as_string}}"
       end
 
       begin

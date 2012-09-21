@@ -1,6 +1,6 @@
 ## Version 0.0.20
 
-  * 
+  * Hide sesitive information when printing data sent to API in debug mode
 
 ## Version 0.0.19
 
