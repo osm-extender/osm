@@ -325,12 +325,51 @@ describe "API" do
           'location' => '',
           'notes' => '',
           'sectionid' => 1,
-          'googlecalendar' => nil
+          'googlecalendar' => nil,
+          'archived' => '0'
         }]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1", :body => body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
       events = Osm::Api.new('1', '2').get_events(1)
       events[0].id.should == 1
+    end
+
+    it "Fetch events for a section honoring archived option" do
+      body = {
+        'identifier' => 'eventid',
+        'label' => 'name',
+        'items' => [{
+          'eventid' => '1',
+          'name' => 'An Event',
+          'startdate' => '2001-02-03',
+          'enddate' => nil,
+          'starttime' => '00:00:00',
+          'endtime' => '00:00:00',
+          'cost' => '0.00',
+          'location' => '',
+          'notes' => '',
+          'sectionid' => 1,
+          'googlecalendar' => nil,
+          'archived' => '0'
+        },{
+          'eventid' => '2',
+          'name' => 'An Archived Event',
+          'startdate' => '2001-02-03',
+          'enddate' => nil,
+          'starttime' => '00:00:00',
+          'endtime' => '00:00:00',
+          'cost' => '0.00',
+          'location' => '',
+          'notes' => '',
+          'sectionid' => 1,
+          'googlecalendar' => nil,
+          'archived' => '1'
+        }]
+      }
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
+      Osm::Api.new('1', '2').get_events(1).size.should == 1
+      Osm::Api.new('1', '2').get_events(1, {:include_archived => true}).size.should == 2
     end
 
 

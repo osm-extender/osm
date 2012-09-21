@@ -401,27 +401,33 @@ module Osm
     # Get events
     # @param [Osm:Section, Fixnum] section the section (or its ID) to get the events for
     # @!macro options_get
+    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @!macro options_api_data
     # @return [Array<Osm::Event>]
     def get_events(section, options={}, api_data={})
       section_id = id_for_section(section)
+      events = nil
 
       if !options[:no_cache] && cache_exist?("events-#{section_id}") && self.user_can_access?(:programme, section_id, api_data)
-        return cache_read("events-#{section_id}")
-      end
+        events = cache_read("events-#{section_id}")
+      else
 
-      data = perform_query("events.php?action=getEvents&sectionid=#{section_id}", api_data)
+        data = perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true", api_data)
 
-      result = Array.new
-      unless data['items'].nil?
-        data['items'].each do |item|
-          result.push Osm::Event.from_api(item)
+        events = Array.new
+        unless data['items'].nil?
+          data['items'].each do |item|
+            events.push Osm::Event.from_api(item)
+          end
         end
+        self.user_can_access :programme, section_id, api_data
+        cache_write("events-#{section_id}", events, :expires_in => @@default_cache_ttl)
       end
-      self.user_can_access :programme, section_id, api_data
-      cache_write("events-#{section_id}", result, :expires_in => @@default_cache_ttl)
 
-      return result
+      return events if options[:include_archived]
+      return events.reject do |event|
+        event.archived?
+      end
     end
 
     # Get due badges

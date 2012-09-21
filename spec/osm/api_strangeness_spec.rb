@@ -40,7 +40,7 @@ describe "Online Scout Manager API Strangeness" do
 
   it "handles a non existant array when no events" do
     data = '{"identifier":"eventid","label":"name"}'
-    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1", :body => data)
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => data)
 
     @api.get_events(1).should == []
   end
