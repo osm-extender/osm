@@ -94,3 +94,31 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ### Actions
   * Authorise an app to use the API on a user's behalf
+
+
+## Parts of the OSM API currently NOT supported:
+
+  * Flexi record fields and data
+  * Retreival of leader access
+  * Terms:
+    * Create
+    * Update
+  * Register - Update attendance
+  * Events:
+    * Attendance (everything)
+    * Create
+    * Update
+  * Member:
+    * Update
+    * Add
+  * Badges:
+    * Which requirements each member has met:
+      * Retreive
+      * Update
+    * Retrieve details for each badge (stock, short column names etc.)
+  * Update Activity
+  * Gift aid (everything)
+  * Finances (Everything)
+  * SMS:
+    * Retreival of devlery reports
+    * Sending a message
