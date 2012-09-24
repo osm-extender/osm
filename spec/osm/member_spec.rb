@@ -36,10 +36,10 @@ describe "Member" do
       'age' => '06/07',
       'yrs' => 1,
       'patrol' => 'Blue',
-      'patrolidO' => '3',
+      'patrolidO' => '4',
       'patrolleaderO' => 0,
     }
-    member = Osm::Member.from_api(data)
+    member = Osm::Member.from_api(data, 2)
 
     member.id.should == 1
     member.section_id.should == 2
