@@ -111,7 +111,7 @@ module Osm
     end
 
     def inspect
-      attribute_descriptions = attributes.merge('section' => section.inspect_without_role(self))
+      attribute_descriptions = attributes.merge('section' => (section.nil? ? nil : section.inspect_without_role(self)))
       return_inspect(attribute_descriptions)
     end
 
