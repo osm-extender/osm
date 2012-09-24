@@ -47,20 +47,16 @@ module Osm
     # Initialize a new RegisterData from api data
     # @param [Hash] data the hash of data provided by the API
     def self.from_api(data)
-      attributes = {}
-      attributes[:member_id] = Osm::to_i_or_nil(data['scoutid'])
-      attributes[:grouping_id] = Osm::to_i_or_nil(data['patrolid'])
-      attributes[:section_id] = Osm::to_i_or_nil(data['sectionid'])
-      attributes[:first_name] = data['firstname']
-      attributes[:last_name] = data['lastname']
-      attributes[:total] = data['total'].to_i
-
-      attributes[:attendance] = {}
-      data.except('scoutid', 'patrolid', 'sectionid', 'firstname', 'lastname', 'total').keys.each do |key|
-        attributes[:attendance][Date.strptime(key, Osm::OSM_DATE_FORMAT)] = data[key]
-      end
-
-      new(attributes)
+      new(
+        :member_id => Osm::to_i_or_nil(data['scoutid']),
+        :grouping_id => Osm::to_i_or_nil(data['patrolid']),
+        :section_id => Osm::to_i_or_nil(data['sectionid']),
+        :first_name => data['firstname'],
+        :last_name => data['lastname'],
+        :total => data['total'].to_i,
+        :attendance => data.select { |key, value| key.to_s.match(Osm::OSM_DATE_REGEX) }.
+                            inject({}){ |new_hash,(date, attendance)| new_hash[Date.strptime(date, Osm::OSM_DATE_FORMAT)] = attendance; new_hash },
+      )
     end
 
   end # Class RegisterData
