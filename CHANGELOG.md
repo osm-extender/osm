@@ -1,15 +1,19 @@
+## Version 0.0.21
+
+  * Fix getting section\_id and grouping\_id for api.get\_members
+
 ## Version 0.0.20
 
-  * Start deprecation of api\_data option in Api methods (raise a warning and adjust documentation)
+  * Start deprecation of api\_data option in api methods (raise a warning and adjust documentation)
   * Hide sesitive information when printing data sent to OSM in debug mode
   * Add archived attribute to Event
-  * Add :include\_archived option to Api.get\_events method
+  * Add :include\_archived option to api.get\_events method
   * Add retreival of Flexi Records
   * Make set\_user method of Api public
 
 ## Version 0.0.19
 
-  * Fix caching error in Api.get\_register\_data
+  * Fix caching error in api.get\_register\_data
 
 ## Version 0.0.18
 
@@ -51,7 +55,7 @@
 
 ## Version 0.0.14
 
-  * Fix Api.get_register\_data\ returning wrong object
+  * Fix api.get_register\_data\ returning wrong object
   * Fix check of :num\_scouts in Section.initalize
 
 ## Version 0.0.13
@@ -66,8 +70,8 @@
     * Activity.files now returns an array of Osm::Activity::File objects
     * Activity.versions now returns an array of Osm::Activity::Version objects
     * Section.flexi_records now returns an array of Osm::Section::FlexiRecord objects
-    * Api.get\_register\_structure now returns an array of RegisterField objects
-  * Api.get\_register becomes Api.get\_register\_data and now returns an array of RegisterData objects
+    * api.get\_register\_structure now returns an array of RegisterField objects
+  * api.get\_register becomes api.get\_register\_data and now returns an array of RegisterData objects
   * Attribute name changes:
     * Activity::Badge.section becomes section\_type
     * Activity::File.file\_id becomes id

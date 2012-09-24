@@ -119,10 +119,10 @@ module Osm
 
     # Initialize a new Member from api data
     # @param [Hash] data the hash of data provided by the API
-    def self.from_api(data)
+    def self.from_api(data, section_id)
       new({
+        :section_id => section_id,
         :id => Osm::to_i_or_nil(data['scoutid']),
-        :section_id => Osm::to_i_or_nil(data['sectionidO']),
         :type => data['type'],
         :first_name => data['firstname'],
         :last_name => data['lastname'],
@@ -146,8 +146,8 @@ module Osm
         :school => data['school'],
         :ethnicity => data['ethnicity'],
         :subs => data['subs'],
-        :grouping_id => Osm::to_i_or_nil(data['patrolidO']),
-        :grouping_leader => Osm::to_i_or_nil(data['patrolleaderO']),
+        :grouping_id => Osm::to_i_or_nil(data['patrolid']),
+        :grouping_leader => Osm::to_i_or_nil(data['patrolleader']),
         :joined => Osm::parse_date(data['joined']),
         :age => data['age'],
         :joined_years => data['yrs'].to_i,
