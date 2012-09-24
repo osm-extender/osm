@@ -3,6 +3,7 @@
   * Hide sesitive information when printing data sent to OSM in debug mode
   * Add archived attribute to Event
   * Add :include\_archived option to Api.get\_events method
+  * Add retreival of Flexi Records
 
 ## Version 0.0.19
 

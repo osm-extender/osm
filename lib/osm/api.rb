@@ -455,6 +455,7 @@ module Osm
     # @return [Osm::DueBadges]
     def get_due_badges(section, term=nil, options={}, api_data={})
       section_id = id_for_section(section)
+      section_type = type_for_section(section, api_data)
       term_id = id_for_term(term, section, api_data)
       cache_key = "due_badges-#{section_id}-#{term_id}"
 
@@ -462,7 +463,6 @@ module Osm
         return cache_read(cache_key)
       end
 
-      section_type = get_section(section_id, api_data).type.to_s
       data = perform_query("challenges.php?action=outstandingBadges&section=#{section_type}&sectionid=#{section_id}&termid=#{term_id}", api_data)
 
       data = Osm::DueBadges.from_api(data)
@@ -524,6 +524,62 @@ module Osm
         to_return.push Osm::RegisterData.from_api(item)
       end
       self.user_can_access :register, section_id, api_data
+      cache_write(cache_key, to_return, :expires_in => @@default_cache_ttl/2)
+      return to_return
+    end
+
+    # Get flexirecord structure
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the structure for
+    # @param [Fixnum] the id of the Flexi Record
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<Osm::FlexiRecordField>] representing the fields of the flexi record
+    def get_flexi_record_fields(section, id, options={}, api_data={})
+      section_id = id_for_section(section)
+      cache_key = "flexi_record_structure-#{section_id}-#{id}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:flexi, section_id, api_data)
+        return cache_read(cache_key)
+      end
+
+      data = perform_query("extras.php?action=getExtra&sectionid=#{section_id}&extraid=#{id}", api_data)
+
+      structure = []
+      data['structure'].each do |item|
+        item['rows'].each do |row|
+          structure.push Osm::FlexiRecordField.from_api(row)
+        end
+      end
+      self.user_can_access :flexi, section_id, api_data
+      cache_write(cache_key, structure, :expires_in => @@default_cache_ttl/2)
+
+      return structure
+    end
+
+    # Get flexi record data
+    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the register for
+    # @param [Fixnum] the id of the Flexi Record
+    # @param [Osm:Term, Fixnum] section the term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @!macro options_api_data
+    # @return [Array<FlexiRecordData>]
+    def get_flexi_record_data(section, id, term=nil, options={}, api_data={})
+      section_id = id_for_section(section)
+      section_type = type_for_section(section, api_data)
+      term_id = id_for_term(term, section, api_data)
+      cache_key = "flexi_record_data-#{section_id}-#{term_id}-#{id}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:flexi, section_id, api_data)
+        return cache_read(cache_key)
+      end
+
+      data = perform_query("extras.php?action=getExtraRecords&sectionid=#{section_id}&extraid=#{id}&termid=#{term_id}&section=#{section_type}", api_data)
+
+      to_return = []
+      data['items'].each do |item|
+        to_return.push Osm::FlexiRecordData.from_api(item)
+      end
+      self.user_can_access :flexi, section_id, api_data
       cache_write(cache_key, to_return, :expires_in => @@default_cache_ttl/2)
       return to_return
     end
@@ -705,6 +761,11 @@ module Osm
     def id_for_section(section)
       id_for(Osm::Section, section, 'section')
     end
+
+    def type_for_section(section, api_data)
+      (section.is_a?(Osm::Section) ? section : get_section(section, api_data)).type.to_s
+    end
+
     def id_for_term(term, section, api_data)
       return term.nil? ? Osm::find_current_term_id(self, id_for_section(section), api_data) : id_for(Osm::Term, term, 'term')
     end

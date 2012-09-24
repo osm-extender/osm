@@ -413,6 +413,58 @@ describe "API" do
     end
 
 
+    it "Fetch the flexi record fields for a section" do
+      data = {
+        "extraid" => "2",
+        "sectionid" => "1",
+        "name" => "A Flexi Record",
+        "config" => "[{\"id\":\"f_1\",\"name\":\"Field 1\",\"width\":\"150\"},{\"id\":\"f_2\",\"name\":\"Field 2\",\"width\":\"150\"}]",
+        "total" => "none",
+        "extrafields" => "[]",
+        "structure" => [
+          {
+            "rows" => [
+              {"name" => "First name","field" => "firstname","width" => "150px"},
+              {"name" => "Last name","field" => "lastname","width" => "150px"},
+            ],
+            "noscroll" => true
+          },
+          {"rows" => [
+            {"name" => "Field 1","field" => "f_1","width" => "150px","editable" => true},
+            {"name" => "Filed 2","field" => "f_2","width" => "150px","editable" => true},
+          ]}
+        ]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtra&sectionid=1&extraid=2", :body => data.to_json)
+
+      fields = Osm::Api.new('1', '2').get_flexi_record_fields(1, 2)
+      fields.is_a?(Array).should be_true
+    end
+
+    it "Fetch the flexi record data for a section" do
+      data = {
+        'identifier' => 'scoutid',
+        'label' => "name",
+        'items' => [{
+          "scoutid" => "1",
+          "firstname" => "First",
+          "lastname" => "Last",
+          "dob" => "",
+          "patrolid" => "2",
+          "total" => "",
+          "completed" => "",
+          "f_1" => "A",
+          "f_2" => "B",
+          "age" => "",
+          "patrol" => "Green"
+        }]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json)
+
+      records = Osm::Api.new('1', '2').get_flexi_record_data(Osm::Section.new(:id => 1, :type => :cubs), 2, 3)
+      records.is_a?(Array).should be_true
+    end
+
 
     it "Create an evening (succeded)" do
       url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=addActivityToProgramme'

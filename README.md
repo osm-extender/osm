@@ -73,12 +73,14 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * API Access for our app
   * Due Badges
   * Events
+  * Flexi Record Data
+  * Flexi Record Structure
   * Groupings (e.g. Sixes, Patrols)
   * Members
   * Notepad
   * Notepads
   * Programme
-  * Register
+  * Register Data
   * Register Structure
   * Roles
   * Section
@@ -98,12 +100,12 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported:
 
-  * Flexi record fields and data
   * Retreival of leader access
   * Terms:
     * Create
     * Update
   * Register - Update attendance
+  * Flexi Record - Update data
   * Events:
     * Attendance (everything)
     * Create
@@ -120,5 +122,5 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Gift aid (everything)
   * Finances (Everything)
   * SMS:
-    * Retreival of devlery reports
+    * Retreival of delivery reports
     * Sending a message
