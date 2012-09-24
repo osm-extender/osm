@@ -1,3 +1,7 @@
+## Version 0.0.21
+
+  * 
+
 ## Version 0.0.20
 
   * Start deprecation of api\_data option in Api methods (raise a warning and adjust documentation)
