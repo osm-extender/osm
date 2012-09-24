@@ -1,3 +1,12 @@
+## Version 0.0.20
+
+  * Start deprecation of api\_data option in Api methods (raise a warning and adjust documentation)
+  * Hide sesitive information when printing data sent to OSM in debug mode
+  * Add archived attribute to Event
+  * Add :include\_archived option to Api.get\_events method
+  * Add retreival of Flexi Records
+  * Make set\_user method of Api public
+
 ## Version 0.0.19
 
   * Fix caching error in Api.get\_register\_data

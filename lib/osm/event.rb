@@ -4,22 +4,23 @@ module Osm
     include ::ActiveAttr::MassAssignmentSecurity
     include ::ActiveAttr::Model
 
-    # @!attribute [r] id
+    # @!attribute [rw] id
     #   @return [Fixnum] the id for the event
-    # @!attribute [r] section_id
+    # @!attribute [rw] section_id
     #   @return [Fixnum] the id for the section
-    # @!attribute [r] name
+    # @!attribute [rw] name
     #   @return [String] the name of the event
-    # @!attribute [r] start
+    # @!attribute [rw] start
     #   @return [DateTime] when the event starts
-    # @!attribute [r] finish
+    # @!attribute [rw] finish
     #   @return [DateTime] when the event ends
-    # @!attribute [r] cost
+    # @!attribute [rw] cost
     #   @return [String] the cost of the event
-    # @!attribute [r] location
+    # @!attribute [rw] location
     #   @return [String] where the event is
-    # @!attribute [r] notes
+    # @!attribute [rw] notes
     #   @return [String] notes about the event
+    # @!attribute [rw] archived
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -29,8 +30,9 @@ module Osm
     attribute :cost, :type => String, :default => ''
     attribute :location, :type => String, :default => ''
     attribute :notes, :type => String, :default => ''
+    attribute :archived, :type => Boolean, :default => false
 
-    attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes
+    attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -53,6 +55,7 @@ module Osm
         :cost => data['cost'],
         :location => data['location'],
         :notes => data['notes'],
+        :archived => data['archived'].eql?('1')
       })
     end
 

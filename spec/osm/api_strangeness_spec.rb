@@ -40,7 +40,7 @@ describe "Online Scout Manager API Strangeness" do
 
   it "handles a non existant array when no events" do
     data = '{"identifier":"eventid","label":"name"}'
-    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1", :body => data)
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => data)
 
     @api.get_events(1).should == []
   end
@@ -51,6 +51,33 @@ describe "Online Scout Manager API Strangeness" do
     FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body)
 
     @api.get_section(1).fields.should == {}
+  end
+
+
+  it "handles a section's flexi records being a hash" do
+    data = {
+      'subscription_level' => '3',
+      'subscription_expires' => (Date.today + 60).strftime('%Y-%m-%d'),
+      'sectionType' => 'cubs',
+      'numscouts' => 10,
+      'columnNames' => {},
+      'fields' => {},
+      'intouch' => {},
+      'mobFields' => {},
+      'extraRecords' => {
+        '1' => {
+          'name' => 'Name 1',
+          'extraid' => 1
+        },
+        '2' => {
+          'name' => 'Name 2',
+          'extraid' => 2
+        }
+      }
+    }
+    section = Osm::Section.from_api(1, 'Name', data, nil)
+    section.flexi_records.size.should == 2
 
   end
+
 end

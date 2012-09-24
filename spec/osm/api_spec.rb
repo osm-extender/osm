@@ -85,6 +85,18 @@ describe "API" do
     Osm::Api.new.authorize(user_email, user_password).should == {'userid' => 'id', 'secret' => 'secret'}
   end
 
+  it "sets a new API user" do
+    api = Osm::Api.new
+    api.set_user('1', '2')
+
+    HTTParty.should_receive(:post).with("https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", {:body => {
+      'apiid' => @api_config[:api_id],
+      'token' => @api_config[:api_token],
+      'userid' => '1',
+      'secret' => '2',
+    }}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
+    api.get_roles
+  end
 
 
   describe "Using the API:" do
@@ -325,12 +337,51 @@ describe "API" do
           'location' => '',
           'notes' => '',
           'sectionid' => 1,
-          'googlecalendar' => nil
+          'googlecalendar' => nil,
+          'archived' => '0'
         }]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1", :body => body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
       events = Osm::Api.new('1', '2').get_events(1)
       events[0].id.should == 1
+    end
+
+    it "Fetch events for a section honoring archived option" do
+      body = {
+        'identifier' => 'eventid',
+        'label' => 'name',
+        'items' => [{
+          'eventid' => '1',
+          'name' => 'An Event',
+          'startdate' => '2001-02-03',
+          'enddate' => nil,
+          'starttime' => '00:00:00',
+          'endtime' => '00:00:00',
+          'cost' => '0.00',
+          'location' => '',
+          'notes' => '',
+          'sectionid' => 1,
+          'googlecalendar' => nil,
+          'archived' => '0'
+        },{
+          'eventid' => '2',
+          'name' => 'An Archived Event',
+          'startdate' => '2001-02-03',
+          'enddate' => nil,
+          'starttime' => '00:00:00',
+          'endtime' => '00:00:00',
+          'cost' => '0.00',
+          'location' => '',
+          'notes' => '',
+          'sectionid' => 1,
+          'googlecalendar' => nil,
+          'archived' => '1'
+        }]
+      }
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
+      Osm::Api.new('1', '2').get_events(1).size.should == 1
+      Osm::Api.new('1', '2').get_events(1, {:include_archived => true}).size.should == 2
     end
 
 
@@ -373,6 +424,58 @@ describe "API" do
       register.is_a?(Array).should be_true
     end
 
+
+    it "Fetch the flexi record fields for a section" do
+      data = {
+        "extraid" => "2",
+        "sectionid" => "1",
+        "name" => "A Flexi Record",
+        "config" => "[{\"id\":\"f_1\",\"name\":\"Field 1\",\"width\":\"150\"},{\"id\":\"f_2\",\"name\":\"Field 2\",\"width\":\"150\"}]",
+        "total" => "none",
+        "extrafields" => "[]",
+        "structure" => [
+          {
+            "rows" => [
+              {"name" => "First name","field" => "firstname","width" => "150px"},
+              {"name" => "Last name","field" => "lastname","width" => "150px"},
+            ],
+            "noscroll" => true
+          },
+          {"rows" => [
+            {"name" => "Field 1","field" => "f_1","width" => "150px","editable" => true},
+            {"name" => "Filed 2","field" => "f_2","width" => "150px","editable" => true},
+          ]}
+        ]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtra&sectionid=1&extraid=2", :body => data.to_json)
+
+      fields = Osm::Api.new('1', '2').get_flexi_record_fields(1, 2)
+      fields.is_a?(Array).should be_true
+    end
+
+    it "Fetch the flexi record data for a section" do
+      data = {
+        'identifier' => 'scoutid',
+        'label' => "name",
+        'items' => [{
+          "scoutid" => "1",
+          "firstname" => "First",
+          "lastname" => "Last",
+          "dob" => "",
+          "patrolid" => "2",
+          "total" => "",
+          "completed" => "",
+          "f_1" => "A",
+          "f_2" => "B",
+          "age" => "",
+          "patrol" => "Green"
+        }]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json)
+
+      records = Osm::Api.new('1', '2').get_flexi_record_data(Osm::Section.new(:id => 1, :type => :cubs), 2, 3)
+      records.is_a?(Array).should be_true
+    end
 
 
     it "Create an evening (succeded)" do
@@ -479,9 +582,12 @@ describe "API" do
         'userid' => 'user',
         'secret' => 'secret',
       }
+      api = Osm::Api.new('1', '2')
 
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"1":"Section 1"}'}) }
-      Osm::Api.new('1', '2').get_notepads({}, {'userid'=>'user', 'secret'=>'secret'}).should == {1 => 'Section 1'}
+      api.should_receive(:warn).with('[DEPRECATION OF OPTION] use of the api_data option is deprecated.')
+
+      api.get_notepads({}, {'userid'=>'user', 'secret'=>'secret'}).should == {1 => 'Section 1'}
     end
   end
 

@@ -6,6 +6,7 @@ module Osm
   OSM_DATE_FORMAT = '%Y-%m-%d'
   OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
   OSM_TIME_REGEX = /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/
+  OSM_DATE_REGEX = /\A\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1])\Z/
 end
 
 require File.join(File.dirname(__FILE__), '..', 'version')
