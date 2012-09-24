@@ -3,7 +3,7 @@
 #   @option options [Boolean] :no_cache (optional) if true then the data will be retreived from OSM not the cache
 
 # @!macro [new] options_api_data
-#   @param [Hash] api_data
+#   @param [Hash] api_data - DEPRECATED (DO NOT USE THIS OPTION)
 #   @option api_data [String] 'userid' (optional) the OSM userid to make the request as
 #   @option api_data [String] 'secret' (optional) the OSM secret belonging to the above user
 
@@ -102,11 +102,21 @@ module Osm
       return data
     end
 
+    # Set the OSM user to make future requests as
+    # @param [String] userid the OSM userid to use (get this using the authorize method)
+    # @param [String] secret the OSM secret to use (get this using the authorize method)
+    def set_user(userid, secret)
+      @userid = userid
+      @secret = secret
+    end
+
+
     # Get the user's roles
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::Role>]
     def get_roles(options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       cache_key = "roles-#{api_data[:userid] || @userid}"
 
       if !options[:no_cache] && cache_exist?(cache_key)
@@ -132,6 +142,7 @@ module Osm
     # @!macro options_api_data
     # @return [Hash] a hash (keys are section IDs, values are a string)
     def get_notepads(options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       cache_key = "notepads-#{api_data[:userid] || @userid}"
 
       if !options[:no_cache] && cache_exist?(cache_key)
@@ -158,6 +169,7 @@ module Osm
     # @return nil if an error occured or the user does not have access to that section
     # @return [String] the content of the notepad otherwise
     def get_notepad(section, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       cache_key = "notepad-#{section_id}"
 
@@ -182,6 +194,7 @@ module Osm
     # @return nil if an error occured or the user does not have access to that section
     # @return [Osm::Section]
     def get_section(section_id, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       cache_key = "section-#{section_id}"
 
       if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:section, section_id, api_data)
@@ -204,6 +217,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<Osm::Grouping>]
     def get_groupings(section, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       cache_key = "groupings-#{section_id}"
 
@@ -229,6 +243,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<Osm::Term>]
     def get_terms(options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       cache_key = "terms-#{api_data[:userid] || @userid}"
 
       if !options[:no_cache] && cache_exist?(cache_key)
@@ -258,6 +273,7 @@ module Osm
     # @return nil if an error occured or the user does not have access to that term
     # @return [Osm::Term]
     def get_term(term_id, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       cache_key = "term-#{term_id}"
 
       if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:term, term_id, api_data)
@@ -281,6 +297,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<Osm::Evening>]
     def get_programme(section, term, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       term_id = id_for_term(term, section, api_data)
       cache_key = "programme-#{section_id}-#{term_id}"
@@ -316,6 +333,7 @@ module Osm
     # @!macro options_api_data
     # @return [Osm::Activity]
     def get_activity(activity_id, version=nil, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       cache_key = "activity-#{activity_id}-"
 
       if !options[:no_cache] && cache_exist?("#{cache_key}-#{version}") && self.user_can_access?(:activity, activity_id, api_data)
@@ -344,6 +362,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<Osm::Member>]
     def get_members(section, term=nil, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       term_id = id_for_term(term, section, api_data)
       cache_key = "members-#{section_id}-#{term_id}"
@@ -370,6 +389,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<Osm::ApiAccess>]
     def get_api_access(section, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       cache_key = "api_access-#{api_data['userid'] || @userid}-#{section_id}"
 
@@ -399,6 +419,7 @@ module Osm
     # @!macro options_api_data
     # @return [Osm::ApiAccess]
     def get_our_api_access(section, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       cache_key = "api_access-#{api_data['userid'] || @userid}-#{section_id}-#{Osm::Api.api_id}"
 
@@ -422,6 +443,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<Osm::Event>]
     def get_events(section, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       cache_key = "events-#{section_id}"
       events = nil
@@ -454,6 +476,7 @@ module Osm
     # @!macro options_api_data
     # @return [Osm::DueBadges]
     def get_due_badges(section, term=nil, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       section_type = type_for_section(section, api_data)
       term_id = id_for_term(term, section, api_data)
@@ -479,6 +502,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<Osm::RegisterField>] representing the fields of the register
     def get_register_structure(section, term=nil, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       term_id = id_for_term(term, section, api_data)
       cache_key = "register_structure-#{section_id}-#{term_id}"
@@ -508,6 +532,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<RegisterData>] representing the attendance of each member
     def get_register_data(section, term=nil, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       term_id = id_for_term(term, section, api_data)
       cache_key = "register-#{section_id}-#{term_id}"
@@ -535,6 +560,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<Osm::FlexiRecordField>] representing the fields of the flexi record
     def get_flexi_record_fields(section, id, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       cache_key = "flexi_record_structure-#{section_id}-#{id}"
 
@@ -564,6 +590,7 @@ module Osm
     # @!macro options_api_data
     # @return [Array<FlexiRecordData>]
     def get_flexi_record_data(section, id, term=nil, options={}, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       section_type = type_for_section(section, api_data)
       term_id = id_for_term(term, section, api_data)
@@ -590,6 +617,7 @@ module Osm
     # @!macro options_api_data
     # @return [Boolean] if the operation suceeded or not
     def create_evening(section, meeting_date, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       section_id = id_for_section(section)
       evening_api_data = {
         'meetingdate' => meeting_date.strftime(Osm::OSM_DATE_FORMAT),
@@ -612,6 +640,7 @@ module Osm
     # @!macro options_api_data
     # @return [Boolean] if the operation suceeded or not
     def update_evening(evening, api_data={})
+      warn "[DEPRECATION OF OPTION] use of the api_data option is deprecated." unless api_data == {}
       raise ArgumentIsInvalid, 'evening is invalid' unless evening.valid?
       response = perform_query("programme.php?action=editEvening", api_data.merge(evening.to_api))
 
@@ -660,17 +689,11 @@ module Osm
 
 
     private
-    # Set the OSM user to make future requests as
-    # @param [String] userid the OSM userid to use (get this using the authorize method)
-    # @param [String] secret the OSM secret to use (get this using the authorize method)
-    def set_user(userid, secret)
-      @userid = userid
-      @secret = secret
-    end
-
     # Make the query to the OSM API
     # @param [String] url the script on the remote server to invoke
     # @param [Hash] api_data a hash containing the values to be sent to the server
+    #   @option api_data [String] 'userid' (optional) the OSM userid to make the request as
+    #   @option api_data [String] 'secret' (optional) the OSM secret belonging to the above user
     # @return [Hash, Array, String] the parsed JSON returned by OSM
     def perform_query(url, api_data={})
       api_data['apiid'] = @@api_id

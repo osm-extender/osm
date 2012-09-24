@@ -85,6 +85,18 @@ describe "API" do
     Osm::Api.new.authorize(user_email, user_password).should == {'userid' => 'id', 'secret' => 'secret'}
   end
 
+  it "sets a new API user" do
+    api = Osm::Api.new
+    api.set_user('1', '2')
+
+    HTTParty.should_receive(:post).with("https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", {:body => {
+      'apiid' => @api_config[:api_id],
+      'token' => @api_config[:api_token],
+      'userid' => '1',
+      'secret' => '2',
+    }}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
+    api.get_roles
+  end
 
 
   describe "Using the API:" do
@@ -570,9 +582,12 @@ describe "API" do
         'userid' => 'user',
         'secret' => 'secret',
       }
+      api = Osm::Api.new('1', '2')
 
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"1":"Section 1"}'}) }
-      Osm::Api.new('1', '2').get_notepads({}, {'userid'=>'user', 'secret'=>'secret'}).should == {1 => 'Section 1'}
+      api.should_receive(:warn).with('[DEPRECATION OF OPTION] use of the api_data option is deprecated.')
+
+      api.get_notepads({}, {'userid'=>'user', 'secret'=>'secret'}).should == {1 => 'Section 1'}
     end
   end
 
