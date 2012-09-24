@@ -96,7 +96,10 @@ module Osm
       }
 
       # Populate arrays
-      (data['extraRecords'].is_a?(Array) ? data['extraRecords'] : []).each do |record_data|
+      fr = []
+      fr = data['extraRecords'] if data['extraRecords'].is_a?(Array)
+      fr = data['extraRecords'].values if data['extraRecords'].is_a?(Hash)
+      fr.each do |record_data|
         attributes[:flexi_records].push FlexiRecord.from_api(record_data)
       end
 
