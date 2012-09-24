@@ -1,3 +1,7 @@
+## Version 0.0.22
+
+  * 
+
 ## Version 0.0.21
 
   * Fix getting section\_id and grouping\_id for api.get\_members
