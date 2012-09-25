@@ -163,7 +163,7 @@ module Osm
     end
 
     # Get the notepad for a specified section
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the notepad for
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the notepad for
     # @!macro options_get
     # @!macro options_api_data
     # @return nil if an error occured or the user does not have access to that section
@@ -291,8 +291,8 @@ module Osm
     end
 
     # Get the programme for a given term
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the programme for
-    # @param [Osm:term, Fixnum] term the term (or its ID) to get the programme for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the programme for
+    # @param [Osm::term, Fixnum, nil] term the term (or its ID) to get the programme for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::Evening>]
@@ -356,8 +356,8 @@ module Osm
     end
 
     # Get members
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the members for
-    # @param [Osm:Term, Fixnum] term the term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the members for
+    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::Member>]
@@ -384,7 +384,7 @@ module Osm
     end
 
     # Get API access details for a given section
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the details for
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::ApiAccess>]
@@ -414,7 +414,7 @@ module Osm
     end
 
     # Get our API access details for a given section
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the details for
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
     # @!macro options_get
     # @!macro options_api_data
     # @return [Osm::ApiAccess]
@@ -437,7 +437,7 @@ module Osm
     end
 
     # Get events
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the events for
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the events for
     # @!macro options_get
     # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @!macro options_api_data
@@ -471,7 +471,8 @@ module Osm
     end
 
     # Get due badges
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the due badges for
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the due badges for
+    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Osm::DueBadges]
@@ -496,8 +497,8 @@ module Osm
     end
 
     # Get register structure
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the structure for
-    # @param [Osm:Term, Fixnum] section the term (or its ID) to get the structure for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
+    # @param [Osm::Term, Fixnum, nil] section the term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<Osm::RegisterField>] representing the fields of the register
@@ -526,8 +527,8 @@ module Osm
     end
 
     # Get register data
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the register for
-    # @param [Osm:Term, Fixnum] section the term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the register for
+    # @param [Osm::Term, Fixnum, nil] section the term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<RegisterData>] representing the attendance of each member
@@ -554,7 +555,7 @@ module Osm
     end
 
     # Get flexirecord structure
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the structure for
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
     # @param [Fixnum] the id of the Flexi Record
     # @!macro options_get
     # @!macro options_api_data
@@ -585,7 +586,7 @@ module Osm
     # Get flexi record data
     # @param [Osm:Section, Fixnum] section the section (or its ID) to get the register for
     # @param [Fixnum] the id of the Flexi Record
-    # @param [Osm:Term, Fixnum] section the term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param [Osm:Term, Fixnum, nil] section the term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @!macro options_api_data
     # @return [Array<FlexiRecordData>]
@@ -611,8 +612,32 @@ module Osm
       return to_return
     end
 
+    # Get badge stock levels
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the stock levels for
+    # @param [Osm::Term, Fixnum, nil] section the term (or its ID) to get the stock levels for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @return Hash
+    def get_badge_stock_levels(section, term=nil, options={})
+      section_id = id_for_section(section)
+      section_type = type_for_section(section)
+      term_id = id_for_term(term, section)
+      cache_key = "badge_stock-#{section_id}-#{term_id}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:badge, section_id)
+        return cache_read(cache_key)
+      end
+
+      data = perform_query("challenges.php?action=getInitialBadges&type=core&sectionid=#{section_id}&section=#{section_type}&termid=#{term_id}")
+      data = (data['stock'] || {}).select{ |k,v| !k.eql?('sectionid') }
+
+      self.user_can_access :badge, section_id
+      cache_write(cache_key, data, :expires_in => @@default_cache_ttl)
+      return data
+    end
+
+
     # Create an evening in OSM
-    # @param [Fixnum] section_id the id of the section to add the term to
+    # @param [Osm::Section, Fixnum] section or section_id to add the evening to
     # @param [Date] meeting_date the date of the meeting
     # @!macro options_api_data
     # @return [Boolean] if the operation suceeded or not
@@ -635,6 +660,39 @@ module Osm
       return data.is_a?(Hash) && (data['result'] == 0)
     end
 
+    # Create a term in OSM
+    # @param [Hash] options - the configuration of the new term
+    #   @option options [Osm::Section, Fixnum] :section (required) section or section_id to add the term to
+    #   @option options [String] :name (required) the name for the term
+    #   @option options [Date] :start (required) the date for the start of term
+    #   @option options [Date] :finish (required) the date for the finish of term
+    # @return [Boolean] if the operation suceeded or not
+    def create_term(options={})
+      raise ArgumentError, ":section can't be nil" if options[:section].nil?
+      raise ArgumentError, ":name can't be nil" if options[:name].nil?
+      raise ArgumentError, ":start can't be nil" if options[:start].nil?
+      raise ArgumentError, ":finish can't be nil" if options[:finish].nil?
+
+      section_id = id_for_section(options[:section])
+      api_data = {
+        'term' => options[:name],
+        'start' => options[:start].strftime(Osm::OSM_DATE_FORMAT),
+        'end' => options[:finish].strftime(Osm::OSM_DATE_FORMAT),
+        'termid' => '0'
+      }
+
+      data = perform_query("users.php?action=addTerm&sectionid=#{section_id}", api_data)
+
+      # The cached terms for the section will be out of date - remove them
+      get_terms.each do |term|
+        cache_delete("term-#{term.id}") if term.section_id == section_id
+      end
+      cache_delete("terms-#{@userid}")
+
+      return data.is_a?(Hash) && data['terms'].is_a?(Hash)
+    end
+
+
     # Update an evening in OSM
     # @param [Osm::Evening] evening the evening to update
     # @!macro options_api_data
@@ -652,6 +710,22 @@ module Osm
       return response.is_a?(Hash) && (response['result'] == 0)
     end
 
+    # Update a term in OSM
+    # @param [Osm::Term] term the term to update
+    # @return [Boolean] if the operation suceeded or not
+    def update_term(term)
+      raise ArgumentIsInvalid, 'term is invalid' unless term.valid?
+
+      data = perform_query("users.php?action=addTerm&sectionid=#{term.section_id}", term.to_api)
+
+      # The cached terms for the section will be out of date - remove them
+      cache_delete("term-#{term.id}")
+      cache_delete("terms-#{@userid}")
+
+      return data.is_a?(Hash) && data['terms'].is_a?(Hash)
+    end
+  
+  
 
     protected
     # Set access permission for the current user on a resource stored in the cache
@@ -660,7 +734,7 @@ module Osm
     # @param [Hash] api_data the data hash used in accessing the api
     # @param [Boolean] permission wether the user can access the resource
     # @return [Boolean] the permission which was set
-    def user_can_access(resource_type, resource_id, api_data, permission=true)
+    def user_can_access(resource_type, resource_id, api_data={}, permission=true)
       user = (api_data['userid'] || @userid).to_i
       resource_id = resource_id.to_i
       resource_type = resource_type.to_sym
@@ -677,7 +751,7 @@ module Osm
     # @param [Hash] api_data the data hash used in accessing the api
     # @return nil if the combination of user and resource has not been set
     # @return [Boolean] if the user can access the resource
-    def user_can_access?(resource_type, resource_id, api_data)
+    def user_can_access?(resource_type, resource_id, api_data={})
       user = (api_data['userid'] || @userid).to_i
       resource_id = resource_id.to_i
       resource_type = resource_type.to_sym
@@ -785,11 +859,11 @@ module Osm
       id_for(Osm::Section, section, 'section')
     end
 
-    def type_for_section(section, api_data)
+    def type_for_section(section, api_data={})
       (section.is_a?(Osm::Section) ? section : get_section(section, api_data)).type.to_s
     end
 
-    def id_for_term(term, section, api_data)
+    def id_for_term(term, section, api_data={})
       return term.nil? ? Osm::find_current_term_id(self, id_for_section(section), api_data) : id_for(Osm::Term, term, 'term')
     end
 

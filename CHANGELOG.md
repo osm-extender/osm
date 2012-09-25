@@ -1,10 +1,21 @@
+## Version 0.0.22
+
+  * Adjustments so DueBadge is similar enough to badge\_stock data to be useful:
+    * by\_member Hash -> Keys are member's name (String), values are the badge key (String)
+    * descriptions Hash -> keys are the badge key (String), values are the badge name (String)
+    * totals Hash -> keys are the badge key (String), values are the  number required (Fixnum)
+    * Badge keys are the same as are used in getting badge stock levels
+  * Add ability to get badge stock levels
+  * Add ability to Create a term
+  * Add ability to Update a term
+
 ## Version 0.0.21
 
   * Fix getting section\_id and grouping\_id for api.get\_members
 
 ## Version 0.0.20
 
-  * Start deprecation of api\_data option in api methods (raise a warning and adjust documentation)
+  * Deprecation of api\_data option in api methods (raise a warning if used and adjust documentation)
   * Hide sesitive information when printing data sent to OSM in debug mode
   * Add archived attribute to Event
   * Add :include\_archived option to api.get\_events method

@@ -33,6 +33,17 @@ describe "Term" do
   end
 
 
+  it "Creates the data for saving through the API" do
+    term = Osm::Term.new(@attributes)
+    term.to_api.should == {
+      'term' => @attributes[:name],
+      'start' => @attributes[:start].strftime(Osm::OSM_DATE_FORMAT),
+      'end' => @attributes[:finish].strftime(Osm::OSM_DATE_FORMAT),
+      'termid' => @attributes[:id]
+    }
+  end
+
+
   it "Compares two matching terms" do
     term1 = Osm::Term.new(@attributes)
     term2 = Osm::Term.new(@attributes)
