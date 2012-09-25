@@ -72,6 +72,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * API Access
   * API Access for our app
   * Due Badges
+  * Evening
   * Events
   * Flexi Record Data
   * Flexi Record Structure
@@ -100,25 +101,33 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported:
 
-  * Retreival of leader access
-  * Terms:
-    * Create
-    * Update
-  * Register - Update attendance
-  * Flexi Record - Update data
-  * Events:
-    * Attendance (everything)
-    * Create
-    * Update
-  * Member:
-    * Update
-    * Add
   * Badges:
     * Which requirements each member has met:
       * Retreive
       * Update
     * Retrieve details for each badge (stock, short column names etc.)
+  * Retreival of leader access
+  * Terms:
+    * Create
+    * Update
+    * Delete (if API allows)
+  * Register - Update attendance
+  * Flexi Records:
+    * Update data
+    * Delete
+    * Update
+    * Add Column
+  * Events:
+    * Attendance (everything)
+    * Create
+    * Update
+    * Delete
+  * Member:
+    * Update
+    * Add
+    * Delete
   * Update Activity
+  * Delete Evening
   * Gift aid (everything)
   * Finances (Everything)
   * SMS:
