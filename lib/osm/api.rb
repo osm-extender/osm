@@ -628,7 +628,8 @@ module Osm
       end
 
       data = perform_query("challenges.php?action=getInitialBadges&type=core&sectionid=#{section_id}&section=#{section_type}&termid=#{term_id}")
-      data = (data['stock'] || {}).select{ |k,v| !k.eql?('sectionid') }
+      data = (data['stock'] || {}).select{ |k,v| !k.eql?('sectionid') }.
+                                   inject({}){ |new_hash,(badge, level)| new_hash[badge] = level.to_i; new_hash }
 
       self.user_can_access :badge, section_id
       cache_write(cache_key, data, :expires_in => @@default_cache_ttl)

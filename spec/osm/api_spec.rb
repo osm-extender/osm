@@ -404,9 +404,9 @@ describe "API" do
     it "Fetch badge stock levels for a section" do
       badges_body = {
         'stock' => {
-          'sectionid' => 1,
-          'badge_1' => 1,
-          'badge_2' => 2
+          'sectionid' => '1',
+          'badge_1' => '1',
+          'badge_2' => '2'
         }
       }
 
