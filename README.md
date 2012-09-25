@@ -107,10 +107,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
       * Update
     * Retrieve details for each badge (stock, short column names etc.)
   * Retreival of leader access
-  * Terms:
-    * Create
-    * Update
-    * Delete (if API allows)
   * Register - Update attendance
   * Flexi Records:
     * Update data
@@ -127,6 +123,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Add
     * Delete
   * Update Activity
+  * Add activity to programme
   * Delete Evening
   * Gift aid (everything)
   * Finances (Everything)

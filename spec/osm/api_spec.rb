@@ -557,7 +557,107 @@ describe "API" do
       api = Osm::Api.new('user', 'secret')
       evening = Osm::Evening.new
       expect{ api.update_evening(evening) }.to raise_error(Osm::ArgumentIsInvalid)
-    end  end
+    end
+
+
+    it "Create a term (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'term' => 'A Term',
+        'start' => '2010-01-01',
+        'end' => '2010-12-31',
+        'termid' => '0'
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_terms) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"terms":{}}'}) }
+
+      api.create_term({
+        :section => 1,
+        :name => 'A Term',
+        :start => Date.new(2010, 01, 01),
+        :finish => Date.new(2010, 12, 31),
+      }).should be_true
+    end
+
+    it "Create a term (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'term' => 'A Term',
+        'start' => '2010-01-01',
+        'end' => '2010-12-31',
+        'termid' => '0'
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_terms) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+      api.create_term({
+        :section => 1,
+        :name => 'A Term',
+        :start => Date.new(2010, 01, 01),
+        :finish => Date.new(2010, 12, 31),
+      }).should be_false
+    end
+
+
+    it "Update a term (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'term' => 'A Term',
+        'start' => '2010-01-01',
+        'end' => '2010-12-31',
+        'termid' => 2
+      }
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_terms) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"terms":{}}'}) }
+
+      term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
+      api.update_term(term).should be_true
+    end
+
+    it "Update a term (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'term' => 'A Term',
+        'start' => '2010-01-01',
+        'end' => '2010-12-31',
+        'termid' => 2
+      }
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_terms) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+      term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
+      api.update_term(term).should be_false
+    end
+
+    it "Update a term (invalid term)" do
+      api = Osm::Api.new('user', 'secret')
+      term = Osm::Term.new
+      expect{ api.update_term(term) }.to raise_error(Osm::ArgumentIsInvalid)
+    end
+
+  end
 
 
   describe "Options Hash" do

@@ -1,6 +1,7 @@
 ## Version 0.0.22
 
-  * 
+  * Create a term
+  * Update a term
 
 ## Version 0.0.21
 
@@ -8,7 +9,7 @@
 
 ## Version 0.0.20
 
-  * Start deprecation of api\_data option in api methods (raise a warning and adjust documentation)
+  * Deprecation of api\_data option in api methods (raise a warning if used and adjust documentation)
   * Hide sesitive information when printing data sent to OSM in debug mode
   * Add archived attribute to Event
   * Add :include\_archived option to api.get\_events method

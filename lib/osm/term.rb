@@ -47,6 +47,17 @@ module Osm
       )
     end
 
+    # Get the term's data for use with the API
+    # @return [Hash]
+    def to_api
+      {
+        'term' => name,
+        'start' => start.strftime(Osm::OSM_DATE_FORMAT),
+        'end' => finish.strftime(Osm::OSM_DATE_FORMAT),
+        'termid' => id
+      }
+    end
+
     # Determine if the term is completly before the passed date
     # @param [Date] date
     # @return [Boolean] if the term is completly before the passed date

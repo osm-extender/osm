@@ -612,7 +612,7 @@ module Osm
     end
 
     # Create an evening in OSM
-    # @param [Fixnum] section_id the id of the section to add the term to
+    # @param [Osm::Section, Fixnum] section or section_id to add the evening to
     # @param [Date] meeting_date the date of the meeting
     # @!macro options_api_data
     # @return [Boolean] if the operation suceeded or not
@@ -635,6 +635,39 @@ module Osm
       return data.is_a?(Hash) && (data['result'] == 0)
     end
 
+    # Create a term in OSM
+    # @param [Hash] options - the configuration of the new term
+    #   @option options [Osm::Section, Fixnum] :section (required) section or section_id to add the term to
+    #   @option options [String] :name (required) the name for the term
+    #   @option options [Date] :start (required) the date for the start of term
+    #   @option options [Date] :finish (required) the date for the finish of term
+    # @return [Boolean] if the operation suceeded or not
+    def create_term(options={})
+      raise ArgumentError, ":section can't be nil" if options[:section].nil?
+      raise ArgumentError, ":name can't be nil" if options[:name].nil?
+      raise ArgumentError, ":start can't be nil" if options[:start].nil?
+      raise ArgumentError, ":finish can't be nil" if options[:finish].nil?
+
+      section_id = id_for_section(options[:section])
+      api_data = {
+        'term' => options[:name],
+        'start' => options[:start].strftime(Osm::OSM_DATE_FORMAT),
+        'end' => options[:finish].strftime(Osm::OSM_DATE_FORMAT),
+        'termid' => '0'
+      }
+
+      data = perform_query("users.php?action=addTerm&sectionid=#{section_id}", api_data)
+
+      # The cached terms for the section will be out of date - remove them
+      get_terms.each do |term|
+        cache_delete("term-#{term.id}") if term.section_id == section_id
+      end
+      cache_delete("terms-#{@userid}")
+
+      return data.is_a?(Hash) && data['terms'].is_a?(Hash)
+    end
+
+
     # Update an evening in OSM
     # @param [Osm::Evening] evening the evening to update
     # @!macro options_api_data
@@ -652,6 +685,22 @@ module Osm
       return response.is_a?(Hash) && (response['result'] == 0)
     end
 
+    # Update a term in OSM
+    # @param [Osm::Term] term the term to update
+    # @return [Boolean] if the operation suceeded or not
+    def update_term(term)
+      raise ArgumentIsInvalid, 'term is invalid' unless term.valid?
+
+      data = perform_query("users.php?action=addTerm&sectionid=#{term.section_id}", term.to_api)
+
+      # The cached terms for the section will be out of date - remove them
+      cache_delete("term-#{term.id}")
+      cache_delete("terms-#{@userid}")
+
+      return data.is_a?(Hash) && data['terms'].is_a?(Hash)
+    end
+  
+  
 
     protected
     # Set access permission for the current user on a resource stored in the cache
