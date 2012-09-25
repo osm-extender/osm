@@ -1,7 +1,12 @@
 ## Version 0.0.22
 
-  * Create a term
-  * Update a term
+  * Adjustments so DueBadge is similar enough to badge\_stock data to be useful:
+    * by\_member Hash -> Keys are member's name (String), values are the badge key (String)
+    * descriptions Hash -> keys are the badge key (String), values are the badge name (String)
+    * totals Hash -> keys are the badge key (String), values are the  number required (Fixnum)
+    * Badge keys are the same as are used in getting badge stock levels
+  * Add ability to Create a term
+  * Add ability to Update a term
 
 ## Version 0.0.21
 

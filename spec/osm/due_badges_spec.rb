@@ -11,21 +11,21 @@ describe "DueBadge" do
             'scoutid' => '1',
             'firstname' => 'John',
             'lastname' => 'Doe',
-            'completed' => '',
+            'level' => '',
             'extra' => '',
           }
         ],
-        'cubs_core_participation' => [{
+        'staged_staged_participation' => [{
             'sid' => '2',
             'firstname' => 'Jane',
             'lastname' => 'Doe',
-            'completed' => '3',
-            'extra' => 'Lvl 3'
+            'level' => '2',
+            'extra' => 'Lvl 2'
           }, {
             'sid' => '1',
             'firstname' => 'John',
             'lastname' => 'Doe',
-            'completed' => '2',
+            'level' => '2',
             'extra' => 'Lvl 2'
           }
         ]
@@ -38,10 +38,10 @@ describe "DueBadge" do
           'type' => 'activity',
           'badge' => 'badge_name'
         },
-        'cubs_core_participation' => {
+        'staged_staged_participation' => {
           'name' => 'Participation',
-          'section' => 'cubs',
-          'type' => 'core',
+          'section' => 'staged',
+          'type' => 'staged',
           'badge' => 'participation'
         }
       }
@@ -49,9 +49,9 @@ describe "DueBadge" do
     db = Osm::DueBadges.from_api(data)
 
     db.empty?.should == false
-    db.descriptions.should == {:badge_name=>{:name=>"Badge Name", :section=>:cubs, :type=>:activity, :badge=>"badge_name"}, :cubs_core_participation=>{:name=>"Participation", :section=>:cubs, :type=>:core, :badge=>"participation"}}
-    db.by_member.should == {"John Doe"=>[{:badge=>:badge_name, :extra_information=>""}, {:badge=>:cubs_core_participation, :extra_information=>"Lvl 2"}], "Jane Doe"=>[{:badge=>:cubs_core_participation, :extra_information=>"Lvl 3"}]}
-    db.totals.should == {:badge_name=>{""=>1}, :cubs_core_participation=>{"Lvl 3"=>1, "Lvl 2"=>1}}
+    db.descriptions.should == {'badge_name_1'=>'Badge Name', 'staged_staged_participation_2'=>'Participation (Level 2)'}
+    db.by_member.should == {'John Doe'=>['badge_name_1', 'staged_staged_participation_2'], 'Jane Doe'=>['staged_staged_participation_2']}
+    db.totals.should == {'staged_staged_participation_2'=>2, 'badge_name_1'=>1}
     db.valid?.should be_true
   end
 
