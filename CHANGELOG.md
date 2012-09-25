@@ -1,6 +1,6 @@
 ## Version 0.0.23
 
-  * 
+  * get\_badge\_stock\_levels now returns a hash whoose values are Fixnum not String
 
 ## Version 0.0.22
 
