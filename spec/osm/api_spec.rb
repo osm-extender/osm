@@ -401,6 +401,33 @@ describe "API" do
     end
 
 
+    it "Fetch badge stock levels for a section" do
+      badges_body = {
+        'stock' => {
+          'sectionid' => 1,
+          'badge_1' => 1,
+          'badge_2' => 2
+        }
+      }
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=core&sectionid=1&section=test&termid=2", :body => badges_body.to_json)
+
+      section = Osm::Section.new(:id => 1, :type => :test)
+      term = Osm::Term.new(:id => 2)
+      stock = Osm::Api.new('1', '2').get_badge_stock_levels(section, term)
+      stock.should == {'badge_1' => 1, 'badge_2' => 2}
+    end
+
+    it "Fetch badge stock levels for a section (data from API missing)" do
+      badges_body = {}
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=core&sectionid=1&section=test&termid=2", :body => badges_body.to_json)
+
+      section = Osm::Section.new(:id => 1, :type => :test)
+      term = Osm::Term.new(:id => 2)
+      stock = Osm::Api.new('1', '2').get_badge_stock_levels(section, term)
+      stock.should == {}
+    end
+
     it "Fetch the register structure for a section" do
       data = [
         {"rows" => [{"name"=>"First name","field"=>"firstname","width"=>"100px"},{"name"=>"Last name","field"=>"lastname","width"=>"100px"},{"name"=>"Total","field"=>"total","width"=>"60px"}],"noscroll"=>true},

@@ -5,6 +5,7 @@
     * descriptions Hash -> keys are the badge key (String), values are the badge name (String)
     * totals Hash -> keys are the badge key (String), values are the  number required (Fixnum)
     * Badge keys are the same as are used in getting badge stock levels
+  * Add ability to get badge stock levels
   * Add ability to Create a term
   * Add ability to Update a term
 
