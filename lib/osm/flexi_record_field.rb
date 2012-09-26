@@ -19,6 +19,7 @@ module Osm
 
     validates_presence_of :id
     validates_presence_of :name
+    validates_inclusion_of :editable, :in => [true, false]
 
 
     # @!method initialize
