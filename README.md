@@ -110,14 +110,12 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Register - Update attendance
   * Flexi Records:
     * Update data
-    * Delete
-    * Update
     * Add Column
   * Events:
     * Attendance (everything)
+    * Add column
     * Create
     * Update
-    * Delete
   * Member:
     * Update
     * Add

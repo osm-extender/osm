@@ -154,4 +154,14 @@ describe "Section" do
     end
   end
 
+
+  it "Sorts Flexi Records by name" do
+    fr1 = Osm::Section::FlexiRecord.new(:id => 1, :name => 'A')
+    fr2 = Osm::Section::FlexiRecord.new(:id => 1, :name => 'B')
+    fr3 = Osm::Section::FlexiRecord.new(:id => 1, :name => 'C')
+    records = [fr2, fr1, fr3]
+
+    records.sort.should == [fr1, fr2, fr3]
+  end
+
 end
