@@ -1,6 +1,6 @@
 ## Version 0.0.24
 
-  * 
+  * Make Section::FlexiRecord sortable
 
 ## Version 0.0.23
 

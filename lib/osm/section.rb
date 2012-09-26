@@ -102,6 +102,7 @@ module Osm
       fr.each do |record_data|
         attributes[:flexi_records].push FlexiRecord.from_api(record_data)
       end
+      attributes[:flexi_records].sort
 
       new(attributes)
     end
@@ -137,17 +138,17 @@ module Osm
       end
     end
 
-    def <=>(another_section)
+    def <=>(another)
       begin
-        return self.role <=> another_section.role
+        return self.role <=> another.role
       rescue NoMethodError
-        return false
+        return 1
       end
     end
 
-    def ==(another_section)
+    def ==(another)
       begin
-        return self.id == another_section.id
+        return self.id == another.id
       rescue NoMethodError
         return false
       end
@@ -170,6 +171,7 @@ module Osm
       separator = " " unless attribute_descriptions.empty?
       "#<#{self.class.name}#{separator}#{attribute_descriptions}>"
     end
+
 
     class FlexiRecord
       include ::ActiveAttr::MassAssignmentSecurity
@@ -206,6 +208,15 @@ module Osm
           :name => data['name'],
         })
       end
+
+      def <=>(another)
+        begin
+          return self.name <=> another.name
+        rescue NoMethodError
+          return 1
+        end
+      end
+
     end # Class Section::FlexiRecord
 
   end # Class Section
