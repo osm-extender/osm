@@ -1,6 +1,12 @@
 ## Version 0.0.25
 
-  * 
+  * FlexiRecordData, move these attributes to the fields hash:
+    * first\_name => 'firstname'
+    * last\_name => 'lastname'
+    * age => 'age'
+    * date\_of\_birth => 'dob'
+    * completed => 'completed'
+    * total => 'total'
 
 ## Version 0.0.24
 

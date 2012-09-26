@@ -24,13 +24,13 @@ describe "Flexi Record Data" do
 
     rd.member_id.should == 1
     rd.grouping_id.should == 2
-    rd.first_name.should == 'First'
-    rd.last_name.should == 'Last'
-    rd.total.should == 3
-    rd.completed.nil?.should be_true
-    rd.age.nil?.should be_true
-    rd.date_of_birth.should == Date.new(1899, 11, 30)
     rd.fields.should == {
+      'firstname' => 'First',
+      'lastname' => 'Last',
+      'dob' => Date.new(1899, 11, 30),
+      'total' => 3,
+      'completed' => nil,
+      'age' => nil,
       'f_1' => 'a',
       'f_2' => 'b',
     }
