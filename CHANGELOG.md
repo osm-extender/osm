@@ -1,3 +1,7 @@
+## Version 0.0.26
+
+  * 
+
 ## Version 0.0.25
 
   * FlexiRecordData, move these attributes to the fields hash:
