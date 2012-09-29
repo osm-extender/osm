@@ -73,7 +73,10 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * API Access for our app
   * Due Badges
   * Evening
+  * Event
   * Events
+  * Event Fields
+  * Event Attendance
   * Flexi Record Data
   * Flexi Record Structure
   * Groupings (e.g. Sixes, Patrols)
@@ -112,7 +115,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Update data
     * Add Column
   * Events:
-    * Attendance (everything)
+    * Attendance (update)
     * Add column
     * Create
     * Update

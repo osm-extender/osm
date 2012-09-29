@@ -449,25 +449,99 @@ module Osm
       events = nil
 
       if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, section_id, api_data)
-        events = cache_read(cache_key)
-      else
-
-        data = perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true", api_data)
-
-        events = Array.new
-        unless data['items'].nil?
-          data['items'].each do |item|
-            events.push Osm::Event.from_api(item)
-          end
-        end
-        self.user_can_access :programme, section_id, api_data
-        cache_write(cache_key, events, :expires_in => @@default_cache_ttl)
+        return cache_read(cache_key)
       end
+
+      data = perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true", api_data)
+
+      events = Array.new
+      unless data['items'].nil?
+        data['items'].each do |item|
+          event = Osm::Event.from_api(item)
+          events.push event
+          cache_write("event-#{section_id}-#{event.id}", event, :expires_in => @@default_cache_ttl)
+        end
+      end
+      self.user_can_access :programme, section_id, api_data
+      cache_write(cache_key, events, :expires_in => @@default_cache_ttl)
 
       return events if options[:include_archived]
       return events.reject do |event|
         event.archived?
       end
+    end
+
+    # Get event
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the events for
+    # @param [Fixnum] event_id the id of the event to get
+    # @!macro options_get
+    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
+    # @return [Osm::Event, nil] the event (or nil if it couldn't be found
+    def get_event(section, event_id, options={})
+      section_id = id_for_section(section)
+      cache_key = "event-#{section_id}-#{event_id}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, section_id)
+        return cache_read(cache_key)
+      end
+
+      events = get_events(section, options)
+      return nil unless events.is_a? Array
+
+      events.each do |event|
+        return event if event.id == event_id
+      end
+
+      return nil
+    end
+
+    # Get event fields
+    # @param [Osm::Event, Fixnum] event the event to get the fieldss for
+    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
+    # @return [Hash] fields of data assigned to the event (keys is the id, value is the field names)
+    def get_event_fields(event, term=nil, options={})
+      term_id = id_for_term(term, event.section_id)
+      cache_key = "event-fields-#{event.section_id}-#{event.id}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, event.section_id)
+        return cache_read(cache_key)
+      end
+
+      data = perform_query("events.php?action=getEvent&sectionid=#{event.section_id}&eventid=#{event.id}")
+
+      fields = {}
+      ActiveSupport::JSON.decode(data['config']).each do |field|
+        fields[field['id']] = field['name']
+      end
+      return fields
+    end
+
+    # Get event attendance
+    # @param [Osm::Event] event the event to get the fieldss for
+    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
+    # @return [Hash] fields of data assigned to the event (keys is the id, value is the field names)
+    def get_event_attendance(event, term=nil, options={})
+      term_id = id_for_term(term, event.section_id)
+      cache_key = "event-attendance-#{event.section_id}-#{event.id}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, event.section_id)
+        return cache_read(cache_key)
+      end
+
+      data = perform_query("events.php?action=getEventAttendance&eventid=#{event.id}&sectionid=#{event.section_id}&termid=#{term_id}")
+      data = data['items']
+
+      to_return = []
+      data.each do |item|
+        to_return.push Osm::EventAttendance.from_api(item)
+      end
+      self.user_can_access :programme, event.section_id
+      cache_write(cache_key, to_return, :expires_in => @@default_cache_ttl/2)
+      return to_return
     end
 
     # Get due badges

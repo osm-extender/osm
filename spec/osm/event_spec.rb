@@ -16,7 +16,7 @@ describe "Event" do
       'cost' => 'Free',
       'location' => 'Somewhere',
       'notes' => 'None',
-      'archived' => '0'
+      'archived' => '0',
     }
     event = Osm::Event.from_api(data)
 

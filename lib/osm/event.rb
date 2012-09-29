@@ -21,6 +21,7 @@ module Osm
     # @!attribute [rw] notes
     #   @return [String] notes about the event
     # @!attribute [rw] archived
+    #   @return [Boolean] if the event has been archived
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -55,7 +56,7 @@ module Osm
         :cost => data['cost'],
         :location => data['location'],
         :notes => data['notes'],
-        :archived => data['archived'].eql?('1')
+        :archived => data['archived'].eql?('1'),
       })
     end
 
