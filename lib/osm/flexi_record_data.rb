@@ -41,7 +41,7 @@ module Osm
         :member_id => Osm::to_i_or_nil(data['scoutid']),
         :grouping_id => Osm::to_i_or_nil(data['patrolid'].eql?('') ? nil : data['patrolid']),
         :fields => data.select { |key, value|
-          ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/^f_\d+/)
+          ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
         }
       })
     end

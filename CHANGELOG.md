@@ -4,6 +4,7 @@
     * Add api.get\_event
     * Add api.get\_event\_fields
     * Add api.get\_event\_attendance
+    * Add api.update\_event\_attendance
   * Fix "uninitialized constant Osm::Api::HTTParty"
 
 ## Version 0.0.25

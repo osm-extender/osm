@@ -94,6 +94,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ### Update
   * Evening
+  * Event Attendance
 
 ### Create
   * Evening
@@ -115,7 +116,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Update data
     * Add Column
   * Events:
-    * Attendance (update)
     * Add column
     * Create
     * Update

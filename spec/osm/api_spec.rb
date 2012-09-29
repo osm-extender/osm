@@ -444,6 +444,67 @@ describe "API" do
       attendance.is_a?(Array).should be_true
     end
 
+    it "Update an event's attendance" do
+      events_body = {
+        'identifier' => 'eventid',
+        'label' => 'name',
+        'items' => [{
+          'eventid' => '2',
+          'name' => 'An Event',
+          'startdate' => '2001-02-03',
+          'enddate' => nil,
+          'starttime' => '00:00:00',
+          'endtime' => '00:00:00',
+          'cost' => '0.00',
+          'location' => '',
+          'notes' => '',
+          'sectionid' => 1,
+          'googlecalendar' => nil,
+          'archived' => '0'
+        }]
+      }
+      attendance_body = {
+	'identifier' => 'scoutid',
+	'eventid' => '2',
+	'items' => [
+          {
+	    'scoutid' => '1',
+	    'attending' => 'Yes',
+            'firstname' => 'First',
+            'lastname' => 'Last',
+            'dob' => '1980-01-02',
+            'patrolid' => '2',
+            'f_1' => '',
+          }
+        ]
+      }
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json)
+
+      api = Osm::Api.new('1', '2')
+      e = api.get_event(1, 2)
+      ea = api.get_event_attendance(e, 3)[0]
+      ea.fields['f_1'] = 'TEST'
+
+      HTTParty.should_receive(:post).with(
+        "https://www.onlinescoutmanager.co.uk/events.php?action=updateScout",
+        {:body => {
+          'scoutid' => 1,
+          'column' => 'f_1',
+          'value' => 'TEST',
+          'sectionid' => 1,
+          'row' => 0,
+          'eventid' => 2,
+          'apiid' => '1',
+          'token' => 'API TOKEN',
+          'userid' => '1',
+          'secret' => '2',
+        }}
+      ) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      api.update_event_attendance(e, ea, 'f_1').should be_true
+    end
+
     it "Fetch events for a section honoring archived option" do
       body = {
         'identifier' => 'eventid',

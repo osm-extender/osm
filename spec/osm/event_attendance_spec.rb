@@ -16,7 +16,7 @@ describe "Event Attendance" do
       "attending" => "Yes",
     }
 
-    ea = Osm::EventAttendance.from_api(data)
+    ea = Osm::EventAttendance.from_api(data, 3)
 
     ea.member_id.should == 1
     ea.grouping_id.should == 2
@@ -27,6 +27,7 @@ describe "Event Attendance" do
       'attending' => true,
       'f_1' => 'a',
     }
+    ea.row.should == 3
     ea.valid?.should be_true
   end
 

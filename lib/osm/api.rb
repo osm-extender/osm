@@ -448,7 +448,7 @@ module Osm
       cache_key = "events-#{section_id}"
       events = nil
 
-      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, section_id, api_data)
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:events, section_id, api_data)
         return cache_read(cache_key)
       end
 
@@ -462,7 +462,7 @@ module Osm
           cache_write("event-#{section_id}-#{event.id}", event, :expires_in => @@default_cache_ttl)
         end
       end
-      self.user_can_access :programme, section_id, api_data
+      self.user_can_access :events, section_id, api_data
       cache_write(cache_key, events, :expires_in => @@default_cache_ttl)
 
       return events if options[:include_archived]
@@ -481,7 +481,7 @@ module Osm
       section_id = id_for_section(section)
       cache_key = "event-#{section_id}-#{event_id}"
 
-      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, section_id)
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:events, section_id)
         return cache_read(cache_key)
       end
 
@@ -505,7 +505,7 @@ module Osm
       term_id = id_for_term(term, event.section_id)
       cache_key = "event-fields-#{event.section_id}-#{event.id}"
 
-      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, event.section_id)
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:events, event.section_id)
         return cache_read(cache_key)
       end
 
@@ -515,6 +515,9 @@ module Osm
       ActiveSupport::JSON.decode(data['config']).each do |field|
         fields[field['id']] = field['name']
       end
+
+      self.user_can_access :events, event.section_id
+      cache_write(cache_key, fields, :expires_in => @@default_cache_ttl)
       return fields
     end
 
@@ -528,7 +531,7 @@ module Osm
       term_id = id_for_term(term, event.section_id)
       cache_key = "event-attendance-#{event.section_id}-#{event.id}"
 
-      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, event.section_id)
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:events, event.section_id)
         return cache_read(cache_key)
       end
 
@@ -536,10 +539,10 @@ module Osm
       data = data['items']
 
       to_return = []
-      data.each do |item|
-        to_return.push Osm::EventAttendance.from_api(item)
+      data.each_with_index do |item, index|
+        to_return.push Osm::EventAttendance.from_api(item, index)
       end
-      self.user_can_access :programme, event.section_id
+      self.user_can_access :events, event.section_id
       cache_write(cache_key, to_return, :expires_in => @@default_cache_ttl/2)
       return to_return
     end
@@ -798,6 +801,31 @@ module Osm
       cache_delete("terms-#{@userid}")
 
       return data.is_a?(Hash) && data['terms'].is_a?(Hash)
+    end
+
+    # Update event attendance
+    # @param [Osm::Event] event the event to update the attendance of
+    # @param [Osm::EventAttendance] event_attendance the attendance record to update
+    # @param [String] field_id the id of the field to update (must be 'attending' or /\Af_\d+\Z/)
+    # @return [Boolean] if the operation suceeded or not
+    def update_event_attendance(event, event_attendance, field_id)
+      raise ArgumentIsInvalid, 'event is invalid' unless event.valid?
+      raise ArgumentIsInvalid, 'event_attendance is invalid' unless event_attendance.valid?
+      raise ArgumentIsInvalid, 'field_id is invalid' unless field_id.match(/\Af_\d+\Z/) || field_id.eql?('attending')
+
+      data = perform_query("events.php?action=updateScout", {
+        'scoutid' => event_attendance.member_id,
+        'column' => field_id,
+        'value' => !field_id.eql?('attending') ? event_attendance.fields[field_id] : (event_attendance.fields['attending'] ? 'Yes' : 'No'),
+        'sectionid' => event.section_id,
+        'row' => event_attendance.row,
+        'eventid' => event.id,
+      })
+
+      # The cached event attedance will be out of date
+      cache_delete("event-attendance-#{event.section_id}-#{event.id}")
+
+      return data.is_a?(Hash)
     end
   
   
