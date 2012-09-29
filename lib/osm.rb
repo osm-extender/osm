@@ -1,5 +1,9 @@
 require 'active_attr'
+require 'active_support'
+require 'active_model'
 require 'date'
+require 'httparty'
+
 
 module Osm
   OSM_EPOCH_S = '1970-01-01'

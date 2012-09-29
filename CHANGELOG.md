@@ -1,6 +1,6 @@
 ## Version 0.0.26
 
-  * 
+  * Fix "uninitialized constant Osm::Api::HTTParty"
 
 ## Version 0.0.25
 
