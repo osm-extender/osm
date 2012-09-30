@@ -114,19 +114,18 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
   * Badges:
     * Which requirements each member has met:
-      * Retreive
-      * Update
-    * Retrieve details for each badge (stock, short column names etc.)
+      * Retreive [issue 21]
+      * Update [issue 22]
+    * Retrieve details for each badge (stock, short column names etc.) [issue 20]
   * Flexi Records:
-    * Update data
-    * Add Column
+    * Update data [issue 23]
+    * Add Column [issue 24]
   * Member:
-    * Update
-    * Add
-    * Delete
+    * Update [issue 33]
+    * Add [issue 34]
+  * Add activity to programme [issue 35]
+  * Delete Evening [issue 36]
   * Update Activity
-  * Add activity to programme
-  * Delete Evening
   * Gift aid (everything)
   * Finances (Everything)
   * SMS:
