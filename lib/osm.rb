@@ -63,6 +63,16 @@ module Osm
     end
   end
 
+  def self.parse_date_time(date_time)
+    return nil if date_time.nil? || date_time.empty?
+    begin
+      return DateTime.strptime((date_time), OSM_DATETIME_FORMAT)
+    rescue ArgumentError
+      return nil
+    end
+  end
+
+
   def self.parse_date(date, options={})
     return nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
     begin

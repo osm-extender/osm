@@ -110,7 +110,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
       * Retreive
       * Update
     * Retrieve details for each badge (stock, short column names etc.)
-  * Retreival of leader access
   * Register - Update attendance
   * Flexi Records:
     * Update data
