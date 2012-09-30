@@ -326,6 +326,25 @@ module Osm
       return result
     end
 
+    # Get the badge requirements met on a specific evening
+    # @param [Osm::Section] section the section to get the pbadge requirements for
+    # @param [Osm::Evening, DateTime, Date] evening the evening (or its date) to get the badge requirements for
+    # @!macro options_get
+    # @return [Array<Hash>] hashes ready to pass into the update_register method
+    def get_badge_requirements_for_evening(section, evening, options={})
+      evening = evening.meeting_date if evening.is_a?(Osm::Evening)
+      cache_key = "badge_requirements-#{section.id}-#{evening.strftime('%Y%m%d')}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, section.id)
+        return cache_read(cache_key)
+      end
+
+      data = perform_query("users.php?action=getActivityRequirements&date=#{evening.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
+
+      cache_write(cache_key, data, :expires_in => @@default_cache_ttl)
+      return data
+    end
+
     # Get activity details
     # @param [Fixnum] activity_id the activity ID
     # @param [Fixnum] version the version of the activity to retreive, if nil the latest version will be assumed
@@ -873,6 +892,43 @@ module Osm
       end
 
       return response.is_a?(Hash) && (response['result'] == 0)
+    end
+
+
+    # Update register for an evening in OSM
+    # @param [Hash] data
+    # @option data [Osm::Section] :section the section to update the register for
+    # @option data [Osm::Term, Fixnum, nil] :term the term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @option data [Osm::Evening, DateTime, Date] :evening the evening to update the register on
+    # @option data [String] :attendance what to mark the attendance as, one of "Yes", "No" or "Absent"
+    # @option data [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>] :members the members (or their ids) to update
+    # @option data [Array<Hash>] :completed_badge_requirements (optional) the badge requirements to mark as completed, selected from the Hash returned by the get_badge_requirements_for_evening method
+    # @return [Boolean] wether the update succedded
+    def update_register(data={})
+      raise ArgumentIsInvalid, ':attendance is invalid' unless ['Yes', 'No', 'Absent'].include?(data[:attendance])
+      raise ArgumentIsInvalid, ':section is missing' if data[:section].nil?
+      raise ArgumentIsInvalid, ':term is missing' if data[:term].nil?
+      raise ArgumentIsInvalid, ':evening is missing' if data[:evening].nil?
+      raise ArgumentIsInvalid, ':members is missing' if data[:members].nil?
+
+      term_id = id_for_term(data[:term], data[:section])
+
+      data[:members] = [data[:members]] unless data[:members].is_a?(Array)    # Make sure it's an Array
+      data[:members] = data[:members].map{ |member| (member.is_a?(Fixnum) ? member : member.id).to_s } # Make sure it's an Array of Strings
+
+      response = perform_query("users.php?action=registerUpdate&sectionid=#{data[:section].id}&termid=#{term_id}", {
+        'scouts' => data[:members].inspect,
+        'selectedDate' => data[:evening].strftime(Osm::OSM_DATE_FORMAT),
+        'present' => data[:attendance],
+        'section' => data[:section].type,
+        'sectionid' => data[:section].id,
+        'completedBadges' => (data[:completed_badge_requirements] || []).to_json
+      })
+
+      # The cached attendance will be out of date - remove them
+      cache_delete("register-#{data[:section].id}-#{term_id}")
+
+      return response.is_a?(Array)
     end
 
     # Update a term in OSM

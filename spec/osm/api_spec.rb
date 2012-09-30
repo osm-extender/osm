@@ -560,6 +560,17 @@ describe "API" do
     end
 
 
+    it "Fetch badge requirements for an evening" do
+      badges_body = [{'a'=>'a'},{'a'=>'A'}]
+      FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs', :body => badges_body.to_json)
+
+      section = Osm::Section.new(:id => 3, :type => :cubs)
+      evening = Date.new(2000, 1, 2)
+
+      Osm::Api.new('1', '2').get_badge_requirements_for_evening(section, evening).should == badges_body
+    end
+
+
     it "Fetch badge stock levels for a section" do
       badges_body = {
         'stock' => {
@@ -1005,6 +1016,32 @@ describe "API" do
         :start => Date.new(2010, 01, 01),
         :finish => Date.new(2010, 12, 31),
       }).should be_false
+    end
+
+    it "Update register attendance" do
+      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=registerUpdate&sectionid=1&termid=2'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'scouts' => '["3"]',
+        'selectedDate' => '2000-01-02',
+        'present' => 'Yes',
+        'section' => :cubs,
+        'sectionid' => 1,
+        'completedBadges' => '[{"a":"A"},{"b":"B"}]'
+      }
+
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
+      Osm::Api.new('user', 'secret').update_register({
+        :section => Osm::Section.new(:id=>1, :type=>:cubs),
+        :term => 2,
+        :evening => Date.new(2000, 1, 2),
+        :attendance => 'Yes',
+        :members => 3,
+        :completed_badge_requirements => [{'a'=>'A'}, {'b'=>'B'}]
+      }).should be_true
     end
 
 

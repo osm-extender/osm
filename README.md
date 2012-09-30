@@ -71,6 +71,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Activity
   * API Access
   * API Access for our app
+  * Badge requirements for evening
   * Due Badges
   * Evening
   * Event
@@ -96,6 +97,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Evening
   * Event
   * Event Attendance
+  * Register attendance
 
 ### Create
   * Evening
@@ -115,7 +117,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
       * Retreive
       * Update
     * Retrieve details for each badge (stock, short column names etc.)
-  * Register - Update attendance
   * Flexi Records:
     * Update data
     * Add Column

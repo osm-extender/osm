@@ -1,5 +1,8 @@
 ## Version 0.0.26
 
+  * Register - Update attendance
+    * Add api.get\_badge\_requirements\_for\_evening
+    * Add api.update\_register
   * Event:
     * Add api.ceate\_event
     * Add api.update\_event
