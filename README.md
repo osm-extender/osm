@@ -98,6 +98,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ### Create
   * Evening
+  * Event
 
 ### Actions
   * Authorise an app to use the API on a user's behalf
@@ -116,8 +117,8 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Add Column
   * Events:
     * Add column
-    * Create
     * Update
+    * Delete
   * Member:
     * Update
     * Add

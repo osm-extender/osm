@@ -746,6 +746,70 @@ describe "API" do
     end
 
 
+    it "Create an event (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'name' => 'Test event',
+        'startdate' => '2000-01-02',
+        'enddate' => '2001-02-03',
+        'starttime' => '03:04:05',
+        'endtime' => '04:05:06',
+        'cost' => '1.23',
+        'location' => 'Somewhere',
+        'notes' => 'none'
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_events) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":1}'}) }
+
+      api.create_event(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
+        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
+        :cost => '1.23',
+        :location => 'Somewhere',
+        :notes => 'none'
+      })).should == 1
+    end
+
+    it "Create an event (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'name' => 'Test event',
+        'startdate' => '2000-01-02',
+        'enddate' => '2001-02-03',
+        'starttime' => '03:04:05',
+        'endtime' => '04:05:06',
+        'cost' => '1.23',
+        'location' => 'Somewhere',
+        'notes' => 'none'
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_events) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+      api.create_event(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
+        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
+        :cost => '1.23',
+        :location => 'Somewhere',
+        :notes => 'none'
+      })).should be_nil
+    end
+
     it "Create a term (succeded)" do
       url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
       post_data = {

@@ -1,5 +1,7 @@
 ## Version 0.0.26
 
+  * Event:
+    * Add api.ceate\_event
   * Event attendance:
     * Add api.get\_event
     * Add api.get\_event\_fields

@@ -738,6 +738,33 @@ module Osm
       return data.is_a?(Hash) && (data['result'] == 0)
     end
 
+    # Create an event in OSM
+    # @param [Osm::Event] event the event to add to OSM
+    # @return [Fixnum, nil] the id of the created event, nil if failed
+    def create_event(event)
+      raise ArgumentIsInvalid, 'event is invalid' unless event.valid?
+
+      data = perform_query("events.php?action=addEvent&sectionid=#{event.section_id}", {
+        'name' => event.name,
+        'location' => event.location,
+        'startdate' => event.start.strftime(Osm::OSM_DATE_FORMAT),
+        'enddate' => event.finish.strftime(Osm::OSM_DATE_FORMAT),
+        'cost' => event.cost,
+        'notes' => event.notes,
+        'starttime' => event.start.strftime(Osm::OSM_TIME_FORMAT),
+        'endtime' => event.finish.strftime(Osm::OSM_TIME_FORMAT),
+      })
+
+      # The cached events for the section will be out of date - remove them
+      get_events(event.section_id).each do |item|
+        cache_delete("event-#{item.section_id}-#{item.id}")
+      end
+      cache_delete("events-#{event.section_id}")
+
+      return data.is_a?(Hash) ? data['id'] : nil
+    end
+
+
     # Create a term in OSM
     # @param [Hash] options - the configuration of the new term
     #   @option options [Osm::Section, Fixnum] :section (required) section or section_id to add the term to
