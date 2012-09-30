@@ -907,7 +907,6 @@ module Osm
     def update_register(data={})
       raise ArgumentIsInvalid, ':attendance is invalid' unless ['Yes', 'No', 'Absent'].include?(data[:attendance])
       raise ArgumentIsInvalid, ':section is missing' if data[:section].nil?
-      raise ArgumentIsInvalid, ':term is missing' if data[:term].nil?
       raise ArgumentIsInvalid, ':evening is missing' if data[:evening].nil?
       raise ArgumentIsInvalid, ':members is missing' if data[:members].nil?
 
