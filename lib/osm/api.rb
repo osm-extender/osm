@@ -791,6 +791,21 @@ module Osm
       return data.is_a?(Hash) && (data['id'].to_i == event.id)
     end
 
+    # Delete an event from OSM
+    # @param [Osm::Event] event the event to delete from OSM
+    # @return [Boolean] wether the delete succedded
+    def delete_event(event)
+      raise ArgumentIsInvalid, 'event is invalid' unless event.valid?
+
+      data = perform_query("events.php?action=deleteEvent&sectionid=#{event.section_id}&eventid=#{event.id}", {})
+
+      # The cached events for the section will be out of date - remove them
+      cache_delete("event-#{event.section_id}-#{event.id}")
+      cache_delete("events-#{event.section_id}")
+
+      return data.is_a?(Hash) ? data['ok'] : false
+    end
+
     # Create a term in OSM
     # @param [Hash] options - the configuration of the new term
     #   @option options [Osm::Section, Fixnum] :section (required) section or section_id to add the term to
