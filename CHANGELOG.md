@@ -4,6 +4,7 @@
     * Add api.ceate\_event
     * Add api.update\_event
     * Add api.delete\_event
+    * Add api.add\_event\_field
   * Event attendance:
     * Add api.get\_event
     * Add api.get\_event\_fields

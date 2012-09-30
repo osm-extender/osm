@@ -916,6 +916,46 @@ describe "API" do
       })).should be_false
     end
 
+    it "Add field to an event (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addColumn&sectionid=1&eventid=2'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'columnName' => 'Test field',
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"eventid":"2"}'}) }
+
+      api.add_event_field(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :id => 2
+      }), 'Test field').should be_true
+    end
+
+    it "Add field to an event (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addColumn&sectionid=1&eventid=2'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'columnName' => 'Test field',
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+      api.add_event_field(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :id => 2
+      }), 'Test field').should be_false
+    end
+
 
     it "Create a term (succeded)" do
       url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'

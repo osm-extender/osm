@@ -806,6 +806,25 @@ module Osm
       return data.is_a?(Hash) ? data['ok'] : false
     end
 
+    # Add a field to an Event in OSM
+    # @param [Osm::Event] event the event to update in OSM
+    # @param [String] field_label the label for the field to add
+    # @return [Boolean] wether the update succedded
+    def add_event_field(event, field_label)
+      raise ArgumentIsInvalid, 'event is invalid' unless event.valid?
+      raise ArgumentIsInvalid, 'field_label is invalid' if field_label.blank?
+
+      data = perform_query("events.php?action=addColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
+        'columnName' => field_label
+      })
+
+      # The cached events for the section will be out of date - remove them
+      cache_delete("event-fields-#{event.section_id}-#{event.id}")
+      cache_delete("event-attendance-#{event.section_id}-#{event.id}")
+
+      return data.is_a?(Hash) && (data['eventid'].to_i == event.id)
+    end
+
     # Create a term in OSM
     # @param [Hash] options - the configuration of the new term
     #   @option options [Osm::Section, Fixnum] :section (required) section or section_id to add the term to
