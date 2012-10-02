@@ -1,9 +1,14 @@
 require 'active_attr'
+require 'active_support'
+require 'active_model'
 require 'date'
+require 'httparty'
+
 
 module Osm
   OSM_EPOCH_S = '1970-01-01'
   OSM_DATE_FORMAT = '%Y-%m-%d'
+  OSM_TIME_FORMAT = '%H:%M:%S'
   OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
   OSM_TIME_REGEX = /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/
   OSM_DATE_REGEX = /\A\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1])\Z/
@@ -58,6 +63,16 @@ module Osm
       return nil
     end
   end
+
+  def self.parse_date_time(date_time)
+    return nil if date_time.nil? || date_time.empty?
+    begin
+      return DateTime.strptime((date_time), OSM_DATETIME_FORMAT)
+    rescue ArgumentError
+      return nil
+    end
+  end
+
 
   def self.parse_date(date, options={})
     return nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])

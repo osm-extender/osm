@@ -71,9 +71,13 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Activity
   * API Access
   * API Access for our app
+  * Badge requirements for evening
   * Due Badges
   * Evening
+  * Event
   * Events
+  * Event Fields
+  * Event Attendance
   * Flexi Record Data
   * Flexi Record Structure
   * Groupings (e.g. Sixes, Patrols)
@@ -91,9 +95,16 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ### Update
   * Evening
+  * Event
+  * Event Attendance
+  * Register attendance
 
 ### Create
   * Evening
+  * Event
+
+### Delete
+  * Event
 
 ### Actions
   * Authorise an app to use the API on a user's behalf
@@ -103,26 +114,18 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
   * Badges:
     * Which requirements each member has met:
-      * Retreive
-      * Update
-    * Retrieve details for each badge (stock, short column names etc.)
-  * Retreival of leader access
-  * Register - Update attendance
+      * Retreive [issue 21]
+      * Update [issue 22]
+    * Retrieve details for each badge (stock, short column names etc.) [issue 20]
   * Flexi Records:
-    * Update data
-    * Add Column
-  * Events:
-    * Attendance (everything)
-    * Add column
-    * Create
-    * Update
+    * Update data [issue 23]
+    * Add Column [issue 24]
   * Member:
-    * Update
-    * Add
-    * Delete
+    * Update [issue 33]
+    * Add [issue 34]
+  * Add activity to programme [issue 35]
+  * Delete Evening [issue 36]
   * Update Activity
-  * Add activity to programme
-  * Delete Evening
   * Gift aid (everything)
   * Finances (Everything)
   * SMS:

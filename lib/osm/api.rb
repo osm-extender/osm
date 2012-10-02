@@ -326,6 +326,25 @@ module Osm
       return result
     end
 
+    # Get the badge requirements met on a specific evening
+    # @param [Osm::Section] section the section to get the pbadge requirements for
+    # @param [Osm::Evening, DateTime, Date] evening the evening (or its date) to get the badge requirements for
+    # @!macro options_get
+    # @return [Array<Hash>] hashes ready to pass into the update_register method
+    def get_badge_requirements_for_evening(section, evening, options={})
+      evening = evening.meeting_date if evening.is_a?(Osm::Evening)
+      cache_key = "badge_requirements-#{section.id}-#{evening.strftime('%Y%m%d')}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, section.id)
+        return cache_read(cache_key)
+      end
+
+      data = perform_query("users.php?action=getActivityRequirements&date=#{evening.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
+
+      cache_write(cache_key, data, :expires_in => @@default_cache_ttl)
+      return data
+    end
+
     # Get activity details
     # @param [Fixnum] activity_id the activity ID
     # @param [Fixnum] version the version of the activity to retreive, if nil the latest version will be assumed
@@ -448,26 +467,103 @@ module Osm
       cache_key = "events-#{section_id}"
       events = nil
 
-      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:programme, section_id, api_data)
-        events = cache_read(cache_key)
-      else
-
-        data = perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true", api_data)
-
-        events = Array.new
-        unless data['items'].nil?
-          data['items'].each do |item|
-            events.push Osm::Event.from_api(item)
-          end
-        end
-        self.user_can_access :programme, section_id, api_data
-        cache_write(cache_key, events, :expires_in => @@default_cache_ttl)
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:events, section_id, api_data)
+        return cache_read(cache_key)
       end
+
+      data = perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true", api_data)
+
+      events = Array.new
+      unless data['items'].nil?
+        data['items'].each do |item|
+          event = Osm::Event.from_api(item)
+          events.push event
+          cache_write("event-#{section_id}-#{event.id}", event, :expires_in => @@default_cache_ttl)
+        end
+      end
+      self.user_can_access :events, section_id, api_data
+      cache_write(cache_key, events, :expires_in => @@default_cache_ttl)
 
       return events if options[:include_archived]
       return events.reject do |event|
         event.archived?
       end
+    end
+
+    # Get event
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the events for
+    # @param [Fixnum] event_id the id of the event to get
+    # @!macro options_get
+    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
+    # @return [Osm::Event, nil] the event (or nil if it couldn't be found
+    def get_event(section, event_id, options={})
+      section_id = id_for_section(section)
+      cache_key = "event-#{section_id}-#{event_id}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:events, section_id)
+        return cache_read(cache_key)
+      end
+
+      events = get_events(section, options)
+      return nil unless events.is_a? Array
+
+      events.each do |event|
+        return event if event.id == event_id
+      end
+
+      return nil
+    end
+
+    # Get event fields
+    # @param [Osm::Event, Fixnum] event the event to get the fieldss for
+    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
+    # @return [Hash] fields of data assigned to the event (keys is the id, value is the field names)
+    def get_event_fields(event, term=nil, options={})
+      term_id = id_for_term(term, event.section_id)
+      cache_key = "event-fields-#{event.section_id}-#{event.id}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:events, event.section_id)
+        return cache_read(cache_key)
+      end
+
+      data = perform_query("events.php?action=getEvent&sectionid=#{event.section_id}&eventid=#{event.id}")
+
+      fields = {}
+      ActiveSupport::JSON.decode(data['config']).each do |field|
+        fields[field['id']] = field['name']
+      end
+
+      self.user_can_access :events, event.section_id
+      cache_write(cache_key, fields, :expires_in => @@default_cache_ttl)
+      return fields
+    end
+
+    # Get event attendance
+    # @param [Osm::Event] event the event to get the fieldss for
+    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
+    # @return [Hash] fields of data assigned to the event (keys is the id, value is the field names)
+    def get_event_attendance(event, term=nil, options={})
+      term_id = id_for_term(term, event.section_id)
+      cache_key = "event-attendance-#{event.section_id}-#{event.id}"
+
+      if !options[:no_cache] && cache_exist?(cache_key) && self.user_can_access?(:events, event.section_id)
+        return cache_read(cache_key)
+      end
+
+      data = perform_query("events.php?action=getEventAttendance&eventid=#{event.id}&sectionid=#{event.section_id}&termid=#{term_id}")
+      data = data['items']
+
+      to_return = []
+      data.each_with_index do |item, index|
+        to_return.push Osm::EventAttendance.from_api(item, index)
+      end
+      self.user_can_access :events, event.section_id
+      cache_write(cache_key, to_return, :expires_in => @@default_cache_ttl/2)
+      return to_return
     end
 
     # Get due badges
@@ -661,6 +757,93 @@ module Osm
       return data.is_a?(Hash) && (data['result'] == 0)
     end
 
+    # Create an event in OSM
+    # @param [Osm::Event] event the event to add to OSM
+    # @return [Fixnum, nil] the id of the created event, nil if failed
+    def create_event(event)
+      raise ArgumentIsInvalid, 'event is invalid' unless event.valid?
+
+      data = perform_query("events.php?action=addEvent&sectionid=#{event.section_id}", {
+        'name' => event.name,
+        'location' => event.location,
+        'startdate' => event.start.strftime(Osm::OSM_DATE_FORMAT),
+        'enddate' => event.finish.strftime(Osm::OSM_DATE_FORMAT),
+        'cost' => event.cost,
+        'notes' => event.notes,
+        'starttime' => event.start.strftime(Osm::OSM_TIME_FORMAT),
+        'endtime' => event.finish.strftime(Osm::OSM_TIME_FORMAT),
+      })
+
+      # The cached events for the section will be out of date - remove them
+      get_events(event.section_id).each do |item|
+        cache_delete("event-#{item.section_id}-#{item.id}")
+      end
+      cache_delete("events-#{event.section_id}")
+
+      return data.is_a?(Hash) ? data['id'] : nil
+    end
+
+    # Update an event in OSM
+    # @param [Osm::Event] event the event to update in OSM
+    # @return [Boolean] wether the update succedded
+    def update_event(event)
+      raise ArgumentIsInvalid, 'event is invalid' unless event.valid?
+
+      data = perform_query("events.php?action=addEvent&sectionid=#{event.section_id}", {
+        'eventid' => event.id,
+        'name' => event.name,
+        'location' => event.location,
+        'startdate' => event.start? ? event.start.strftime(Osm::OSM_DATE_FORMAT) : '',
+        'enddate' => event.finish? ? event.finish.strftime(Osm::OSM_DATE_FORMAT) : '',
+        'cost' => event.cost,
+        'notes' => event.notes,
+        'starttime' => event.start? ? event.start.strftime(Osm::OSM_TIME_FORMAT) : '',
+        'endtime' => event.finish? ? event.finish.strftime(Osm::OSM_TIME_FORMAT) : '',
+      })
+
+      # The cached events for the section will be out of date - remove them
+      get_events(event.section_id).each do |item|
+        cache_delete("event-#{item.section_id}-#{item.id}")
+      end
+      cache_delete("events-#{event.section_id}")
+
+      return data.is_a?(Hash) && (data['id'].to_i == event.id)
+    end
+
+    # Delete an event from OSM
+    # @param [Osm::Event] event the event to delete from OSM
+    # @return [Boolean] wether the delete succedded
+    def delete_event(event)
+      raise ArgumentIsInvalid, 'event is invalid' unless event.valid?
+
+      data = perform_query("events.php?action=deleteEvent&sectionid=#{event.section_id}&eventid=#{event.id}", {})
+
+      # The cached events for the section will be out of date - remove them
+      cache_delete("event-#{event.section_id}-#{event.id}")
+      cache_delete("events-#{event.section_id}")
+
+      return data.is_a?(Hash) ? data['ok'] : false
+    end
+
+    # Add a field to an Event in OSM
+    # @param [Osm::Event] event the event to update in OSM
+    # @param [String] field_label the label for the field to add
+    # @return [Boolean] wether the update succedded
+    def add_event_field(event, field_label)
+      raise ArgumentIsInvalid, 'event is invalid' unless event.valid?
+      raise ArgumentIsInvalid, 'field_label is invalid' if field_label.blank?
+
+      data = perform_query("events.php?action=addColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
+        'columnName' => field_label
+      })
+
+      # The cached events for the section will be out of date - remove them
+      cache_delete("event-fields-#{event.section_id}-#{event.id}")
+      cache_delete("event-attendance-#{event.section_id}-#{event.id}")
+
+      return data.is_a?(Hash) && (data['eventid'].to_i == event.id)
+    end
+
     # Create a term in OSM
     # @param [Hash] options - the configuration of the new term
     #   @option options [Osm::Section, Fixnum] :section (required) section or section_id to add the term to
@@ -711,6 +894,42 @@ module Osm
       return response.is_a?(Hash) && (response['result'] == 0)
     end
 
+
+    # Update register for an evening in OSM
+    # @param [Hash] data
+    # @option data [Osm::Section] :section the section to update the register for
+    # @option data [Osm::Term, Fixnum, nil] :term the term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @option data [Osm::Evening, DateTime, Date] :evening the evening to update the register on
+    # @option data [String] :attendance what to mark the attendance as, one of "Yes", "No" or "Absent"
+    # @option data [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>] :members the members (or their ids) to update
+    # @option data [Array<Hash>] :completed_badge_requirements (optional) the badge requirements to mark as completed, selected from the Hash returned by the get_badge_requirements_for_evening method
+    # @return [Boolean] wether the update succedded
+    def update_register(data={})
+      raise ArgumentIsInvalid, ':attendance is invalid' unless ['Yes', 'No', 'Absent'].include?(data[:attendance])
+      raise ArgumentIsInvalid, ':section is missing' if data[:section].nil?
+      raise ArgumentIsInvalid, ':evening is missing' if data[:evening].nil?
+      raise ArgumentIsInvalid, ':members is missing' if data[:members].nil?
+
+      term_id = id_for_term(data[:term], data[:section])
+
+      data[:members] = [data[:members]] unless data[:members].is_a?(Array)    # Make sure it's an Array
+      data[:members] = data[:members].map{ |member| (member.is_a?(Fixnum) ? member : member.id).to_s } # Make sure it's an Array of Strings
+
+      response = perform_query("users.php?action=registerUpdate&sectionid=#{data[:section].id}&termid=#{term_id}", {
+        'scouts' => data[:members].inspect,
+        'selectedDate' => data[:evening].strftime(Osm::OSM_DATE_FORMAT),
+        'present' => data[:attendance],
+        'section' => data[:section].type,
+        'sectionid' => data[:section].id,
+        'completedBadges' => (data[:completed_badge_requirements] || []).to_json
+      })
+
+      # The cached attendance will be out of date - remove them
+      cache_delete("register-#{data[:section].id}-#{term_id}")
+
+      return response.is_a?(Array)
+    end
+
     # Update a term in OSM
     # @param [Osm::Term] term the term to update
     # @return [Boolean] if the operation suceeded or not
@@ -724,6 +943,31 @@ module Osm
       cache_delete("terms-#{@userid}")
 
       return data.is_a?(Hash) && data['terms'].is_a?(Hash)
+    end
+
+    # Update event attendance
+    # @param [Osm::Event] event the event to update the attendance of
+    # @param [Osm::EventAttendance] event_attendance the attendance record to update
+    # @param [String] field_id the id of the field to update (must be 'attending' or /\Af_\d+\Z/)
+    # @return [Boolean] if the operation suceeded or not
+    def update_event_attendance(event, event_attendance, field_id)
+      raise ArgumentIsInvalid, 'event is invalid' unless event.valid?
+      raise ArgumentIsInvalid, 'event_attendance is invalid' unless event_attendance.valid?
+      raise ArgumentIsInvalid, 'field_id is invalid' unless field_id.match(/\Af_\d+\Z/) || field_id.eql?('attending')
+
+      data = perform_query("events.php?action=updateScout", {
+        'scoutid' => event_attendance.member_id,
+        'column' => field_id,
+        'value' => !field_id.eql?('attending') ? event_attendance.fields[field_id] : (event_attendance.fields['attending'] ? 'Yes' : 'No'),
+        'sectionid' => event.section_id,
+        'row' => event_attendance.row,
+        'eventid' => event.id,
+      })
+
+      # The cached event attedance will be out of date
+      cache_delete("event-attendance-#{event.section_id}-#{event.id}")
+
+      return data.is_a?(Hash)
     end
   
   

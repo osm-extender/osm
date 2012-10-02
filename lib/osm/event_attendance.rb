@@ -1,6 +1,6 @@
 module Osm
 
-  class FlexiRecordData
+  class EventAttendance
     include ::ActiveAttr::MassAssignmentSecurity
     include ::ActiveAttr::Model
 
@@ -10,13 +10,17 @@ module Osm
     #   @return [Fixnum] OSM id for the grouping the member is in
     # @!attribute [rw] fields
     #   @return [Hash] Keys are the field's id, values are the field values
+    # @!attribute [rw] row
+    #   @return [Fixnum] part of the OSM API
 
+    attribute :row, :type => Integer
     attribute :member_id, :type => Integer
     attribute :grouping_id, :type => Integer
     attribute :fields, :default => {}
 
-    attr_accessible :member_id, :grouping_id, :fields
+    attr_accessible :member_id, :grouping_id, :fields, :row
 
+    validates_numericality_of :row, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
     validates :fields, :hash => {:key_type => String}
@@ -29,23 +33,23 @@ module Osm
 
     # Initialize a new FlexiRecordData from api data
     # @param [Hash] data the hash of data provided by the API
-    def self.from_api(data)
+    # @param [Fixnum] row part of the OSM API
+    def self.from_api(data, row)
       data.merge!({
         'dob' => data['dob'].nil? ? nil : Osm::parse_date(data['dob'], :ignore_epoch => true),
-        'total' => Osm::to_i_or_nil(data['total'].eql?('') ? nil : data['total']),
-        'completed' => Osm::to_i_or_nil(data['completed'].eql?('') ? nil : data['completed']),
-        'age' => data['age'].eql?('') ? nil : data['age'],
+        'attending' => data['attending'].eql?('Yes'),
       })
 
       new({
         :member_id => Osm::to_i_or_nil(data['scoutid']),
         :grouping_id => Osm::to_i_or_nil(data['patrolid'].eql?('') ? nil : data['patrolid']),
         :fields => data.select { |key, value|
-          ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
-        }
+          ['firstname', 'lastname', 'dob', 'attending'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
+        },
+        :row => row,
       })
     end
 
-  end # Class FlexiRecordData
+  end # Class EventAttendance
 
 end # Module

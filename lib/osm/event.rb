@@ -21,6 +21,7 @@ module Osm
     # @!attribute [rw] notes
     #   @return [String] notes about the event
     # @!attribute [rw] archived
+    #   @return [Boolean] if the event has been archived
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -34,7 +35,7 @@ module Osm
 
     attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :name
 
@@ -55,7 +56,7 @@ module Osm
         :cost => data['cost'],
         :location => data['location'],
         :notes => data['notes'],
-        :archived => data['archived'].eql?('1')
+        :archived => data['archived'].eql?('1'),
       })
     end
 

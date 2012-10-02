@@ -1,3 +1,20 @@
+## Version 0.0.26
+
+  * Register - Update attendance
+    * Add api.get\_badge\_requirements\_for\_evening
+    * Add api.update\_register
+  * Event:
+    * Add api.ceate\_event
+    * Add api.update\_event
+    * Add api.delete\_event
+    * Add api.add\_event\_field
+  * Event attendance:
+    * Add api.get\_event
+    * Add api.get\_event\_fields
+    * Add api.get\_event\_attendance
+    * Add api.update\_event\_attendance
+  * Fix "uninitialized constant Osm::Api::HTTParty"
+
 ## Version 0.0.25
 
   * FlexiRecordData, move these attributes to the fields hash:

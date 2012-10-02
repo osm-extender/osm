@@ -346,6 +346,165 @@ describe "API" do
       events[0].id.should == 1
     end
 
+    it "Fetch an event" do
+      body = {
+        'identifier' => 'eventid',
+        'label' => 'name',
+        'items' => [{
+          'eventid' => '2',
+          'name' => 'An Event',
+          'startdate' => '2001-02-03',
+          'enddate' => nil,
+          'starttime' => '00:00:00',
+          'endtime' => '00:00:00',
+          'cost' => '0.00',
+          'location' => '',
+          'notes' => '',
+          'sectionid' => 1,
+          'googlecalendar' => nil,
+          'archived' => '0'
+        }]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
+      event = Osm::Api.new('1', '2').get_event(1, 2)
+      event.id.should == 2
+    end
+
+    it "Fetch an event's fields" do
+      events_body = {
+        'identifier' => 'eventid',
+        'label' => 'name',
+        'items' => [{
+          'eventid' => '2',
+          'name' => 'An Event',
+          'startdate' => '2001-02-03',
+          'enddate' => nil,
+          'starttime' => '00:00:00',
+          'endtime' => '00:00:00',
+          'cost' => '0.00',
+          'location' => '',
+          'notes' => '',
+          'sectionid' => 1,
+          'googlecalendar' => nil,
+          'archived' => '0'
+        }]
+      }
+      fields_body = {
+        'config' => '[{"id":"f_1","name":"Field 1"}]'
+      }
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => fields_body.to_json)
+      api = Osm::Api.new('1', '2')
+
+      fields = api.get_event_fields(api.get_event(1, 2), 3)
+      fields.should == {'f_1' => 'Field 1'}
+    end
+
+    it "Fetch an event's attendance" do
+      events_body = {
+        'identifier' => 'eventid',
+        'label' => 'name',
+        'items' => [{
+          'eventid' => '2',
+          'name' => 'An Event',
+          'startdate' => '2001-02-03',
+          'enddate' => nil,
+          'starttime' => '00:00:00',
+          'endtime' => '00:00:00',
+          'cost' => '0.00',
+          'location' => '',
+          'notes' => '',
+          'sectionid' => 1,
+          'googlecalendar' => nil,
+          'archived' => '0'
+        }]
+      }
+      attendance_body = {
+	'identifier' => 'scoutid',
+	'eventid' => '2',
+	'items' => [
+          {
+	    'scoutid' => '1',
+	    'attending' => 'Yes',
+            'firstname' => 'First',
+            'lastname' => 'Last',
+            'dob' => '1980-01-02',
+            'patrolid' => '2',
+            'f_1' => '',
+          }
+        ]
+      }
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json)
+      api = Osm::Api.new('1', '2')
+
+      attendance = api.get_event_attendance(api.get_event(1, 2), 3)
+      attendance.is_a?(Array).should be_true
+    end
+
+    it "Update an event's attendance" do
+      events_body = {
+        'identifier' => 'eventid',
+        'label' => 'name',
+        'items' => [{
+          'eventid' => '2',
+          'name' => 'An Event',
+          'startdate' => '2001-02-03',
+          'enddate' => nil,
+          'starttime' => '00:00:00',
+          'endtime' => '00:00:00',
+          'cost' => '0.00',
+          'location' => '',
+          'notes' => '',
+          'sectionid' => 1,
+          'googlecalendar' => nil,
+          'archived' => '0'
+        }]
+      }
+      attendance_body = {
+	'identifier' => 'scoutid',
+	'eventid' => '2',
+	'items' => [
+          {
+	    'scoutid' => '1',
+	    'attending' => 'Yes',
+            'firstname' => 'First',
+            'lastname' => 'Last',
+            'dob' => '1980-01-02',
+            'patrolid' => '2',
+            'f_1' => '',
+          }
+        ]
+      }
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json)
+
+      api = Osm::Api.new('1', '2')
+      e = api.get_event(1, 2)
+      ea = api.get_event_attendance(e, 3)[0]
+      ea.fields['f_1'] = 'TEST'
+
+      HTTParty.should_receive(:post).with(
+        "https://www.onlinescoutmanager.co.uk/events.php?action=updateScout",
+        {:body => {
+          'scoutid' => 1,
+          'column' => 'f_1',
+          'value' => 'TEST',
+          'sectionid' => 1,
+          'row' => 0,
+          'eventid' => 2,
+          'apiid' => '1',
+          'token' => 'API TOKEN',
+          'userid' => '1',
+          'secret' => '2',
+        }}
+      ) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      api.update_event_attendance(e, ea, 'f_1').should be_true
+    end
+
     it "Fetch events for a section honoring archived option" do
       body = {
         'identifier' => 'eventid',
@@ -398,6 +557,17 @@ describe "API" do
 
       due_badges = Osm::Api.new('1', '2').get_due_badges(1, 2)
       due_badges.should_not be_nil
+    end
+
+
+    it "Fetch badge requirements for an evening" do
+      badges_body = [{'a'=>'a'},{'a'=>'A'}]
+      FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs', :body => badges_body.to_json)
+
+      section = Osm::Section.new(:id => 3, :type => :cubs)
+      evening = Date.new(2000, 1, 2)
+
+      Osm::Api.new('1', '2').get_badge_requirements_for_evening(section, evening).should == badges_body
     end
 
 
@@ -587,6 +757,217 @@ describe "API" do
     end
 
 
+    it "Create an event (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'name' => 'Test event',
+        'startdate' => '2000-01-02',
+        'enddate' => '2001-02-03',
+        'starttime' => '03:04:05',
+        'endtime' => '04:05:06',
+        'cost' => '1.23',
+        'location' => 'Somewhere',
+        'notes' => 'none'
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_events) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+
+      api.create_event(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
+        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
+        :cost => '1.23',
+        :location => 'Somewhere',
+        :notes => 'none'
+      })).should == 2
+    end
+
+    it "Create an event (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'name' => 'Test event',
+        'startdate' => '2000-01-02',
+        'enddate' => '2001-02-03',
+        'starttime' => '03:04:05',
+        'endtime' => '04:05:06',
+        'cost' => '1.23',
+        'location' => 'Somewhere',
+        'notes' => 'none'
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_events) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+      api.create_event(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
+        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
+        :cost => '1.23',
+        :location => 'Somewhere',
+        :notes => 'none'
+      })).should be_nil
+    end
+
+    it "Update an event (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'name' => 'Test event',
+        'startdate' => '2000-01-02',
+        'enddate' => '2001-02-03',
+        'starttime' => '03:04:05',
+        'endtime' => '04:05:06',
+        'cost' => '1.23',
+        'location' => 'Somewhere',
+        'notes' => 'none',
+        'eventid' => 2
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_events) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+
+      api.update_event(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
+        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
+        :cost => '1.23',
+        :location => 'Somewhere',
+        :notes => 'none',
+        :id => 2
+      })).should be_true
+    end
+
+    it "Update an event (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'name' => 'Test event',
+        'startdate' => '2000-01-02',
+        'enddate' => '2001-02-03',
+        'starttime' => '03:04:05',
+        'endtime' => '04:05:06',
+        'cost' => '1.23',
+        'location' => 'Somewhere',
+        'notes' => 'none',
+        'eventid' => 2
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      api.stub(:get_events) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+      api.update_event(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
+        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
+        :cost => '1.23',
+        :location => 'Somewhere',
+        :notes => 'none',
+        :id => 2
+      })).should be_false
+    end
+
+    it "Delete an event (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=deleteEvent&sectionid=1&eventid=2'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+
+      api.delete_event(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :id => 2
+      })).should be_true
+    end
+
+    it "Delete an event (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=deleteEvent&sectionid=1&eventid=2'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
+
+      api.delete_event(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :id => 2
+      })).should be_false
+    end
+
+    it "Add field to an event (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addColumn&sectionid=1&eventid=2'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'columnName' => 'Test field',
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"eventid":"2"}'}) }
+
+      api.add_event_field(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :id => 2
+      }), 'Test field').should be_true
+    end
+
+    it "Add field to an event (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addColumn&sectionid=1&eventid=2'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'columnName' => 'Test field',
+      }
+
+      api = Osm::Api.new('user', 'secret')
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+      api.add_event_field(Osm::Event.new({
+        :section_id => 1,
+        :name => 'Test event',
+        :id => 2
+      }), 'Test field').should be_false
+    end
+
+
     it "Create a term (succeded)" do
       url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
       post_data = {
@@ -635,6 +1016,32 @@ describe "API" do
         :start => Date.new(2010, 01, 01),
         :finish => Date.new(2010, 12, 31),
       }).should be_false
+    end
+
+    it "Update register attendance" do
+      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=registerUpdate&sectionid=1&termid=2'
+      post_data = {
+        'apiid' => @api_config[:api_id],
+        'token' => @api_config[:api_token],
+        'userid' => 'user',
+        'secret' => 'secret',
+        'scouts' => '["3"]',
+        'selectedDate' => '2000-01-02',
+        'present' => 'Yes',
+        'section' => :cubs,
+        'sectionid' => 1,
+        'completedBadges' => '[{"a":"A"},{"b":"B"}]'
+      }
+
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
+      Osm::Api.new('user', 'secret').update_register({
+        :section => Osm::Section.new(:id=>1, :type=>:cubs),
+        :term => 2,
+        :evening => Date.new(2000, 1, 2),
+        :attendance => 'Yes',
+        :members => 3,
+        :completed_badge_requirements => [{'a'=>'A'}, {'b'=>'B'}]
+      }).should be_true
     end
 
 
