@@ -22,6 +22,28 @@ RSpec.configure do |config|
   config.before(:each) do
     FakeWeb.clean_registry
     OsmTest::Cache.clear
+
+    @CONFIGURATION = {
+      :api => {
+        :default_site => :osm,
+        :osm => {
+          :id => '1',
+          :token => 'API TOKEN',
+          :name => 'API NAME',
+        },
+        :ogm => {
+          :id => '2',
+          :token => 'API TOKEN 2',
+          :name => 'API NAME 2',
+        },
+      },
+      :cache => {
+        :cache => OsmTest::Cache,
+      },
+    }
+    Osm::configure(@CONFIGURATION)
+    
+    @api = Osm::Api.new('user_id', 'secret')
   end
 end
 

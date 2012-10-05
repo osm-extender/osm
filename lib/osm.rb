@@ -6,6 +6,11 @@ require 'httparty'
 
 
 module Osm
+  class Error < Exception; end
+  class ConnectionError < Error; end
+  class ArgumentIsInvalid < ArgumentError; end
+
+  private
   OSM_EPOCH_S = '1970-01-01'
   OSM_DATE_FORMAT = '%Y-%m-%d'
   OSM_TIME_FORMAT = '%H:%M:%S'
@@ -20,9 +25,26 @@ Dir[File.join(File.dirname(__FILE__) , 'osm', '*.rb')].each {|file| require file
 
 
 module Osm
-  class Error < Exception; end
-  class ConnectionError < Error; end
-  class ArgumentIsInvalid < ArgumentError; end
+
+    # Configure the options used by classes in the module
+    # @param [Hash] options
+    # @option options [Hash] :api Default options for accessing the API
+    # @option options[:api] [Symbol] :default_site wether to use OSM (if :osm) or OGM (if :ogm) by default
+    # @option options[:api] [Hash] :osm (optional but :osm_api or :ogm_api must be present) the api data for OSM
+    # @option options[:api][:osm] [String] :id the apiid given to you for using the OSM id
+    # @option options[:api][:osm] [String] :token the token which goes with the above api
+    # @option options[:api][:osm] [String] :name the name displayed in the External Access tab of OSM
+    # @option options[:api] [Hash] :ogm (optional but :osm_api or :ogm_api must be present) the api data for OGM
+    # @option options[:api][:ogm] [String] :id the apiid given to you for using the OGM id
+    # @option options[:api][:ogm] [String] :token the token which goes with the above api
+    # @option options[:api][:ogm] [String] :name the name displayed in the External Access tab of OGM
+    # @option options[:api] [Boolean] :debug if true debugging info is output (optional, default = false)
+    # @return nil
+    def self.configure(options)
+      Osm::Api.configure(options[:api])
+      nil
+    end
+
 
   private  
   def self.make_array_of_symbols(array)
@@ -44,25 +66,25 @@ module Osm
     raise Error, 'There is no current term for the section.'
   end
 
-  def self.make_datetime(date, time, options={})
-    date = nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
-    time = nil if time.nil? || time.empty?
-    if (!date.nil? && !time.nil?)
-      begin
-        return DateTime.strptime((date + ' ' + time), OSM_DATETIME_FORMAT)
-      rescue ArgumentError
-        return nil
-      end
-    elsif !date.nil?
-      begin
-        return DateTime.strptime(date, OSM_DATE_FORMAT)
-      rescue ArgumentError
-        return nil
-      end
-    else
-      return nil
-    end
-  end
+  ###def self.make_datetime(date, time, options={})
+  ###  date = nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
+  ###  time = nil if time.nil? || time.empty?
+  ###  if (!date.nil? && !time.nil?)
+  ###    begin
+  ###      return DateTime.strptime((date + ' ' + time), OSM_DATETIME_FORMAT)
+  ###    rescue ArgumentError
+  ###      return nil
+  ###    end
+  ###  elsif !date.nil?
+  ###    begin
+  ###      return DateTime.strptime(date, OSM_DATE_FORMAT)
+  ###    rescue ArgumentError
+  ###      return nil
+  ###    end
+  ###  else
+  ###    return nil
+  ###  end
+  ###end
 
   def self.parse_date_time(date_time)
     return nil if date_time.nil? || date_time.empty?

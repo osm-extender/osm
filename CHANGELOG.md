@@ -1,6 +1,7 @@
 ## Version 0.1.0
 
- * 
+  * Configuration is through Osm::configure not Osm::Api.configure and it takes a different Hash
+  * Api.authorize returns a different Hash
 
 ## Version 0.0.27
 
