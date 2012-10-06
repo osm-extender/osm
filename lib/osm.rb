@@ -21,6 +21,7 @@ end
 
 require File.join(File.dirname(__FILE__), '..', 'version')
 Dir[File.join(File.dirname(__FILE__) , '*_validator.rb')].each {|file| require file }
+require File.join(File.dirname(__FILE__), 'osm', 'model')
 Dir[File.join(File.dirname(__FILE__) , 'osm', '*.rb')].each {|file| require file }
 
 
@@ -39,8 +40,13 @@ module Osm
     # @option options[:api][:ogm] [String] :token the token which goes with the above api
     # @option options[:api][:ogm] [String] :name the name displayed in the External Access tab of OGM
     # @option options[:api] [Boolean] :debug if true debugging info is output (optional, default = false)
+    # @option options [Hash] :cache_config (optional) How classes in the module will cache data. Whilst this is optional you should remember that caching is required to use the OSM API.
+    # @option options[:cache] [Class] :cache An instance of a cache class, must provide the methods (exist?, delete, write, read), for details see Rails.cache.
+    # @option options[:cache] [Fixnum] :ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
+    # @option options[:cache] [String] :prepend_to_key (optional, default = 'OSMAPI') Text to prepend to the key used to store data in the cache
     # @return nil
     def self.configure(options)
+      Osm::Model.configure(options[:cache])
       Osm::Api.configure(options[:api])
       nil
     end
@@ -53,38 +59,38 @@ module Osm
     end
   end
 
-  def self.find_current_term_id(api, section_id, data={})
-    terms = api.get_terms(data)
-
-    # Return the term we are currently in
-    unless terms.nil?
-      terms.each do |term|
-        return term.id if (term.section_id == section_id) && term.current?
-      end
-    end
-
-    raise Error, 'There is no current term for the section.'
-  end
-
-  ###def self.make_datetime(date, time, options={})
-  ###  date = nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
-  ###  time = nil if time.nil? || time.empty?
-  ###  if (!date.nil? && !time.nil?)
-  ###    begin
-  ###      return DateTime.strptime((date + ' ' + time), OSM_DATETIME_FORMAT)
-  ###    rescue ArgumentError
-  ###      return nil
+  ###def self.find_current_term_id(api, section_id, data={})
+  ###  terms = api.get_terms(data)
+  ###
+  ###  # Return the term we are currently in
+  ###  unless terms.nil?
+  ###    terms.each do |term|
+  ###      return term.id if (term.section_id == section_id) && term.current?
   ###    end
-  ###  elsif !date.nil?
-  ###    begin
-  ###      return DateTime.strptime(date, OSM_DATE_FORMAT)
-  ###    rescue ArgumentError
-  ###      return nil
-  ###    end
-  ###  else
-  ###    return nil
   ###  end
+  ###
+  ###  raise Error, 'There is no current term for the section.'
   ###end
+  ###
+  def self.make_datetime(date, time, options={})
+    date = nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
+    time = nil if time.nil? || time.empty?
+    if (!date.nil? && !time.nil?)
+      begin
+        return DateTime.strptime((date + ' ' + time), OSM_DATETIME_FORMAT)
+      rescue ArgumentError
+        return nil
+      end
+    elsif !date.nil?
+      begin
+        return DateTime.strptime(date, OSM_DATE_FORMAT)
+      rescue ArgumentError
+        return nil
+      end
+    else
+      return nil
+    end
+  end
 
   def self.parse_date_time(date_time)
     return nil if date_time.nil? || date_time.empty?
