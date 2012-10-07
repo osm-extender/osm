@@ -27,12 +27,12 @@ describe "API" do
 
 
   it "Create" do
-    @api.nil?.should == false
+    @api.should_not be_nil
     @api.api_id.should == @CONFIGURATION[:api][:osm][:id]
     @api.api_name.should == @CONFIGURATION[:api][:osm][:name]
   end
 
-  it "Raises errors on bad arguents to configure" do
+  it "Raises errors on bad arguments to configure" do
     expect{ Osm::Api.configure(@CONFIGURATION[:api].select{ |k,v| (k != :default_site)}) }.to raise_error(ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm')
     expect{ Osm::Api.configure(@CONFIGURATION[:api].merge(:default_site => :invalid)) }.to raise_error(ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm')
 
