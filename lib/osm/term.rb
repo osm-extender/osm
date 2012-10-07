@@ -62,34 +62,13 @@ module Osm
 
     # Get the terms that the OSM user can access for a given section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] section_id the ID of the section to get terms for
+    # @param [Fixnum] section the section (or its ID) of the section to get terms for
     # @!macro options_get
     # @return [Array<Osm::Term>, nil] An array of terms or nil if the user can not access that section
-    def self.get_for_section(api, section_id, options={})
+    def self.get_for_section(api, section, options={})
+      section_id = section.to_i
       return nil unless get_user_permissions(api).keys.include?(section_id)
-      cache_key = ['terms', api.user_id]
-
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        terms = cache_read(api, cache_key)
-        return terms.select{ |term| term.section_id == section_id }
-      end
-
-      data = api.perform_query('api.php?action=getTerms')
-
-      result = Array.new
-      (data[section_id.to_s] || []).each do |term_data|
-        term = Osm::Term.new(
-          :id => Osm::to_i_or_nil(term_data['termid']),
-          :section_id => Osm::to_i_or_nil(term_data['sectionid']),
-          :name => term_data['name'],
-          :start => Osm::parse_date(term_data['startdate']),
-          :finish => Osm::parse_date(term_data['enddate']),
-        )
-        result.push term
-        cache_write(api, ['term', term.id], term)
-      end
-
-      return result
+      return get_all(api, options).select{ |term| term.section_id == section_id }
     end
 
     # Get a term
@@ -118,10 +97,11 @@ module Osm
 
     # Get the current term for a given section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] section_id the ID of the section to get terms for
+    # @param [Osm::Section, Fixnum] section The section (or its ID)  to get terms for
     # @!macro options_get
     # @return [Osm::Term, nil] The current term or nil if the user can not access that section
-    def self.get_current_term_for_section(api, section_id, options={})
+    def self.get_current_term_for_section(api, section, options={})
+      section_id = section.to_i
       terms = get_for_section(api, section_id, options)
 
       return nil if terms.nil?
@@ -133,7 +113,7 @@ module Osm
     end
 
     # Create a term in OSM
-    # @param [Osm::Api] The api to use to make the request
+    # @param [Osm::Api] api The api to use to make the request
     # @param [Hash] options - the configuration of the new term
     #   @option options [Osm::Section, Fixnum] :section (required) section or section_id to add the term to
     #   @option options [String] :name (required) the name for the term
@@ -146,7 +126,6 @@ module Osm
       raise ArgumentError, ":start can't be nil" if options[:start].nil?
       raise ArgumentError, ":finish can't be nil" if options[:finish].nil?
 
-      section_id = options[:section].is_a?(Fixnum) ? options[:section] : options[:section].id
       api_data = {
         'term' => options[:name],
         'start' => options[:start].strftime(Osm::OSM_DATE_FORMAT),
@@ -154,10 +133,10 @@ module Osm
         'termid' => '0'
       }
 
-      data = api.perform_query("users.php?action=addTerm&sectionid=#{section_id}", api_data)
+      data = api.perform_query("users.php?action=addTerm&sectionid=#{options[:section].to_i}", api_data)
 
       # The cached terms for the section will be out of date - remove them
-      get_all(api).each do |term|
+      get_all(api, options).each do |term|
         cache_delete(api, ['term', term.id]) if term.section_id == section_id
       end
       cache_delete(api, ['terms', api.user_id])
