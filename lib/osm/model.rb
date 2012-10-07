@@ -38,6 +38,10 @@ module Osm
     end
 
 
+    def to_i
+      id
+    end
+
     private
     # Wrap cache calls
     def self.cache_read(api, key)
