@@ -2,7 +2,18 @@
 
   * Configuration is through Osm::configure not Osm::Api.configure and it takes a different Hash
   * Api.authorize returns a different Hash
-  * Section now has class methods to get\_all(api) and get(api, section\_id)
+  * Section now has class methods to:
+    * get\_all(api)
+    * get(api, section\_id)
+  * Term now has class methods to:
+    * get\_all(api)
+    * get(api, term\_id)
+    * get\_for\_section(api, section\_id)
+    * get\_current\_term\_for\_section(api, section\_id)
+  * Removal of Osm::Api methods:
+    * get\_*
+    * update\_*
+    * create\_*
   * Removal of Osm::Role
     * Osm::Section now has two new required attributes group\_id and group\_name
     * long\_name and full\_name methods should be replaced with something similar to "#{section.name} (#{section.group\_name})" in your own code

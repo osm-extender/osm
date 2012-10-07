@@ -41,10 +41,6 @@ describe "Section" do
     section.group_id.should == 3
     section.group_name.should == '3rd Somewhere'
     section.flexi_records.should == []
-    #section.flexi_records[0].id.should == 1
-    #section.flexi_records[0].name.should == 'Name 1'
-    #section.flexi_records[1].id.should == 2
-    #section.flexi_records[1].name.should == 'Name 2'
     section.valid?.should be_true
   end
 
