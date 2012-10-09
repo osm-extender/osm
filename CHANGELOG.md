@@ -17,6 +17,7 @@
     * Class method get\_ours(api, section) -> actually just calls get(api, section, api)
   * Activity now has class method get(api, activity\_id)
   * DueBadges now has a class method get(api, section)
+  * Grouping now has a class method get\_for\_section(api, section)
   * Removal of Osm::Api methods:
     * get\_*
     * update\_*
