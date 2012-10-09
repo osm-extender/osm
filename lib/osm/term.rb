@@ -29,7 +29,7 @@ module Osm
 
 
     # Get the terms that the OSM user can access
-    # @param [Osm::Api] The api to use to make the request
+    # @param [Osm::Api] api The api to use to make the request
     # @!macro options_get
     # @return [Array<Osm::Term>]
     def self.get_all(api, options={})

@@ -11,6 +11,10 @@
     * get\_for\_section(api, section\_id)
     * get\_current\_term\_for\_section(api, section\_id)
   * Member now has a class method to get\_for\_section(api, section\_id, term\_id)
+  * ApiAccess:
+    * Class method get\_all(api, section)
+    * Class method get(api, section, for\_api)
+    * Class method get\_ours(api, section) -> actually just calls get(api, section, api)
   * Removal of Osm::Api methods:
     * get\_*
     * update\_*

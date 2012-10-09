@@ -4,52 +4,60 @@ require 'spec_helper'
 
 describe "API Access" do
 
-  it "Create from API data" do
+  it "Create" do
     data = {
-      'apiid' => '1',
-      'name' => 'Name',
-      'permissions' => {'permission' => '10'},
+      :id => 1,
+      :name => 'Name',
+      :permissions => {:permission => [:read]},
     }
-    api_access = Osm::ApiAccess.from_api(data)
+    api_access = Osm::ApiAccess.new(data)
 
     api_access.id.should == 1
     api_access.name.should == 'Name'
-    api_access.permissions.should == {:permission => 10}
+    api_access.permissions.should == {:permission => [:read]}
     api_access.valid?.should be_true
   end
 
 
-  it "Allows interegation of the permissions hash" do
-    api_access = Osm::ApiAccess.new({
-      :id => 1,
-      :name => 'Name',
-      :permissions => {
-        :read_only => 10,
-        :read_write => 20,
-      },
-    })
+  describe "Using the API" do
 
-    api_access.can_read?(:read_only).should == true
-    api_access.can_read?(:read_write).should == true
+    before :each do
+      body = {
+        'apis' => [
+          {
+            'apiid' => '1',
+            'name' => 'API Name',
+            'permissions' => { 'read' => '10', 'readwrite' => '20' }
+          }, {
+            'apiid' => '2',
+            'name' => 'API 2 Name',
+            'permissions' => { 'read' => '10', 'readwrite' => '20' }
+          }
+        ]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getAPIAccess&sectionid=1", :body => body.to_json)
+    end
 
-    api_access.can_write?(:read_only).should == false
-    api_access.can_write?(:read_write).should == true
+    it "Get All" do
+      api_accesses = Osm::ApiAccess.get_all(@api, 1)
 
-    api_access.can_read?(:non_existant).should == false
-    api_access.can_write?(:non_existant).should == false
-  end
+      api_accesses.size.should == 2
+      api_access = api_accesses[0]
+      api_access.id.should == 1
+      api_access.name.should == 'API Name'
+      api_access.permissions.should == {:read => [:read], :readwrite => [:read, :write]}
+    end
 
+    it "Get One" do
+      api_access = Osm::ApiAccess.get(@api, 1, 2)
+      api_access.id.should == 2
+    end
 
-  it "Tells us if it's the our api" do
-    Osm::Api.stub(:api_id) { '1' }
+    it "Get Ours" do
+      api_access = Osm::ApiAccess.get_ours(@api, 1)
+      api_access.id.should == 1
+    end
 
-    apis = {
-      :ours => Osm::ApiAccess.new({:id => 1, :name => 'Name', :permissions => {}}),
-      :not_ours => Osm::ApiAccess.new({:id => 2, :name => 'Name', :permissions => {}}),
-    }
-
-    apis[:ours].our_api?.should == true
-    apis[:not_ours].our_api?.should == false
   end
 
 end

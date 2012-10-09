@@ -77,6 +77,9 @@ module Osm
     def api_id
       @@api_details[@site][:id]
     end
+    def to_i
+      api_id
+    end
 
 
     # Get the site this Api currently uses
