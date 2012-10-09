@@ -43,9 +43,9 @@ module Osm
     attribute :intouch_fields, :default => {}
     attribute :mobile_fields, :default => {}
     attribute :flexi_records, :default => []
-    attribute :role
 
-    attr_accessible :id, :name, :group_id, :group_name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records, :role
+    attr_accessible :id, :name, :group_id, :group_name, :subscription_level, :subscription_expires, :type,
+                    :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0, :allow_nil => true
