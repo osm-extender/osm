@@ -15,6 +15,7 @@
     * Class method get\_all(api, section)
     * Class method get(api, section, for\_api)
     * Class method get\_ours(api, section) -> actually just calls get(api, section, api)
+  * Activity now has class method get(api, activity\_id)
   * Removal of Osm::Api methods:
     * get\_*
     * update\_*
