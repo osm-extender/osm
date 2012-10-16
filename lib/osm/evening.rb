@@ -1,10 +1,7 @@
 module Osm
 
-  class Evening
+  class Evening < Osm::Model
     class Activity; end # Ensure the constant exists for the validators
-
-    include ::ActiveAttr::MassAssignmentSecurity
-    include ::ActiveAttr::Model
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id of the evening
@@ -60,37 +57,103 @@ module Osm
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
-    # Initialize a new Evening from api data
-    # @param [Hash] data the hash of data provided by the API
-    # @param activities an array of hashes to generate the list of ProgrammeActivity objects
-    def self.from_api(data, activities)
-      attributes = {}
-      attributes[:id] = Osm::to_i_or_nil(data['eveningid'])
-      attributes[:section_id] = Osm::to_i_or_nil(data['sectionid'])
-      attributes[:title] = data['title'] || 'Unnamed meeting'
-      attributes[:notes_for_parents] = data['notesforparents'] || ''
-      attributes[:games] = data['games'] || ''
-      attributes[:pre_notes] = data['prenotes'] || ''
-      attributes[:post_notes] = data['postnotes'] || ''
-      attributes[:leaders] = data['leaders'] || ''
-      attributes[:start_time] = data['starttime'].nil? ? nil : data['starttime'][0..4]
-      attributes[:finish_time] = data['endtime'].nil? ? nil : data['endtime'][0..4]
-      attributes[:meeting_date] = Osm::parse_date(data['meetingdate'])
+    # Get the programme for a given term
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the programme for
+    # @param [Osm::term, Fixnum, nil] term the term (or its ID) to get the programme for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @return [Array<Osm::Evening>]
+    def self.get_programme(api, section, term, options={})
+      section_id = section.to_i
+      term_id = term.to_i
+      cache_key = ['programme', section_id, term_id]
 
-      attributes[:activities] = Array.new
-      unless activities.nil?
-        activities.each do |item|
-          attributes[:activities].push Evening::Activity.from_api(item)
-        end
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section_id)[:programme].include?(:read)
+        return cache_read(api, cache_key)
       end
 
-      new(attributes)
+      data = api.perform_query("programme.php?action=getProgramme&sectionid=#{section_id}&termid=#{term_id}")
+
+      result = Array.new
+      data = {'items'=>[],'activities'=>{}} if data.is_a? Array
+      items = data['items'] || []
+      activities = data['activities'] || {}
+
+      items.each do |item|
+        attributes = {}
+        attributes[:id] = Osm::to_i_or_nil(item['eveningid'])
+        attributes[:section_id] = Osm::to_i_or_nil(item['sectionid'])
+        attributes[:title] = item['title'] || 'Unnamed meeting'
+        attributes[:notes_for_parents] = item['notesforparents'] || ''
+        attributes[:games] = item['games'] || ''
+        attributes[:pre_notes] = item['prenotes'] || ''
+        attributes[:post_notes] = item['postnotes'] || ''
+        attributes[:leaders] = item['leaders'] || ''
+        attributes[:start_time] = item['starttime'].nil? ? nil : item['starttime'][0..4]
+        attributes[:finish_time] = item['endtime'].nil? ? nil : item['endtime'][0..4]
+        attributes[:meeting_date] = Osm::parse_date(item['meetingdate'])
+  
+        our_activities = activities[item['eveningid']]
+        attributes[:activities] = Array.new
+        unless our_activities.nil?
+          our_activities.each do |activity_data|
+            attributes[:activities].push Osm::Evening::Activity.new(
+              :activity_id => Osm::to_i_or_nil(activity_data['activityid']),
+              :title => activity_data['title'],
+              :notes => activity_data['notes'],
+            )
+          end
+        end
+  
+        result.push new(attributes)
+      end
+
+      cache_write(api, cache_key, result)
+      return result
     end
 
-    # Get the evening's data for use with the API
-    # @return [Hash]
-    def to_api
-      {
+
+    # Create an evening in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section or section_id to add the evening to
+    # @param [Date] meeting_date the date of the meeting
+    # @return [Boolean] if the operation suceeded or not
+    def self.create(api, section, meeting_date)
+      section_id = section.to_i
+      api_data = {
+        'meetingdate' => meeting_date.strftime(Osm::OSM_DATE_FORMAT),
+        'sectionid' => section_id,
+        'activityid' => -1
+      }
+
+      data = api.perform_query("programme.php?action=addActivityToProgramme", api_data)
+
+      # The cached programmes for the section will be out of date - remove them
+      Osm::Term.get_for_section(api, section).each do |term|
+        cache_delete(api, ['programme', section_id, term.id])
+      end
+
+      return data.is_a?(Hash) && (data['result'] == 0)
+    end
+
+
+    # Update an evening in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @return [Boolean] if the operation suceeded or not
+    def update(api)
+      raise ObjectIsInvalid, 'evening is invalid' unless valid?
+
+      activities_data = Array.new
+      activities.each do |activity|
+        this_activity = {
+          'activityid' => activity.activity_id,
+          'notes' => activity.notes,
+        }
+        activities_data.push this_activity
+      end
+      activities_data = ActiveSupport::JSON.encode(activities_data)
+
+      api_data = {
         'eveningid' => id,
         'sectionid' => section_id,
         'meetingdate' => meeting_date.strftime(Osm::OSM_DATE_FORMAT),
@@ -102,27 +165,39 @@ module Osm
         'postnotes' => post_notes,
         'games' => games,
         'leaders' => leaders,
-        'activity' => activities_for_to_api,
+        'activity' => activities_data,
       }
+      response = api.perform_query("programme.php?action=editEvening", api_data)
+
+      # The cached programmes for the section will be out of date - remove them
+      Osm::Term.get_for_section(api, section_id).each do |term|
+        self.class.cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
+      end
+
+      return response.is_a?(Hash) && (response['result'] == 0)
+    end
+
+
+    # Get the badge requirements met on a specific evening
+    # @param [Osm::Api] api The api to use to make the request
+    # @!macro options_get
+    # @return [Array<Hash>] hashes ready to pass into the update_register method
+    def get_badge_requirements(api, options={})
+      section = Osm::Section.get(api, section_id)
+      cache_key = ['badge_requirements', section.id, id]
+
+      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && get_user_permissions(api, section_id)[:programme].include?(:read)
+        return self.class.cache_read(api, cache_key)
+      end
+
+      data = api.perform_query("users.php?action=getActivityRequirements&date=#{meeting_date.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
+
+      self.class.cache_write(api, cache_key, data)
+      return data
     end
 
 
     private
-    # Get the JSON for the activities to pass to the OSM API
-    # @return [String]
-    def activities_for_to_api
-      to_save = Array.new
-      activities.each do |activity|
-        this_activity = {
-          'activityid' => activity.activity_id,
-          'notes' => activity.notes,
-        }
-        to_save.push this_activity
-      end
-      return ActiveSupport::JSON.encode(to_save)
-    end
-
-
     class Activity
       include ::ActiveAttr::MassAssignmentSecurity
       include ::ActiveAttr::Model
@@ -143,21 +218,9 @@ module Osm
       validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
       validates_presence_of :title
 
-
       # @!method initialize
       #   Initialize a new Evening::Activity
       #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-  
-      # Initialize a new Evening::Activity from api data
-      # @param [Hash] data the hash of data provided by the API
-      def self.from_api(data)
-        new({
-          :activity_id => Osm::to_i_or_nil(data['activityid']),
-          :title => data['title'],
-          :notes => data['notes'],
-        })
-      end
 
     end # Class Evening::Activity
 

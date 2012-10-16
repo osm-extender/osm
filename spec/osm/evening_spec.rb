@@ -4,8 +4,8 @@ require 'date'
 
 describe "Evening" do
 
-  before :each do
-    @attributes = {
+  it "Create" do
+    e = Osm::Evening.new(
       :id => 1,
       :section_id => 2,
       :title => 'Evening Name',
@@ -17,30 +17,8 @@ describe "Evening" do
       :start_time => '19:00',
       :finish_time => '21:00',
       :meeting_date => Date.new(2000, 01, 02),
-    }
-  end
-
-  it "Create from API data" do
-    data = {
-      'eveningid' => 1,
-      'sectionid' => 2,
-      'title' => 'Evening Name',
-      'notesforparents' => 'Notes for parents',
-      'games' => 'Games',
-      'prenotes' => 'Before',
-      'postnotes' => 'After',
-      'leaders' => 'Leaders',
-      'starttime' => '19:00',
-      'endtime' => '21:00',
-      'meetingdate' => '2000-01-02',
-    }
-    activities = [{
-      'eveningid' => 1,
-      'activityid' => 2,
-      'title' => 'Activity Name',
-      'notes' => 'Notes',
-    }]
-    e = Osm::Evening.from_api(data, activities)
+      :activities => []
+    )
 
     e.id.should == 1
     e.section_id.should == 2
@@ -53,41 +31,128 @@ describe "Evening" do
     e.start_time.should == '19:00'
     e.finish_time.should == '21:00'
     e.meeting_date.should == Date.new(2000, 1, 2)
+    e.activities.should == []
+    e.valid?.should be_true
+  end
+  
+  it "Create Evening::Activity" do
+    ea = Osm::Evening::Activity.new(
+      :activity_id => 2,
+      :title => 'Activity Name',
+      :notes => 'Notes',
+    )
 
-    ea = e.activities[0]
     ea.activity_id.should == 2
     ea.title.should == 'Activity Name'
     ea.notes.should == 'Notes'
-
-    e.valid?.should be_true
+    ea.valid?.should be_true
   end
 
 
-  it "Creates the data for saving through the API" do
-    data = @attributes.merge(
-      :activities => [ Osm::Evening::Activity.new(
-        :activity_id => 4,
-        :title => 'Activity Name',
-        :notes => 'Notes',
-      ) ]
-    )
+  describe 'Using the API' do
 
-    e = Osm::Evening.new(data)
+    it "Fetch the term's programme for a section" do
+      items = [{"eveningid" => "5", "sectionid" =>"3", "title" => "Weekly Meeting 1", "notesforparents" => "", "games" => "", "prenotes" => "", "postnotes" => "", "leaders" => "", "meetingdate" => "2001-02-03", "starttime" => "19:15:00", "endtime" => "20:30:00", "googlecalendar" => ""}]
+      activities = {"5" => [
+        {"activityid" => "6", "title" => "Activity 6", "notes" => "", "eveningid" => "5"},
+        {"activityid" => "7", "title" => "Activity 7", "notes" => "", "eveningid" => "5"}
+      ]}
+      body = {"items" => items, "activities" => activities}
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getProgramme&sectionid=3&termid=4", :body => body.to_json)
 
-    e.to_api.should == {
-      'eveningid' => 1,
-      'sectionid' => 2,
-      'meetingdate' => '2000-01-02',
-      'starttime' => '19:00',
-      'endtime' => '21:00',
-      'title' => 'Evening Name',
-      'notesforparents' => 'Notes for parents',
-      'prenotes' => 'Before',
-      'postnotes' => 'After',
-      'games' => 'Games',
-      'leaders' => 'Leaders',
-      'activity' => '[{"activityid":4,"notes":"Notes"}]',
-    }
+      programme = Osm::Evening.get_programme(@api, 3, 4)
+      programme.size.should == 1
+      programme[0].is_a?(Osm::Evening).should be_true
+      programme[0].activities.size.should == 2
+    end
+
+    it "Fetch badge requirements for an evening" do
+      badges_body = [{'a'=>'a'},{'a'=>'A'}]
+      FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs', :body => badges_body.to_json)
+      roles_body = [
+        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"3", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
+      ]
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => roles_body.to_json)
+
+      evening = Osm::Evening.new(:meeting_date => Date.new(2000, 1, 2), :section_id => 3)
+      evening.get_badge_requirements(@api).should == badges_body
+    end
+
+    it "Create an evening (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=addActivityToProgramme'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'meetingdate' => '2000-01-02',
+        'sectionid' => 1,
+        'activityid' => -1,
+      }
+
+      Osm::Term.stub(:get_for_section) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
+      Osm::Evening.create(@api, 1, Date.new(2000, 1, 2)).should be_true
+    end
+
+    it "Create an evening (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=addActivityToProgramme'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'meetingdate' => '2000-01-02',
+        'sectionid' => 1,
+        'activityid' => -1,
+      }
+
+      Osm::Term.stub(:get_for_section) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
+      Osm::Evening.create(@api, 1, Date.new(2000, 1, 2)).should be_false
+    end
+
+
+    it "Update an evening (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=editEvening'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
+        'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
+        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
+      }
+      Osm::Term.stub(:get_for_section) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
+
+      evening = Osm::Evening.new(:id=>1, :section_id=>2, :meeting_date=>Date.new(2000, 01, 02))
+      evening.update(@api).should be_true
+    end
+
+    it "Update an evening (failed)" do
+      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=editEvening'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
+        'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
+        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
+      }
+      Osm::Term.stub(:get_for_section) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
+
+      evening = Osm::Evening.new(:id=>1, :section_id=>2, :meeting_date=>Date.new(2000, 01, 02))
+      evening.update(@api).should be_false
+    end
+
+    it "Update an evening (invalid evening)" do
+      evening = Osm::Evening.new
+      expect{ evening.update(@api) }.to raise_error(Osm::ObjectIsInvalid)
+    end
+
   end
-
 end
