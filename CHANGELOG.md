@@ -2,22 +2,6 @@
 
   * Configuration is through Osm::configure not Osm::Api.configure and it takes a different Hash
   * Api.authorize returns a different Hash
-  * Section now has class methods to:
-    * get\_all(api)
-    * get(api, section\_id)
-  * Term now has class methods to:
-    * get\_all(api)
-    * get(api, term\_id)
-    * get\_for\_section(api, section\_id)
-    * get\_current\_term\_for\_section(api, section\_id)
-  * Member now has a class method to get\_for\_section(api, section\_id, term\_id)
-  * ApiAccess:
-    * Class method get\_all(api, section)
-    * Class method get(api, section, for\_api)
-    * Class method get\_ours(api, section) -> actually just calls get(api, section, api)
-  * Activity now has class method get(api, activity\_id)
-  * DueBadges now has a class method get(api, section)
-  * Grouping now has a class method get\_for\_section(api, section)
   * Removal of Osm::Api methods:
     * get\_*
     * update\_*
@@ -26,6 +10,24 @@
     * Osm::Section now has two new required attributes group\_id and group\_name
     * long\_name and full\_name methods should be replaced with something similar to "#{section.name} (#{section.group\_name})" in your own code
     * Section has a class method fetch\_user\_permissions(api) which returns a Hash (section\_id to permissions Hash)
+  * Activity now has class method get(api, activity\_id)
+  * ApiAccess: now has class methods
+    * get\_all(api, section)
+    * get(api, section, for\_api)
+    * get\_ours(api, section) -> actually just calls get(api, section, api)
+  * DueBadges now has a class method get(api, section)
+  * Evening now has class methods:
+    * 
+  * Grouping now has a class method get\_for\_section(api, section)
+  * Member now has a class method to get\_for\_section(api, section\_id, term\_id)
+  * Section now has class methods:
+    * get\_all(api)
+    * get(api, section\_id)
+  * Term now has class methods:
+    * get\_all(api)
+    * get(api, term\_id)
+    * get\_for\_section(api, section\_id)
+    * get\_current\_term\_for\_section(api, section\_id)
 
 ## Version 0.0.27
 
