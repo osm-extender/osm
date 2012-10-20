@@ -8,6 +8,7 @@ require 'httparty'
 module Osm
   class Error < Exception; end
   class ConnectionError < Error; end
+  class Forbidden < Error; end
   class ArgumentIsInvalid < ArgumentError; end
   class ObjectIsInvalid < Error; end
 

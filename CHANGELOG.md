@@ -6,6 +6,7 @@
     * get\_*
     * update\_*
     * create\_*
+  * EventAttendance is now Event::Attendance
   * Removal of Osm::Role
     * Osm::Section now has two new required attributes group\_id and group\_name
     * long\_name and full\_name methods should be replaced with something similar to "#{section.name} (#{section.group\_name})" in your own code
@@ -22,6 +23,17 @@
   * Evening now has instance methods:
     * update(api)
     * get\_badge\_requirements(api, evening)
+  * Event now has class methods:
+    * get\_for\_section(api, section)
+    * get(api, section, event\_id)
+  * Event now has instance methods:
+    * create(api)
+    * update(api)
+    * delete(api)
+    * get\_attendance(api)
+    * add\_field(api, label)
+  * Event now has a fields attribute
+  * Event::Attendance has instance method update(api, field\_id)
   * Grouping now has a class method get\_for\_section(api, section)
   * Member now has a class method to get\_for\_section(api, section\_id, term\_id)
   * Section now has class methods:
