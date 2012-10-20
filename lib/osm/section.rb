@@ -184,6 +184,28 @@ module Osm
       return all_permissions
     end
 
+    # Get the section's notepads
+    # @param [Osm::Api] The api to use to make the request
+    # @!macro options_get
+    # @return [String] the section's notepad
+    def get_notepad(api, options={})
+      cache_key = ['notepad', id]
+
+      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && get_user_permissions(api).keys.include?(section_id)
+        return self.class.cache_read(api, cache_key)
+      end
+
+      notepads = api.perform_query('api.php?action=getNotepads')
+      return '' unless notepads.is_a?(Hash)
+
+      notepad = ''
+      notepads.each do |key, value|
+        self.class.cache_write(api, ['notepad', key.to_i], value)
+        notepad = value if key.to_i == id
+      end
+
+      return notepad
+    end
 
     # Check if this section is one of the youth sections
     # @return [Boolean]

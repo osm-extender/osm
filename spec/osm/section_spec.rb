@@ -115,6 +115,13 @@ describe "Section" do
       }
     end
 
+    it "Gets the section's notepad" do
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1", "2" => "Section 2"}.to_json)
+      section = Osm::Section.get(@api, 1)
+      section.should_not be_nil
+      section.get_notepad(@api).should == 'Section 1'
+    end
+
   end
 
 
@@ -261,6 +268,16 @@ describe "Online Scout Manager API Strangeness" do
     fr = section.flexi_records[0]
     fr.id.should == 1
     fr.name.should == 'Flexi Record 1'
+  end
+
+  it "handles an empty array representing no notepads" do
+    body = [{"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"beavers\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Flexi Record 1\",\"extraid\":\"111\"}],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"1", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}}]
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json)
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => '[]')
+
+    section = Osm::Section.get(@api, 1)
+    section.should_not be_nil
+    section.get_notepad(@api).should == ''
   end
 
 end

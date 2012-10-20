@@ -9,13 +9,6 @@ describe "Online Scout Manager API Strangeness" do
     @api = Osm::Api.new('2345', 'abcd')
   end
 
-
-  it "handles an empty array representing no notepads" do
-    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => '[]')
-    @api.get_notepad(1).should == nil
-  end
-
-
   it "handles a non existant array when no events" do
     data = '{"identifier":"eventid","label":"name"}'
     FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => data)

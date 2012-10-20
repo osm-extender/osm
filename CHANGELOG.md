@@ -27,6 +27,7 @@
   * Section now has class methods:
     * get\_all(api)
     * get(api, section\_id)
+  * Section now has instance method get\_notepad(api)
   * Term now has class methods:
     * get\_all(api)
     * get(api, term\_id)
