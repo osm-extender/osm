@@ -13,7 +13,7 @@ module Osm
 
     @@cache = nil               # Class to use for caching
     @@cache_prepend = 'OSMAPI'  # Prepended to the key
-    @@cache_ttl = 1800          # Half an hour
+    @@cache_ttl = 600           # 10 minutes
 
 
     # Configure the options used by all models
