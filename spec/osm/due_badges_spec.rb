@@ -46,7 +46,7 @@ describe "DueBadge" do
         }
       }
     }
-    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => body.to_json)
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => data.to_json)
 
     db = Osm::DueBadges.get(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
     db.empty?.should == false

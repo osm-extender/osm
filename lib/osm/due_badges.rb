@@ -43,7 +43,7 @@ module Osm
         return cache_read(api, cache_key)
       end
 
-      data = perform_query("challenges.php?action=outstandingBadges&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
+      data = api.perform_query("challenges.php?action=outstandingBadges&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
 
 
       data = {} unless data.is_a?(Hash) # OSM/OGM returns an empty array to represent no badges
