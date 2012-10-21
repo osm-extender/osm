@@ -1,3 +1,60 @@
+## Version 0.1.0
+
+  * Configuration is through Osm::configure not Osm::Api.configure and it takes a different Hash
+  * Api.authorize returns a different Hash
+  * Removal of Osm::Api methods:
+    * get\_*
+    * update\_*
+    * create\_*
+  * EventAttendance is now Event::Attendance
+  * Removal of Osm::Role
+    * Osm::Section now has two new required attributes group\_id and group\_name
+    * long\_name and full\_name methods should be replaced with something similar to "#{section.name} (#{section.group\_name})" in your own code
+    * Section has a class method fetch\_user\_permissions(api) which returns a Hash (section\_id to permissions Hash)
+  * Activity now has class method get(api, activity\_id)
+  * ApiAccess: now has class methods
+    * get\_all(api, section)
+    * get(api, section, for\_api)
+    * get\_ours(api, section) -> actually just calls get(api, section, api)
+  * DueBadges now has a class method get(api, section)
+  * Evening now has class methods:
+    * get\_programme(api, section\_id, term\_id)
+    * create(api, parameters)
+  * Evening now has instance methods:
+    * update(api)
+    * get\_badge\_requirements(api, evening)
+  * Event now has class methods:
+    * get\_for\_section(api, section)
+    * get(api, section, event\_id)
+    * create(api)
+  * Event now has instance methods:
+    * update(api)
+    * delete(api)
+    * get\_attendance(api)
+    * add\_field(api, label)
+  * Event now has a fields attribute
+  * Event::Attendance has instance method update(api, field\_id)
+  * FlexiRecord has class methods:
+    * get\_fields(api, section, flexi\_record\_id)
+    * get\_data(api, section, flexi\_record\_id, term)
+  * Grouping now has a class method get\_for\_section(api, section)
+  * Member now has a class method to get\_for\_section(api, section\_id, term\_id)
+  * Register now has class methods:
+    * get\_structure(api, section)
+    * get\_attendance(api, section)
+    * update\_attendance(data)
+  * Section now has class methods:
+    * get\_all(api)
+    * get(api, section\_id)
+  * Section now has instance method get\_notepad(api)
+  * Term now has class methods:
+    * get\_all(api)
+    * get(api, term\_id)
+    * get\_for\_section(api, section\_id)
+    * get\_current\_term\_for\_section(api, section\_id)
+    * create(api, parameters)
+  * Term now has instance method update(api)
+
 ## Version 0.0.26
 
   * Register - Update attendance

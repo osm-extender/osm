@@ -6,23 +6,56 @@ require 'httparty'
 
 
 module Osm
-  OSM_EPOCH_S = '1970-01-01'
+  class Error < Exception; end
+  class ConnectionError < Error; end
+  class Forbidden < Error; end
+  class ArgumentIsInvalid < ArgumentError; end
+  class ObjectIsInvalid < Error; end
+
+  private
+  OSM_EPOCH = '1970-01-01'
+  OSM_EPOCH_HUMAN = '1970-01-01'
   OSM_DATE_FORMAT = '%Y-%m-%d'
   OSM_TIME_FORMAT = '%H:%M:%S'
   OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+  OSM_DATE_FORMAT_HUMAN = '%d/%m/%Y'
+  OSM_DATETIME_FORMAT_HUMAN = '%d/%m/%Y %H:%M:%S'
   OSM_TIME_REGEX = /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/
-  OSM_DATE_REGEX = /\A\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1])\Z/
+  OSM_DATE_REGEX = /\A(?:\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1]))|(?:(?:0?[1-9]|[1-2][0-9]|3[0-1])\/(?:0?[1-9]|1[0-2])\/\d{2}|\d{4})\Z/
 end
 
 require File.join(File.dirname(__FILE__), '..', 'version')
 Dir[File.join(File.dirname(__FILE__) , '*_validator.rb')].each {|file| require file }
+require File.join(File.dirname(__FILE__), 'osm', 'model')
 Dir[File.join(File.dirname(__FILE__) , 'osm', '*.rb')].each {|file| require file }
 
 
 module Osm
-  class Error < Exception; end
-  class ConnectionError < Error; end
-  class ArgumentIsInvalid < ArgumentError; end
+
+    # Configure the options used by classes in the module
+    # @param [Hash] options
+    # @option options [Hash] :api Default options for accessing the API
+    # @option options[:api] [Symbol] :default_site wether to use OSM (if :osm) or OGM (if :ogm) by default
+    # @option options[:api] [Hash] :osm (optional but :osm_api or :ogm_api must be present) the api data for OSM
+    # @option options[:api][:osm] [String] :id the apiid given to you for using the OSM id
+    # @option options[:api][:osm] [String] :token the token which goes with the above api
+    # @option options[:api][:osm] [String] :name the name displayed in the External Access tab of OSM
+    # @option options[:api] [Hash] :ogm (optional but :osm_api or :ogm_api must be present) the api data for OGM
+    # @option options[:api][:ogm] [String] :id the apiid given to you for using the OGM id
+    # @option options[:api][:ogm] [String] :token the token which goes with the above api
+    # @option options[:api][:ogm] [String] :name the name displayed in the External Access tab of OGM
+    # @option options[:api] [Boolean] :debug if true debugging info is output (optional, default = false)
+    # @option options [Hash] :cache_config (optional) How classes in the module will cache data. Whilst this is optional you should remember that caching is required to use the OSM API.
+    # @option options[:cache] [Class] :cache An instance of a cache class, must provide the methods (exist?, delete, write, read), for details see Rails.cache.
+    # @option options[:cache] [Fixnum] :ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
+    # @option options[:cache] [String] :prepend_to_key (optional, default = 'OSMAPI') Text to prepend to the key used to store data in the cache
+    # @return nil
+    def self.configure(options)
+      Osm::Model.configure(options[:cache])
+      Osm::Api.configure(options[:api])
+      nil
+    end
+
 
   private  
   def self.make_array_of_symbols(array)
@@ -31,21 +64,8 @@ module Osm
     end
   end
 
-  def self.find_current_term_id(api, section_id, data={})
-    terms = api.get_terms(data)
-
-    # Return the term we are currently in
-    unless terms.nil?
-      terms.each do |term|
-        return term.id if (term.section_id == section_id) && term.current?
-      end
-    end
-
-    raise Error, 'There is no current term for the section.'
-  end
-
   def self.make_datetime(date, time, options={})
-    date = nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
+    date = nil if date.nil? || date.empty? || (!options[:ignore_epoch] && epoch_date?(date))
     time = nil if time.nil? || time.empty?
     if (!date.nil? && !time.nil?)
       begin
@@ -55,7 +75,7 @@ module Osm
       end
     elsif !date.nil?
       begin
-        return DateTime.strptime(date, OSM_DATE_FORMAT)
+        return DateTime.strptime(date, (date.include?('-') ? OSM_DATE_FORMAT : OSM_DATE_FORMAT_HUMAN))
       rescue ArgumentError
         return nil
       end
@@ -75,9 +95,9 @@ module Osm
 
 
   def self.parse_date(date, options={})
-    return nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
+    return nil if date.nil? || date.empty? || (!options[:ignore_epoch] && epoch_date?(date))
     begin
-      return Date.strptime(date, OSM_DATE_FORMAT)
+      return Date.strptime(date, (date.include?('-') ? OSM_DATE_FORMAT : OSM_DATE_FORMAT_HUMAN))
     rescue ArgumentError
       return nil
     end
@@ -100,6 +120,11 @@ module Osm
       hash_out[key.to_sym] = value
     end
     hash_out
+  end
+
+
+  def self.epoch_date?(date)
+    [OSM_EPOCH, OSM_EPOCH_HUMAN].include?(date)
   end
 
 end # Module

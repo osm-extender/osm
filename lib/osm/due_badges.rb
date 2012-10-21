@@ -1,8 +1,6 @@
 module Osm
 
-  class DueBadges
-    include ::ActiveAttr::MassAssignmentSecurity
-    include ::ActiveAttr::Model
+  class DueBadges < Osm::Model
 
     # @!attribute [rw] descriptions
     #   @return [Hash] descriptions for each of the badges
@@ -30,15 +28,25 @@ module Osm
     end
 
 
-    # @!method initialize
-    #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    # Get due badges
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the due badges for
+    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @return [Osm::DueBadges]
+    def self.get(api, section, term=nil, options={})
+      section = Osm::Section.get(api, section, options) if section.is_a?(Fixnum)
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term.to_i
+      cache_key = ['due_badges', section.id, term_id]
+
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section.id)[:badge].include?(:read)
+        return cache_read(api, cache_key)
+      end
+
+      data = api.perform_query("challenges.php?action=outstandingBadges&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
 
 
-    # Initialize a new DueBadges from api data
-    # @param [Hash] data the hash of data provided by the API
-    def self.from_api(data)
-      data = {} unless data.is_a?(Hash) # OSM returns an empty array to represent no badges
+      data = {} unless data.is_a?(Hash) # OSM/OGM returns an empty array to represent no badges
       pending_raw = data['pending'] || {}
       descriptions_raw = data['description'] || {}
 
@@ -52,15 +60,22 @@ module Osm
           name = "#{member['firstname']} #{member['lastname']}"
           description = descriptions_raw[key]['name'] + (descriptions_raw[key]['section'].eql?('staged') ? " (Level #{member['level']})" : '')
           description_key = key + (descriptions_raw[key]['section'].eql?('staged') ? "_#{member['level']}" : '_1')
-
           attributes[:descriptions][description_key] = description
           attributes[:by_member][name] ||= []
           attributes[:by_member][name].push(description_key)
         end
       end
 
-      new(attributes)
+      due_badges = Osm::DueBadges.new(attributes)
+      cache_write(api, cache_key, due_badges)
+      return due_badges
     end
+
+
+    # @!method initialize
+    #   Initialize a new Term
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
 
     # Check if there are no badges due
     # @return [Boolean]

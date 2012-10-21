@@ -46,13 +46,20 @@ describe "DueBadge" do
         }
       }
     }
-    db = Osm::DueBadges.from_api(data)
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => data.to_json)
 
+    db = Osm::DueBadges.get(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
     db.empty?.should == false
     db.descriptions.should == {'badge_name_1'=>'Badge Name', 'staged_staged_participation_2'=>'Participation (Level 2)'}
     db.by_member.should == {'John Doe'=>['badge_name_1', 'staged_staged_participation_2'], 'Jane Doe'=>['staged_staged_participation_2']}
     db.totals.should == {'staged_staged_participation_2'=>2, 'badge_name_1'=>1}
     db.valid?.should be_true
+  end
+
+  it "handles an empty array representing no due badges" do
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => '[]')
+    db = Osm::DueBadges.get(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
+    db.should_not == nil
   end
 
 end

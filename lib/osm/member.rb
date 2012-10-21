@@ -1,8 +1,6 @@
 module Osm
 
-  class Member
-    include ::ActiveAttr::MassAssignmentSecurity
-    include ::ActiveAttr::Model
+  class Member < Osm::Model
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the member
@@ -54,6 +52,24 @@ module Osm
     #   @return [String] the member's ethnicity
     # @!attribute [rw] subs
     #   @return [String] details about the member's subs
+    # @!attribute [rw] custom1
+    #   @return [String] the custom1 data for the member
+    # @!attribute [rw] custom2
+    #   @return [String] the custom2 data for the member
+    # @!attribute [rw] custom3
+    #   @return [String] the custom3 data for the member
+    # @!attribute [rw] custom4
+    #   @return [String] the custom4 data for the member
+    # @!attribute [rw] custom5
+    #   @return [String] the custom5 data for the member
+    # @!attribute [rw] custom6
+    #   @return [String] the custom6 data for the member
+    # @!attribute [rw] custom7
+    #   @return [String] the custom7 data for the member
+    # @!attribute [rw] custom8
+    #   @return [String] the custom8 data for the member
+    # @!attribute [rw] custom9
+    #   @return [String] the custom9 data for the member
     # @!attribute [rw] grouping_id
     #   @return [Fixnum] the grouping within the section that the member belongs to
     # @!attribute [rw] grouping_leader
@@ -90,13 +106,26 @@ module Osm
     attribute :school, :type => String, :default => ''
     attribute :ethnicity, :type => String, :default => ''
     attribute :subs, :type => String, :default => ''
+    attribute :custom1, :type => String, :default => ''
+    attribute :custom2, :type => String, :default => ''
+    attribute :custom3, :type => String, :default => ''
+    attribute :custom4, :type => String, :default => ''
+    attribute :custom5, :type => String, :default => ''
+    attribute :custom6, :type => String, :default => ''
+    attribute :custom7, :type => String, :default => ''
+    attribute :custom8, :type => String, :default => ''
+    attribute :custom9, :type => String, :default => ''
     attribute :grouping_id, :type => Integer
     attribute :grouping_leader, :type => Integer
     attribute :joined, :type => Date
     attribute :age, :type => String
     attribute :joined_years, :type => Integer
 
-    attr_accessible :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4, :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started, :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs, :grouping_id, :grouping_leader, :joined, :age, :joined_years
+    attr_accessible :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4,
+                    :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started,
+                    :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs,
+                    :custom1, :custom2, :custom3, :custom4, :custom5, :custom6, :custom7, :custom8, :custom9,
+                    :grouping_id, :grouping_leader, :joined, :age, :joined_years
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -112,47 +141,77 @@ module Osm
     validates_format_of :age, :with => /\A[0-9]{2}\/(0[0-9]|1[012])\Z/, :message => 'age is not in the correct format (yy/mm)', :allow_blank => true
 
 
+    # Get members for a section
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the members for
+    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @return [Array<Osm::Member>]
+    def self.get_for_section(api, section, term=nil, options={})
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
+      section_id = section.to_i
+      cache_key = ['members', section_id, term_id]
+
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section_id)[:member].include?(:read)
+        return cache_read(api, cache_key)
+      end
+
+      data = api.perform_query("users.php?action=getUserDetails&sectionid=#{section_id}&termid=#{term_id}")
+
+      result = Array.new
+      data['items'].each do |item|
+        result.push Osm::Member.new(
+          :section_id => section_id,
+          :id => Osm::to_i_or_nil(item['scoutid']),
+          :type => item['type'],
+          :first_name => item['firstname'],
+          :last_name => item['lastname'],
+          :email1 => item['email1'],
+          :email2 => item['email2'],
+          :email3 => item['email3'],
+          :email4 => item['email4'],
+          :phone1 => item['phone1'],
+          :phone2 => item['phone2'],
+          :phone3 => item['phone3'],
+          :phone4 => item['phone4'],
+          :address => item['address'],
+          :address2 => item['address2'],
+          :date_of_birth => Osm::parse_date(item['dob'], :ignore_epoch => true),
+          :started => Osm::parse_date(item['started']),
+          :joining_in_years => item['joining_in_yrs'].to_i,
+          :parents => item['parents'],
+          :notes => item['notes'],
+          :medical => item['medical'],
+          :religion => item['religion'],
+          :school => item['school'],
+          :ethnicity => item['ethnicity'],
+          :subs => item['subs'],
+          :custom1 => item['custom1'],
+          :custom2 => item['custom2'],
+          :custom3 => item['custom3'],
+          :custom4 => item['custom4'],
+          :custom5 => item['custom5'],
+          :custom6 => item['custom6'],
+          :custom7 => item['custom7'],
+          :custom8 => item['custom8'],
+          :custom9 => item['custom9'],
+          :grouping_id => Osm::to_i_or_nil(item['patrolid']),
+          :grouping_leader => Osm::to_i_or_nil(item['patrolleader']),
+          :joined => Osm::parse_date(item['joined']),
+          :age => item['age'],
+          :joined_years => item['yrs'].to_i,
+        )
+      end
+
+      cache_write(api, cache_key, result)
+      return result
+    end
+
+
     # @!method initialize
     #   Initialize a new Term
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-
-    # Initialize a new Member from api data
-    # @param [Hash] data the hash of data provided by the API
-    def self.from_api(data, section_id)
-      new({
-        :section_id => section_id,
-        :id => Osm::to_i_or_nil(data['scoutid']),
-        :type => data['type'],
-        :first_name => data['firstname'],
-        :last_name => data['lastname'],
-        :email1 => data['email1'],
-        :email2 => data['email2'],
-        :email3 => data['email3'],
-        :email4 => data['email4'],
-        :phone1 => data['phone1'],
-        :phone2 => data['phone2'],
-        :phone3 => data['phone3'],
-        :phone4 => data['phone4'],
-        :address => data['address'],
-        :address2 => data['address2'],
-        :date_of_birth => Osm::parse_date(data['dob'], :ignore_epoch => true),
-        :started => Osm::parse_date(data['started']),
-        :joining_in_years => data['joining_in_yrs'].to_i,
-        :parents => data['parents'],
-        :notes => data['notes'],
-        :medical => data['medical'],
-        :religion => data['religion'],
-        :school => data['school'],
-        :ethnicity => data['ethnicity'],
-        :subs => data['subs'],
-        :grouping_id => Osm::to_i_or_nil(data['patrolid']),
-        :grouping_leader => Osm::to_i_or_nil(data['patrolleader']),
-        :joined => Osm::parse_date(data['joined']),
-        :age => data['age'],
-        :joined_years => data['yrs'].to_i,
-      })
-    end
 
     # Get the years element of this scout's age
     # @return [Fixnum] the number of years this scout has been alive

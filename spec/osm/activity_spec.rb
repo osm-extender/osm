@@ -1,10 +1,10 @@
 # encoding: utf-8
 require 'spec_helper'
 
-describe "Activity" do
+describe "Using The API" do
 
-  it "Create from API data" do
-    data = {
+  it "Get One" do
+    body = {
         'details' => {
         'activityid' => '1',
         'version' => '0',
@@ -53,7 +53,10 @@ describe "Activity" do
         }
       ]
     }
-    activity = Osm::Activity.from_api(data)
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getActivity&id=1", :body => body.to_json)
+
+
+    activity = Osm::Activity.get(@api, 1)
 
     activity.id.should == 1
     activity.version.should == 0
