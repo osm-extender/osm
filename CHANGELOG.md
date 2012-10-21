@@ -55,10 +55,6 @@
     * create(api, parameters)
   * Term now has instance method update(api)
 
-## Version 0.0.27
-
-  * 
-
 ## Version 0.0.26
 
   * Register - Update attendance
