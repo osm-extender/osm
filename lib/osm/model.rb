@@ -33,7 +33,7 @@ module Osm
 
       @@cache = options[:cache]
       @@cache_prepend = options[:prepend_to_key] || 'OSMAPI'
-      @@cache_ttl = options[:ttl] || 1800
+      @@cache_ttl = options[:ttl] || 600
       nil
     end
 
@@ -70,10 +70,11 @@ module Osm
     # Get access permission for an API user
     # @param [Osm::Api] The api to use to make the request
     # @param [Fixnum, nil] section_id to get permissions for, if nil a Hash of all section's permissions is returned
+    # @!macro options_get
     # @return [Hash] the permissions Hash
-    def self.get_user_permissions(api, section_id=nil)
+    def self.get_user_permissions(api, section_id=nil, options={})
       key = ['permissions', api.user_id]
-      permissions = cache_exist?(api, key) ? cache_read(api, key) : Osm::Section.fetch_user_permissions(api)
+      permissions = (!options[:no_cache] && cache_exist?(api, key)) ? cache_read(api, key) : Osm::Section.fetch_user_permissions(api)
       return section_id.nil? ? permissions : (permissions[section_id] || {})
     end
 

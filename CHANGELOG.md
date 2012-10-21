@@ -1,3 +1,8 @@
+## Version 0.1.1
+
+  * Add get\_options Hash to Model.get\_user\_permissions
+  * Bug fixes
+
 ## Version 0.1.0
 
   * Configuration is through Osm::configure not Osm::Api.configure and it takes a different Hash
