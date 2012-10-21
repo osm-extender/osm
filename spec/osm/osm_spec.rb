@@ -45,8 +45,14 @@ describe "Online Scout Manager" do
     end
 
     it "is given an invalid date string" do
-      Osm::parse_date('No date here!').should == nil
+      Osm::parse_date('No date here!').should be_nil
     end
+
+    it "is given a human date" do
+      Osm::parse_date('03/02/2001').should == Date.new(2001, 02, 03)
+      Osm::parse_date('3/2/2001').should == Date.new(2001, 02, 03)
+    end
+
   end
 
 end

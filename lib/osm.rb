@@ -13,12 +13,15 @@ module Osm
   class ObjectIsInvalid < Error; end
 
   private
-  OSM_EPOCH_S = '1970-01-01'
+  OSM_EPOCH = '1970-01-01'
+  OSM_EPOCH_HUMAN = '1970-01-01'
   OSM_DATE_FORMAT = '%Y-%m-%d'
   OSM_TIME_FORMAT = '%H:%M:%S'
   OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+  OSM_DATE_FORMAT_HUMAN = '%d/%m/%Y'
+  OSM_DATETIME_FORMAT_HUMAN = '%d/%m/%Y %H:%M:%S'
   OSM_TIME_REGEX = /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/
-  OSM_DATE_REGEX = /\A\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1])\Z/
+  OSM_DATE_REGEX = /\A(?:\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1]))|(?:(?:0?[1-9]|[1-2][0-9]|3[0-1])\/(?:0?[1-9]|1[0-2])\/\d{2}|\d{4})\Z/
 end
 
 require File.join(File.dirname(__FILE__), '..', 'version')
@@ -62,7 +65,7 @@ module Osm
   end
 
   def self.make_datetime(date, time, options={})
-    date = nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
+    date = nil if date.nil? || date.empty? || (!options[:ignore_epoch] && epoch_date?(date))
     time = nil if time.nil? || time.empty?
     if (!date.nil? && !time.nil?)
       begin
@@ -72,7 +75,7 @@ module Osm
       end
     elsif !date.nil?
       begin
-        return DateTime.strptime(date, OSM_DATE_FORMAT)
+        return DateTime.strptime(date, (date.include?('-') ? OSM_DATE_FORMAT : OSM_DATE_FORMAT_HUMAN))
       rescue ArgumentError
         return nil
       end
@@ -92,9 +95,9 @@ module Osm
 
 
   def self.parse_date(date, options={})
-    return nil if date.nil? || date.empty? || (date.eql?(OSM_EPOCH_S) && !options[:ignore_epoch])
+    return nil if date.nil? || date.empty? || (!options[:ignore_epoch] && epoch_date?(date))
     begin
-      return Date.strptime(date, OSM_DATE_FORMAT)
+      return Date.strptime(date, (date.include?('-') ? OSM_DATE_FORMAT : OSM_DATE_FORMAT_HUMAN))
     rescue ArgumentError
       return nil
     end
@@ -117,6 +120,11 @@ module Osm
       hash_out[key.to_sym] = value
     end
     hash_out
+  end
+
+
+  def self.epoch_date?(date)
+    [OSM_EPOCH, OSM_EPOCH_HUMAN].include?(date)
   end
 
 end # Module
