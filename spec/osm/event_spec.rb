@@ -165,7 +165,7 @@ describe "Event" do
       Osm::Event.stub(:get_for_section) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
 
-      event = Osm::Event.new(
+      event = Osm::Event.create(@api, {
         :section_id => 1,
         :name => 'Test event',
         :start => DateTime.new(2000, 01, 02, 03, 04, 05),
@@ -174,15 +174,16 @@ describe "Event" do
         :location => 'Somewhere',
         :notes => 'none',
         :fields => {},
-      )
-      event.create(@api).should == 2
+      })
+      event.should_not be_nil
+      event.id.should == 2
     end
 
     it "Create (failed)" do
       Osm::Event.stub(:get_for_section) { [] }
       HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
-      event = Osm::Event.new(
+      event = Osm::Event.create(@api, {
         :section_id => 1,
         :name => 'Test event',
         :start => DateTime.new(2000, 01, 02, 03, 04, 05),
@@ -191,8 +192,8 @@ describe "Event" do
         :location => 'Somewhere',
         :notes => 'none',
         :fields => {},
-      )
-      event.create(@api).should be_nil
+      })
+      event.should be_nil
     end
 
 

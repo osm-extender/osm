@@ -126,26 +126,33 @@ module Osm
 
     # Create an event in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @return [Fixnum, nil] the id of the created event, nil if failed
-    def create(api)
-      raise ObjectIsInvalid, 'event is invalid' unless valid?
-      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permissions(api, section_id)[:events].include?(:write)
+    # @return [Osm::Event, nil] the created event, nil if failed
+    def self.create(api, parameters)
+      event = new(parameters)
+      raise ObjectIsInvalid, 'event is invalid' unless event.valid?
+      raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permissions(api, event.section_id)[:events].include?(:write)
 
-      data = api.perform_query("events.php?action=addEvent&sectionid=#{section_id}", {
-        'name' => name,
-        'location' => location,
-        'startdate' => start.strftime(Osm::OSM_DATE_FORMAT),
-        'enddate' => finish.strftime(Osm::OSM_DATE_FORMAT),
-        'cost' => cost,
-        'notes' => notes,
-        'starttime' => start.strftime(Osm::OSM_TIME_FORMAT),
-        'endtime' => finish.strftime(Osm::OSM_TIME_FORMAT),
+      data = api.perform_query("events.php?action=addEvent&sectionid=#{event.section_id}", {
+        'name' => event.name,
+        'location' => event.location,
+        'startdate' => event.start.strftime(Osm::OSM_DATE_FORMAT),
+        'enddate' => event.finish.strftime(Osm::OSM_DATE_FORMAT),
+        'cost' => event.cost,
+        'notes' => event.notes,
+        'starttime' => event.start.strftime(Osm::OSM_TIME_FORMAT),
+        'endtime' => event.finish.strftime(Osm::OSM_TIME_FORMAT),
       })
 
       # The cached events for the section will be out of date - remove them
-      self.class.cache_delete(api, ['events', section_id])
+      cache_delete(api, ['events', event.section_id])
+      cache_write(api, ['event', event.id], event)
 
-      return data.is_a?(Hash) ? data['id'] : nil
+      if (data.is_a?(Hash) && data.has_key?('id'))
+        event.id = data['id'].to_i
+        return event
+      else
+        return nil
+      end
     end
 
     # Update event in OSM

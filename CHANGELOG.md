@@ -26,8 +26,8 @@
   * Event now has class methods:
     * get\_for\_section(api, section)
     * get(api, section, event\_id)
-  * Event now has instance methods:
     * create(api)
+  * Event now has instance methods:
     * update(api)
     * delete(api)
     * get\_attendance(api)
