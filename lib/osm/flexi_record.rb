@@ -10,7 +10,7 @@ module Osm
     # @return [Array<Osm::FlexiRecordField>] representing the fields of the flexi record
     def self.get_fields(api, section, id, options={})
       section_id = section.to_i
-      cache_key = ['flexi_record_structure', id]
+      cache_key = ['flexi_record_fields', id]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permissions(api, section_id)[:flexi].include?(:read)
         return Osm::Model.cache_read(api, cache_key)
