@@ -1,3 +1,7 @@
+## Version 0.1.1
+
+  * 
+
 ## Version 0.1.0
 
   * Configuration is through Osm::configure not Osm::Api.configure and it takes a different Hash
