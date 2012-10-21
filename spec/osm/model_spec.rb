@@ -41,7 +41,7 @@ describe "Model" do
     Osm::Model.configure({})
     config = ModelTester.test_get_config
     config[:cache].should be_nil
-    config[:ttl].should == 1800
+    config[:ttl].should == 600
     config[:prepend_to_key].should == 'OSMAPI'
   end
 
@@ -63,7 +63,7 @@ describe "Model" do
     end
 
     it "Writes" do
-      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-key', 'data', {:expires_in=>1800}) { true }
+      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-key', 'data', {:expires_in=>600}) { true }
       ModelTester.cache('write', @api, 'key', 'data').should be_true
     end
 
@@ -123,7 +123,7 @@ describe "Model" do
 
     it "All Sections" do
       permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-permissions-user_id', permissions, {:expires_in=>1800}) { true }
+      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-permissions-user_id', permissions, {:expires_in=>600}) { true }
       ModelTester.set_user_permissions(@api, permissions)
     end
 
@@ -131,7 +131,7 @@ describe "Model" do
       permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
       OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
       OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
-      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-permissions-user_id', permissions.merge(3 => {:a => [:read]}), {:expires_in=>1800}) { true }
+      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-permissions-user_id', permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
       ModelTester.set_user_permissions(@api, 3, {:a => [:read]})
     end
 
