@@ -51,7 +51,7 @@ module Osm
         attributes[:permissions].keys.each do |old_key|
           new_key = (old_key.to_sym rescue old_key)    # Get symbol of the key
           attributes[:permissions][new_key] = attributes[:permissions].delete(old_key)  # Change the key
-          attributes[:permissions][new_key] = permissions_map[attributes[:permissions][new_key].to_i] # Translate permissions value
+          attributes[:permissions][new_key] = permissions_map[attributes[:permissions][new_key].to_i] || [] # Translate permissions value
         end
         attributes[:permissions].freeze
 

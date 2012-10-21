@@ -36,7 +36,7 @@ module Osm
     # @return [Osm::DueBadges]
     def self.get(api, section, term=nil, options={})
       section = Osm::Section.get(api, section, options) if section.is_a?(Fixnum)
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term.to_i
+      term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
       cache_key = ['due_badges', section.id, term_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section.id)[:badge].include?(:read)
