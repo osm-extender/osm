@@ -34,6 +34,9 @@
     * add\_field(api, label)
   * Event now has a fields attribute
   * Event::Attendance has instance method update(api, field\_id)
+  * FlexiRecord has class methods:
+    * get\_fields(api, section, flexi\_record\_id)
+    * get\_data(api, section, flexi\_record\_id, term)
   * Grouping now has a class method get\_for\_section(api, section)
   * Member now has a class method to get\_for\_section(api, section\_id, term\_id)
   * Register now has class methods:
