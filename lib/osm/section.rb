@@ -243,9 +243,9 @@ module Osm
         compare_group_name = group_name <=> another.group_name
         return compare_group_name unless compare_group_name == 0
   
-        return 0 if section.type == another.type
+        return 0 if type == another.type
         [:beavers, :cubs, :scouts, :explorers, :waiting, :adults].each do |type|
-          return -1 if section.type == type
+          return -1 if type == type
           return 1 if another.type == type
         end
       rescue NoMethodError
