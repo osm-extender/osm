@@ -36,6 +36,10 @@
   * Event::Attendance has instance method update(api, field\_id)
   * Grouping now has a class method get\_for\_section(api, section)
   * Member now has a class method to get\_for\_section(api, section\_id, term\_id)
+  * Register now has class methods:
+    * get\_structure(api, section)
+    * get\_attendance(api, section)
+    * update\_attendance(data)
   * Section now has class methods:
     * get\_all(api)
     * get(api, section\_id)
