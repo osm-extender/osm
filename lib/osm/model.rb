@@ -33,7 +33,7 @@ module Osm
 
       @@cache = options[:cache]
       @@cache_prepend = options[:prepend_to_key] || 'OSMAPI'
-      @@cache_ttl = options[:ttl] || 1800
+      @@cache_ttl = options[:ttl] || 600
       nil
     end
 
