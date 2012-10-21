@@ -1,15 +1,16 @@
 module Osm
 
-  class Section
+  class Section < Osm::Model
     class FlexiRecord; end # Ensure the constant exists for the validators
-
-    include ::ActiveAttr::MassAssignmentSecurity
-    include ::ActiveAttr::Model
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the section
     # @!attribute [rw] name
     #   @return [String] the section name
+    # @!attribute [rw] group_id
+    #   @return [Fixnum] the id for the group
+    # @!attribute [rw] group_name
+    #   @return [String] the group name
     # @!attribute [rw] subscription_level
     #   @return [Symbol] what subscription the section has to OSM (:bronze, :silver or :gold)
     # @!attribute [rw] subscription_expires
@@ -28,11 +29,11 @@ module Osm
     #   @return [Hash] which columns are shown in the OSM mobile app
     # @!attribute [rw] flexi_records
     #   @return [Array<FlexiRecord>] list of the extra records the section has
-    # @!attribute [rw] role
-    #   @return [Osm::Role] the role linking the user to this section
 
     attribute :id, :type => Integer
     attribute :name, :type => String
+    attribute :group_id, :type => Integer
+    attribute :group_name, :type => String
     attribute :subscription_level, :default => :unknown
     attribute :subscription_expires, :type => Date
     attribute :type, :default => :unknown
@@ -42,12 +43,15 @@ module Osm
     attribute :intouch_fields, :default => {}
     attribute :mobile_fields, :default => {}
     attribute :flexi_records, :default => []
-    attribute :role
 
-    attr_accessible :id, :name, :subscription_level, :subscription_expires, :type, :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records, :role
+    attr_accessible :id, :name, :group_id, :group_name, :subscription_level, :subscription_expires, :type,
+                    :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
+    validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :num_scouts, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_presence_of :name
+    validates_presence_of :group_name
     validates_presence_of :subscription_level
     validates_presence_of :subscription_expires
     validates_presence_of :type
@@ -56,14 +60,13 @@ module Osm
     validates_presence_of :intouch_fields, :unless => Proc.new { |a| a.intouch_fields == {} }
     validates_presence_of :mobile_fields, :unless => Proc.new { |a| a.mobile_fields == {} }
     validates_presence_of :flexi_records, :unless => Proc.new { |a| a.flexi_records == [] }
-    validates_presence_of :role
 
     validates_inclusion_of :subscription_level, :in => [:bronze, :silver, :gold, :unknown], :message => 'is not a valid level'
 
     validates :column_names, :hash => {:key_type => Symbol, :value_type => String}
-    validates :fields, :hash => {:key_type => Symbol, :value_type => String}
-    validates :intouch_fields, :hash => {:key_type => Symbol, :value_type => String}
-    validates :mobile_fields, :hash => {:key_type => Symbol, :value_type => String}
+    validates :fields, :hash => {:key_type => Symbol, :value_in => [true, false]}
+    validates :intouch_fields, :hash => {:key_type => Symbol, :value_in => [true, false]}
+    validates :mobile_fields, :hash => {:key_type => Symbol, :value_in => [true, false]}
 
 
     # @!method initialize
@@ -71,40 +74,137 @@ module Osm
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
-    # Initialize a new Sections from api data
-    # @param [Fixnum] id the section ID used by the API to refer to this section
-    # @param [String] name the name given to the sction in OSM
-    # @param [Hash] data the hash of data for the object returned by the API
-    # @param [Osm::Role] role the Osm::Role linked with this section
-    def self.from_api(id, name, data, role)
-      subscription_levels = [:bronze, :silver, :gold]
-      subscription_level = data['subscription_level'].to_i - 1
-
-      attributes = {
-        :id => Osm::to_i_or_nil(id),
-        :name => name,
-        :subscription_level => (subscription_levels[subscription_level] unless subscription_level < 0) || :unknown,
-        :subscription_expires => data['subscription_expires'] ? Date.parse(data['subscription_expires'], 'yyyy-mm-dd') : nil,
-        :type => !data['sectionType'].nil? ? data['sectionType'].to_sym : :unknown,
-        :num_scouts => data['numscouts'],
-        :column_names => data['columnNames'].is_a?(Hash) ? Osm::symbolize_hash(data['columnNames']) : {},
-        :fields => data['fields'].is_a?(Hash) ? Osm::symbolize_hash(data['fields']) : {},
-        :intouch_fields => data['intouch'].is_a?(Hash) ? Osm::symbolize_hash(data['intouch']) : {},
-        :mobile_fields => data['mobFields'].is_a?(Hash) ? Osm::symbolize_hash(data['mobFields']) : {},
-        :role => role,
-        :flexi_records => [],
+    # Get the user's sections
+    # @param [Osm::Api] The api to use to make the request
+    # @!macro options_get
+    # @return [Array<Osm::Section>]
+    def self.get_all(api, options={})
+      cache_key = ['sections', api.user_id]
+      subscription_levels = {
+        1 => :bronze,
+        2 => :silver,
+        3 => :gold,
       }
 
-      # Populate arrays
-      fr = []
-      fr = data['extraRecords'] if data['extraRecords'].is_a?(Array)
-      fr = data['extraRecords'].values if data['extraRecords'].is_a?(Hash)
-      fr.each do |record_data|
-        attributes[:flexi_records].push FlexiRecord.from_api(record_data)
+      if !options[:no_cache] && cache_exist?(api, cache_key)
+        return cache_read(api, cache_key)
       end
-      attributes[:flexi_records].sort
 
-      new(attributes)
+      data = api.perform_query('api.php?action=getUserRoles')
+
+      result = Array.new
+      permissions = Hash.new
+      data.each do |role_data|
+        section_data = ActiveSupport::JSON.decode(role_data['sectionConfig'])
+
+        # Make sense of flexi records
+        fr_data = []
+        flexi_records = []
+        fr_data = section_data['extraRecords'] if section_data['extraRecords'].is_a?(Array)
+        fr_data = section_data['extraRecords'].values if section_data['extraRecords'].is_a?(Hash)
+        fr_data.each do |record_data|
+          # Expect item to be: {:name=>String, :extraid=>Fixnum}
+          # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
+          record_data = record_data[1] if record_data.is_a?(Array)
+          flexi_records.push FlexiRecord.new(
+            :id => Osm::to_i_or_nil(record_data['extraid']),
+            :name => record_data['name'],
+          )
+        end
+
+        section = new(
+          :id => Osm::to_i_or_nil(role_data['sectionid']),
+          :name => role_data['sectionname'],
+          :subscription_level => (subscription_levels[section_data['subscription_level']] || :unknown),
+          :subscription_expires => Osm::parse_date(section_data['subscription_expires']),
+          :type => !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : :unknown,
+          :num_scouts => section_data['numscouts'],
+          :column_names => section_data['columnNames'].is_a?(Hash) ? Osm::symbolize_hash(section_data['columnNames']) : {},
+          :fields => section_data['fields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['fields']) : {},
+          :intouch_fields => section_data['intouch'].is_a?(Hash) ? Osm::symbolize_hash(section_data['intouch']) : {},
+          :mobile_fields => section_data['mobFields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['mobFields']) : {},
+          :flexi_records => flexi_records.sort,
+          :group_id => role_data['groupid'],
+          :group_name => role_data['groupname'],
+        )
+
+        result.push section
+        cache_write(api, ['section', section.id], section)
+        permissions.merge!(section.id => make_permissions_hash(role_data['permissions']))
+      end
+
+      set_user_permissions(api, get_user_permissions(api).merge(permissions))
+      cache_write(api, cache_key, result)
+      return result
+    end
+
+
+    # Get a section
+    # @param [Osm::Api] The api to use to make the request
+    # @param [Fixnum] section_id the section id of the required section
+    # @!macro options_get
+    # @return nil if an error occured or the user does not have access to that section
+    # @return [Osm::Section]
+    def self.get(api, section_id, options={})
+      cache_key = ['section', section_id]
+
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api).keys.include?(section_id)
+        return cache_read(api, cache_key)
+      end
+
+      sections = get_all(api, options)
+      return nil unless sections.is_a? Array
+
+      sections.each do |section|
+        return section if section.id == section_id
+      end
+      return nil
+    end
+
+
+    # Get API user's permissions
+    # @param [Osm::Api] The api to use to make the request
+    # @!macro options_get
+    # @return nil if an error occured or the user does not have access to that section
+    # @return [Hash] {section_id => permissions_hash}
+    def self.fetch_user_permissions(api, options={})
+      cache_key = ['permissions', api.user_id]
+
+      if !options[:no_cache] && cache_exist?(api, cache_key)
+        return cache_read(api, cache_key)
+      end
+
+      data = api.perform_query('api.php?action=getUserRoles')
+
+      all_permissions = Hash.new
+      data.each do |item|
+        all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => make_permissions_hash(item['permissions']))
+      end
+      cache_write(api, cache_key, all_permissions)
+      return all_permissions
+    end
+
+    # Get the section's notepads
+    # @param [Osm::Api] The api to use to make the request
+    # @!macro options_get
+    # @return [String] the section's notepad
+    def get_notepad(api, options={})
+      cache_key = ['notepad', id]
+
+      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && get_user_permissions(api).keys.include?(section_id)
+        return self.class.cache_read(api, cache_key)
+      end
+
+      notepads = api.perform_query('api.php?action=getNotepads')
+      return '' unless notepads.is_a?(Hash)
+
+      notepad = ''
+      notepads.each do |key, value|
+        self.class.cache_write(api, ['notepad', key.to_i], value)
+        notepad = value if key.to_i == id
+      end
+
+      return notepad
     end
 
     # Check if this section is one of the youth sections
@@ -140,7 +240,14 @@ module Osm
 
     def <=>(another)
       begin
-        return self.role <=> another.role
+        compare_group_name = group_name <=> another.group_name
+        return compare_group_name unless compare_group_name == 0
+  
+        return 0 if section.type == another.type
+        [:beavers, :cubs, :scouts, :explorers, :waiting, :adults].each do |type|
+          return -1 if section.type == type
+          return 1 if another.type == type
+        end
       rescue NoMethodError
         return 1
       end
@@ -153,23 +260,22 @@ module Osm
         return false
       end
     end
-    
-    def inspect
-      attribute_descriptions = attributes.merge('role' => (role.nil? ? nil : role.inspect_without_section(self)))
-      return_inspect(attribute_descriptions)
-    end
-
-    def inspect_without_role(exclude_role)
-      attribute_descriptions = (role == exclude_role) ? attributes.merge('role' => 'SET') : attributes
-      return_inspect(attribute_descriptions)
-    end
 
 
     private
-    def return_inspect(attribute_descriptions)
-      attribute_descriptions.sort.map { |key, value| "#{key}: #{key.eql?('role') ? value : value.inspect}" }.join(", ")
-      separator = " " unless attribute_descriptions.empty?
-      "#<#{self.class.name}#{separator}#{attribute_descriptions}>"
+    def self.make_permissions_hash(permissions)
+      return {} unless permissions.is_a?(Hash)
+
+      permissions_map = {
+        10  => [:read],
+        20  => [:read, :write],
+        100 => [:read, :write, :administer],
+      }
+
+      return permissions.inject({}) do |new_hash, (key, value)|
+        new_hash[key.to_sym] = (permissions_map[value] || [])
+        new_hash
+      end
     end
 
 
@@ -194,20 +300,6 @@ module Osm
       # @!method initialize
       #   Initialize a new FlexiRecord
       #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-
-      # Initialize a new FlexiRecord from api data
-      # @param [Hash] data the hash of data provided by the API
-      def self.from_api(data)
-        # Expect item to be: {:name=>String, :extraid=>Fixnum}
-        # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
-        data = data[1] if data.is_a?(Array)
-
-        new({
-          :id => Osm::to_i_or_nil(data['extraid']),
-          :name => data['name'],
-        })
-      end
 
       def <=>(another)
         begin

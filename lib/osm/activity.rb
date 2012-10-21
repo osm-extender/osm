@@ -1,12 +1,9 @@
 module Osm
 
-  class Activity
+  class Activity < Osm::Model
     class Badge; end # Ensure the constant exists for the validators
     class File; end # Ensure the constant exists for the validators
     class Version; end # Ensure the constant exists for the validators
-
-    include ::ActiveAttr::MassAssignmentSecurity
-    include ::ActiveAttr::Model
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the activity
@@ -70,7 +67,9 @@ module Osm
     attribute :files, :default => []
     attribute :badges, :default => []
 
-    attr_accessible :id, :version, :group_id, :user_id, :title, :description, :resources, :instructions, :running_time, :location, :shared, :rating, :editable, :deletable, :used, :versions, :sections, :tags, :files, :badges
+    attr_accessible :id, :version, :group_id, :user_id, :title, :description, :resources, :instructions,
+                    :running_time, :location, :shared, :rating, :editable, :deletable, :used, :versions,
+                    :sections, :tags, :files, :badges
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0
@@ -88,7 +87,6 @@ module Osm
     validates_inclusion_of :deletable, :in => [true, false]
     validates_inclusion_of :location, :in => [:indoors, :outdoors, :both], :message => 'is not a valid location'
 
-
     validates :sections, :array_of => {:item_type => Symbol}
     validates :tags, :array_of => {:item_type => String}
     validates :badges, :array_of => {:item_type => Osm::Activity::Badge, :item_valid => true}
@@ -96,14 +94,26 @@ module Osm
     validates :versions, :array_of => {:item_type => Osm::Activity::Version, :item_valid => true}
 
 
-    # @!method initialize
-    #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    # Get activity details
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Fixnum] activity_id the activity ID
+    # @param [Fixnum] version the version of the activity to retreive, if nil the latest version will be assumed
+    # @!macro options_get
+    # @return [Osm::Activity]
+    def self.get(api, activity_id, version=nil, options={})
+      cache_key = ['activity', activity_id]
 
+      if !options[:no_cache] && cache_exist?(api, [*cache_key, version]) # TODO work out permission check
+        return cache_read(api, [*cache_key, version])
+      end
 
-    # Initialize a new Activity from api data
-    # @param [Hash] data the hash of data provided by the API
-    def self.from_api(data)
+      data = nil
+      if version.nil?
+        data = api.perform_query("programme.php?action=getActivity&id=#{activity_id}")
+      else
+        data = api.perform_query("programme.php?action=getActivity&id=#{activity_id}&version=#{version}")
+      end
+
       attributes = {}
       attributes[:id] = Osm::to_i_or_nil(data['details']['activityid'])
       attributes[:version] = data['details']['version'].to_i
@@ -128,17 +138,43 @@ module Osm
 
       # Populate Arrays
       (data['files'].is_a?(Array) ? data['files'] : []).each do |file_data|
-        attributes[:files].push File.from_api(file_data)
+        attributes[:files].push File.new(
+          :id => Osm::to_i_or_nil(file_data['fileid']),
+          :activity_id => Osm::to_i_or_nil(file_data['activityid']),
+          :file_name => file_data['filename'],
+          :name => file_data['name']
+        )
       end
       (data['badges'].is_a?(Array) ? data['badges'] : []).each do |badge_data|
-        attributes[:badges].push Badge.from_api(badge_data)
+        attributes[:badges].push Badge.new(
+          :activity_id => Osm::to_i_or_nil(badge_data['activityid']),
+          :section_type => badge_data['section'].to_sym,
+          :type => badge_data['badgetype'].to_sym,
+          :badge => badge_data['badge'],
+          :requirement => badge_data['columnname'],
+          :label => badge_data['label']
+        )
       end
       (data['versions'].is_a?(Array) ? data['versions'] : []).each do |version_data|
-        attributes[:versions].push Version.from_api(version_data)
+        attributes[:versions].push Version.new(
+          :version => Osm::to_i_or_nil(version_data['value']),
+          :created_by => Osm::to_i_or_nil(version_data['userid']),
+          :created_by_name => version_data['firstname'],
+          :label => version_data['label']
+        )
       end
 
-      return new(attributes)
+      activity = Osm::Activity.new(attributes)
+
+      cache_write(api, [*cache_key, nil], activity) if version.nil?
+      cache_write(api, [*cache_key, version], activity)
+      return activity
     end
+
+
+    # @!method initialize
+    #   Initialize a new Term
+    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     private
@@ -167,22 +203,9 @@ module Osm
       validates_presence_of :file_name
       validates_presence_of :name
 
-
       # @!method initialize
       #   Initialize a new Term
       #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-
-      # Initialize a new File from api data
-      # @param [Hash] data the hash of data provided by the API
-      def self.from_api(data)
-        return new({
-          :id => Osm::to_i_or_nil(data['fileid']),
-          :activity_id => Osm::to_i_or_nil(data['activityid']),
-          :file_name => data['filename'],
-          :name => data['name']
-        })
-      end
 
     end # Class Activity::File
 
@@ -221,24 +244,9 @@ module Osm
         record.errors.add(attr, 'must be a Symbol') unless value.is_a?(Symbol)
       end
 
-
       # @!method initialize
       #   Initialize a new Badge
       #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-
-      # Initialize a new Badge from api data
-      # @param [Hash] data the hash of data provided by the API
-      def self.from_api(data)
-        return new({
-          :activity_id => Osm::to_i_or_nil(data['activityid']),
-          :section_type => data['section'].to_sym,
-          :type => data['badgetype'].to_sym,
-          :badge => data['badge'],
-          :requirement => data['columnname'],
-          :label => data['label']
-        })
-      end
 
     end # Class Activity::Badge
 
@@ -267,22 +275,9 @@ module Osm
       validates_presence_of :created_by_name
       validates_presence_of :label
 
-
       # @!method initialize
       #   Initialize a new Version
       #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-
-      # Initialize a new Version from api data
-      # @param [Hash] data the hash of data provided by the API
-      def self.from_api(data)
-        return new({
-          :version => Osm::to_i_or_nil(data['value']),
-          :created_by => Osm::to_i_or_nil(data['userid']),
-          :created_by_name => data['firstname'],
-          :label => data['label']
-        })
-      end
 
     end # Class Activity::Version
 

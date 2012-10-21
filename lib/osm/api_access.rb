@@ -1,8 +1,6 @@
 module Osm
 
-  class ApiAccess
-    include ::ActiveAttr::MassAssignmentSecurity
-    include ::ActiveAttr::Model
+  class ApiAccess < Osm::Model
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the API
@@ -20,51 +18,90 @@ module Osm
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_presence_of :name
 
-    validates :permissions, :hash => {:key_type => Symbol, :value_in => [10, 20]}
+    validates :permissions, :hash => {:key_type => Symbol, :value_type => Array}
+
+
+    # Get API access details for a given section
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
+    # @!macro options_get
+    # @return [Array<Osm::ApiAccess>]
+    def self.get_all(api, section, options={})
+      section_id = section.to_i
+      cache_key = ['api_access', api.user_id, section_id]
+
+      if !options[:no_cache] && cache_exist?(api, cache_key)
+        return cache_read(api, cache_key)
+      end
+
+      data = api.perform_query("users.php?action=getAPIAccess&sectionid=#{section_id}")
+
+      permissions_map = {
+        10  => [:read],
+        20  => [:read, :write],
+      }
+      result = Array.new
+      data['apis'].each do |item|
+        attributes = {}
+        attributes[:id] = item['apiid'].to_i
+        attributes[:name] = item['name']
+        attributes[:permissions] = item['permissions'].is_a?(Hash) ? item['permissions'] : {}
+  
+        # Rubyify permissions hash
+        attributes[:permissions].keys.each do |old_key|
+          new_key = (old_key.to_sym rescue old_key)    # Get symbol of the key
+          attributes[:permissions][new_key] = attributes[:permissions].delete(old_key)  # Change the key
+          attributes[:permissions][new_key] = permissions_map[attributes[:permissions][new_key].to_i] # Translate permissions value
+        end
+        attributes[:permissions].freeze
+
+        this_item = new(attributes)
+        result.push this_item
+        cache_write(api, [*cache_key, this_item.id], this_item)
+      end
+      cache_write(api, cache_key, result)
+
+      return result
+    end
+
+
+    # Get our API access details for a given section
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
+    # @!macro options_get
+    # @return [Osm::ApiAccess]
+    def self.get_ours(api, section, options={})
+      get(api, section, api.api_id, options)
+    end
+
+
+    # Get API Access for a given API
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
+    # @param [Osm::Api] for_api The api (or its ID) to get access for
+    # @!macro options_get
+    # @return [Osm::ApiAccess]
+    def self.get(api, section, for_api, options={})
+      section_id = section.to_i
+      for_api_id = for_api.to_i
+      cache_key = ['api_access', api.user_id, section_id, for_api]
+
+      if !options[:no_cache] && cache_exist?(api, cache_key)
+        return cache_read(api, cache_key)
+      end
+
+      data = get_all(api, section_id, options)
+
+      data.each do |item|
+        return item if item.id == for_api_id
+      end
+      return nil
+    end
 
 
     # @!method initialize
     #   Initialize a new Term
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-
-    # Initialize a new ApiAccess from api data
-    # @param [Hash] data the hash of data provided by the API
-    def self.from_api(data)
-      attributes = {}
-      attributes[:id] = data['apiid'].to_i
-      attributes[:name] = data['name']
-      attributes[:permissions] = data['permissions'].is_a?(Hash) ? data['permissions'] : {}
-
-      # Rubyfy permissions hash
-      attributes[:permissions].keys.each do |key|
-        attributes[:permissions][key] = attributes[:permissions][key].to_i
-        attributes[:permissions][(key.to_sym rescue key) || key] = attributes[:permissions].delete(key) # Symbolize key
-      end
-      attributes[:permissions].freeze
-
-      return new(attributes)
-    end
-
-    # Determine if this API has read access for the provided permission
-    # @param [Symbol] key the permission being queried
-    # @return [Boolean] if this API can read the passed permission
-    def can_read?(key)
-      return [20, 10].include?(permissions[key])
-    end
-
-    # Determine if this API has write access for the provided permission
-    # @param [Symbol] key the permission being queried
-    # @return [Boolean] if this API can write the passed permission
-    def can_write?(key)
-      return [20].include?(permissions[key])
-    end
-
-    # Determine if this API is the API being used to make requests
-    # @return [Boolean] if this is the API being used
-    def our_api?
-      return id == Osm::Api.api_id.to_i
-    end
 
   end # Class ApiAccess
 

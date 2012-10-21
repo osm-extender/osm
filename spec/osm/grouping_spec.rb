@@ -4,18 +4,22 @@ require 'spec_helper'
 describe "Grouping" do
 
   it "Create" do
-    data = {
+    body = {'patrols' => [{
       'patrolid' => 1,
       'name' => 'Patrol Name',
       'active' => 1,
-      'points' => '2',
-    }
-    patrol = Osm::Grouping.from_api(data)
+      'points' => '3',
+    }]}
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getPatrols&sectionid=2", :body => body.to_json)
 
+    patrols = Osm::Grouping.get_for_section(@api, 2)
+    patrols.size.should == 1
+    patrol = patrols[0]
     patrol.id.should == 1
+    patrol.section_id.should == 2
     patrol.name.should == 'Patrol Name'
     patrol.active.should == true
-    patrol.points.should == 2
+    patrol.points.should == 3
     patrol.valid?.should be_true
   end
 
