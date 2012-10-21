@@ -1,3 +1,7 @@
+## Version 0.1.2
+
+  * 
+
 ## Version 0.1.1
 
   * Add get\_options Hash to Model.get\_user\_permissions
