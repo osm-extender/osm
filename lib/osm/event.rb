@@ -203,7 +203,7 @@ module Osm
     # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @return [Array<Osm::Event::Attendance>]
     def get_attendance(api, term=nil, options={})
-      term_id = term.to_i
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['event_attendance', id]
 
       if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && self.class.get_user_permissions(api, section_id)[:events].include?(:read)

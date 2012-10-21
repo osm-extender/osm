@@ -10,7 +10,7 @@ module Osm
     # @return [Array<Osm::Register::Field>] representing the fields of the register
     def self.get_structure(api, section, term=nil, options={})
       section_id = section.to_i
-      term_id = term.to_i
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['register_structure', section_id, term_id]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permissions(api, section_id)[:register].include?(:read)
@@ -42,7 +42,7 @@ module Osm
     # @return [Array<Register::Attendance>] representing the attendance of each member
     def self.get_attendance(api, section, term=nil, options={})
       section_id = section.to_i
-      term_id = term.to_i
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['register_attendance', section_id, term_id]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permissions(api, section_id)[:register].include?(:read)
@@ -86,7 +86,7 @@ module Osm
       raise ArgumentIsInvalid, ':members is missing' if data[:members].nil?
 
       api = data[:api]
-      term_id = data[:term].to_i
+      term_id = data[:term].nil? ? Osm::Term.get_current_term_for_section(api, section).id : data[:term].to_i
 
       data[:members] = [*data[:members]].map{ |member| (member.is_a?(Fixnum) ? member : member.id).to_s } # Make sure it's an Array of Strings
 

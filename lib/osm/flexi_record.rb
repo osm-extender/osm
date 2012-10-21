@@ -35,22 +35,21 @@ module Osm
 
     # Get data for flexi record
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm:Section, Fixnum] section the section (or its ID) to get the register for
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the register for
     # @param [Fixnum] the id of the Flexi Record
-    # @param [Osm:Term, Fixnum, nil] section the term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param [Osm::Term, Fixnum, nil] section the term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<FlexiRecordData>]
     def self.get_data(api, section, id, term=nil, options={})
-      section_id = section.id
-      section_type = section.type
-      term_id = term.to_i
+      section = Osm::Section.get(api, section) if section.is_a?(Fixnum)
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['flexi_record_data', id, term_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permissions(api, section_id)[:flexi].include?(:read)
+      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permissions(api, section.id)[:flexi].include?(:read)
         return Osm::Model.cache_read(api, cache_key)
       end
 
-      data = api.perform_query("extras.php?action=getExtraRecords&sectionid=#{section_id}&extraid=#{id}&termid=#{term_id}&section=#{section_type}")
+      data = api.perform_query("extras.php?action=getExtraRecords&sectionid=#{section.id}&extraid=#{id}&termid=#{term_id}&section=#{section.type}")
 
       to_return = []
       data['items'].each do |item|

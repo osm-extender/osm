@@ -65,7 +65,7 @@ module Osm
     # @return [Array<Osm::Evening>]
     def self.get_programme(api, section, term, options={})
       section_id = section.to_i
-      term_id = term.to_i
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['programme', section_id, term_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section_id)[:programme].include?(:read)

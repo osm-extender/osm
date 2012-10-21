@@ -148,8 +148,7 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Member>]
     def self.get_for_section(api, section, term=nil, options={})
-      term = Osm::Term.get_current_term_for_section(api, section.to_i, options) if term.nil?
-      term_id = term.to_i
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       section_id = section.to_i
       cache_key = ['members', section_id, term_id]
 
