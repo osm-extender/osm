@@ -184,6 +184,7 @@ module Osm
       return all_permissions
     end
 
+
     # Get the section's notepads
     # @param [Osm::Api] The api to use to make the request
     # @!macro options_get
@@ -206,6 +207,28 @@ module Osm
 
       return notepad
     end
+
+    # Get badge stock levels
+    # @param [Osm::Api] The api to use to make the request
+    # @param [Osm::Term, Fixnum, nil] section the term (or its ID) to get the stock levels for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @return Hash
+    def get_badge_stock(api, term=nil, options={})
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, self).id : term.to_i
+      cache_key = ['badge_stock', id, term_id]
+
+      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && self.class.get_user_permissions(api, self)[:badge].include?(:read)
+        return self.class.cache_read(api, cache_key)
+      end
+
+      data = api.perform_query("challenges.php?action=getInitialBadges&type=core&sectionid=#{id}&section=#{type}&termid=#{term_id}")
+      data = (data['stock'] || {}).select{ |k,v| !k.eql?('sectionid') }.
+                                   inject({}){ |new_hash,(badge, level)| new_hash[badge] = level.to_i; new_hash }
+
+      self.class.cache_write(api, cache_key, data)
+      return data
+    end
+
 
     # Check if this section is one of the youth sections
     # @return [Boolean]
