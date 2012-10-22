@@ -1,3 +1,7 @@
+## Version 0.1.4
+
+  * 
+
 ## Version 0.1.3
 
   * Add get\_badge\_stock(api) to section
