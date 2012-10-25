@@ -75,6 +75,7 @@ module Osm
     def self.get_user_permissions(api, section_id=nil, options={})
       key = ['permissions', api.user_id]
       permissions = (!options[:no_cache] && cache_exist?(api, key)) ? cache_read(api, key) : Osm::Section.fetch_user_permissions(api)
+      permissions ||= {}
       return section_id.nil? ? (permissions || {}) : (permissions[section_id] || {})
     end
 
