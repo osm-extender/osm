@@ -75,7 +75,18 @@ module Osm
     def self.get_user_permissions(api, section_id=nil, options={})
       key = ['permissions', api.user_id]
       permissions = (!options[:no_cache] && cache_exist?(api, key)) ? cache_read(api, key) : Osm::Section.fetch_user_permissions(api)
-      return section_id.nil? ? permissions : (permissions[section_id] || {})
+      return section_id.nil? ? (permissions || {}) : (permissions[section_id] || {})
+    end
+
+    # Get an access permission for an API user
+    # @param [Osm::Api] The api to use to make the request
+    # @param [Fixnum, nil] section_id to get permissions for, if nil a Hash of all section's permissions is returned
+    # @param [Symbol] permission
+    # @!macro options_get
+    # @return [Array<Symbol>] the actions the user can perform for the provided permission
+    def self.get_user_permission(api, section_id, permission, options={})
+      permissions = get_user_permissions(api, section_id, options)[permission]
+      return (permissions || [])
     end
 
     # Set access permission for an API user

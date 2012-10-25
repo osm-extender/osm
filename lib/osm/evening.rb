@@ -68,7 +68,7 @@ module Osm
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['programme', section_id, term_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section_id)[:programme].include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section_id, :programme).include?(:read)
         return cache_read(api, cache_key)
       end
 
@@ -186,7 +186,7 @@ module Osm
       section = Osm::Section.get(api, section_id)
       cache_key = ['badge_requirements', section.id, id]
 
-      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && get_user_permissions(api, section_id)[:programme].include?(:read)
+      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && get_user_permission(api, section_id, :programme).include?(:read)
         return self.class.cache_read(api, cache_key)
       end
 

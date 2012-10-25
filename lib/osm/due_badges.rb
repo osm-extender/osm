@@ -39,7 +39,7 @@ module Osm
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
       cache_key = ['due_badges', section.id, term_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section.id)[:badge].include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section.id, :badge).include?(:read)
         return cache_read(api, cache_key)
       end
 

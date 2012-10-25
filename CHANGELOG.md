@@ -1,6 +1,6 @@
 ## Version 0.1.4
 
-  * 
+  * Osm::Model has new class method get\_user\_permission(api, section_id, permission)
 
 ## Version 0.1.3
 
