@@ -296,7 +296,7 @@ module Osm
       }
 
       return permissions.inject({}) do |new_hash, (key, value)|
-        new_hash[key.to_sym] = (permissions_map[value] || [])
+        new_hash[key.to_sym] = (permissions_map[value.to_i] || [])
         new_hash
       end
     end
