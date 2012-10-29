@@ -13,7 +13,7 @@ module Osm
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['register_structure', section_id, term_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permissions(api, section_id)[:register].include?(:read)
+      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permission(api, section_id, :register).include?(:read)
         return Osm::Model.cache_read(api, cache_key)
       end
 
@@ -45,7 +45,7 @@ module Osm
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['register_attendance', section_id, term_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permissions(api, section_id)[:register].include?(:read)
+      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permission(api, section_id, :register).include?(:read)
         return Osm::Model.cache_read(api, cache_key)
       end
 

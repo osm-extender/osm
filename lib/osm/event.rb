@@ -58,7 +58,7 @@ module Osm
       cache_key = ['events', section_id]
       events = nil
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section_id)[:events].include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section_id, :events).include?(:read)
         return cache_read(api, cache_key)
       end
 
@@ -109,7 +109,7 @@ module Osm
       section_id = section.to_i
       cache_key = ['event', event_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section_id)[:events].include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section_id, :events).include?(:read)
         return cache_read(api, cache_key)
       end
 
@@ -130,7 +130,7 @@ module Osm
     def self.create(api, parameters)
       event = new(parameters)
       raise ObjectIsInvalid, 'event is invalid' unless event.valid?
-      raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permissions(api, event.section_id)[:events].include?(:write)
+      raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, event.section_id, :events).include?(:write)
 
       data = api.perform_query("events.php?action=addEvent&sectionid=#{event.section_id}", {
         'name' => event.name,
@@ -159,7 +159,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] wether the update succedded
     def update(api)
-      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permissions(api, section_id)[:events].include?(:write)
+      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permission(api, section_id, :events).include?(:write)
 
       data = api.perform_query("events.php?action=addEvent&sectionid=#{section_id}", {
         'eventid' => id,
@@ -184,7 +184,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] wether the delete succedded
     def delete(api)
-      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permissions(api, section_id)[:events].include?(:write)
+      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permission(api, section_id, :events).include?(:write)
 
       data = api.perform_query("events.php?action=deleteEvent&sectionid=#{section_id}&eventid=#{id}")
 
@@ -206,7 +206,7 @@ module Osm
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['event_attendance', id]
 
-      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && self.class.get_user_permissions(api, section_id)[:events].include?(:read)
+      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && self.class.get_user_permission(api, section_id, :events).include?(:read)
         return self.class.cache_read(api, cache_key)
       end
 
@@ -242,7 +242,7 @@ module Osm
     # @return [Boolean] wether the update succedded
     def add_field(api, label)
       raise ArgumentIsInvalid, 'label is invalid' if label.blank?
-      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permissions(api, section_id)[:events].include?(:write)
+      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permission(api, section_id, :events).include?(:write)
 
       data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
         'columnName' => label
@@ -299,7 +299,7 @@ module Osm
       # @return [Boolean] if the operation suceeded or not
       def update(api, field_id)
         raise ArgumentIsInvalid, 'field_id is invalid' unless field_id.match(/\Af_\d+\Z/) || field_id.eql?('attending')
-        raise Forbidden, 'you do not have permission to write to events for this section' unless Osm::Model.get_user_permissions(api, event.section_id)[:events].include?(:write)
+        raise Forbidden, 'you do not have permission to write to events for this section' unless Osm::Model.get_user_permission(api, event.section_id, :events).include?(:write)
 
         data = api.perform_query("events.php?action=updateScout", {
           'scoutid' => member_id,

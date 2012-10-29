@@ -152,7 +152,7 @@ module Osm
       section_id = section.to_i
       cache_key = ['members', section_id, term_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api, section_id)[:member].include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section_id, :member).include?(:read)
         return cache_read(api, cache_key)
       end
 

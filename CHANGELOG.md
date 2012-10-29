@@ -1,3 +1,8 @@
+## Version 0.1.4
+
+  * Osm::Model has new class method get\_user\_permission(api, section_id, permission)
+  * API may return permissions value as a string not integer
+
 ## Version 0.1.3
 
   * Add get\_badge\_stock(api) to section

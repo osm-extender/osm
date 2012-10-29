@@ -217,7 +217,7 @@ module Osm
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, self).id : term.to_i
       cache_key = ['badge_stock', id, term_id]
 
-      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && self.class.get_user_permissions(api, self)[:badge].include?(:read)
+      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && self.class.get_user_permission(api, self, :badge).include?(:read)
         return self.class.cache_read(api, cache_key)
       end
 
@@ -296,7 +296,7 @@ module Osm
       }
 
       return permissions.inject({}) do |new_hash, (key, value)|
-        new_hash[key.to_sym] = (permissions_map[value] || [])
+        new_hash[key.to_sym] = (permissions_map[value.to_i] || [])
         new_hash
       end
     end
