@@ -159,7 +159,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] wether the update succedded
     def update(api)
-      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permission(api, section_id, :events).include?(:write)
+      raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
 
       data = api.perform_query("events.php?action=addEvent&sectionid=#{section_id}", {
         'eventid' => id,
@@ -174,8 +174,8 @@ module Osm
       })
 
       # The cached events for the section will be out of date - remove them
-      self.class.cache_delete(api, ['event', id])
-      self.class.cache_delete(api, ['events', section_id])
+      cache_delete(api, ['event', id])
+      cache_delete(api, ['events', section_id])
 
       return data.is_a?(Hash) && (data['id'].to_i == id)
     end
@@ -184,13 +184,13 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] wether the delete succedded
     def delete(api)
-      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permission(api, section_id, :events).include?(:write)
+      raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
 
       data = api.perform_query("events.php?action=deleteEvent&sectionid=#{section_id}&eventid=#{id}")
 
       # The cached events for the section will be out of date - remove them
-      self.class.cache_delete(api, ['events', section_id])
-      self.class.cache_delete(api, ['event', id])
+      cache_delete(api, ['events', section_id])
+      cache_delete(api, ['event', id])
 
       return data.is_a?(Hash) ? data['ok'] : false
     end
@@ -206,8 +206,8 @@ module Osm
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['event_attendance', id]
 
-      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && self.class.get_user_permission(api, section_id, :events).include?(:read)
-        return self.class.cache_read(api, cache_key)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section_id, :events).include?(:read)
+        return cache_read(api, cache_key)
       end
 
       data = api.perform_query("events.php?action=getEventAttendance&eventid=#{id}&sectionid=#{section_id}&termid=#{term_id}")
@@ -231,7 +231,7 @@ module Osm
         )
       end
 
-      self.class.cache_write(api, cache_key, attendance)
+      cache_write(api, cache_key, attendance)
       return attendance
     end
 
@@ -242,16 +242,16 @@ module Osm
     # @return [Boolean] wether the update succedded
     def add_field(api, label)
       raise ArgumentIsInvalid, 'label is invalid' if label.blank?
-      raise Forbidden, 'you do not have permission to write to events for this section' unless self.class.get_user_permission(api, section_id, :events).include?(:write)
+      raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
 
       data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
         'columnName' => label
       })
 
       # The cached events for the section will be out of date - remove them
-      self.class.cache_delete(api, ['events', section_id])
-      self.class.cache_delete(api, ['event', id])
-      self.class.cache_delete(api, ['event_attendance', id])
+      cache_delete(api, ['events', section_id])
+      cache_delete(api, ['event', id])
+      cache_delete(api, ['event_attendance', id])
 
       return data.is_a?(Hash) && (data['eventid'].to_i == id)
     end

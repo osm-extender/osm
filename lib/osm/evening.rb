@@ -171,7 +171,7 @@ module Osm
 
       # The cached programmes for the section will be out of date - remove them
       Osm::Term.get_for_section(api, section_id).each do |term|
-        self.class.cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
+        cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
       end
 
       return response.is_a?(Hash) && (response['result'] == 0)
@@ -186,13 +186,13 @@ module Osm
       section = Osm::Section.get(api, section_id)
       cache_key = ['badge_requirements', section.id, id]
 
-      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && get_user_permission(api, section_id, :programme).include?(:read)
-        return self.class.cache_read(api, cache_key)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section_id, :programme).include?(:read)
+        return cache_read(api, cache_key)
       end
 
       data = api.perform_query("users.php?action=getActivityRequirements&date=#{meeting_date.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
 
-      self.class.cache_write(api, cache_key, data)
+      cache_write(api, cache_key, data)
       return data
     end
 

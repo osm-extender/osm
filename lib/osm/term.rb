@@ -159,8 +159,8 @@ module Osm
       })
 
       # The cached terms for the section will be out of date - remove them
-      self.class.cache_delete(api, ['term', id])
-      self.class.cache_delete(api, ['terms', api.user_id])
+      cache_delete(api, ['term', id])
+      cache_delete(api, ['terms', api.user_id])
 
       return data.is_a?(Hash) && data['terms'].is_a?(Hash)
     end
