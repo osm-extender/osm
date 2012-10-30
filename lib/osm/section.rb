@@ -192,8 +192,8 @@ module Osm
     def get_notepad(api, options={})
       cache_key = ['notepad', id]
 
-      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && get_user_permissions(api).keys.include?(section_id)
-        return self.class.cache_read(api, cache_key)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api).keys.include?(section_id)
+        return cache_read(api, cache_key)
       end
 
       notepads = api.perform_query('api.php?action=getNotepads')
@@ -201,7 +201,7 @@ module Osm
 
       notepad = ''
       notepads.each do |key, value|
-        self.class.cache_write(api, ['notepad', key.to_i], value)
+        cache_write(api, ['notepad', key.to_i], value)
         notepad = value if key.to_i == id
       end
 
@@ -217,15 +217,15 @@ module Osm
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, self).id : term.to_i
       cache_key = ['badge_stock', id, term_id]
 
-      if !options[:no_cache] && self.class.cache_exist?(api, cache_key) && self.class.get_user_permission(api, self, :badge).include?(:read)
-        return self.class.cache_read(api, cache_key)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, self, :badge).include?(:read)
+        return cache_read(api, cache_key)
       end
 
       data = api.perform_query("challenges.php?action=getInitialBadges&type=core&sectionid=#{id}&section=#{type}&termid=#{term_id}")
       data = (data['stock'] || {}).select{ |k,v| !k.eql?('sectionid') }.
                                    inject({}){ |new_hash,(badge, level)| new_hash[badge] = level.to_i; new_hash }
 
-      self.class.cache_write(api, cache_key, data)
+      cache_write(api, cache_key, data)
       return data
     end
 

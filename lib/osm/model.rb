@@ -90,6 +90,7 @@ module Osm
       return (permissions || [])
     end
 
+
     # Set access permission for an API user
     # @param [Osm::Api] The api to use to make the request
     # @param [Fixnum, nil] section_id to set permissions for, if nil the Hash of all section's permissions is set
@@ -100,6 +101,17 @@ module Osm
         permissions = get_user_permissions(api).merge(section_id => permissions)
       end
       cache_write(api, key, permissions)
+    end
+
+
+    # Make selected class methods instance methods too
+    %w{
+      cache_read cache_write cache_exist? cache_delete
+      get_user_permissions get_user_permission set_user_permission
+    }.each do |method_name|
+      define_method method_name do |*options|
+        self.class.send(method_name, *options)
+      end
     end
 
 
