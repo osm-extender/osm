@@ -63,12 +63,35 @@ describe "Register" do
       data = {
         'identifier' => 'scoutid',
         'label' => "name",
-        'items' => []
+        'items' => [
+          {
+            "total" => 4,
+            "2000-01-01" => "Yes",
+            "2000-01-02" => "No",
+            "scoutid" => "2",
+            "firstname" => "First",
+            "lastname" => "Last",
+            "patrolid" => "3"
+          }
+        ]
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json)
 
       register = Osm::Register.get_attendance(@api, 1, 2)
       register.is_a?(Array).should be_true
+      register.size.should == 1
+      reg = register[0]
+      reg.attendance.should == {
+        Date.new(2000, 1, 1) => 'Yes',
+        Date.new(2000, 1, 2) => 'No'
+      }
+      reg.first_name.should == 'First'
+      reg.last_name.should == 'Last'
+      reg.grouping_id.should == 3
+      reg.member_id.should == 2
+      reg.total.should == 4
+      reg.section_id.should == 1
+      reg.valid?.should be_true
     end
 
     it "Update register attendance" do
@@ -96,6 +119,37 @@ describe "Register" do
         :members => 3,
         :completed_badge_requirements => [{'a'=>'A'}, {'b'=>'B'}]
       }).should be_true
+    end
+
+    it "Handles the total row" do
+      data = {
+        'identifier' => 'scoutid',
+        'label' => "name",
+        'items' => [
+          {
+            "total" => 1,
+            "scoutid" => "2",
+            "firstname" => "First",
+            "lastname" => "Last",
+            "patrolid" => "3"
+          },{
+            "total" => 119,
+            "2000-01-01" => 8,
+            "scoutid" => -1,
+            "firstname" => "TOTAL",
+            "lastname" => "",
+            "patrolid" => 0
+          }
+        ]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json)
+
+      register = Osm::Register.get_attendance(@api, 1, 2)
+      register.is_a?(Array).should be_true
+      register.size.should == 1
+      reg = register[0]
+      reg.first_name.should == 'First'
+      reg.last_name.should == 'Last'
     end
 
   end

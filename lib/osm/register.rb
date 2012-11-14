@@ -54,16 +54,18 @@ module Osm
       data = data['items']
       to_return = []
       data.each do |item|
-        to_return.push Osm::Register::Attendance.new(
-          :member_id => Osm::to_i_or_nil(item['scoutid']),
-          :grouping_id => Osm::to_i_or_nil(item ['patrolid']),
-          :section_id => Osm::to_i_or_nil(item['sectionid']),
-          :first_name => item['firstname'],
-          :last_name => item['lastname'],
-          :total => item['total'].to_i,
-          :attendance => item.select { |key, value| key.to_s.match(Osm::OSM_DATE_REGEX) }.
-                              inject({}){ |new_hash,(date, attendance)| new_hash[Date.strptime(date, Osm::OSM_DATE_FORMAT)] = attendance; new_hash },
-        )
+        unless item['scoutid'].to_i < 0  # It's a total row
+          to_return.push Osm::Register::Attendance.new(
+            :member_id => Osm::to_i_or_nil(item['scoutid']),
+            :grouping_id => Osm::to_i_or_nil(item ['patrolid']),
+            :section_id => section_id,
+            :first_name => item['firstname'],
+            :last_name => item['lastname'],
+            :total => item['total'].to_i,
+            :attendance => item.select { |key, value| key.to_s.match(Osm::OSM_DATE_REGEX) }.
+                                inject({}){ |new_hash,(date, attendance)| new_hash[Date.strptime(date, Osm::OSM_DATE_FORMAT)] = attendance; new_hash },
+          )
+        end
       end
       Osm::Model.cache_write(api, cache_key, to_return)
       return to_return

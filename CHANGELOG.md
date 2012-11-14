@@ -1,6 +1,6 @@
 ## Version 0.1.6
 
-  * 
+  * Internal changes due to OSM adding total rows in register and fexi record data (the total rows are ignored)
 
 ## Version 0.1.5
 
