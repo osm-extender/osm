@@ -1,6 +1,6 @@
 ## Version 0.1.7
 
-  * 
+  * Ignore sections of type discount - assuming they're a strange symtom of how OSM handles discount codes
 
 ## Version 0.1.6
 
