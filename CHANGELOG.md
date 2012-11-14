@@ -1,3 +1,7 @@
+## Version 0.1.8
+
+  * 
+
 ## Version 0.1.7
 
   * Ignore sections of type discount - assuming they're a strange symtom of how OSM handles discount codes
