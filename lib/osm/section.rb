@@ -95,42 +95,44 @@ module Osm
       result = Array.new
       permissions = Hash.new
       data.each do |role_data|
-        section_data = ActiveSupport::JSON.decode(role_data['sectionConfig'])
+        unless role_data['section'].eql?('discount')  # It's not an actual section
+          section_data = ActiveSupport::JSON.decode(role_data['sectionConfig'])
 
-        # Make sense of flexi records
-        fr_data = []
-        flexi_records = []
-        fr_data = section_data['extraRecords'] if section_data['extraRecords'].is_a?(Array)
-        fr_data = section_data['extraRecords'].values if section_data['extraRecords'].is_a?(Hash)
-        fr_data.each do |record_data|
-          # Expect item to be: {:name=>String, :extraid=>Fixnum}
-          # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
-          record_data = record_data[1] if record_data.is_a?(Array)
-          flexi_records.push FlexiRecord.new(
-            :id => Osm::to_i_or_nil(record_data['extraid']),
-            :name => record_data['name'],
+          # Make sense of flexi records
+          fr_data = []
+          flexi_records = []
+          fr_data = section_data['extraRecords'] if section_data['extraRecords'].is_a?(Array)
+          fr_data = section_data['extraRecords'].values if section_data['extraRecords'].is_a?(Hash)
+          fr_data.each do |record_data|
+            # Expect item to be: {:name=>String, :extraid=>Fixnum}
+            # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
+            record_data = record_data[1] if record_data.is_a?(Array)
+            flexi_records.push FlexiRecord.new(
+              :id => Osm::to_i_or_nil(record_data['extraid']),
+              :name => record_data['name'],
+            )
+          end
+
+          section = new(
+            :id => Osm::to_i_or_nil(role_data['sectionid']),
+            :name => role_data['sectionname'],
+            :subscription_level => (subscription_levels[section_data['subscription_level']] || :unknown),
+            :subscription_expires => Osm::parse_date(section_data['subscription_expires']),
+            :type => !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : (!section_data['section'].nil? ? section_data['section'].to_sym : :unknown),
+            :num_scouts => section_data['numscouts'],
+            :column_names => section_data['columnNames'].is_a?(Hash) ? Osm::symbolize_hash(section_data['columnNames']) : {},
+            :fields => section_data['fields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['fields']) : {},
+            :intouch_fields => section_data['intouch'].is_a?(Hash) ? Osm::symbolize_hash(section_data['intouch']) : {},
+            :mobile_fields => section_data['mobFields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['mobFields']) : {},
+            :flexi_records => flexi_records.sort,
+            :group_id => role_data['groupid'],
+            :group_name => role_data['groupname'],
           )
+
+          result.push section
+          cache_write(api, ['section', section.id], section)
+          permissions.merge!(section.id => make_permissions_hash(role_data['permissions']))
         end
-
-        section = new(
-          :id => Osm::to_i_or_nil(role_data['sectionid']),
-          :name => role_data['sectionname'],
-          :subscription_level => (subscription_levels[section_data['subscription_level']] || :unknown),
-          :subscription_expires => Osm::parse_date(section_data['subscription_expires']),
-          :type => !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : :unknown,
-          :num_scouts => section_data['numscouts'],
-          :column_names => section_data['columnNames'].is_a?(Hash) ? Osm::symbolize_hash(section_data['columnNames']) : {},
-          :fields => section_data['fields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['fields']) : {},
-          :intouch_fields => section_data['intouch'].is_a?(Hash) ? Osm::symbolize_hash(section_data['intouch']) : {},
-          :mobile_fields => section_data['mobFields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['mobFields']) : {},
-          :flexi_records => flexi_records.sort,
-          :group_id => role_data['groupid'],
-          :group_name => role_data['groupname'],
-        )
-
-        result.push section
-        cache_write(api, ['section', section.id], section)
-        permissions.merge!(section.id => make_permissions_hash(role_data['permissions']))
       end
 
       set_user_permissions(api, get_user_permissions(api).merge(permissions))
@@ -178,7 +180,9 @@ module Osm
 
       all_permissions = Hash.new
       data.each do |item|
-        all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => make_permissions_hash(item['permissions']))
+        unless item['section'].eql?('discount')  # It's not an actual section
+          all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => make_permissions_hash(item['permissions']))
+        end
       end
       cache_write(api, cache_key, all_permissions)
       return all_permissions
