@@ -53,21 +53,23 @@ module Osm
 
       to_return = []
       data['items'].each do |item|
-        fields = item.select { |key, value|
-          ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
-        }
-        fields.merge!(
-          'dob' => item['dob'].empty? ? nil : item['dob'],
-          'total' => item['total'].empty? ? nil : item['total'],
-          'completed' => item['completed'].empty? ? nil : item['completed'],
-          'age' => item['age'].empty? ? nil : item['age'],
-        )
-
-        to_return.push Osm::FlexiRecord::Data.new(
-          :member_id => Osm::to_i_or_nil(item['scoutid']),
-          :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
-          :fields => fields
-        )
+        unless item['scoutid'].to_i < 0  # It's a total row
+          fields = item.select { |key, value|
+            ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
+          }
+          fields.merge!(
+            'dob' => item['dob'].empty? ? nil : item['dob'],
+            'total' => item['total'].empty? ? nil : item['total'],
+            'completed' => item['completed'].empty? ? nil : item['completed'],
+            'age' => item['age'].empty? ? nil : item['age'],
+          )
+  
+          to_return.push Osm::FlexiRecord::Data.new(
+            :member_id => Osm::to_i_or_nil(item['scoutid']),
+            :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+            :fields => fields
+          )
+        end
       end
 
       Osm::Model.cache_write(api, cache_key, to_return)
