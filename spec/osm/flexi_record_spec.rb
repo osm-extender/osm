@@ -107,6 +107,7 @@ describe "Flexi Record" do
 
       records = Osm::FlexiRecord.get_data(@api, Osm::Section.new(:id => 1, :type => :cubs), 2, 3)
       records.is_a?(Array).should be_true
+      records.size.should == 1
       record = records[0]
       record.member_id.should == 1
       record.grouping_id.should == 2
@@ -122,6 +123,50 @@ describe "Flexi Record" do
       }
       record.valid?.should be_true
     end
+
+
+    it "Handles the total row" do
+      data = {
+        'identifier' => 'scoutid',
+        'label' => "name",
+        'items' => [{
+          "scoutid" => "-1",
+          "firstname" => "TOTAL",
+          "lastname" => "",
+          "dob" => "",
+          "patrolid" => "-1",
+          "total" => 100,
+          "completed" => 0,
+          "f_1" => 25,
+          "f_2" => 75,
+          "age" => "",
+          "patrol" => ""
+        },{
+          "scoutid" => "1",
+          "firstname" => "First",
+          "lastname" => "Last",
+          "dob" => "",
+          "patrolid" => "2",
+          "total" => "",
+          "completed" => "",
+          "f_1" => "A",
+          "f_2" => "B",
+          "age" => "",
+          "patrol" => "Green"
+        }]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json)
+
+      records = Osm::FlexiRecord.get_data(@api, Osm::Section.new(:id => 1, :type => :cubs), 2, 3)
+      records.is_a?(Array).should be_true
+      records.size.should == 1
+      record = records[0]
+      record.member_id.should == 1
+      record.grouping_id.should == 2
+      record.fields['firstname'].should == 'First'
+      record.fields['lastname'].should == 'Last'
+    end
+
 
   end
 
