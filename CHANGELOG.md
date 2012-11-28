@@ -1,6 +1,6 @@
 ## Version 0.1.8
 
-  * 
+  * Fix 'undefined local variable' when getting a section's notepad from the cache
 
 ## Version 0.1.7
 
