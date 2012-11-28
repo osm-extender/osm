@@ -196,7 +196,7 @@ module Osm
     def get_notepad(api, options={})
       cache_key = ['notepad', id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api).keys.include?(section_id)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api).keys.include?(id)
         return cache_read(api, cache_key)
       end
 
