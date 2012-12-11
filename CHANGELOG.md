@@ -1,6 +1,6 @@
 ## Version 0.1.9
 
-  * 
+  * Fix fetching of members for a waiting list
 
 ## Version 0.1.8
 
