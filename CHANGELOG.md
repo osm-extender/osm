@@ -1,3 +1,8 @@
+## Version 0.1.9
+
+  * Fix fetching of members for a waiting list
+  * Fix 'undefuned method' when creating an event without a start or finish datetime
+
 ## Version 0.1.8
 
   * Fix 'undefined local variable' when getting a section's notepad from the cache

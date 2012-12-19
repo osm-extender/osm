@@ -135,12 +135,12 @@ module Osm
       data = api.perform_query("events.php?action=addEvent&sectionid=#{event.section_id}", {
         'name' => event.name,
         'location' => event.location,
-        'startdate' => event.start.strftime(Osm::OSM_DATE_FORMAT),
-        'enddate' => event.finish.strftime(Osm::OSM_DATE_FORMAT),
+        'startdate' => event.start? ? event.start.strftime(Osm::OSM_DATE_FORMAT) : '',
+        'enddate' => event.finish? ? event.finish.strftime(Osm::OSM_DATE_FORMAT) : '',
         'cost' => event.cost,
         'notes' => event.notes,
-        'starttime' => event.start.strftime(Osm::OSM_TIME_FORMAT),
-        'endtime' => event.finish.strftime(Osm::OSM_TIME_FORMAT),
+        'starttime' => event.start? ? event.start.strftime(Osm::OSM_TIME_FORMAT) : '',
+        'endtime' => event.finish? ? event.finish.strftime(Osm::OSM_TIME_FORMAT) : '',
       })
 
       # The cached events for the section will be out of date - remove them
