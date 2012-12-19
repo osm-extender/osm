@@ -1,6 +1,6 @@
 ## Version 0.1.10
 
-  * 
+  * Fix 'undefined variable' when getting an event's attendance without passing a term.
 
 ## Version 0.1.9
 
