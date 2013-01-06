@@ -96,7 +96,7 @@ module Osm
       permissions = Hash.new
       data.each do |role_data|
         unless role_data['section'].eql?('discount')  # It's not an actual section
-          section_data = ActiveSupport::JSON.decode(role_data['sectionConfig'])
+          section_data = role_data['sectionConfig'].is_a?(String) ? ActiveSupport::JSON.decode(role_data['sectionConfig']) : role_data['sectionConfig']
 
           # Make sense of flexi records
           fr_data = []
