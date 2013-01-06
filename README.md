@@ -137,3 +137,4 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * SMS:
     * Retreival of delivery reports
     * Sending a message
+  * MyScout
