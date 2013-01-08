@@ -2,6 +2,24 @@
 
   * Fix "can't convert Hash into String" occuring when some section's config is a Hash not a JSON encoded Hash
   * Remove num\_scouts attribute from Section (OSM always sets this to 999)
+  * Add My.SCOUT related attributes to Section:
+    * gocardless (Boolean) - does the section use gocardless
+    * myscout\_events\_expires (Date) - when the subscription to Events in My.SCOUT expires
+    * myscout\_badges\_expires (Date) - when the subscription to Badges in My.SCOUT expires
+    * myscout\_programme\_expires (Date) - when the subscription to Badges in My.SCOUT expires
+    * myscout\_events (Boolean) - whether the section uses the Events part of My.SCOUT
+    * myscout\_badges (Boolean) - whether the section uses the Badges part of My.SCOUT
+    * myscout\_programme (Boolean) - whether the section uses the Programme part of My.SCOUT
+    * myscout\_payments (Boolean) - whether the section uses the Payments part of My.SCOUT
+    * myscout\_emails (Hash of Symbol to Boolean) - which email addresses are linked to MyScout for each Member
+    * myscout\_email\_address\_send (String, blank OK) - which email address to send My.SCOUT emails as
+    * myscout\_email\_address\_copy (String, blank OK) - which email address to send copys of My.SCOUT emails to
+    * myscout\_badges\_partial (Boolean) - Wether parents can see partially completed badges
+    * myscout\_programme\_summary (Boolean) - Wether parents can see the summary of programme items
+    * myscout\_event\_reminder\_count (Integer) - How many event reminders to send to parents who haven't responded
+    * myscout\_event\_reminder\_frequency (Integer) - How many days to leave between event reminder emails
+    * myscout\_payment\_reminder\_count (Integer) - How many payment reminders to send to parents who haven't paid yet
+    * myscout\_payment\_reminder\_frequency (Integer) - How many days to leave between payment reminder emails
 
 ## Version 0.1.10
 

@@ -19,7 +19,24 @@ describe "Section" do
       :mobile_fields => {:mobile_fields => true},
       :flexi_records => [],
       :group_id => 3,
-      :group_name => '3rd Somewhere'
+      :group_name => '3rd Somewhere',
+      :gocardless => true,
+      :myscout_events_expires => (Date.today + 61).strftime('%Y-%m-%d'),
+      :myscout_badges_expires => (Date.today + 62).strftime('%Y-%m-%d'),
+      :myscout_programme_expires => (Date.today + 63).strftime('%Y-%m-%d'),
+      :myscout_events => true,
+      :myscout_badges => true,
+      :myscout_programme => true,
+      :myscout_payments => true,
+      :myscout_emails => {:email1 => true, :email2 => false},
+      :myscout_email_address_send => 'send_from@example.com',
+      :myscout_email_address_copy => '',
+      :myscout_badges_partial => true,
+      :myscout_programme_summary => true,
+      :myscout_event_reminder_count => 4,
+      :myscout_event_reminder_frequency => 5,
+      :myscout_payment_reminder_count => 6,
+      :myscout_payment_reminder_frequency => 7
     }
   end
 
@@ -39,6 +56,23 @@ describe "Section" do
     section.group_id.should == 3
     section.group_name.should == '3rd Somewhere'
     section.flexi_records.should == []
+    section.gocardless.should == true
+    section.myscout_events_expires.should == Date.today + 61
+    section.myscout_badges_expires.should == Date.today + 62
+    section.myscout_programme_expires.should == Date.today + 63
+    section.myscout_events.should == true
+    section.myscout_badges.should == true
+    section.myscout_programme.should == true
+    section.myscout_payments.should == true
+    section.myscout_emails.should == {:email1 => true, :email2 => false}
+    section.myscout_email_address_send.should == 'send_from@example.com'
+    section.myscout_email_address_copy.should == ''
+    section.myscout_badges_partial.should == true
+    section.myscout_programme_summary.should == true
+    section.myscout_event_reminder_count.should == 4
+    section.myscout_event_reminder_frequency.should == 5
+    section.myscout_payment_reminder_count.should == 6
+    section.myscout_payment_reminder_frequency.should == 7
     section.valid?.should be_true
   end
 
@@ -61,7 +95,7 @@ describe "Section" do
 
     before :each do
       body = [
-        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"beavers\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Flexi Record 1\",\"extraid\":\"111\"}],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"1", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
+        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"beavers\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Flexi Record 1\",\"extraid\":\"111\"}],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true},\"gocardless\":\"true\",\"portal\":{\"paymentRemindFrequency\":\"7\",\"paymentRemindCount\":\"6\",\"eventRemindFrequency\":\"5\",\"eventRemindCount\":\"4\",\"badgesPartial\":1,\"programmeSummary\":1,\"emailAddress\":\"send_from@example.com\",\"emailAddressCopy\":\"\",\"payments\":1,\"badges\":1,\"emails\":{\"email1\":\"true\",\"email2\":\"false\"},\"events\":1,\"programme\":1},\"portalExpires\":{\"events\":\"2013-01-06\",\"eventsA\":1,\"badges\":\"2013-01-07\",\"badgesA\":1,\"programme\":\"2013-01-08\",\"programmeA\":1}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"1", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
         {"sectionConfig"=>"{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member's Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member's Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}", "groupname"=>"1st Somewhere", "groupid"=>"1", "groupNormalised"=>"1", "sectionid"=>"2", "sectionname"=>"Section 2", "section"=>"cubs", "isDefault"=>"0", "permissions"=>{"badge"=>100, "member"=>100, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}}
       ]
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json)
@@ -86,12 +120,30 @@ describe "Section" do
       section.flexi_records.size.should == 1
       section.flexi_records[0].id.should == 111
       section.flexi_records[0].name.should == 'Flexi Record 1'
+      section.gocardless.should == true
+      section.myscout_events_expires.should == Date.new(2013, 1, 6)
+      section.myscout_badges_expires.should == Date.new(2013, 1, 7)
+      section.myscout_programme_expires.should == Date.new(2013, 1, 8)
+      section.myscout_events.should == true
+      section.myscout_badges.should == true
+      section.myscout_programme.should == true
+      section.myscout_payments.should == true
+      section.myscout_emails.should == {:email1 => true, :email2 => false}
+      section.myscout_email_address_send.should == 'send_from@example.com'
+      section.myscout_email_address_copy.should == ''
+      section.myscout_badges_partial.should == true
+      section.myscout_programme_summary.should == true
+      section.myscout_event_reminder_count.should == 4
+      section.myscout_event_reminder_frequency.should == 5
+      section.myscout_payment_reminder_count.should == 6
+      section.myscout_payment_reminder_frequency.should == 7
     end
   
     it "Gets a section" do
       section = Osm::Section.get(@api, 1)
       section.should_not be_nil
       section.id.should == 1
+      section.valid?.should be_true
     end
 
     it "Fetches user's permissions" do
