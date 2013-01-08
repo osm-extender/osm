@@ -118,6 +118,9 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported:
 
+  * Event Fields:
+    * Delete [issue 45]
+    * Rename [issue 46]
   * Badges:
     * Which requirements each member has met:
       * Retreive [issue 21]
