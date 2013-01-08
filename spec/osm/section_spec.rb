@@ -12,7 +12,6 @@ describe "Section" do
       :subscription_level => :silver,
       :subscription_expires => (Date.today + 60).strftime('%Y-%m-%d'),
       :type => :cubs,
-      :num_scouts => 10,
       :wizard => false,
       :column_names => {:column_names => 'names'},
       :fields => {:fields => true},
@@ -33,7 +32,6 @@ describe "Section" do
     section.subscription_level.should == :silver
     section.subscription_expires.should == Date.today + 60
     section.type.should == :cubs
-    section.num_scouts.should == 10
     section.column_names.should == {:column_names => 'names'}
     section.fields.should == {:fields => true}
     section.intouch_fields.should == {:intouch_fields => true}
@@ -51,7 +49,6 @@ describe "Section" do
     section.subscription_level.should == :unknown
     section.subscription_expires.should == nil
     section.type.should == :unknown
-    section.num_scouts.should == nil
     section.column_names.should == {}
     section.fields.should == {}
     section.intouch_fields.should == {}
@@ -80,7 +77,6 @@ describe "Section" do
       section.subscription_level.should == :bronze
       section.subscription_expires.should == Date.new(2013, 1, 5)
       section.type.should == :beavers
-      section.num_scouts.should == 10
       section.column_names.should == {:column_names => 'names'}
       section.fields.should == {:fields => true}
       section.intouch_fields.should == {:intouch_fields => true}

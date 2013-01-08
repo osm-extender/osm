@@ -17,8 +17,6 @@ module Osm
     #   @return [Date] when the section's subscription to OSM expires
     # @!attribute [rw] type
     #   @return [Symbol] the section type (:beavers, :cubs, :scouts, :exporers, :adults, :waiting, :unknown)
-    # @!attribute [rw] num_scouts
-    #   @return [Fixnum] how many members the section has
     # @!attribute [rw] column_names
     #   @return [Hash] custom names to use for the data columns
     # @!attribute [rw] fields
@@ -37,7 +35,6 @@ module Osm
     attribute :subscription_level, :default => :unknown
     attribute :subscription_expires, :type => Date
     attribute :type, :default => :unknown
-    attribute :num_scouts, :type => Integer
     attribute :column_names, :default => {}
     attribute :fields, :default => {}
     attribute :intouch_fields, :default => {}
@@ -45,11 +42,10 @@ module Osm
     attribute :flexi_records, :default => []
 
     attr_accessible :id, :name, :group_id, :group_name, :subscription_level, :subscription_expires, :type,
-                    :num_scouts, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records
+                    :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0, :allow_nil => true
-    validates_numericality_of :num_scouts, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_presence_of :name
     validates_presence_of :group_name
     validates_presence_of :subscription_level
