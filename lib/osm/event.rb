@@ -50,7 +50,7 @@ module Osm
     attribute :notepad, :type => String, :default => ''
     attribute :public_notepad, :type => String, :default => ''
     attribute :confirm_by_date, :type => Date
-    attribute :allow_changes, :type => Boolean
+    attribute :allow_changes, :type => Boolean, :default => false
     attribute :reminders, :type => Boolean, :default => true
 
     attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
