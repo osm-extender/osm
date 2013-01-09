@@ -1,3 +1,7 @@
+## Version 0.0.12
+
+  * 
+
 ## Version 0.0.11
 
   * Fix "can't convert Hash into String" occuring when some section's config is a Hash not a JSON encoded Hash
