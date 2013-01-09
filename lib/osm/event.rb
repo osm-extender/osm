@@ -1,6 +1,7 @@
 module Osm
 
   class Event < Osm::Model
+    class Column; end # Ensure the constant exists for the validators
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the event
@@ -21,7 +22,10 @@ module Osm
     # @!attribute [rw] archived
     #   @return [Boolean] if the event has been archived
     # @!attribute [rw] fields
+    #   @deprecated use columns instead
     #   @return [Hash] Keys are the field's id, values are the field names
+    # @!attribute [rw] columns
+    #   @return [Array<Osm::Event::Column>] the custom columns for the event
     # @!attribute [rw] notepad
     #   @return [String] notepad for the event
     # @!attribute [rw] public_notepad
@@ -42,7 +46,7 @@ module Osm
     attribute :location, :type => String, :default => ''
     attribute :notes, :type => String, :default => ''
     attribute :archived, :type => Boolean, :default => false
-    attribute :fields, :default => {}
+    attribute :columns, :default => []
     attribute :notepad, :type => String, :default => ''
     attribute :public_notepad, :type => String, :default => ''
     attribute :confirm_by_date, :type => Date
@@ -50,18 +54,19 @@ module Osm
     attribute :reminders, :type => Boolean, :default => true
 
     attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
-                    :fields, :notepad, :public_notepad, :confirm_by_date, :allow_changes, :reminders
+                    :fields, :columns, :notepad, :public_notepad,
+                    :confirm_by_date, :allow_changes, :reminders
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :name
-    validates :fields, :hash => {:key_type => String, :value_type => String}
+    validates :columns, :array_of => {:item_type => Osm::Event::Column, :item_valid => true}
     validates_inclusion_of :allow_changes, :in => [true, false]
     validates_inclusion_of :reminders, :in => [true, false]
 
 
     # @!method initialize
-    #   Initialize a new Term
+    #   Initialize a new Event
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
@@ -136,6 +141,9 @@ module Osm
         'notes' => event.notes,
         'starttime' => event.start? ? event.start.strftime(Osm::OSM_TIME_FORMAT) : '',
         'endtime' => event.finish? ? event.finish.strftime(Osm::OSM_TIME_FORMAT) : '',
+        'confdate' => event.confirm_by_date? ? event.confirm_by_date.strftime(Osm::OSM_DATE_FORMAT) : '',
+        'allowChanges' => event.allow_changes ? 'true' : 'false',
+        'disablereminders' => !event.reminders ? 'true' : 'false',
       })
 
       # The cached events for the section will be out of date - remove them
@@ -166,6 +174,17 @@ module Osm
         'notes' => notes,
         'starttime' => start? ? start.strftime(Osm::OSM_TIME_FORMAT) : '',
         'endtime' => finish? ? finish.strftime(Osm::OSM_TIME_FORMAT) : '',
+        'confdate' => confirm_by_date? ? confirm_by_date.strftime(Osm::OSM_DATE_FORMAT) : '',
+        'allowChanges' => allow_changes ? 'true' : 'false',
+        'disablereminders' => !reminders ? 'true' : 'false',
+      })
+      api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
+        'eventid' => id,
+        'notepad' => notepad,
+      })
+      api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
+        'eventid' => id,
+        'pnnotepad' => public_notepad,
       })
 
       # The cached events for the section will be out of date - remove them
@@ -231,16 +250,44 @@ module Osm
     end
 
 
+    # Add a column to the event in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [String] label the label for the field in OSM
+    # @param [String] name the label for the field in My.SCOUT (if this is blank then parents can't edit it)
+    # @return [Boolean] wether the update succedded
+    def add_column(api, name, label)
+      raise ArgumentIsInvalid, 'name is invalid' if name.blank?
+      raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
+
+      data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
+        'columnName' => name,
+        'parentLabel' => label
+      })
+
+      # The cached events for the section will be out of date - remove them
+      cache_delete(api, ['events', section_id])
+      cache_delete(api, ['event', id])
+      cache_delete(api, ['event_attendance', id])
+
+      self.columns = self.class.new_event_from_data(data).columns
+
+      return data.is_a?(Hash) && (data['eventid'].to_i == id)
+    end
+
     # Add a field in OSM
+    # @deprecated use add_column instead
     # @param [Osm::Api] api The api to use to make the request
     # @param [String] field_label the label for the field to add
     # @return [Boolean] wether the update succedded
+    # TODO - Remove this method when upping the version
     def add_field(api, label)
+      warn "[DEPRECATION OF METHOD] this method is being depreiated, use add_column instead"
       raise ArgumentIsInvalid, 'label is invalid' if label.blank?
       raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
 
       data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
-        'columnName' => label
+        'columnName' => label,
+        'parentLabel' => ''
       })
 
       # The cached events for the section will be out of date - remove them
@@ -252,11 +299,21 @@ module Osm
     end
 
 
+    # TODO - Remove this attribute when upping the version
+    def fields
+      warn "[DEPRECATION OF ATTRIBUTE] this attribute is being depreiated, in favor of returning an array of Field objects."
+      return columns.inject({}){ |h,(c)| h[c.id] = c.name; h}
+    end
+    def fields=(value)
+      raise "[DEPRECATION OF ATTRIBUTE] this attribute is being depreiated, in favor of returning an array of Field objects."
+    end
+
+
     private
     def self.new_event_from_data(event_data)
-      fields = {}
+      columns = []
       ActiveSupport::JSON.decode(event_data['config']).each do |field|
-        fields[field['id']] = field['name']
+        columns.push Column.new(:id => field['id'], :name => field['name'], :parent_label => field['pL'])
       end
 
       event = Osm::Event.new(
@@ -269,7 +326,7 @@ module Osm
         :location => event_data['location'],
         :notes => event_data['notes'],
         :archived => event_data['archived'].eql?('1'),
-        :fields => fields,
+        :columns => columns,
         :notepad => event_data['notepad'],
         :public_notepad => event_data['publicnotes'],
         :confirm_by_date => Osm::parse_date(event_data['confdate']),
@@ -277,6 +334,34 @@ module Osm
         :reminders => !event_data['disablereminders'].eql?('1'),
       )
     end
+
+
+    class Column
+      include ::ActiveAttr::MassAssignmentSecurity
+      include ::ActiveAttr::Model
+  
+      # @!attribute [rw] id
+      #   @return [String] OSM id for the column
+      # @!attribute [rw] name
+      #   @return [String] name for the column (displayed in OSM)
+      # @!attribute [rw] parent_label
+      #   @return [String] label to display in My.SCOUT ("" prevents display in My.SCOUT)
+
+      attribute :id, :type => String
+      attribute :name, :type => String
+      attribute :parent_label, :type => String, :default => ''
+
+      attr_accessible :id, :name, :parent_label
+
+      validates_presence_of :id
+      validates_presence_of :name
+
+
+      # @!method initialize
+      #   Initialize a new Column
+      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+    end # class Column
 
 
     class Attendance
@@ -310,7 +395,7 @@ module Osm
 
   
       # @!method initialize
-      #   Initialize a new FlexiRecordData
+      #   Initialize a new Attendance
       #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 

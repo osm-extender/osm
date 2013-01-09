@@ -26,6 +26,9 @@
     * confirm\_by\_date - the last day that parents can change their child's attendance details
     * allow\_changes - wether parents can change their child's attendance details
     * reminders - wether reminder emails are sent
+  * Osm::Event
+    * Mark fields attribute as depricated
+    * Add columns attribute returning an array of column details
 
 ## Version 0.1.10
 
