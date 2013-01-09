@@ -15,7 +15,12 @@ describe "Event" do
       :location => 'Somewhere',
       :notes => 'None',
       :archived => '0',
-      :fields => {},
+      :columns => [],
+      :notepad => 'notepad',
+      :public_notepad => 'public notepad',
+      :confirm_by_date => Date.new(2002, 1, 2),
+      :allow_changes => true,
+      :reminders => false,
     }
     event = Osm::Event.new(data)
 
@@ -28,7 +33,12 @@ describe "Event" do
     event.location.should == 'Somewhere'
     event.notes.should == 'None'
     event.archived.should be_false
-    event.fields.should == {}
+    event.columns.should == []
+    event.notepad.should == 'notepad'
+    event.public_notepad.should == 'public notepad'
+    event.confirm_by_date.should == Date.new(2002, 1, 2)
+    event.allow_changes.should == true
+    event.reminders.should == false
     event.valid?.should be_true
   end
 
@@ -37,8 +47,8 @@ describe "Event" do
       :member_id => 1,
       :grouping_id => 2,
       :row => 3,
-      :fields => {},
-      :event => Osm::Event.new(:id => 1, :section_id => 1, :name => 'Name', :fields => {})
+      :columns => [],
+      :event => Osm::Event.new(:id => 1, :section_id => 1, :name => 'Name', :columns => [])
     }
 
     ea = Osm::Event::Attendance.new(data)  
@@ -68,16 +78,38 @@ describe "Event" do
           'notes' => 'Notes',
           'sectionid' => 1,
           'googlecalendar' => nil,
-          'archived' => '0'
+          'archived' => '0',
+          'confdate' => nil,
+          'allowchanges' => '1',
+          'disablereminders' => '1'
         }]
       }
 
-      fields_body = {
-        'config' => '[{"id":"f_1","name":"Field 1"}]'
+      event_body = {
+        'eventid' => '2',
+        'name' => 'An Event',
+        'startdate' => '2001-01-02',
+        'enddate' => '2001-02-05',
+        'starttime' => '00:00:00',
+        'endtime' => '12:00:00',
+        'cost' => '0.00',
+        'location' => 'Somewhere',
+        'notes' => 'Notes',
+        'notepad' => 'notepad',
+        'publicnotes' => 'public notepad',
+        'config' => '[{"id":"f_1","name":"Name","pL":"Label"}]',
+        'sectionid' => '1',
+        'googlecalendar' => nil,
+        'archived' => '0',
+        'confdate' => '2002-01-02',
+        'allowchanges' => '1',
+        'disablereminders' => '1',
+        'pnnotepad' => '',
+        'structure' => []
       }
 
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => fields_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => event_body.to_json)
 
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
     end
@@ -89,12 +121,20 @@ describe "Event" do
       event.id.should == 2
       event.section_id.should == 1
       event.name.should == 'An Event'
-      event.start.should == Date.new(2001, 2, 3)
+      event.start.should == Date.new(2001, 1, 2)
       event.finish.should == DateTime.new(2001, 2, 5, 12, 0, 0)
       event.cost.should == '0.00'
       event.location.should == 'Somewhere'
       event.notes.should == 'Notes'
       event.archived.should be_false
+      event.notepad.should == 'notepad'
+      event.public_notepad.should == 'public notepad'
+      event.confirm_by_date.should == Date.new(2002, 1, 2)
+      event.allow_changes.should == true
+      event.reminders.should == false
+      event.columns[0].id.should == 'f_1'
+      event.columns[0].name.should == 'Name'
+      event.columns[0].parent_label.should == 'Label'
       event.valid?.should be_true
     end
 
@@ -132,10 +172,15 @@ describe "Event" do
       }
 
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]'}.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]'}.to_json)
-      Osm::Event.get_for_section(@api, 1).size.should == 1
-      Osm::Event.get_for_section(@api, 1, {:include_archived => true}).size.should == 2
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json)
+
+      events = Osm::Event.get_for_section(@api, 1)
+      all_events = Osm::Event.get_for_section(@api, 1, {:include_archived => true})
+
+      events.size.should == 1
+      events[0].id == 1
+      all_events.size.should == 2
     end
 
     it "Get event" do
@@ -159,7 +204,10 @@ describe "Event" do
         'endtime' => '04:05:06',
         'cost' => '1.23',
         'location' => 'Somewhere',
-        'notes' => 'none'
+        'notes' => 'none',
+        'confdate' => '2000-01-01',
+        'allowChanges' => 'true',
+        'disablereminders' => 'false',
       }
 
       Osm::Event.stub(:get_for_section) { [] }
@@ -168,12 +216,17 @@ describe "Event" do
       event = Osm::Event.create(@api, {
         :section_id => 1,
         :name => 'Test event',
-        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
-        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
+        :start => DateTime.new(2000, 1, 2, 3, 4, 5),
+        :finish => DateTime.new(2001, 2, 3, 4, 5, 6),
         :cost => '1.23',
         :location => 'Somewhere',
         :notes => 'none',
-        :fields => {},
+        :columns => [],
+        :notepad => '',
+        :public_notepad => '',
+        :confirm_by_date => Date.new(2000, 1, 1),
+        :allow_changes => true,
+        :reminders => true,
       })
       event.should_not be_nil
       event.id.should == 2
@@ -191,7 +244,12 @@ describe "Event" do
         :cost => '1.23',
         :location => 'Somewhere',
         :notes => 'none',
-        :fields => {},
+        :columns => [],
+        :notepad => '',
+        :public_notepad => '',
+        :confirm_by_date => nil,
+        :allow_changes => true,
+        :reminders => true,
       })
       event.should be_nil
     end
@@ -212,10 +270,15 @@ describe "Event" do
         'cost' => '1.23',
         'location' => 'Somewhere',
         'notes' => 'none',
-        'eventid' => 2
+        'eventid' => 2,
+        'confdate' => '',
+        'allowChanges' => 'true',
+        'disablereminders' => 'false',
       }
 
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "notepad"=>"notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "pnnotepad"=>"public notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -225,13 +288,18 @@ describe "Event" do
         :cost => '1.23',
         :location => 'Somewhere',
         :notes => 'none',
-        :id => 2
+        :id => 2,
+        :confirm_by_date => nil,
+        :allow_changes => true,
+        :reminders => true,
+        :notepad => 'notepad',
+        :public_notepad => 'public notepad',
       )
       event.update(@api).should be_true
     end
 
     it "Update (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).exactly(3).times { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -347,28 +415,34 @@ describe "Event" do
     end
 
 
-    it "Add field (succeded)" do
+    it "Add column (succeded)" do
       url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addColumn&sectionid=1&eventid=2'
       post_data = {
         'apiid' => @CONFIGURATION[:api][:osm][:id],
         'token' => @CONFIGURATION[:api][:osm][:token],
         'userid' => 'user_id',
         'secret' => 'secret',
-        'columnName' => 'Test field',
+        'columnName' => 'Test name',
+        'parentLabel' => 'Test label',
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"eventid":"2"}'}) }
+      body = {
+        'eventid' => '2',
+        'config' => '[{"id":"f_1","name":"Test name","pL":"Test label"}]'
+      }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
-      event.add_field(@api, 'Test field').should be_true
+      event.add_column(@api, 'Test name', 'Test label').should be_true
+      event.columns.should == [Osm::Event::Column.new(:id=>'f_1', :name=>'Test name', :parent_label=>'Test label')]
     end
 
-    it "Add field (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+    it "Add column (failed)" do
+      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
-      event.add_field(@api, 'Test field').should be_false
+      event.add_column(@api, 'Test name', 'Test label').should be_false
     end
 
   end
