@@ -255,7 +255,7 @@ module Osm
     # @param [String] label the label for the field in OSM
     # @param [String] name the label for the field in My.SCOUT (if this is blank then parents can't edit it)
     # @return [Boolean] wether the update succedded
-    def add_column(api, name, label)
+    def add_column(api, name, label='')
       raise ArgumentIsInvalid, 'name is invalid' if name.blank?
       raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
 
