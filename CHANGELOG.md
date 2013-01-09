@@ -20,6 +20,12 @@
     * myscout\_event\_reminder\_frequency (Integer) - How many days to leave between event reminder emails
     * myscout\_payment\_reminder\_count (Integer) - How many payment reminders to send to parents who haven't paid yet
     * myscout\_payment\_reminder\_frequency (Integer) - How many days to leave between payment reminder emails
+  * Add new OSM attributes to Event:
+    * notepad - the notepad shown in OSM
+    * public\_notepad - the notepad shown on My.SCOUT
+    * confirm\_by\_date - the last day that parents can change their child's attendance details
+    * allow\_changes - wether parents can change their child's attendance details
+    * reminders - wether reminder emails are sent
 
 ## Version 0.1.10
 

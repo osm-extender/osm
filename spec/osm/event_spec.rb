@@ -16,6 +16,11 @@ describe "Event" do
       :notes => 'None',
       :archived => '0',
       :fields => {},
+      :notepad => 'notepad',
+      :public_notepad => 'public notepad',
+      :confirm_by_date => Date.new(2002, 1, 2),
+      :allow_changes => true,
+      :reminders => false,
     }
     event = Osm::Event.new(data)
 
@@ -29,6 +34,11 @@ describe "Event" do
     event.notes.should == 'None'
     event.archived.should be_false
     event.fields.should == {}
+    event.notepad.should == 'notepad'
+    event.public_notepad.should == 'public notepad'
+    event.confirm_by_date.should == Date.new(2002, 1, 2)
+    event.allow_changes.should == true
+    event.reminders.should == false
     event.valid?.should be_true
   end
 
@@ -68,16 +78,38 @@ describe "Event" do
           'notes' => 'Notes',
           'sectionid' => 1,
           'googlecalendar' => nil,
-          'archived' => '0'
+          'archived' => '0',
+          'confdate' => nil,
+          'allowchanges' => '1',
+          'disablereminders' => '1'
         }]
       }
 
-      fields_body = {
-        'config' => '[{"id":"f_1","name":"Field 1"}]'
+      event_body = {
+        'eventid' => '2',
+        'name' => 'An Event',
+        'startdate' => '2001-01-02',
+        'enddate' => '2001-02-05',
+        'starttime' => '00:00:00',
+        'endtime' => '12:00:00',
+        'cost' => '0.00',
+        'location' => 'Somewhere',
+        'notes' => 'Notes',
+        'notepad' => 'notepad',
+        'publicnotes' => 'public notepad',
+        'config' => '[{"id":"f_1","name":"Field 1"}]',
+        'sectionid' => '1',
+        'googlecalendar' => nil,
+        'archived' => '0',
+        'confdate' => '2002-01-02',
+        'allowchanges' => '1',
+        'disablereminders' => '1',
+        'pnnotepad' => '',
+        'structure' => []
       }
 
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => fields_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => event_body.to_json)
 
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
     end
@@ -89,12 +121,17 @@ describe "Event" do
       event.id.should == 2
       event.section_id.should == 1
       event.name.should == 'An Event'
-      event.start.should == Date.new(2001, 2, 3)
+      event.start.should == Date.new(2001, 1, 2)
       event.finish.should == DateTime.new(2001, 2, 5, 12, 0, 0)
       event.cost.should == '0.00'
       event.location.should == 'Somewhere'
       event.notes.should == 'Notes'
       event.archived.should be_false
+      event.notepad.should == 'notepad'
+      event.public_notepad.should == 'public notepad'
+      event.confirm_by_date.should == Date.new(2002, 1, 2)
+      event.allow_changes.should == true
+      event.reminders.should == false
       event.valid?.should be_true
     end
 
@@ -132,10 +169,15 @@ describe "Event" do
       }
 
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]'}.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]'}.to_json)
-      Osm::Event.get_for_section(@api, 1).size.should == 1
-      Osm::Event.get_for_section(@api, 1, {:include_archived => true}).size.should == 2
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json)
+
+      events = Osm::Event.get_for_section(@api, 1)
+      all_events = Osm::Event.get_for_section(@api, 1, {:include_archived => true})
+
+      events.size.should == 1
+      events[0].id == 1
+      all_events.size.should == 2
     end
 
     it "Get event" do
@@ -174,6 +216,11 @@ describe "Event" do
         :location => 'Somewhere',
         :notes => 'none',
         :fields => {},
+        :notepad => '',
+        :public_notepad => '',
+        :confirm_by_date => '',
+        :allow_changes => true,
+        :reminders => true,
       })
       event.should_not be_nil
       event.id.should == 2
@@ -192,6 +239,11 @@ describe "Event" do
         :location => 'Somewhere',
         :notes => 'none',
         :fields => {},
+        :notepad => '',
+        :public_notepad => '',
+        :confirm_by_date => '',
+        :allow_changes => true,
+        :reminders => true,
       })
       event.should be_nil
     end

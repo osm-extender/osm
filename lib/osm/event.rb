@@ -22,6 +22,16 @@ module Osm
     #   @return [Boolean] if the event has been archived
     # @!attribute [rw] fields
     #   @return [Hash] Keys are the field's id, values are the field names
+    # @!attribute [rw] notepad
+    #   @return [String] notepad for the event
+    # @!attribute [rw] public_notepad
+    #   @return [String] public notepad (shown in My.SCOUT) for the event
+    # @!attribute [rw] confirm_by_date
+    #   @return [Date] the date parents can no longer add/change their child's details
+    # @!attribute [rw] allow_changes
+    #   @return [Boolean] wether parent's can change their child's details
+    # @!attribute [rw] reminders
+    #   @return [Boolean] wether email reminders are sent for the event
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -33,13 +43,21 @@ module Osm
     attribute :notes, :type => String, :default => ''
     attribute :archived, :type => Boolean, :default => false
     attribute :fields, :default => {}
+    attribute :notepad, :type => String, :default => ''
+    attribute :public_notepad, :type => String, :default => ''
+    attribute :confirm_by_date, :type => Date
+    attribute :allow_changes, :type => Boolean
+    attribute :reminders, :type => Boolean, :default => true
 
-    attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived, :fields
+    attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
+                    :fields, :notepad, :public_notepad, :confirm_by_date, :allow_changes, :reminders
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :name
     validates :fields, :hash => {:key_type => String, :value_type => String}
+    validates_inclusion_of :allow_changes, :in => [true, false]
+    validates_inclusion_of :reminders, :in => [true, false]
 
 
     # @!method initialize
@@ -66,26 +84,9 @@ module Osm
 
       events = Array.new
       unless data['items'].nil?
-        data['items'].each do |item|
-          event_id = Osm::to_i_or_nil(item['eventid'])
-          fields_data = api.perform_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
-          fields = {}
-          ActiveSupport::JSON.decode(fields_data['config']).each do |field|
-            fields[field['id']] = field['name']
-          end
-
-          event = Osm::Event.new(
-            :id => event_id,
-            :section_id => Osm::to_i_or_nil(item['sectionid']),
-            :name => item['name'],
-            :start => Osm::make_datetime(item['startdate'], item['starttime']),
-            :finish => Osm::make_datetime(item['enddate'], item['endtime']),
-            :cost => item['cost'],
-            :location => item['location'],
-            :notes => item['notes'],
-            :archived => item['archived'].eql?('1'),
-            :fields => fields,
-          )
+        data['items'].map { |i| i['eventid'].to_i }.each do |event_id|
+          event_data = api.perform_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
+          event = self.new_event_from_data(event_data)
           events.push event
           cache_write(api, ['event', event.id], event)
         end
@@ -113,14 +114,8 @@ module Osm
         return cache_read(api, cache_key)
       end
 
-      events = get_for_section(api, section, options)
-      return nil unless events.is_a? Array
-
-      events.each do |event|
-        return event if event.id == event_id
-      end
-
-      return nil
+      event_data = api.perform_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
+      return self.new_event_from_data(event_data)
     end
 
 
@@ -256,6 +251,32 @@ module Osm
       return data.is_a?(Hash) && (data['eventid'].to_i == id)
     end
 
+
+    private
+    def self.new_event_from_data(event_data)
+      fields = {}
+      ActiveSupport::JSON.decode(event_data['config']).each do |field|
+        fields[field['id']] = field['name']
+      end
+
+      event = Osm::Event.new(
+        :id => Osm::to_i_or_nil(event_data['eventid']),
+        :section_id => Osm::to_i_or_nil(event_data['sectionid']),
+        :name => event_data['name'],
+        :start => Osm::make_datetime(event_data['startdate'], event_data['starttime']),
+        :finish => Osm::make_datetime(event_data['enddate'], event_data['endtime']),
+        :cost => event_data['cost'],
+        :location => event_data['location'],
+        :notes => event_data['notes'],
+        :archived => event_data['archived'].eql?('1'),
+        :fields => fields,
+        :notepad => event_data['notepad'],
+        :public_notepad => event_data['publicnotes'],
+        :confirm_by_date => Osm::parse_date(event_data['confdate']),
+        :allow_changes => event_data['allowchanges'].eql?('1'),
+        :reminders => !event_data['disablereminders'].eql?('1'),
+      )
+    end
 
 
     class Attendance
