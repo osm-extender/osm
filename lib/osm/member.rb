@@ -73,7 +73,7 @@ module Osm
     # @!attribute [rw] grouping_id
     #   @return [Fixnum] the grouping within the section that the member belongs to
     # @!attribute [rw] grouping_leader
-    #   @return [Fixnum] wether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL)
+    #   @return [Fixnum] whether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL)
     # @!attribute [rw] joined
     #   @return [Date] when the member joined the section
     # @!attribute [rw] age

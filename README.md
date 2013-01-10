@@ -68,7 +68,7 @@ api_for_this_user = Osm::Api.new(userid, secret)
 Documentation can be found on [rubydoc.info](http://rubydoc.info/github/robertgauld/osm/master/frames)
 
 We follow the [Semantic Versioning](http://semver.org/) concept,
-however it should be noted that when the OSM API adds a feature it can be difficult to decide wether to bump the patch or minor version number up. A smaller change (such as adding score into the grouping object) will bump the patch whereas a larger change wil bump the minor version.
+however it should be noted that when the OSM API adds a feature it can be difficult to decide Whether to bump the patch or minor version number up. A smaller change (such as adding score into the grouping object) will bump the patch whereas a larger change wil bump the minor version.
 
 
 ## Parts of the OSM API Supported:

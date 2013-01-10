@@ -17,7 +17,7 @@ module Osm
 
     # Configure the API options used by all instances of the class
     # @param [Hash] options
-    # @option options [Symbol] :default_site wether to use OSM (if :osm) or OGM (if :ogm)
+    # @option options [Symbol] :default_site whether to use OSM (if :osm) or OGM (if :ogm)
     # @option options [Hash] :osm (optional but :osm_api or :ogm_api must be present) the api data for OSM
     # @option options[:osm] [String] :id the apiid given to you for using the OSM id
     # @option options[:osm] [String] :token the token which goes with the above api
@@ -53,7 +53,7 @@ module Osm
     # Initialize a new API connection
     # @param [String] user_id osm userid of the user to act as (get this by using the authorize method)
     # @param [String] secret osm secret of the user to act as (get this by using the authorize method)
-    # @param [Symbol] site wether to use OSM (:osm) or OGM (:ogm), defaults to the value set for the class
+    # @param [Symbol] site whether to use OSM (:osm) or OGM (:ogm), defaults to the value set for the class
     # @return nil
     def initialize(user_id, secret, site=@@site)
       raise ArgumentError, 'You must pass a secret (get this by using the authorize method)' if secret.nil?

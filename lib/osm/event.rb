@@ -33,9 +33,9 @@ module Osm
     # @!attribute [rw] confirm_by_date
     #   @return [Date] the date parents can no longer add/change their child's details
     # @!attribute [rw] allow_changes
-    #   @return [Boolean] wether parent's can change their child's details
+    #   @return [Boolean] whether parent's can change their child's details
     # @!attribute [rw] reminders
-    #   @return [Boolean] wether email reminders are sent for the event
+    #   @return [Boolean] whether email reminders are sent for the event
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -160,7 +160,7 @@ module Osm
 
     # Update event in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @return [Boolean] wether the update succedded
+    # @return [Boolean] whether the update succedded
     def update(api)
       raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
 
@@ -196,7 +196,7 @@ module Osm
 
     # Delete event from OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @return [Boolean] wether the delete succedded
+    # @return [Boolean] whether the delete succedded
     def delete(api)
       raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
 
@@ -254,7 +254,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @param [String] label the label for the field in OSM
     # @param [String] name the label for the field in My.SCOUT (if this is blank then parents can't edit it)
-    # @return [Boolean] wether the update succedded
+    # @return [Boolean] whether the update succedded
     def add_column(api, name, label='')
       raise ArgumentIsInvalid, 'name is invalid' if name.blank?
       raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
@@ -278,7 +278,7 @@ module Osm
     # @deprecated use add_column instead
     # @param [Osm::Api] api The api to use to make the request
     # @param [String] field_label the label for the field to add
-    # @return [Boolean] wether the update succedded
+    # @return [Boolean] whether the update succedded
     # TODO - Remove this method when upping the version
     def add_field(api, label)
       warn "[DEPRECATION OF METHOD] this method is being depreiated, use add_column instead"
@@ -392,7 +392,7 @@ module Osm
 
       # Delete event column from OSM
       # @param [Osm::Api] api The api to use to make the request
-      # @return [Boolean] wether the delete succedded
+      # @return [Boolean] whether the delete succedded
       def delete(api)
         raise Forbidden, 'you do not have permission to write to events for this section' unless Osm::Model.get_user_permission(api, event.section_id, :events).include?(:write)
 

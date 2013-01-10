@@ -24,8 +24,8 @@
     * myscout\_emails (Hash of Symbol to Boolean) - which email addresses are linked to MyScout for each Member
     * myscout\_email\_address\_send (String, blank OK) - which email address to send My.SCOUT emails as
     * myscout\_email\_address\_copy (String, blank OK) - which email address to send copys of My.SCOUT emails to
-    * myscout\_badges\_partial (Boolean) - Wether parents can see partially completed badges
-    * myscout\_programme\_summary (Boolean) - Wether parents can see the summary of programme items
+    * myscout\_badges\_partial (Boolean) - Whether parents can see partially completed badges
+    * myscout\_programme\_summary (Boolean) - Whether parents can see the summary of programme items
     * myscout\_event\_reminder\_count (Integer) - How many event reminders to send to parents who haven't responded
     * myscout\_event\_reminder\_frequency (Integer) - How many days to leave between event reminder emails
     * myscout\_payment\_reminder\_count (Integer) - How many payment reminders to send to parents who haven't paid yet
@@ -34,8 +34,8 @@
     * notepad - the notepad shown in OSM
     * public\_notepad - the notepad shown on My.SCOUT
     * confirm\_by\_date - the last day that parents can change their child's attendance details
-    * allow\_changes - wether parents can change their child's attendance details
-    * reminders - wether reminder emails are sent
+    * allow\_changes - whether parents can change their child's attendance details
+    * reminders - whether reminder emails are sent
   * Osm::Event
     * Mark fields attribute as depricated
     * Add columns attribute returning an array of column details

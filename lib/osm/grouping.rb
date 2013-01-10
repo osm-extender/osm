@@ -9,7 +9,7 @@ module Osm
     # @!attribute [rw] name
     #   @return [String] the name of the grouping
     # @!attribute [rw] active
-    #   @return [Boolean] wether the grouping is active
+    #   @return [Boolean] whether the grouping is active
     # @!attribute [rw] points
     #   @return [Fixnum] the points awarded to the grouping
 
