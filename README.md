@@ -111,7 +111,9 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Event
 
 ### Delete
+  * Evening
   * Event
+  * Event Column
 
 ### Actions
   * Authorise an app to use the API on a user's behalf
@@ -119,8 +121,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported:
 
-  * Event Fields:
-    * Delete [issue 45]
   * Badges:
     * Which requirements each member has met:
       * Retreive [issue 21]

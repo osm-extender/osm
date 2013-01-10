@@ -177,6 +177,20 @@ module Osm
       return response.is_a?(Hash) && (response['result'] == 0)
     end
 
+    # Delete evening from OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @return [Boolean] true
+    def delete(api)
+      data = api.perform_query("programme.php?action=deleteEvening&eveningid=#{id}&sectionid=#{section_id}")
+
+      # The cached programmes for the section will be out of date - remove them
+      Osm::Term.get_for_section(api, section_id).each do |term|
+        cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
+      end
+
+      return true
+    end
+
 
     # Get the badge requirements met on a specific evening
     # @param [Osm::Api] api The api to use to make the request

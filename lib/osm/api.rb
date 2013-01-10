@@ -171,6 +171,7 @@ module Osm
         puts result.response.body
       end
 
+      return nil if result.response.body.empty?
       raise Osm::Error, result.response.body unless looks_like_json?(result.response.body)
       decoded = ActiveSupport::JSON.decode(result.response.body)
       osm_error = get_osm_error(decoded)

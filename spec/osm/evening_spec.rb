@@ -154,5 +154,21 @@ describe "Evening" do
       expect{ evening.update(@api) }.to raise_error(Osm::ObjectIsInvalid)
     end
 
+
+    it "Delete an evening" do
+      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=deleteEvening&eveningid=1&sectionid=2'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+      }
+      Osm::Term.stub(:get_for_section) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>''}) }
+
+      evening = Osm::Evening.new(:id=>1, :section_id=>2)
+      evening.delete(@api).should be_true
+    end
+
   end
 end
