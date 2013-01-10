@@ -9,6 +9,10 @@
     * Add delete method to update OSM
   * Osm::Evening
     * Add delete method to update OSM
+    * Changes to create method:
+      * Now takes arguments of (api, parameters)
+      * Now returns an Osm::Evening on success, nil on failure
+      * Will now pass start time, finish time and title to OSM
 
 ## Version 0.0.11
 

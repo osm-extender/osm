@@ -88,28 +88,33 @@ describe "Evening" do
         'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => -1,
+        'start' => '2000-01-02',
+        'starttime' => '11:11',
+        'endtime' => '22:22',
+        'title' => 'Title',
       }
 
       Osm::Term.stub(:get_for_section) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
-      Osm::Evening.create(@api, 1, Date.new(2000, 1, 2)).should be_true
+      Osm::Evening.create(@api, {
+        :section_id => 1,
+        :meeting_date => Date.new(2000, 1, 2),
+        :start_time => '11:11',
+        :finish_time => '22:22',
+        :title => 'Title',
+      }).should be_true
     end
 
     it "Create an evening (failed)" do
-      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=addActivityToProgramme'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'meetingdate' => '2000-01-02',
-        'sectionid' => 1,
-        'activityid' => -1,
-      }
-
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
-      Osm::Evening.create(@api, 1, Date.new(2000, 1, 2)).should be_false
+      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
+      Osm::Evening.create(@api, {
+        :section_id => 1,
+        :meeting_date => Date.new(2000, 1, 2),
+        :start_time => '11:11',
+        :finish_time => '22:22',
+        :title => 'Title',
+      }).should be_false
     end
 
 
