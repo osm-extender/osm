@@ -82,7 +82,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Evening
   * Event
   * Events
-  * Event Fields
+  * Event Columns
   * Event Attendance
   * Flexi Record Data
   * Flexi Record Structure
@@ -103,6 +103,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Evening
   * Event
   * Event Attendance
+  * Event Column
   * Register attendance
 
 ### Create
@@ -120,7 +121,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
   * Event Fields:
     * Delete [issue 45]
-    * Rename [issue 46]
   * Badges:
     * Which requirements each member has met:
       * Retreive [issue 21]

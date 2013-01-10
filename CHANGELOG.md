@@ -3,6 +3,9 @@
   * Attribute Section.myscout\_email\_address\_send defaults to an empty String
   * Attribute Section.myscout\_email\_address\_copy defaults to an empty String
   * Attribute Section.myscout\_email\_address\_send renamed to myscout\_email\_address\_from
+  * Osm::Event::Column
+    * rename parent\_label attribute to label
+    * Add update method to update OSM
 
 ## Version 0.0.11
 
