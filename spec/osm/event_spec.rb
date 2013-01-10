@@ -489,6 +489,36 @@ describe "Event" do
       column.update(@api).should be_false
     end
 
+
+    it "Delete column (succeded)" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=deleteColumn&sectionid=1&eventid=2'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'columnId' => 'f_1'
+      }
+
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"eventid":"2","config":"[]"}'}) }
+
+      event = Osm::Event.new(:id => 2, :section_id => 1)
+      column = Osm::Event::Column.new(:id => 'f_1', :event => event)
+      event.columns = [column]
+
+      column.delete(@api).should be_true
+      event.columns.should == []
+    end
+
+    it "Delete column (failed)" do
+      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[{\"id\":\"f_1\"}]"}'}) }
+
+      event = Osm::Event.new(:id => 2, :section_id => 1)
+      column = Osm::Event::Column.new(:id => 'f_1', :event => event)
+      event.columns = [column]
+      column.delete(@api).should be_false
+    end
+
   end
 
 

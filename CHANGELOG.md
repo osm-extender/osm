@@ -6,6 +6,7 @@
   * Osm::Event::Column
     * rename parent\_label attribute to label
     * Add update method to update OSM
+    * Add delete method to update OSM
 
 ## Version 0.0.11
 

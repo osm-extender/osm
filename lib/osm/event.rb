@@ -366,7 +366,7 @@ module Osm
       #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
-      # Update event column
+      # Update event column in OSM
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] if the operation suceeded or not
       def update(api)
@@ -378,13 +378,42 @@ module Osm
           'pL' => label
         })
 
+        # The cached events for the section will be out of date - remove them
+        Osm::Model.cache_delete(api, ['events', event.section_id])
+        Osm::Model.cache_delete(api, ['event', event.id])
+
         (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
           if i['id'] == id
             return i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label))
           end
         end
         return false
+      end
 
+      # Delete event column from OSM
+      # @param [Osm::Api] api The api to use to make the request
+      # @return [Boolean] wether the delete succedded
+      def delete(api)
+        raise Forbidden, 'you do not have permission to write to events for this section' unless Osm::Model.get_user_permission(api, event.section_id, :events).include?(:write)
+
+        data = api.perform_query("events.php?action=deleteColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
+          'columnId' => id
+        })
+
+        # The cached events for the section will be out of date - remove them
+        Osm::Model.cache_delete(api, ['events', event.section_id])
+        Osm::Model.cache_delete(api, ['event', event.id])
+
+        (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
+          return false if i['id'] == id
+        end
+
+        new_columns = []
+        event.columns.each do |column|
+          new_columns.push(column) unless column == self
+        end
+        event.columns = new_columns
+        return true
       end
 
     end # class Column
