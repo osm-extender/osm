@@ -16,6 +16,8 @@
   * Add activity to programme
       * Evening.add\_activity(api, activity, notes="")
       * Activity.add\_to\_programme(api, section, date, notes="")
+  * Osm::Member
+    * Add create method to update OSM
 
 ## Version 0.1.11
 

@@ -109,6 +109,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 ### Create
   * Evening
   * Event
+  * Member
 
 ### Delete
   * Evening
@@ -130,10 +131,9 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Flexi Records:
     * Update data [issue 23]
     * Add Column [issue 24]
-    * Update Column
+    * Update Column [issue 47]
   * Member:
     * Update [issue 33]
-    * Add [issue 34]
   * Update Activity
   * Gift aid (Everything)
   * Finances (Everything)

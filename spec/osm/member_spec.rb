@@ -191,6 +191,109 @@ describe "Member" do
       members.size.should == 0
     end
 
+    it "Create in OSM (succeded)" do
+      member = Osm::Member.new(
+        :section_id => 2,
+        :first_name => 'First',
+        :last_name => 'Last',
+        :email1 => 'email1@example.com',
+        :email2 => 'email2@example.com',
+        :email3 => 'email3@example.com',
+        :email4 => 'email4@example.com',
+        :phone1 => '11111 111111',
+        :phone2 => '222222',
+        :phone3 => '+33 3333 333333',
+        :phone4 => '4444 444 444',
+        :address => '1 Some Road',
+        :address2 => 'Address 2',
+        :date_of_birth => '2000-01-02',
+        :started => '2006-01-02',
+        :joined => '2006-01-03',
+        :parents => 'John and Jane Doe',
+        :notes => 'None',
+        :medical => 'Nothing',
+        :religion => 'Unknown',
+        :school => 'Some School',
+        :ethnicity => 'Yes',
+        :subs => 'Upto end of 2007',
+        :custom1 => 'Custom Field 1',
+        :custom2 => 'Custom Field 2',
+        :custom3 => 'Custom Field 3',
+        :custom4 => 'Custom Field 4',
+        :custom5 => 'Custom Field 5',
+        :custom6 => 'Custom Field 6',
+        :custom7 => 'Custom Field 7',
+        :custom8 => 'Custom Field 8',
+        :custom9 => 'Custom Field 9',
+        :grouping_id => '3',
+        :grouping_leader => 0,
+      )
+
+      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=newMember'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'sectionid' => 2,
+        'firstname' => 'First',
+        'lastname' => 'Last',
+        'email1' => 'email1@example.com',
+        'email2' => 'email2@example.com',
+        'email3' => 'email3@example.com',
+        'email4' => 'email4@example.com',
+        'phone1' => '11111 111111',
+        'phone2' => '222222',
+        'phone3' => '+33 3333 333333',
+        'phone4' => '4444 444 444',
+        'address' => '1 Some Road',
+        'address2' => 'Address 2',
+        'dob' => '2000-01-02',
+        'started' => '2006-01-02',
+        'startedsection' => '2006-01-03',
+        'parents' => 'John and Jane Doe',
+        'notes' => 'None',
+        'medical' => 'Nothing',
+        'religion' => 'Unknown',
+        'school' => 'Some School',
+        'ethnicity' => 'Yes',
+        'subs' => 'Upto end of 2007',
+        'custom1' => 'Custom Field 1',
+        'custom2' => 'Custom Field 2',
+        'custom3' => 'Custom Field 3',
+        'custom4' => 'Custom Field 4',
+        'custom5' => 'Custom Field 5',
+        'custom6' => 'Custom Field 6',
+        'custom7' => 'Custom Field 7',
+        'custom8' => 'Custom Field 8',
+        'custom9' => 'Custom Field 9',
+        'patrolid' => 3,
+        'patrolleader' => 0,
+      }
+
+      Osm::Term.stub(:get_for_section) { [] }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":1}'}) }
+      member.create(@api).should be_true
+      member.id.should == 1
+    end
+
+    it "Create in OSM (failed)" do
+      member = Osm::Member.new(
+        :section_id => 2,
+        :first_name => 'First',
+        :last_name => 'Last',
+        :date_of_birth => '2000-01-02',
+        :started => '2006-01-02',
+        :joined => '2006-01-03',
+        :grouping_id => '3',
+        :grouping_leader => 0,
+      )
+
+      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":-1}'}) }
+      member.create(@api).should be_false
+    end
+
+
   end
 
 end
