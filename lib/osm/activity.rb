@@ -177,6 +177,24 @@ module Osm
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
+    # Add this activity to the programme in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] activity The Section (or it's ID) to add the Activity to
+    # @param [Date, DateTime] date The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
+    # @param [String] notes The notes which should appear for this Activity on this Evening
+    # @return [Boolean] Whether the activity ws successfully added
+    def add_to_programme(api, section, date, notes="")
+      data = api.perform_query("programme.php?action=addActivityToProgramme", {
+        'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
+        'activityid' => id,
+        'sectionid' => section.to_i,
+        'notes' => notes,
+      })
+
+      return (data == {'result'=>0})
+    end
+
+
     private
     class File
       include ::ActiveAttr::MassAssignmentSecurity

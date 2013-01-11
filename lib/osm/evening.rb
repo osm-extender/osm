@@ -63,6 +63,7 @@ module Osm
     # @param [Osm::term, Fixnum, nil] term the term (or its ID) to get the programme for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Evening>]
+    # TODO Change to get_all in next version bump
     def self.get_programme(api, section, term, options={})
       section_id = section.to_i
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
@@ -176,6 +177,26 @@ module Osm
       end
 
       return response.is_a?(Hash) && (response['result'] == 0)
+    end
+
+    # Add an activity to this evening in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Activity] activity The Activity to add to the Evening
+    # @param [String] notes The notes which should appear for this Activity on this Evening
+    # @return [Boolean] Whether the activity ws successfully added
+    def add_activity(api, activity, notes='')
+      if activity.add_to_programme(api, section_id, meeting_date, notes)
+        activities.push Osm::Evening::Activity.new(:activity_id => activity.id, :notes => notes, :title => activity.title)
+
+        # The cached programmes for the section will be out of date - remove them
+        Osm::Term.get_for_section(api, section_id).each do |term|
+          cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
+        end
+
+        return true
+      end
+
+      return false
     end
 
     # Delete evening from OSM

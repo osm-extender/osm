@@ -104,7 +104,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Event
   * Event Attendance
   * Event Column
-  * Register attendance
+  * Register Attendance
 
 ### Create
   * Evening
@@ -117,9 +117,10 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ### Actions
   * Authorise an app to use the API on a user's behalf
+  * Add activity to programme
 
 
-## Parts of the OSM API currently NOT supported:
+## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
   * Badges:
     * Which requirements each member has met:
@@ -132,12 +133,10 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Member:
     * Update [issue 33]
     * Add [issue 34]
-  * Add activity to programme [issue 35]
-  * Delete Evening [issue 36]
   * Update Activity
-  * Gift aid (everything)
+  * Gift aid (Everything)
   * Finances (Everything)
   * SMS:
     * Retreival of delivery reports
     * Sending a message
-  * MyScout
+  * MyScout (Everything) (Maybe)

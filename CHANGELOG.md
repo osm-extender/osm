@@ -1,4 +1,4 @@
-## Version 0.0.12
+## Version 0.1.12
 
   * Attribute Section.myscout\_email\_address\_send defaults to an empty String
   * Attribute Section.myscout\_email\_address\_copy defaults to an empty String
@@ -13,8 +13,11 @@
       * Now takes arguments of (api, parameters)
       * Now returns an Osm::Evening on success, nil on failure
       * Will now pass start time, finish time and title to OSM
+  * Add activity to programme
+      * Evening.add\_activity(api, activity, notes="")
+      * Activity.add\_to\_programme(api, section, date, notes="")
 
-## Version 0.0.11
+## Version 0.1.11
 
   * Fix "can't convert Hash into String" occuring when some section's config is a Hash not a JSON encoded Hash
   * Remove num\_scouts attribute from Section (OSM always sets this to 999)
