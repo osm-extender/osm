@@ -270,6 +270,61 @@ module Osm
       end
     end
 
+    # Update the user in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @return [Boolan] whether the member was successfully updated or not
+    def update(api)
+      raise ObjectIsInvalid, 'member is invalid' unless valid?
+
+      values = {
+        'firstname' => first_name,
+        'lastname' => last_name,
+        'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
+        'started' => started.strftime(Osm::OSM_DATE_FORMAT),
+        'startedsection' => joined.strftime(Osm::OSM_DATE_FORMAT),
+        'patrolid' => grouping_id,
+        'patrolleader' => grouping_leader,
+        'email1' => email1,
+        'email2' => email2,
+        'email3' => email3,
+        'email4' => email4,
+        'phone1' => phone1,
+        'phone2' => phone2,
+        'phone3' => phone3,
+        'phone4' => phone4,
+        'address' => address,
+        'address2' => address2,
+        'parents' => parents,
+        'notes' => notes,
+        'medical' => medical,
+        'religion' => religion,
+        'school' => school,
+        'ethnicity' => ethnicity,
+        'subs' => subs,
+        'custom1' => custom1,
+        'custom2' => custom2,
+        'custom3' => custom3,
+        'custom4' => custom4,
+        'custom5' => custom5,
+        'custom6' => custom6,
+        'custom7' => custom7,
+        'custom8' => custom8,
+        'custom9' => custom9,
+      }
+
+      result = true
+      values.each do |column, value|
+        data = api.perform_query("users.php?action=updateMember&dateFormat=generic", {
+          'scoutid' => self.id,
+          'column' => column,
+          'value' => value,
+          'sectionid' => section_id,
+        })
+        result &= (data[column] == value.to_s)
+      end
+
+      return result
+    end
 
     # Get the years element of this scout's age
     # @return [Fixnum] the number of years this scout has been alive

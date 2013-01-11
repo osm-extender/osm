@@ -18,6 +18,7 @@
       * Activity.add\_to\_programme(api, section, date, notes="")
   * Osm::Member
     * Add create method to update OSM
+    * Add update method to update OSM
 
 ## Version 0.1.11
 

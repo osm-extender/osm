@@ -104,6 +104,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Event
   * Event Attendance
   * Event Column
+  * Member
   * Register Attendance
 
 ### Create
@@ -132,8 +133,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Update data [issue 23]
     * Add Column [issue 24]
     * Update Column [issue 47]
-  * Member:
-    * Update [issue 33]
   * Update Activity
   * Gift aid (Everything)
   * Finances (Everything)
