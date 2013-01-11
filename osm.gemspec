@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
   s.version     = Osm::VERSION
   s.authors     = ['Robert Gauld']
   s.email       = ['robert@robertgauld.co.uk']
-  s.homepage    = ''
+  s.homepage    = 'https://github.com/robertgauld/osm'
   s.summary     = %q{Use the Online Scout Manager API}
   s.description = %q{Use the Online Scout Manager API (https://www.onlinescoutmanager.co.uk) to retrieve and save data.}
 

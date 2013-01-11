@@ -130,6 +130,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Flexi Records:
     * Update data [issue 23]
     * Add Column [issue 24]
+    * Update Column
   * Member:
     * Update [issue 33]
     * Add [issue 34]
