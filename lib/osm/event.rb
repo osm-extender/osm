@@ -33,9 +33,9 @@ module Osm
     # @!attribute [rw] confirm_by_date
     #   @return [Date] the date parents can no longer add/change their child's details
     # @!attribute [rw] allow_changes
-    #   @return [Boolean] wether parent's can change their child's details
+    #   @return [Boolean] whether parent's can change their child's details
     # @!attribute [rw] reminders
-    #   @return [Boolean] wether email reminders are sent for the event
+    #   @return [Boolean] whether email reminders are sent for the event
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -160,7 +160,7 @@ module Osm
 
     # Update event in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @return [Boolean] wether the update succedded
+    # @return [Boolean] whether the update succedded
     def update(api)
       raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
 
@@ -196,7 +196,7 @@ module Osm
 
     # Delete event from OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @return [Boolean] wether the delete succedded
+    # @return [Boolean] whether the delete succedded
     def delete(api)
       raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
 
@@ -254,7 +254,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @param [String] label the label for the field in OSM
     # @param [String] name the label for the field in My.SCOUT (if this is blank then parents can't edit it)
-    # @return [Boolean] wether the update succedded
+    # @return [Boolean] whether the update succedded
     def add_column(api, name, label='')
       raise ArgumentIsInvalid, 'name is invalid' if name.blank?
       raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
@@ -278,7 +278,7 @@ module Osm
     # @deprecated use add_column instead
     # @param [Osm::Api] api The api to use to make the request
     # @param [String] field_label the label for the field to add
-    # @return [Boolean] wether the update succedded
+    # @return [Boolean] whether the update succedded
     # TODO - Remove this method when upping the version
     def add_field(api, label)
       warn "[DEPRECATION OF METHOD] this method is being depreiated, use add_column instead"
@@ -311,11 +311,6 @@ module Osm
 
     private
     def self.new_event_from_data(event_data)
-      columns = []
-      ActiveSupport::JSON.decode(event_data['config']).each do |field|
-        columns.push Column.new(:id => field['id'], :name => field['name'], :parent_label => field['pL'])
-      end
-
       event = Osm::Event.new(
         :id => Osm::to_i_or_nil(event_data['eventid']),
         :section_id => Osm::to_i_or_nil(event_data['sectionid']),
@@ -326,13 +321,19 @@ module Osm
         :location => event_data['location'],
         :notes => event_data['notes'],
         :archived => event_data['archived'].eql?('1'),
-        :columns => columns,
         :notepad => event_data['notepad'],
         :public_notepad => event_data['publicnotes'],
         :confirm_by_date => Osm::parse_date(event_data['confdate']),
         :allow_changes => event_data['allowchanges'].eql?('1'),
         :reminders => !event_data['disablereminders'].eql?('1'),
       )
+
+      columns = []
+      ActiveSupport::JSON.decode(event_data['config']).each do |field|
+        columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :event => event)
+      end
+      event.columns = columns
+      return event
     end
 
 
@@ -344,14 +345,17 @@ module Osm
       #   @return [String] OSM id for the column
       # @!attribute [rw] name
       #   @return [String] name for the column (displayed in OSM)
-      # @!attribute [rw] parent_label
+      # @!attribute [rw] label
       #   @return [String] label to display in My.SCOUT ("" prevents display in My.SCOUT)
+      # @!attriute [rw] event
+      #   @return [Osm::Event] the event that this column belongs to
 
       attribute :id, :type => String
       attribute :name, :type => String
-      attribute :parent_label, :type => String, :default => ''
+      attribute :label, :type => String, :default => ''
+      attribute :event
 
-      attr_accessible :id, :name, :parent_label
+      attr_accessible :id, :name, :label, :event
 
       validates_presence_of :id
       validates_presence_of :name
@@ -360,6 +364,57 @@ module Osm
       # @!method initialize
       #   Initialize a new Column
       #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+
+      # Update event column in OSM
+      # @param [Osm::Api] api The api to use to make the request
+      # @return [Boolean] if the operation suceeded or not
+      def update(api)
+        raise Forbidden, 'you do not have permission to write to events for this section' unless Osm::Model.get_user_permission(api, event.section_id, :events).include?(:write)
+
+        data = api.perform_query("events.php?action=renameColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
+          'columnId' => id,
+          'columnName' => name,
+          'pL' => label
+        })
+
+        # The cached events for the section will be out of date - remove them
+        Osm::Model.cache_delete(api, ['events', event.section_id])
+        Osm::Model.cache_delete(api, ['event', event.id])
+
+        (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
+          if i['id'] == id
+            return i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label))
+          end
+        end
+        return false
+      end
+
+      # Delete event column from OSM
+      # @param [Osm::Api] api The api to use to make the request
+      # @return [Boolean] whether the delete succedded
+      def delete(api)
+        raise Forbidden, 'you do not have permission to write to events for this section' unless Osm::Model.get_user_permission(api, event.section_id, :events).include?(:write)
+
+        data = api.perform_query("events.php?action=deleteColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
+          'columnId' => id
+        })
+
+        # The cached events for the section will be out of date - remove them
+        Osm::Model.cache_delete(api, ['events', event.section_id])
+        Osm::Model.cache_delete(api, ['event', event.id])
+
+        (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
+          return false if i['id'] == id
+        end
+
+        new_columns = []
+        event.columns.each do |column|
+          new_columns.push(column) unless column == self
+        end
+        event.columns = new_columns
+        return true
+      end
 
     end # class Column
 
@@ -376,6 +431,8 @@ module Osm
       #   @return [Hash] Keys are the field's id, values are the field values
       # @!attribute [rw] row
       #   @return [Fixnum] part of the OSM API
+      # @!attriute [rw] event
+      #   @return [Osm::Event] the event that this attendance applies to
   
       attribute :row, :type => Integer
       attribute :member_id, :type => Integer

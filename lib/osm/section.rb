@@ -45,8 +45,8 @@ module Osm
     #   @return [Boolean] whether the section uses the Payments part of My.SCOUT
     # @!attribute [rw] myscout_emails
     #   @return [Hash of Symbol to Boolean] which email addresses are linked to MyScout for each Member
-    # @!attribute [rw] myscout_email_address_send
-    #   @return [String] which email address to send My.SCOUT emails as
+    # @!attribute [rw] myscout_email_address_from
+    #   @return [String] which email address to send My.SCOUT emails as coming from
     # @!attribute [rw] myscout_email_address_copy
     #   @return [String] which email address to send copys of My.SCOUT emails to
     # @!attribute [rw] myscout_badges_partial
@@ -82,9 +82,9 @@ module Osm
     attribute :myscout_badges, :type => Boolean
     attribute :myscout_programme, :type => Boolean
     attribute :myscout_payments, :type => Boolean
-    attribute :myscout_emails, :default => {}# (Hash of Symbol to Boolean)
-    attribute :myscout_email_address_send, :type => String#, blank OK)
-    attribute :myscout_email_address_copy, :type => String#, blank OK)
+    attribute :myscout_emails, :default => {}
+    attribute :myscout_email_address_from, :type => String, :default => ''
+    attribute :myscout_email_address_copy, :type => String, :default => ''
     attribute :myscout_badges_partial, :type => Boolean
     attribute :myscout_programme_summary, :type => Boolean
     attribute :myscout_event_reminder_count, :type => Integer
@@ -97,7 +97,7 @@ module Osm
                     :gocardless, :myscout_events_expires, :myscout_badges_expires,
                     :myscout_programme_expires, :myscout_events, :myscout_badges,
                     :myscout_programme, :myscout_payments, :myscout_emails,
-                    :myscout_email_address_send, :myscout_email_address_copy,
+                    :myscout_email_address_from, :myscout_email_address_copy,
                     :myscout_badges_partial, :myscout_programme_summary,
                     :myscout_event_reminder_count, :myscout_event_reminder_frequency,
                     :myscout_payment_reminder_count, :myscout_payment_reminder_frequency
@@ -205,8 +205,8 @@ module Osm
             :myscout_programme => myscout_data['programme'] == 1,
             :myscout_payments => myscout_data['payments'] == 1,
             :myscout_emails => (myscout_data['emails'] || {}).inject({}) { |n,(k,v)| n[k.to_sym] = v.eql?('true'); n},
-            :myscout_email_address_send => myscout_data['emailAddress'],
-            :myscout_email_address_copy => myscout_data['emailAddressCopy'],
+            :myscout_email_address_from => myscout_data['emailAddress'] ? myscout_data['emailAddress'] : '',
+            :myscout_email_address_copy => myscout_data['emailAddressCopy'] ? myscout_data['emailAddressCopy'] : '',
             :myscout_badges_partial => myscout_data['badgesPartial'] == 1,
             :myscout_programme_summary => myscout_data['programmeSummary'] == 1,
             :myscout_event_reminder_count => myscout_data['eventRemindCount'].to_i,

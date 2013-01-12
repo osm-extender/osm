@@ -1,3 +1,5 @@
+# TODO make 'proper' class
+
 module Osm
 
   class FlexiRecord
@@ -5,7 +7,7 @@ module Osm
     # Get structure for a flexi record
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
-    # @param [Fixnum] the id of the Flexi Record
+    # @param [Fixnum] id the id of the Flexi Record
     # @!macro options_get
     # @return [Array<Osm::FlexiRecordField>] representing the fields of the flexi record
     def self.get_fields(api, section, id, options={})
@@ -31,6 +33,87 @@ module Osm
       Osm::Model.cache_write(api, cache_key, structure)
 
       return structure
+    end
+
+    # Add a field in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
+    # @param [Fixnum] id the id of the Flexi Record
+    # @param [String] name The name for the created column
+    # @return [Boolean] whether the field was created in OSM
+    def self.add_field(api, section, id, name)
+      raise ArgumentError, 'name is invalid' if name.blank?
+      section_id = section.to_i
+
+      data = api.perform_query("extras.php?action=addColumn&sectionid=#{section_id}&extraid=#{id}", {
+        'columnName' => name,
+      })
+
+      if (data.is_a?(Hash) && data.has_key?('config'))
+        ActiveSupport::JSON.decode(data['config']).each do |field|
+          if field['name'] == name
+            # The cached fields for the flexi record will be out of date - remove them
+             Osm::Model.cache_delete(api, ['flexi_record_fields', id])
+            return true
+          end
+        end
+      end
+      return false
+    end
+
+    # Update a field in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
+    # @param [Fixnum] id the id of the Flexi Record
+    # @param [String] field the id of the Flexi Record Field
+    # @param [String] name The new name for the created column
+    # @return [Boolean] whether the field was updated in OSM
+    def self.update_field(api, section, id, field, name)
+      raise ArgumentError, 'name is invalid' if name.blank?
+      section_id = section.to_i
+
+      data = api.perform_query("extras.php?action=renameColumn&sectionid=#{section_id}&extraid=#{id}", {
+        'columnId' => field,
+        'columnName' => name,
+      })
+
+      if (data.is_a?(Hash) && data.has_key?('config'))
+        ActiveSupport::JSON.decode(data['config']).each do |f|
+          if (f['id'] == field) && (f['name'] == name)
+            # The cached fields for the flexi record will be out of date - remove them
+            Osm::Model.cache_delete(api, ['flexi_record_fields', id])
+            return true
+          end
+        end
+      end
+      return false
+    end
+
+    # Update a field in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
+    # @param [Fixnum] id the id of the Flexi Record
+    # @param [String] field the id of the Flexi Record Field
+    # @return [Boolean] whether the field was updated in OSM
+    def self.delete_field(api, section, id, field)
+      section_id = section.to_i
+
+      data = api.perform_query("extras.php?action=deleteColumn&sectionid=#{section_id}&extraid=#{id}", {
+        'columnId' => field,
+      })
+
+      if (data.is_a?(Hash) && data.has_key?('config'))
+        ActiveSupport::JSON.decode(data['config']).each do |f|
+          if f['id'] == field
+            # It wasn't deleted
+            return false
+          end
+        end
+      end
+
+      # The cached fields for the flexi record will be out of date - remove them
+      Osm::Model.cache_delete(api, ['flexi_record_fields', id])
+      return true
     end
 
     # Get data for flexi record
@@ -76,6 +159,36 @@ module Osm
       return to_return
     end
 
+    # Update a field in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to update the data for
+    # @param [Fixnum] flexi_record_id the id of the Flexi Record
+    # @param [Osm::Member, Fixnum] member the member (or their ID) to update
+    # @param [String] column the id of the Flexi Record Field
+    # @param [String] value The updated value
+    # @return [Boolean] whether the field was updated in OSM
+    def self.update_data(api, section, flexi_record_id, member, column, value)
+      raise ArgumentError, 'name is invalid' if name.blank?
+      section_id = section.to_i
+      member_id = member.to_i
+      term_id = Osm::Term.get_current_term_for_section(api, section).id
+
+      data = api.perform_query("extras.php?action=updateScout", {
+        'termid' => term_id,
+        'scoutid' => member_id,
+        'column' => column,
+        'value' => value,
+        'sectionid' => section_id,
+        'extraid' => flexi_record_id,
+      })
+
+      if (data.is_a?(Hash) && data['items'].is_a?(Array))
+        data['items'].each do |item|
+          return true if (item[column] == value) && (item['scoutid'] == member_id.to_s)
+        end
+      end
+      return false
+    end
 
 
 

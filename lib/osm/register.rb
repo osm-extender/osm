@@ -80,7 +80,7 @@ module Osm
     # @option data [String] :attendance what to mark the attendance as, one of "Yes", "No" or "Absent"
     # @option data [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>] :members the members (or their ids) to update
     # @option data [Array<Hash>] :completed_badge_requirements (optional) the badge requirements to mark as completed, selected from the Hash returned by the get_badge_requirements_for_evening method
-    # @return [Boolean] wether the update succedded
+    # @return [Boolean] whether the update succedded
     def self.update_attendance(data={})
       raise ArgumentIsInvalid, ':attendance is invalid' unless ['Yes', 'No', 'Absent'].include?(data[:attendance])
       raise ArgumentIsInvalid, ':section is missing' if data[:section].nil?

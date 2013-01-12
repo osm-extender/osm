@@ -35,7 +35,7 @@ module Osm
     # Configure the options used by classes in the module
     # @param [Hash] options
     # @option options [Hash] :api Default options for accessing the API
-    # @option options[:api] [Symbol] :default_site wether to use OSM (if :osm) or OGM (if :ogm) by default
+    # @option options[:api] [Symbol] :default_site whether to use OSM (if :osm) or OGM (if :ogm) by default
     # @option options[:api] [Hash] :osm (optional but :osm_api or :ogm_api must be present) the api data for OSM
     # @option options[:api][:osm] [String] :id the apiid given to you for using the OSM id
     # @option options[:api][:osm] [String] :token the token which goes with the above api

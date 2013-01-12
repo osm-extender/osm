@@ -63,6 +63,7 @@ module Osm
     # @param [Osm::term, Fixnum, nil] term the term (or its ID) to get the programme for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Evening>]
+    # TODO Change to get_all in next version bump
     def self.get_programme(api, section, term, options={})
       section_id = section.to_i
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
@@ -115,25 +116,26 @@ module Osm
 
     # Create an evening in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section or section_id to add the evening to
-    # @param [Date] meeting_date the date of the meeting
-    # @return [Boolean] if the operation suceeded or not
-    def self.create(api, section, meeting_date)
-      section_id = section.to_i
-      api_data = {
-        'meetingdate' => meeting_date.strftime(Osm::OSM_DATE_FORMAT),
-        'sectionid' => section_id,
-        'activityid' => -1
-      }
+    # @return [Osm::Evening, nil] the created evening, nil if failed
+    def self.create(api, parameters)
+      evening = new(parameters)
 
-      data = api.perform_query("programme.php?action=addActivityToProgramme", api_data)
+      data = api.perform_query("programme.php?action=addActivityToProgramme", {
+        'meetingdate' => evening.meeting_date.strftime(Osm::OSM_DATE_FORMAT),
+        'sectionid' => evening.section_id,
+        'activityid' => -1,
+        'start' => evening.meeting_date.strftime(Osm::OSM_DATE_FORMAT),
+        'starttime' => evening.start_time,
+        'endtime' => evening.finish_time,
+        'title' => evening.title,
+      })
 
       # The cached programmes for the section will be out of date - remove them
-      Osm::Term.get_for_section(api, section).each do |term|
-        cache_delete(api, ['programme', section_id, term.id])
+      Osm::Term.get_for_section(api, evening.section_id).each do |term|
+        cache_delete(api, ['programme', evening.section_id, term.id])
       end
 
-      return data.is_a?(Hash) && (data['result'] == 0)
+      return data.is_a?(Hash) ? evening : nil
     end
 
 
@@ -175,6 +177,40 @@ module Osm
       end
 
       return response.is_a?(Hash) && (response['result'] == 0)
+    end
+
+    # Add an activity to this evening in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Activity] activity The Activity to add to the Evening
+    # @param [String] notes The notes which should appear for this Activity on this Evening
+    # @return [Boolean] Whether the activity ws successfully added
+    def add_activity(api, activity, notes='')
+      if activity.add_to_programme(api, section_id, meeting_date, notes)
+        activities.push Osm::Evening::Activity.new(:activity_id => activity.id, :notes => notes, :title => activity.title)
+
+        # The cached programmes for the section will be out of date - remove them
+        Osm::Term.get_for_section(api, section_id).each do |term|
+          cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
+        end
+
+        return true
+      end
+
+      return false
+    end
+
+    # Delete evening from OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @return [Boolean] true
+    def delete(api)
+      data = api.perform_query("programme.php?action=deleteEvening&eveningid=#{id}&sectionid=#{section_id}")
+
+      # The cached programmes for the section will be out of date - remove them
+      Osm::Term.get_for_section(api, section_id).each do |term|
+        cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
+      end
+
+      return true
     end
 
 

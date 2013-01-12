@@ -73,7 +73,7 @@ module Osm
     # @!attribute [rw] grouping_id
     #   @return [Fixnum] the grouping within the section that the member belongs to
     # @!attribute [rw] grouping_leader
-    #   @return [Fixnum] wether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL)
+    #   @return [Fixnum] whether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL)
     # @!attribute [rw] joined
     #   @return [Date] when the member joined the section
     # @!attribute [rw] age
@@ -127,12 +127,12 @@ module Osm
                     :custom1, :custom2, :custom3, :custom4, :custom5, :custom6, :custom7, :custom8, :custom9,
                     :grouping_id, :grouping_leader, :joined, :age, :joined_years
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
     validates_numericality_of :grouping_leader, :only_integer=>true, :greater_than_or_equal_to=>0, :less_than_or_equal_to=>2
-    validates_numericality_of :joined_years, :only_integer=>true, :greater_than_or_equal_to=>-1
-    validates_numericality_of :joining_in_years, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :joined_years, :only_integer=>true, :greater_than_or_equal_to=>-1, :allow_nil=>true
+    validates_numericality_of :joining_in_years, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
     validates_presence_of :first_name
     validates_presence_of :last_name
     validates_presence_of :date_of_birth
@@ -199,7 +199,7 @@ module Osm
           :grouping_id => Osm::to_i_or_nil(item['patrolid']),
           :grouping_leader => Osm::to_i_or_nil(item['patrolleader']),
           :joined => Osm::parse_date(item['joined']),
-          :age => item['age'],
+          :age => item['age'].gsub(' ', ''),
           :joined_years => item['yrs'].to_i,
         )
       end
@@ -210,9 +210,121 @@ module Osm
 
 
     # @!method initialize
-    #   Initialize a new Term
+    #   Initialize a new Member
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
+
+    # Create the user in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @return [Boolan] whether the member was successfully added or not
+    def create(api)
+      raise ObjectIsInvalid, 'member is invalid' unless valid?
+      raise Error, 'the member already exists in OSM' unless id.nil?
+
+      data = api.perform_query("users.php?action=newMember", {
+        'firstname' => first_name,
+        'lastname' => last_name,
+        'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
+        'started' => started.strftime(Osm::OSM_DATE_FORMAT),
+        'startedsection' => joined.strftime(Osm::OSM_DATE_FORMAT),
+        'patrolid' => grouping_id,
+        'patrolleader' => grouping_leader,
+        'sectionid' => section_id,
+        'email1' => email1,
+        'email2' => email2,
+        'email3' => email3,
+        'email4' => email4,
+        'phone1' => phone1,
+        'phone2' => phone2,
+        'phone3' => phone3,
+        'phone4' => phone4,
+        'address' => address,
+        'address2' => address2,
+        'parents' => parents,
+        'notes' => notes,
+        'medical' => medical,
+        'religion' => religion,
+        'school' => school,
+        'ethnicity' => ethnicity,
+        'subs' => subs,
+        'custom1' => custom1,
+        'custom2' => custom2,
+        'custom3' => custom3,
+        'custom4' => custom4,
+        'custom5' => custom5,
+        'custom6' => custom6,
+        'custom7' => custom7,
+        'custom8' => custom8,
+        'custom9' => custom9,
+      })
+
+      if (data.is_a?(Hash) && (data['result'] == 'ok') && (data['scoutid'].to_i > 0))
+        self.id = data['scoutid'].to_i
+        # The cached members for the section will be out of date - remove them
+        Osm::Term.get_for_section(api, section_id).each do |term|
+          cache_delete(api, ['members', section_id, term.id])
+        end
+        return true
+      else
+        return false
+      end
+    end
+
+    # Update the user in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @return [Boolan] whether the member was successfully updated or not
+    def update(api)
+      raise ObjectIsInvalid, 'member is invalid' unless valid?
+
+      values = {
+        'firstname' => first_name,
+        'lastname' => last_name,
+        'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
+        'started' => started.strftime(Osm::OSM_DATE_FORMAT),
+        'startedsection' => joined.strftime(Osm::OSM_DATE_FORMAT),
+        'patrolid' => grouping_id,
+        'patrolleader' => grouping_leader,
+        'email1' => email1,
+        'email2' => email2,
+        'email3' => email3,
+        'email4' => email4,
+        'phone1' => phone1,
+        'phone2' => phone2,
+        'phone3' => phone3,
+        'phone4' => phone4,
+        'address' => address,
+        'address2' => address2,
+        'parents' => parents,
+        'notes' => notes,
+        'medical' => medical,
+        'religion' => religion,
+        'school' => school,
+        'ethnicity' => ethnicity,
+        'subs' => subs,
+        'custom1' => custom1,
+        'custom2' => custom2,
+        'custom3' => custom3,
+        'custom4' => custom4,
+        'custom5' => custom5,
+        'custom6' => custom6,
+        'custom7' => custom7,
+        'custom8' => custom8,
+        'custom9' => custom9,
+      }
+
+      result = true
+      values.each do |column, value|
+        data = api.perform_query("users.php?action=updateMember&dateFormat=generic", {
+          'scoutid' => self.id,
+          'column' => column,
+          'value' => value,
+          'sectionid' => section_id,
+        })
+        result &= (data[column] == value.to_s)
+      end
+
+      return result
+    end
 
     # Get the years element of this scout's age
     # @return [Fixnum] the number of years this scout has been alive

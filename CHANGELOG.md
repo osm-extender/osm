@@ -1,4 +1,31 @@
-## Version 0.0.11
+## Version 0.1.12
+
+  * Attribute Section.myscout\_email\_address\_send defaults to an empty String
+  * Attribute Section.myscout\_email\_address\_copy defaults to an empty String
+  * Attribute Section.myscout\_email\_address\_send renamed to myscout\_email\_address\_from
+  * Osm::Event::Column
+    * Rename parent\_label attribute to label
+    * Add update method to update OSM
+    * Add delete method to update OSM
+  * Osm::Evening
+    * Add delete method to update OSM
+    * Changes to create method:
+      * Now takes arguments of (api, parameters)
+      * Now returns an Osm::Evening on success, nil on failure
+      * Will now pass start time, finish time and title to OSM
+  * Add activity to programme
+      * Evening.add\_activity(api, activity, notes="")
+      * Activity.add\_to\_programme(api, section, date, notes="")
+  * Osm::Member
+    * Add create method to update OSM
+    * Add update method to update OSM
+  * Osm::FlexiRecord
+    * Add add\_field method to add a field to the record in OSM
+    * Add update\_field method to rename a field in OSM
+    * Add delete\_field method to delete a field from OSM
+    * Add update\_data method to update the data in OSM
+
+## Version 0.1.11
 
   * Fix "can't convert Hash into String" occuring when some section's config is a Hash not a JSON encoded Hash
   * Remove num\_scouts attribute from Section (OSM always sets this to 999)
@@ -14,8 +41,8 @@
     * myscout\_emails (Hash of Symbol to Boolean) - which email addresses are linked to MyScout for each Member
     * myscout\_email\_address\_send (String, blank OK) - which email address to send My.SCOUT emails as
     * myscout\_email\_address\_copy (String, blank OK) - which email address to send copys of My.SCOUT emails to
-    * myscout\_badges\_partial (Boolean) - Wether parents can see partially completed badges
-    * myscout\_programme\_summary (Boolean) - Wether parents can see the summary of programme items
+    * myscout\_badges\_partial (Boolean) - Whether parents can see partially completed badges
+    * myscout\_programme\_summary (Boolean) - Whether parents can see the summary of programme items
     * myscout\_event\_reminder\_count (Integer) - How many event reminders to send to parents who haven't responded
     * myscout\_event\_reminder\_frequency (Integer) - How many days to leave between event reminder emails
     * myscout\_payment\_reminder\_count (Integer) - How many payment reminders to send to parents who haven't paid yet
@@ -24,8 +51,8 @@
     * notepad - the notepad shown in OSM
     * public\_notepad - the notepad shown on My.SCOUT
     * confirm\_by\_date - the last day that parents can change their child's attendance details
-    * allow\_changes - wether parents can change their child's attendance details
-    * reminders - wether reminder emails are sent
+    * allow\_changes - whether parents can change their child's attendance details
+    * reminders - whether reminder emails are sent
   * Osm::Event
     * Mark fields attribute as depricated
     * Add columns attribute returning an array of column details

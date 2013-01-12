@@ -68,7 +68,7 @@ api_for_this_user = Osm::Api.new(userid, secret)
 Documentation can be found on [rubydoc.info](http://rubydoc.info/github/robertgauld/osm/master/frames)
 
 We follow the [Semantic Versioning](http://semver.org/) concept,
-however it should be noted that when the OSM API adds a feature it can be difficult to decide wether to bump the patch or minor version number up. A smaller change (such as adding score into the grouping object) will bump the patch whereas a larger change wil bump the minor version.
+however it should be noted that when the OSM API adds a feature it can be difficult to decide Whether to bump the patch or minor version number up. A smaller change (such as adding score into the grouping object) will bump the patch whereas a larger change wil bump the minor version.
 
 
 ## Parts of the OSM API Supported:
@@ -82,7 +82,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Evening
   * Event
   * Events
-  * Event Fields
+  * Event Columns
   * Event Attendance
   * Flexi Record Data
   * Flexi Record Structure
@@ -103,41 +103,40 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Evening
   * Event
   * Event Attendance
-  * Register attendance
+  * Event Column
+  * Flexi Record Column
+  * Flexi Record Data
+  * Member
+  * Register Attendance
 
 ### Create
   * Evening
   * Event
+  * Member
+  * Flexi Record Column
 
 ### Delete
+  * Evening
   * Event
+  * Event Column
+  * Flexi Record Column
 
 ### Actions
   * Authorise an app to use the API on a user's behalf
+  * Add activity to programme
 
 
-## Parts of the OSM API currently NOT supported:
+## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
-  * Event Fields:
-    * Delete [issue 45]
-    * Rename [issue 46]
   * Badges:
     * Which requirements each member has met:
       * Retreive [issue 21]
       * Update [issue 22]
     * Retrieve details for each badge (stock, short column names etc.) [issue 20]
-  * Flexi Records:
-    * Update data [issue 23]
-    * Add Column [issue 24]
-  * Member:
-    * Update [issue 33]
-    * Add [issue 34]
-  * Add activity to programme [issue 35]
-  * Delete Evening [issue 36]
   * Update Activity
-  * Gift aid (everything)
+  * Gift aid (Everything)
   * Finances (Everything)
   * SMS:
     * Retreival of delivery reports
     * Sending a message
-  * MyScout
+  * MyScout (Everything) (Maybe)

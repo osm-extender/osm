@@ -29,7 +29,7 @@ describe "Section" do
       :myscout_programme => true,
       :myscout_payments => true,
       :myscout_emails => {:email1 => true, :email2 => false},
-      :myscout_email_address_send => 'send_from@example.com',
+      :myscout_email_address_from => 'send_from@example.com',
       :myscout_email_address_copy => '',
       :myscout_badges_partial => true,
       :myscout_programme_summary => true,
@@ -65,7 +65,7 @@ describe "Section" do
     section.myscout_programme.should == true
     section.myscout_payments.should == true
     section.myscout_emails.should == {:email1 => true, :email2 => false}
-    section.myscout_email_address_send.should == 'send_from@example.com'
+    section.myscout_email_address_from.should == 'send_from@example.com'
     section.myscout_email_address_copy.should == ''
     section.myscout_badges_partial.should == true
     section.myscout_programme_summary.should == true
@@ -88,6 +88,8 @@ describe "Section" do
     section.intouch_fields.should == {}
     section.mobile_fields.should == {}
     section.flexi_records.should == []
+    section.myscout_email_address_from.should == ''
+    section.myscout_email_address_copy.should == ''
   end
 
 
@@ -95,7 +97,7 @@ describe "Section" do
 
     before :each do
       body = [
-        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"beavers\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Flexi Record 1\",\"extraid\":\"111\"}],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true},\"gocardless\":\"true\",\"portal\":{\"paymentRemindFrequency\":\"7\",\"paymentRemindCount\":\"6\",\"eventRemindFrequency\":\"5\",\"eventRemindCount\":\"4\",\"badgesPartial\":1,\"programmeSummary\":1,\"emailAddress\":\"send_from@example.com\",\"emailAddressCopy\":\"\",\"payments\":1,\"badges\":1,\"emails\":{\"email1\":\"true\",\"email2\":\"false\"},\"events\":1,\"programme\":1},\"portalExpires\":{\"events\":\"2013-01-06\",\"eventsA\":1,\"badges\":\"2013-01-07\",\"badgesA\":1,\"programme\":\"2013-01-08\",\"programmeA\":1}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"1", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
+        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"beavers\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Flexi Record 1\",\"extraid\":\"111\"}],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true},\"gocardless\":\"true\",\"portal\":{\"paymentRemindFrequency\":\"7\",\"paymentRemindCount\":\"6\",\"eventRemindFrequency\":\"5\",\"eventRemindCount\":\"4\",\"badgesPartial\":1,\"programmeSummary\":1,\"emailAddress\":\"send_from@example.com\",\"emailAddressCopy\":null,\"payments\":1,\"badges\":1,\"emails\":{\"email1\":\"true\",\"email2\":\"false\"},\"events\":1,\"programme\":1},\"portalExpires\":{\"events\":\"2013-01-06\",\"eventsA\":1,\"badges\":\"2013-01-07\",\"badgesA\":1,\"programme\":\"2013-01-08\",\"programmeA\":1}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"1", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
         {"sectionConfig"=>"{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member's Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member's Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}", "groupname"=>"1st Somewhere", "groupid"=>"1", "groupNormalised"=>"1", "sectionid"=>"2", "sectionname"=>"Section 2", "section"=>"cubs", "isDefault"=>"0", "permissions"=>{"badge"=>100, "member"=>100, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}}
       ]
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json)
@@ -129,7 +131,7 @@ describe "Section" do
       section.myscout_programme.should == true
       section.myscout_payments.should == true
       section.myscout_emails.should == {:email1 => true, :email2 => false}
-      section.myscout_email_address_send.should == 'send_from@example.com'
+      section.myscout_email_address_from.should == 'send_from@example.com'
       section.myscout_email_address_copy.should == ''
       section.myscout_badges_partial.should == true
       section.myscout_programme_summary.should == true
