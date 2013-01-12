@@ -1,3 +1,5 @@
+# TODO make 'proper' class
+
 module Osm
 
   class FlexiRecord
@@ -5,7 +7,7 @@ module Osm
     # Get structure for a flexi record
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
-    # @param [Fixnum] the id of the Flexi Record
+    # @param [Fixnum] id the id of the Flexi Record
     # @!macro options_get
     # @return [Array<Osm::FlexiRecordField>] representing the fields of the flexi record
     def self.get_fields(api, section, id, options={})
@@ -32,6 +34,33 @@ module Osm
 
       return structure
     end
+
+    # Add a field in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
+    # @param [Fixnum] id the id of the Flexi Record
+    # @param [String] name The name for the created column
+    # @return [Boolean] whether the field was created in OSM
+    def self.add_field(api, section, id, name)
+      raise ArgumentError, 'name is invalid' if name.blank?
+      section_id = section.to_i
+
+      data = api.perform_query("extras.php?action=addColumn&sectionid=#{section_id}&extraid=#{id}", {
+        'columnName' => name,
+      })
+
+      if (data.is_a?(Hash) && data.has_key?('config'))
+        ActiveSupport::JSON.decode(data['config']).each do |field|
+          if field['name'] == name
+            # The cached fields for the flexi record will be out of date - remove them
+             Osm::Model.cache_delete(api, ['flexi_record_fields', id])
+            return true
+          end
+        end
+      end
+      return false
+    end
+
 
     # Get data for flexi record
     # @param [Osm::Api] api The api to use to make the request

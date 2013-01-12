@@ -19,6 +19,8 @@
   * Osm::Member
     * Add create method to update OSM
     * Add update method to update OSM
+  * Osm::FlexiRecord
+    * Add add\_field method to add a field to the record in OSM
 
 ## Version 0.1.11
 

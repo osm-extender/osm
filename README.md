@@ -111,6 +111,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Evening
   * Event
   * Member
+  * Flexi Record Column
 
 ### Delete
   * Evening
@@ -131,7 +132,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Retrieve details for each badge (stock, short column names etc.) [issue 20]
   * Flexi Records:
     * Update data [issue 23]
-    * Add Column [issue 24]
     * Update Column [issue 47]
   * Update Activity
   * Gift aid (Everything)
