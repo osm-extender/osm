@@ -105,7 +105,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Event Attendance
   * Event Column
   * Flexi Record Column
-  * Flexi Record Data [issue 23]
+  * Flexi Record Data
   * Member
   * Register Attendance
 

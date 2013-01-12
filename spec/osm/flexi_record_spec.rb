@@ -268,6 +268,7 @@ describe "Flexi Record" do
       Osm::FlexiRecord.delete_field(@api, 1, 2, 'f_1').should be_false
     end
 
+
     it "Fetch Data" do
       data = {
         'identifier' => 'scoutid',
@@ -305,6 +306,47 @@ describe "Flexi Record" do
         'f_2' => 'B',
       }
       record.valid?.should be_true
+    end
+
+
+    it "Update data (success)" do
+      url = "https://www.onlinescoutmanager.co.uk/extras.php?action=updateScout"
+
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'termid' => 1,
+        'scoutid' => 2,
+        'column' => 'f_1',
+        'value' => 'value',
+        'sectionid' => 3,
+        'extraid' => 4,
+      }
+
+      data = {
+        'items' => [
+          {'f_1' => 'value', 'scoutid' => '2'},
+        ]
+      }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 1) }
+
+      Osm::FlexiRecord.update_data(@api, 3, 4, 2, 'f_1', 'value').should be_true
+    end
+
+    it "Update data (failed)" do
+      data = {
+        'items' => [
+          {'f_1' => 'old value', 'scoutid' => '2'},
+        ]
+      }
+
+      HTTParty.stub(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 1) }
+
+      Osm::FlexiRecord.update_data(@api, 3, 4, 2, 'f_1', 'value').should be_false
     end
 
 

@@ -159,6 +159,36 @@ module Osm
       return to_return
     end
 
+    # Update a field in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to update the data for
+    # @param [Fixnum] flexi_record_id the id of the Flexi Record
+    # @param [Osm::Member, Fixnum] member the member (or their ID) to update
+    # @param [String] column the id of the Flexi Record Field
+    # @param [String] value The updated value
+    # @return [Boolean] whether the field was updated in OSM
+    def self.update_data(api, section, flexi_record_id, member, column, value)
+      raise ArgumentError, 'name is invalid' if name.blank?
+      section_id = section.to_i
+      member_id = member.to_i
+      term_id = Osm::Term.get_current_term_for_section(api, section).id
+
+      data = api.perform_query("extras.php?action=updateScout", {
+        'termid' => term_id,
+        'scoutid' => member_id,
+        'column' => column,
+        'value' => value,
+        'sectionid' => section_id,
+        'extraid' => flexi_record_id,
+      })
+
+      if (data.is_a?(Hash) && data['items'].is_a?(Array))
+        data['items'].each do |item|
+          return true if (item[column] == value) && (item['scoutid'] == member_id.to_s)
+        end
+      end
+      return false
+    end
 
 
 

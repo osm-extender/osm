@@ -23,6 +23,7 @@
     * Add add\_field method to add a field to the record in OSM
     * Add update\_field method to rename a field in OSM
     * Add delete\_field method to delete a field from OSM
+    * Add update\_data method to update the data in OSM
 
 ## Version 0.1.11
 
