@@ -81,12 +81,39 @@ module Osm
         ActiveSupport::JSON.decode(data['config']).each do |f|
           if (f['id'] == field) && (f['name'] == name)
             # The cached fields for the flexi record will be out of date - remove them
-             Osm::Model.cache_delete(api, ['flexi_record_fields', id])
+            Osm::Model.cache_delete(api, ['flexi_record_fields', id])
             return true
           end
         end
       end
       return false
+    end
+
+    # Update a field in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
+    # @param [Fixnum] id the id of the Flexi Record
+    # @param [String] field the id of the Flexi Record Field
+    # @return [Boolean] whether the field was updated in OSM
+    def self.delete_field(api, section, id, field)
+      section_id = section.to_i
+
+      data = api.perform_query("extras.php?action=deleteColumn&sectionid=#{section_id}&extraid=#{id}", {
+        'columnId' => field,
+      })
+
+      if (data.is_a?(Hash) && data.has_key?('config'))
+        ActiveSupport::JSON.decode(data['config']).each do |f|
+          if f['id'] == field
+            # It wasn't deleted
+            return false
+          end
+        end
+      end
+
+      # The cached fields for the flexi record will be out of date - remove them
+      Osm::Model.cache_delete(api, ['flexi_record_fields', id])
+      return true
     end
 
     # Get data for flexi record

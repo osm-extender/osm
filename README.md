@@ -105,6 +105,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Event Attendance
   * Event Column
   * Flexi Record Column
+  * Flexi Record Data [issue 23]
   * Member
   * Register Attendance
 
@@ -118,6 +119,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Evening
   * Event
   * Event Column
+  * Flexi Record Column
 
 ### Actions
   * Authorise an app to use the API on a user's behalf
@@ -131,8 +133,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
       * Retreive [issue 21]
       * Update [issue 22]
     * Retrieve details for each badge (stock, short column names etc.) [issue 20]
-  * Flexi Records:
-    * Update data [issue 23]
   * Update Activity
   * Gift aid (Everything)
   * Finances (Everything)
