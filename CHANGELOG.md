@@ -1,6 +1,9 @@
 ## Version 0.1.13
 
-  * 
+  * Add attendance limit attributes to Event:
+    * attendance\_limit - Fixnum, 0 = no limit
+    * attendance\_limit\_includes\_leaders Boolean
+  * Add limited\_attendance? method to Event
 
 ## Version 0.1.12
 

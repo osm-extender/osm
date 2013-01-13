@@ -36,6 +36,10 @@ module Osm
     #   @return [Boolean] whether parent's can change their child's details
     # @!attribute [rw] reminders
     #   @return [Boolean] whether email reminders are sent for the event
+    # @!attribute [rw] attendance_limit
+    #   @return [Fixnum] the maximum number of people who can attend the event (0 = no limit)
+    # @!attendance [rw] attendance_limit_includes_leaders
+    #   @return [Boolean] whether the attendance limit includes leaders
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -52,17 +56,21 @@ module Osm
     attribute :confirm_by_date, :type => Date
     attribute :allow_changes, :type => Boolean, :default => false
     attribute :reminders, :type => Boolean, :default => true
+    attribute :attendance_limit, :type => Integer, :default => 0
+    attribute :attendance_limit_includes_leaders, :type => Boolean, :default => false
 
     attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
-                    :fields, :columns, :notepad, :public_notepad,
-                    :confirm_by_date, :allow_changes, :reminders
+                    :fields, :columns, :notepad, :public_notepad, :confirm_by_date, :allow_changes,
+                    :reminders, :attendance_limit, :attendance_limit_includes_leaders
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :attendance_limit, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_presence_of :name
     validates :columns, :array_of => {:item_type => Osm::Event::Column, :item_valid => true}
     validates_inclusion_of :allow_changes, :in => [true, false]
     validates_inclusion_of :reminders, :in => [true, false]
+    validates_inclusion_of :attendance_limit_includes_leaders, :in => [true, false]
 
 
     # @!method initialize
@@ -144,6 +152,8 @@ module Osm
         'confdate' => event.confirm_by_date? ? event.confirm_by_date.strftime(Osm::OSM_DATE_FORMAT) : '',
         'allowChanges' => event.allow_changes ? 'true' : 'false',
         'disablereminders' => !event.reminders ? 'true' : 'false',
+        'attendancelimit' => event.attendance_limit,
+        'limitincludesleaders' => event.attendance_limit_includes_leaders,
       })
 
       # The cached events for the section will be out of date - remove them
@@ -177,6 +187,8 @@ module Osm
         'confdate' => confirm_by_date? ? confirm_by_date.strftime(Osm::OSM_DATE_FORMAT) : '',
         'allowChanges' => allow_changes ? 'true' : 'false',
         'disablereminders' => !reminders ? 'true' : 'false',
+        'attendancelimit' => attendance_limit,
+        'limitincludesleaders' => attendance_limit_includes_leaders,
       })
       api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
         'eventid' => id,
@@ -309,6 +321,11 @@ module Osm
     end
 
 
+    def limited_attendance?
+      (attendance_limit != 0)
+    end
+
+
     private
     def self.new_event_from_data(event_data)
       event = Osm::Event.new(
@@ -326,6 +343,8 @@ module Osm
         :confirm_by_date => Osm::parse_date(event_data['confdate']),
         :allow_changes => event_data['allowchanges'].eql?('1'),
         :reminders => !event_data['disablereminders'].eql?('1'),
+        :attendance_limit => event_data['attendancelimit'].to_i,
+        :attendance_limit_includes_leaders => event_data['limitincludesleaders'].eql?('1'),
       )
 
       columns = []
