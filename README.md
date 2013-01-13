@@ -100,6 +100,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Terms
 
 ### Update
+  * Activity
   * Evening
   * Event
   * Event Attendance
@@ -133,7 +134,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
       * Retreive [issue 21]
       * Update [issue 22]
     * Retrieve details for each badge (stock, short column names etc.) [issue 20]
-  * Update Activity [issue 51]
   * SMS:
     * Retreival of delivery reports
     * Sending a message
