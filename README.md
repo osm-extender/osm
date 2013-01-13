@@ -128,16 +128,16 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
+  * Update section notepad [issue 50]
   * Badges:
     * Which requirements each member has met:
       * Retreive [issue 21]
       * Update [issue 22]
     * Retrieve details for each badge (stock, short column names etc.) [issue 20]
-  * Update Activity
-  * Update section notepad
-  * Gift aid (Everything)
-  * Finances (Everything)
+  * Update Activity [issue 51]
   * SMS:
     * Retreival of delivery reports
     * Sending a message
+  * Gift aid (Everything)
+  * Finances (Everything)
   * MyScout (Everything) (Maybe)
