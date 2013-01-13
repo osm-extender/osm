@@ -4,6 +4,7 @@
     * attendance\_limit - Fixnum, 0 = no limit
     * attendance\_limit\_includes\_leaders Boolean
   * Add limited\_attendance? method to Event
+  * Add setting of a section's notepad
 
 ## Version 0.1.12
 

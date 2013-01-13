@@ -165,12 +165,40 @@ describe "Section" do
       }
     end
 
+
     it "Gets the section's notepad" do
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => {"1" => "Section 1", "2" => "Section 2"}.to_json)
-      section = Osm::Section.get(@api, 1)
-      section.should_not be_nil
+      url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+      }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>{"1" => "Section 1", "2" => "Section 2"}.to_json}) }
+      section = Osm::Section.new(:id => 1)
       section.get_notepad(@api).should == 'Section 1'
     end
+
+    it "Sets the section's notepad (success)" do
+      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=updateNotepad&sectionid=1'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'value' => 'content'
+      }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+      section = Osm::Section.new(:id => 1)
+      section.set_notepad(@api, 'content').should be_true
+    end
+
+    it "Sets the section's notepad (fail)" do
+      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
+      section = Osm::Section.new(:id => 1)
+      section.set_notepad(@api, 'content').should be_false
+    end
+
 
     it "Fetch badge stock levels" do
       badges_body = {

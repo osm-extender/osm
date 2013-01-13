@@ -128,7 +128,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
-  * Update section notepad [issue 50]
   * Badges:
     * Which requirements each member has met:
       * Retreive [issue 21]
