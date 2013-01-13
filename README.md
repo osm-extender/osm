@@ -134,6 +134,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
       * Update [issue 22]
     * Retrieve details for each badge (stock, short column names etc.) [issue 20]
   * Update Activity
+  * Update section notepad
   * Gift aid (Everything)
   * Finances (Everything)
   * SMS:
