@@ -275,7 +275,7 @@ module Osm
     end
 
 
-    # Get the section's notepads
+    # Get the section's notepad from OSM
     # @param [Osm::Api] The api to use to make the request
     # @!macro options_get
     # @return [String] the section's notepad
@@ -297,6 +297,21 @@ module Osm
 
       return notepad
     end
+
+    # Set the section's notepad in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [String] content The content of the notepad
+    # @return [Boolean] whether the notepad was sucessfully updated
+    def set_notepad(api, content)
+      data = api.perform_query("users.php?action=updateNotepad&sectionid=#{id}", {'value' => content})
+
+      if data.is_a?(Hash) && data['ok'] # Success
+        cache_write(api, ['notepad', id], content)
+        return true
+      end
+      return false
+    end
+
 
     # Get badge stock levels
     # @param [Osm::Api] The api to use to make the request

@@ -58,8 +58,8 @@ module Osm
     attribute :location
     attribute :shared, :type => Integer
     attribute :rating, :type => Integer
-    attribute :editable, :type => Boolean
-    attribute :deletable, :type => Boolean
+    attribute :editable, :type => Boolean, :default => true
+    attribute :deletable, :type => Boolean, :default => true
     attribute :used, :type => Integer
     attribute :versions, :default => []
     attribute :sections, :default => []
@@ -72,13 +72,13 @@ module Osm
                     :sections, :tags, :files, :badges
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
-    validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0
-    validates_numericality_of :user_id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
+    validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+    validates_numericality_of :user_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
     validates_numericality_of :running_time, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :shared, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :rating, :only_integer=>true
-    validates_numericality_of :used, :only_integer=>true
+    validates_numericality_of :shared, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
+    validates_numericality_of :rating, :only_integer=>true, :allow_nil=>true
+    validates_numericality_of :used, :only_integer=>true, :allow_nil=>true
     validates_presence_of :title
     validates_presence_of :description
     validates_presence_of :resources
@@ -179,10 +179,10 @@ module Osm
 
     # Add this activity to the programme in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] activity The Section (or it's ID) to add the Activity to
+    # @param [Osm::Section, Fixnum] section The Section (or it's ID) to add the Activity to
     # @param [Date, DateTime] date The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
     # @param [String] notes The notes which should appear for this Activity on this Evening
-    # @return [Boolean] Whether the activity ws successfully added
+    # @return [Boolean] Whether the activity was successfully added
     def add_to_programme(api, section, date, notes="")
       data = api.perform_query("programme.php?action=addActivityToProgramme", {
         'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
@@ -192,6 +192,34 @@ module Osm
       })
 
       return (data == {'result'=>0})
+    end
+
+    # Update this activity in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum] section The Section (or it's ID)
+    # @param [Boolean] secret_update Whether this is a secret update
+    # @return [Boolean] Whether the activity was successfully added
+    def update(api, section, secret_update=false)
+      raise ObjectIsInvalid, 'activity is invalid' unless valid?
+
+      data = api.perform_query("programme.php?action=update", {
+        'title' => title,
+        'description' => description,
+        'resources' => resources,
+        'instructions' => instructions,
+        'id' => id,
+        'files' => files.map{|f| f.id }.join(','),
+        'time' => running_time.to_s,
+        'location' => location,
+        'sections' => sections.to_json,
+        'tags' => tags.to_json,
+        'links' => badges.map{ |b| {'activityid'=>b.activity_id.to_s, 'section'=>b.section_type, 'badgetype'=>b.type, 'badge'=>b.badge, 'columnname'=>b.requirement, 'label'=>b.label}}.to_json,
+        'shared' => shared,
+        'sectionid' => section.to_i,
+        'secretEdit' => secret_update,
+      })
+
+      return (data == {'result'=>true})
     end
 
 

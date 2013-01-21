@@ -1,3 +1,13 @@
+## Version 0.1.13
+
+  * Add attendance limit attributes to Event:
+    * attendance\_limit - Fixnum, 0 = no limit
+    * attendance\_limit\_includes\_leaders Boolean
+  * Add limited\_attendance? method to Event
+  * Add setting of a section's notepad
+  * Add updating of Activity
+  * Add grouping\_name attribute to Member
+
 ## Version 0.1.12
 
   * Attribute Section.myscout\_email\_address\_send defaults to an empty String

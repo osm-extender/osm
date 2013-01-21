@@ -94,28 +94,86 @@ describe "Using The API" do
   end
 
 
-    it "Add activity to programme (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=addActivityToProgramme'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'meetingdate' => '2000-01-02',
-        'sectionid' => 1,
-        'activityid' => 2,
-        'notes' => 'Notes',
-      }
+  it "Add activity to programme (succeded)" do
+    url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=addActivityToProgramme'
+    post_data = {
+      'apiid' => @CONFIGURATION[:api][:osm][:id],
+      'token' => @CONFIGURATION[:api][:osm][:token],
+      'userid' => 'user_id',
+      'secret' => 'secret',
+      'meetingdate' => '2000-01-02',
+      'sectionid' => 1,
+      'activityid' => 2,
+      'notes' => 'Notes',
+    }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
-      activity = Osm::Activity.new(:id => 2)
-      activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should be_true
-    end
+    HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
+    activity = Osm::Activity.new(:id => 2)
+    activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should be_true
+  end
 
-    it "Add activity to programme (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
-      activity = Osm::Activity.new(:id => 2)
-      activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should be_false
-    end
+  it "Add activity to programme (failed)" do
+    HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
+    activity = Osm::Activity.new(:id => 2)
+    activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should be_false
+  end
+
+
+  it "Update activity in OSM (succeded)" do
+    url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=update'
+    post_data = {
+      'apiid' => @CONFIGURATION[:api][:osm][:id],
+      'token' => @CONFIGURATION[:api][:osm][:token],
+      'userid' => 'user_id',
+      'secret' => 'secret',
+      'title' => 'title',
+      'description' => 'description',
+      'resources' => 'resources',
+      'instructions' => 'instructions',
+      'id' => 2,
+      'files' => '3,4',
+      'time' => '5',
+      'location' => :indoors,
+      'sections' => '["beavers","cubs"]',
+      'tags' => '["tag1","tag2"]',
+      'links' => '[{"activityid":"2","section":"beavers","badgetype":"t","badge":"b","columnname":"r","label":"l"}]',
+      'shared' => 0,
+      'sectionid' => 1,
+      'secretEdit' => true,
+    }
+
+    HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":true}'}) }
+    activity = Osm::Activity.new(
+      :id => 2,
+      :title => 'title',
+      :description => 'description',
+      :resources => 'resources',
+      :instructions => 'instructions',
+      :files => [Osm::Activity::File.new(:id=>3, :activity_id=>2, :file_name=>'fn', :name=>'n'), Osm::Activity::File.new(:id=>4, :activity_id=>2, :file_name=>'fn2', :name=>'n2')],
+      :running_time => 5,
+      :location => :indoors,
+      :sections => [:beavers, :cubs],
+      :tags => ['tag1', 'tag2'],
+      :badges => [Osm::Activity::Badge.new(:activity_id=>2, :section_type=>:beavers, :type=>:t, :badge=>'b', :requirement=>'r', :label=>'l')],
+      :shared => 0,
+      :section_id => 1,
+    )
+    activity.update(@api, 1, true).should be_true
+  end
+
+  it "Update activity in OSM (failed)" do
+    HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":false}'}) }
+    activity = Osm::Activity.new(
+      :id => 2,
+      :title => 'title',
+      :description => 'description',
+      :resources => 'resources',
+      :instructions => 'instructions',
+      :location => :indoors,
+      :running_time => 0,
+    )
+    activity.update(@api, 1, true).should be_false
+  end
+
 
 end

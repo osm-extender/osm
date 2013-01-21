@@ -21,6 +21,8 @@ describe "Event" do
       :confirm_by_date => Date.new(2002, 1, 2),
       :allow_changes => true,
       :reminders => false,
+      :attendance_limit => 3,
+      :attendance_limit_includes_leaders => true,
     }
     event = Osm::Event.new(data)
 
@@ -39,7 +41,14 @@ describe "Event" do
     event.confirm_by_date.should == Date.new(2002, 1, 2)
     event.allow_changes.should == true
     event.reminders.should == false
+    event.attendance_limit.should == 3
+    event.attendance_limit_includes_leaders.should == true
     event.valid?.should be_true
+  end
+
+  it "Correctly tells if attendance is limited" do
+    Osm::Event.new(:attendance_limit => 0).limited_attendance?.should be_false
+    Osm::Event.new(:attendance_limit => 1).limited_attendance?.should be_true
   end
 
   it "Create Event::Attendance" do
@@ -81,7 +90,9 @@ describe "Event" do
           'archived' => '0',
           'confdate' => nil,
           'allowchanges' => '1',
-          'disablereminders' => '1'
+          'disablereminders' => '1',
+          'attendancelimit' => '3',
+          'limitincludesleaders' => '1',
         }]
       }
 
@@ -105,7 +116,9 @@ describe "Event" do
         'allowchanges' => '1',
         'disablereminders' => '1',
         'pnnotepad' => '',
-        'structure' => []
+        'structure' => [],
+        'attendancelimit' => '3',
+        'limitincludesleaders' => '1',
       }
 
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body.to_json)
@@ -132,6 +145,8 @@ describe "Event" do
       event.confirm_by_date.should == Date.new(2002, 1, 2)
       event.allow_changes.should == true
       event.reminders.should == false
+      event.attendance_limit.should == 3
+      event.attendance_limit_includes_leaders.should == true
       event.columns[0].id.should == 'f_1'
       event.columns[0].name.should == 'Name'
       event.columns[0].label.should == 'Label'
@@ -208,6 +223,8 @@ describe "Event" do
         'confdate' => '2000-01-01',
         'allowChanges' => 'true',
         'disablereminders' => 'false',
+        'attendancelimit' => 3,
+        'limitincludesleaders' => true,
       }
 
       Osm::Event.stub(:get_for_section) { [] }
@@ -227,6 +244,8 @@ describe "Event" do
         :confirm_by_date => Date.new(2000, 1, 1),
         :allow_changes => true,
         :reminders => true,
+        :attendance_limit => 3,
+        :attendance_limit_includes_leaders => true,
       })
       event.should_not be_nil
       event.id.should == 2
@@ -274,6 +293,8 @@ describe "Event" do
         'confdate' => '',
         'allowChanges' => 'true',
         'disablereminders' => 'false',
+        'attendancelimit' => 3,
+        'limitincludesleaders' => true,
       }
 
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
@@ -294,6 +315,8 @@ describe "Event" do
         :reminders => true,
         :notepad => 'notepad',
         :public_notepad => 'public notepad',
+        :attendance_limit => 3,
+        :attendance_limit_includes_leaders => true,
       )
       event.update(@api).should be_true
     end
