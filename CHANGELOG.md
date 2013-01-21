@@ -1,3 +1,7 @@
+## Version 0.1.16
+
+  * 
+
 ## Version 0.1.15
 
   * Rename grouping\_name attribute of Member to grouping
