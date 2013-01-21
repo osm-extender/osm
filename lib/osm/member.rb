@@ -200,7 +200,7 @@ module Osm
           :custom8 => item['custom8'],
           :custom9 => item['custom9'],
           :grouping_id => Osm::to_i_or_nil(item['patrolid']),
-          :grouping_name => Osm::to_i_or_nil(item['patrol']),
+          :grouping_name => item['patrol'],
           :grouping_leader => Osm::to_i_or_nil(item['patrolleader']),
           :joined => Osm::parse_date(item['joined']),
           :age => item['age'].gsub(' ', ''),
