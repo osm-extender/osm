@@ -6,6 +6,7 @@
   * Add limited\_attendance? method to Event
   * Add setting of a section's notepad
   * Add updating of Activity
+  * Add grouping\_name attribute to Member
 
 ## Version 0.1.12
 
