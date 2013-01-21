@@ -1,6 +1,6 @@
 ## Version 0.1.14
 
-  * 
+  * Fix group\_name attribute of Member not being set when getting data from OSM
 
 ## Version 0.1.13
 
