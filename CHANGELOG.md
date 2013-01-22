@@ -1,6 +1,8 @@
 ## Version 0.1.16
 
-  * 
+  * Member's grouping attribute:
+    * Renamed to grouping\_label
+    * Virtual attribute grouping added (maps to grouping\_label currently) marked as depricated as it will use a Grouping object not a String in the future
 
 ## Version 0.1.15
 

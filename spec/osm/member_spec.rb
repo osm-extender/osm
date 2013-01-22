@@ -41,7 +41,7 @@ describe "Member" do
       :custom9 => 'Custom Field 9',
       :grouping_id => '3',
       :grouping_leader => 0,
-      :grouping => 'Grouping',
+      :grouping_label => 'Grouping',
       :joined => '2006-01-07',
       :age => '06/07',
       :joined_years => 1,
@@ -83,7 +83,7 @@ describe "Member" do
     member.custom8.should == 'Custom Field 8'
     member.custom9.should == 'Custom Field 9'
     member.grouping_id.should == 3
-    member.grouping.should == 'Grouping'
+    member.grouping_label.should == 'Grouping'
     member.grouping_leader.should == 0
     member.joined.should == Date.new(2006, 1, 7)
     member.age.should == '06/07'
