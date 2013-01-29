@@ -4,6 +4,7 @@
     * Renamed to grouping\_label
     * Virtual attribute grouping added (maps to grouping\_label currently) marked as depricated as it will use a Grouping object not a String in the future
   * Fix exception when OSM returns empty string when requesting groupings for a section
+  * Fix exception when OSM returns empty string when requesting register structure for a section
 
 ## Version 0.1.15
 
