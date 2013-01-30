@@ -300,8 +300,6 @@ module Osm
         'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
         'started' => started.strftime(Osm::OSM_DATE_FORMAT),
         'startedsection' => joined.strftime(Osm::OSM_DATE_FORMAT),
-        'patrolid' => grouping_id,
-        'patrolleader' => grouping_leader,
         'email1' => email1,
         'email2' => email2,
         'email3' => email3,
@@ -340,6 +338,14 @@ module Osm
         })
         result &= (data[column] == value.to_s)
       end
+
+      data = api.perform_query("users.php?action=updateMemberPatrol", {
+        'scoutid' => self.id,
+        'patrolid' => grouping_id,
+        'pl' => grouping_leader,
+        'sectionid' => section_id,
+      })
+      result &= ((data['patrolid'].to_i == grouping_id) && (data['patrolleader'].to_i == grouping_leader))
 
       return result
     end
