@@ -135,7 +135,7 @@ module Osm
     validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
     validates_numericality_of :grouping_leader, :only_integer=>true, :greater_than_or_equal_to=>0, :less_than_or_equal_to=>2
     validates_numericality_of :joined_years, :only_integer=>true, :greater_than_or_equal_to=>-1, :allow_nil=>true
-    validates_numericality_of :joining_in_years, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
+    validates_numericality_of :joining_in_years, :only_integer=>true, :greater_than_or_equal_to=>-1, :allow_nil=>true
     validates_presence_of :first_name
     validates_presence_of :last_name
     validates_presence_of :date_of_birth
