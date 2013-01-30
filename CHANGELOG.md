@@ -7,6 +7,7 @@
   * Fix exception when OSM returns empty string when requesting register structure for a section
   * Fix updating of grouping for Member
   * Fix validation error for Member - a leader's joining\_in\_years is -1
+  * Add spaces and spaces? methods to Event
 
 ## Version 0.1.15
 
