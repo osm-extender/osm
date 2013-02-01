@@ -325,8 +325,32 @@ module Osm
       (attendance_limit != 0)
     end
 
+    # Whether there are spaces left for the event
+    # @param [Osm::Api] api The api to use to make the request
+    # @return [Boolean] whether there are spaces left for the event
+    def spaces?(api)
+      return true unless limited_attendance?
+      return attendance_limit > attendees(api)
+    end
+
+    # Get the number of spaces left for the event
+    # @param [Osm::Api] api The api to use to make the request
+    # @return [Fixnum, nil] the number of spaces left (nil if there is no attendance limit)
+    def spaces(api)
+      return nil unless limited_attendance?
+      return attendance_limit - attendees(api)
+    end
+
 
     private
+    def attendees(api)
+      attendees = 0
+      get_attendance(api).each do |a|
+        attendees += 1 unless attendance_limit_includes_leaders && (a.grouping_id == -2)
+      end
+      return attendees
+    end
+
     def self.new_event_from_data(event_data)
       event = Osm::Event.new(
         :id => Osm::to_i_or_nil(event_data['eventid']),

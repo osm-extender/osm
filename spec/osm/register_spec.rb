@@ -152,6 +152,19 @@ describe "Register" do
       reg.last_name.should == 'Last'
     end
 
+    it "Handles no data" do
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => '')
+      register_structure = Osm::Register.get_structure(@api, 1, 2)
+      register_structure.is_a?(Array).should be_true
+      register_structure.size.should == 0
+
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => '')
+      register = Osm::Register.get_attendance(@api, 1, 2)
+      register.is_a?(Array).should be_true
+      register.size.should == 0
+    end
+
   end
 
 end

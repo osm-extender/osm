@@ -1,3 +1,14 @@
+## Version 0.1.16
+
+  * Member's grouping attribute:
+    * Renamed to grouping\_label
+    * Virtual attribute grouping added (maps to grouping\_label currently) marked as depricated as it will use a Grouping object not a String in the future
+  * Fix exception when OSM returns empty string when requesting groupings for a section
+  * Fix exception when OSM returns empty string when requesting register structure for a section
+  * Fix updating of grouping for Member
+  * Fix validation error for Member - a leader's joining\_in\_years is -1
+  * Add spaces and spaces? methods to Event
+
 ## Version 0.1.15
 
   * Rename grouping\_name attribute of Member to grouping

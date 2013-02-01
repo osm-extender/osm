@@ -44,16 +44,18 @@ module Osm
       data = api.perform_query("users.php?action=getPatrols&sectionid=#{section_id}")
 
       result = Array.new
-      data['patrols'].each do |item|
-        result.push Osm::Grouping.new({
-        :id => Osm::to_i_or_nil(item['patrolid']),
-        :section_id => section_id,
-        :name => item['name'],
-        :active => (item['active'] == 1),
-        :points => Osm::to_i_or_nil(item['points']),
-      })
+      if data.is_a?(Hash) && data['patrols'].is_a?(Array)
+        data['patrols'].each do |item|
+          result.push Osm::Grouping.new({
+          :id => Osm::to_i_or_nil(item['patrolid']),
+          :section_id => section_id,
+          :name => item['name'],
+          :active => (item['active'] == 1),
+          :points => Osm::to_i_or_nil(item['points']),
+        })
+        end
+        cache_write(api, cache_key, result)
       end
-      cache_write(api, cache_key, result)
 
       return result
     end

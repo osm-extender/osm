@@ -51,6 +51,7 @@ describe "Event" do
     Osm::Event.new(:attendance_limit => 1).limited_attendance?.should be_true
   end
 
+
   it "Create Event::Attendance" do
     data = {
       :member_id => 1,
@@ -204,6 +205,108 @@ describe "Event" do
       event.id.should == 2
     end
 
+    describe "Tells if there are spaces" do
+
+      it "No limit" do
+        event = Osm::Event.new(:attendance_limit => 0, :id => 1, :section_id => 2)
+        event.spaces?(@api).should be_true
+        event.spaces(@api).should == nil
+      end
+
+      it "Under limit" do
+        FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3', :body => {
+          'identifier' => 'scoutid',
+          'eventid' => '1',
+          'items' => [
+            {
+              'scoutid' => '4',
+              'attending' => 'Yes',
+              'firstname' => 'First',
+              'lastname' => 'Last',
+              'dob' => '1980-01-02',
+              'patrolid' => '2',
+              'f_1' => 'a',
+            },
+          ]
+        }.to_json)
+        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
+
+        event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
+        event.spaces?(@api).should be_true
+        event.spaces(@api).should == 1
+      end
+
+      it "Over limit" do
+        FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3', :body => {
+          'identifier' => 'scoutid',
+          'eventid' => '1',
+          'items' => [
+            {
+              'scoutid' => '4',
+              'attending' => 'Yes',
+              'firstname' => 'First',
+              'lastname' => 'Last',
+              'dob' => '1980-01-02',
+              'patrolid' => '2',
+              'f_1' => 'a',
+            },{
+              'scoutid' => '5',
+              'attending' => 'Yes',
+              'firstname' => 'First',
+              'lastname' => 'Last',
+              'dob' => '1980-01-02',
+              'patrolid' => '2',
+              'f_1' => 'a',
+            },{
+              'scoutid' => '6',
+              'attending' => 'Yes',
+              'firstname' => 'First',
+              'lastname' => 'Last',
+              'dob' => '1980-01-02',
+              'patrolid' => '2',
+              'f_1' => 'a',
+            }
+          ]
+        }.to_json)
+        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
+
+        event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
+        event.spaces?(@api).should be_false
+        event.spaces(@api).should == -1
+      end
+
+      it "At limit" do
+        FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3', :body => {
+          'identifier' => 'scoutid',
+          'eventid' => '1',
+          'items' => [
+            {
+              'scoutid' => '4',
+              'attending' => 'Yes',
+              'firstname' => 'First',
+              'lastname' => 'Last',
+              'dob' => '1980-01-02',
+              'patrolid' => '2',
+              'f_1' => 'a',
+            },{
+              'scoutid' => '5',
+              'attending' => 'Yes',
+              'firstname' => 'First',
+              'lastname' => 'Last',
+              'dob' => '1980-01-02',
+              'patrolid' => '2',
+              'f_1' => 'a',
+            }
+          ]
+        }.to_json)
+        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
+
+        event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
+        event.spaces?(@api).should be_false
+        event.spaces(@api).should == 0
+      end
+
+    end
 
     it "Create (succeded)" do
       url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
