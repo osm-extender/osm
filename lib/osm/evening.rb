@@ -1,3 +1,5 @@
+# TODO with next version bump - rename to Meeting
+
 module Osm
 
   class Evening < Osm::Model
@@ -230,6 +232,28 @@ module Osm
 
       cache_write(api, cache_key, data)
       return data
+    end
+
+
+    def <=>(another)
+      begin
+        compare = self.section_id <=> another.section_id
+        return compare unless compare == 0
+  
+        compare = self.meeting_date <=> another.meeting_date
+        return compare unless compare == 0
+
+        my_start_time = self.start_time.split(':').map{ |i| i.to_i }
+        another_start_time = another.start_time.split(':').map{ |i| i.to_i }
+        compare = my_start_time[0] <=> another_start_time[0]
+        return compare unless compare == 0
+        compare = my_start_time[1] <=> another_start_time[1]
+        return compare unless compare == 0
+  
+        return self.id <=> another.id
+      rescue NoMethodError
+        return 0
+      end
     end
 
 

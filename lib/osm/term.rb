@@ -221,7 +221,7 @@ module Osm
   
         return self.id <=> another_term.id
       rescue NoMethodError
-        return false
+        return 0
       end
     end
 

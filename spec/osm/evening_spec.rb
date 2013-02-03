@@ -34,7 +34,19 @@ describe "Evening" do
     e.activities.should == []
     e.valid?.should be_true
   end
-  
+
+  it "Sorts by Section ID, Meeting date, Start time and then Evening ID" do
+    evening1 = Osm::Evening.new(:section_id => 1, :id => 1, :meeting_date => (Date.today - 1), :start_time => '18:00')
+    evening2 = Osm::Evening.new(:section_id => 2, :id => 1, :meeting_date => (Date.today - 1), :start_time => '18:00')
+    evening3 = Osm::Evening.new(:section_id => 2, :id => 1, :meeting_date => (Date.today + 1), :start_time => '18:00')
+    evening4 = Osm::Evening.new(:section_id => 2, :id => 1, :meeting_date => (Date.today + 1), :start_time => '19:00')
+    evening5 = Osm::Evening.new(:section_id => 2, :id => 2, :meeting_date => (Date.today + 1), :start_time => '19:00')
+
+    data = [evening5, evening3, evening2, evening4, evening1]
+    data.sort.should == [evening1, evening2, evening3, evening4, evening5]
+  end
+
+
   it "Create Evening::Activity" do
     ea = Osm::Evening::Activity.new(
       :activity_id => 2,
