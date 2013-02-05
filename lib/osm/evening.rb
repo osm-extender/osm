@@ -1,4 +1,4 @@
-# TODO with next version bump - rename to Meeting
+# TODO with next version bump - rename to Meeting, also rename meeting_date to date
 
 module Osm
 
@@ -66,7 +66,7 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Evening>]
     # TODO Change to get_all in next version bump
-    def self.get_programme(api, section, term, options={})
+    def self.get_programme(api, section, term=nil, options={})
       section_id = section.to_i
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['programme', section_id, term_id]

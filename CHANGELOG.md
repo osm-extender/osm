@@ -1,6 +1,7 @@
 ## Version 0.1.17
 
   * Add comparison to Evening
+  * Passing a Term to the get\_programme method of Evening is now optional
 
 ## Version 0.1.16
 
