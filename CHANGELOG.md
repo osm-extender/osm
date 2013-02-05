@@ -1,5 +1,8 @@
 ## Version 0.2.0
 
+  * Evening:
+    * Rename to Meeting
+    * Rename meeting\_date attribute to date
   * Event:
     * Removal of add\_field method (use add\_column instead)
     * Removal of fields attribute (use columns instead)

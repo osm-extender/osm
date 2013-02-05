@@ -1,30 +1,28 @@
-# TODO with next version bump - rename to Meeting, also rename meeting_date to date
-
 module Osm
 
-  class Evening < Osm::Model
+  class Meeting < Osm::Model
     class Activity; end # Ensure the constant exists for the validators
 
     # @!attribute [rw] id
-    #   @return [Fixnum] the id of the evening
+    #   @return [Fixnum] the id of the meeting
     # @!attribute [rw] section_id
-    #   @return [Fixnum] the section the evening belongs to
+    #   @return [Fixnum] the section the meeting belongs to
     # @!attribute [rw] title
-    #   @return [String] the title of the evening
+    #   @return [String] the title of the meeting
     # @!attribute [rw] notes_for_parents
     #   @return [String] notes to be shared with parents
     # @!attribute [rw] games
-    #   @return [String] games to be played during the evening
+    #   @return [String] games to be played during the meeting
     # @!attribute [rw] pre_notes
-    #   @return [String] notes for the start of the evening
+    #   @return [String] notes for the start of the meeting
     # @!attribute [rw] post_notes
-    #   @return [String] notes for the end of the evening
+    #   @return [String] notes for the end of the meeting
     # @!attribute [rw] leaders
-    #   @return [String] the leaders present at the evening
-    # @!attribute [rw] meeting_date
-    #   @return [Date] the date of the evening
+    #   @return [String] the leaders present at the meeting
+    # @!attribute [rw] date
+    #   @return [Date] the date of the meeting
     # @!attribute [rw] activities
-    #   @return [Array<Activity>] list of activities being done during the evening
+    #   @return [Array<Activity>] list of activities being done during the meeting
     # @!attribute [rw] start_time
     #   @return [String] the start time (hh:mm)
     # @!attribute [rw] finish_time
@@ -38,24 +36,24 @@ module Osm
     attribute :pre_notes, :type => String, :default => ''
     attribute :post_notes, :type => String, :default => ''
     attribute :leaders, :type => String, :default => ''
-    attribute :meeting_date, :type => Date
+    attribute :date, :type => Date
     attribute :start_time, :type => String
     attribute :finish_time, :type => String
     attribute :activities, :default => []
 
-    attr_accessible :id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :meeting_date, :activities, :start_time, :finish_time
+    attr_accessible :id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :date, :activities, :start_time, :finish_time
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :title
-    validates_presence_of :meeting_date
+    validates_presence_of :date
     validates_format_of :start_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
     validates_format_of :finish_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
 
-    validates :activities, :array_of => {:item_type => Osm::Evening::Activity, :item_valid => true}
+    validates :activities, :array_of => {:item_type => Osm::Meeting::Activity, :item_valid => true}
 
     # @!method initialize
-    #   Initialize a new Evening
+    #   Initialize a new Meeting
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
@@ -64,7 +62,7 @@ module Osm
     # @param [Osm::Section, Fixnum] section the section (or its ID) to get the programme for
     # @param [Osm::term, Fixnum, nil] term the term (or its ID) to get the programme for, passing nil causes the current term to be used
     # @!macro options_get
-    # @return [Array<Osm::Evening>]
+    # @return [Array<Osm::Meeting>]
     # TODO Change to get_all in next version bump
     def self.get_programme(api, section, term=nil, options={})
       section_id = section.to_i
@@ -94,13 +92,13 @@ module Osm
         attributes[:leaders] = item['leaders'] || ''
         attributes[:start_time] = item['starttime'].nil? ? nil : item['starttime'][0..4]
         attributes[:finish_time] = item['endtime'].nil? ? nil : item['endtime'][0..4]
-        attributes[:meeting_date] = Osm::parse_date(item['meetingdate'])
+        attributes[:date] = Osm::parse_date(item['meetingdate'])
   
         our_activities = activities[item['eveningid']]
         attributes[:activities] = Array.new
         unless our_activities.nil?
           our_activities.each do |activity_data|
-            attributes[:activities].push Osm::Evening::Activity.new(
+            attributes[:activities].push Osm::Meeting::Activity.new(
               :activity_id => Osm::to_i_or_nil(activity_data['activityid']),
               :title => activity_data['title'],
               :notes => activity_data['notes'],
@@ -116,36 +114,36 @@ module Osm
     end
 
 
-    # Create an evening in OSM
+    # Create a meeting in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @return [Osm::Evening, nil] the created evening, nil if failed
+    # @return [Osm::Meeting, nil] the created meeting, nil if failed
     def self.create(api, parameters)
-      evening = new(parameters)
+      meeting = new(parameters)
 
       data = api.perform_query("programme.php?action=addActivityToProgramme", {
-        'meetingdate' => evening.meeting_date.strftime(Osm::OSM_DATE_FORMAT),
-        'sectionid' => evening.section_id,
+        'meetingdate' => meeting.date.strftime(Osm::OSM_DATE_FORMAT),
+        'sectionid' => meeting.section_id,
         'activityid' => -1,
-        'start' => evening.meeting_date.strftime(Osm::OSM_DATE_FORMAT),
-        'starttime' => evening.start_time,
-        'endtime' => evening.finish_time,
-        'title' => evening.title,
+        'start' => meeting.date.strftime(Osm::OSM_DATE_FORMAT),
+        'starttime' => meeting.start_time,
+        'endtime' => meeting.finish_time,
+        'title' => meeting.title,
       })
 
       # The cached programmes for the section will be out of date - remove them
-      Osm::Term.get_for_section(api, evening.section_id).each do |term|
-        cache_delete(api, ['programme', evening.section_id, term.id])
+      Osm::Term.get_for_section(api, meeting.section_id).each do |term|
+        cache_delete(api, ['programme', meeting.section_id, term.id])
       end
 
-      return data.is_a?(Hash) ? evening : nil
+      return data.is_a?(Hash) ? meeting : nil
     end
 
 
-    # Update an evening in OSM
+    # Update an meeting in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] if the operation suceeded or not
     def update(api)
-      raise ObjectIsInvalid, 'evening is invalid' unless valid?
+      raise ObjectIsInvalid, 'meeting is invalid' unless valid?
 
       activities_data = Array.new
       activities.each do |activity|
@@ -160,7 +158,7 @@ module Osm
       api_data = {
         'eveningid' => id,
         'sectionid' => section_id,
-        'meetingdate' => meeting_date.strftime(Osm::OSM_DATE_FORMAT),
+        'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
         'starttime' => start_time,
         'endtime' => finish_time,
         'title' => title,
@@ -175,24 +173,24 @@ module Osm
 
       # The cached programmes for the section will be out of date - remove them
       Osm::Term.get_for_section(api, section_id).each do |term|
-        cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
+        cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(date)
       end
 
       return response.is_a?(Hash) && (response['result'] == 0)
     end
 
-    # Add an activity to this evening in OSM
+    # Add an activity to this meeting in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Activity] activity The Activity to add to the Evening
-    # @param [String] notes The notes which should appear for this Activity on this Evening
+    # @param [Osm::Activity] activity The Activity to add to the Meeting
+    # @param [String] notes The notes which should appear for this Activity on this Meeting
     # @return [Boolean] Whether the activity ws successfully added
     def add_activity(api, activity, notes='')
-      if activity.add_to_programme(api, section_id, meeting_date, notes)
-        activities.push Osm::Evening::Activity.new(:activity_id => activity.id, :notes => notes, :title => activity.title)
+      if activity.add_to_programme(api, section_id, date, notes)
+        activities.push Osm::Meeting::Activity.new(:activity_id => activity.id, :notes => notes, :title => activity.title)
 
         # The cached programmes for the section will be out of date - remove them
         Osm::Term.get_for_section(api, section_id).each do |term|
-          cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
+          cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(date)
         end
 
         return true
@@ -201,7 +199,7 @@ module Osm
       return false
     end
 
-    # Delete evening from OSM
+    # Delete meeting from OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] true
     def delete(api)
@@ -209,14 +207,14 @@ module Osm
 
       # The cached programmes for the section will be out of date - remove them
       Osm::Term.get_for_section(api, section_id).each do |term|
-        cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(meeting_date)
+        cache_delete(api, ['programme', section_id, term.id]) if term.contains_date?(date)
       end
 
       return true
     end
 
 
-    # Get the badge requirements met on a specific evening
+    # Get the badge requirements met on a specific meeting
     # @param [Osm::Api] api The api to use to make the request
     # @!macro options_get
     # @return [Array<Hash>] hashes ready to pass into the update_register method
@@ -228,7 +226,7 @@ module Osm
         return cache_read(api, cache_key)
       end
 
-      data = api.perform_query("users.php?action=getActivityRequirements&date=#{meeting_date.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
+      data = api.perform_query("users.php?action=getActivityRequirements&date=#{date.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
 
       cache_write(api, cache_key, data)
       return data
@@ -240,7 +238,7 @@ module Osm
         compare = self.section_id <=> another.section_id
         return compare unless compare == 0
   
-        compare = self.meeting_date <=> another.meeting_date
+        compare = self.date <=> another.date
         return compare unless compare == 0
 
         my_start_time = self.start_time.split(':').map{ |i| i.to_i }
@@ -267,7 +265,7 @@ module Osm
       # @!attribute [rw] title
       #   @return [String] the activity's title
       # @!attribute [rw] notes
-      #   @return [String] notes relevant to doing this activity on this evening
+      #   @return [String] notes relevant to doing this activity on this meeting
 
       attribute :activity_id, :type => Integer
       attribute :title, :type => String
@@ -279,11 +277,11 @@ module Osm
       validates_presence_of :title
 
       # @!method initialize
-      #   Initialize a new Evening::Activity
+      #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-    end # Class Evening::Activity
+    end # Class Meeting::Activity
 
-  end # Class Evening
+  end # Class Meeting
 
 end # Module
