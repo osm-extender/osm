@@ -21,9 +21,6 @@ module Osm
     #   @return [String] notes about the event
     # @!attribute [rw] archived
     #   @return [Boolean] if the event has been archived
-    # @!attribute [rw] fields
-    #   @deprecated use columns instead
-    #   @return [Hash] Keys are the field's id, values are the field names
     # @!attribute [rw] columns
     #   @return [Array<Osm::Event::Column>] the custom columns for the event
     # @!attribute [rw] notepad
@@ -286,41 +283,8 @@ module Osm
       return data.is_a?(Hash) && (data['eventid'].to_i == id)
     end
 
-    # Add a field in OSM
-    # @deprecated use add_column instead
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [String] field_label the label for the field to add
-    # @return [Boolean] whether the update succedded
-    # TODO - Remove this method when upping the version
-    def add_field(api, label)
-      warn "[DEPRECATION OF METHOD] this method is being depreiated, use add_column instead"
-      raise ArgumentIsInvalid, 'label is invalid' if label.blank?
-      raise Forbidden, 'you do not have permission to write to events for this section' unless get_user_permission(api, section_id, :events).include?(:write)
-
-      data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
-        'columnName' => label,
-        'parentLabel' => ''
-      })
-
-      # The cached events for the section will be out of date - remove them
-      cache_delete(api, ['events', section_id])
-      cache_delete(api, ['event', id])
-      cache_delete(api, ['event_attendance', id])
-
-      return data.is_a?(Hash) && (data['eventid'].to_i == id)
-    end
-
-
-    # TODO - Remove this attribute when upping the version
-    def fields
-      warn "[DEPRECATION OF ATTRIBUTE] this attribute is being depreiated, in favor of returning an array of Field objects."
-      return columns.inject({}){ |h,(c)| h[c.id] = c.name; h}
-    end
-    def fields=(value)
-      raise "[DEPRECATION OF ATTRIBUTE] this attribute is being depreiated, in favor of returning an array of Field objects."
-    end
-
-
+    # Whether thete is a limit on attendance for this event
+    # @return [Boolean] whether thete is a limit on attendance for this event
     def limited_attendance?
       (attendance_limit != 0)
     end

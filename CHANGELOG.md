@@ -1,6 +1,8 @@
 ## Version 0.2.0
 
-  * 
+  * Event:
+    * Removal of add\_field method (use add\_column instead)
+    * Removal of fields attribute (use columns instead)
 
 ## Version 0.1.17
 
