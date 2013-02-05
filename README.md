@@ -134,9 +134,10 @@ however it should be noted that when the OSM API adds a feature it can be diffic
       * Retreive [issue 21]
       * Update [issue 22]
     * Retrieve details for each badge (stock, short column names etc.) [issue 20]
+    * Update badge stock [issue 56]
   * SMS:
-    * Retreival of delivery reports
-    * Sending a message
+    * Retrieval of delivery reports [issue 54]
+    * Sending a message [issue 54]
   * Gift aid (Everything)
   * Finances (Everything)
   * MyScout (Everything) (Maybe)
