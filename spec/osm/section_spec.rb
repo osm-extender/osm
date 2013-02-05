@@ -9,7 +9,7 @@ describe "Section" do
     @attributes = {
       :id => 1,
       :name => 'Name',
-      :subscription_level => :silver,
+      :subscription_level => 2,
       :subscription_expires => (Date.today + 60).strftime('%Y-%m-%d'),
       :type => :cubs,
       :wizard => false,
@@ -46,7 +46,7 @@ describe "Section" do
 
     section.id.should == 1
     section.name.should == 'Name' 
-    section.subscription_level.should == :silver
+    section.subscription_level.should == 2
     section.subscription_expires.should == Date.today + 60
     section.type.should == :cubs
     section.column_names.should == {:column_names => 'names'}
@@ -80,7 +80,7 @@ describe "Section" do
   it "Create has sensible defaults" do
     section = Osm::Section.new
 
-    section.subscription_level.should == :unknown
+    section.subscription_level.should == 1
     section.subscription_expires.should == nil
     section.type.should == :unknown
     section.column_names.should == {}
@@ -110,7 +110,7 @@ describe "Section" do
       section = sections[0]
       section.id.should == 1
       section.name.should == 'Section 1' 
-      section.subscription_level.should == :bronze
+      section.subscription_level.should == 1
       section.subscription_expires.should == Date.new(2013, 1, 5)
       section.type.should == :beavers
       section.column_names.should == {:column_names => 'names'}

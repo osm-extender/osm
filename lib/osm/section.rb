@@ -12,7 +12,7 @@ module Osm
     # @!attribute [rw] group_name
     #   @return [String] the group name
     # @!attribute [rw] subscription_level
-    #   @return [Symbol] what subscription the section has to OSM (:bronze, :silver or :gold)
+    #   @return [Fixnum] what subscription the section has to OSM (1-bronze, 2-silver, 3-gold)
     # @!attribute [rw] subscription_expires
     #   @return [Date] when the section's subscription to OSM expires
     # @!attribute [rw] type
@@ -66,7 +66,7 @@ module Osm
     attribute :name, :type => String
     attribute :group_id, :type => Integer
     attribute :group_name, :type => String
-    attribute :subscription_level, :default => :unknown
+    attribute :subscription_level, :default => 1
     attribute :subscription_expires, :type => Date
     attribute :type, :default => :unknown
     attribute :column_names, :default => {}
@@ -120,7 +120,7 @@ module Osm
     validates_presence_of :mobile_fields, :unless => Proc.new { |a| a.mobile_fields == {} }
     validates_presence_of :flexi_records, :unless => Proc.new { |a| a.flexi_records == [] }
 
-    validates_inclusion_of :subscription_level, :in => [:bronze, :silver, :gold, :unknown], :message => 'is not a valid level'
+    validates_inclusion_of :subscription_level, :in => (1..3), :message => 'is not a valid subscription level'
     validates_inclusion_of :gocardless, :in => [true, false]
     validates_inclusion_of :myscout_events, :in => [true, false]
     validates_inclusion_of :myscout_badges, :in => [true, false]
@@ -147,11 +147,6 @@ module Osm
     # @return [Array<Osm::Section>]
     def self.get_all(api, options={})
       cache_key = ['sections', api.user_id]
-      subscription_levels = {
-        1 => :bronze,
-        2 => :silver,
-        3 => :gold,
-      }
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
@@ -185,7 +180,7 @@ module Osm
           section = new(
             :id => Osm::to_i_or_nil(role_data['sectionid']),
             :name => role_data['sectionname'],
-            :subscription_level => (subscription_levels[section_data['subscription_level']] || :unknown),
+            :subscription_level => Osm::to_i_or_nil(section_data['subscription_level']),
             :subscription_expires => Osm::parse_date(section_data['subscription_expires']),
             :type => !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : (!section_data['section'].nil? ? section_data['section'].to_sym : :unknown),
             :num_scouts => section_data['numscouts'],
@@ -364,6 +359,16 @@ module Osm
       define_method "#{attribute}?" do
         type == attribute
       end
+    end
+
+    # Get the name for the section's subscription level
+    # @return [String, nil] the name of the subscription level (nil if no name exists)
+    def subscription_level_name
+      return {
+        1 => 'Bronze',
+        2 => 'Silver',
+        3 => 'Gold',
+      }[subscription_level]
     end
 
     def <=>(another)
