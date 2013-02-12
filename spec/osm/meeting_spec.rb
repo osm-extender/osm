@@ -72,7 +72,7 @@ describe "Meeting" do
       body = {"items" => items, "activities" => activities}
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getProgramme&sectionid=3&termid=4", :body => body.to_json)
 
-      programme = Osm::Meeting.get_programme(@api, 3, 4)
+      programme = Osm::Meeting.get_all(@api, 3, 4)
       programme.size.should == 1
       programme[0].is_a?(Osm::Meeting).should be_true
       programme[0].activities.size.should == 2
