@@ -7,6 +7,9 @@
   * Event:
     * Removal of add\_field method (use add\_column instead)
     * Removal of fields attribute (use columns instead)
+  * Member:
+    * Removal of grouping attribute
+    * Removal of grouping\_label attribute
   * Section:
     * subscription\_level attribute is now a Fixnum not Symbol
     * Addition of subscription\_level\_name method to get the name of the subscription level for the section

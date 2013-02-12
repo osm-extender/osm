@@ -74,8 +74,6 @@ module Osm
     #   @return [Fixnum] the grouping within the section that the member belongs to
     # @!attribute [rw] grouping_leader
     #   @return [Fixnum] whether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL)
-    # @!attribute [rw] grouping_label
-    #   @return [Fixnum] the grouping within the section that the member belongs to (as displayed in OSM, if member was retrieved from OSM)
     # @!attribute [rw] joined
     #   @return [Date] when the member joined the section
     # @!attribute [rw] age
@@ -118,7 +116,6 @@ module Osm
     attribute :custom8, :type => String, :default => ''
     attribute :custom9, :type => String, :default => ''
     attribute :grouping_id, :type => Integer
-    attribute :grouping_label, :type => String, :default => ''
     attribute :grouping_leader, :type => Integer
     attribute :joined, :type => Date
     attribute :age, :type => String
@@ -128,7 +125,7 @@ module Osm
                     :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started,
                     :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs,
                     :custom1, :custom2, :custom3, :custom4, :custom5, :custom6, :custom7, :custom8, :custom9,
-                    :grouping_id, :grouping_label, :grouping_leader, :joined, :age, :joined_years
+                    :grouping_id, :grouping_leader, :joined, :age, :joined_years
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -200,7 +197,6 @@ module Osm
           :custom8 => item['custom8'],
           :custom9 => item['custom9'],
           :grouping_id => Osm::to_i_or_nil(item['patrolid']),
-          :grouping_label => item['patrol'],
           :grouping_leader => Osm::to_i_or_nil(item['patrolleader']),
           :joined => Osm::parse_date(item['joined']),
           :age => item['age'].gsub(' ', ''),
@@ -211,20 +207,6 @@ module Osm
       cache_write(api, cache_key, result)
       return result
     end
-
-
-    # @deprecated use grouping_label instead
-    # @return [String] the grouping as displayed in OSM
-    # TODO - Use a Grouping object not String when upping the version
-    def grouping
-      return self.grouping_label
-    end
-    # @deprecated use grouping_label instead
-    # TODO - Use a Grouping object not String when upping the version
-    def grouping=(new_grouping)
-      return self.grouping_label = new_grouping
-    end
-
 
 
     # @!method initialize
