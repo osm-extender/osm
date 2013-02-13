@@ -212,11 +212,13 @@ module Osm
 
           result.push section
           cache_write(api, ['section', section.id], section)
-          permissions.merge!(section.id => make_permissions_hash(role_data['permissions']))
+          permissions.merge!(section.id => Osm.make_permissions_hash(role_data['permissions']))
         end
       end
 
-      set_user_permissions(api, get_user_permissions(api).merge(permissions))
+      permissions.each do |s_id, perms|
+        api.set_user_permissions(s_id, perms)
+      end
       cache_write(api, cache_key, result)
       return result
     end
@@ -231,7 +233,7 @@ module Osm
     def self.get(api, section_id, options={})
       cache_key = ['section', section_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api).keys.include?(section_id)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && can_access_section?(section_id)
         return cache_read(api, cache_key)
       end
 
@@ -245,39 +247,15 @@ module Osm
     end
 
 
-    # Get API user's permissions
-    # @param [Osm::Api] The api to use to make the request
-    # @!macro options_get
-    # @return nil if an error occured or the user does not have access to that section
-    # @return [Hash] {section_id => permissions_hash}
-    def self.fetch_user_permissions(api, options={})
-      cache_key = ['permissions', api.user_id]
-
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
-
-      data = api.perform_query('api.php?action=getUserRoles')
-
-      all_permissions = Hash.new
-      data.each do |item|
-        unless item['section'].eql?('discount')  # It's not an actual section
-          all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => make_permissions_hash(item['permissions']))
-        end
-      end
-      cache_write(api, cache_key, all_permissions)
-      return all_permissions
-    end
-
-
     # Get the section's notepad from OSM
     # @param [Osm::Api] The api to use to make the request
     # @!macro options_get
     # @return [String] the section's notepad
     def get_notepad(api, options={})
+      require_access_to_section(api, self, options)
       cache_key = ['notepad', id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permissions(api).keys.include?(id)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && can_access_section?
         return cache_read(api, cache_key)
       end
 
@@ -298,6 +276,7 @@ module Osm
     # @param [String] content The content of the notepad
     # @return [Boolean] whether the notepad was sucessfully updated
     def set_notepad(api, content)
+      require_access_to_section(api, self)
       data = api.perform_query("users.php?action=updateNotepad&sectionid=#{id}", {'value' => content})
 
       if data.is_a?(Hash) && data['ok'] # Success
@@ -314,10 +293,11 @@ module Osm
     # @!macro options_get
     # @return Hash
     def get_badge_stock(api, term=nil, options={})
+      require_ability_to(api, :read, :badge, self, options)
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, self).id : term.to_i
       cache_key = ['badge_stock', id, term_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, self, :badge).include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
@@ -395,24 +375,8 @@ module Osm
     end
 
 
-    private
-    def self.make_permissions_hash(permissions)
-      return {} unless permissions.is_a?(Hash)
-
-      permissions_map = {
-        10  => [:read],
-        20  => [:read, :write],
-        100 => [:read, :write, :administer],
-      }
-
-      return permissions.inject({}) do |new_hash, (key, value)|
-        new_hash[key.to_sym] = (permissions_map[value.to_i] || [])
-        new_hash
-      end
-    end
-
-
     class FlexiRecord
+      # TODO use Osm::FlexiRecord instead
       include ::ActiveAttr::MassAssignmentSecurity
       include ::ActiveAttr::Model
 

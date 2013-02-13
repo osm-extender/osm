@@ -66,8 +66,8 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Term>, nil] An array of terms or nil if the user can not access that section
     def self.get_for_section(api, section, options={})
+      require_access_to_section(api, section, options)
       section_id = section.to_i
-      return nil unless get_user_permissions(api).keys.include?(section_id)
       return get_all(api, options).select{ |term| term.section_id == section_id }
     end
 
@@ -76,7 +76,7 @@ module Osm
     # @param [Fixnum] term_id the id of the required term
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that term
-    # @return [Osm::Section]
+    # @return [Osm::Term]
     def self.get(api, term_id, options={})
       cache_key = ['term', term_id]
 
@@ -89,7 +89,7 @@ module Osm
 
       terms.each do |term|
         if term.id == term_id
-          return (get_user_permissions(api).keys.include?(term.section_id) ? term : nil)
+          return (can_access_section?(api, term.section_id, options) ? term : nil)
         end
       end
       return nil
@@ -125,6 +125,7 @@ module Osm
       raise ArgumentError, ":name can't be nil" if options[:name].nil?
       raise ArgumentError, ":start can't be nil" if options[:start].nil?
       raise ArgumentError, ":finish can't be nil" if options[:finish].nil?
+      require_access_to_section(api, options[:section])
 
       api_data = {
         'term' => options[:name],
@@ -150,6 +151,7 @@ module Osm
     # @return [Boolean] if the operation suceeded or not
     def update(api)
       raise ObjectIsInvalid, 'term is invalid' unless valid?
+      require_access_to_section(api, section_id)
 
       data = api.perform_query("users.php?action=addTerm&sectionid=#{section_id}", {
         'term' => name,

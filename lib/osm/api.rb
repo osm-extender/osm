@@ -138,6 +138,40 @@ module Osm
       }))
     end
 
+    # Get API user's permissions
+    # @!macro options_get
+    # @return nil if an error occured or the user does not have access to that section
+    # @return [Hash] {section_id => permissions_hash}
+    def get_user_permissions(options={})
+      cache_key = ['permissions', user_id]
+
+      if !options[:no_cache] && Osm::Model.cache_exist?(self, cache_key)
+        return Osm::Model.cache_read(self, cache_key)
+      end
+
+      data = perform_query('api.php?action=getUserRoles')
+
+      all_permissions = Hash.new
+      data.each do |item|
+        unless item['section'].eql?('discount')  # It's not an actual section
+          all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
+        end
+      end
+      Osm::Model.cache_write(self, cache_key, all_permissions)
+
+      return all_permissions
+    end
+
+    # Set access permission for an API user for a given Section
+    # @param [Section, Fixnum] section the Section to set permissions for
+    # @param [Hash] permissions the permissions Hash
+    def set_user_permissions(section, permissions)
+      key = ['permissions', user_id]
+      permissions = get_user_permissions.merge(section.to_i => permissions)
+      Osm::Model.cache_write(self, key, permissions)
+    end
+
+
     private
     # Make a query to the OSM/OGM API
     # @param [Symbol] site The site to use either :osm or :ogm

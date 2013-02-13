@@ -148,12 +148,13 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Member>]
     def self.get_for_section(api, section, term=nil, options={})
+      require_ability_to(api, :read, :member, section, options)
       section = Osm::Section.get(api, section) if section.is_a?(Fixnum)
       term = -1 if section.waiting?
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['members', section.id, term_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section.id, :member).include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
@@ -218,6 +219,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolan] whether the member was successfully added or not
     def create(api)
+      require_ability_to(api, :write, :member, section_id)
       raise ObjectIsInvalid, 'member is invalid' unless valid?
       raise Error, 'the member already exists in OSM' unless id.nil?
 
@@ -274,6 +276,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolan] whether the member was successfully updated or not
     def update(api)
+      require_ability_to(api, :write, :member, section_id)
       raise ObjectIsInvalid, 'member is invalid' unless valid?
 
       values = {

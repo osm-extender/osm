@@ -190,6 +190,8 @@ module Osm
     # @param [String] notes The notes which should appear for this Activity on this Evening
     # @return [Boolean] Whether the activity was successfully added
     def add_to_programme(api, section, date, notes="")
+      require_ability_to(api, :write, :programme, section)
+
       data = api.perform_query("programme.php?action=addActivityToProgramme", {
         'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
         'activityid' => id,
@@ -207,6 +209,7 @@ module Osm
     # @return [Boolean] Whether the activity was successfully added
     def update(api, section, secret_update=false)
       raise ObjectIsInvalid, 'activity is invalid' unless valid?
+      riase Forbidden, "You are not allowed to update this activity" unless self.editable
 
       data = api.perform_query("programme.php?action=update", {
         'title' => title,

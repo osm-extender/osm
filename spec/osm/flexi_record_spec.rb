@@ -54,7 +54,7 @@ describe "Flexi Record" do
 
   describe "Using the API" do
 
-    before :all do
+    before :each do
       @flexi_record = Osm::FlexiRecord.new(:section_id => 1, :id => 2)
     end
 
@@ -474,7 +474,6 @@ describe "Flexi Record" do
       record.fields['firstname'].should == 'First'
       record.fields['lastname'].should == 'Last'
     end
-
 
   end
 

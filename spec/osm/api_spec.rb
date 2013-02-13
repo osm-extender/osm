@@ -64,6 +64,37 @@ describe "API" do
   end
 
 
+  describe "User Permissions" do
+
+    it "Get from cache" do
+      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
+      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
+      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
+      @api.get_user_permissions.should == permissions
+    end
+
+    it "Get from API" do
+      body = [
+        {"sectionid"=>"1", "permissions"=>{"a"=>20}},
+        {"sectionid"=>"2", "permissions"=>{"a"=>10}}
+      ]
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json)
+
+      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
+      OsmTest::Cache.should_not_receive('read')
+      @api.get_user_permissions.should == permissions
+    end
+
+    it "Set" do
+      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
+      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
+      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
+      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-permissions-user_id', permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
+      @api.set_user_permissions(3, {:a => [:read]})
+    end
+
+  end
+
 
   describe "OSM and Internet error conditions:" do
     it "Raises a connection error if the HTTP status code was not 'OK'" do

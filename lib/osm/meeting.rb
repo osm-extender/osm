@@ -64,11 +64,12 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Meeting>]
     def self.get_all(api, section, term=nil, options={})
+      require_ability_to(api, :read, :programme, section, options)
       section_id = section.to_i
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['programme', section_id, term_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section_id, :programme).include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
@@ -117,6 +118,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @return [Osm::Meeting, nil] the created meeting, nil if failed
     def self.create(api, parameters)
+      require_ability_to(api, :write, :programme, parameters[:section_id])
       meeting = new(parameters)
 
       data = api.perform_query("programme.php?action=addActivityToProgramme", {
@@ -142,6 +144,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] if the operation suceeded or not
     def update(api)
+      require_ability_to(api, :write, :programme, section_id)
       raise ObjectIsInvalid, 'meeting is invalid' unless valid?
 
       activities_data = Array.new
@@ -202,6 +205,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] true
     def delete(api)
+      require_ability_to(api, :write, :programme, section_id)
       data = api.perform_query("programme.php?action=deleteEvening&eveningid=#{id}&sectionid=#{section_id}")
 
       # The cached programmes for the section will be out of date - remove them
@@ -218,10 +222,11 @@ module Osm
     # @!macro options_get
     # @return [Array<Hash>] hashes ready to pass into the update_register method
     def get_badge_requirements(api, options={})
+      require_ability_to(api, :read, :programme, section_id, options)
       section = Osm::Section.get(api, section_id)
       cache_key = ['badge_requirements', section.id, id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section_id, :programme).include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 

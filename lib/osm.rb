@@ -122,6 +122,20 @@ module Osm
     hash_out
   end
 
+  def self.make_permissions_hash(permissions)
+    return {} unless permissions.is_a?(Hash)
+
+    permissions_map = {
+      10  => [:read],
+      20  => [:read, :write],
+      100 => [:read, :write, :administer],
+    }
+
+    return permissions.inject({}) do |new_hash, (key, value)|
+      new_hash[key.to_sym] = (permissions_map[value.to_i] || [])
+      new_hash
+    end
+  end
 
   def self.epoch_date?(date)
     [OSM_EPOCH, OSM_EPOCH_HUMAN].include?(date)

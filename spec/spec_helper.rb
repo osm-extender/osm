@@ -44,6 +44,8 @@ RSpec.configure do |config|
     Osm::configure(@CONFIGURATION)
     
     @api = Osm::Api.new('user_id', 'secret')
+    Osm::Model.stub(:require_ability_to) {}
+    Osm::Model.stub(:require_access_to_section) {}
   end
 end
 

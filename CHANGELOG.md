@@ -1,5 +1,9 @@
 ## Version 0.2.0
 
+  * Raises Forbidden exception if:
+    * You try to use a feature which requires an OSM subscription above your current one
+    * You try to access a feature which you don't have the correct permissions for
+    * You try to access a Section (or it's Grouping) you shouldn't be accessing
   * Activity
     * Check user has permission to view before returning from cache
   * Evening:

@@ -20,9 +20,10 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::FlexiRecordColumn>] representing the columns of the flexi record
     def get_columns(api, options={})
+      require_ability_to(api, :read, :flexi, section_id, options)
       cache_key = ['flexi_record_columns', self.id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permission(api, self.section_id, :flexi).include?(:read)
+      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
         return Osm::Model.cache_read(api, cache_key)
       end
 
@@ -49,6 +50,7 @@ module Osm
     # @param [String] name The name for the created column
     # @return [Boolean] whether the column was created in OSM
     def add_column(api, name)
+      require_ability_to(api, :write, :flexi, section_id)
       raise ArgumentError, 'name is invalid' if name.blank?
 
       data = api.perform_query("extras.php?action=addColumn&sectionid=#{section_id}&extraid=#{id}", {
@@ -73,11 +75,12 @@ module Osm
     # @!macro options_get
     # @return [Array<FlexiRecordData>]
     def get_data(api, term=nil, options={})
+      require_ability_to(api, :read, :flexi, section_id, options)
       section = Osm::Section.get(api, self.section_id)
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['flexi_record_data', id, term_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key) && Osm::Model.get_user_permission(api, section.id, :flexi).include?(:read)
+      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
         return Osm::Model.cache_read(api, cache_key)
       end
 
@@ -111,7 +114,10 @@ module Osm
 
 
 
-    class Column < Osm::Model
+    class Column
+      include ::ActiveAttr::MassAssignmentSecurity
+      include ::ActiveAttr::Model
+
       # @!attribute [rw] flexi_record
       #   @return [Boolean] The FlexiRecord this column belongs to
       # @!attribute [rw] id
@@ -142,6 +148,7 @@ module Osm
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the column was updated in OSM
       def update(api)
+        Osm::Model.require_ability_to(api, :write, :flexi, flexi_record.section_id)
         raise Forbidden, 'this column is not editable' unless self.editable
         raise ObjectIsInvalid, 'column is invalid' unless valid?
 
@@ -166,6 +173,7 @@ module Osm
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the column was updated in OSM
       def delete(api)
+        Osm::Model.require_ability_to(api, :write, :flexi, flexi_record.section_id)
         raise Forbidden, 'this column is not editable' unless self.editable
 
         data = api.perform_query("extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", {
@@ -189,7 +197,10 @@ module Osm
     end # Class FlexiRecord::Column
 
 
-    class Data < Osm::Model
+    class Data
+      include ::ActiveAttr::MassAssignmentSecurity
+      include ::ActiveAttr::Model
+
       # @!attribute [rw] flexi_record
       #   @return [Boolean] The FlexiRecord this column belongs to
       # @!attribute [rw] member_id
@@ -220,6 +231,7 @@ module Osm
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the data was updated in OSM
       def update(api)
+        Osm::Model.require_ability_to(api, :write, :flexi, flexi_record.section_id)
         raise ObjectIsInvalid, 'data is invalid' unless valid?
 
         term_id = Osm::Term.get_current_term_for_section(api, flexi_record.section_id).id

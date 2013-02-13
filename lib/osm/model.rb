@@ -66,48 +66,78 @@ module Osm
       "#{@@cache_prepend.empty? ? '' : "#{@@cache_prepend}-"}#{api.site}-#{key}"
     end
 
-
-    # Get access permission for an API user
+    # Raise an exception if the user does not have access to a section
     # @param [Osm::Api] The api to use to make the request
-    # @param [Fixnum, nil] section_id to get permissions for, if nil a Hash of all section's permissions is returned
+    # @param [Osm::Section, Fixnum] section the Section (or its ID) the permission is required on
     # @!macro options_get
-    # @return [Hash] the permissions Hash
-    def self.get_user_permissions(api, section_id=nil, options={})
-      key = ['permissions', api.user_id]
-      permissions = (!options[:no_cache] && cache_exist?(api, key)) ? cache_read(api, key) : Osm::Section.fetch_user_permissions(api)
-      permissions ||= {}
-      return section_id.nil? ? (permissions || {}) : (permissions[section_id] || {})
-    end
-
-    # Get an access permission for an API user
-    # @param [Osm::Api] The api to use to make the request
-    # @param [Fixnum, nil] section_id to get permissions for, if nil a Hash of all section's permissions is returned
-    # @param [Symbol] permission
-    # @!macro options_get
-    # @return [Array<Symbol>] the actions the user can perform for the provided permission
-    def self.get_user_permission(api, section_id, permission, options={})
-      permissions = get_user_permissions(api, section_id, options)[permission]
-      return (permissions || [])
-    end
-
-
-    # Set access permission for an API user
-    # @param [Osm::Api] The api to use to make the request
-    # @param [Fixnum, nil] section_id to set permissions for, if nil the Hash of all section's permissions is set
-    # @param [Hash] permissions the permissions Hash
-    def self.set_user_permissions(api, section_id=nil, permissions)
-      key = ['permissions', api.user_id]
-      if section_id
-        permissions = get_user_permissions(api).merge(section_id => permissions)
+    def self.require_access_to_section(api, section, options={})
+      unless api.get_user_permissions(options).keys.include?(section.to_i)
+        raise Forbidden, "You do not have access to that section"
       end
-      cache_write(api, key, permissions)
+    end
+
+    # Check if the user dhas access to a section
+    # @param [Osm::Api] The api to use to make the request
+    # @param [Osm::Section, Fixnum] section the Section (or its ID) the permission is required on
+    # @!macro options_get
+    def self.can_access_section?(api, section, options={})
+      api.get_user_permissions(options).keys.include?(section.to_i)
+    end
+
+    # Raise an exception if the user does not have the relevant permission
+    # @param [Osm::Api] The api to use to make the request
+    # @param [Symbol] to what action is required to be done (e.g. :read or :write)
+    # @param [Symbol] on what the OSM permission is required on (e.g. :member or :programme)
+    # @param [Osm::Section, Fixnum] section the Section (or its ID) the permission is required on
+    # @!macro options_get
+    def self.require_permission(api, to, on, section, options={})
+      section_id = section.to_i
+
+      # Check user's permissions in OSM
+      permissions = api.get_user_permissions(options)
+      permissions = permissions[section_id] || {}
+      permissions = permissions[on] || []
+      unless permissions.include?(to)
+        raise Forbidden, "Your OSM user does not have permission to #{to} on #{on} for #{Osm::Section.get(api, section_id, options).try(:name)}"
+      end
+
+      # Check what the user gave our API
+      permissions = Osm::ApiAccess.get_ours(api, section_id, options).permissions
+      unless permissions[on].include?(to)
+        raise Forbidden, "You have not granted the #{to} permissions on #{on} to the #{api.name} API for #{Osm::Section.get(api, section_id, options).try(:name)}"
+      end
+    end
+
+    # Raise an exception if the user does not have the relevant permission
+    # @param [Osm::Api] The api to use to make the request
+    # @param [Symbol] level the OSM subscription level required (e.g. :gold)
+    # @param [Osm::Section, Fixnum] section the Section (or its ID) the subscription is required on
+    # @!macro options_get
+    def self.require_subscription(api, level, section, options={})
+      section = Osm::Section.get(api, section, options) if section.is_a?(Fixnum)
+      level = ([:bronze, :silver, :gold].find(level) || -1) + 1 if level.is_a?(Symbol)
+      if section.nil? || section.subscription_level < level
+        raise Forbidden, "Insufficent OSM subscription level (#{level} required for #{section.name})"
+      end
+    end
+
+    # Raise an exception if the user does not have the relevant permission
+    # @param [Osm::Api] The api to use to make the request
+    # @param [Symbol] to what action is required to be done (e.g. :read or :write)
+    # @param [Symbol] on what the OSM permission is required on (e.g. :member or :programme)
+    # @param [Osm::Section, Fixnum] section the Section (or its ID) the permission is required on
+    # @!macro options_get
+    def self.require_ability_to(api, to, on, section, options={})
+      require_permission(api, to, on, section, options)
+      require_subscription(api, :silver, section, options) if [:register, :contact, :events, :flexi].include?(on)
+      require_subscription(api, :gold, section, options) if [:finance].include?(on)
     end
 
 
     # Make selected class methods instance methods too
     %w{
-      cache_read cache_write cache_exist? cache_delete
-      get_user_permissions get_user_permission set_user_permission
+      cache_read cache_write cache_exist? cache_delete require_access_to_section
+      can_access_section? require_permission require_subscription require_ability_to
     }.each do |method_name|
       define_method method_name do |*options|
         self.class.send(method_name, *options)

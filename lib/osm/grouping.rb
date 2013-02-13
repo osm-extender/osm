@@ -34,6 +34,7 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Grouping>, nil] An array of groupings or nil if the user can not access that section
     def self.get_for_section(api, section, options={})
+      require_access_to_section(api, section, options)
       section_id = section.to_i
       cache_key = ['groupings', section_id]
 

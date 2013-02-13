@@ -148,23 +148,6 @@ describe "Section" do
       section.valid?.should be_true
     end
 
-    it "Fetches user's permissions" do
-      permissions = Osm::Section.fetch_user_permissions(@api)
-      permissions[1].should_not be_nil
-      permissions[1].should == {
-        :badge => [:read],
-        :member => [:read, :write],
-        :user => [:read, :write, :administer],
-        :register => [:read, :write, :administer],
-        :contact => [:read, :write, :administer],
-        :programme => [:read, :write, :administer],
-        :originator => [],
-        :events => [:read, :write, :administer],
-        :finance => [:read, :write, :administer],
-        :flexi => [:read, :write, :administer],
-      }
-    end
-
 
     it "Gets the section's notepad" do
       url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads'
