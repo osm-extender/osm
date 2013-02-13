@@ -272,7 +272,7 @@ describe "Member" do
       }
 
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":1}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":1}'}) }
       member.create(@api).should be_true
       member.id.should == 1
     end
@@ -289,7 +289,7 @@ describe "Member" do
         :grouping_leader => 0,
       )
 
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":-1}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":-1}'}) }
       member.create(@api).should be_false
     end
 
@@ -382,7 +382,7 @@ describe "Member" do
             'column' => column,
             'value' => value,
             'sectionid' => member.section_id,
-          }}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
+          }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
         end
       end
       HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/users.php?action=updateMemberPatrol', {:body => {
@@ -394,7 +394,7 @@ describe "Member" do
         'patrolid' => member.grouping_id,
         'pl' => member.grouping_leader,
         'sectionid' => member.section_id,
-      }}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
+      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
 
       member.update(@api).should be_true
     end
@@ -412,7 +412,7 @@ describe "Member" do
         :grouping_leader => 0,
       )
 
-      HTTParty.stub(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
       member.update(@api).should be_false
     end
 

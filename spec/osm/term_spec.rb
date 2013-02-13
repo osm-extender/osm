@@ -37,7 +37,7 @@ describe "Term" do
     term.should_not == Osm::Term.new(@attributes.merge(:id => 3))
   end
 
-  it "Sorts by Section ID, Start date and then Term ID" do
+  it "Sorts by Section ID, Start date and th Term ID" do
     term1 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 11, :start => (Date.today - 60), :finish => (Date.today - 1)))
     term2 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 12, :start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 13, :start => (Date.today +  1), :finish => (Date.today + 60)))
@@ -191,7 +191,7 @@ describe "Term" do
       }
 
       Osm::Term.stub(:get_all) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"terms":{}}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"terms":{}}'}) }
 
       Osm::Term.create(@api, {
         :section => 1,
@@ -215,7 +215,7 @@ describe "Term" do
       }
 
       Osm::Term.stub(:get_all) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       Osm::Term.create(@api, {
         :section => 1,
@@ -238,7 +238,7 @@ describe "Term" do
         'termid' => 2
       }
       Osm::Term.stub(:get_all) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"terms":{}}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"terms":{}}'}) }
 
       term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
       term.update(@api).should be_true
@@ -257,7 +257,7 @@ describe "Term" do
         'termid' => 2
       }
       Osm::Term.stub(:get_all) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
       term.update(@api).should be_false

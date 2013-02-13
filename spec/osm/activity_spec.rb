@@ -107,13 +107,13 @@ describe "Using The API" do
       'notes' => 'Notes',
     }
 
-    HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
+    HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
     activity = Osm::Activity.new(:id => 2)
     activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should be_true
   end
 
   it "Add activity to programme (failed)" do
-    HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
+    HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
     activity = Osm::Activity.new(:id => 2)
     activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should be_false
   end
@@ -142,7 +142,7 @@ describe "Using The API" do
       'secretEdit' => true,
     }
 
-    HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":true}'}) }
+    HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":true}'}) }
     activity = Osm::Activity.new(
       :id => 2,
       :title => 'title',
@@ -162,7 +162,7 @@ describe "Using The API" do
   end
 
   it "Update activity in OSM (failed)" do
-    HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":false}'}) }
+    HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":false}'}) }
     activity = Osm::Activity.new(
       :id => 2,
       :title => 'title',

@@ -331,7 +331,7 @@ describe "Event" do
       }
 
       Osm::Event.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
 
       event = Osm::Event.create(@api, {
         :section_id => 1,
@@ -356,7 +356,7 @@ describe "Event" do
 
     it "Create (failed)" do
       Osm::Event.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       event = Osm::Event.create(@api, {
         :section_id => 1,
@@ -400,9 +400,9 @@ describe "Event" do
         'limitincludesleaders' => true,
       }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "notepad"=>"notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "pnnotepad"=>"public notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "notepad"=>"notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "pnnotepad"=>"public notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -425,7 +425,7 @@ describe "Event" do
     end
 
     it "Update (failed)" do
-      HTTParty.should_receive(:post).exactly(3).times { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).exactly(3).times { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -450,7 +450,7 @@ describe "Event" do
         'secret' => 'secret',
       }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -466,7 +466,7 @@ describe "Event" do
     end
 
     it "Delete (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -535,7 +535,7 @@ describe "Event" do
           'userid' => 'user_id',
           'secret' => 'secret',
         }}
-      ) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      ) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       ea.update(@api, 'f_1').should be_true
     end
@@ -555,7 +555,7 @@ describe "Event" do
         'eventid' => '2',
         'config' => '[{"id":"f_1","name":"Test name","pL":"Test label"}]'
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
@@ -567,7 +567,7 @@ describe "Event" do
     end
 
     it "Add column (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
@@ -590,7 +590,7 @@ describe "Event" do
         'eventid' => '2',
         'config' => '[{"id":"f_1","name":"New name","pL":"New label"}]'
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.columns = [Osm::Event::Column.new(:id => 'f_1', :event => event)]
@@ -607,7 +607,7 @@ describe "Event" do
     end
 
     it "Update column (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
@@ -626,7 +626,7 @@ describe "Event" do
         'columnId' => 'f_1'
       }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"eventid":"2","config":"[]"}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"eventid":"2","config":"[]"}'}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
@@ -637,7 +637,7 @@ describe "Event" do
     end
 
     it "Delete column (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[{\"id\":\"f_1\"}]"}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[{\"id\":\"f_1\"}]"}'}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)

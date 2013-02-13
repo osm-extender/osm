@@ -107,7 +107,7 @@ describe "Meeting" do
       }
 
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
       Osm::Meeting.create(@api, {
         :section_id => 1,
         :date => Date.new(2000, 1, 2),
@@ -119,7 +119,7 @@ describe "Meeting" do
 
     it "Create a meeting (failed)" do
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
       Osm::Meeting.create(@api, {
         :section_id => 1,
         :date => Date.new(2000, 1, 2),
@@ -144,7 +144,7 @@ describe "Meeting" do
       }
 
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
       activity = Osm::Activity.new(:id => 2, :title => 'Title')
       meeting = Osm::Meeting.new(:section_id => 1, :date => Date.new(2000, 1, 2))
       meeting.add_activity(@api, activity, 'Notes').should be_true
@@ -152,7 +152,7 @@ describe "Meeting" do
     end
 
     it "Add activity to meeting (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
       activity = Osm::Activity.new(:id => 2, :title => 'Title')
       meeting = Osm::Meeting.new(:section_id => 1, :date => Date.new(2000, 1, 2))
       meeting.add_activity(@api, activity, 'Notes').should be_false
@@ -171,7 +171,7 @@ describe "Meeting" do
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
 
       meeting = Osm::Meeting.new(:id=>1, :section_id=>2, :date=>Date.new(2000, 01, 02))
       meeting.update(@api).should be_true
@@ -189,7 +189,7 @@ describe "Meeting" do
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
       }
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
 
       meeting = Osm::Meeting.new(:id=>1, :section_id=>2, :date=>Date.new(2000, 01, 02))
       meeting.update(@api).should be_false
@@ -210,7 +210,7 @@ describe "Meeting" do
         'secret' => 'secret',
       }
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>''}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>''}) }
 
       meeting = Osm::Meeting.new(:id=>1, :section_id=>2)
       meeting.delete(@api).should be_true

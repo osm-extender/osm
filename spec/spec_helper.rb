@@ -67,4 +67,24 @@ module OsmTest
       @@cache = {}
     end
   end
+
+  class DummyHttpResult
+    def initialize(options={})
+      @response = OsmTest::DummyHttpResponse.new(options[:response])
+    end
+    def response
+      @response
+    end
+  end
+  class DummyHttpResponse
+    def initialize(options={})
+      @options = options
+    end
+    def code
+      @options[:code]
+    end
+    def body
+      @options[:body]
+    end
+  end
 end
