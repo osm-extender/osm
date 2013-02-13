@@ -80,10 +80,10 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Badge requirements for evening
   * Due Badges
   * Evening
-  * Event
-  * Events
-  * Event Columns
-  * Event Attendance
+  * Event (Silver required)
+  * Events (Silver required)
+  * Event Columns (Silver required)
+  * Event Attendance (Silver required)
   * Flexi Record Data
   * Flexi Record Structure
   * Groupings (e.g. Sixes, Patrols)
@@ -102,9 +102,9 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 ### Update
   * Activity
   * Evening
-  * Event
-  * Event Attendance
-  * Event Column
+  * Event (Silver required)
+  * Event Attendance (Silver required)
+  * Event Column (Silver required)
   * Flexi Record Column
   * Flexi Record Data
   * Member
@@ -112,14 +112,14 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ### Create
   * Evening
-  * Event
+  * Event (Silver required)
   * Member
   * Flexi Record Column
 
 ### Delete
   * Evening
-  * Event
-  * Event Column
+  * Event (Silver required)
+  * Event Column (Silver required)
   * Flexi Record Column
 
 ### Actions
@@ -129,15 +129,16 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
-  * Badges:
+  * Badges (Silver required for activity, Bronze for core, challenge and staged):
     * Which requirements each member has met:
       * Retreive [issue 21]
       * Update [issue 22]
     * Retrieve details for each badge (stock, short column names etc.) [issue 20]
     * Update badge stock [issue 56]
+  * Event - Create column (Silver required)
   * SMS:
     * Retrieval of delivery reports [issue 54]
     * Sending a message [issue 54]
-  * Gift aid (Everything)
-  * Finances (Everything)
+  * Gift aid (Everything) (Gold required)
+  * Finances (Everything) (Gold required)
   * MyScout (Everything) (Maybe)

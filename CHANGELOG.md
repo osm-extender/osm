@@ -1,5 +1,7 @@
 ## Version 0.2.0
 
+  * Activity
+    * Check user has permission to view before returning from cache
   * Evening:
     * Rename to Meeting
     * Rename meeting\_date attribute to date
