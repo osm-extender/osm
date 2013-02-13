@@ -5,11 +5,12 @@ require 'date'
 
 describe "Flexi Record" do
 
-  it "Create FlexiRecord::Field" do
-    field = Osm::FlexiRecord::Field.new(
+  it "Create FlexiRecord::Column" do
+    field = Osm::FlexiRecord::Column.new(
       :id => "f_1",
       :name => "Field Name",
-      :editable => true
+      :editable => true,
+      :flexi_record => Osm::FlexiRecord.new(),
     )
 
     field.id.should == 'f_1'
@@ -31,7 +32,8 @@ describe "Flexi Record" do
         'age' => nil,
         'f_1' => 'a',
         'f_2' => 'b',
-      }
+      },
+      :flexi_record => Osm::FlexiRecord.new()
     )
 
     rd.member_id.should == 1
@@ -51,6 +53,10 @@ describe "Flexi Record" do
 
 
   describe "Using the API" do
+
+    before :all do
+      @flexi_record = Osm::FlexiRecord.new(:section_id => 1, :id => 2)
+    end
 
     it "Fetch Fields" do
       data = {
@@ -76,7 +82,7 @@ describe "Flexi Record" do
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtra&sectionid=1&extraid=2", :body => data.to_json)
 
-      fields = Osm::FlexiRecord.get_fields(@api, 1, 2)
+      fields = @flexi_record.get_columns(@api)
       fields.is_a?(Array).should be_true
       fields[0].valid?.should be_true
       fields[0].id.should == 'firstname'
@@ -116,9 +122,9 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
 
-      Osm::FlexiRecord.add_field(@api, 1, 2, 'name').should be_true
+      @flexi_record.add_column(@api, 'name').should be_true
     end
 
     it "Add field (failure)" do
@@ -141,9 +147,9 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
 
-      Osm::FlexiRecord.add_field(@api, 1, 2, 'name').should be_false
+      @flexi_record.add_column(@api, 'name').should be_false
     end
 
     it "Update field (success)" do
@@ -178,9 +184,15 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
 
-      Osm::FlexiRecord.update_field(@api, 1, 2, 'f_1', 'name').should be_true
+      col = Osm::FlexiRecord::Column.new(
+        :flexi_record => @flexi_record,
+        :id => 'f_1',
+        :name => 'name',
+        :editable => true
+      )
+      col.update(@api).should be_true
     end
 
     it "Update field (failure)" do
@@ -203,11 +215,26 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
 
-      Osm::FlexiRecord.update_field(@api, 1, 2, 'f_1', 'name').should be_false
+      col = Osm::FlexiRecord::Column.new(
+        :flexi_record => @flexi_record,
+        :id => 'f_1',
+        :name => 'name',
+        :editable => true
+      )
+      col.update(@api).should be_false
     end
 
+    it "Update field (uneditable)" do
+      col = Osm::FlexiRecord::Column.new(
+        :flexi_record => @flexi_record,
+        :id => 'f_1',
+        :name => 'name',
+        :editable => false
+      )
+      expect{ col.update(@api) }.to raise_error(Osm::Forbidden)
+    end
 
     it "Delete field (success)" do
       url = "https://www.onlinescoutmanager.co.uk/extras.php?action=deleteColumn&sectionid=1&extraid=2"
@@ -238,9 +265,16 @@ describe "Flexi Record" do
           {"rows" => []}
         ]
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
 
-      Osm::FlexiRecord.delete_field(@api, 1, 2, 'f_1').should be_true
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+
+      col = Osm::FlexiRecord::Column.new(
+        :flexi_record => @flexi_record,
+        :id => 'f_1',
+        :name => 'name',
+        :editable => true
+      )
+      col.delete(@api).should be_true
     end
 
     it "Delete field (failure)" do
@@ -263,11 +297,26 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
 
-      Osm::FlexiRecord.delete_field(@api, 1, 2, 'f_1').should be_false
+      col = Osm::FlexiRecord::Column.new(
+        :flexi_record => @flexi_record,
+        :id => 'f_1',
+        :name => 'name',
+        :editable => true
+      )
+      col.delete(@api).should be_false
     end
 
+    it "Delete field (uneditable)" do
+      col = Osm::FlexiRecord::Column.new(
+        :flexi_record => @flexi_record,
+        :id => 'f_1',
+        :name => 'name',
+        :editable => false
+      )
+      expect{ col.delete(@api) }.to raise_error(Osm::Forbidden)
+    end
 
     it "Fetch Data" do
       data = {
@@ -288,8 +337,9 @@ describe "Flexi Record" do
         }]
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json)
+      Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
 
-      records = Osm::FlexiRecord.get_data(@api, Osm::Section.new(:id => 1, :type => :cubs), 2, 3)
+      records = @flexi_record.get_data(@api, 3)
       records.is_a?(Array).should be_true
       records.size.should == 1
       record = records[0]
@@ -317,36 +367,68 @@ describe "Flexi Record" do
         'token' => @CONFIGURATION[:api][:osm][:token],
         'userid' => 'user_id',
         'secret' => 'secret',
-        'termid' => 1,
-        'scoutid' => 2,
+        'termid' => 3,
+        'scoutid' => 4,
         'column' => 'f_1',
         'value' => 'value',
-        'sectionid' => 3,
-        'extraid' => 4,
+        'sectionid' => 1,
+        'extraid' => 2,
       }
 
       data = {
         'items' => [
-          {'f_1' => 'value', 'scoutid' => '2'},
+          {'f_1' => 'value', 'scoutid' => '4'},
         ]
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
-      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 1) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
-      Osm::FlexiRecord.update_data(@api, 3, 4, 2, 'f_1', 'value').should be_true
+      fr = Osm::FlexiRecord.new(:section_id => 1, :id => 2)
+      fr.stub(:get_columns) { [Osm::FlexiRecord::Column.new(:id => 'f_1', :editable => true)] }
+      fr_data = Osm::FlexiRecord::Data.new(
+        :flexi_record => fr,
+        :member_id => 4,
+        :grouping_id => 5,
+        :fields => {'f_1' => 'value'}
+      )
+      fr_data.update(@api).should be_true
     end
 
     it "Update data (failed)" do
       data = {
         'items' => [
-          {'f_1' => 'old value', 'scoutid' => '2'},
+          {'f_1' => 'old value', 'scoutid' => '4'},
         ]
       }
 
-      HTTParty.stub(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
       Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 1) }
 
-      Osm::FlexiRecord.update_data(@api, 3, 4, 2, 'f_1', 'value').should be_false
+      fr = Osm::FlexiRecord.new(:section_id => 1, :id => 2)
+      fr.stub(:get_columns) { [Osm::FlexiRecord::Column.new(:id => 'f_1', :editable => true)] }
+
+      fr_data = Osm::FlexiRecord::Data.new(
+        :flexi_record => fr,
+        :member_id => 4,
+        :grouping_id => 5,
+        :fields => {'f_1' => 'value'}
+      )
+      fr_data.update(@api).should be_false
+    end
+
+    it "Update data (uneditable field)" do
+      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 1) }
+
+      fr = Osm::FlexiRecord.new(:section_id => 1, :id => 2)
+      fr.stub(:get_columns) { [Osm::FlexiRecord::Column.new(:id => 'f_1', :editable => false)] }
+
+      fr_data = Osm::FlexiRecord::Data.new(
+        :flexi_record => fr,
+        :member_id => 4,
+        :grouping_id => 5,
+        :fields => {'f_1' => 'value'}
+      )
+      fr_data.update(@api).should be_true
     end
 
 
@@ -381,8 +463,9 @@ describe "Flexi Record" do
         }]
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json)
+      Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
 
-      records = Osm::FlexiRecord.get_data(@api, Osm::Section.new(:id => 1, :type => :cubs), 2, 3)
+      records = @flexi_record.get_data(@api, 3)
       records.is_a?(Array).should be_true
       records.size.should == 1
       record = records[0]

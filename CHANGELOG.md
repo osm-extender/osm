@@ -9,6 +9,17 @@
   * Event:
     * Removal of add\_field method (use add\_column instead)
     * Removal of fields attribute (use columns instead)
+  * FlexiRecord:
+    * Addition of id and section\_id attributes (these no longer need to be passed to methods)
+    * FlexiRecord::Field renamed to FlexiRecord::Column
+    * The following methods are now instance not class methods:
+      * get\_fields (also renamed to get\_columns)
+      * add\_field (also renamed to add\_column)
+      * get\_data
+    * The following methods have bceome instance methods of a subclasses:
+      * update\_field (moved to column.update)
+      * delete\_field (moved to column.delete)
+      * update\_data (moved to data.update)
   * Member:
     * Removal of grouping attribute
     * Removal of grouping\_label attribute
