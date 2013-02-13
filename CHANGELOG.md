@@ -14,7 +14,7 @@
     * Removal of add\_field method (use add\_column instead)
     * Removal of fields attribute (use columns instead)
   * FlexiRecord:
-    * Addition of id and section\_id attributes (these no longer need to be passed to methods)
+    * Addition of id, section\_id and name attributes (these no longer need to be passed to methods)
     * FlexiRecord::Field renamed to FlexiRecord::Column
     * The following methods are now instance not class methods:
       * get\_fields (also renamed to get\_columns)
@@ -30,6 +30,7 @@
   * Section:
     * subscription\_level attribute is now a Fixnum not Symbol
     * Addition of subscription\_level\_name method to get the name of the subscription level for the section
+    * flexi\_records attribute now contains an Array of Osm::FlexiRecord
 
 ## Version 0.1.17
 

@@ -161,6 +161,7 @@ module Osm
           section_data = role_data['sectionConfig'].is_a?(String) ? ActiveSupport::JSON.decode(role_data['sectionConfig']) : role_data['sectionConfig']
           myscout_data = section_data['portal'] || {}
           section_data['portalExpires'] ||= {}
+          section_id = Osm::to_i_or_nil(role_data['sectionid'])
 
           # Make sense of flexi records
           fr_data = []
@@ -171,14 +172,15 @@ module Osm
             # Expect item to be: {:name=>String, :extraid=>Fixnum}
             # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
             record_data = record_data[1] if record_data.is_a?(Array)
-            flexi_records.push FlexiRecord.new(
+            flexi_records.push Osm::FlexiRecord.new(
               :id => Osm::to_i_or_nil(record_data['extraid']),
               :name => record_data['name'],
+              :section_id => section_id,
             )
           end
 
           section = new(
-            :id => Osm::to_i_or_nil(role_data['sectionid']),
+            :id => section_id,
             :name => role_data['sectionname'],
             :subscription_level => Osm::to_i_or_nil(section_data['subscription_level']),
             :subscription_expires => Osm::parse_date(section_data['subscription_expires']),
@@ -373,40 +375,6 @@ module Osm
         return false
       end
     end
-
-
-    class FlexiRecord
-      # TODO use Osm::FlexiRecord instead
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
-
-      # @!attribute [rw] id
-      #   @return [Fixnum] the aid of the flexi-record
-      # @!attribute [rw] name
-      #   @return [String] the name given to the flexi-record
-
-      attribute :id, :type => Integer
-      attribute :name, :type => String
-
-      attr_accessible :id, :name
-
-      validates_numericality_of :id, :only_integer=>true, :greater_than=>0
-      validates_presence_of :name
-
-
-      # @!method initialize
-      #   Initialize a new FlexiRecord
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-      def <=>(another)
-        begin
-          return self.name <=> another.name
-        rescue NoMethodError
-          return 1
-        end
-      end
-
-    end # Class Section::FlexiRecord
 
   end # Class Section
 

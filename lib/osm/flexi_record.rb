@@ -1,3 +1,5 @@
+# TODO - allow renaming of flexi record in OSM
+
 module Osm
 
   class FlexiRecord < Osm::Model
@@ -5,14 +7,18 @@ module Osm
     #   @return [Fixnum] the id for the flexi_record
     # @!attribute [rw] section_id
     #   @return [Fixnum] the section the member belongs to
+    # @!attribute [rw] name
+    #   @return [String] the flexi record's name name
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
+    attribute :name, :type => String
 
-    attr_accessible :id, :section_id
+    attr_accessible :id, :section_id, :name
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
+    validates_presence_of :name
 
 
     # Get structure for the flexi record
@@ -110,6 +116,15 @@ module Osm
 
       Osm::Model.cache_write(api, cache_key, to_return)
       return to_return
+    end
+
+
+    def <=>(another)
+      begin
+        return self.name <=> another.name
+      rescue NoMethodError
+        return 1
+      end
     end
 
 

@@ -273,30 +273,6 @@ end
 
 
 
-describe "Section::FlexiRecord" do
-
-  it "Create" do
-    fr = Osm::Section::FlexiRecord.new(:id => 1, :name => 'Name')
-
-    fr.id.should == 1
-    fr.name.should == 'Name' 
-    fr.valid?.should be_true
-  end
-
-
-  it "Sorts Flexi Records by name" do
-    fr1 = Osm::Section::FlexiRecord.new(:id => 3, :name => 'A')
-    fr2 = Osm::Section::FlexiRecord.new(:id => 2, :name => 'B')
-    fr3 = Osm::Section::FlexiRecord.new(:id => 1, :name => 'C')
-    records = [fr2, fr1, fr3]
-
-    records.sort.should == [fr1, fr2, fr3]
-  end
-
-end
-
-
-
 describe "Online Scout Manager API Strangeness" do
 
   it "handles a section with no type" do

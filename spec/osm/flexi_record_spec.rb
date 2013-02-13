@@ -5,6 +5,18 @@ require 'date'
 
 describe "Flexi Record" do
 
+  it "Create" do
+    fr = Osm::FlexiRecord.new(
+      :id => 1,
+      :section_id => 2,
+      :name => 'name'
+    )
+    fr.id.should == 1
+    fr.section_id.should == 2
+    fr.name.should == 'name'
+    fr.valid?.should be_true
+  end
+
   it "Create FlexiRecord::Column" do
     field = Osm::FlexiRecord::Column.new(
       :id => "f_1",
@@ -51,11 +63,20 @@ describe "Flexi Record" do
     rd.valid?.should be_true
   end
 
+  it "Sorts by name" do
+    fr1 = Osm::FlexiRecord.new(:id => 3, :name => 'A')
+    fr2 = Osm::FlexiRecord.new(:id => 2, :name => 'B')
+    fr3 = Osm::FlexiRecord.new(:id => 1, :name => 'C')
+    records = [fr2, fr1, fr3]
+
+    records.sort.should == [fr1, fr2, fr3]
+  end
+
 
   describe "Using the API" do
 
     before :each do
-      @flexi_record = Osm::FlexiRecord.new(:section_id => 1, :id => 2)
+      @flexi_record = Osm::FlexiRecord.new(:section_id => 1, :id => 2, :name => 'A Flexi Record')
     end
 
     it "Fetch Fields" do
