@@ -66,13 +66,6 @@ describe "API" do
 
   describe "User Permissions" do
 
-    it "Get from cache" do
-      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
-      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
-      @api.get_user_permissions.should == permissions
-    end
-
     it "Get from API" do
       body = [
         {"sectionid"=>"1", "permissions"=>{"a"=>20}},
@@ -83,6 +76,31 @@ describe "API" do
       permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
       OsmTest::Cache.should_not_receive('read')
       @api.get_user_permissions.should == permissions
+    end
+
+    it "Get from cache" do
+      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
+      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
+      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
+      @api.get_user_permissions.should == permissions
+    end
+
+    it "Get ignoring cache" do
+      data = [
+        {"sectionid"=>"1", "permissions"=>{"a"=>10}},
+      ]
+      body = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+      }
+      url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles'
+
+      OsmTest::Cache.should_not_receive('exist?').with('OSMAPI-osm-permissions-user_id')
+      OsmTest::Cache.should_not_receive('read').with('OSMAPI-osm-permissions-user_id')
+      HTTParty.should_receive(:post).with(url, {:body=>body}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      @api.get_user_permissions(:no_cache => true).should == {1 => {:a => [:read]}}
     end
 
     it "Set" do

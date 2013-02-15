@@ -1,5 +1,3 @@
-# TODO - allow renaming of flexi record in OSM
-
 module Osm
 
   class FlexiRecord < Osm::Model
