@@ -115,7 +115,18 @@ module Osm
     # @!macro options_get
     def self.require_subscription(api, level, section, options={})
       section = Osm::Section.get(api, section, options) if section.is_a?(Fixnum)
-      level = ([:bronze, :silver, :gold].find(level) || -1) + 1 if level.is_a?(Symbol)
+      if level.is_a?(Symbol) # Convert to Fixnum
+        case level
+        when :bronze
+          level = 1
+        when :silver
+          level = 2
+        when :gold
+          level = 3
+        else
+          level = 0
+        end
+      end
       if section.nil? || section.subscription_level < level
         raise Forbidden, "Insufficent OSM subscription level (#{level} required for #{section.name})"
       end
