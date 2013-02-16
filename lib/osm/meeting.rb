@@ -63,7 +63,7 @@ module Osm
     # @param [Osm::term, Fixnum, nil] term the term (or its ID) to get the programme for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Meeting>]
-    def self.get_all(api, section, term=nil, options={})
+    def self.get_for_section(api, section, term=nil, options={})
       require_ability_to(api, :read, :programme, section, options)
       section_id = section.to_i
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i

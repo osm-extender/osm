@@ -9,7 +9,7 @@
   * Evening:
     * Rename to Meeting
     * Rename meeting\_date attribute to date
-    * Rename get\_programme method to get\_all
+    * Rename get\_programme method to get\_for\_section
   * Event:
     * Removal of add\_field method (use add\_column instead)
     * Removal of fields attribute (use columns instead)
