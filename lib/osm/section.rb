@@ -149,12 +149,14 @@ module Osm
       cache_key = ['sections', api.user_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
+        ids = cache_read(api, cache_key)
+        return get_from_ids(api, ids, 'section', options, :get_all)
       end
 
       data = api.perform_query('api.php?action=getUserRoles')
 
       result = Array.new
+      ids = Array.new
       permissions = Hash.new
       data.each do |role_data|
         unless role_data['section'].eql?('discount')  # It's not an actual section
@@ -213,6 +215,7 @@ module Osm
           )
 
           result.push section
+          ids.push section.id
           cache_write(api, ['section', section.id], section)
           permissions.merge!(section.id => Osm.make_permissions_hash(role_data['permissions']))
         end
@@ -221,7 +224,7 @@ module Osm
       permissions.each do |s_id, perms|
         api.set_user_permissions(s_id, perms)
       end
-      cache_write(api, cache_key, result)
+      cache_write(api, cache_key, ids)
       return result
     end
 

@@ -31,7 +31,8 @@ module Osm
       cache_key = ['api_access', api.user_id, section_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
+        ids = cache_read(api, cache_key)
+        return get_from_ids(api, ids, cache_key, section, options, :get_all)
       end
 
       data = api.perform_query("users.php?action=getAPIAccess&sectionid=#{section_id}")
@@ -41,6 +42,7 @@ module Osm
         20  => [:read, :write],
       }
       result = Array.new
+      ids = Array.new
       data['apis'].each do |item|
         attributes = {}
         attributes[:id] = item['apiid'].to_i
@@ -57,9 +59,10 @@ module Osm
 
         this_item = new(attributes)
         result.push this_item
+        ids.push this_item.id
         cache_write(api, [*cache_key, this_item.id], this_item)
       end
-      cache_write(api, cache_key, result)
+      cache_write(api, cache_key, ids)
 
       return result
     end

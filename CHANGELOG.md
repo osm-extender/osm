@@ -31,6 +31,8 @@
     * subscription\_level attribute is now a Fixnum not Symbol
     * Addition of subscription\_level\_name method to get the name of the subscription level for the section
     * flexi\_records attribute now contains an Array of Osm::FlexiRecord
+  * "Under the hood" changes:
+    * Instead of caching individual items and a list of items the gem now caches a list of IDs. This should reduce the cache size.
 
 ## Version 0.1.17
 

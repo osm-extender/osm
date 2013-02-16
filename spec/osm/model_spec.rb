@@ -16,6 +16,11 @@ describe "Model" do
     def self.cache(method, *options)
       self.send("cache_#{method}", *options)
     end
+
+    def self.test_get_all(api, keys, key)
+      ids = cache_read(api, keys)
+      return get_from_ids(api, ids, key, {}, :get_all)
+    end
   end
 
 
@@ -87,6 +92,25 @@ describe "Model" do
 
     it "Builds a key from an array" do
       ModelTester.cache('key', @api, ['a', 'b']).should == 'OSMAPI-osm-a-b'
+    end
+
+  end
+
+
+  describe "Get items from ids" do
+
+    it "All items in cache" do
+      OsmTest::Cache.write('OSMAPI-osm-items', [1, 2])
+      OsmTest::Cache.write('OSMAPI-osm-item-1', '1')
+      OsmTest::Cache.write('OSMAPI-osm-item-2', '2')
+      ModelTester.test_get_all(@api, 'items', 'item').should == ['1', '2']
+    end
+    
+    it "An item not in cache" do
+      OsmTest::Cache.write('OSMAPI-osm-items', [1, 2])
+      OsmTest::Cache.write('OSMAPI-osm-item-1', '1')
+      ModelTester.stub(:get_all) { ['A', 'B'] }
+      ModelTester.test_get_all(@api, 'items', 'item').should == ['A', 'B']
     end
 
   end

@@ -88,21 +88,25 @@ module Osm
       events = nil
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
+        ids = cache_read(api, cache_key)
+        events = get_from_ids(api, ids, 'event', section, options, :get_for_section)
       end
 
-      data = api.perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
-
-      events = Array.new
-      unless data['items'].nil?
-        data['items'].map { |i| i['eventid'].to_i }.each do |event_id|
-          event_data = api.perform_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
-          event = self.new_event_from_data(event_data)
-          events.push event
-          cache_write(api, ['event', event.id], event)
+      if events.nil?
+        data = api.perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
+        events = Array.new
+        ids = Array.new
+        unless data['items'].nil?
+          data['items'].map { |i| i['eventid'].to_i }.each do |event_id|
+            event_data = api.perform_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
+            event = self.new_event_from_data(event_data)
+            events.push event
+            ids.push event.id
+            cache_write(api, ['event', event.id], event)
+          end
         end
+        cache_write(api, cache_key, ids)
       end
-      cache_write(api, cache_key, events)
 
       return events if options[:include_archived]
       return events.reject do |event|

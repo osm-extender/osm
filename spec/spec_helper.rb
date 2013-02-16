@@ -68,6 +68,9 @@ module OsmTest
     def self.clear
       @@cache = {}
     end
+    def self.inspect
+      @@cache.inspect
+    end
   end
 
   class DummyHttpResult

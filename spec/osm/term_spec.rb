@@ -131,16 +131,24 @@ describe "Term" do
     end
 
 
-    it "Gets all terms" do
-      terms = Osm::Term.get_all(@api)
-      terms.size.should == 3
-      terms.map{ |i| i.id }.should == [1, 2, 3]
-      term = terms[0]
-      term.is_a?(Osm::Term).should be_true
-      term.id.should == 1
-      term.name.should == 'Term 1'
-      term.start.should == (Date.today + 31)
-      term.finish.should == (Date.today + 90)
+    describe "Get all terms" do
+      it "From OSM" do
+        terms = Osm::Term.get_all(@api)
+        terms.size.should == 3
+        terms.map{ |i| i.id }.should == [1, 2, 3]
+        term = terms[0]
+        term.is_a?(Osm::Term).should be_true
+        term.id.should == 1
+        term.name.should == 'Term 1'
+        term.start.should == (Date.today + 31)
+        term.finish.should == (Date.today + 90)
+      end
+
+      it "From cache" do
+        terms = Osm::Term.get_all(@api)
+        HTTParty.should_not_receive(:post)
+        Osm::Term.get_all(@api).should == terms
+      end
     end
 
     it "Gets all terms for a section" do

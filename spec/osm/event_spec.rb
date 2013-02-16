@@ -128,75 +128,84 @@ describe "Event" do
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
     end
 
-    it "Get events for section" do
-      events = Osm::Event.get_for_section(@api, 1)
-      events.size.should == 1
-      event = events[0]
-      event.id.should == 2
-      event.section_id.should == 1
-      event.name.should == 'An Event'
-      event.start.should == Date.new(2001, 1, 2)
-      event.finish.should == DateTime.new(2001, 2, 5, 12, 0, 0)
-      event.cost.should == '0.00'
-      event.location.should == 'Somewhere'
-      event.notes.should == 'Notes'
-      event.archived.should be_false
-      event.notepad.should == 'notepad'
-      event.public_notepad.should == 'public notepad'
-      event.confirm_by_date.should == Date.new(2002, 1, 2)
-      event.allow_changes.should == true
-      event.reminders.should == false
-      event.attendance_limit.should == 3
-      event.attendance_limit_includes_leaders.should == true
-      event.columns[0].id.should == 'f_1'
-      event.columns[0].name.should == 'Name'
-      event.columns[0].label.should == 'Label'
-      event.valid?.should be_true
-    end
+    describe "Get events for section" do
+      it "From OSM" do
+        events = Osm::Event.get_for_section(@api, 1)
+        events.size.should == 1
+        event = events[0]
+        event.id.should == 2
+        event.section_id.should == 1
+        event.name.should == 'An Event'
+        event.start.should == Date.new(2001, 1, 2)
+        event.finish.should == DateTime.new(2001, 2, 5, 12, 0, 0)
+        event.cost.should == '0.00'
+        event.location.should == 'Somewhere'
+        event.notes.should == 'Notes'
+        event.archived.should be_false
+        event.notepad.should == 'notepad'
+        event.public_notepad.should == 'public notepad'
+        event.confirm_by_date.should == Date.new(2002, 1, 2)
+        event.allow_changes.should == true
+        event.reminders.should == false
+        event.attendance_limit.should == 3
+        event.attendance_limit_includes_leaders.should == true
+        event.columns[0].id.should == 'f_1'
+        event.columns[0].name.should == 'Name'
+        event.columns[0].label.should == 'Label'
+        event.valid?.should be_true
+      end
 
-    it "Fetch events for a section honoring archived option" do
-      body = {
-        'identifier' => 'eventid',
-        'label' => 'name',
-        'items' => [{
-          'eventid' => '1',
-          'name' => 'An Event',
-          'startdate' => '2001-02-03',
-          'enddate' => nil,
-          'starttime' => '00:00:00',
-          'endtime' => '00:00:00',
-          'cost' => '0.00',
-          'location' => '',
-          'notes' => '',
-          'sectionid' => 1,
-          'googlecalendar' => nil,
-          'archived' => '0'
-        },{
-          'eventid' => '2',
-          'name' => 'An Archived Event',
-          'startdate' => '2001-02-03',
-          'enddate' => nil,
-          'starttime' => '00:00:00',
-          'endtime' => '00:00:00',
-          'cost' => '0.00',
-          'location' => '',
-          'notes' => '',
-          'sectionid' => 1,
-          'googlecalendar' => nil,
-          'archived' => '1'
-        }]
-      }
+      it "From cache" do
+        events = Osm::Event.get_for_section(@api, 1)
+        HTTParty.should_not_receive(:post)
+        Osm::Event.get_for_section(@api, 1).should == events
+      end
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json)
+      it "Honours archived option" do
+        body = {
+          'identifier' => 'eventid',
+          'label' => 'name',
+          'items' => [{
+            'eventid' => '1',
+            'name' => 'An Event',
+            'startdate' => '2001-02-03',
+            'enddate' => nil,
+            'starttime' => '00:00:00',
+            'endtime' => '00:00:00',
+            'cost' => '0.00',
+            'location' => '',
+            'notes' => '',
+            'sectionid' => 1,
+            'googlecalendar' => nil,
+            'archived' => '0'
+          },{
+            'eventid' => '2',
+            'name' => 'An Archived Event',
+            'startdate' => '2001-02-03',
+            'enddate' => nil,
+            'starttime' => '00:00:00',
+            'endtime' => '00:00:00',
+            'cost' => '0.00',
+            'location' => '',
+            'notes' => '',
+            'sectionid' => 1,
+            'googlecalendar' => nil,
+            'archived' => '1'
+          }]
+        }
 
-      events = Osm::Event.get_for_section(@api, 1)
-      all_events = Osm::Event.get_for_section(@api, 1, {:include_archived => true})
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json)
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json)
 
-      events.size.should == 1
-      events[0].id == 1
-      all_events.size.should == 2
+        events = Osm::Event.get_for_section(@api, 1)
+        OsmTest::Cache.clear
+        all_events = Osm::Event.get_for_section(@api, 1, {:include_archived => true})
+
+        events.size.should == 1
+        events[0].id == 1
+        all_events.size.should == 2
+      end
     end
 
     it "Get event" do

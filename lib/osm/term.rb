@@ -36,12 +36,14 @@ module Osm
       cache_key = ['terms', api.user_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
+        ids = cache_read(api, cache_key)
+        return get_from_ids(api, ids, 'term', options, :get_all)
       end
 
       data = api.perform_query('api.php?action=getTerms')
 
-      result = Array.new
+      terms = Array.new
+      ids = Array.new
       data.each_key do |key|
         data[key].each do |term_data|
           term = Osm::Term.new(
@@ -51,13 +53,14 @@ module Osm
             :start => Osm::parse_date(term_data['startdate']),
             :finish => Osm::parse_date(term_data['enddate']),
           )
-          result.push term
+          terms.push term
+          ids.push term.id
           cache_write(api, ['term', term.id], term)
         end
       end
 
-      cache_write(api, cache_key, result)
-      return result
+      cache_write(api, cache_key, ids)
+      return terms
     end
 
     # Get the terms that the OSM user can access for a given section
@@ -81,7 +84,8 @@ module Osm
       cache_key = ['term', term_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
+        term = cache_read(api, cache_key)
+        return term if can_access_section?(api, term.section_id, options)
       end
 
       terms = get_all(api, options)

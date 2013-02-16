@@ -66,6 +66,7 @@ module Osm
       "#{@@cache_prepend.empty? ? '' : "#{@@cache_prepend}-"}#{api.site}-#{key}"
     end
 
+
     # Raise an exception if the user does not have access to a section
     # @param [Osm::Api] The api to use to make the request
     # @param [Osm::Section, Fixnum] section the Section (or its ID) the permission is required on
@@ -76,7 +77,7 @@ module Osm
       end
     end
 
-    # Check if the user dhas access to a section
+    # Check if the user has access to a section
     # @param [Osm::Api] The api to use to make the request
     # @param [Osm::Section, Fixnum] section the Section (or its ID) the permission is required on
     # @!macro options_get
@@ -142,6 +143,29 @@ module Osm
       require_permission(api, to, on, section, options)
       require_subscription(api, :silver, section, options) if [:register, :contact, :events, :flexi].include?(on)
       require_subscription(api, :gold, section, options) if [:finance].include?(on)
+    end
+
+
+    # Get a list of items given a list of item IDs
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Array<Fixnum>] ids The ids of the items to get
+    # @param [String] key the key for getting an item from the cache (the key [key, id] is generated)
+    # @param [Array] argumentss The arguments to pass to get_all
+    # @!macro options_get
+    # @param [Symbol] get_all_method The method to get all items (either :get_all or :get_for_section)
+    # @return [Array] An array of the items
+    def self.get_from_ids(api, ids, key, arguments=[], options, get_all_method)
+      raise ArgumentError, "get_al_method is invalid" unless [:get_all, :get_for_section].include?(get_all_method)
+      items = Array.new
+      ids.each do |id|
+        if cache_exist?(api, [key, id])
+          items.push cache_read(api, [*key, id])
+        else
+          # At least this one item is not in the cache - we might as well refresh the lot
+          return self.send(get_all_method, api, *arguments, options.merge(:no_cache => true))
+        end
+      end
+      return items
     end
 
 
