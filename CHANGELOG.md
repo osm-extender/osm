@@ -6,6 +6,7 @@
     * You try to access a Section (or it's Grouping) you shouldn't be accessing
   * Activity
     * Check user has permission to view before returning from cache
+  * Add updating of Grouping
   * Evening:
     * Rename to Meeting
     * Rename meeting\_date attribute to date
@@ -27,6 +28,7 @@
   * Member:
     * Removal of grouping attribute
     * Removal of grouping\_label attribute
+    * Addition of myscout\_link method (used to get the link to the member's My.SCOUT page)
   * Section:
     * subscription\_level attribute is now a Fixnum not Symbol
     * Addition of subscription\_level\_name method to get the name of the subscription level for the section

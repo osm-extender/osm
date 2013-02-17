@@ -238,7 +238,7 @@ module Osm
     def self.get(api, section_id, options={})
       cache_key = ['section', section_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && can_access_section?(section_id)
+      if !options[:no_cache] && cache_exist?(api, cache_key) && can_access_section?(api, section_id)
         return cache_read(api, cache_key)
       end
 
@@ -260,7 +260,7 @@ module Osm
       require_access_to_section(api, self, options)
       cache_key = ['notepad', id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && can_access_section?
+      if !options[:no_cache] && cache_exist?(api, cache_key) && can_access_section?(api, section_id)
         return cache_read(api, cache_key)
       end
 

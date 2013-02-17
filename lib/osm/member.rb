@@ -354,6 +354,25 @@ module Osm
       return "#{first_name}#{seperator.to_s}#{last_name}"
     end
 
+    # Get the My.SCOUT link for this member
+    # @param [Osm::Api] api The api to use to make the request
+    # @param Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme or :badges)
+    # @return [String] the link for this member's My.SCOUT
+    def myscout_link(api, link_to=:badges)
+      require_ability_to(api, :read, :member, section_id)
+      raise ObjectIsInvalid, 'member is invalid' unless valid?
+      raise Error, 'the member does not already exist in OSM' if id.nil?
+      raise Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges].include?(link_to)
+
+      if @myscout_link_key.nil?
+        data = api.perform_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{self.id}")
+        raise Osm::Error, 'Could not retrieve the key for the link from OSM' unless data['ok']
+        @myscout_link_key = data['key']
+      end
+
+      return "https://www.onlinescoutmanager.co.uk/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{@myscout_link_key}"
+    end
+
   end # Class Member
 
 end # Module

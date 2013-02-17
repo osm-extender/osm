@@ -416,6 +416,63 @@ describe "Member" do
       member.update(@api).should be_false
     end
 
+    describe "Get My.SCOUT link" do
+      
+      before :each do
+        @member = Osm::Member.new(
+          :id => 1,
+          :section_id => 2,
+          :first_name => 'First',
+          :last_name => 'Last',
+          :date_of_birth => '2000-01-02',
+          :started => '2006-01-02',
+          :joined => '2006-01-03',
+          :grouping_id => '3',
+          :grouping_leader => 0,
+        )
+      end
+
+      it "Default" do
+        url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getMyScoutKey&sectionid=2&scoutid=1'
+        HTTParty.should_receive(:post).with(url, {:body => {
+          'apiid' => @CONFIGURATION[:api][:osm][:id],
+          'token' => @CONFIGURATION[:api][:osm][:token],
+          'userid' => 'user_id',
+          'secret' => 'secret',
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true,"key":"KEY-HERE"}'}) }
+        @member.myscout_link(@api).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
+      end
+
+      it "Payments" do
+        url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getMyScoutKey&sectionid=2&scoutid=1'
+        FakeWeb.register_uri(:post, url, :body => '{"ok":true,"key":"KEY-HERE"}')
+        @member.myscout_link(@api, :payments).should == 'https://www.onlinescoutmanager.co.uk/parents/payments.php?sc=1&se=2&c=KEY-HERE'
+      end
+
+      it "Events" do
+        url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getMyScoutKey&sectionid=2&scoutid=1'
+        FakeWeb.register_uri(:post, url, :body => '{"ok":true,"key":"KEY-HERE"}')
+        @member.myscout_link(@api, :events).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE'
+      end
+
+      it "Programme" do
+        url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getMyScoutKey&sectionid=2&scoutid=1'
+        FakeWeb.register_uri(:post, url, :body => '{"ok":true,"key":"KEY-HERE"}')
+        @member.myscout_link(@api, :programme).should == 'https://www.onlinescoutmanager.co.uk/parents/programme.php?sc=1&se=2&c=KEY-HERE'
+      end
+
+      it "Badges" do
+        url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getMyScoutKey&sectionid=2&scoutid=1'
+        FakeWeb.register_uri(:post, url, :body => '{"ok":true,"key":"KEY-HERE"}')
+        @member.myscout_link(@api, :badges).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
+      end
+
+      it "Invalid" do
+        expect{ @member.myscout_link(@api, :invalid) }.to raise_error(Osm::ArgumentIsInvalid)
+      end
+
+    end
+
   end
 
 end
