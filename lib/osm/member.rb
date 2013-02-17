@@ -272,7 +272,7 @@ module Osm
       end
     end
 
-    # Update the user in OSM
+    # Update the member in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolan] whether the member was successfully updated or not
     def update(api)

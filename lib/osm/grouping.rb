@@ -34,8 +34,8 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Grouping>, nil] An array of groupings or nil if the user can not access that section
     def self.get_for_section(api, section, options={})
-      require_access_to_section(api, section, options)
       section_id = section.to_i
+      require_ability_to(api, :read, :member, section_id)
       cache_key = ['groupings', section_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
@@ -65,6 +65,32 @@ module Osm
     # @!method initialize
     #   Initialize a new Term
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+
+    # Update the grouping in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @return [Boolan] whether the member was successfully updated or not
+    def update(api)
+      require_ability_to(api, :administer, :member, section_id)
+      raise ObjectIsInvalid, 'grouping is invalid' unless valid?
+
+      result = true
+
+      data = api.perform_query("users.php?action=editPatrol&sectionid=#{section_id}", {
+        'patrolid' => self.id,
+        'name' => name,
+        'active' => active,
+      })
+      result &= data.nil?
+
+      data = api.perform_query("users.php?action=updatePatrolPoints&sectionid=#{section_id}", {
+        'patrolid' => self.id,
+        'points' => points,
+      })
+      result &= (data == {})
+
+      return result
+    end
 
 
   end # Class Grouping
