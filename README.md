@@ -129,6 +129,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
+  * Groupings (update marks, names etc.)
   * Badges (Silver required for activity, Bronze for core, challenge and staged):
     * Which requirements each member has met:
       * Retreive [issue 21]
