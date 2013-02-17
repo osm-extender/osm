@@ -6,7 +6,6 @@
     * You try to access a Section (or it's Grouping) you shouldn't be accessing
   * Activity
     * Check user has permission to view before returning from cache
-  * Add updating of Grouping
   * Evening:
     * Rename to Meeting
     * Rename meeting\_date attribute to date
