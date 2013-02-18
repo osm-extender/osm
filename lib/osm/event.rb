@@ -221,11 +221,11 @@ module Osm
 
       data = api.perform_query("events.php?action=deleteEvent&sectionid=#{section_id}&eventid=#{id}")
 
-      # The cached events for the section will be out of date - remove them
-      cache_delete(api, ['events', section_id])
-      cache_delete(api, ['event', id])
-
-      return data.is_a?(Hash) ? data['ok'] : false
+      if data.is_a?(Hash) && data['ok']
+        cache_delete(api, ['event', id])
+        return true
+      end
+      return false
     end
 
 
@@ -418,10 +418,6 @@ module Osm
           'columnId' => id
         })
 
-        # The cached events for the section will be out of date - remove them
-        Osm::Model.cache_delete(api, ['events', event.section_id])
-        Osm::Model.cache_delete(api, ['event', event.id])
-
         (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
           return false if i['id'] == id
         end
@@ -431,6 +427,8 @@ module Osm
           new_columns.push(column) unless column == self
         end
         event.columns = new_columns
+
+        Osm::Model.cache_write(api, ['event', event.id], event)
         return true
       end
 
