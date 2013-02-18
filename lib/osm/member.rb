@@ -279,39 +279,39 @@ module Osm
       require_ability_to(api, :write, :member, section_id)
       raise ObjectIsInvalid, 'member is invalid' unless valid?
 
-      values = {
-        'firstname' => first_name,
-        'lastname' => last_name,
-        'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
-        'started' => started.strftime(Osm::OSM_DATE_FORMAT),
-        'startedsection' => joined.strftime(Osm::OSM_DATE_FORMAT),
-        'email1' => email1,
-        'email2' => email2,
-        'email3' => email3,
-        'email4' => email4,
-        'phone1' => phone1,
-        'phone2' => phone2,
-        'phone3' => phone3,
-        'phone4' => phone4,
-        'address' => address,
-        'address2' => address2,
-        'parents' => parents,
-        'notes' => notes,
-        'medical' => medical,
-        'religion' => religion,
-        'school' => school,
-        'ethnicity' => ethnicity,
-        'subs' => subs,
-        'custom1' => custom1,
-        'custom2' => custom2,
-        'custom3' => custom3,
-        'custom4' => custom4,
-        'custom5' => custom5,
-        'custom6' => custom6,
-        'custom7' => custom7,
-        'custom8' => custom8,
-        'custom9' => custom9,
-      }
+      to_update = changed_attributes
+      values = {}
+      values['firstname']      = first_name if to_update.include?('first_name')
+      values['lastname']       = last_name  if to_update.include?('last_name')
+      values['dob']            = date_of_birth.strftime(Osm::OSM_DATE_FORMAT) if to_update.include?('date_of_birth')
+      values['started']        = started.strftime(Osm::OSM_DATE_FORMAT) if to_update.include?('started')
+      values['startedsection'] = joined.strftime(Osm::OSM_DATE_FORMAT) if to_update.include?('joined')
+      values['email1']         = email1     if to_update.include?('email1')
+      values['email2']         = email2     if to_update.include?('email2')
+      values['email3']         = email3     if to_update.include?('email3')
+      values['email4']         = email4     if to_update.include?('email4')
+      values['phone1']         = phone1     if to_update.include?('phone1')
+      values['phone2']         = phone2     if to_update.include?('phone2')
+      values['phone3']         = phone3     if to_update.include?('phone3')
+      values['phone4']         = phone4     if to_update.include?('phone3')
+      values['address']        = address    if to_update.include?('address')
+      values['address2']       = address2   if to_update.include?('address2')
+      values['parents']        = parents    if to_update.include?('parents')
+      values['notes']          = notes      if to_update.include?('notes')
+      values['medical']        = medical    if to_update.include?('medical')
+      values['religion']       = religion   if to_update.include?('religion')
+      values['school']         = school     if to_update.include?('school')
+      values['ethnicity']      = ethnicity  if to_update.include?('ethnicity')
+      values['subs']           = subs       if to_update.include?('subs')
+      values['custom1']        = custom1    if to_update.include?('custom1')
+      values['custom2']        = custom2    if to_update.include?('custom2')
+      values['custom3']        = custom3    if to_update.include?('custom3')
+      values['custom4']        = custom4    if to_update.include?('custom4')
+      values['custom5']        = custom5    if to_update.include?('custom5')
+      values['custom6']        = custom6    if to_update.include?('custom6')
+      values['custom7']        = custom7    if to_update.include?('custom7')
+      values['custom8']        = custom8    if to_update.include?('custom8')
+      values['custom9']        = custom9    if to_update.include?('custom9')
 
       result = true
       values.each do |column, value|
@@ -324,13 +324,15 @@ module Osm
         result &= (data[column] == value.to_s)
       end
 
-      data = api.perform_query("users.php?action=updateMemberPatrol", {
-        'scoutid' => self.id,
-        'patrolid' => grouping_id,
-        'pl' => grouping_leader,
-        'sectionid' => section_id,
-      })
-      result &= ((data['patrolid'].to_i == grouping_id) && (data['patrolleader'].to_i == grouping_leader))
+      if to_update.include?('grouping_id') || to_update.include?('grouping_leader')
+        data = api.perform_query("users.php?action=updateMemberPatrol", {
+          'scoutid' => self.id,
+          'patrolid' => grouping_id,
+          'pl' => grouping_leader,
+          'sectionid' => section_id,
+        })
+        result &= ((data['patrolid'].to_i == grouping_id) && (data['patrolleader'].to_i == grouping_leader))
+      end
 
       return result
     end

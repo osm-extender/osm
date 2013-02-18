@@ -295,43 +295,42 @@ describe "Member" do
 
 
     it "Update in OSM (succeded)" do
-      member = Osm::Member.new(
-        :id => 1,
-        :section_id => 2,
-        :first_name => 'First',
-        :last_name => 'Last',
-        :email1 => 'email1@example.com',
-        :email2 => 'email2@example.com',
-        :email3 => 'email3@example.com',
-        :email4 => 'email4@example.com',
-        :phone1 => '11111 111111',
-        :phone2 => '222222',
-        :phone3 => '+33 3333 333333',
-        :phone4 => '4444 444 444',
-        :address => '1 Some Road',
-        :address2 => 'Address 2',
-        :date_of_birth => '2000-01-02',
-        :started => '2006-01-02',
-        :joined => '2006-01-03',
-        :parents => 'John and Jane Doe',
-        :notes => 'None',
-        :medical => 'Nothing',
-        :religion => 'Unknown',
-        :school => 'Some School',
-        :ethnicity => 'Yes',
-        :subs => 'Upto end of 2007',
-        :custom1 => 'Custom Field 1',
-        :custom2 => 'Custom Field 2',
-        :custom3 => 'Custom Field 3',
-        :custom4 => 'Custom Field 4',
-        :custom5 => 'Custom Field 5',
-        :custom6 => 'Custom Field 6',
-        :custom7 => 'Custom Field 7',
-        :custom8 => 'Custom Field 8',
-        :custom9 => 'Custom Field 9',
-        :grouping_id => 3,
-        :grouping_leader => 0,
-      )
+      member = Osm::Member.new()
+      member.id = 1
+      member.section_id = 2
+      member.first_name = 'First'
+      member.last_name = 'Last'
+      member.email1 = 'email1@example.com'
+      member.email2 = 'email2@example.com'
+      member.email3 = 'email3@example.com'
+      member.email4 = 'email4@example.com'
+      member.phone1 = '11111 111111'
+      member.phone2 = '222222'
+      member.phone3 = '+33 3333 333333'
+      member.phone4 = '4444 444 444'
+      member.address = '1 Some Road'
+      member.address2 = 'Address 2'
+      member.date_of_birth = '2000-01-02'
+      member.started = '2006-01-02'
+      member.joined = '2006-01-03'
+      member.parents = 'John and Jane Doe'
+      member.notes = 'None'
+      member.medical = 'Nothing'
+      member.religion = 'Unknown'
+      member.school = 'Some School'
+      member.ethnicity = 'Yes'
+      member.subs = 'Upto end of 2007'
+      member.custom1 = 'Custom Field 1'
+      member.custom2 = 'Custom Field 2'
+      member.custom3 = 'Custom Field 3'
+      member.custom4 = 'Custom Field 4'
+      member.custom5 = 'Custom Field 5'
+      member.custom6 = 'Custom Field 6'
+      member.custom7 = 'Custom Field 7'
+      member.custom8 = 'Custom Field 8'
+      member.custom9 = 'Custom Field 9'
+      member.grouping_id = 3
+      member.grouping_leader = 0
 
       url = 'https://www.onlinescoutmanager.co.uk/users.php?action=updateMember&dateFormat=generic'
       body_data = {
@@ -399,11 +398,60 @@ describe "Member" do
       member.update(@api).should be_true
     end
 
+    it "Update in OSM (only updated fields)" do
+      member = Osm::Member.new(
+        :id => 1,
+        :section_id => 2,
+        :date_of_birth => '2000-01-02',
+        :started => '2006-01-02',
+        :joined => '2006-01-03',
+        :grouping_leader => 0,
+      )
+      member.first_name = 'First'
+      member.last_name = 'Last'
+      member.grouping_id = 3
+
+      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=updateMember&dateFormat=generic'
+      body_data = {
+        'firstname' => 'First',
+        'lastname' => 'Last',
+        'patrolid' => 3,
+        'patrolleader' => 0,
+      }
+      body = (body_data.inject({}) {|h,(k,v)| h[k]=v.to_s; h}).to_json
+
+      body_data.each do |column, value|
+        unless ['patrolid', 'patrolleader'].include?(column)
+          HTTParty.should_receive(:post).with(url, {:body => {
+            'apiid' => @CONFIGURATION[:api][:osm][:id],
+            'token' => @CONFIGURATION[:api][:osm][:token],
+            'userid' => 'user_id',
+            'secret' => 'secret',
+            'scoutid' => member.id,
+            'column' => column,
+            'value' => value,
+            'sectionid' => member.section_id,
+          }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
+        end
+      end
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/users.php?action=updateMemberPatrol', {:body => {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'scoutid' => member.id,
+        'patrolid' => member.grouping_id,
+        'pl' => member.grouping_leader,
+        'sectionid' => member.section_id,
+      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
+
+      member.update(@api).should be_true
+    end
+
     it "Update in OSM (failed)" do
       member = Osm::Member.new(
         :id => 1,
         :section_id => 2,
-        :first_name => 'First',
         :last_name => 'Last',
         :date_of_birth => '2000-01-02',
         :started => '2006-01-02',
@@ -411,6 +459,7 @@ describe "Member" do
         :grouping_id => '3',
         :grouping_leader => 0,
       )
+      member.first_name = 'First'
 
       HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
       member.update(@api).should be_false

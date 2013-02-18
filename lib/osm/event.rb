@@ -177,6 +177,8 @@ module Osm
     def update(api)
       require_ability_to(api, :write, :events, section_id)
 
+      to_update = changed_attributes
+
       data = api.perform_query("events.php?action=addEvent&sectionid=#{section_id}", {
         'eventid' => id,
         'name' => name,
@@ -193,14 +195,16 @@ module Osm
         'attendancelimit' => attendance_limit,
         'limitincludesleaders' => attendance_limit_includes_leaders,
       })
+
       api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
         'eventid' => id,
         'notepad' => notepad,
-      })
+      }) if to_update.include?('notepad')
+
       api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
         'eventid' => id,
         'pnnotepad' => public_notepad,
-      })
+      }) if to_update.include?('public_notepad')
 
       # The cached events for the section will be out of date - remove them
       cache_delete(api, ['event', id])

@@ -4,6 +4,9 @@
     * You try to use a feature which requires an OSM subscription above your current one
     * You try to access a feature which you don't have the correct permissions for
     * You try to access a Section (or it's Grouping) you shouldn't be accessing
+  * All Model classes:
+    * Addition of changed\_attributes method to get a list of attributes which have changed
+    * Addition of reset\_changed\_attributes method to reset the list of attributes which have changed
   * Activity
     * Check user has permission to view before returning from cache
   * Add updating of Grouping
@@ -35,6 +38,7 @@
     * flexi\_records attribute now contains an Array of Osm::FlexiRecord
   * "Under the hood" changes:
     * Instead of caching individual items and a list of items the gem now caches a list of IDs. This should reduce the cache size.
+    * When updating items requires multiple OSM requests, now only updates what changed
 
 ## Version 0.1.17
 

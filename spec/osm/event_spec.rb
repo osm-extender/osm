@@ -425,16 +425,18 @@ describe "Event" do
         :confirm_by_date => nil,
         :allow_changes => true,
         :reminders => true,
-        :notepad => 'notepad',
-        :public_notepad => 'public notepad',
+        :notepad => '',
+        :public_notepad => '',
         :attendance_limit => 3,
         :attendance_limit_includes_leaders => true,
       )
+      event.notepad = 'notepad'
+      event.public_notepad = 'public notepad'
       event.update(@api).should be_true
     end
 
     it "Update (failed)" do
-      HTTParty.should_receive(:post).exactly(3).times { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).exactly(1).times { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,

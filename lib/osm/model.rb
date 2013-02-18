@@ -42,6 +42,27 @@ module Osm
       id
     end
 
+    # Get a list of attributes which have changed
+    # @return Array[String] the names of attributes which have changed
+    def changed_attributes
+      attributes.keys.select{ |k| attributes[k] != @original_attributes[k] }
+    end
+
+    # Reset the list of attributes which have changed
+    def reset_changed_attributes
+      @original_attributes = attributes
+    end
+
+
+    # Override initialize to set @orig_attributes
+    old_initialize = instance_method(:initialize)
+    define_method :initialize do |*args|
+      ret_val = old_initialize.bind(self).call(*args)
+      @original_attributes = attributes
+      return ret_val
+    end
+
+
     private
     # Wrap cache calls
     def self.cache_read(api, key)

@@ -5,6 +5,9 @@ require 'spec_helper'
 describe "Model" do
 
   class ModelTester < Osm::Model
+    attribute :test_attribute
+    attr_accessible :test_attribute
+
     def self.test_get_config
       {
         :cache => @@cache,
@@ -113,6 +116,19 @@ describe "Model" do
       ModelTester.test_get_all(@api, 'items', 'item').should == ['A', 'B']
     end
 
+  end
+
+
+  describe "Track attribute changes" do
+    test = ModelTester.new(:test_attribute => 1)
+    test.test_attribute.should == 1
+    test.changed_attributes.should == []
+
+    test.test_attribute = 2
+    test.changed_attributes.should == ['test_attribute']
+
+    test.reset_changed_attributes
+    test.changed_attributes.should == []
   end
 
 end

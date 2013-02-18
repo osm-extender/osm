@@ -74,20 +74,25 @@ module Osm
       require_ability_to(api, :administer, :member, section_id)
       raise ObjectIsInvalid, 'grouping is invalid' unless valid?
 
+      to_update = changed_attributes
       result = true
 
-      data = api.perform_query("users.php?action=editPatrol&sectionid=#{section_id}", {
-        'patrolid' => self.id,
-        'name' => name,
-        'active' => active,
-      })
-      result &= data.nil?
+      if to_update.include?('name') || to_update.include?('active')
+        data = api.perform_query("users.php?action=editPatrol&sectionid=#{section_id}", {
+          'patrolid' => self.id,
+          'name' => name,
+          'active' => active,
+        })
+        result &= data.nil?
+      end
 
-      data = api.perform_query("users.php?action=updatePatrolPoints&sectionid=#{section_id}", {
-        'patrolid' => self.id,
-        'points' => points,
-      })
-      result &= (data == {})
+      if to_update.include?('points')
+        data = api.perform_query("users.php?action=updatePatrolPoints&sectionid=#{section_id}", {
+          'patrolid' => self.id,
+          'points' => points,
+        })
+        result &= (data == {})
+      end
 
       return result
     end
