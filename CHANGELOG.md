@@ -9,6 +9,7 @@
     * Addition of reset\_changed\_attributes method to reset the list of attributes which have changed
   * Activity
     * Check user has permission to view before returning from cache
+    * Addition of osm\_link method to get the URL for viewing in OSM
   * Add updating of Grouping
   * Evening:
     * Rename to Meeting

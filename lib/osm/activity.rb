@@ -183,6 +183,13 @@ module Osm
     #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
+    # Get the link to display this activity in OSM
+    # @return [String] the link for this member's My.SCOUT
+    def osm_link
+      raise ObjectIsInvalid, 'activity is invalid' unless valid?
+      return "https://www.onlinescoutmanager.co.uk/?l=p#{self.id}"
+    end
+
     # Add this activity to the programme in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum] section The Section (or it's ID) to add the Activity to
