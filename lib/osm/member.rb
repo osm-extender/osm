@@ -74,8 +74,6 @@ module Osm
     #   @return [Fixnum] the grouping within the section that the member belongs to
     # @!attribute [rw] grouping_leader
     #   @return [Fixnum] whether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL)
-    # @!attribute [rw] grouping_label
-    #   @return [Fixnum] the grouping within the section that the member belongs to (as displayed in OSM, if member was retrieved from OSM)
     # @!attribute [rw] joined
     #   @return [Date] when the member joined the section
     # @!attribute [rw] age
@@ -118,7 +116,6 @@ module Osm
     attribute :custom8, :type => String, :default => ''
     attribute :custom9, :type => String, :default => ''
     attribute :grouping_id, :type => Integer
-    attribute :grouping_label, :type => String, :default => ''
     attribute :grouping_leader, :type => Integer
     attribute :joined, :type => Date
     attribute :age, :type => String
@@ -128,7 +125,7 @@ module Osm
                     :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started,
                     :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs,
                     :custom1, :custom2, :custom3, :custom4, :custom5, :custom6, :custom7, :custom8, :custom9,
-                    :grouping_id, :grouping_label, :grouping_leader, :joined, :age, :joined_years
+                    :grouping_id, :grouping_leader, :joined, :age, :joined_years
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -146,17 +143,18 @@ module Osm
 
     # Get members for a section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the members for
-    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the members for
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Member>]
     def self.get_for_section(api, section, term=nil, options={})
+      require_ability_to(api, :read, :member, section, options)
       section = Osm::Section.get(api, section) if section.is_a?(Fixnum)
       term = -1 if section.waiting?
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['members', section.id, term_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section.id, :member).include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
@@ -200,7 +198,6 @@ module Osm
           :custom8 => item['custom8'],
           :custom9 => item['custom9'],
           :grouping_id => Osm::to_i_or_nil(item['patrolid']),
-          :grouping_label => item['patrol'],
           :grouping_leader => Osm::to_i_or_nil(item['patrolleader']),
           :joined => Osm::parse_date(item['joined']),
           :age => item['age'].gsub(' ', ''),
@@ -213,31 +210,20 @@ module Osm
     end
 
 
-    # @deprecated use grouping_label instead
-    # @return [String] the grouping as displayed in OSM
-    # TODO - Use a Grouping object not String when upping the version
-    def grouping
-      return self.grouping_label
-    end
-    # @deprecated use grouping_label instead
-    # TODO - Use a Grouping object not String when upping the version
-    def grouping=(new_grouping)
-      return self.grouping_label = new_grouping
-    end
-
-
-
     # @!method initialize
     #   Initialize a new Member
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Create the user in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolan] whether the member was successfully added or not
+    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
+    # @raise [Osm::Error] If the member already exists in OSM
     def create(api)
-      raise ObjectIsInvalid, 'member is invalid' unless valid?
-      raise Error, 'the member already exists in OSM' unless id.nil?
+      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      require_ability_to(api, :write, :member, section_id)
+      raise Osm::Error, 'the member already exists in OSM' unless id.nil?
 
       data = api.perform_query("users.php?action=newMember", {
         'firstname' => first_name,
@@ -288,45 +274,47 @@ module Osm
       end
     end
 
-    # Update the user in OSM
+    # Update the member in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolan] whether the member was successfully updated or not
+    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     def update(api)
-      raise ObjectIsInvalid, 'member is invalid' unless valid?
+      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      require_ability_to(api, :write, :member, section_id)
 
-      values = {
-        'firstname' => first_name,
-        'lastname' => last_name,
-        'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
-        'started' => started.strftime(Osm::OSM_DATE_FORMAT),
-        'startedsection' => joined.strftime(Osm::OSM_DATE_FORMAT),
-        'email1' => email1,
-        'email2' => email2,
-        'email3' => email3,
-        'email4' => email4,
-        'phone1' => phone1,
-        'phone2' => phone2,
-        'phone3' => phone3,
-        'phone4' => phone4,
-        'address' => address,
-        'address2' => address2,
-        'parents' => parents,
-        'notes' => notes,
-        'medical' => medical,
-        'religion' => religion,
-        'school' => school,
-        'ethnicity' => ethnicity,
-        'subs' => subs,
-        'custom1' => custom1,
-        'custom2' => custom2,
-        'custom3' => custom3,
-        'custom4' => custom4,
-        'custom5' => custom5,
-        'custom6' => custom6,
-        'custom7' => custom7,
-        'custom8' => custom8,
-        'custom9' => custom9,
-      }
+      to_update = changed_attributes
+      values = {}
+      values['firstname']      = first_name if to_update.include?('first_name')
+      values['lastname']       = last_name  if to_update.include?('last_name')
+      values['dob']            = date_of_birth.strftime(Osm::OSM_DATE_FORMAT) if to_update.include?('date_of_birth')
+      values['started']        = started.strftime(Osm::OSM_DATE_FORMAT) if to_update.include?('started')
+      values['startedsection'] = joined.strftime(Osm::OSM_DATE_FORMAT) if to_update.include?('joined')
+      values['email1']         = email1     if to_update.include?('email1')
+      values['email2']         = email2     if to_update.include?('email2')
+      values['email3']         = email3     if to_update.include?('email3')
+      values['email4']         = email4     if to_update.include?('email4')
+      values['phone1']         = phone1     if to_update.include?('phone1')
+      values['phone2']         = phone2     if to_update.include?('phone2')
+      values['phone3']         = phone3     if to_update.include?('phone3')
+      values['phone4']         = phone4     if to_update.include?('phone3')
+      values['address']        = address    if to_update.include?('address')
+      values['address2']       = address2   if to_update.include?('address2')
+      values['parents']        = parents    if to_update.include?('parents')
+      values['notes']          = notes      if to_update.include?('notes')
+      values['medical']        = medical    if to_update.include?('medical')
+      values['religion']       = religion   if to_update.include?('religion')
+      values['school']         = school     if to_update.include?('school')
+      values['ethnicity']      = ethnicity  if to_update.include?('ethnicity')
+      values['subs']           = subs       if to_update.include?('subs')
+      values['custom1']        = custom1    if to_update.include?('custom1')
+      values['custom2']        = custom2    if to_update.include?('custom2')
+      values['custom3']        = custom3    if to_update.include?('custom3')
+      values['custom4']        = custom4    if to_update.include?('custom4')
+      values['custom5']        = custom5    if to_update.include?('custom5')
+      values['custom6']        = custom6    if to_update.include?('custom6')
+      values['custom7']        = custom7    if to_update.include?('custom7')
+      values['custom8']        = custom8    if to_update.include?('custom8')
+      values['custom9']        = custom9    if to_update.include?('custom9')
 
       result = true
       values.each do |column, value|
@@ -339,13 +327,23 @@ module Osm
         result &= (data[column] == value.to_s)
       end
 
-      data = api.perform_query("users.php?action=updateMemberPatrol", {
-        'scoutid' => self.id,
-        'patrolid' => grouping_id,
-        'pl' => grouping_leader,
-        'sectionid' => section_id,
-      })
-      result &= ((data['patrolid'].to_i == grouping_id) && (data['patrolleader'].to_i == grouping_leader))
+      if to_update.include?('grouping_id') || to_update.include?('grouping_leader')
+        data = api.perform_query("users.php?action=updateMemberPatrol", {
+          'scoutid' => self.id,
+          'patrolid' => grouping_id,
+          'pl' => grouping_leader,
+          'sectionid' => section_id,
+        })
+        result &= ((data['patrolid'].to_i == grouping_id) && (data['patrolleader'].to_i == grouping_leader))
+      end
+
+      if result
+        reset_changed_attributes
+        # The cached columns for the flexi record will be out of date - remove them
+        Osm::Term.get_for_section(api, section_id).each do |term|
+          Osm::Model.cache_delete(api, ['members', section_id, term.id])
+        end
+      end
 
       return result
     end
@@ -363,10 +361,32 @@ module Osm
     end
 
     # Get the full name
-    # @param [String] seperator what to split the scout's first name and last name with
+    # @param [String] seperator What to split the scout's first name and last name with
     # @return [String] this scout's full name seperated by the optional seperator
     def name(seperator=' ')
       return "#{first_name}#{seperator.to_s}#{last_name}"
+    end
+
+    # Get the My.SCOUT link for this member
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme or :badges)
+    # @return [String] the link for this member's My.SCOUT
+    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
+    # @raise [Osm::ArgumentIsInvalid] If link_to is not an allowed Symbol
+    # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
+    def myscout_link(api, link_to=:badges)
+      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      require_ability_to(api, :read, :member, section_id)
+      raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
+      raise Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges].include?(link_to)
+
+      if @myscout_link_key.nil?
+        data = api.perform_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{self.id}")
+        raise Osm::Error, 'Could not retrieve the key for the link from OSM' unless data['ok']
+        @myscout_link_key = data['key']
+      end
+
+      return "https://www.onlinescoutmanager.co.uk/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{@myscout_link_key}"
     end
 
   end # Class Member

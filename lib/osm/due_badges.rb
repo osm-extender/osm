@@ -30,16 +30,17 @@ module Osm
 
     # Get due badges
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the due badges for
-    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Osm::DueBadges]
     def self.get(api, section, term=nil, options={})
+      require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) if section.is_a?(Fixnum)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
       cache_key = ['due_badges', section.id, term_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && get_user_permission(api, section.id, :badge).include?(:read)
+      if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
@@ -74,7 +75,7 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Check if there are no badges due

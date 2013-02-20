@@ -44,6 +44,8 @@ RSpec.configure do |config|
     Osm::configure(@CONFIGURATION)
     
     @api = Osm::Api.new('user_id', 'secret')
+    Osm::Model.stub(:require_ability_to) {}
+    Osm::Model.stub(:require_access_to_section) {}
   end
 end
 
@@ -65,6 +67,29 @@ module OsmTest
     end
     def self.clear
       @@cache = {}
+    end
+    def self.inspect
+      @@cache.inspect
+    end
+  end
+
+  class DummyHttpResult
+    def initialize(options={})
+      @response = OsmTest::DummyHttpResponse.new(options[:response])
+    end
+    def response
+      @response
+    end
+  end
+  class DummyHttpResponse
+    def initialize(options={})
+      @options = options
+    end
+    def code
+      @options[:code]
+    end
+    def body
+      @options[:body]
     end
   end
 end

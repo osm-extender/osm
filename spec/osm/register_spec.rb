@@ -109,7 +109,7 @@ describe "Register" do
         'completedBadges' => '[{"a":"A"},{"b":"B"}]'
       }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
       Osm::Register.update_attendance({
         :api => @api,
         :section => Osm::Section.new(:id=>1, :type=>:cubs),

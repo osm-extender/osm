@@ -38,14 +38,22 @@ describe "API Access" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getAPIAccess&sectionid=1", :body => body.to_json)
     end
 
-    it "Get All" do
-      api_accesses = Osm::ApiAccess.get_all(@api, 1)
+    describe "Get All" do
+      it "From OSM" do
+        api_accesses = Osm::ApiAccess.get_all(@api, 1)
+  
+        api_accesses.size.should == 2
+        api_access = api_accesses[0]
+        api_access.id.should == 1
+        api_access.name.should == 'API Name'
+        api_access.permissions.should == {:read => [:read], :readwrite => [:read, :write]}
+      end
 
-      api_accesses.size.should == 2
-      api_access = api_accesses[0]
-      api_access.id.should == 1
-      api_access.name.should == 'API Name'
-      api_access.permissions.should == {:read => [:read], :readwrite => [:read, :write]}
+      it "From cache" do
+        api_accesses = Osm::ApiAccess.get_all(@api, 1)
+        HTTParty.should_not_receive(:post)
+        Osm::ApiAccess.get_all(@api, 1).should == api_accesses
+      end
     end
 
     it "Get One" do

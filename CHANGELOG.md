@@ -1,6 +1,47 @@
-## Version 0.1.18
+## Version 0.2.0
 
-  * 
+  * Raises Forbidden exception if:
+    * You try to use a feature which requires an OSM subscription above your current one
+    * You try to access a feature which you don't have the correct permissions for
+    * You try to access a Section (or it's Grouping) you shouldn't be accessing
+  * All Model classes:
+    * Addition of changed\_attributes method to get a list of attributes which have changed
+    * Addition of reset\_changed\_attributes method to reset the list of attributes which have changed
+  * Activity
+    * Check user has permission to view before returning from cache
+    * Addition of osm\_link method to get the URL for viewing in OSM
+  * Add updating of Grouping
+  * Evening:
+    * Rename to Meeting
+    * Rename meeting\_date attribute to date
+    * Rename get\_programme method to get\_for\_section
+  * Event:
+    * Removal of add\_field method (use add\_column instead)
+    * Removal of fields attribute (use columns instead)
+  * FlexiRecord:
+    * Addition of id, section\_id and name attributes (these no longer need to be passed to methods)
+    * FlexiRecord::Field renamed to FlexiRecord::Column
+    * The following methods are now instance not class methods:
+      * get\_fields (also renamed to get\_columns)
+      * add\_field (also renamed to add\_column)
+      * get\_data
+    * The following methods have bceome instance methods of a subclasses:
+      * update\_field (moved to column.update)
+      * delete\_field (moved to column.delete)
+      * update\_data (moved to data.update)
+  * Member:
+    * Removal of grouping attribute
+    * Removal of grouping\_label attribute
+    * Addition of myscout\_link method (used to get the link to the member's My.SCOUT page)
+  * Section:
+    * subscription\_level attribute is now a Fixnum not Symbol
+    * Addition of subscription\_level\_name method to get the name of the subscription level for the section
+    * flexi\_records attribute now contains an Array of Osm::FlexiRecord
+  * "Under the hood" changes:
+    * Instead of caching individual items and a list of items the gem now caches a list of IDs. This should reduce the cache size.
+    * When updating items requires multiple OSM requests, now only updates what changed
+    * Updating of cached data when deleting/updating items from OSM
+>>>>>>> dev_v_0.2.0
 
 ## Version 0.1.17
 
