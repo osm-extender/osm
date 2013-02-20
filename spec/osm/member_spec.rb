@@ -394,6 +394,7 @@ describe "Member" do
         'pl' => member.grouping_leader,
         'sectionid' => member.section_id,
       }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
+      Osm::Term.stub(:get_for_section) { [] }
 
       member.update(@api).should be_true
     end
@@ -444,6 +445,7 @@ describe "Member" do
         'pl' => member.grouping_leader,
         'sectionid' => member.section_id,
       }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
+      Osm::Term.stub(:get_for_section) { [] }
 
       member.update(@api).should be_true
     end

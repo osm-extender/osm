@@ -206,9 +206,8 @@ module Osm
         'pnnotepad' => public_notepad,
       }) if to_update.include?('public_notepad')
 
-      # The cached events for the section will be out of date - remove them
+      # The cached event will be out of date - remove it
       cache_delete(api, ['event', id])
-      cache_delete(api, ['events', section_id])
 
       return data.is_a?(Hash) && (data['id'].to_i == id)
     end
@@ -396,9 +395,10 @@ module Osm
           'pL' => label
         })
 
-        # The cached events for the section will be out of date - remove them
-        Osm::Model.cache_delete(api, ['events', event.section_id])
+        # The cached event will be out of date - remove it
         Osm::Model.cache_delete(api, ['event', event.id])
+        # The cached event attedance will be out of date
+        Osm::Model.cache_delete(api, ['event_attendance', event.id])
 
         (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
           if i['id'] == id

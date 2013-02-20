@@ -164,9 +164,8 @@ module Osm
         'termid' => id
       })
 
-      # The cached terms for the section will be out of date - remove them
+      # The cached term will be out of date - remove it
       cache_delete(api, ['term', id])
-      cache_delete(api, ['terms', api.user_id])
 
       return data.is_a?(Hash) && data['terms'].is_a?(Hash)
     end

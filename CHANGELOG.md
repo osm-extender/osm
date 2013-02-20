@@ -39,7 +39,7 @@
   * "Under the hood" changes:
     * Instead of caching individual items and a list of items the gem now caches a list of IDs. This should reduce the cache size.
     * When updating items requires multiple OSM requests, now only updates what changed
-    * Updating of cached data when deleting items from OSM
+    * Updating of cached data when deleting/updating items from OSM
 
 ## Version 0.1.17
 

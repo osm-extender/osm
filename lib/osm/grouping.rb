@@ -94,6 +94,11 @@ module Osm
         result &= (data == {})
       end
 
+      if result
+        # The cached groupings for the section will be out of date - remove them
+        Osm::Model.cache_delete(api, ['groupings', section_id])
+      end
+
       return result
     end
 

@@ -334,6 +334,13 @@ module Osm
         result &= ((data['patrolid'].to_i == grouping_id) && (data['patrolleader'].to_i == grouping_leader))
       end
 
+      if result
+        # The cached columns for the flexi record will be out of date - remove them
+        Osm::Term.get_for_section(api, section_id).each do |term|
+          Osm::Model.cache_delete(api, ['members', section_id, term.id])
+        end
+      end
+
       return result
     end
 
