@@ -30,8 +30,8 @@ module Osm
 
     # Get due badges
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the due badges for
-    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Osm::DueBadges]
     def self.get(api, section, term=nil, options={})
@@ -75,7 +75,7 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Check if there are no badges due

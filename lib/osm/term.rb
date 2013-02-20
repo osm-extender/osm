@@ -65,7 +65,7 @@ module Osm
 
     # Get the terms that the OSM user can access for a given section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] section the section (or its ID) of the section to get terms for
+    # @param [Fixnum] section The section (or its ID) of the section to get terms for
     # @!macro options_get
     # @return [Array<Osm::Term>, nil] An array of terms or nil if the user can not access that section
     def self.get_for_section(api, section, options={})
@@ -75,8 +75,8 @@ module Osm
     end
 
     # Get a term
-    # @param [Osm::Api] The api to use to make the request
-    # @param [Fixnum] term_id the id of the required term
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Fixnum] term_id The id of the required term
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that term
     # @return [Osm::Term]
@@ -101,9 +101,10 @@ module Osm
 
     # Get the current term for a given section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section The section (or its ID)  to get terms for
-    # @!macro options_get
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID)  to get terms for
+    # @!macro options_get 
     # @return [Osm::Term, nil] The current term or nil if the user can not access that section
+    # @raise [Osm::Error] If the term doesn't have a Term which is current
     def self.get_current_term_for_section(api, section, options={})
       section_id = section.to_i
       terms = get_for_section(api, section_id, options)
@@ -113,7 +114,7 @@ module Osm
         return term if term.current?
       end
 
-      raise Error, 'There is no current term for the section.'
+      raise Osm::Error, 'There is no current term for the section.'
     end
 
     # Create a term in OSM
@@ -151,10 +152,11 @@ module Osm
 
 
     # Update a term in OSM
-    # @param [Osm::Api] The api to use to make the request
+    # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] if the operation suceeded or not
+    # @raise [Osm::ObjectIsInvalid] If the Term is invalid
     def update(api)
-      raise ObjectIsInvalid, 'term is invalid' unless valid?
+      raise Osm::ObjectIsInvalid, 'term is invalid' unless valid?
       require_access_to_section(api, section_id)
 
       data = api.perform_query("users.php?action=addTerm&sectionid=#{section_id}", {
@@ -178,7 +180,7 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Determine if the term is completly before the passed date
@@ -214,7 +216,7 @@ module Osm
     end
 
     # Determine if the provided date is within the term
-    # @param [Date] date the date to test
+    # @param [Date] date The date to test
     # @return [Boolean] if the term started before the date and finishes after the date
     def contains_date?(date)
       return (start <= date) && (finish >= date)

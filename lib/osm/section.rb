@@ -138,11 +138,11 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Section
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Get the user's sections
-    # @param [Osm::Api] The api to use to make the request
+    # @param [Osm::Api] api The api to use to make the request
     # @!macro options_get
     # @return [Array<Osm::Section>]
     def self.get_all(api, options={})
@@ -230,8 +230,8 @@ module Osm
 
 
     # Get a section
-    # @param [Osm::Api] The api to use to make the request
-    # @param [Fixnum] section_id the section id of the required section
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Fixnum] section_id The section id of the required section
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that section
     # @return [Osm::Section]
@@ -253,7 +253,7 @@ module Osm
 
 
     # Get the section's notepad from OSM
-    # @param [Osm::Api] The api to use to make the request
+    # @param [Osm::Api] api The api to use to make the request
     # @!macro options_get
     # @return [String] the section's notepad
     def get_notepad(api, options={})
@@ -293,8 +293,8 @@ module Osm
 
 
     # Get badge stock levels
-    # @param [Osm::Api] The api to use to make the request
-    # @param [Osm::Term, Fixnum, nil] section the term (or its ID) to get the stock levels for, passing nil causes the current term to be used
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the stock levels for, passing nil causes the current term to be used
     # @!macro options_get
     # @return Hash
     def get_badge_stock(api, term=nil, options={})

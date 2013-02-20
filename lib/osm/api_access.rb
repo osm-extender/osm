@@ -23,7 +23,7 @@ module Osm
 
     # Get API access details for a given section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the details for
     # @!macro options_get
     # @return [Array<Osm::ApiAccess>]
     def self.get_all(api, section, options={})
@@ -70,7 +70,7 @@ module Osm
 
     # Get our API access details for a given section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the details for
     # @!macro options_get
     # @return [Osm::ApiAccess]
     def self.get_ours(api, section, options={})
@@ -80,7 +80,7 @@ module Osm
 
     # Get API Access for a given API
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the details for
     # @param [Osm::Api] for_api The api (or its ID) to get access for
     # @!macro options_get
     # @return [Osm::ApiAccess]
@@ -104,7 +104,7 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
   end # Class ApiAccess
 

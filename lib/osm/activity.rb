@@ -96,8 +96,8 @@ module Osm
 
     # Get activity details
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] activity_id the activity ID
-    # @param [Fixnum] version the version of the activity to retreive, if nil the latest version will be assumed
+    # @param [Fixnum] activity_id The activity ID
+    # @param [Fixnum] version The version of the activity to retreive, if nil the latest version will be assumed
     # @!macro options_get
     # @return [Osm::Activity]
     def self.get(api, activity_id, version=nil, options={})
@@ -180,19 +180,20 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Get the link to display this activity in OSM
     # @return [String] the link for this member's My.SCOUT
+    # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
     def osm_link
-      raise ObjectIsInvalid, 'activity is invalid' unless valid?
+      raise Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
       return "https://www.onlinescoutmanager.co.uk/?l=p#{self.id}"
     end
 
     # Add this activity to the programme in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section The Section (or it's ID) to add the Activity to
+    # @param [Osm::Section, Fixnum, #to_i] section The Section (or it's ID) to add the Activity to
     # @param [Date, DateTime] date The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
     # @param [String] notes The notes which should appear for this Activity on this Evening
     # @return [Boolean] Whether the activity was successfully added
@@ -217,12 +218,14 @@ module Osm
 
     # Update this activity in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section The Section (or it's ID)
+    # @param [Osm::Section, Fixnum, #to_i] section The Section (or it's ID)
     # @param [Boolean] secret_update Whether this is a secret update
     # @return [Boolean] Whether the activity was successfully added
+    # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
+    # @raise [Osm::Forbidden] If the Activity is not editable
     def update(api, section, secret_update=false)
-      raise ObjectIsInvalid, 'activity is invalid' unless valid?
-      riase Forbidden, "You are not allowed to update this activity" unless self.editable
+      raise Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
+      raise Osm::Forbidden, "You are not allowed to update this activity" unless self.editable
 
       data = api.perform_query("programme.php?action=update", {
         'title' => title,
@@ -279,7 +282,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new Term
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     end # Class Activity::File
 
@@ -320,7 +323,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new Badge
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     end # Class Activity::Badge
 
@@ -351,7 +354,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new Version
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     end # Class Activity::Version
 

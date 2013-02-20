@@ -4,8 +4,8 @@ module Osm
 
     # Get register structure
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the structure for
-    # @param [Osm::Term, Fixnum, nil] section the term (or its ID) to get the structure for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the structure for
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Register::Field>] representing the fields of the register
     def self.get_structure(api, section, term=nil, options={})
@@ -41,8 +41,8 @@ module Osm
 
     # Get register attendance
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the register for
-    # @param [Osm::Term, Fixnum, nil] section the term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the register for
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Register::Attendance>] representing the attendance of each member
     def self.get_attendance(api, section, term=nil, options={})
@@ -85,18 +85,23 @@ module Osm
     # @param [Hash] data
     # @option data [Osm::Api] :api The api to use to make the request
     # @option data [Osm::Section] :section the section to update the register for
-    # @option data [Osm::Term, Fixnum, nil] :term the term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @option data [Osm::Term, #to_i, nil] :term The term (or its ID) to get the register for, passing nil causes the current term to be used
     # @option data [Osm::Evening, DateTime, Date] :evening the evening to update the register on
     # @option data [String] :attendance what to mark the attendance as, one of "Yes", "No" or "Absent"
     # @option data [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>] :members the members (or their ids) to update
     # @option data [Array<Hash>] :completed_badge_requirements (optional) the badge requirements to mark as completed, selected from the Hash returned by the get_badge_requirements_for_evening method
     # @return [Boolean] whether the update succedded
+    # @raise [Osm::ArgumentIsInvalid] If data[:attendance] is not "Yes", "No" or "Absent"
+    # @raise [Osm::ArgumentIsInvalid] If data[:section] is missing
+    # @raise [Osm::ArgumentIsInvalid] If data[:evening] is missing
+    # @raise [Osm::ArgumentIsInvalid] If data[:members] is missing
+    # @raise [Osm::ArgumentIsInvalid] If data[:api] is missing
     def self.update_attendance(data={})
-      raise ArgumentIsInvalid, ':attendance is invalid' unless ['Yes', 'No', 'Absent'].include?(data[:attendance])
-      raise ArgumentIsInvalid, ':section is missing' if data[:section].nil?
-      raise ArgumentIsInvalid, ':evening is missing' if data[:evening].nil?
-      raise ArgumentIsInvalid, ':members is missing' if data[:members].nil?
-      raise ArgumentIsInvalid, ':api is missing' if data[:api].nil?
+      raise Osm::ArgumentIsInvalid, ':attendance is invalid' unless ['Yes', 'No', 'Absent'].include?(data[:attendance])
+      raise Osm::ArgumentIsInvalid, ':section is missing' if data[:section].nil?
+      raise Osm::ArgumentIsInvalid, ':evening is missing' if data[:evening].nil?
+      raise Osm::ArgumentIsInvalid, ':members is missing' if data[:members].nil?
+      raise Osm::ArgumentIsInvalid, ':api is missing' if data[:api].nil?
       api = data[:api]
       Osm::Model.require_ability_to(api, :write, :register, data[:section])
 
@@ -140,7 +145,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new RegisterField
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     end # Class Register::Field
 
@@ -182,7 +187,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new registerData
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     end # Class Register::Data
 

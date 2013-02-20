@@ -54,13 +54,13 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Meeting
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Get the programme for a given term
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the programme for
-    # @param [Osm::term, Fixnum, nil] term the term (or its ID) to get the programme for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the programme for
+    # @param [Osm::term, Fixnum, nil] term The term (or its ID) to get the programme for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Meeting>]
     def self.get_for_section(api, section, term=nil, options={})
@@ -143,9 +143,10 @@ module Osm
     # Update an meeting in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolean] if the operation suceeded or not
+    # @raise [Osm::ObjectIsInvalid] If the Meeting is invalid
     def update(api)
+      raise Osm::ObjectIsInvalid, 'meeting is invalid' unless valid?
       require_ability_to(api, :write, :programme, section_id)
-      raise ObjectIsInvalid, 'meeting is invalid' unless valid?
 
       activities_data = Array.new
       activities.each do |activity|
@@ -286,7 +287,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new Meeting::Activity
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     end # Class Meeting::Activity
 

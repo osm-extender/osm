@@ -143,8 +143,8 @@ module Osm
 
     # Get members for a section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the members for
-    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the members for
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Member>]
     def self.get_for_section(api, section, term=nil, options={})
@@ -212,16 +212,18 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Member
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Create the user in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolan] whether the member was successfully added or not
+    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
+    # @raise [Osm::Error] If the member already exists in OSM
     def create(api)
+      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :write, :member, section_id)
-      raise ObjectIsInvalid, 'member is invalid' unless valid?
-      raise Error, 'the member already exists in OSM' unless id.nil?
+      raise Osm::Error, 'the member already exists in OSM' unless id.nil?
 
       data = api.perform_query("users.php?action=newMember", {
         'firstname' => first_name,
@@ -275,9 +277,10 @@ module Osm
     # Update the member in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolan] whether the member was successfully updated or not
+    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     def update(api)
+      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :write, :member, section_id)
-      raise ObjectIsInvalid, 'member is invalid' unless valid?
 
       to_update = changed_attributes
       values = {}
@@ -358,7 +361,7 @@ module Osm
     end
 
     # Get the full name
-    # @param [String] seperator what to split the scout's first name and last name with
+    # @param [String] seperator What to split the scout's first name and last name with
     # @return [String] this scout's full name seperated by the optional seperator
     def name(seperator=' ')
       return "#{first_name}#{seperator.to_s}#{last_name}"
@@ -368,10 +371,13 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @param [Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme or :badges)
     # @return [String] the link for this member's My.SCOUT
+    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
+    # @raise [Osm::ArgumentIsInvalid] If link_to is not an allowed Symbol
+    # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
     def myscout_link(api, link_to=:badges)
+      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
-      raise ObjectIsInvalid, 'member is invalid' unless valid?
-      raise Error, 'the member does not already exist in OSM' if id.nil?
+      raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
       raise Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges].include?(link_to)
 
       if @myscout_link_key.nil?

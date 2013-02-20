@@ -72,12 +72,12 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Event
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Get events for a section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the events for
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
     # @!macro options_get
     # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @return [Array<Osm::Event>]
@@ -116,8 +116,8 @@ module Osm
 
     # Get an event
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the events for
-    # @param [Fixnum] event_id the id of the event to get
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
+    # @param [Fixnum] event_id The id of the event to get
     # @!macro options_get
     # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @return [Osm::Event, nil] the event (or nil if it couldn't be found
@@ -138,10 +138,11 @@ module Osm
     # Create an event in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Osm::Event, nil] the created event, nil if failed
+    # @raise [Osm::ObjectIsInvalid] If the Event is invalid
     def self.create(api, parameters)
       require_ability_to(api, :write, :events, parameters[:section_id])
       event = new(parameters)
-      raise ObjectIsInvalid, 'event is invalid' unless event.valid?
+      raise Osm::ObjectIsInvalid, 'event is invalid' unless event.valid?
 
       data = api.perform_query("events.php?action=addEvent&sectionid=#{event.section_id}", {
         'name' => event.name,
@@ -234,7 +235,7 @@ module Osm
 
     # Get event attendance
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Term, Fixnum, nil] term the term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @return [Array<Osm::Event::Attendance>]
@@ -275,12 +276,13 @@ module Osm
 
     # Add a column to the event in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @param [String] label the label for the field in OSM
-    # @param [String] name the label for the field in My.SCOUT (if this is blank then parents can't edit it)
+    # @param [String] label The label for the field in OSM
+    # @param [String] name The label for the field in My.SCOUT (if this is blank then parents can't edit it)
     # @return [Boolean] whether the update succedded
+    # @raise [Osm::ArgumentIsInvalid] If the name is blank
     def add_column(api, name, label='')
       require_ability_to(api, :write, :events, section_id)
-      raise ArgumentIsInvalid, 'name is invalid' if name.blank?
+      raise Osm::ArgumentIsInvalid, 'name is invalid' if name.blank?
 
       data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
         'columnName' => name,
@@ -381,7 +383,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new Column
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
       # Update event column in OSM
@@ -469,16 +471,17 @@ module Osm
   
       # @!method initialize
       #   Initialize a new Attendance
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
       # Update event attendance
       # @param [Osm::Api] api The api to use to make the request
-      # @param [String] field_id the id of the field to update (must be 'attending' or /\Af_\d+\Z/)
+      # @param [String] field_id The id of the field to update (must be 'attending' or /\Af_\d+\Z/)
       # @return [Boolean] if the operation suceeded or not
+      # @raise [Osm::ArgumentIsInvalid] If field_id does not match the pattern "f_#{number}" or is "attending"
       def update(api, field_id)
         require_ability_to(api, :write, :events, event.section_id)
-        raise ArgumentIsInvalid, 'field_id is invalid' unless field_id.match(/\Af_\d+\Z/) || field_id.eql?('attending')
+        raise Osm::ArgumentIsInvalid, 'field_id is invalid' unless field_id.match(/\Af_\d+\Z/) || field_id.eql?('attending')
 
         data = api.perform_query("events.php?action=updateScout", {
           'scoutid' => member_id,

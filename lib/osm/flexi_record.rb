@@ -75,7 +75,7 @@ module Osm
 
     # Get data for flexi record
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Term, Fixnum, nil] section the term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<FlexiRecordData>]
     def get_data(api, term=nil, options={})
@@ -151,16 +151,18 @@ module Osm
 
       # @!method initialize
       #   Initialize a new FlexiRecord::Column
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
       # Update a column in OSM
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the column was updated in OSM
+      # @raise [Osm::ObjectIsInvalid] If the Column is invalid
+      # @raise [Osm::Forbidden] If the COlumn is not editable
       def update(api)
+        raise Osm::ObjectIsInvalid, 'column is invalid' unless valid?
         require_ability_to(api, :write, :flexi, flexi_record.section_id)
-        raise Forbidden, 'this column is not editable' unless self.editable
-        raise ObjectIsInvalid, 'column is invalid' unless valid?
+        raise Osm::Forbidden, 'this column is not editable' unless self.editable
 
         data = api.perform_query("extras.php?action=renameColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", {
           'columnId' => self.id,
@@ -182,10 +184,11 @@ module Osm
 
       # Delete a column in OSM
       # @param [Osm::Api] api The api to use to make the request
-      # @return [Boolean] whether the column was updated in OSM
+      # @return [Boolean] whether the column was deleted from OSM
+      # @raise [Osm::Forbidden] If this Column is not editable
       def delete(api)
         require_ability_to(api, :write, :flexi, flexi_record.section_id)
-        raise Forbidden, 'this column is not editable' unless self.editable
+        raise Osm::Forbidden, 'this column is not editable' unless self.editable
 
         data = api.perform_query("extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", {
           'columnId' => self.id,
@@ -232,15 +235,16 @@ module Osm
 
       # @!method initialize
       #   Initialize a new FlexiRecord::Data
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
       # Update data in OSM
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the data was updated in OSM
+      # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
+        raise Osm::ObjectIsInvalid, 'data is invalid' unless valid?
         require_ability_to(api, :write, :flexi, flexi_record.section_id)
-        raise ObjectIsInvalid, 'data is invalid' unless valid?
 
         term_id = Osm::Term.get_current_term_for_section(api, flexi_record.section_id).id
 

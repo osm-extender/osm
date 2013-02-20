@@ -30,7 +30,7 @@ module Osm
 
     # Get the groupings that a section has
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] section the section (or its ID) of the section to get groupings for
+    # @param [Fixnum] section The section (or its ID) of the section to get groupings for
     # @!macro options_get
     # @return [Array<Osm::Grouping>, nil] An array of groupings or nil if the user can not access that section
     def self.get_for_section(api, section, options={})
@@ -64,15 +64,16 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Update the grouping in OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Boolan] whether the member was successfully updated or not
+    # @raise [Osm::ObjectIsInvalid] If the Grouping is invalid
     def update(api)
+      raise Osm::ObjectIsInvalid, 'grouping is invalid' unless valid?
       require_ability_to(api, :administer, :member, section_id)
-      raise ObjectIsInvalid, 'grouping is invalid' unless valid?
 
       to_update = changed_attributes
       result = true
