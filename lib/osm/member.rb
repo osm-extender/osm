@@ -335,6 +335,7 @@ module Osm
       end
 
       if result
+        reset_changed_attributes
         # The cached columns for the flexi record will be out of date - remove them
         Osm::Term.get_for_section(api, section_id).each do |term|
           Osm::Model.cache_delete(api, ['members', section_id, term.id])
@@ -365,7 +366,7 @@ module Osm
 
     # Get the My.SCOUT link for this member
     # @param [Osm::Api] api The api to use to make the request
-    # @param Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme or :badges)
+    # @param [Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme or :badges)
     # @return [String] the link for this member's My.SCOUT
     def myscout_link(api, link_to=:badges)
       require_ability_to(api, :read, :member, section_id)

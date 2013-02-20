@@ -1,7 +1,7 @@
 module Osm
 
   class Event < Osm::Model
-    class Column; end # Ensure the constant exists for the validators
+    class Column < Osm::Model; end # Ensure the constant exists for the validators
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the event
@@ -206,10 +206,14 @@ module Osm
         'pnnotepad' => public_notepad,
       }) if to_update.include?('public_notepad')
 
-      # The cached event will be out of date - remove it
-      cache_delete(api, ['event', id])
-
-      return data.is_a?(Hash) && (data['id'].to_i == id)
+      if data.is_a?(Hash) && (data['id'].to_i == id)
+        reset_changed_attributes
+        # The cached event will be out of date - remove it
+        cache_delete(api, ['event', id])
+        return true
+      else
+        return false
+      end
     end
 
     # Delete event from OSM
@@ -354,10 +358,7 @@ module Osm
     end
 
 
-    class Column
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
-  
+    class Column < Osm::Model
       # @!attribute [rw] id
       #   @return [String] OSM id for the column
       # @!attribute [rw] name
@@ -387,7 +388,7 @@ module Osm
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] if the operation suceeded or not
       def update(api)
-        Osm::Model.require_ability_to(api, :write, :events, event.section_id)
+        require_ability_to(api, :write, :events, event.section_id)
 
         data = api.perform_query("events.php?action=renameColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
           'columnId' => id,
@@ -395,14 +396,16 @@ module Osm
           'pL' => label
         })
 
-        # The cached event will be out of date - remove it
-        Osm::Model.cache_delete(api, ['event', event.id])
-        # The cached event attedance will be out of date
-        Osm::Model.cache_delete(api, ['event_attendance', event.id])
-
         (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
           if i['id'] == id
-            return i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label))
+            if i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label))
+              reset_changed_attributes
+                # The cached event will be out of date - remove it
+                cache_delete(api, ['event', event.id])
+                # The cached event attedance will be out of date
+                cache_delete(api, ['event_attendance', event.id])
+              return true
+            end
           end
         end
         return false
@@ -412,7 +415,7 @@ module Osm
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the delete succedded
       def delete(api)
-        Osm::Model.require_ability_to(api, :write, :events, event.section_id)
+        require_ability_to(api, :write, :events, event.section_id)
 
         data = api.perform_query("events.php?action=deleteColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
           'columnId' => id
@@ -428,7 +431,7 @@ module Osm
         end
         event.columns = new_columns
 
-        Osm::Model.cache_write(api, ['event', event.id], event)
+        cache_write(api, ['event', event.id], event)
         return true
       end
 
@@ -485,11 +488,15 @@ module Osm
           'row' => row,
           'eventid' => event.id,
         })
-  
-        # The cached event attedance will be out of date
-        Osm::Model.cache_delete(api, ['event_attendance', event.id])
-  
-        return data.is_a?(Hash)
+    
+        if data.is_a?(Hash)
+          reset_changed_attributes
+          # The cached event attedance will be out of date
+          Osm::Model.cache_delete(api, ['event_attendance', event.id])
+          return true
+        else
+          return false
+        end
       end
 
     end # Class Attendance

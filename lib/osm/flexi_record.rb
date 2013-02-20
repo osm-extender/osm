@@ -127,10 +127,7 @@ module Osm
 
 
 
-    class Column
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
-
+    class Column < Osm::Model
       # @!attribute [rw] flexi_record
       #   @return [Boolean] The FlexiRecord this column belongs to
       # @!attribute [rw] id
@@ -161,7 +158,7 @@ module Osm
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the column was updated in OSM
       def update(api)
-        Osm::Model.require_ability_to(api, :write, :flexi, flexi_record.section_id)
+        require_ability_to(api, :write, :flexi, flexi_record.section_id)
         raise Forbidden, 'this column is not editable' unless self.editable
         raise ObjectIsInvalid, 'column is invalid' unless valid?
 
@@ -173,8 +170,9 @@ module Osm
         if (data.is_a?(Hash) && data.has_key?('config'))
           ActiveSupport::JSON.decode(data['config']).each do |f|
             if (f['id'] == self.id) && (f['name'] == self.name)
+              reset_changed_attributes
               # The cached columns for the flexi record will be out of date - remove them
-              Osm::Model.cache_delete(api, ['flexi_record_columns', flexi_record.id])
+              cache_delete(api, ['flexi_record_columns', flexi_record.id])
               return true
             end
           end
@@ -186,7 +184,7 @@ module Osm
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the column was updated in OSM
       def delete(api)
-        Osm::Model.require_ability_to(api, :write, :flexi, flexi_record.section_id)
+        require_ability_to(api, :write, :flexi, flexi_record.section_id)
         raise Forbidden, 'this column is not editable' unless self.editable
 
         data = api.perform_query("extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", {
@@ -203,17 +201,14 @@ module Osm
         end
 
         # The cached columns for the flexi record will be out of date - remove them
-        Osm::Model.cache_delete(api, ['flexi_record_columns', flexi_record.id])
+        cache_delete(api, ['flexi_record_columns', flexi_record.id])
         return true
       end
 
     end # Class FlexiRecord::Column
 
 
-    class Data
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
-
+    class Data < Osm::Model
       # @!attribute [rw] flexi_record
       #   @return [Boolean] The FlexiRecord this column belongs to
       # @!attribute [rw] member_id
@@ -244,7 +239,7 @@ module Osm
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the data was updated in OSM
       def update(api)
-        Osm::Model.require_ability_to(api, :write, :flexi, flexi_record.section_id)
+        require_ability_to(api, :write, :flexi, flexi_record.section_id)
         raise ObjectIsInvalid, 'data is invalid' unless valid?
 
         term_id = Osm::Term.get_current_term_for_section(api, flexi_record.section_id).id
@@ -272,8 +267,11 @@ module Osm
           end
         end
 
-        # The cached datas for the flexi record will be out of date - remove them
-        Osm::Model.cache_delete(api, ['flexi_record_data', flexi_record.id])
+        if updated
+          reset_changed_attributes
+          # The cached datas for the flexi record will be out of date - remove them
+          cache_delete(api, ['flexi_record_data', flexi_record.id])
+        end
 
         return updated
       end
