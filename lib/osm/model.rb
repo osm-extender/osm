@@ -127,7 +127,8 @@ module Osm
 
       # Check what the user gave our API
       permissions = Osm::ApiAccess.get_ours(api, section_id, options).permissions
-      unless permissions[on].include?(to)
+      permissions = permissions[on] || []
+      unless permissions.include?(to)
         raise Osm::Forbidden, "You have not granted the #{to} permissions on #{on} to the #{api.name} API for #{Osm::Section.get(api, section_id, options).try(:name)}"
       end
     end
