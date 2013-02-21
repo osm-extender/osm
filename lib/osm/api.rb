@@ -51,9 +51,9 @@ module Osm
     end
 
     # Initialize a new API connection
-    # @param [String] user_id osm userid of the user to act as (get this by using the authorize method)
-    # @param [String] secret osm secret of the user to act as (get this by using the authorize method)
-    # @param [Symbol] site whether to use OSM (:osm) or OGM (:ogm), defaults to the value set for the class
+    # @param [String] user_id OSM userid of the user to act as (get this by using the authorize method)
+    # @param [String] secret OSM secret of the user to act as (get this by using the authorize method)
+    # @param [Symbol] site Whether to use OSM (:osm) or OGM (:ogm), defaults to the value set for the class
     # @return nil
     def initialize(user_id, secret, site=@@site)
       raise ArgumentError, 'You must pass a secret (get this by using the authorize method)' if secret.nil?
@@ -98,8 +98,8 @@ module Osm
 
     # Get the userid and secret to be able to act as a certain user on the OSM/OGM system
     # @param [Symbol] site The site to use either :osm or :ogm (defaults to whatever was set in the configure method)
-    # @param [String] email the login email address of the user on OSM
-    # @param [String] password the login password of the user on OSM
+    # @param [String] email The login email address of the user on OSM
+    # @param [String] password The login password of the user on OSM
     # @return [Hash] a hash containing the following keys:
     #   * :user_id - the userid to use in future requests
     #   * :secret - the secret to use in future requests
@@ -117,8 +117,8 @@ module Osm
 
 
     # Set the OSM user to make future requests as
-    # @param [String] user_id the OSM userid to use (get this using the authorize method)
-    # @param [String] secret the OSM secret to use (get this using the authorize method)
+    # @param [String] user_id The OSM userid to use (get this using the authorize method)
+    # @param [String] secret The OSM secret to use (get this using the authorize method)
     # @return [Osm::Api] self
     def set_user(user_id, secret)
       @user_id = user_id
@@ -128,8 +128,8 @@ module Osm
 
 
     # Make a query to the OSM/OGM API
-    # @param [String] url the script on the remote server to invoke
-    # @param [Hash] api_data a hash containing the values to be sent to the server in the body of the request
+    # @param [String] url The script on the remote server to invoke
+    # @param [Hash] api_data A hash containing the values to be sent to the server in the body of the request
     # @return [Hash, Array, String] the parsed JSON returned by OSM
     def perform_query(url, api_data={})
       self.class.perform_query(@site, url, api_data.merge({
@@ -138,12 +138,48 @@ module Osm
       }))
     end
 
+    # Get API user's permissions
+    # @!macro options_get
+    # @return nil if an error occured or the user does not have access to that section
+    # @return [Hash] {section_id => permissions_hash}
+    def get_user_permissions(options={})
+      cache_key = ['permissions', user_id]
+
+      if !options[:no_cache] && Osm::Model.cache_exist?(self, cache_key)
+        return Osm::Model.cache_read(self, cache_key)
+      end
+
+      data = perform_query('api.php?action=getUserRoles')
+
+      all_permissions = Hash.new
+      data.each do |item|
+        unless item['section'].eql?('discount')  # It's not an actual section
+          all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
+        end
+      end
+      Osm::Model.cache_write(self, cache_key, all_permissions)
+
+      return all_permissions
+    end
+
+    # Set access permission for an API user for a given Section
+    # @param [Section, Fixnum] section The Section to set permissions for
+    # @param [Hash] permissions The permissions Hash
+    def set_user_permissions(section, permissions)
+      key = ['permissions', user_id]
+      permissions = get_user_permissions.merge(section.to_i => permissions)
+      Osm::Model.cache_write(self, key, permissions)
+    end
+
+
     private
     # Make a query to the OSM/OGM API
     # @param [Symbol] site The site to use either :osm or :ogm
-    # @param [String] url the script on the remote server to invoke
-    # @param [Hash] api_data a hash containing the values to be sent to the server in the body of the request
+    # @param [String] url The script on the remote server to invoke
+    # @param [Hash] api_data A hash containing the values to be sent to the server in the body of the request
     # @return [Hash, Array, String] the parsed JSON returned by OSM
+    # @raise [Osm::Error] If an error was returned by OSM
+    # @raise [Osm::ConnectionError] If an error occured connecting to OSM
     def self.perform_query(site, url, api_data={})
       raise ArgumentError, 'site is invalid, this should be set to either :osm or :ogm' unless [:osm, :ogm].include?(site)
  
@@ -180,7 +216,7 @@ module Osm
     end
 
     # Check if text looks like it's JSON
-    # @param [String] text what to look at
+    # @param [String] text What to look at
     # @return [Boolean]
     def self.looks_like_json?(text)
       (['[', '{'].include?(text[0]))

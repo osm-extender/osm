@@ -2,29 +2,7 @@
 require 'spec_helper'
 
 
-class DummyHttpResult
-  def initialize(options={})
-    @response = DummyHttpResponse.new(options[:response])
-  end
-  def response
-    @response
-  end
-end
-class DummyHttpResponse
-  def initialize(options={})
-    @options = options
-  end
-  def code
-    @options[:code]
-  end
-  def body
-    @options[:body]
-  end
-end
-
-
 describe "API" do
-
 
   it "Create" do
     @api.should_not be_nil
@@ -68,7 +46,7 @@ describe "API" do
       'email' => user_email,
       'password' => user_password,
     }
-    HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"userid":"id","secret":"secret"}'}) }
+    HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"userid":"id","secret":"secret"}'}) }
 
     Osm::Api.authorize(user_email, user_password).should == {:user_id => 'id', :secret => 'secret'}
   end
@@ -81,15 +59,64 @@ describe "API" do
       'token' => @CONFIGURATION[:api][:osm][:token],
       'userid' => '1',
       'secret' => '2',
-    }}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
+    }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
     @api.perform_query('test')
   end
 
 
+  describe "User Permissions" do
+
+    it "Get from API" do
+      body = [
+        {"sectionid"=>"1", "permissions"=>{"a"=>20}},
+        {"sectionid"=>"2", "permissions"=>{"a"=>10}}
+      ]
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json)
+
+      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
+      OsmTest::Cache.should_not_receive('read')
+      @api.get_user_permissions.should == permissions
+    end
+
+    it "Get from cache" do
+      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
+      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
+      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
+      @api.get_user_permissions.should == permissions
+    end
+
+    it "Get ignoring cache" do
+      data = [
+        {"sectionid"=>"1", "permissions"=>{"a"=>10}},
+      ]
+      body = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+      }
+      url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles'
+
+      OsmTest::Cache.should_not_receive('exist?').with('OSMAPI-osm-permissions-user_id')
+      OsmTest::Cache.should_not_receive('read').with('OSMAPI-osm-permissions-user_id')
+      HTTParty.should_receive(:post).with(url, {:body=>body}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      @api.get_user_permissions(:no_cache => true).should == {1 => {:a => [:read]}}
+    end
+
+    it "Set" do
+      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
+      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
+      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
+      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-permissions-user_id', permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
+      @api.set_user_permissions(3, {:a => [:read]})
+    end
+
+  end
+
 
   describe "OSM and Internet error conditions:" do
     it "Raises a connection error if the HTTP status code was not 'OK'" do
-      HTTParty.stub(:post) { DummyHttpResult.new(:response=>{:code=>'500'}) }
+      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'500'}) }
       expect{ Osm::Api.authorize('email@example.com', 'password') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
     end
 
@@ -101,12 +128,12 @@ describe "API" do
 
 
     it "Raises an error if OSM returns an error (as a hash)" do
-      HTTParty.stub(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"error":"Error message"}'}) }
+      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"error":"Error message"}'}) }
       expect{ Osm::Api.authorize('email@example.com', 'password') }.to raise_error(Osm::Error, 'Error message')
     end
 
     it "Raises an error if OSM returns an error (as a plain string)" do
-      HTTParty.stub(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'Error message'}) }
+      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'Error message'}) }
       expect{ Osm::Api.authorize('email@example.com', 'password') }.to raise_error(Osm::Error, 'Error message')
     end
   end

@@ -128,75 +128,84 @@ describe "Event" do
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
     end
 
-    it "Get events for section" do
-      events = Osm::Event.get_for_section(@api, 1)
-      events.size.should == 1
-      event = events[0]
-      event.id.should == 2
-      event.section_id.should == 1
-      event.name.should == 'An Event'
-      event.start.should == Date.new(2001, 1, 2)
-      event.finish.should == DateTime.new(2001, 2, 5, 12, 0, 0)
-      event.cost.should == '0.00'
-      event.location.should == 'Somewhere'
-      event.notes.should == 'Notes'
-      event.archived.should be_false
-      event.notepad.should == 'notepad'
-      event.public_notepad.should == 'public notepad'
-      event.confirm_by_date.should == Date.new(2002, 1, 2)
-      event.allow_changes.should == true
-      event.reminders.should == false
-      event.attendance_limit.should == 3
-      event.attendance_limit_includes_leaders.should == true
-      event.columns[0].id.should == 'f_1'
-      event.columns[0].name.should == 'Name'
-      event.columns[0].label.should == 'Label'
-      event.valid?.should be_true
-    end
+    describe "Get events for section" do
+      it "From OSM" do
+        events = Osm::Event.get_for_section(@api, 1)
+        events.size.should == 1
+        event = events[0]
+        event.id.should == 2
+        event.section_id.should == 1
+        event.name.should == 'An Event'
+        event.start.should == Date.new(2001, 1, 2)
+        event.finish.should == DateTime.new(2001, 2, 5, 12, 0, 0)
+        event.cost.should == '0.00'
+        event.location.should == 'Somewhere'
+        event.notes.should == 'Notes'
+        event.archived.should be_false
+        event.notepad.should == 'notepad'
+        event.public_notepad.should == 'public notepad'
+        event.confirm_by_date.should == Date.new(2002, 1, 2)
+        event.allow_changes.should == true
+        event.reminders.should == false
+        event.attendance_limit.should == 3
+        event.attendance_limit_includes_leaders.should == true
+        event.columns[0].id.should == 'f_1'
+        event.columns[0].name.should == 'Name'
+        event.columns[0].label.should == 'Label'
+        event.valid?.should be_true
+      end
 
-    it "Fetch events for a section honoring archived option" do
-      body = {
-        'identifier' => 'eventid',
-        'label' => 'name',
-        'items' => [{
-          'eventid' => '1',
-          'name' => 'An Event',
-          'startdate' => '2001-02-03',
-          'enddate' => nil,
-          'starttime' => '00:00:00',
-          'endtime' => '00:00:00',
-          'cost' => '0.00',
-          'location' => '',
-          'notes' => '',
-          'sectionid' => 1,
-          'googlecalendar' => nil,
-          'archived' => '0'
-        },{
-          'eventid' => '2',
-          'name' => 'An Archived Event',
-          'startdate' => '2001-02-03',
-          'enddate' => nil,
-          'starttime' => '00:00:00',
-          'endtime' => '00:00:00',
-          'cost' => '0.00',
-          'location' => '',
-          'notes' => '',
-          'sectionid' => 1,
-          'googlecalendar' => nil,
-          'archived' => '1'
-        }]
-      }
+      it "From cache" do
+        events = Osm::Event.get_for_section(@api, 1)
+        HTTParty.should_not_receive(:post)
+        Osm::Event.get_for_section(@api, 1).should == events
+      end
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json)
+      it "Honours archived option" do
+        body = {
+          'identifier' => 'eventid',
+          'label' => 'name',
+          'items' => [{
+            'eventid' => '1',
+            'name' => 'An Event',
+            'startdate' => '2001-02-03',
+            'enddate' => nil,
+            'starttime' => '00:00:00',
+            'endtime' => '00:00:00',
+            'cost' => '0.00',
+            'location' => '',
+            'notes' => '',
+            'sectionid' => 1,
+            'googlecalendar' => nil,
+            'archived' => '0'
+          },{
+            'eventid' => '2',
+            'name' => 'An Archived Event',
+            'startdate' => '2001-02-03',
+            'enddate' => nil,
+            'starttime' => '00:00:00',
+            'endtime' => '00:00:00',
+            'cost' => '0.00',
+            'location' => '',
+            'notes' => '',
+            'sectionid' => 1,
+            'googlecalendar' => nil,
+            'archived' => '1'
+          }]
+        }
 
-      events = Osm::Event.get_for_section(@api, 1)
-      all_events = Osm::Event.get_for_section(@api, 1, {:include_archived => true})
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json)
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json)
 
-      events.size.should == 1
-      events[0].id == 1
-      all_events.size.should == 2
+        events = Osm::Event.get_for_section(@api, 1)
+        OsmTest::Cache.clear
+        all_events = Osm::Event.get_for_section(@api, 1, {:include_archived => true})
+
+        events.size.should == 1
+        events[0].id == 1
+        all_events.size.should == 2
+      end
     end
 
     it "Get event" do
@@ -331,7 +340,7 @@ describe "Event" do
       }
 
       Osm::Event.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
 
       event = Osm::Event.create(@api, {
         :section_id => 1,
@@ -356,7 +365,7 @@ describe "Event" do
 
     it "Create (failed)" do
       Osm::Event.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       event = Osm::Event.create(@api, {
         :section_id => 1,
@@ -400,9 +409,9 @@ describe "Event" do
         'limitincludesleaders' => true,
       }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "notepad"=>"notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "pnnotepad"=>"public notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "notepad"=>"notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "pnnotepad"=>"public notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -416,16 +425,18 @@ describe "Event" do
         :confirm_by_date => nil,
         :allow_changes => true,
         :reminders => true,
-        :notepad => 'notepad',
-        :public_notepad => 'public notepad',
+        :notepad => '',
+        :public_notepad => '',
         :attendance_limit => 3,
         :attendance_limit_includes_leaders => true,
       )
+      event.notepad = 'notepad'
+      event.public_notepad = 'public notepad'
       event.update(@api).should be_true
     end
 
     it "Update (failed)" do
-      HTTParty.should_receive(:post).exactly(3).times { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      HTTParty.should_receive(:post).exactly(1).times { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -450,7 +461,7 @@ describe "Event" do
         'secret' => 'secret',
       }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -466,7 +477,7 @@ describe "Event" do
     end
 
     it "Delete (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -535,7 +546,7 @@ describe "Event" do
           'userid' => 'user_id',
           'secret' => 'secret',
         }}
-      ) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      ) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       ea.update(@api, 'f_1').should be_true
     end
@@ -555,7 +566,7 @@ describe "Event" do
         'eventid' => '2',
         'config' => '[{"id":"f_1","name":"Test name","pL":"Test label"}]'
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
@@ -567,7 +578,7 @@ describe "Event" do
     end
 
     it "Add column (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
@@ -590,7 +601,7 @@ describe "Event" do
         'eventid' => '2',
         'config' => '[{"id":"f_1","name":"New name","pL":"New label"}]'
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.columns = [Osm::Event::Column.new(:id => 'f_1', :event => event)]
@@ -607,7 +618,7 @@ describe "Event" do
     end
 
     it "Update column (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
@@ -626,7 +637,7 @@ describe "Event" do
         'columnId' => 'f_1'
       }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"eventid":"2","config":"[]"}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"eventid":"2","config":"[]"}'}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
@@ -637,7 +648,7 @@ describe "Event" do
     end
 
     it "Delete column (failed)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[{\"id\":\"f_1\"}]"}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[{\"id\":\"f_1\"}]"}'}) }
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)

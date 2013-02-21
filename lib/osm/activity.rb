@@ -96,15 +96,21 @@ module Osm
 
     # Get activity details
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] activity_id the activity ID
-    # @param [Fixnum] version the version of the activity to retreive, if nil the latest version will be assumed
+    # @param [Fixnum] activity_id The activity ID
+    # @param [Fixnum] version The version of the activity to retreive, if nil the latest version will be assumed
     # @!macro options_get
     # @return [Osm::Activity]
     def self.get(api, activity_id, version=nil, options={})
       cache_key = ['activity', activity_id]
 
-      if !options[:no_cache] && cache_exist?(api, [*cache_key, version]) # TODO work out permission check
-        return cache_read(api, [*cache_key, version])
+      if !options[:no_cache] && cache_exist?(api, [*cache_key, version])
+        activity = cache_read(api, [*cache_key, version])
+        if (activity.shared == 2) || (activity.user_id == api.user_id) ||  # Shared or owned by this user
+        Osm::Section.get_all(api).map{ |s| s.group_id }.uniq.include?(activity.group_id)  # user belomngs to the group owning the activity
+          return activity
+        else
+          return nil
+        end
       end
 
       data = nil
@@ -174,16 +180,26 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
+
+    # Get the link to display this activity in OSM
+    # @return [String] the link for this member's My.SCOUT
+    # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
+    def osm_link
+      raise Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
+      return "https://www.onlinescoutmanager.co.uk/?l=p#{self.id}"
+    end
 
     # Add this activity to the programme in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section The Section (or it's ID) to add the Activity to
+    # @param [Osm::Section, Fixnum, #to_i] section The Section (or it's ID) to add the Activity to
     # @param [Date, DateTime] date The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
     # @param [String] notes The notes which should appear for this Activity on this Evening
     # @return [Boolean] Whether the activity was successfully added
     def add_to_programme(api, section, date, notes="")
+      require_ability_to(api, :write, :programme, section)
+
       data = api.perform_query("programme.php?action=addActivityToProgramme", {
         'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
         'activityid' => id,
@@ -191,16 +207,25 @@ module Osm
         'notes' => notes,
       })
 
-      return (data == {'result'=>0})
+      if (data == {'result'=>0})
+        # The cached activity will be out of date - remove it
+        cache_delete(api, ['activity', self.id])
+        return true
+      else
+        return false
+      end
     end
 
     # Update this activity in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section The Section (or it's ID)
+    # @param [Osm::Section, Fixnum, #to_i] section The Section (or it's ID)
     # @param [Boolean] secret_update Whether this is a secret update
     # @return [Boolean] Whether the activity was successfully added
+    # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
+    # @raise [Osm::Forbidden] If the Activity is not editable
     def update(api, section, secret_update=false)
-      raise ObjectIsInvalid, 'activity is invalid' unless valid?
+      raise Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
+      raise Osm::Forbidden, "You are not allowed to update this activity" unless self.editable
 
       data = api.perform_query("programme.php?action=update", {
         'title' => title,
@@ -219,7 +244,13 @@ module Osm
         'secretEdit' => secret_update,
       })
 
-      return (data == {'result'=>true})
+      if (data == {'result'=>true})
+        # The cached activity will be out of date - remove it
+        cache_delete(api, ['activity', self.id])
+        return true
+      else
+        return false
+      end
     end
 
 
@@ -251,7 +282,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new Term
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     end # Class Activity::File
 
@@ -292,7 +323,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new Badge
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     end # Class Activity::Badge
 
@@ -323,7 +354,7 @@ module Osm
 
       # @!method initialize
       #   Initialize a new Version
-      #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     end # Class Activity::Version
 

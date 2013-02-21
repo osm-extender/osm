@@ -23,7 +23,7 @@ module Osm
 
     # Get API access details for a given section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the details for
     # @!macro options_get
     # @return [Array<Osm::ApiAccess>]
     def self.get_all(api, section, options={})
@@ -31,7 +31,8 @@ module Osm
       cache_key = ['api_access', api.user_id, section_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
+        ids = cache_read(api, cache_key)
+        return get_from_ids(api, ids, cache_key, section, options, :get_all)
       end
 
       data = api.perform_query("users.php?action=getAPIAccess&sectionid=#{section_id}")
@@ -41,6 +42,7 @@ module Osm
         20  => [:read, :write],
       }
       result = Array.new
+      ids = Array.new
       data['apis'].each do |item|
         attributes = {}
         attributes[:id] = item['apiid'].to_i
@@ -57,9 +59,10 @@ module Osm
 
         this_item = new(attributes)
         result.push this_item
+        ids.push this_item.id
         cache_write(api, [*cache_key, this_item.id], this_item)
       end
-      cache_write(api, cache_key, result)
+      cache_write(api, cache_key, ids)
 
       return result
     end
@@ -67,7 +70,7 @@ module Osm
 
     # Get our API access details for a given section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the details for
     # @!macro options_get
     # @return [Osm::ApiAccess]
     def self.get_ours(api, section, options={})
@@ -77,7 +80,7 @@ module Osm
 
     # Get API Access for a given API
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum] section the section (or its ID) to get the details for
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the details for
     # @param [Osm::Api] for_api The api (or its ID) to get access for
     # @!macro options_get
     # @return [Osm::ApiAccess]
@@ -101,7 +104,7 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Term
-    #   @param [Hash] attributes the hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
   end # Class ApiAccess
 

@@ -9,7 +9,7 @@ describe "Section" do
     @attributes = {
       :id => 1,
       :name => 'Name',
-      :subscription_level => :silver,
+      :subscription_level => 2,
       :subscription_expires => (Date.today + 60).strftime('%Y-%m-%d'),
       :type => :cubs,
       :wizard => false,
@@ -46,7 +46,7 @@ describe "Section" do
 
     section.id.should == 1
     section.name.should == 'Name' 
-    section.subscription_level.should == :silver
+    section.subscription_level.should == 2
     section.subscription_expires.should == Date.today + 60
     section.type.should == :cubs
     section.column_names.should == {:column_names => 'names'}
@@ -80,7 +80,7 @@ describe "Section" do
   it "Create has sensible defaults" do
     section = Osm::Section.new
 
-    section.subscription_level.should == :unknown
+    section.subscription_level.should == 1
     section.subscription_expires.should == nil
     section.type.should == :unknown
     section.column_names.should == {}
@@ -103,42 +103,50 @@ describe "Section" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json)
     end
 
-    it "Gets all sections" do
-      sections = Osm::Section.get_all(@api)
-      sections.map{ |i| i.id }.should == [1, 2]
+    describe "Gets all sections" do
+      it "From OSM" do
+        sections = Osm::Section.get_all(@api)
+        sections.map{ |i| i.id }.should == [1, 2]
+  
+        section = sections[0]
+        section.id.should == 1
+        section.name.should == 'Section 1' 
+        section.subscription_level.should == 1
+        section.subscription_expires.should == Date.new(2013, 1, 5)
+        section.type.should == :beavers
+        section.column_names.should == {:column_names => 'names'}
+        section.fields.should == {:fields => true}
+        section.intouch_fields.should == {:intouch_fields => true}
+        section.mobile_fields.should == {:mobile_fields => true}
+        section.group_id.should == 3
+        section.group_name.should == '3rd Somewhere'
+        section.flexi_records.size.should == 1
+        section.flexi_records[0].id.should == 111
+        section.flexi_records[0].name.should == 'Flexi Record 1'
+        section.gocardless.should == true
+        section.myscout_events_expires.should == Date.new(2013, 1, 6)
+        section.myscout_badges_expires.should == Date.new(2013, 1, 7)
+        section.myscout_programme_expires.should == Date.new(2013, 1, 8)
+        section.myscout_events.should == true
+        section.myscout_badges.should == true
+        section.myscout_programme.should == true
+        section.myscout_payments.should == true
+        section.myscout_emails.should == {:email1 => true, :email2 => false}
+        section.myscout_email_address_from.should == 'send_from@example.com'
+        section.myscout_email_address_copy.should == ''
+        section.myscout_badges_partial.should == true
+        section.myscout_programme_summary.should == true
+        section.myscout_event_reminder_count.should == 4
+        section.myscout_event_reminder_frequency.should == 5
+        section.myscout_payment_reminder_count.should == 6
+        section.myscout_payment_reminder_frequency.should == 7
+      end
 
-      section = sections[0]
-      section.id.should == 1
-      section.name.should == 'Section 1' 
-      section.subscription_level.should == :bronze
-      section.subscription_expires.should == Date.new(2013, 1, 5)
-      section.type.should == :beavers
-      section.column_names.should == {:column_names => 'names'}
-      section.fields.should == {:fields => true}
-      section.intouch_fields.should == {:intouch_fields => true}
-      section.mobile_fields.should == {:mobile_fields => true}
-      section.group_id.should == 3
-      section.group_name.should == '3rd Somewhere'
-      section.flexi_records.size.should == 1
-      section.flexi_records[0].id.should == 111
-      section.flexi_records[0].name.should == 'Flexi Record 1'
-      section.gocardless.should == true
-      section.myscout_events_expires.should == Date.new(2013, 1, 6)
-      section.myscout_badges_expires.should == Date.new(2013, 1, 7)
-      section.myscout_programme_expires.should == Date.new(2013, 1, 8)
-      section.myscout_events.should == true
-      section.myscout_badges.should == true
-      section.myscout_programme.should == true
-      section.myscout_payments.should == true
-      section.myscout_emails.should == {:email1 => true, :email2 => false}
-      section.myscout_email_address_from.should == 'send_from@example.com'
-      section.myscout_email_address_copy.should == ''
-      section.myscout_badges_partial.should == true
-      section.myscout_programme_summary.should == true
-      section.myscout_event_reminder_count.should == 4
-      section.myscout_event_reminder_frequency.should == 5
-      section.myscout_payment_reminder_count.should == 6
-      section.myscout_payment_reminder_frequency.should == 7
+      it "From cache" do
+        sections = Osm::Section.get_all(@api)
+        HTTParty.should_not_receive(:post)
+        Osm::Section.get_all(@api).should == sections
+      end
     end
   
     it "Gets a section" do
@@ -146,23 +154,6 @@ describe "Section" do
       section.should_not be_nil
       section.id.should == 1
       section.valid?.should be_true
-    end
-
-    it "Fetches user's permissions" do
-      permissions = Osm::Section.fetch_user_permissions(@api)
-      permissions[1].should_not be_nil
-      permissions[1].should == {
-        :badge => [:read],
-        :member => [:read, :write],
-        :user => [:read, :write, :administer],
-        :register => [:read, :write, :administer],
-        :contact => [:read, :write, :administer],
-        :programme => [:read, :write, :administer],
-        :originator => [],
-        :events => [:read, :write, :administer],
-        :finance => [:read, :write, :administer],
-        :flexi => [:read, :write, :administer],
-      }
     end
 
 
@@ -174,7 +165,7 @@ describe "Section" do
         'userid' => 'user_id',
         'secret' => 'secret',
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>{"1" => "Section 1", "2" => "Section 2"}.to_json}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>{"1" => "Section 1", "2" => "Section 2"}.to_json}) }
       section = Osm::Section.new(:id => 1)
       section.get_notepad(@api).should == 'Section 1'
     end
@@ -188,13 +179,13 @@ describe "Section" do
         'secret' => 'secret',
         'value' => 'content'
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
       section = Osm::Section.new(:id => 1)
       section.set_notepad(@api, 'content').should be_true
     end
 
     it "Sets the section's notepad (fail)" do
-      HTTParty.should_receive(:post) { DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
+      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
       section = Osm::Section.new(:id => 1)
       section.set_notepad(@api, 'content').should be_false
     end
@@ -284,30 +275,6 @@ describe "Section" do
         section.youth_section?.should be_false
       end
     end
-  end
-
-end
-
-
-
-describe "Section::FlexiRecord" do
-
-  it "Create" do
-    fr = Osm::Section::FlexiRecord.new(:id => 1, :name => 'Name')
-
-    fr.id.should == 1
-    fr.name.should == 'Name' 
-    fr.valid?.should be_true
-  end
-
-
-  it "Sorts Flexi Records by name" do
-    fr1 = Osm::Section::FlexiRecord.new(:id => 3, :name => 'A')
-    fr2 = Osm::Section::FlexiRecord.new(:id => 2, :name => 'B')
-    fr3 = Osm::Section::FlexiRecord.new(:id => 1, :name => 'C')
-    records = [fr2, fr1, fr3]
-
-    records.sort.should == [fr1, fr2, fr3]
   end
 
 end

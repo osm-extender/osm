@@ -5,6 +5,9 @@ require 'spec_helper'
 describe "Model" do
 
   class ModelTester < Osm::Model
+    attribute :test_attribute
+    attr_accessible :test_attribute
+
     def self.test_get_config
       {
         :cache => @@cache,
@@ -15,6 +18,11 @@ describe "Model" do
 
     def self.cache(method, *options)
       self.send("cache_#{method}", *options)
+    end
+
+    def self.test_get_all(api, keys, key)
+      ids = cache_read(api, keys)
+      return get_from_ids(api, ids, key, {}, :get_all)
     end
   end
 
@@ -92,49 +100,35 @@ describe "Model" do
   end
 
 
-  describe "Get User Permissions" do
+  describe "Get items from ids" do
 
-    it "From cache" do
-      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
-      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
-      ModelTester.get_user_permissions(@api).should == permissions
+    it "All items in cache" do
+      OsmTest::Cache.write('OSMAPI-osm-items', [1, 2])
+      OsmTest::Cache.write('OSMAPI-osm-item-1', '1')
+      OsmTest::Cache.write('OSMAPI-osm-item-2', '2')
+      ModelTester.test_get_all(@api, 'items', 'item').should == ['1', '2']
     end
-
-    it "From API" do
-      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { false }
-      Osm::Section.should_receive('fetch_user_permissions').with(@api) { permissions }
-      ModelTester.get_user_permissions(@api).should == permissions
-    end
-
-    it "Single section" do
-      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id').twice { true }
-      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id').twice { permissions }
-      ModelTester.get_user_permissions(@api, 1).should == permissions[1]
-      ModelTester.get_user_permissions(@api, 2).should == permissions[2]
+    
+    it "An item not in cache" do
+      OsmTest::Cache.write('OSMAPI-osm-items', [1, 2])
+      OsmTest::Cache.write('OSMAPI-osm-item-1', '1')
+      ModelTester.stub(:get_all) { ['A', 'B'] }
+      ModelTester.test_get_all(@api, 'items', 'item').should == ['A', 'B']
     end
 
   end
 
 
-  describe "Set User Permissions" do
+  describe "Track attribute changes" do
+    test = ModelTester.new(:test_attribute => 1)
+    test.test_attribute.should == 1
+    test.changed_attributes.should == []
 
-    it "All Sections" do
-      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-permissions-user_id', permissions, {:expires_in=>600}) { true }
-      ModelTester.set_user_permissions(@api, permissions)
-    end
+    test.test_attribute = 2
+    test.changed_attributes.should == ['test_attribute']
 
-    it "Single section" do
-      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
-      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
-      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-permissions-user_id', permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
-      ModelTester.set_user_permissions(@api, 3, {:a => [:read]})
-    end
-
+    test.reset_changed_attributes
+    test.changed_attributes.should == []
   end
 
 end
