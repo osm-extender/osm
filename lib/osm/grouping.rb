@@ -73,7 +73,7 @@ module Osm
     # @raise [Osm::ObjectIsInvalid] If the Grouping is invalid
     def update(api)
       raise Osm::ObjectIsInvalid, 'grouping is invalid' unless valid?
-      require_ability_to(api, :administer, :member, section_id)
+      require_ability_to(api, :read, :member, section_id)
 
       to_update = changed_attributes
       result = true
