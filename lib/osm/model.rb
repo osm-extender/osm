@@ -38,9 +38,16 @@ module Osm
     end
 
 
+    # Default to_i conversion is of id
     def to_i
-      id
+      id.to_i
     end
+
+    # Default compare based on id
+    def <=>(another)
+      return self.id <=> another.try(:id)
+    end
+
 
     # Get a list of attributes which have changed
     # @return Array[String] the names of attributes which have changed

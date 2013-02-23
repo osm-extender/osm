@@ -321,6 +321,15 @@ module Osm
       return attendance_limit - attendees(api)
     end
 
+    # Compare Event based on start, name then id
+    def <=>(another)
+      return 0 if self.id == another.try(:id)
+      result = self.start <=> another.try(:start)
+      result = self.name <=> another.try(:name) if result == 0
+      result = self.id <=> another.try(:id) if result == 0
+      return result
+    end
+
 
     private
     def attendees(api)
@@ -357,6 +366,7 @@ module Osm
       end
       event.columns = columns
       return event
+
     end
 
 
@@ -437,6 +447,13 @@ module Osm
         return true
       end
 
+      # Compare Column based on event then id
+      def <=>(another)
+        result = self.event <=> another.try(:event)
+        result = self.id <=> another.try(:id) if result == 0
+        return result
+      end
+
     end # class Column
 
 
@@ -500,6 +517,13 @@ module Osm
         else
           return false
         end
+      end
+
+      # Compare Activity based on event then row
+      def <=>(another)
+        result = self.event <=> another.try(:event)
+        result = self.row <=> another.try(:row) if result == 0
+        return result
       end
 
     end # Class Attendance

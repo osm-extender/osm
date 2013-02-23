@@ -1,8 +1,6 @@
 module Osm
 
   class Section < Osm::Model
-    class FlexiRecord; end # Ensure the constant exists for the validators
-
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the section
     # @!attribute [rw] name
@@ -134,6 +132,7 @@ module Osm
     validates :intouch_fields, :hash => {:key_type => Symbol, :value_in => [true, false]}
     validates :mobile_fields, :hash => {:key_type => Symbol, :value_in => [true, false]}
     validates :myscout_emails, :hash => {:key_in => [:email1, :email2, :email3, :email4], :value_in => [true, false]}
+    validates :flexi_records, :array_of => {:item_type => Osm::FlexiRecord, :item_valid => true}
 
 
     # @!method initialize
@@ -356,27 +355,18 @@ module Osm
       }[subscription_level]
     end
 
+    # Compare Section based on group_name type (age order), then name
     def <=>(another)
-      begin
-        compare_group_name = group_name <=> another.group_name
-        return compare_group_name unless compare_group_name == 0
-  
-        return 0 if type == another.type
-        [:beavers, :cubs, :scouts, :explorers, :waiting, :adults].each do |type|
-          return -1 if type == type
-          return 1 if another.type == type
+      result = self.group_name <=> another.try(:group_name)
+      result = 0 if self.type == another.try(:type) && result == 0
+      [:beavers, :cubs, :scouts, :explorers, :waiting, :adults].each do |type|
+        if result == 0
+          result = -1 if self.type == type
+          result =  1 if another.try(:type) == type
         end
-      rescue NoMethodError
-        return 1
       end
-    end
-
-    def ==(another)
-      begin
-        return self.id == another.id
-      rescue NoMethodError
-        return false
-      end
+      result = self.name <=> another.try(:name) if result == 0
+      return result
     end
 
   end # Class Section

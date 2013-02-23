@@ -104,6 +104,12 @@ module Osm
       return result
     end
 
+    # Compare Grouping based on section_id then name
+    def <=>(another)
+      result = self.section_id <=> another.try(:section_id)
+      result = self.name <=> another.try(:name) if result == 0
+      return result
+    end
 
   end # Class Grouping
 

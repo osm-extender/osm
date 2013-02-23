@@ -389,6 +389,16 @@ module Osm
       return "https://www.onlinescoutmanager.co.uk/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{@myscout_link_key}"
     end
 
+    # Compare Activity based on section_id, grouping_id, grouping_leader (descending), last_name then first_name
+    def <=>(another)
+      result = self.section_id <=> another.try(:section_id)
+      result = self.grouping_id <=> another.try(:grouping_id) if result == 0
+      result = -(self.grouping_leader <=> another.try(:grouping_leader)) if result == 0
+      result = self.last_name <=> another.try(:last_name) if result == 0
+      result = self.first_name <=> another.try(:last_name) if result == 0
+      return result
+    end
+
   end # Class Member
 
 end # Module

@@ -18,6 +18,14 @@ describe "API Access" do
     api_access.valid?.should be_true
   end
 
+  it "Sorts by id" do
+    a1 = Osm::ApiAccess.new(:id => 1)
+    a2 = Osm::ApiAccess.new(:id => 2)
+
+    data = [a2, a1]
+    data.sort.should == [a1, a2]
+  end
+
 
   describe "Using the API" do
 

@@ -17,25 +17,58 @@ describe "Flexi Record" do
     fr.valid?.should be_true
   end
 
-  it "Create FlexiRecord::Column" do
-    field = Osm::FlexiRecord::Column.new(
-      :id => "f_1",
-      :name => "Field Name",
-      :editable => true,
-      :flexi_record => Osm::FlexiRecord.new(),
-    )
+  describe "FlexiRecord::Column" do
 
-    field.id.should == 'f_1'
-    field.name.should == 'Field Name'
-    field.editable.should be_true
-    field.valid?.should be_true
+    it "Create" do
+      field = Osm::FlexiRecord::Column.new(
+        :id => "f_1",
+        :name => "Field Name",
+        :editable => true,
+        :flexi_record => Osm::FlexiRecord.new(),
+      )
+
+      field.id.should == 'f_1'
+      field.name.should == 'Field Name'
+      field.editable.should be_true
+      field.valid?.should be_true
+    end
+
+    it "Sorts by flexirecord then id (system first then user)" do
+      frc1 = Osm::FlexiRecord::Column.new(:flexi_record => Osm::FlexiRecord.new(:section_id => 1), :id => 'f_1')
+      frc2 = Osm::FlexiRecord::Column.new(:flexi_record => Osm::FlexiRecord.new(:section_id => 2), :id => 'a')
+      frc3 = Osm::FlexiRecord::Column.new(:flexi_record => Osm::FlexiRecord.new(:section_id => 2), :id => 'b')
+      frc4 = Osm::FlexiRecord::Column.new(:flexi_record => Osm::FlexiRecord.new(:section_id => 2), :id => 'f_1')
+      frc5 = Osm::FlexiRecord::Column.new(:flexi_record => Osm::FlexiRecord.new(:section_id => 2), :id => 'f_2')
+
+      columns = [frc3, frc2, frc1, frc5, frc4]
+      columns.sort.should == [frc1, frc2, frc3, frc4, frc5]
+    end
+
   end
 
-  it "Create FlexiRecord::Data" do
-    rd = Osm::FlexiRecord::Data.new(
-      :member_id => 1,
-      :grouping_id => 2,
-      :fields => {
+
+  describe "FlexiRecord::Data" do
+
+    it "Create" do
+      rd = Osm::FlexiRecord::Data.new(
+        :member_id => 1,
+        :grouping_id => 2,
+        :fields => {
+          'firstname' => 'First',
+          'lastname' => 'Last',
+          'dob' => Date.new(1899, 11, 30),
+          'total' => 3,
+          'completed' => nil,
+          'age' => nil,
+          'f_1' => 'a',
+          'f_2' => 'b',
+        },
+        :flexi_record => Osm::FlexiRecord.new()
+      )
+
+      rd.member_id.should == 1
+      rd.grouping_id.should == 2
+      rd.fields.should == {
         'firstname' => 'First',
         'lastname' => 'Last',
         'dob' => Date.new(1899, 11, 30),
@@ -44,29 +77,27 @@ describe "Flexi Record" do
         'age' => nil,
         'f_1' => 'a',
         'f_2' => 'b',
-      },
-      :flexi_record => Osm::FlexiRecord.new()
-    )
+      }
+      rd.valid?.should be_true
+    end
 
-    rd.member_id.should == 1
-    rd.grouping_id.should == 2
-    rd.fields.should == {
-      'firstname' => 'First',
-      'lastname' => 'Last',
-      'dob' => Date.new(1899, 11, 30),
-      'total' => 3,
-      'completed' => nil,
-      'age' => nil,
-      'f_1' => 'a',
-      'f_2' => 'b',
-    }
-    rd.valid?.should be_true
+    it "Sorts by flexirecord, grouping_id then member_id" do
+      frd1 = Osm::FlexiRecord::Data.new(:flexi_record => Osm::FlexiRecord.new(:section_id => 1), :grouping_id => 1, :member_id => 1)
+      frd2 = Osm::FlexiRecord::Data.new(:flexi_record => Osm::FlexiRecord.new(:section_id => 2), :grouping_id => 1, :member_id => 1)
+      frd3 = Osm::FlexiRecord::Data.new(:flexi_record => Osm::FlexiRecord.new(:section_id => 2), :grouping_id => 2, :member_id => 1)
+      frd4 = Osm::FlexiRecord::Data.new(:flexi_record => Osm::FlexiRecord.new(:section_id => 2), :grouping_id => 2, :member_id => 2)
+
+      datas = [frd3, frd2, frd1, frd4]
+      datas.sort.should == [frd1, frd2, frd3, frd4]
+    end
+
   end
 
-  it "Sorts by name" do
-    fr1 = Osm::FlexiRecord.new(:id => 3, :name => 'A')
-    fr2 = Osm::FlexiRecord.new(:id => 2, :name => 'B')
-    fr3 = Osm::FlexiRecord.new(:id => 1, :name => 'C')
+
+  it "Sorts by section ID then name" do
+    fr1 = Osm::FlexiRecord.new(:section_id => 1, :name => 'A')
+    fr2 = Osm::FlexiRecord.new(:section_id => 2, :name => 'B')
+    fr3 = Osm::FlexiRecord.new(:section_id => 2, :name => 'C')
     records = [fr2, fr1, fr3]
 
     records.sort.should == [fr1, fr2, fr3]

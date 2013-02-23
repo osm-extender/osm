@@ -106,6 +106,7 @@ module Osm
     #   Initialize a new Term
     #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
+
   end # Class ApiAccess
 
 end # Module

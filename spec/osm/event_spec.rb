@@ -51,24 +51,46 @@ describe "Event" do
     Osm::Event.new(:attendance_limit => 1).limited_attendance?.should be_true
   end
 
+  it "Sorts by start, name then ID (unless IDs are equal)" do
+    e1 = Osm::Event.new(:start => '2000-01-01 01:00:00', :name => 'An event', :id => 1)
+    e2 = Osm::Event.new(:start => '2000-01-02 01:00:00', :name => 'An event', :id => 2)
+    e3 = Osm::Event.new(:start => '2000-01-02 01:00:00', :name => 'Event name', :id => 3)
+    e4 = Osm::Event.new(:start => '2000-01-02 01:00:00', :name => 'Event name', :id => 4)
+    events = [e2, e4, e3, e1]
 
-  it "Create Event::Attendance" do
-    data = {
-      :member_id => 1,
-      :grouping_id => 2,
-      :row => 3,
-      :columns => [],
-      :event => Osm::Event.new(:id => 1, :section_id => 1, :name => 'Name', :columns => [])
-    }
-
-    ea = Osm::Event::Attendance.new(data)  
-    ea.member_id.should == 1
-    ea.grouping_id.should == 2
-    ea.fields.should == {}
-    ea.row.should == 3
-    ea.valid?.should be_true
+    events.sort.should == [e1, e2, e3, e4]
+    (Osm::Event.new(:id => 1) <=> Osm::Event.new(:id => 1)).should == 0
   end
 
+  describe "Event::Attendance" do 
+  
+    it "Create" do
+      data = {
+        :member_id => 1,
+        :grouping_id => 2,
+        :row => 3,
+        :columns => [],
+        :event => Osm::Event.new(:id => 1, :section_id => 1, :name => 'Name', :columns => [])
+      }
+
+      ea = Osm::Event::Attendance.new(data)  
+      ea.member_id.should == 1
+      ea.grouping_id.should == 2
+      ea.fields.should == {}
+      ea.row.should == 3
+      ea.valid?.should be_true
+    end
+
+    it "Sorts by event ID then row" do
+      ea1 = Osm::Event::Attendance.new(:event => Osm::Event.new(:id => 1), :row => 1)
+      ea2 = Osm::Event::Attendance.new(:event => Osm::Event.new(:id => 2), :row => 1)
+      ea3 = Osm::Event::Attendance.new(:event => Osm::Event.new(:id => 2), :row => 2)
+      event_attendances = [ea3, ea2, ea1]
+
+      event_attendances.sort.should == [ea1, ea2, ea3]
+    end
+
+  end
 
   describe "Using the API" do
 

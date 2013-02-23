@@ -28,7 +28,7 @@ module Osm
       cache_key = ['flexi_record_columns', self.id]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
+        return cache_read(api, cache_key)
       end
 
       data = api.perform_query("extras.php?action=getExtra&sectionid=#{self.section_id}&extraid=#{self.id}")
@@ -44,7 +44,7 @@ module Osm
           )
         end
       end
-      Osm::Model.cache_write(api, cache_key, structure)
+      cache_write(api, cache_key, structure)
 
       return structure
     end
@@ -65,7 +65,7 @@ module Osm
         ActiveSupport::JSON.decode(data['config']).each do |field|
           if field['name'] == name
             # The cached fields for the flexi record will be out of date - remove them
-             Osm::Model.cache_delete(api, ['flexi_record_columns', id])
+            cache_delete(api, ['flexi_record_columns', id])
             return true
           end
         end
@@ -85,7 +85,7 @@ module Osm
       cache_key = ['flexi_record_data', id, term_id]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
+        return cache_read(api, cache_key)
       end
 
       data = api.perform_query("extras.php?action=getExtraRecords&sectionid=#{section.id}&extraid=#{id}&termid=#{term_id}&section=#{section.type}")
@@ -112,17 +112,15 @@ module Osm
         end
       end
 
-      Osm::Model.cache_write(api, cache_key, to_return)
+      cache_write(api, cache_key, to_return)
       return to_return
     end
 
-
+    # Compare Activity based on section_id then name
     def <=>(another)
-      begin
-        return self.name <=> another.name
-      rescue NoMethodError
-        return 1
-      end
+      result = self.section_id <=> another.try(:section_id)
+      result = self.name <=> another.try(:name) if result == 0
+      return result
     end
 
 
@@ -208,6 +206,26 @@ module Osm
         return true
       end
 
+      # Compare Column based on flexi_record then id
+      def <=>(another)
+        result = self.flexi_record <=> another.try(:flexi_record)
+        if result == 0
+          if id.match(/\Af_\d+\Z/)
+            # This is a user column
+            unless another.try(:id).to_s.match(/\Af_\d+\Z/)
+              return 1
+            end
+          else
+            # This is a system column
+            if another.try(:id).to_s.match(/\Af_\d+\Z/)
+              return -1
+            end
+          end
+          result = self.id <=> another.try(:id)
+        end
+        return result
+      end
+
     end # Class FlexiRecord::Column
 
 
@@ -278,6 +296,14 @@ module Osm
         end
 
         return updated
+      end
+
+      # Compare Data based on flexi_record, grouping_id then member_id
+      def <=>(another)
+        result = self.flexi_record <=> another.try(:flexi_record)
+        result = self.grouping_id <=> another.try(:grouping_id) if result == 0
+        result = self.member_id <=> another.try(:member_id) if result == 0
+        return result
       end
 
     end # Class FlexiRecord::Data
