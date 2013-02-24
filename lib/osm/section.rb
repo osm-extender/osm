@@ -291,29 +291,6 @@ module Osm
     end
 
 
-    # Get badge stock levels
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the stock levels for, passing nil causes the current term to be used
-    # @!macro options_get
-    # @return Hash
-    def get_badge_stock(api, term=nil, options={})
-      require_ability_to(api, :read, :badge, self, options)
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, self).id : term.to_i
-      cache_key = ['badge_stock', id, term_id]
-
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
-
-      data = api.perform_query("challenges.php?action=getInitialBadges&type=core&sectionid=#{id}&section=#{type}&termid=#{term_id}")
-      data = (data['stock'] || {}).select{ |k,v| !k.eql?('sectionid') }.
-                                   inject({}){ |new_hash,(badge, level)| new_hash[badge] = level.to_i; new_hash }
-
-      cache_write(api, cache_key, data)
-      return data
-    end
-
-
     # Check if this section is one of the youth sections
     # @return [Boolean]
     def youth_section?

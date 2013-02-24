@@ -1,6 +1,10 @@
 ## Version 0.3.0
 
-  * 
+  * Removal of DueBadges
+  * Removal of get\_badge\_stock method from sections
+  * Addition of Badges model:
+    * With get\_due\_badges(api, section, term-nil, options={}) method
+    * With get\_stock(api, section, term=nil, options={}) method
 
 ## Version 0.2.2
 
