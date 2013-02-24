@@ -1,6 +1,6 @@
 ## Version 0.2.1
 
-  * Add sorting/comparing (using <=>) to each model
+  * Add comparing and sorting (using <=>, <, <=, >, >= and between?) to each model
     * Activity - id then version
     * Activity::File - activity\_id then name
     * Activity::Version - activity\_id then version

@@ -48,6 +48,23 @@ module Osm
       return self.id <=> another.try(:id)
     end
 
+    # Add other compare functions
+    def <(another)
+      send('<=>', another) < 0
+    end
+    def <=(another)
+      send('<=>', another) <= 0
+    end
+    def >(another)
+      send('<=>', another) > 0
+    end
+    def >=(another)
+      send('<=>', another) >= 0
+    end
+    def between?(min, max)
+      (send('<=>', min) > 0) && (send('<=>', max) < 0)
+    end
+
 
     # Get a list of attributes which have changed
     # @return Array[String] the names of attributes which have changed
