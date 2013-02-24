@@ -222,26 +222,12 @@ module Osm
       return (start <= date) && (finish >= date)
     end
 
+    # Compare Term based on section_id, start then id
     def <=>(another_term)
-      begin
-        compare = self.section_id <=> another_term.section_id
-        return compare unless compare == 0
-  
-        compare = self.start <=> another_term.start
-        return compare unless compare == 0
-  
-        return self.id <=> another_term.id
-      rescue NoMethodError
-        return 0
-      end
-    end
-
-    def ==(another_term)
-      begin
-        return self.id == another_term.id
-      rescue NoMethodError
-        return false
-      end
+      result = self.section_id <=> another_term.section_id
+      result = self.start <=> another_term.start if result == 0
+      result = self.id <=> another_term.id if result == 0
+      return result
     end
 
   end # Class Term

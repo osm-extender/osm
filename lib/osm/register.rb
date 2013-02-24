@@ -143,9 +143,16 @@ module Osm
       validates_presence_of :name
       validates_presence_of :tooltip, :allow_blank => true
 
+
       # @!method initialize
       #   Initialize a new RegisterField
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+
+      # Compare Field based on id then version
+      def <=>(another)
+        return self.id <=> another.try(:id)
+      end
 
     end # Class Register::Field
 
@@ -185,11 +192,22 @@ module Osm
 
       validates :attendance, :hash => {:key_type => Date, :value_in => ['Yes', 'No', nil]}
 
+
       # @!method initialize
       #   Initialize a new registerData
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-    end # Class Register::Data
+
+      # Compare Attendance based on section_id, grouping_id, last_name then first_name
+      def <=>(another)
+        result = self.section_id <=> another.try(:section_id)
+        result = self.grouping_id <=> another.try(:grouping_id) if result == 0
+        result = self.last_name <=> another.try(:last_name) if result == 0
+        result = self.first_name <=> another.try(:last_name) if result == 0
+        return result
+      end
+
+    end # Class Register::Attendance
 
   end # Class Register
   

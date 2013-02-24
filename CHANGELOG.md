@@ -1,3 +1,25 @@
+## Version 0.2.1
+
+  * Add comparing and sorting (using <=>, <, <=, >, >= and between?) to each model
+    * Activity - id then version
+    * Activity::File - activity\_id then name
+    * Activity::Version - activity\_id then version
+    * ApiAccess - id
+    * Event - start, name then id (shortcuts, returning 0 if ids are equal)
+    * Event::Column - event then id
+    * Event::Attendance - event then row
+    * FlexiRecord - section\_id then name
+    * FlexiRecord::Column - flexi\_record then id (system ones first then user ones)
+    * FlexiRecord::Data - flexi\_record, grouping\_id then member\_id
+    * Grouping - section\_id then name
+    * Meeting - section\_id, date, start\_time then id
+    * Meeting::Activity - title then activity\_id
+    * Member - section\_id, grouping\_id, grouping\_leader (descending), last\_name then first\_name
+    * Register::Field - id
+    * Register::Attendance - section\_id, grouping\_id, last\_name then first\_name
+    * Section - group\_name, type (by age) then name
+    * Term - section\_id, start then id
+
 ## Version 0.2.0
 
   * Raises Forbidden exception if:

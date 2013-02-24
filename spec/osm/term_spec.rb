@@ -37,7 +37,7 @@ describe "Term" do
     term.should_not == Osm::Term.new(@attributes.merge(:id => 3))
   end
 
-  it "Sorts by Section ID, Start date and th Term ID" do
+  it "Sorts by Section ID, Start date and then Term ID" do
     term1 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 11, :start => (Date.today - 60), :finish => (Date.today - 1)))
     term2 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 12, :start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 13, :start => (Date.today +  1), :finish => (Date.today + 60)))

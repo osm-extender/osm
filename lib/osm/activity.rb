@@ -253,6 +253,13 @@ module Osm
       end
     end
 
+    # Compare Activity based on id then version
+    def <=>(another)
+      result = self.id <=> another.try(:id)
+      result = self.version <=> another.try(:version) if result == 0
+      return result
+    end
+
 
     private
     class File
@@ -283,6 +290,13 @@ module Osm
       # @!method initialize
       #   Initialize a new Term
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+      # Compare File based on activity_id then name
+      def <=>(another)
+        result = self.activity_id <=> another.try(:activity_id)
+        result = self.name <=> another.try(:name) if result == 0
+        return result
+      end
 
     end # Class Activity::File
 
@@ -355,6 +369,13 @@ module Osm
       # @!method initialize
       #   Initialize a new Version
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+      # Compare Version based on activity_id then version
+      def <=>(another)
+        result = self.activity_id <=> another.try(:activity_id)
+        result = self.version <=> another.try(:version) if result == 0
+        return result
+      end
 
     end # Class Activity::Version
 

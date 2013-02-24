@@ -113,6 +113,20 @@ describe "Member" do
   end
 
 
+  it "Sorts by section_id, grouping_id, grouping_leader (descending), last_name then first_name" do
+    m1 = Osm::Member.new(:section_id => 1, :grouping_id => 1, :grouping_leader => 1, :last_name => 'a', :first_name => 'a')
+    m2 = Osm::Member.new(:section_id => 2, :grouping_id => 1, :grouping_leader => 1, :last_name => 'a', :first_name => 'a')
+    m3 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 1, :last_name => 'a', :first_name => 'a')
+    m4 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 0, :last_name => 'a', :first_name => 'a')
+    m5 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 0, :last_name => 'a', :first_name => 'a')
+    m6 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 0, :last_name => 'b', :first_name => 'a')
+    m7 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 0, :last_name => 'b', :first_name => 'b')
+
+    data = [m4, m2, m3, m1, m7, m6, m5]
+    data.sort.should == [m1, m2, m3, m4, m5, m6, m7]
+  end
+
+
   describe "Using the API" do
 
     it "Create from API data" do

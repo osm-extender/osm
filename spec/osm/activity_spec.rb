@@ -3,18 +3,51 @@ require 'spec_helper'
 
 describe "Activity" do
 
-    it "Get OSM link" do
-      activity = Osm::Activity.new(
-        :id => 1,
-        :running_time => 10,
-        :title => 'Title',
-        :description => 'Description',
-        :resources => 'Resources',
-        :instructions => 'Instructions',
-        :location => :indoors,
-      )
-      activity.osm_link.should == 'https://www.onlinescoutmanager.co.uk/?l=p1'
+  it "Get OSM link" do
+    activity = Osm::Activity.new(
+      :id => 1,
+      :running_time => 10,
+      :title => 'Title',
+      :description => 'Description',
+      :resources => 'Resources',
+      :instructions => 'Instructions',
+      :location => :indoors,
+    )
+    activity.osm_link.should == 'https://www.onlinescoutmanager.co.uk/?l=p1'
+  end
+
+  it "Sorts by id then version" do
+    a1 = Osm::Activity.new(:id => 1, :version => 1)
+    a2 = Osm::Activity.new(:id => 2, :version => 1)
+    a3 = Osm::Activity.new(:id => 2, :version => 2)
+
+    activities = [a2, a3, a1]
+    activities.sort.should == [a1, a2, a3]
+  end
+
+
+  describe "Activity::File" do
+    it "Sorts by activity_id then name" do
+      a1 = Osm::Activity::File.new(:activity_id => 1, :name => 'a')
+      a2 = Osm::Activity::File.new(:activity_id => 2, :name => 'a')
+      a3 = Osm::Activity::File.new(:activity_id => 2, :name => 'b')
+
+      activities = [a2, a3, a1]
+      activities.sort.should == [a1, a2, a3]
     end
+  end
+
+
+  describe "Activity::Version" do
+    it "Sorts by activity_id then version" do
+      a1 = Osm::Activity::File.new(:activity_id => 1, :version => 1)
+      a2 = Osm::Activity::File.new(:activity_id => 2, :version => 1)
+      a3 = Osm::Activity::File.new(:activity_id => 2, :version => 2)
+
+      activities = [a2, a3, a1]
+      activities.sort.should == [a1, a2, a3]
+    end
+  end
 
 
   describe "Using The API" do

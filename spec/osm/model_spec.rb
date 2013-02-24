@@ -5,8 +5,8 @@ require 'spec_helper'
 describe "Model" do
 
   class ModelTester < Osm::Model
-    attribute :test_attribute
-    attr_accessible :test_attribute
+    attribute :id
+    attr_accessible :id
 
     def self.test_get_config
       {
@@ -120,15 +120,63 @@ describe "Model" do
 
 
   describe "Track attribute changes" do
-    test = ModelTester.new(:test_attribute => 1)
-    test.test_attribute.should == 1
+    test = ModelTester.new(:id => 1)
+    test.id.should == 1
     test.changed_attributes.should == []
 
-    test.test_attribute = 2
-    test.changed_attributes.should == ['test_attribute']
+    test.id = 2
+    test.changed_attributes.should == ['id']
 
     test.reset_changed_attributes
     test.changed_attributes.should == []
+  end
+
+
+  describe "Comparisons" do
+
+    before :each do
+      @mt1 = ModelTester.new(:id => 1)
+      @mt2 = ModelTester.new(:id => 2)
+      @mt3 = ModelTester.new(:id => 3)
+      @mt2a = ModelTester.new(:id => 2)
+    end
+
+    it "<=>" do
+      (@mt1 <=> @mt2).should == -1
+      (@mt2 <=> @mt1).should == 1
+      (@mt2 <=> @mt2a).should == 0
+    end
+
+    it ">" do
+      (@mt1 > @mt2).should be_false
+      (@mt2 > @mt1).should be_true
+      (@mt2 > @mt2a).should be_false
+    end
+
+    it ">=" do
+      (@mt1 >= @mt2).should be_false
+      (@mt2 >= @mt1).should be_true
+      (@mt2 >= @mt2a).should be_true
+    end
+
+    it "<" do
+      (@mt1 < @mt2).should be_true
+      (@mt2 < @mt1).should be_false
+      (@mt2 < @mt2a).should be_false
+    end
+
+    it "<=" do
+      (@mt1 <= @mt2).should be_true
+      (@mt2 <= @mt1).should be_false
+      (@mt2 <= @mt2a).should be_true
+    end
+
+    it "between" do
+      @mt2.between?(@mt1, @mt3).should be_true
+      @mt1.between?(@mt1, @mt3).should be_false
+      @mt3.between?(@mt1, @mt3).should be_false
+    end
+
   end
 
 end

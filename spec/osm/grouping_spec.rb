@@ -3,6 +3,15 @@ require 'spec_helper'
 
 describe "Grouping" do
 
+  it "Sorts by section_id then name" do
+    g1 = Osm::Grouping.new(:section_id => 1, :name => 'a')
+    g2 = Osm::Grouping.new(:section_id => 2, :name => 'a')
+    g3 = Osm::Grouping.new(:section_id => 2, :name => 'b')
+
+    data = [g3, g1, g2]
+    data.sort.should == [g1, g2, g3]
+  end
+
   describe "Using the API" do
 
     it "Get for section" do
@@ -76,6 +85,7 @@ describe "Grouping" do
 
       grouping.update(@api).should be_true
     end
+
     it "Update in OSM (failed)" do
       grouping = Osm::Grouping.new(
         :id => 1,

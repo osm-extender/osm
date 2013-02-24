@@ -241,26 +241,18 @@ module Osm
       return data
     end
 
-
+    # Compare Meeting based on section_id, date, start_time then id
     def <=>(another)
-      begin
-        compare = self.section_id <=> another.section_id
-        return compare unless compare == 0
-  
-        compare = self.date <=> another.date
-        return compare unless compare == 0
-
+      result = self.section_id <=> another.try(:section_id)
+      result = self.date <=> another.try(:date) if result == 0
+      if result == 0
         my_start_time = self.start_time.split(':').map{ |i| i.to_i }
         another_start_time = another.start_time.split(':').map{ |i| i.to_i }
-        compare = my_start_time[0] <=> another_start_time[0]
-        return compare unless compare == 0
-        compare = my_start_time[1] <=> another_start_time[1]
-        return compare unless compare == 0
-  
-        return self.id <=> another.id
-      rescue NoMethodError
-        return 0
-      end
+        result = my_start_time[0] <=> another_start_time[0] if result == 0
+        result = compare = my_start_time[1] <=> another_start_time[1] if result == 0
+      end  
+      result = self.id <=> another.try(:id) if result == 0
+      return result
     end
 
 
@@ -288,6 +280,13 @@ module Osm
       # @!method initialize
       #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+      # Compare Activity based on title then activity_id
+      def <=>(another)
+        result = self.title <=> another.try(:title)
+        result = self.activity_id <=> another.try(:activity_id) if result == 0
+        return result
+      end
 
     end # Class Meeting::Activity
 

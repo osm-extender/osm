@@ -228,12 +228,14 @@ describe "Section" do
   end
 
 
-  it "Sorts by Group Name then section type (age order)" do
-    section1 = Osm::Section.new(@attributes.merge(:group_id => 1, :group_name => '1st Somewhere', :type => :beavers))
-    section2 = Osm::Section.new(@attributes.merge(:group_id => 2, :group_name => '2nd Somewhere', :type => :beavers))
-    section3 = Osm::Section.new(@attributes.merge(:group_id => 2, :group_name => '2nd Somewhere', :type => :cubs))
+  it "Sorts by Group Name, section type (age order) then name" do
+    section1 = Osm::Section.new(@attributes.merge(:group_id => 1, :group_name => '1st Somewhere', :type => :beavers, :name => 'a'))
+    section2 = Osm::Section.new(@attributes.merge(:group_id => 2, :group_name => '2nd Somewhere', :type => :beavers, :name => 'a'))
+    section3 = Osm::Section.new(@attributes.merge(:group_id => 2, :group_name => '2nd Somewhere', :type => :cubs, :name => 'a'))
+    section4 = Osm::Section.new(@attributes.merge(:group_id => 2, :group_name => '2nd Somewhere', :type => :cubs, :name => 'b'))
 
-    [section2, section3, section1].sort.should == [section1, section2, section3]
+    data = [section2, section4, section3, section1]
+    data.sort.should == [section1, section2, section3, section4]
   end
 
 

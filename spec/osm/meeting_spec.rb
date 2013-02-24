@@ -47,17 +47,30 @@ describe "Meeting" do
   end
 
 
-  it "Create Meeting::Activity" do
-    ea = Osm::Meeting::Activity.new(
-      :activity_id => 2,
-      :title => 'Activity Name',
-      :notes => 'Notes',
-    )
+  describe "Meeting::Activity" do
 
-    ea.activity_id.should == 2
-    ea.title.should == 'Activity Name'
-    ea.notes.should == 'Notes'
-    ea.valid?.should be_true
+    it "Create Meeting::Activity" do
+      ea = Osm::Meeting::Activity.new(
+        :activity_id => 2,
+        :title => 'Activity Name',
+        :notes => 'Notes',
+      )
+
+      ea.activity_id.should == 2
+      ea.title.should == 'Activity Name'
+      ea.notes.should == 'Notes'
+      ea.valid?.should be_true
+    end
+
+    it "Sorts by title then activity_id" do
+      a1 = Osm::Meeting::Activity.new(:title => 'a', :activity_id => 1)
+      a2 = Osm::Meeting::Activity.new(:title => 'b', :activity_id => 1)
+      a3 = Osm::Meeting::Activity.new(:title => 'b', :activity_id => 2)
+
+      data = [a2, a3, a1]
+      data.sort.should == [a1, a2, a3]
+    end
+
   end
 
 
