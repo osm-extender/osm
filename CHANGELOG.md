@@ -1,4 +1,4 @@
-## Version 0.2.1
+## Version 0.2.2
 
   * Add comparing and sorting (using <=>, <, <=, >, >= and between?) to each model
     * Activity - id then version
