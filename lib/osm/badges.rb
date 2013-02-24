@@ -4,15 +4,14 @@ module Osm
 
     # Get badge stock levels for a section
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the stock levels for, passing nil causes the current term to be used
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the badge stock for
     # @!macro options_get
     # @return Hash
-    def self.get_stock(api, section, term=nil, options={})
+    def self.get_stock(api, section, options={})
       Osm::Model.require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
-      cache_key = ['badge_stock', section.id, term_id]
+      term_id = Osm::Term.get_current_term_for_section(api, section).id
+      cache_key = ['badge_stock', section.id]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
         return Osm::Model.cache_read(api, cache_key)
@@ -25,6 +24,28 @@ module Osm
       Osm::Model.cache_write(api, cache_key, data)
       return data
     end
+
+    # Update badge stock levels
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to update ther badge stock for
+    # @param [Sring, #to_s] badge_key The badge to set the stock level for
+    # @param [Fixnum, #to_i] stock_level How many of the provided badge there are
+    # @return [Boolan] whether the update was successfull or not
+    def self.update_stock(api, section, badge_key, stock_level)
+      Osm::Model.require_ability_to(api, :write, :badge, section)
+      section = Osm::Section.get(api, section) unless section.is_a?(Osm::Section)
+
+      Osm::Model.cache_delete(api, ['badge_stock', section.id])
+
+      data = api.perform_query("challenges.php?action=updateStock", {
+        'stock' => stock_level,
+        'table' => badge_key,
+        'sectionid' => section.id,
+        'section' => section.type,
+      })
+      return data.is_a?(Hash) && (data['sectionid'].to_i == section.id) && (data[badge_key.to_s].to_i == stock_level)
+    end
+
 
     # Get due badges
     # @param [Osm::Api] api The api to use to make the request
