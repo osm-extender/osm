@@ -14,6 +14,7 @@
     * All:
       * Inherit from Badge (do not use this class directly)
       * With get\_badges\_for\_section(api, section, options={}) method
+      * With get\_badge\_data\_for\_section(api, section, badge\_key, term=nil, options={}) method
 
 ## Version 0.2.2
 

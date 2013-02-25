@@ -41,6 +41,25 @@ describe "Badge" do
     requirement.valid?.should be_true
   end
 
+  it "Create Data" do
+    data = Osm::Badge::Data.new(
+      :member_id => 1,
+      :completed => true,
+      :awarded_date => Date.new(2000, 1, 2),
+      :requirements => {},
+      :section_id => 2,
+      :badge_key => 'key',
+    )
+
+    data.member_id.should == 1
+    data.completed.should == true
+    data.awarded_date.should == Date.new(2000, 1, 2)
+    data.requirements.should == {}
+    data.section_id.should == 2
+    data.badge_key.should == 'key'
+    data.valid?.should be_true
+  end
+
 
   describe "Using the OSM API" do
 
@@ -69,7 +88,7 @@ describe "Badge" do
           },
           "details" => {
             "badge" => {
-              "shortname" => "membership",
+              "shortname" => "badge",
               "name" => "b_name",
               "description" => "b_req_notes",
               "picture" => "badge.png",
@@ -78,7 +97,7 @@ describe "Badge" do
               "groupname" => nil,
               "status" => "3",
               "userid" => "0",
-              "table" => "badge"
+              "table" => "table"
             },
           },
           "stock" => {"sectionid" => "1","badge" => "3"}
@@ -148,6 +167,80 @@ describe "Badge" do
         badge.total_needed.should == 2
         badge.needed_from_section.should == {'a' => 1}
         badge.requirements.should == [Osm::Badge::Requirement.new(:name=>'r_name', :description=>'r_description', :field=>'r_field', :editable=>true, :badge_key=>'badge')]
+      end
+
+    end
+
+    describe "Get badge data for a section" do
+      
+      before :each do
+        @data = {
+          'identifier' => 'scoutid',
+          'items' => [{
+            'scoutid' => 3,
+            'firstname' => 'fn',
+            'lastname' => 'ln',
+            'sid' => '',
+            'completed' => '1',
+            'awarded' => '',
+            'awardeddate' => '2000-01-02',
+            'patrolid' => 4,
+            'a_1' => 'd',
+          }]
+        }
+        @data = @data.to_json
+      end
+
+      it "Core badge" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?termid=2&type=core&section=beavers&c=badge&sectionid=1", :body => @data)
+        datas = Osm::CoreBadge.get_badge_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 'badge', 2)
+        datas.size.should == 1
+        data = datas[0]
+        data.member_id.should == 3
+        data.completed.should == true
+        data.awarded_date.should == Date.new(2000, 1, 2)
+        data.requirements.should == {'a_1' => 'd'}
+        data.section_id.should == 1
+        data.badge_key.should == 'badge'
+      end
+
+      it "Challenge badge" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?termid=2&type=challenge&section=beavers&c=badge&sectionid=1", :body => @data)
+        datas = Osm::ChallengeBadge.get_badge_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 'badge', 2)
+        datas.size.should == 1
+        data = datas[0]
+        data.member_id.should == 3
+        data.completed.should == true
+        data.awarded_date.should == Date.new(2000, 1, 2)
+        data.requirements.should == {'a_1' => 'd'}
+        data.section_id.should == 1
+        data.badge_key.should == 'badge'
+      end
+
+      it "Staged badge" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?termid=2&type=staged&section=beavers&c=badge&sectionid=1", :body => @data)
+        datas = Osm::StagedBadge.get_badge_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 'badge', 2)
+        datas.size.should == 1
+        data = datas[0]
+        data.member_id.should == 3
+        data.completed.should == true
+        data.awarded_date.should == Date.new(2000, 1, 2)
+        data.requirements.should == {'a_1' => 'd'}
+        data.section_id.should == 1
+        data.badge_key.should == 'badge'
+      end
+
+      it "Activity badge" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?termid=2&type=activity&section=beavers&c=badge&sectionid=1", :body => @data)
+        datas = Osm::ActivityBadge.get_badge_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 'badge', 2)
+        datas.size.should == 1
+        data = datas[0]
+        data.member_id.should == 3
+        data.completed.should == true
+        data.awarded_date.should == Date.new(2000, 1, 2)
+        data.requirements.should == {'a_1' => 'd'}
+        data.section_id.should == 1
+        data.badge_key.should == 'badge'
       end
 
     end
