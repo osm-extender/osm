@@ -6,6 +6,14 @@
     * With get\_due\_badges(api, section, options={}) method
     * With get\_stock(api, section, term=nil, options={}) method
     * With update\_stock(api, section, badge\_key, stock\_level) method
+  * Addition of Badge models:
+    * CoreBadge
+    * ChallengeBadge
+    * StagedBadge
+    * ActivityBadge
+    * All:
+      * Inherit from Badge (do not use this class directly)
+      * With get\_badges\_for\_section(api, section, options={}) method
 
 ## Version 0.2.2
 
