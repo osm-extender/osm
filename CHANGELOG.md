@@ -4,7 +4,7 @@
   * Removal of get\_badge\_stock method from sections
   * Addition of Badges model:
     * With get\_due\_badges(api, section, options={}) method
-    * With get\_stock(api, section, term=nil, options={}) method
+    * With get\_stock(api, section, options={}) method
     * With update\_stock(api, section, badge\_key, stock\_level) method
   * Addition of Badge models:
     * CoreBadge
