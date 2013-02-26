@@ -61,6 +61,32 @@ describe "Badge" do
   end
 
 
+  it "Compare badges by name then osm_key" do
+    b1 = Osm::Badge.new(:name => 'A', :osm_key => 'a')
+    b2 = Osm::Badge.new(:name => 'B', :osm_key => 'a')
+    b3 = Osm::Badge.new(:name => 'B', :osm_key => 'b')
+    badges = [b3, b1, b2]
+    badges.sort.should == [b1, b2, b3]
+  end
+
+  it "Compare badge requirements by badge then field" do
+    b1 = Osm::Badge::Requirement.new(:badge => Osm::Badge.new(:name => 'A'), :field => 'a')
+    b2 = Osm::Badge::Requirement.new(:badge => Osm::Badge.new(:name => 'B'), :field => 'a')
+    b3 = Osm::Badge::Requirement.new(:badge => Osm::Badge.new(:name => 'B'), :field => 'b')
+    badges = [b3, b1, b2]
+    badges.sort.should == [b1, b2, b3]
+  end
+
+  it "Compare badge data by badge, section_id then member_id" do
+    b1 = Osm::Badge::Data.new(:badge => Osm::Badge.new(:name => 'A'), :section_id => 1, :member_id => 1)
+    b2 = Osm::Badge::Data.new(:badge => Osm::Badge.new(:name => 'B'), :section_id => 1, :member_id => 1)
+    b3 = Osm::Badge::Data.new(:badge => Osm::Badge.new(:name => 'B'), :section_id => 2, :member_id => 1)
+    b4 = Osm::Badge::Data.new(:badge => Osm::Badge.new(:name => 'B'), :section_id => 2, :member_id => 2)
+    badges = [b3, b4, b1, b2]
+    badges.sort.should == [b1, b2, b3, b4]
+  end
+
+
   describe "Using the OSM API" do
 
     describe "Get Badges" do

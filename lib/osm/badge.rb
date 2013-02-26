@@ -1,6 +1,5 @@
 # TODO - Add met badge requirement count
 # TODO - Add still to do requirement count
-# TODO - Add sorting
 
 module Osm
 
@@ -136,6 +135,13 @@ module Osm
       return datas
     end
 
+    # Compare Badge based on name then osm_key
+    def <=>(another)
+      result = self.name <=> another.try(:name)
+      result = self.osm_key <=> another.try(:osm_key) if result == 0
+      return result
+    end
+
 
     private
     def self.badge_type
@@ -178,6 +184,13 @@ module Osm
       # @!method initialize
       #   Initialize a new Badge
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+      # Compare Badge::Requirement based on badge then field
+      def <=>(another)
+        result = self.badge <=> another.try(:badge)
+        result = self.field <=> another.try(:field) if result == 0
+        return result
+      end
 
     end # Class Requirement
 
@@ -261,7 +274,15 @@ module Osm
         return updated
       end
 
-    end # Class Requirement
+      # Compare Badge::Data based on badge, section_id then member_id
+      def <=>(another)
+        result = self.badge <=> another.try(:badge)
+        result = self.section_id <=> another.try(:section_id) if result == 0
+        result = self.member_id <=> another.try(:member_id) if result == 0
+        return result
+      end
+
+    end # Class Data
 
   end # Class Badge
 
