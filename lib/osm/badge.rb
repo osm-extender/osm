@@ -1,6 +1,3 @@
-# TODO - Add met badge requirement count
-# TODO - Add still to do requirement count
-
 module Osm
 
   class Badge < Osm::Model
@@ -237,6 +234,45 @@ module Osm
         self.requirements = DirtyHashy.new(self.requirements)
         self.requirements.clean_up!
         return ret_val
+      end
+
+
+      # Get the total number of gained requirements
+      # @return [Fixnum] the total number of requirements considered gained
+      def total_gained
+        count = 0
+        requirements.each do |field, data|
+          next if data.blank? || data.downcase[0].eql?('x')
+          count += 1
+        end
+        return count
+      end
+
+      # Get the total number of sections gained
+      # @return [Hash]
+      def sections_gained
+        required = badge.needed_from_section
+        gained = gained_in_sections
+        count = 0
+
+        required.each do |section, needed|
+          next if gained[section] >= needed
+          count += 1
+        end
+        return count
+      end
+
+      # Get the number of requirements gained in each section
+      # @return [Hash]
+      def gained_in_sections
+        count = {}
+        requirements.each do |field, data|
+          field = field.split('_')[0]
+          count[field] ||= 0
+          next if data.blank? || data.downcase[0].eql?('x')
+          count[field] += 1
+        end
+        return count
       end
 
       # Update data in OSM

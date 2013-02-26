@@ -18,6 +18,9 @@
   * Addition of Badge::Requirements class
   * Addition of Badge::Data class
     * With update(api) method
+    * With total\_gained method
+    * With sections\_gained method
+    * With gained\_in\_sections method
 
 ## Version 0.2.2
 

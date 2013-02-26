@@ -87,6 +87,48 @@ describe "Badge" do
   end
 
 
+  it "Get total requirements gained for a member" do
+    data = Osm::Badge::Data.new(
+      :requirements => {'a_1' => 'x', 'a_2' => 'a', 'b_1' => 'yes', 'b_2' => '2000-01-02'}
+    )
+    data.total_gained.should == 3
+  end
+
+  it "Get total requirements met in each section for a member" do
+    badge = Osm::Badge.new(
+      :needed_from_section => {'a' => 1, 'b' => 2},
+      :requirements => [
+        Osm::Badge::Requirement.new(:field => 'a_1'),
+        Osm::Badge::Requirement.new(:field => 'a_2'),
+        Osm::Badge::Requirement.new(:field => 'b_1'),
+        Osm::Badge::Requirement.new(:field => 'b_2'),
+      ]
+    )
+    data = Osm::Badge::Data.new(
+      :badge => badge,
+      :requirements => {'a_1' => 'x', 'a_2' => '', 'b_1' => 'yes', 'b_2' => '2000-01-02'}
+    )
+    data.gained_in_sections.should == {'a' => 0, 'b' => 2}
+  end
+
+  it "Get number of sections met for a member" do
+    badge = Osm::Badge.new(
+      :needed_from_section => {'a' => 1, 'b' => 2},
+      :requirements => [
+        Osm::Badge::Requirement.new(:field => 'a_1'),
+        Osm::Badge::Requirement.new(:field => 'a_2'),
+        Osm::Badge::Requirement.new(:field => 'b_1'),
+        Osm::Badge::Requirement.new(:field => 'b_2'),
+      ]
+    )
+    data = Osm::Badge::Data.new(
+      :badge => badge,
+      :requirements => {'a_1' => 'x', 'a_2' => '', 'b_1' => 'yes', 'b_2' => '2000-01-02'}
+    )
+    data.sections_gained.should == 1
+  end
+
+
   describe "Using the OSM API" do
 
     describe "Get Badges" do
