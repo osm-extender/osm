@@ -24,7 +24,7 @@ Use the [Online Scout Manager](https://www.onlinescoutmanager.co.uk) API.
 Add to your Gemfile and run the `bundle` command to install it.
 
 ```ruby
-gem 'osm'
+gem 'osm', '~> 0.3.0'
 ```
 
 Configure the gem during the initalization of the app (e.g. if using rails then config/initializers/osm.rb would look like):
@@ -41,7 +41,7 @@ ActionDispatch::Callbacks.to_prepare do
       },
     },
     :cache => {
-      :cache          => Rails.cache,
+      :cache => Rails.cache,
     },
   )
 end
@@ -53,7 +53,7 @@ end
 In order to use the OSM API you first need to authorize the api to be used by the user, to do this use the {Osm::Api#authorize} method to get a userid and secret.
 
 ```ruby
-Osm::Api.new.authorize(users_email_address, users_osm_password)
+Osm::Api.authorize(users_email_address, users_osm_password)
 ```
 
 Once you have done this you should store the userid and secret somewhere, you can then create an {Osm::Api} object to start acting as the user.
@@ -77,7 +77,11 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Activity
   * API Access
   * API Access for our app
-  * Badge requirements for evening
+  * Badges (Silver required for activity, Bronze for core, challenge and staged):
+    * Which requirements each member has met
+    * Details for each badge
+    * Requirements for evening
+    * Badge stock levels
   * Due Badges
   * Evening
   * Event (Silver required)
@@ -114,6 +118,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 ### Create
   * Evening
   * Event (Silver required)
+  * Event Column (Silver required)
   * Member
   * Flexi Record Column
 
@@ -131,12 +136,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
   * Badges (Silver required for activity, Bronze for core, challenge and staged):
-    * Which requirements each member has met:
-      * Retreive [issue 21]
-      * Update [issue 22]
-    * Retrieve details for each badge (stock, short column names etc.) [issue 20]
-    * Update badge stock [issue 56]
-  * Event - Create column (Silver required)
+    * Update Which requirements each member has met [issue 22]
   * SMS:
     * Retrieval of delivery reports [issue 54]
     * Sending a message [issue 54]
