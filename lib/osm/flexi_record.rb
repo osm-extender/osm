@@ -237,7 +237,7 @@ module Osm
       # @!attribute [rw] grouping__id
       #   @return [Fixnum] OSM id for the grouping the member is in
       # @!attribute [rw] fields
-      #   @return [Hash] Keys are the field's id, values are the field values
+      #   @return [DirtyHashy] Keys are the field's id, values are the field values
 
       attribute :flexi_record, :type => Object
       attribute :member_id, :type => Integer
@@ -251,9 +251,18 @@ module Osm
       validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
       validates :fields, :hash => {:key_type => String}
 
+
       # @!method initialize
       #   Initialize a new FlexiRecord::Data
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      # Override initialize to set @orig_attributes
+      old_initialize = instance_method(:initialize)
+      define_method :initialize do |*args|
+        ret_val = old_initialize.bind(self).call(*args)
+        self.fields = DirtyHashy.new(self.fields)
+        self.fields.clean_up!
+        return ret_val
+      end
 
 
       # Update data in OSM
@@ -267,20 +276,21 @@ module Osm
         term_id = Osm::Term.get_current_term_for_section(api, flexi_record.section_id).id
 
         updated = true
-        flexi_record.get_columns(api).each do |column|
-          if column.editable
+        editable_fields = flexi_record.get_columns(api).select{ |c| c.editable }.map{ |i| i.id }
+        fields.changes.each do |field, (was,now)|
+          if editable_fields.include?(field)
             data = api.perform_query("extras.php?action=updateScout", {
               'termid' => term_id,
               'scoutid' => self.member_id,
-              'column' => column.id,
-              'value' => fields[column.id],
+              'column' => field,
+              'value' => now,
               'sectionid' => flexi_record.section_id,
               'extraid' => flexi_record.id,
             })
             if (data.is_a?(Hash) && data['items'].is_a?(Array))
               data['items'].each do |item|
                 if item['scoutid'] == member_id.to_s  # Find this member from the list of all members
-                  updated = false unless item[column.id] == self.fields[column.id]
+                  updated = false unless item[field] == now
                 end
               end
             else
@@ -290,7 +300,7 @@ module Osm
         end
 
         if updated
-          reset_changed_attributes
+          fields.clean_up!
           # The cached datas for the flexi record will be out of date - remove them
           cache_delete(api, ['flexi_record_data', flexi_record.id])
         end

@@ -21,6 +21,7 @@
     * With total\_gained method
     * With sections\_gained method
     * With gained\_in\_sections method
+  * FlexiRecord::Data now updates only changed fields
 
 ## Version 0.2.2
 
