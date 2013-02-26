@@ -190,22 +190,6 @@ describe "Section" do
       section.set_notepad(@api, 'content').should be_false
     end
 
-
-    it "Fetch badge stock levels" do
-      badges_body = {
-        'stock' => {
-          'sectionid' => '1',
-          'badge_1' => '1',
-          'badge_2' => '2'
-        }
-      }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=core&sectionid=1&section=beavers&termid=2", :body => badges_body.to_json)
-
-      section = Osm::Section.get(@api, 1)
-      section.should_not be_nil
-      section.get_badge_stock(@api, 2).should == {'badge_1' => 1, 'badge_2' => 2}
-    end
-
   end
 
 

@@ -1,3 +1,28 @@
+## Version 0.3.0
+
+  * Removal of DueBadges
+  * Removal of get\_badge\_stock method from sections
+  * Addition of Badges model:
+    * With get\_due\_badges(api, section, options={}) method
+    * With get\_stock(api, section, options={}) method
+    * With update\_stock(api, section, badge\_key, stock\_level) method
+  * Addition of Badge models:
+    * CoreBadge
+    * ChallengeBadge
+    * StagedBadge
+    * ActivityBadge
+    * All:
+      * Inherit from Badge (do not use this class directly)
+      * With get\_badges\_for\_section(api, section, options={}) method
+      * With get\_badge\_data\_for\_section(api, section, badge, term=nil, options={}) method
+  * Addition of Badge::Requirements class
+  * Addition of Badge::Data class
+    * With update(api) method
+    * With total\_gained method
+    * With sections\_gained method
+    * With gained\_in\_sections method
+  * FlexiRecord::Data now updates only changed fields
+
 ## Version 0.2.2
 
   * Add comparing and sorting (using <=>, <, <=, >, >= and between?) to each model

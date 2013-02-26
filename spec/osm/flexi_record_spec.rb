@@ -441,8 +441,9 @@ describe "Flexi Record" do
         :flexi_record => fr,
         :member_id => 4,
         :grouping_id => 5,
-        :fields => {'f_1' => 'value'}
+        :fields => {'f_1' => '', 'f_2' => 'value'}
       )
+      fr_data.fields['f_1'] = 'value'
       fr_data.update(@api).should be_true
     end
 
@@ -463,8 +464,9 @@ describe "Flexi Record" do
         :flexi_record => fr,
         :member_id => 4,
         :grouping_id => 5,
-        :fields => {'f_1' => 'value'}
+        :fields => {'f_1' => 'old value'}
       )
+      fr_data.fields['f_1'] = 'new value'
       fr_data.update(@api).should be_false
     end
 
