@@ -1,5 +1,9 @@
+# TODO - Add met badge requirement count
+# TODO - Add still to do requirement count
+# TODO - Add sorting
+
 module Osm
-  
+
   class Badge < Osm::Model
     class Requirement; end # Ensure the constant exists for the validators
 
@@ -8,7 +12,7 @@ module Osm
     # @!attribute [rw] requirement_notes
     #   @return [String] a description of the badge
     # @!attribute [rw] key
-    #   @return [String] the key for the badge (passed to OSM)
+    #   @return [String] the key for the badge in OSM
     # @!attribute [rw] sections_needed
     #   @return [Fixnum]
     # @!attribute [rw] total_needed
@@ -16,23 +20,23 @@ module Osm
     # @!attribute [rw] needed_from_section
     #   @return [Hash]
     # @!attribute [rw] requirements
-    #   @return [Array<Osm::Badges::Badge::Requirement>]
+    #   @return [Array<Osm::Badge::Requirement>]
 
     attribute :name, :type => String
     attribute :requirement_notes, :type => String
-    attribute :key, :type => String
+    attribute :osm_key, :type => String
     attribute :sections_needed, :type => Integer
     attribute :total_needed, :type => Integer
     attribute :needed_from_section, :type => Object
     attribute :requirements, :type => Object
 
-    attr_accessible :name, :requirement_notes, :key, :sections_needed, :total_needed, :needed_from_section, :requirements
+    attr_accessible :name, :requirement_notes, :osm_key, :sections_needed, :total_needed, :needed_from_section, :requirements
 
     validates_numericality_of :sections_needed, :only_integer=>true, :greater_than_or_equal_to=>-1
     validates_numericality_of :total_needed, :only_integer=>true, :greater_than_or_equal_to=>-1
     validates_presence_of :name
     validates_presence_of :requirement_notes
-    validates_presence_of :key
+    validates_presence_of :osm_key
     validates :needed_from_section, :hash => {:key_type => String, :value_type => Fixnum}
     validates :requirements, :array_of => {:item_type => Osm::Badge::Requirement, :item_valid => true}
 
@@ -67,28 +71,30 @@ module Osm
       badge_order.each do |b|
         structure = structures[b]
         detail = details[b]
-        requirements = []
         config = ActiveSupport::JSON.decode(detail['config'] || '{}')
 
+        badge = new(
+          :name => detail['name'],
+          :requirement_notes => detail['description'],
+          :osm_key => detail['shortname'],
+          :sections_needed => config['sectionsneeded'].to_i,
+          :total_needed => config['totalneeded'].to_i,
+          :needed_from_section => (config['sections'] || {}).inject({}) { |h,(k,v)| h[k] = v.to_i; h },
+        )
+
+        requirements = []
         ((structure[1] || {})['rows'] || []).each do |r|
           requirements.push Osm::Badge::Requirement.new(
-            :badge_key => detail['shortname'],
+            :badge => badge,
             :name => r['name'],
             :description => r['tooltip'],
             :field => r['field'],
             :editable => r['editable'].eql?('true'),
           )
         end
+        badge.requirements = requirements
 
-        badges.push new(
-          :name => detail['name'],
-          :requirement_notes => detail['description'],
-          :key => detail['shortname'],
-          :sections_needed => config['sectionsneeded'].to_i,
-          :total_needed => config['totalneeded'].to_i,
-          :needed_from_section => (config['sections'] || {}).inject({}) { |h,(k,v)| h[k] = v.to_i; h },
-          :requirements => requirements,
-        )
+        badges.push badge
       end
 
       cache_write(api, cache_key, badges)
@@ -98,23 +104,23 @@ module Osm
     # Get a list of badge requirements met by members
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
-    # @param [String] badge_key The key of the badge to get data for
+    # @param [Osm::Badge] badge The badge to get data for
     # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
-    # @return [Osm::Badge::Data]
-    def self.get_badge_data_for_section(api, section, badge_key, term=nil, options={})
+    # @return [Array<Osm::Badge::Data>]
+    def self.get_badge_data_for_section(api, section, badge, term=nil, options={})
       raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if badge_type.nil?
       Osm::Model.require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
-      cache_key = ['badge_data', section.id, term_id, badge_key]
+      cache_key = ['badge_data', section.id, term_id, badge.osm_key]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
       datas = []
-      data = api.perform_query("challenges.php?termid=#{term_id}&type=#{badge_type}&section=#{section.type}&c=#{badge_key}&sectionid=#{section.id}")
+      data = api.perform_query("challenges.php?termid=#{term_id}&type=#{badge_type}&section=#{section.type}&c=#{badge.osm_key}&sectionid=#{section.id}")
       data['items'].each do |d|
         datas.push Osm::Badge::Data.new(
           :member_id => d['scoutid'],
@@ -122,7 +128,7 @@ module Osm
           :awarded_date => Osm.parse_date(d['awardeddate']),
           :requirements => d.select{ |k,v| k.include?('_') },
           :section_id => section.id,
-          :badge_key => badge_key,
+          :badge => badge,
         )
       end
 
@@ -144,8 +150,8 @@ module Osm
       include ::ActiveAttr::MassAssignmentSecurity
       include ::ActiveAttr::Model
 
-      # @!attribute [rw] badge_key
-      #   @return [String] passed to OSM
+      # @!attribute [rw] badge
+      #   @return [Osm::Badge] the badge the requirement belongs to
       # @!attribute [rw] name
       #   @return [String] the name of the badge
       # @!attribute [rw] description
@@ -155,18 +161,18 @@ module Osm
       # @!attribute [rw] editable
       #   @return [Boolean]
 
-      attribute :badge_key, :type => String
+      attribute :badge, :type => Object
       attribute :name, :type => String
       attribute :description, :type => String
       attribute :field, :type => String
       attribute :editable, :type => Boolean
 
-      attr_accessible :name, :description, :field, :editable, :badge_key
+      attr_accessible :name, :description, :field, :editable, :badge
 
       validates_presence_of :name
       validates_presence_of :description
       validates_presence_of :field
-      validates_presence_of :badge_key
+      validates_presence_of :badge
       validates_inclusion_of :editable, :in => [true, false]
 
       # @!method initialize
@@ -187,22 +193,22 @@ module Osm
       # @!attribute [rw] awarded_date
       #   @return [Date] when the badge was awarded
       # @!attribute [rw] requirements
-      #   @return [Hash] the data for each badge requirement
+      #   @return [DirtyHashy] the data for each badge requirement
       # @!attribute [rw] section_id
       #   @return [Fixnum] the ID of the section the member belongs to
-      # @!attribute [rw] badge_key
-      #   @return [String] passed to OSM
+      # @!attribute [rw] badge
+      #   @return [Osm::Badge] the badge that the data belongs to
 
       attribute :member_id, :type => Integer
       attribute :completed, :type => Boolean
       attribute :awarded_date, :type => Date
-      attribute :requirements, :type => Object, :default => {}
+      attribute :requirements, :type => Object, :default => DirtyHashy.new
       attribute :section_id, :type => Integer
-      attribute :badge_key, :type => String
+      attribute :badge, :type => Object
 
-      attr_accessible :member_id, :completed, :awarded_date, :requirements, :section_id, :badge_key
+      attr_accessible :member_id, :completed, :awarded_date, :requirements, :section_id, :badge
 
-      validates_presence_of :badge_key
+      validates_presence_of :badge
       validates_inclusion_of :completed, :in => [true, false]
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -211,6 +217,49 @@ module Osm
       # @!method initialize
       #   Initialize a new Badge
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      # Override initialize to set @orig_attributes
+      old_initialize = instance_method(:initialize)
+      define_method :initialize do |*args|
+        ret_val = old_initialize.bind(self).call(*args)
+        self.requirements = DirtyHashy.new(self.requirements)
+        self.requirements.clean_up!
+        return ret_val
+      end
+
+      # Update data in OSM
+      # @param [Osm::Api] api The api to use to make the request
+      # @return [Boolean] whether the data was updated in OSM
+      # @raise [Osm::ObjectIsInvalid] If the Data is invalid
+      def update(api)
+        raise Osm::ObjectIsInvalid, 'data is invalid' unless valid?
+        section = Osm::Section.get(api, section_id)
+        Osm::Model.require_ability_to(api, :write, :badge, section)
+
+        updated = true
+        editable_fields = badge.requirements.select{ |r| r.editable }.map{ |r| r.field}
+        requirements.changes.each do |field, (was,now)|
+          if editable_fields.include?(field)
+            result = api.perform_query("challenges.php?type=#{badge.class.badge_type}&section=#{section.type}", {
+              'action' => 'updatesingle',
+              'id' => member_id,
+              'col' => field,
+              'value' => now,
+              'chal' => badge.osm_key,
+              'sectionid' => section_id,
+            })
+            updated = false unless result.is_a?(Hash) &&
+                                   (result['sid'].to_i == member_id) &&
+                                   (result[field] == now)
+          end
+        end
+
+
+        if updated
+          requirements.clean_up!
+        end
+
+        return updated
+      end
 
     end # Class Requirement
 

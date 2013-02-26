@@ -3,6 +3,7 @@ require 'active_support'
 require 'active_model'
 require 'date'
 require 'httparty'
+require 'dirty_hashy'
 
 
 module Osm

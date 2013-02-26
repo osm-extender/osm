@@ -105,6 +105,8 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ### Update
   * Activity
+  * Badges (Silver required for activity, Bronze for core, challenge and staged):
+    * Which requirements each member has met
   * Evening
   * Event (Silver required)
   * Event Attendance (Silver required)
@@ -135,8 +137,6 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
-  * Badges (Silver required for activity, Bronze for core, challenge and staged):
-    * Update Which requirements each member has met [issue 22]
   * SMS:
     * Retrieval of delivery reports [issue 54]
     * Sending a message [issue 54]
