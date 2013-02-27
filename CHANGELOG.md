@@ -1,6 +1,6 @@
 ## Version 0.3.1
 
-  * 
+  * Add :network Section type
 
 ## Version 0.3.0
 
