@@ -137,6 +137,8 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
+See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadmap) for more details.
+
   * SMS:
     * Retrieval of delivery reports [issue 54]
     * Sending a message [issue 54]
