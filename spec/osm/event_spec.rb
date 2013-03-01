@@ -567,14 +567,15 @@ describe "Event" do
     end
 
     it "Update attendance (succeded)" do
-      ea = Osm::Event::Attendance.new(:row => 0, :member_id => 4, :fields => {'f_1' => 'TEST'}, :event => Osm::Event.new(:id => 2, :section_id => 1))
+      ea = Osm::Event::Attendance.new(:row => 0, :member_id => 4, :fields => {1 => 'old value', 2 => 'another old value'}, :event => Osm::Event.new(:id => 2, :section_id => 1))
 
+      ea.fields[1] = 'value'
       HTTParty.should_receive(:post).with(
         "https://www.onlinescoutmanager.co.uk/events.php?action=updateScout",
         {:body => {
           'scoutid' => 4,
           'column' => 'f_1',
-          'value' => 'TEST',
+          'value' => 'value',
           'sectionid' => 1,
           'row' => 0,
           'eventid' => 2,
@@ -585,7 +586,41 @@ describe "Event" do
         }}
       ) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
-      ea.update(@api, 'f_1').should be_true
+      ea.attending = :yes
+      HTTParty.should_receive(:post).with(
+        "https://www.onlinescoutmanager.co.uk/events.php?action=updateScout",
+        {:body => {
+          'scoutid' => 4,
+          'column' => 'attending',
+          'value' => 'Yes',
+          'sectionid' => 1,
+          'row' => 0,
+          'eventid' => 2,
+          'apiid' => @CONFIGURATION[:api][:osm][:id],
+          'token' => @CONFIGURATION[:api][:osm][:token],
+          'userid' => 'user_id',
+          'secret' => 'secret',
+        }}
+      ) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+      ea.payment_control = :automatic
+      HTTParty.should_receive(:post).with(
+        "https://www.onlinescoutmanager.co.uk/events.php?action=updateScout",
+        {:body => {
+          'scoutid' => 4,
+          'column' => 'payment',
+          'value' => 'Automatic',
+          'sectionid' => 1,
+          'row' => 0,
+          'eventid' => 2,
+          'apiid' => @CONFIGURATION[:api][:osm][:id],
+          'token' => @CONFIGURATION[:api][:osm][:token],
+          'userid' => 'user_id',
+          'secret' => 'secret',
+        }}
+      ) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+      ea.update(@api).should be_true
     end
 
 

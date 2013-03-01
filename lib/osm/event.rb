@@ -525,34 +525,75 @@ module Osm
       # @!method initialize
       #   Initialize a new Attendance
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      old_initialize = instance_method(:initialize)
+      define_method :initialize do |*args|
+        ret_val = old_initialize.bind(self).call(*args)
+        self.fields = DirtyHashy.new(self.fields)
+        self.fields.clean_up!
+        return ret_val
+      end
 
 
       # Update event attendance
       # @param [Osm::Api] api The api to use to make the request
-      # @param [String] field_id The id of the field to update (must be 'attending' or /\Af_\d+\Z/)
       # @return [Boolean] if the operation suceeded or not
-      # @raise [Osm::ArgumentIsInvalid] If field_id does not match the pattern "f_#{number}" or is "attending"
-      def update(api, field_id)
+      def update(api)
         require_ability_to(api, :write, :events, event.section_id)
-        raise Osm::ArgumentIsInvalid, 'field_id is invalid' unless field_id.match(/\Af_\d+\Z/) || field_id.eql?('attending')
 
-        data = api.perform_query("events.php?action=updateScout", {
-          'scoutid' => member_id,
-          'column' => field_id,
-          'value' => !field_id.eql?('attending') ? fields[field_id] : (fields['attending'] ? 'Yes' : 'No'),
-          'sectionid' => event.section_id,
-          'row' => row,
-          'eventid' => event.id,
-        })
-    
-        if data.is_a?(Hash)
+        payment_values = {
+          :manual => 'Manual',
+          :automatic => 'Automatic',
+        }
+        attending_values = {
+          :yes => 'Yes',
+          :no => 'No',
+          :invited => 'Invited',
+          :shown => 'Show in My.SCOUT',
+        }
+
+        updated = true
+        fields.changes.each do |field, (was,now)|
+          data = api.perform_query("events.php?action=updateScout", {
+            'scoutid' => member_id,
+            'column' => "f_#{field}",
+            'value' => now,
+            'sectionid' => event.section_id,
+            'row' => row,
+            'eventid' => event.id,
+          })
+          updated = false unless data.is_a?(Hash)
+        end
+
+        if changed_attributes.include?('payment_control')
+          data = api.perform_query("events.php?action=updateScout", {
+            'scoutid' => member_id,
+            'column' => 'payment',
+            'value' => payment_values[payment_control],
+            'sectionid' => event.section_id,
+            'row' => row,
+            'eventid' => event.id,
+          })
+          updated = false unless data.is_a?(Hash)
+        end
+        if changed_attributes.include?('attending')
+          data = api.perform_query("events.php?action=updateScout", {
+            'scoutid' => member_id,
+            'column' => 'attending',
+            'value' => attending_values[attending],
+            'sectionid' => event.section_id,
+            'row' => row,
+            'eventid' => event.id,
+          })
+          updated = false unless data.is_a?(Hash)
+        end
+
+        if updated
           reset_changed_attributes
+          fields.clean_up!
           # The cached event attedance will be out of date
           Osm::Model.cache_delete(api, ['event_attendance', event.id])
-          return true
-        else
-          return false
         end
+        return updated
       end
 
       # @! method automatic_payments?
