@@ -251,19 +251,25 @@ module Osm
       data = api.perform_query("events.php?action=getEventAttendance&eventid=#{id}&sectionid=#{section_id}&termid=#{term_id}")
       data = data['items']
 
+      attending_values = {
+        'Yes' => :yes,
+        'No' => :no,
+        'Invited' => :invited,
+        'Show in My.SCOUT' => :shown,
+      }
+
       attendance = []
       data.each_with_index do |item, index|
-        item.merge!({
-          'dob' => item['dob'].nil? ? nil : Osm::parse_date(item['dob'], :ignore_epoch => true),
-          'attending' => item['attending'].eql?('Yes'),
-        })
-
         attendance.push Osm::Event::Attendance.new(
           :event => self,
           :member_id => Osm::to_i_or_nil(item['scoutid']),
           :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+          :first_name => item['firstname'],
+          :last_name => item['lastname'],
+          :date_of_birth => item['dob'].nil? ? nil : Osm::parse_date(item['dob'], :ignore_epoch => true),
+          :attending => attending_values[item['attending']],
           :fields => item.select { |key, value|
-            ['firstname', 'lastname', 'dob', 'attending'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
+            key.to_s.match(/\Af_\d+\Z/)
           },
           :row => index,
         )
@@ -457,7 +463,7 @@ module Osm
     end # class Column
 
 
-    class Attendance < Osm::Model  
+    class Attendance < Osm::Model
       # @!attribute [rw] member_id
       #   @return [Fixnum] OSM id for the member
       # @!attribute [rw] grouping__id
@@ -468,24 +474,40 @@ module Osm
       #   @return [Fixnum] part of the OSM API
       # @!attriute [rw] event
       #   @return [Osm::Event] the event that this attendance applies to
+      # @!attribute [rw] first_name
+      #   @return [String] the member's first name
+      # @!attribute [rw] last_name
+      #   @return [String] the member's last name
+      # @!attribute [rw] date_of_birth
+      #   @return [Date] the member's date of birth
+      # @!attribute [rw] attending
+      #   @return [Symbol] whether the member is attending (either :yes, :no, :invited, :shown or nil)
   
       attribute :row, :type => Integer
       attribute :member_id, :type => Integer
       attribute :grouping_id, :type => Integer
       attribute :fields, :default => {}
       attribute :event
-  
-      attr_accessible :member_id, :grouping_id, :fields, :row, :event
-  
+      attribute :first_name, :type => String
+      attribute :last_name, :type => String
+      attribute :date_of_birth, :type => Date
+      attribute :attending
+
+      attr_accessible :member_id, :grouping_id, :fields, :row, :event, :first_name, :last_name, :date_of_birth, :attending
+
       validates_numericality_of :row, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-      validates :fields, :hash => {:key_type => String}
+      validates :fields, :hash => { :key_type => String, :value_type => String }
       validates_each :event do |record, attr, value|
         record.event.valid?
       end
+      validates_presence_of :first_name
+      validates_presence_of :last_name
+      validates_presence_of :date_of_birth
+      validates_inclusion_of :attending, :in => [:yes, :no, :invited, :shown, nil]
 
-  
+
       # @!method initialize
       #   Initialize a new Attendance
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
@@ -519,11 +541,38 @@ module Osm
         end
       end
 
-      # Compare Activity based on event then row
+      # @! method is_attending?
+      #  Check wether the member has said they are attending the event
+      #  @return [Boolean]
+      # @! method is_not_attending?
+      #  Check wether the member has said they are not attending the event
+      #  @return [Boolean]
+      # @! method is_invited?
+      #  Check wether the member has been invited to the event
+      #  @return [Boolean]
+      # @! method is_shown?
+      #  Check wether the member can see the event in My.SCOUT
+      #  @return [Boolean]
+      [:attending, :not_attending, :invited, :shown].each do |attending_type|
+        define_method "is_#{attending_type}?" do
+          attending == attending_type
+        end
+      end
+
+      # Compare Attendance based on event then row
       def <=>(another)
         result = self.event <=> another.try(:event)
         result = self.row <=> another.try(:row) if result == 0
         return result
+      end
+
+      def inspect
+        ret = "#<#{self.class.name} "
+        ret += attributes.except('event').merge({
+          'event.id' => event.nil? ? nil : event.id
+        }).sort.map{|a| "#{a[0]}: #{a[1].inspect}" }.join(', ')
+        ret += ' >'
+        return ret
       end
 
     end # Class Attendance

@@ -1,5 +1,10 @@
-## Version 0.3.1
+## Version 0.4.0
 
+  * Event::Attendance
+    * Move fields['firstname'] to first\_name attribute
+    * Move fields['lastname'] to last\_name attribute
+    * Move fields['dob'] to date\_of\_birth attribute
+    * Move fields['attending'] to attending attribute
   * Add :network Section type
 
 ## Version 0.3.0

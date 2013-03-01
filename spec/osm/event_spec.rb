@@ -69,7 +69,11 @@ describe "Event" do
         :member_id => 1,
         :grouping_id => 2,
         :row => 3,
-        :columns => [],
+        :first_name => 'First',
+        :last_name => 'Last',
+        :attending => :yes,
+        :date_of_birth => Date.new(2000, 1, 2),
+        :fields => {},
         :event => Osm::Event.new(:id => 1, :section_id => 1, :name => 'Name', :columns => [])
       }
 
@@ -78,6 +82,10 @@ describe "Event" do
       ea.grouping_id.should == 2
       ea.fields.should == {}
       ea.row.should == 3
+      ea.first_name.should == 'First'
+      ea.last_name.should == 'Last'
+      ea.date_of_birth.should == Date.new(2000, 1, 2)
+      ea.attending.should == :yes
       ea.valid?.should be_true
     end
 
@@ -528,6 +536,8 @@ describe "Event" do
             'dob' => '1980-01-02',
             'patrolid' => '2',
             'f_1' => 'a',
+            'payment' => 'Manual',
+            'p1' => ''
           }
         ]
       }
@@ -541,11 +551,11 @@ describe "Event" do
       ea = attendance[0]
       ea.member_id.should == 1
       ea.grouping_id.should == 2
+      ea.first_name.should == 'First'
+      ea.last_name.should == 'Last'
+      ea.date_of_birth.should == Date.new(1980, 1, 2)
+      ea.attending.should == :yes
       ea.fields.should == {
-        'firstname' => 'First',
-        'lastname' => 'Last',
-        'dob' => Date.new(1980, 1, 2),
-        'attending' => true,
         'f_1' => 'a',
       }
       ea.row.should == 0
