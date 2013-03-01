@@ -251,6 +251,10 @@ module Osm
       data = api.perform_query("events.php?action=getEventAttendance&eventid=#{id}&sectionid=#{section_id}&termid=#{term_id}")
       data = data['items']
 
+      payment_values = {
+        'Manual' => :manual,
+        'Automatic' => :automatic,
+      }
       attending_values = {
         'Yes' => :yes,
         'No' => :no,
@@ -268,9 +272,12 @@ module Osm
           :last_name => item['lastname'],
           :date_of_birth => item['dob'].nil? ? nil : Osm::parse_date(item['dob'], :ignore_epoch => true),
           :attending => attending_values[item['attending']],
+          :payment_control => payment_values[item['payment']],
           :fields => item.select { |key, value|
             key.to_s.match(/\Af_\d+\Z/)
           },
+          :payments => item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
+                           .inject({}){ |h,(k,v)| h[k[1..-1].to_i] = v; h },
           :row => index,
         )
       end
@@ -482,6 +489,10 @@ module Osm
       #   @return [Date] the member's date of birth
       # @!attribute [rw] attending
       #   @return [Symbol] whether the member is attending (either :yes, :no, :invited, :shown or nil)
+      # @!attribute [rw] payments
+      #   @return [Hash] keys are the payment's id, values are the payment state
+      # @!attribute [rw] payment_control
+      #   @return [Symbol] whether payments are done manually or automatically (either :manual, :automatic or nil)
   
       attribute :row, :type => Integer
       attribute :member_id, :type => Integer
@@ -492,19 +503,23 @@ module Osm
       attribute :last_name, :type => String
       attribute :date_of_birth, :type => Date
       attribute :attending
+      attribute :payments, :default => {}
+      attribute :payment_control
 
-      attr_accessible :member_id, :grouping_id, :fields, :row, :event, :first_name, :last_name, :date_of_birth, :attending
+      attr_accessible :member_id, :grouping_id, :fields, :row, :event, :first_name, :last_name, :date_of_birth, :attending, :payments, :payment_control
 
       validates_numericality_of :row, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
       validates :fields, :hash => { :key_type => String, :value_type => String }
+      validates :payments, :hash => { :key_type => Fixnum, :value_type => String }
       validates_each :event do |record, attr, value|
         record.event.valid?
       end
       validates_presence_of :first_name
       validates_presence_of :last_name
       validates_presence_of :date_of_birth
+      validates_inclusion_of :payment_control, :in => [:manual, :automatic, nil]
       validates_inclusion_of :attending, :in => [:yes, :no, :invited, :shown, nil]
 
 
@@ -538,6 +553,18 @@ module Osm
           return true
         else
           return false
+        end
+      end
+
+      # @! method automatic_payments?
+      #  Check wether payments are made automatically for this member
+      #  @return [Boolean]
+      # @! method manual_payments?
+      #  Check wether payments are made manually for this member
+      #  @return [Boolean]
+      [:automatic, :manual].each do |payment_control_type|
+        define_method "#{payment_control_type}_payments?" do
+          payments == payment_control_type
         end
       end
 

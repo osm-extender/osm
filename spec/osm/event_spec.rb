@@ -74,6 +74,7 @@ describe "Event" do
         :attending => :yes,
         :date_of_birth => Date.new(2000, 1, 2),
         :fields => {},
+        :payments => {},
         :event => Osm::Event.new(:id => 1, :section_id => 1, :name => 'Name', :columns => [])
       }
 
@@ -81,6 +82,7 @@ describe "Event" do
       ea.member_id.should == 1
       ea.grouping_id.should == 2
       ea.fields.should == {}
+      ea.payments.should == {}
       ea.row.should == 3
       ea.first_name.should == 'First'
       ea.last_name.should == 'Last'
@@ -557,6 +559,9 @@ describe "Event" do
       ea.attending.should == :yes
       ea.fields.should == {
         'f_1' => 'a',
+      }
+      ea.payments.should == {
+        1 => '',
       }
       ea.row.should == 0
     end
