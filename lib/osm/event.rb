@@ -273,9 +273,8 @@ module Osm
           :date_of_birth => item['dob'].nil? ? nil : Osm::parse_date(item['dob'], :ignore_epoch => true),
           :attending => attending_values[item['attending']],
           :payment_control => payment_values[item['payment']],
-          :fields => item.select { |key, value|
-            key.to_s.match(/\Af_\d+\Z/)
-          },
+          :fields => item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
+                         .inject({}){ |h,(k,v)| h[k[2..-1].to_i] = v; h },
           :payments => item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
                            .inject({}){ |h,(k,v)| h[k[1..-1].to_i] = v; h },
           :row => index,
@@ -511,7 +510,7 @@ module Osm
       validates_numericality_of :row, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-      validates :fields, :hash => { :key_type => String, :value_type => String }
+      validates :fields, :hash => { :key_type => Fixnum, :value_type => String }
       validates :payments, :hash => { :key_type => Fixnum, :value_type => String }
       validates_each :event do |record, attr, value|
         record.event.valid?

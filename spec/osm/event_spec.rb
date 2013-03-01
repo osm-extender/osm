@@ -558,7 +558,7 @@ describe "Event" do
       ea.date_of_birth.should == Date.new(1980, 1, 2)
       ea.attending.should == :yes
       ea.fields.should == {
-        'f_1' => 'a',
+        1 => 'a',
       }
       ea.payments.should == {
         1 => '',

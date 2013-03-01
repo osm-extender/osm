@@ -5,6 +5,7 @@
     * Move fields['lastname'] to last\_name attribute
     * Move fields['dob'] to date\_of\_birth attribute
     * Move fields['attending'] to attending attribute
+    * The keys for fields are now Fixnums not Strings
     * Addition of payment\_control and payments attributes
     * Addition of automatic\_payments? and manual\_payments? methods
     * Addition of is\_attending?, is\_not\_attending?, is\_invited? and is\_shown? methods
