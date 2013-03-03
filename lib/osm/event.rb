@@ -466,6 +466,10 @@ module Osm
         return result
       end
 
+      def inspect
+        Osm.inspect_instance(self, options={:replace_with => {'event' => :id}})
+      end
+
     end # class Column
 
 
@@ -591,7 +595,7 @@ module Osm
           reset_changed_attributes
           fields.clean_up!
           # The cached event attedance will be out of date
-          Osm::Model.cache_delete(api, ['event_attendance', event.id])
+          cache_delete(api, ['event_attendance', event.id])
         end
         return updated
       end
@@ -634,12 +638,7 @@ module Osm
       end
 
       def inspect
-        ret = "#<#{self.class.name} "
-        ret += attributes.except('event').merge({
-          'event.id' => event.nil? ? nil : event.id
-        }).sort.map{|a| "#{a[0]}: #{a[1].inspect}" }.join(', ')
-        ret += ' >'
-        return ret
+        Osm.inspect_instance(self, options={:replace_with => {'event' => :id}})
       end
 
     end # Class Attendance

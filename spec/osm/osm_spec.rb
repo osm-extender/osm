@@ -55,4 +55,32 @@ describe "Online Scout Manager" do
 
   end
 
+
+  describe "Inspect instance" do
+
+    class TestA < Osm::Model
+      attribute :id
+      attribute :b
+      attr_accessible :id, :b
+    end
+    class TestB < Osm::Model
+      attribute :id
+      attribute :a
+      attr_accessible :id, :a
+    end
+
+    it "Returns a string" do
+      this_one = TestA.new(:id => 1, :b => '1')
+      inspect = Osm.inspect_instance(this_one)
+      inspect.should == '#<TestA b: "1", id: 1 >'
+    end
+
+    it "Replaces items with their attribute" do
+      this_one = TestA.new(:id => 1, :b => TestB.new(:id => 2))
+      inspect = Osm.inspect_instance(this_one, options={:replace_with => {'b' => :id}})
+      inspect.should == '#<TestA b.id: 2, id: 1 >'
+    end
+
+  end
+
 end
