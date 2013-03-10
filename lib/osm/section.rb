@@ -14,7 +14,7 @@ module Osm
     # @!attribute [rw] subscription_expires
     #   @return [Date] when the section's subscription to OSM expires
     # @!attribute [rw] type
-    #   @return [Symbol] the section type (:beavers, :cubs, :scouts, :exporers, :adults, :waiting, :unknown)
+    #   @return [Symbol] the section type (:beavers, :cubs, :scouts, :exporers, :network, :adults, :waiting, :unknown)
     # @!attribute [rw] column_names
     #   @return [Hash] custom names to use for the data columns
     # @!attribute [rw] fields
@@ -310,13 +310,16 @@ module Osm
     # @!method explorers?
     #   Check if this is an Explorers section
     #   @return (Boolean)
+    # @!method network?
+    #   Check if this is a Network section
+    #   @return (Boolean)
     # @!method adults?
     #   Check if this is an Adults section
     #   @return (Boolean)
     # @!method waiting?
     #   Check if this is a waiting list
     #   @return (Boolean)
-    [:beavers, :cubs, :scouts, :explorers, :adults, :waiting].each do |attribute|
+    [:beavers, :cubs, :scouts, :explorers, :network, :adults, :waiting].each do |attribute|
       define_method "#{attribute}?" do
         type == attribute
       end
@@ -336,7 +339,7 @@ module Osm
     def <=>(another)
       result = self.group_name <=> another.try(:group_name)
       result = 0 if self.type == another.try(:type) && result == 0
-      [:beavers, :cubs, :scouts, :explorers, :waiting, :adults].each do |type|
+      [:beavers, :cubs, :scouts, :explorers, :network, :adults, :waiting].each do |type|
         if result == 0
           result = -1 if self.type == type
           result =  1 if another.try(:type) == type

@@ -226,6 +226,10 @@ module Osm
         return result
       end
 
+      def inspect
+        Osm.inspect_instance(self, options={:replace_with => {'flexi_record' => :id}})
+      end
+
     end # Class FlexiRecord::Column
 
 
@@ -314,6 +318,10 @@ module Osm
         result = self.grouping_id <=> another.try(:grouping_id) if result == 0
         result = self.member_id <=> another.try(:member_id) if result == 0
         return result
+      end
+
+      def inspect
+        Osm.inspect_instance(self, options={:replace_with => {'flexi_record' => :id}})
       end
 
     end # Class FlexiRecord::Data

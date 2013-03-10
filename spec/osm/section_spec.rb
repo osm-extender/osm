@@ -229,12 +229,13 @@ describe "Section" do
     cubs      = Osm::Section.new(:type => :cubs)
     scouts    = Osm::Section.new(:type => :scouts)
     explorers = Osm::Section.new(:type => :explorers)
+    network   = Osm::Section.new(:type => :network)
     adults    = Osm::Section.new(:type => :adults)
     waiting   = Osm::Section.new(:type => :waiting)
 
-    {:beavers => beavers, :cubs => cubs, :scouts => scouts, :explorers => explorers, :adults => adults, :waiting => waiting, :unknown => unknown}.each do |section_type, section|
+    {:beavers => beavers, :cubs => cubs, :scouts => scouts, :explorers => explorers, :network => network, :adults => adults, :waiting => waiting, :unknown => unknown}.each do |section_type, section|
       it "For a #{section_type} section" do
-        [:beavers, :cubs, :scouts, :explorers, :adults, :waiting].each do |type|
+        [:beavers, :cubs, :scouts, :explorers, :network, :adults, :waiting].each do |type|
           section.send("#{type.to_s}?").should == (section_type == type)
         end
       end
@@ -248,6 +249,7 @@ describe "Section" do
     cubs =      Osm::Section.new(:type => :cubs)
     scouts =    Osm::Section.new(:type => :scouts)
     explorers = Osm::Section.new(:type => :explorers)
+    network =   Osm::Section.new(:type => :network)
     adults =    Osm::Section.new(:type => :adults)
     waiting =   Osm::Section.new(:type => :waiting)
 
@@ -256,7 +258,7 @@ describe "Section" do
         section.youth_section?.should be_true
       end
     end
-    [adults, waiting, unknown].each do |section|
+    [network, adults, waiting, unknown].each do |section|
       it "For a #{section.type} section" do
         section.youth_section?.should be_false
       end

@@ -142,4 +142,14 @@ module Osm
     [OSM_EPOCH, OSM_EPOCH_HUMAN].include?(date)
   end
 
+  def self.inspect_instance(instance, options={})
+    replace_with = options[:replace_with] || {}
+
+    values = instance.attributes.sort.map{ |(k,v)|
+      (replace_with.keys.include?(k) && !v.nil?) ? "#{k}.#{replace_with[k]}: #{v.try(replace_with[k])}" : "#{k}: #{v.inspect}"
+    }
+
+    return "#<#{instance.class.name} #{values.join(', ')} >"
+  end
+
 end # Module

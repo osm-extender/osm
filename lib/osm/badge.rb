@@ -189,6 +189,10 @@ module Osm
         return result
       end
 
+      def inspect
+        Osm.inspect_instance(self, options={:replace_with => {'badge' => :osm_key}})
+      end
+
     end # Class Requirement
 
 
@@ -316,6 +320,10 @@ module Osm
         result = self.section_id <=> another.try(:section_id) if result == 0
         result = self.member_id <=> another.try(:member_id) if result == 0
         return result
+      end
+
+      def inspect
+        Osm.inspect_instance(self, options={:replace_with => {'badge' => :osm_key}})
       end
 
     end # Class Data

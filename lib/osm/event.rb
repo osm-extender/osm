@@ -251,20 +251,32 @@ module Osm
       data = api.perform_query("events.php?action=getEventAttendance&eventid=#{id}&sectionid=#{section_id}&termid=#{term_id}")
       data = data['items']
 
+      payment_values = {
+        'Manual' => :manual,
+        'Automatic' => :automatic,
+      }
+      attending_values = {
+        'Yes' => :yes,
+        'No' => :no,
+        'Invited' => :invited,
+        'Show in My.SCOUT' => :shown,
+      }
+
       attendance = []
       data.each_with_index do |item, index|
-        item.merge!({
-          'dob' => item['dob'].nil? ? nil : Osm::parse_date(item['dob'], :ignore_epoch => true),
-          'attending' => item['attending'].eql?('Yes'),
-        })
-
         attendance.push Osm::Event::Attendance.new(
           :event => self,
           :member_id => Osm::to_i_or_nil(item['scoutid']),
           :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
-          :fields => item.select { |key, value|
-            ['firstname', 'lastname', 'dob', 'attending'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
-          },
+          :first_name => item['firstname'],
+          :last_name => item['lastname'],
+          :date_of_birth => item['dob'].nil? ? nil : Osm::parse_date(item['dob'], :ignore_epoch => true),
+          :attending => attending_values[item['attending']],
+          :payment_control => payment_values[item['payment']],
+          :fields => item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
+                         .inject({}){ |h,(k,v)| h[k[2..-1].to_i] = v; h },
+          :payments => item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
+                           .inject({}){ |h,(k,v)| h[k[1..-1].to_i] = v; h },
           :row => index,
         )
       end
@@ -454,10 +466,14 @@ module Osm
         return result
       end
 
+      def inspect
+        Osm.inspect_instance(self, options={:replace_with => {'event' => :id}})
+      end
+
     end # class Column
 
 
-    class Attendance < Osm::Model  
+    class Attendance < Osm::Model
       # @!attribute [rw] member_id
       #   @return [Fixnum] OSM id for the member
       # @!attribute [rw] grouping__id
@@ -468,62 +484,161 @@ module Osm
       #   @return [Fixnum] part of the OSM API
       # @!attriute [rw] event
       #   @return [Osm::Event] the event that this attendance applies to
+      # @!attribute [rw] first_name
+      #   @return [String] the member's first name
+      # @!attribute [rw] last_name
+      #   @return [String] the member's last name
+      # @!attribute [rw] date_of_birth
+      #   @return [Date] the member's date of birth
+      # @!attribute [rw] attending
+      #   @return [Symbol] whether the member is attending (either :yes, :no, :invited, :shown or nil)
+      # @!attribute [rw] payments
+      #   @return [Hash] keys are the payment's id, values are the payment state
+      # @!attribute [rw] payment_control
+      #   @return [Symbol] whether payments are done manually or automatically (either :manual, :automatic or nil)
   
       attribute :row, :type => Integer
       attribute :member_id, :type => Integer
       attribute :grouping_id, :type => Integer
       attribute :fields, :default => {}
       attribute :event
-  
-      attr_accessible :member_id, :grouping_id, :fields, :row, :event
-  
+      attribute :first_name, :type => String
+      attribute :last_name, :type => String
+      attribute :date_of_birth, :type => Date
+      attribute :attending
+      attribute :payments, :default => {}
+      attribute :payment_control
+
+      attr_accessible :member_id, :grouping_id, :fields, :row, :event, :first_name, :last_name, :date_of_birth, :attending, :payments, :payment_control
+
       validates_numericality_of :row, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-      validates :fields, :hash => {:key_type => String}
+      validates :fields, :hash => { :key_type => Fixnum, :value_type => String }
+      validates :payments, :hash => { :key_type => Fixnum, :value_type => String }
       validates_each :event do |record, attr, value|
         record.event.valid?
       end
+      validates_presence_of :first_name
+      validates_presence_of :last_name
+      validates_presence_of :date_of_birth
+      validates_inclusion_of :payment_control, :in => [:manual, :automatic, nil]
+      validates_inclusion_of :attending, :in => [:yes, :no, :invited, :shown, nil]
 
-  
+
       # @!method initialize
       #   Initialize a new Attendance
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      old_initialize = instance_method(:initialize)
+      define_method :initialize do |*args|
+        ret_val = old_initialize.bind(self).call(*args)
+        self.fields = DirtyHashy.new(self.fields)
+        self.fields.clean_up!
+        return ret_val
+      end
 
 
       # Update event attendance
       # @param [Osm::Api] api The api to use to make the request
-      # @param [String] field_id The id of the field to update (must be 'attending' or /\Af_\d+\Z/)
       # @return [Boolean] if the operation suceeded or not
-      # @raise [Osm::ArgumentIsInvalid] If field_id does not match the pattern "f_#{number}" or is "attending"
-      def update(api, field_id)
+      def update(api)
         require_ability_to(api, :write, :events, event.section_id)
-        raise Osm::ArgumentIsInvalid, 'field_id is invalid' unless field_id.match(/\Af_\d+\Z/) || field_id.eql?('attending')
 
-        data = api.perform_query("events.php?action=updateScout", {
-          'scoutid' => member_id,
-          'column' => field_id,
-          'value' => !field_id.eql?('attending') ? fields[field_id] : (fields['attending'] ? 'Yes' : 'No'),
-          'sectionid' => event.section_id,
-          'row' => row,
-          'eventid' => event.id,
-        })
-    
-        if data.is_a?(Hash)
+        payment_values = {
+          :manual => 'Manual',
+          :automatic => 'Automatic',
+        }
+        attending_values = {
+          :yes => 'Yes',
+          :no => 'No',
+          :invited => 'Invited',
+          :shown => 'Show in My.SCOUT',
+        }
+
+        updated = true
+        fields.changes.each do |field, (was,now)|
+          data = api.perform_query("events.php?action=updateScout", {
+            'scoutid' => member_id,
+            'column' => "f_#{field}",
+            'value' => now,
+            'sectionid' => event.section_id,
+            'row' => row,
+            'eventid' => event.id,
+          })
+          updated = false unless data.is_a?(Hash)
+        end
+
+        if changed_attributes.include?('payment_control')
+          data = api.perform_query("events.php?action=updateScout", {
+            'scoutid' => member_id,
+            'column' => 'payment',
+            'value' => payment_values[payment_control],
+            'sectionid' => event.section_id,
+            'row' => row,
+            'eventid' => event.id,
+          })
+          updated = false unless data.is_a?(Hash)
+        end
+        if changed_attributes.include?('attending')
+          data = api.perform_query("events.php?action=updateScout", {
+            'scoutid' => member_id,
+            'column' => 'attending',
+            'value' => attending_values[attending],
+            'sectionid' => event.section_id,
+            'row' => row,
+            'eventid' => event.id,
+          })
+          updated = false unless data.is_a?(Hash)
+        end
+
+        if updated
           reset_changed_attributes
+          fields.clean_up!
           # The cached event attedance will be out of date
-          Osm::Model.cache_delete(api, ['event_attendance', event.id])
-          return true
-        else
-          return false
+          cache_delete(api, ['event_attendance', event.id])
+        end
+        return updated
+      end
+
+      # @! method automatic_payments?
+      #  Check wether payments are made automatically for this member
+      #  @return [Boolean]
+      # @! method manual_payments?
+      #  Check wether payments are made manually for this member
+      #  @return [Boolean]
+      [:automatic, :manual].each do |payment_control_type|
+        define_method "#{payment_control_type}_payments?" do
+          payments == payment_control_type
         end
       end
 
-      # Compare Activity based on event then row
+      # @! method is_attending?
+      #  Check wether the member has said they are attending the event
+      #  @return [Boolean]
+      # @! method is_not_attending?
+      #  Check wether the member has said they are not attending the event
+      #  @return [Boolean]
+      # @! method is_invited?
+      #  Check wether the member has been invited to the event
+      #  @return [Boolean]
+      # @! method is_shown?
+      #  Check wether the member can see the event in My.SCOUT
+      #  @return [Boolean]
+      [:attending, :not_attending, :invited, :shown].each do |attending_type|
+        define_method "is_#{attending_type}?" do
+          attending == attending_type
+        end
+      end
+
+      # Compare Attendance based on event then row
       def <=>(another)
         result = self.event <=> another.try(:event)
         result = self.row <=> another.try(:row) if result == 0
         return result
+      end
+
+      def inspect
+        Osm.inspect_instance(self, options={:replace_with => {'event' => :id}})
       end
 
     end # Class Attendance

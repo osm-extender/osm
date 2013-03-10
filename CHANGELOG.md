@@ -1,3 +1,24 @@
+## Version 0.4.0
+
+  * Event::Attendance
+    * Move fields['firstname'] to first\_name attribute
+    * Move fields['lastname'] to last\_name attribute
+    * Move fields['dob'] to date\_of\_birth attribute
+    * Move fields['attending'] to attending attribute
+    * The keys for fields are now Fixnums not Strings
+    * Addition of payment\_control and payments attributes
+    * Addition of automatic\_payments? and manual\_payments? methods
+    * Addition of is\_attending?, is\_not\_attending?, is\_invited? and is\_shown? methods
+    * update(api, field\_id) method now updates only changed fields, becoming update(api)
+  * Add :network Section type
+  * Add custom inspect methods for:
+    * Event::Attendance (replace event with event.id if present)
+    * Event::Column (replace event with event.id if present)
+    * FlexiRecord::Column (replace flexi\_record with flexi\_record.id)
+    * FlexiRecord::Data (replace flexi\_record with flexi\_record.id)
+    * Badge::Requirement (replace badge with badge.osm\_key)
+    * Badge::Data (replace badge with badge.osm\_key)
+
 ## Version 0.3.0
 
   * Removal of DueBadges
