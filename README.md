@@ -1,3 +1,7 @@
+[![Gem Version](https://badge.fury.io/rb/osm.png)](http://badge.fury.io/rb/osm)
+[![Dependency Status](https://gemnasium.com/robertgauld/osm.png)](https://gemnasium.com/robertgauld/osm)
+
+
 ##Build State
 This project uses continuous integration to help ensure that a quality product is delivered.
 Travis CI monitors two branches (versions) of the code - Master (which is what gets released)
@@ -6,10 +10,6 @@ and Staging (which is what is currently being debugged ready for moving to maste
 Master [![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=master)](http://travis-ci.org/robertgauld/osm)
 
 Staging [![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=staging)](http://travis-ci.org/robertgauld/osm)
-
-This project also uses gemnasium to help ensure that the current version of libraries are being used.
-
-Master [![Dependency Status](https://gemnasium.com/robertgauld/osm.png)](https://gemnasium.com/robertgauld/osm)
 
 
 ## OSM
