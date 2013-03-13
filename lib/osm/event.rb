@@ -373,7 +373,9 @@ module Osm
       )
 
       columns = []
-      ActiveSupport::JSON.decode(event_data['config']).each do |field|
+      column_data = ActiveSupport::JSON.decode(event_data['config'] || '[]')
+      column_data = [] unless column_data.is_a?(Array)
+      column_data.each do |field|
         columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :event => event)
       end
       event.columns = columns
