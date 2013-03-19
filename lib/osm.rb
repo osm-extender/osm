@@ -1,3 +1,4 @@
+# Require gems
 require 'active_attr'
 require 'active_support'
 require 'active_model'
@@ -7,6 +8,7 @@ require 'dirty_hashy'
 
 
 module Osm
+  # Declare exceptions
   class Error < Exception; end
   class ConnectionError < Error; end
   class Forbidden < Error; end
@@ -14,6 +16,7 @@ module Osm
   class ObjectIsInvalid < Error; end
 
   private
+  # Set constants
   OSM_EPOCH = '1970-01-01'
   OSM_EPOCH_HUMAN = '1970-01-01'
   OSM_DATE_FORMAT = '%Y-%m-%d'
@@ -25,9 +28,12 @@ module Osm
   OSM_DATE_REGEX = /\A(?:\d{4}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1]))|(?:(?:0?[1-9]|[1-2][0-9]|3[0-1])\/(?:0?[1-9]|1[0-2])\/\d{2}|\d{4})\Z/
 end
 
+# Require file for this gem
 require File.join(File.dirname(__FILE__), '..', 'version')
 Dir[File.join(File.dirname(__FILE__) , '*_validator.rb')].each {|file| require file }
-require File.join(File.dirname(__FILE__), 'osm', 'model')
+['model', 'flexi_record'].each do |file| # These must be included before the rest
+  require File.join(File.dirname(__FILE__), 'osm', file)
+end
 Dir[File.join(File.dirname(__FILE__) , 'osm', '*.rb')].each {|file| require file }
 
 
