@@ -732,11 +732,51 @@ describe "Event" do
 
 
   describe "API Strangeness" do
+
     it "handles a non existant array when no events" do
       data = '{"identifier":"eventid","label":"name"}'
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => data)
       events = Osm::Event.get_for_section(@api, 1).should == []
     end
+
+    it "handles missing config from OSM" do
+      events_body = '{"identifier":"eventid","label":"name","items":[{"eventid":"2","name":"An Event","startdate":"2001-02-03","enddate":"2001-02-05","starttime":"00:00:00","endtime":"12:00:00","cost":"0.00","location":"Somewhere","notes":"Notes","sectionid":1,"googlecalendar":null,"archived":"0","confdate":null,"allowchanges":"1","disablereminders":"1","attendancelimit":"3","limitincludesleaders":"1"}]}'
+
+      event_body = {
+        'eventid' => '2',
+        'name' => 'An Event',
+        'startdate' => '2001-01-02',
+        'enddate' => '2001-02-05',
+        'starttime' => '00:00:00',
+        'endtime' => '12:00:00',
+        'cost' => '0.00',
+        'location' => 'Somewhere',
+        'notes' => 'Notes',
+        'notepad' => 'notepad',
+        'publicnotes' => 'public notepad',
+        'sectionid' => '1',
+        'googlecalendar' => nil,
+        'archived' => '0',
+        'confdate' => '2002-01-02',
+        'allowchanges' => '1',
+        'disablereminders' => '1',
+        'pnnotepad' => '',
+        'structure' => [],
+        'attendancelimit' => '3',
+        'limitincludesleaders' => '1',
+      }
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => event_body.to_json)
+
+      Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
+
+      event = Osm::Event.get(@api, 1, 2)
+      event.should_not be_nil
+      event.id.should == 2
+      event.columns.should == []
+    end
+
   end
 
 end
