@@ -1,3 +1,7 @@
+## Version 0.4.2
+
+  * 
+
 ## Version 0.4.1
 
   * Fix not handling of Event's config not being an Array of Hash
