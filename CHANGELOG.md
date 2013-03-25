@@ -1,3 +1,7 @@
+## Version 0.4.3
+
+  * 
+
 ## Version 0.4.2
 
   * Fix undefined variable "section_id" when fetching notepad from cache
