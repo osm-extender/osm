@@ -36,8 +36,8 @@ describe "Register" do
       :grouping_id => '3',
       :total => 4,
       :attendance => {
-        Date.new(2012, 1, 10) => 'Yes',
-        Date.new(2012, 1, 24) => 'No',
+        Date.new(2012, 1, 10) => :yes,
+        Date.new(2012, 1, 24) => :unadvised_absent,
       }
     )
 
@@ -48,8 +48,8 @@ describe "Register" do
     rd.last_name.should == 'B'
     rd.total.should == 4
     rd.attendance.should == {
-      Date.new(2012, 01, 10) => 'Yes',
-      Date.new(2012, 01, 24) => 'No'
+      Date.new(2012, 01, 10) => :yes,
+      Date.new(2012, 01, 24) => :unadvised_absent
     }
     rd.valid?.should be_true
   end
@@ -96,14 +96,20 @@ describe "Register" do
         ]
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json)
+      Osm::Register.stub(:get_structure) { [
+        Osm::Register::Field.new(:id => '2000-01-01', :name => 'Name', :tooltip => 'Tooltip'),
+        Osm::Register::Field.new(:id => '2000-01-02', :name => 'Name', :tooltip => 'Tooltip'),
+        Osm::Register::Field.new(:id => '2000-01-03', :name => 'Name', :tooltip => 'Tooltip'),
+      ] }
 
       register = Osm::Register.get_attendance(@api, 1, 2)
       register.is_a?(Array).should be_true
       register.size.should == 1
       reg = register[0]
       reg.attendance.should == {
-        Date.new(2000, 1, 1) => 'Yes',
-        Date.new(2000, 1, 2) => 'No'
+        Date.new(2000, 1, 1) => :yes,
+        Date.new(2000, 1, 2) => :advised_absent,
+        Date.new(2000, 1, 3) => :unadvised_absent,
       }
       reg.first_name.should == 'First'
       reg.last_name.should == 'Last'
@@ -135,7 +141,7 @@ describe "Register" do
         :section => Osm::Section.new(:id=>1, :type=>:cubs),
         :term => 2,
         :evening => Date.new(2000, 1, 2),
-        :attendance => 'Yes',
+        :attendance => :yes,
         :members => 3,
         :completed_badge_requirements => [{'a'=>'A'}, {'b'=>'B'}]
       }).should be_true
@@ -163,6 +169,7 @@ describe "Register" do
         ]
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json)
+      Osm::Register.stub(:get_structure) { [] }
 
       register = Osm::Register.get_attendance(@api, 1, 2)
       register.is_a?(Array).should be_true
@@ -172,7 +179,7 @@ describe "Register" do
       reg.last_name.should == 'Last'
     end
 
-    it "Handles no data" do
+    it "Handles no data getting structure" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => '')
       register_structure = Osm::Register.get_structure(@api, 1, 2)
       register_structure.is_a?(Array).should be_true

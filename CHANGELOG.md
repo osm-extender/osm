@@ -4,6 +4,11 @@
     * The by\_member attribute now uses scout\_id as the key
     * Addition of member\_names attribute to allow fetching of members names (the old key for the by\_member attribute)
     * descriptions attribute has been renamed to badge\_names for consistency
+  * Code breaking changes to Register and subclasses:
+    * Register:
+      * update\_attendance - :attendance option is now a Symbol not String (:yes, :unadvised\_absent or :advised\_absent)
+    * Register::Attendance:
+      * attendance attribute is now a Hash of Date to Symbol (instead of to String)
 
 ## Version 0.4.2
 

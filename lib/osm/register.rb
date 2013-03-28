@@ -56,6 +56,7 @@ module Osm
       end
 
       data = api.perform_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}")
+      dates = get_structure(api, section, term, options).map{ |f| f.id }.select{ |f| f.match(Osm::OSM_DATE_REGEX) }
 
       to_return = []
       if data.is_a?(Hash) && data['items'].is_a?(Array)
@@ -63,6 +64,15 @@ module Osm
         data.each do |item|
           if item.is_a?(Hash)
             unless item['scoutid'].to_i < 0  # It's a total row
+              attendance = {}
+              dates.each do |date|
+                item_attendance = item[date]
+                date = Date.strptime(date, Osm::OSM_DATE_FORMAT)
+                attendance[date] = :unadvised_absent
+                attendance[date] = :yes if item_attendance.eql?('Yes')
+                attendance[date] = :advised_absent if item_attendance.eql?('No')
+              end
+              item.select{}
               to_return.push Osm::Register::Attendance.new(
                 :member_id => Osm::to_i_or_nil(item['scoutid']),
                 :grouping_id => Osm::to_i_or_nil(item ['patrolid']),
@@ -70,8 +80,7 @@ module Osm
                 :first_name => item['firstname'],
                 :last_name => item['lastname'],
                 :total => item['total'].to_i,
-                :attendance => item.select { |key, value| key.to_s.match(Osm::OSM_DATE_REGEX) }.
-                                    inject({}){ |new_hash,(date, attendance)| new_hash[Date.strptime(date, Osm::OSM_DATE_FORMAT)] = attendance; new_hash },
+                :attendance => attendance,
               )
             end
           end
@@ -87,7 +96,7 @@ module Osm
     # @option data [Osm::Section] :section the section to update the register for
     # @option data [Osm::Term, #to_i, nil] :term The term (or its ID) to get the register for, passing nil causes the current term to be used
     # @option data [Osm::Evening, DateTime, Date] :evening the evening to update the register on
-    # @option data [String] :attendance what to mark the attendance as, one of "Yes", "No" or "Absent"
+    # @option data [Symbol] :attendance what to mark the attendance as, one of :yes, :unadvised_absent or :advised_absent
     # @option data [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>] :members the members (or their ids) to update
     # @option data [Array<Hash>] :completed_badge_requirements (optional) the badge requirements to mark as completed, selected from the Hash returned by the get_badge_requirements_for_evening method
     # @return [Boolean] whether the update succedded
@@ -97,7 +106,7 @@ module Osm
     # @raise [Osm::ArgumentIsInvalid] If data[:members] is missing
     # @raise [Osm::ArgumentIsInvalid] If data[:api] is missing
     def self.update_attendance(data={})
-      raise Osm::ArgumentIsInvalid, ':attendance is invalid' unless ['Yes', 'No', 'Absent'].include?(data[:attendance])
+      raise Osm::ArgumentIsInvalid, ':attendance is invalid' unless [:yes, :unadvised_absent, :advised_absent].include?(data[:attendance])
       raise Osm::ArgumentIsInvalid, ':section is missing' if data[:section].nil?
       raise Osm::ArgumentIsInvalid, ':evening is missing' if data[:evening].nil?
       raise Osm::ArgumentIsInvalid, ':members is missing' if data[:members].nil?
@@ -112,7 +121,7 @@ module Osm
       response = api.perform_query("users.php?action=registerUpdate&sectionid=#{data[:section].id}&termid=#{term_id}", {
         'scouts' => data[:members].inspect,
         'selectedDate' => data[:evening].strftime(Osm::OSM_DATE_FORMAT),
-        'present' => data[:attendance],
+        'present' => {:yes => 'Yes', :unadvised_absent => nil, :advised_absent => 'No'}[data[:attendance]],
         'section' => data[:section].type,
         'sectionid' => data[:section].id,
         'completedBadges' => (data[:completed_badge_requirements] || []).to_json
@@ -171,7 +180,7 @@ module Osm
       # @!attribute [rw] total
       #   @return [FixNum] Total
       # @!attribute [rw] attendance
-      #   @return [Hash] The data for each field - keys are the date, values one of 'Yes' (present), 'No' (known absence) or nil (absent)
+      #   @return [Hash] The data for each field - keys are the date, values one of :yes, :unadvised_absent or :advised_absent
 
       attribute :member_id, :type => Integer
       attribute :grouping_id, :type => Integer
@@ -190,7 +199,7 @@ module Osm
       validates_presence_of :first_name
       validates_presence_of :last_name
 
-      validates :attendance, :hash => {:key_type => Date, :value_in => ['Yes', 'No', nil]}
+      validates :attendance, :hash => {:key_type => Date, :value_in => [:yes, :unadvised_absent, :advised_absent]}
 
 
       # @!method initialize
