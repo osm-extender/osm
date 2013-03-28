@@ -207,6 +207,21 @@ module Osm
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
+      # Find out if the member was present on a date
+      # @param [Date] date The date to check attendance for
+      # @return [Boolean] whether the member was presnt on the given date
+      def present_on?(date)
+        attendance[date] == :yes
+      end
+
+      # Find out if the member was absent on a date
+      # @param [Date] date The date to check attendance for
+      # @return [Boolean] whether the member was absent on the given date
+      def absent_on?(date)
+        attendance[date] != :yes
+      end
+
+
       # Compare Attendance based on section_id, grouping_id, last_name then first_name
       def <=>(another)
         result = self.section_id <=> another.try(:section_id)

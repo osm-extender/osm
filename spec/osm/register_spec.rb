@@ -65,6 +65,20 @@ describe "Register" do
     data.sort.should == [d1, d2, d3, d4, d5]
   end
 
+  it "Reports if a member was present on a date" do
+    date = Date.new(2000, 1, 1)
+    Osm::Register::Attendance.new(:attendance => {date => :yes}).present_on?(date).should be_true
+    Osm::Register::Attendance.new(:attendance => {date => :known_absent}).present_on?(date).should be_false
+    Osm::Register::Attendance.new(:attendance => {date => :unknown_absent}).present_on?(date).should be_false
+  end
+
+  it "Reports if a member was absent on a date" do
+    date = Date.new(2000, 1, 1)
+    Osm::Register::Attendance.new(:attendance => {date => :yes}).absent_on?(date).should be_false
+    Osm::Register::Attendance.new(:attendance => {date => :known_absent}).absent_on?(date).should be_true
+    Osm::Register::Attendance.new(:attendance => {date => :unknown_absent}).absent_on?(date).should be_true
+  end
+
 
   describe "Using the API" do
 

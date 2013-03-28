@@ -9,6 +9,9 @@
       * update\_attendance - :attendance option is now a Symbol not String (:yes, :unadvised\_absent or :advised\_absent)
     * Register::Attendance:
       * attendance attribute is now a Hash of Date to Symbol (instead of to String)
+  * Register::Attendance gains two helper methods:
+    * present\_on?(date)
+    * absent\_on?(date)
 
 ## Version 0.4.2
 
