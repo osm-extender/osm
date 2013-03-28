@@ -37,6 +37,8 @@ module Osm
     #   @return [Fixnum] the maximum number of people who can attend the event (0 = no limit)
     # @!attendance [rw] attendance_limit_includes_leaders
     #   @return [Boolean] whether the attendance limit includes leaders
+    # @!attribute [rw] allow_booking
+    #   @return [Boolean] whether booking is allowed through My.SCOUT
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -55,10 +57,11 @@ module Osm
     attribute :reminders, :type => Boolean, :default => true
     attribute :attendance_limit, :type => Integer, :default => 0
     attribute :attendance_limit_includes_leaders, :type => Boolean, :default => false
+    attribute :allow_booking, :type => Boolean, :default => true
 
     attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
                     :fields, :columns, :notepad, :public_notepad, :confirm_by_date, :allow_changes,
-                    :reminders, :attendance_limit, :attendance_limit_includes_leaders
+                    :reminders, :attendance_limit, :attendance_limit_includes_leaders, :allow_booking
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -68,6 +71,7 @@ module Osm
     validates_inclusion_of :allow_changes, :in => [true, false]
     validates_inclusion_of :reminders, :in => [true, false]
     validates_inclusion_of :attendance_limit_includes_leaders, :in => [true, false]
+    validates_inclusion_of :allow_booking, :in => [true, false]
 
 
     # @!method initialize
@@ -157,7 +161,8 @@ module Osm
         'allowChanges' => event.allow_changes ? 'true' : 'false',
         'disablereminders' => !event.reminders ? 'true' : 'false',
         'attendancelimit' => event.attendance_limit,
-        'limitincludesleaders' => event.attendance_limit_includes_leaders,
+        'limitincludesleaders' => event.attendance_limit_includes_leaders ? 'true' : 'false',
+        'allowbooking' => event.allow_booking ? 'true' : 'false',
       })
 
       # The cached events for the section will be out of date - remove them
@@ -194,7 +199,8 @@ module Osm
         'allowChanges' => allow_changes ? 'true' : 'false',
         'disablereminders' => !reminders ? 'true' : 'false',
         'attendancelimit' => attendance_limit,
-        'limitincludesleaders' => attendance_limit_includes_leaders,
+        'limitincludesleaders' => attendance_limit_includes_leaders ? 'true' : 'false',
+        'allowbooking' => allow_booking ? 'true' : 'false',
       })
 
       api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
@@ -370,6 +376,7 @@ module Osm
         :reminders => !event_data['disablereminders'].eql?('1'),
         :attendance_limit => event_data['attendancelimit'].to_i,
         :attendance_limit_includes_leaders => event_data['limitincludesleaders'].eql?('1'),
+        :allow_booking => event_data['allowbooking'].eql?('1'),
       )
 
       columns = []

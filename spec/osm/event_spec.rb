@@ -23,6 +23,7 @@ describe "Event" do
       :reminders => false,
       :attendance_limit => 3,
       :attendance_limit_includes_leaders => true,
+      :allow_booking => false,
     }
     event = Osm::Event.new(data)
 
@@ -43,6 +44,7 @@ describe "Event" do
     event.reminders.should == false
     event.attendance_limit.should == 3
     event.attendance_limit_includes_leaders.should == true
+    event.allow_booking.should be_false
     event.valid?.should be_true
   end
 
@@ -126,6 +128,7 @@ describe "Event" do
           'disablereminders' => '1',
           'attendancelimit' => '3',
           'limitincludesleaders' => '1',
+          'allowbooking' => '1',
         }]
       }
 
@@ -152,6 +155,7 @@ describe "Event" do
         'structure' => [],
         'attendancelimit' => '3',
         'limitincludesleaders' => '1',
+        'allowbooking' => '1',
       }
 
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body.to_json)
@@ -181,6 +185,7 @@ describe "Event" do
         event.reminders.should == false
         event.attendance_limit.should == 3
         event.attendance_limit_includes_leaders.should == true
+        event.allow_booking.should == true
         event.columns[0].id.should == 'f_1'
         event.columns[0].name.should == 'Name'
         event.columns[0].label.should == 'Label'
@@ -368,7 +373,8 @@ describe "Event" do
         'allowChanges' => 'true',
         'disablereminders' => 'false',
         'attendancelimit' => 3,
-        'limitincludesleaders' => true,
+        'limitincludesleaders' => 'true',
+        'allowbooking' => 'true',
       }
 
       Osm::Event.stub(:get_for_section) { [] }
@@ -390,6 +396,7 @@ describe "Event" do
         :reminders => true,
         :attendance_limit => 3,
         :attendance_limit_includes_leaders => true,
+        :allow_booking => true,
       })
       event.should_not be_nil
       event.id.should == 2
@@ -438,7 +445,8 @@ describe "Event" do
         'allowChanges' => 'true',
         'disablereminders' => 'false',
         'attendancelimit' => 3,
-        'limitincludesleaders' => true,
+        'limitincludesleaders' => 'true',
+        'allowbooking' => 'true',
       }
 
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
@@ -461,6 +469,7 @@ describe "Event" do
         :public_notepad => '',
         :attendance_limit => 3,
         :attendance_limit_includes_leaders => true,
+        :allow_booking => true,
       )
       event.notepad = 'notepad'
       event.public_notepad = 'public notepad'

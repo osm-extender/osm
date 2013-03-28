@@ -12,6 +12,7 @@
   * Register::Attendance gains two helper methods:
     * present\_on?(date)
     * absent\_on?(date)
+  * Add allow\_booking attribute to Event
 
 ## Version 0.4.2
 
