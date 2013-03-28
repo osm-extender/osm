@@ -1,10 +1,13 @@
-## Version 0.4.3
+## Version 0.5.0
 
-  * 
+  * Code breaking changes to DueBadges:
+    * The by\_member attribute now uses scout\_id as the key
+    * Addition of member\_names attribute to allow fetching of members names (the old key for the by\_member attribute)
+    * descriptions attribute has been renamed to badge\_names for consistency
 
 ## Version 0.4.2
 
-  * Fix undefined variable "section_id" when fetching notepad from cache
+  * Fix undefined variable "section\_id" when fetching notepad from cache
 
 ## Version 0.4.1
 

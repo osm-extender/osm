@@ -19,13 +19,13 @@ describe "Badges" do
             }
           ],
           'staged_staged_participation' => [{
-              'sid' => '2',
+              'scoutid' => '2',
               'firstname' => 'Jane',
               'lastname' => 'Doe',
               'level' => '2',
               'extra' => 'Lvl 2'
             }, {
-              'sid' => '1',
+              'scoutid' => '1',
               'firstname' => 'John',
               'lastname' => 'Doe',
               'level' => '2',
@@ -33,7 +33,6 @@ describe "Badges" do
             }
           ]
         },
-
         'description' => {
           'badge_name' => {
             'name' => 'Badge Name',
@@ -53,8 +52,9 @@ describe "Badges" do
 
       db = Osm::Badges.get_due_badges(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
       db.empty?.should == false
-      db.descriptions.should == {'badge_name_1'=>'Badge Name', 'staged_staged_participation_2'=>'Participation (Level 2)'}
-      db.by_member.should == {'John Doe'=>['badge_name_1', 'staged_staged_participation_2'], 'Jane Doe'=>['staged_staged_participation_2']}
+      db.badge_names.should == {'badge_name_1'=>'Badge Name', 'staged_staged_participation_2'=>'Participation (Level 2)'}
+      db.by_member.should == {1=>['badge_name_1', 'staged_staged_participation_2'], 2=>['staged_staged_participation_2']}
+      db.member_names.should == {1 => 'John Doe', 2 => 'Jane Doe'}
       db.totals.should == {'staged_staged_participation_2'=>2, 'badge_name_1'=>1}
       db.valid?.should be_true
     end
