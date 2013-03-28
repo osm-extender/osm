@@ -13,6 +13,7 @@
     * present\_on?(date)
     * absent\_on?(date)
   * Add allow\_booking attribute to Event
+  * Add myscout\_programme\_times attribute to Section
 
 ## Version 0.4.2
 
