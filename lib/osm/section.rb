@@ -51,6 +51,8 @@ module Osm
     #   @return [Boolean] Wether parents can see partially completed badges
     # @!attribute [rw] myscout_programme_summary
     #   @return [Boolean] Wether parents can see summary of programme items
+    # @!attribute [rw] myscout_programme_times
+    #   @return [Boolean] Wether parents can see times of programme items
     # @!attribute [rw] myscout_event_reminder_count
     #   @return [Fixnum] How many event reminders to send to parents who haven't responded
     # @!attribute [rw] myscout_event_reminder_frequency
@@ -85,6 +87,7 @@ module Osm
     attribute :myscout_email_address_copy, :type => String, :default => ''
     attribute :myscout_badges_partial, :type => Boolean
     attribute :myscout_programme_summary, :type => Boolean
+    attribute :myscout_programme_times, :type => Boolean
     attribute :myscout_event_reminder_count, :type => Integer
     attribute :myscout_event_reminder_frequency, :type => Integer
     attribute :myscout_payment_reminder_count, :type => Integer
@@ -96,7 +99,7 @@ module Osm
                     :myscout_programme_expires, :myscout_events, :myscout_badges,
                     :myscout_programme, :myscout_payments, :myscout_emails,
                     :myscout_email_address_from, :myscout_email_address_copy,
-                    :myscout_badges_partial, :myscout_programme_summary,
+                    :myscout_badges_partial, :myscout_programme_summary, :myscout_programme_times,
                     :myscout_event_reminder_count, :myscout_event_reminder_frequency,
                     :myscout_payment_reminder_count, :myscout_payment_reminder_frequency
 
@@ -126,6 +129,7 @@ module Osm
     validates_inclusion_of :myscout_payments, :in => [true, false]
     validates_inclusion_of :myscout_badges_partial, :in => [true, false]
     validates_inclusion_of :myscout_programme_summary, :in => [true, false]
+    validates_inclusion_of :myscout_programme_times, :in => [true, false]
 
     validates :column_names, :hash => {:key_type => Symbol, :value_type => String}
     validates :fields, :hash => {:key_type => Symbol, :value_in => [true, false]}
@@ -207,6 +211,7 @@ module Osm
             :myscout_email_address_copy => myscout_data['emailAddressCopy'] ? myscout_data['emailAddressCopy'] : '',
             :myscout_badges_partial => myscout_data['badgesPartial'] == 1,
             :myscout_programme_summary => myscout_data['programmeSummary'] == 1,
+            :myscout_programme_times => myscout_data['programmeTimes'] == 1,
             :myscout_event_reminder_count => myscout_data['eventRemindCount'].to_i,
             :myscout_event_reminder_frequency => myscout_data['eventRemindFrequency'].to_i,
             :myscout_payment_reminder_count => myscout_data['paymentRemindCount'].to_i,

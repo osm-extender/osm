@@ -11,7 +11,7 @@ describe "Event" do
       :name => 'Event name',
       :start => DateTime.new(2001, 1, 2, 12 ,0 ,0),
       :finish => nil,
-      :cost => 'Free',
+      :cost => '1.23',
       :location => 'Somewhere',
       :notes => 'None',
       :archived => '0',
@@ -23,6 +23,7 @@ describe "Event" do
       :reminders => false,
       :attendance_limit => 3,
       :attendance_limit_includes_leaders => true,
+      :allow_booking => false,
     }
     event = Osm::Event.new(data)
 
@@ -31,7 +32,7 @@ describe "Event" do
     event.name.should == 'Event name'
     event.start.should == DateTime.new(2001, 1, 2, 12, 0, 0)
     event.finish.should == nil
-    event.cost.should == 'Free'
+    event.cost.should == '1.23'
     event.location.should == 'Somewhere'
     event.notes.should == 'None'
     event.archived.should be_false
@@ -43,12 +44,24 @@ describe "Event" do
     event.reminders.should == false
     event.attendance_limit.should == 3
     event.attendance_limit_includes_leaders.should == true
+    event.allow_booking.should be_false
     event.valid?.should be_true
   end
 
-  it "Correctly tells if attendance is limited" do
+  it "Tells if attendance is limited" do
     Osm::Event.new(:attendance_limit => 0).limited_attendance?.should be_false
     Osm::Event.new(:attendance_limit => 1).limited_attendance?.should be_true
+  end
+
+  it "Tells if the cost is TBC" do
+    Osm::Event.new(:cost => 'TBC').cost_tbc?.should be_true
+    Osm::Event.new(:cost => '1.23').cost_tbc?.should be_false
+  end
+
+  it "Tells if the cost is free" do
+    Osm::Event.new(:cost => 'TBC').cost_free?.should be_false
+    Osm::Event.new(:cost => '1.23').cost_free?.should be_false
+    Osm::Event.new(:cost => '0.00').cost_free?.should be_true
   end
 
   it "Sorts by start, name then ID (unless IDs are equal)" do
@@ -105,7 +118,7 @@ describe "Event" do
   describe "Using the API" do
 
     before :each do
-      events_body = {
+      @events_body = {
         'identifier' => 'eventid',
         'label' => 'name',
         'items' => [{
@@ -126,10 +139,11 @@ describe "Event" do
           'disablereminders' => '1',
           'attendancelimit' => '3',
           'limitincludesleaders' => '1',
+          'allowbooking' => '1',
         }]
       }
 
-      event_body = {
+      @event_body = {
         'eventid' => '2',
         'name' => 'An Event',
         'startdate' => '2001-01-02',
@@ -152,10 +166,11 @@ describe "Event" do
         'structure' => [],
         'attendancelimit' => '3',
         'limitincludesleaders' => '1',
+        'allowbooking' => '1',
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => event_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => @events_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.to_json)
 
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
     end
@@ -181,9 +196,19 @@ describe "Event" do
         event.reminders.should == false
         event.attendance_limit.should == 3
         event.attendance_limit_includes_leaders.should == true
+        event.allow_booking.should == true
         event.columns[0].id.should == 'f_1'
         event.columns[0].name.should == 'Name'
         event.columns[0].label.should == 'Label'
+        event.valid?.should be_true
+      end
+
+      it 'Handles cost of "-1" for TBC' do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.merge({'cost' => '-1'}).to_json)
+
+        events = Osm::Event.get_for_section(@api, 1)
+        event = events[0]
+        event.cost.should == 'TBC'
         event.valid?.should be_true
       end
 
@@ -349,50 +374,104 @@ describe "Event" do
 
     end
 
-    it "Create (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'name' => 'Test event',
-        'startdate' => '2000-01-02',
-        'enddate' => '2001-02-03',
-        'starttime' => '03:04:05',
-        'endtime' => '04:05:06',
-        'cost' => '1.23',
-        'location' => 'Somewhere',
-        'notes' => 'none',
-        'confdate' => '2000-01-01',
-        'allowChanges' => 'true',
-        'disablereminders' => 'false',
-        'attendancelimit' => 3,
-        'limitincludesleaders' => true,
-      }
+    describe "Create (succeded)" do
 
-      Osm::Event.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+      it "Normal" do
+        url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+        post_data = {
+          'apiid' => @CONFIGURATION[:api][:osm][:id],
+          'token' => @CONFIGURATION[:api][:osm][:token],
+          'userid' => 'user_id',
+          'secret' => 'secret',
+          'name' => 'Test event',
+          'startdate' => '2000-01-02',
+          'enddate' => '2001-02-03',
+          'starttime' => '03:04:05',
+          'endtime' => '04:05:06',
+          'cost' => '1.23',
+          'location' => 'Somewhere',
+          'notes' => 'none',
+          'confdate' => '2000-01-01',
+          'allowChanges' => 'true',
+          'disablereminders' => 'false',
+          'attendancelimit' => 3,
+          'limitincludesleaders' => 'true',
+          'allowbooking' => 'true',
+        }
 
-      event = Osm::Event.create(@api, {
-        :section_id => 1,
-        :name => 'Test event',
-        :start => DateTime.new(2000, 1, 2, 3, 4, 5),
-        :finish => DateTime.new(2001, 2, 3, 4, 5, 6),
-        :cost => '1.23',
-        :location => 'Somewhere',
-        :notes => 'none',
-        :columns => [],
-        :notepad => '',
-        :public_notepad => '',
-        :confirm_by_date => Date.new(2000, 1, 1),
-        :allow_changes => true,
-        :reminders => true,
-        :attendance_limit => 3,
-        :attendance_limit_includes_leaders => true,
-      })
-      event.should_not be_nil
-      event.id.should == 2
+        Osm::Event.stub(:get_for_section) { [] }
+        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+
+        event = Osm::Event.create(@api, {
+          :section_id => 1,
+          :name => 'Test event',
+          :start => DateTime.new(2000, 1, 2, 3, 4, 5),
+          :finish => DateTime.new(2001, 2, 3, 4, 5, 6),
+          :cost => '1.23',
+          :location => 'Somewhere',
+          :notes => 'none',
+          :columns => [],
+          :notepad => '',
+          :public_notepad => '',
+          :confirm_by_date => Date.new(2000, 1, 1),
+          :allow_changes => true,
+          :reminders => true,
+          :attendance_limit => 3,
+          :attendance_limit_includes_leaders => true,
+          :allow_booking => true,
+        })
+        event.should_not be_nil
+        event.id.should == 2
+      end
+
+      it "TBC cost" do
+        url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+        post_data = {
+          'apiid' => @CONFIGURATION[:api][:osm][:id],
+          'token' => @CONFIGURATION[:api][:osm][:token],
+          'userid' => 'user_id',
+          'secret' => 'secret',
+          'name' => 'Test event',
+          'startdate' => '2000-01-02',
+          'enddate' => '2001-02-03',
+          'starttime' => '03:04:05',
+          'endtime' => '04:05:06',
+          'cost' => '-1',
+          'location' => 'Somewhere',
+          'notes' => 'none',
+          'confdate' => '2000-01-01',
+          'allowChanges' => 'true',
+          'disablereminders' => 'false',
+          'attendancelimit' => 3,
+          'limitincludesleaders' => 'true',
+          'allowbooking' => 'true',
+        }
+
+        Osm::Event.stub(:get_for_section) { [] }
+        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+
+        event = Osm::Event.create(@api, {
+          :section_id => 1,
+          :name => 'Test event',
+          :start => DateTime.new(2000, 1, 2, 3, 4, 5),
+          :finish => DateTime.new(2001, 2, 3, 4, 5, 6),
+          :cost => 'TBC',
+          :location => 'Somewhere',
+          :notes => 'none',
+          :columns => [],
+          :notepad => '',
+          :public_notepad => '',
+          :confirm_by_date => Date.new(2000, 1, 1),
+          :allow_changes => true,
+          :reminders => true,
+          :attendance_limit => 3,
+          :attendance_limit_includes_leaders => true,
+          :allow_booking => true,
+        })
+        event.should_not be_nil
+        event.id.should == 2
+      end
+
     end
 
     it "Create (failed)" do
@@ -418,53 +497,107 @@ describe "Event" do
     end
 
 
-    it "Update (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'name' => 'Test event',
-        'startdate' => '2000-01-02',
-        'enddate' => '2001-02-03',
-        'starttime' => '03:04:05',
-        'endtime' => '04:05:06',
-        'cost' => '1.23',
-        'location' => 'Somewhere',
-        'notes' => 'none',
-        'eventid' => 2,
-        'confdate' => '',
-        'allowChanges' => 'true',
-        'disablereminders' => 'false',
-        'attendancelimit' => 3,
-        'limitincludesleaders' => true,
-      }
+    describe "Update (succeded)" do
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "notepad"=>"notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "pnnotepad"=>"public notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      it "Normal" do
+        url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+        post_data = {
+          'apiid' => @CONFIGURATION[:api][:osm][:id],
+          'token' => @CONFIGURATION[:api][:osm][:token],
+          'userid' => 'user_id',
+          'secret' => 'secret',
+          'name' => 'Test event',
+          'startdate' => '2000-01-02',
+          'enddate' => '2001-02-03',
+          'starttime' => '03:04:05',
+          'endtime' => '04:05:06',
+          'cost' => '1.23',
+          'location' => 'Somewhere',
+          'notes' => 'none',
+          'eventid' => 2,
+          'confdate' => '',
+          'allowChanges' => 'true',
+          'disablereminders' => 'false',
+          'attendancelimit' => 3,
+          'limitincludesleaders' => 'true',
+          'allowbooking' => 'true',
+        }
 
-      event = Osm::Event.new(
-        :section_id => 1,
-        :name => 'Test event',
-        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
-        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
-        :cost => '1.23',
-        :location => 'Somewhere',
-        :notes => 'none',
-        :id => 2,
-        :confirm_by_date => nil,
-        :allow_changes => true,
-        :reminders => true,
-        :notepad => '',
-        :public_notepad => '',
-        :attendance_limit => 3,
-        :attendance_limit_includes_leaders => true,
-      )
-      event.notepad = 'notepad'
-      event.public_notepad = 'public notepad'
-      event.update(@api).should be_true
+        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "notepad"=>"notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "pnnotepad"=>"public notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+
+        event = Osm::Event.new(
+          :section_id => 1,
+          :name => 'Test event',
+          :start => DateTime.new(2000, 01, 02, 03, 04, 05),
+          :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
+          :cost => '1.23',
+          :location => 'Somewhere',
+          :notes => 'none',
+          :id => 2,
+          :confirm_by_date => nil,
+          :allow_changes => true,
+          :reminders => true,
+          :notepad => '',
+          :public_notepad => '',
+          :attendance_limit => 3,
+          :attendance_limit_includes_leaders => true,
+          :allow_booking => true,
+        )
+        event.notepad = 'notepad'
+        event.public_notepad = 'public notepad'
+        event.update(@api).should be_true
+      end
+
+      it "TBC cost" do
+        url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
+        post_data = {
+          'apiid' => @CONFIGURATION[:api][:osm][:id],
+          'token' => @CONFIGURATION[:api][:osm][:token],
+          'userid' => 'user_id',
+          'secret' => 'secret',
+          'name' => 'Test event',
+          'startdate' => '2000-01-02',
+          'enddate' => '2001-02-03',
+          'starttime' => '03:04:05',
+          'endtime' => '04:05:06',
+          'cost' => '-1',
+          'location' => 'Somewhere',
+          'notes' => 'none',
+          'eventid' => 2,
+          'confdate' => '',
+          'allowChanges' => 'true',
+          'disablereminders' => 'false',
+          'attendancelimit' => 3,
+          'limitincludesleaders' => 'true',
+          'allowbooking' => 'true',
+        }
+
+        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+
+        event = Osm::Event.new(
+          :section_id => 1,
+          :name => 'Test event',
+          :start => DateTime.new(2000, 01, 02, 03, 04, 05),
+          :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
+          :cost => '1.23',
+          :location => 'Somewhere',
+          :notes => 'none',
+          :id => 2,
+          :confirm_by_date => nil,
+          :allow_changes => true,
+          :reminders => true,
+          :notepad => '',
+          :public_notepad => '',
+          :attendance_limit => 3,
+          :attendance_limit_includes_leaders => true,
+          :allow_booking => true,
+        )
+        event.cost = 'TBC'
+        event.update(@api).should be_true
+      end
+
     end
 
     it "Update (failed)" do

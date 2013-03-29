@@ -1,6 +1,26 @@
+## Version 0.5.0
+
+  * Code breaking changes to DueBadges:
+    * The by\_member attribute now uses scout\_id as the key
+    * Addition of member\_names attribute to allow fetching of members names (the old key for the by\_member attribute)
+    * descriptions attribute has been renamed to badge\_names for consistency
+  * Code breaking changes to Register and subclasses:
+    * Register:
+      * update\_attendance - :attendance option is now a Symbol not String (:yes, :unadvised\_absent or :advised\_absent)
+    * Register::Attendance:
+      * attendance attribute is now a Hash of Date to Symbol (instead of to String)
+  * Register::Attendance gains two helper methods:
+    * present\_on?(date)
+    * absent\_on?(date)
+  * Add allow\_booking attribute to Event
+  * Add myscout\_programme\_times attribute to Section
+  * Cost attribute of Event is now checked to be either "TBC" or formatted to /\\A\\d+\\.\\d{2}\\Z/
+  * Add cost\_tbc? method to Event
+  * Add cost\_free? method to Event
+
 ## Version 0.4.2
 
-  * Fix undefined variable "section_id" when fetching notepad from cache
+  * Fix undefined variable "section\_id" when fetching notepad from cache
 
 ## Version 0.4.1
 
