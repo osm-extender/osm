@@ -14,6 +14,9 @@
     * absent\_on?(date)
   * Add allow\_booking attribute to Event
   * Add myscout\_programme\_times attribute to Section
+  * Cost attribute of Event is now checked to be either "TBC" or formatted to /\\A\\d+\\.\\d{2}\\Z/
+  * Add cost\_tbc? method to Event
+  * Add cost\_free? method to Event
 
 ## Version 0.4.2
 
