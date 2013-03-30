@@ -104,19 +104,19 @@ module Osm
     # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Badge::Data>]
-    def self.get_badge_data_for_section(api, section, badge, term=nil, options={})
+    def get_data_for_section(api, section, term=nil, options={})
       raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if badge_type.nil?
       Osm::Model.require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
-      cache_key = ['badge_data', section.id, term_id, badge.osm_key]
+      cache_key = ['badge_data', section.id, term_id, osm_key]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
       datas = []
-      data = api.perform_query("challenges.php?termid=#{term_id}&type=#{badge_type}&section=#{section.type}&c=#{badge.osm_key}&sectionid=#{section.id}")
+      data = api.perform_query("challenges.php?termid=#{term_id}&type=#{badge_type}&section=#{section.type}&c=#{osm_key}&sectionid=#{section.id}")
       data['items'].each do |d|
         datas.push Osm::Badge::Data.new(
           :member_id => d['scoutid'],
@@ -125,7 +125,7 @@ module Osm
           :awarded_date => Osm.parse_date(d['awardeddate']),
           :requirements => d.select{ |k,v| k.include?('_') },
           :section_id => section.id,
-          :badge => badge,
+          :badge => self,
         )
       end
 
@@ -148,6 +148,14 @@ module Osm
     def self.subscription_required
       :bronze
     end
+
+    # Make selected class methods instance methods too
+    [:badge_type, :subscription_required].each do |method_name|
+      define_method method_name do |*options|
+        self.class.send(method_name, *options)
+      end
+    end
+
 
 
     class Requirement

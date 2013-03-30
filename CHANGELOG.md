@@ -4,6 +4,8 @@
     * completed attribute is now a Fixnum not Boolean (fixes staged badges)
     * awarded attribute added (the last level awarded)
     * due? method added
+  * Badge
+    * make get\_badge\_data\_for\_section an instance not class method
 
 ## Version 0.5.0
 

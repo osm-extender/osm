@@ -294,7 +294,7 @@ describe "Badge" do
 
       it "Core badge" do
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?termid=2&type=core&section=beavers&c=badge&sectionid=1", :body => @data)
-        datas = Osm::CoreBadge.get_badge_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), Osm::Badge.new(:osm_key => 'badge'), 2)
+        datas = Osm::CoreBadge.new(:osm_key => 'badge').get_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
@@ -308,7 +308,7 @@ describe "Badge" do
 
       it "Challenge badge" do
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?termid=2&type=challenge&section=beavers&c=badge&sectionid=1", :body => @data)
-        datas = Osm::ChallengeBadge.get_badge_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), Osm::Badge.new(:osm_key => 'badge'), 2)
+        datas = Osm::ChallengeBadge.new(:osm_key => 'badge').get_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
@@ -322,7 +322,7 @@ describe "Badge" do
 
       it "Staged badge" do
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?termid=2&type=staged&section=beavers&c=badge&sectionid=1", :body => @data)
-        datas = Osm::StagedBadge.get_badge_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), Osm::Badge.new(:osm_key => 'badge'), 2)
+        datas = Osm::StagedBadge.new(:osm_key => 'badge').get_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
@@ -336,7 +336,7 @@ describe "Badge" do
 
       it "Activity badge" do
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?termid=2&type=activity&section=beavers&c=badge&sectionid=1", :body => @data)
-        datas = Osm::ActivityBadge.get_badge_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), Osm::Badge.new(:osm_key => 'badge'), 2)
+        datas = Osm::ActivityBadge.new(:osm_key => 'badge').get_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
