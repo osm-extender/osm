@@ -97,10 +97,43 @@ module Osm
       return badges
     end
 
+    # Get a summary of badges earnt by members
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
+    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @return [Array<Hash>]
+    def self.get_summary_for_section(api, section, term=nil, options={})
+      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if badge_type.nil?
+      require_ability_to(api, :read, :badge, section, options)
+      section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
+      term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
+      cache_key = ['badge-summary', section.id, term_id, badge_type]
+
+      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
+        return cache_read(api, cache_key)
+      end
+
+      summary = []
+      data = api.perform_query("challenges.php?action=summary&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}&type=#{badge_type}")
+      data['items'].each do |item|
+        new_item = {
+          :first_name => item['firstname'],
+          :last_name => item['lastname'],
+        }
+        (item.keys - ['firstname', 'lastname']).each do |key|
+          new_item[key] = item[key]
+        end
+        summary.push new_item
+      end
+
+      cache_write(api, cache_key, summary)
+      return summary
+    end
+
     # Get a list of badge requirements met by members
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
-    # @param [Osm::Badge] badge The badge to get data for
     # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Badge::Data>]

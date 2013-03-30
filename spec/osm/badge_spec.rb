@@ -479,6 +479,72 @@ describe "Badge" do
 
     end
 
+
+    describe "Get summary data for a section" do
+
+      before :each do
+        @data = {
+          'items' => [
+            {
+              'firstname' => 'First',
+              'lastname' => 'Last',
+              'badge_none' => '',
+              'badge_earnt' => '2000-01-02',
+            }
+          ]
+        }
+        @data = @data.to_json
+      end
+
+      it "Core badge" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=summary&section=beavers&sectionid=1&termid=2&type=core", :body => @data)
+        summary = Osm::CoreBadge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
+        summary.size.should == 1
+        summary[0].should == {
+          :first_name => 'First',
+          :last_name => 'Last',
+          'badge_none' => '',
+          'badge_earnt' => '2000-01-02',
+        }
+      end
+
+      it "Challenge badge" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=summary&section=beavers&sectionid=1&termid=2&type=challenge", :body => @data)
+        summary = Osm::ChallengeBadge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
+        summary.size.should == 1
+        summary[0].should == {
+          :first_name => 'First',
+          :last_name => 'Last',
+          'badge_none' => '',
+          'badge_earnt' => '2000-01-02',
+        }
+      end
+
+      it "Staged badge" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=summary&section=beavers&sectionid=1&termid=2&type=staged", :body => @data)
+        summary = Osm::StagedBadge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
+        summary.size.should == 1
+        summary[0].should == {
+          :first_name => 'First',
+          :last_name => 'Last',
+          'badge_none' => '',
+          'badge_earnt' => '2000-01-02',
+        }
+      end
+
+      it "Activity badge" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=summary&section=beavers&sectionid=1&termid=2&type=activity", :body => @data)
+        summary = Osm::ActivityBadge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
+        summary.size.should == 1
+        summary[0].should == {
+          :first_name => 'First',
+          :last_name => 'Last',
+          'badge_none' => '',
+          'badge_earnt' => '2000-01-02',
+        }
+      end
+    end
+
   end
 
 end

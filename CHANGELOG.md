@@ -7,6 +7,7 @@
     * add first\_name and last\_name attributes
   * Badge
     * make get\_badge\_data\_for\_section an instance not class method (called get\_data\_for\_section)
+    * add get\_summary\_for\_section(api, section, term=nil, options={}) method
 
 ## Version 0.5.0
 
