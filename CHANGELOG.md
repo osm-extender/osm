@@ -3,6 +3,7 @@
   * Badge::Data
     * completed attribute is now a Fixnum not Boolean (fixes staged badges)
     * awarded attribute added (the last level awarded)
+    * due? method added
 
 ## Version 0.5.0
 

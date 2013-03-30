@@ -130,6 +130,12 @@ describe "Badge" do
     data.sections_gained.should == 1
   end
 
+  it "Works out if the badge is due" do
+    Osm::Badge::Data.new(:completed => 0, :awarded => 0).due?.should be_false
+    Osm::Badge::Data.new(:completed => 1, :awarded => 0).due?.should be_true
+    Osm::Badge::Data.new(:completed => 2, :awarded => 2).due?.should be_false
+    Osm::Badge::Data.new(:completed => 2, :awarded => 1).due?.should be_true
+  end
 
   describe "Using the OSM API" do
 

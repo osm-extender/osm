@@ -284,6 +284,12 @@ module Osm
         return count
       end
 
+      # Check if this bade is due
+      # @return [Boolean] whether the badge is due to the member
+      def due?
+        completed > awarded
+      end
+
       # Update data in OSM
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the data was updated in OSM
