@@ -1,4 +1,4 @@
-## Version 0.5.1
+## Version 0.6.0
 
   * Badge::Data
     * completed attribute is now a Fixnum not Boolean (fixes staged badges)
