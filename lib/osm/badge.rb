@@ -7,7 +7,7 @@ module Osm
     #   @return [String] the name of the badge
     # @!attribute [rw] requirement_notes
     #   @return [String] a description of the badge
-    # @!attribute [rw] key
+    # @!attribute [rw] osm_key
     #   @return [String] the key for the badge in OSM
     # @!attribute [rw] sections_needed
     #   @return [Fixnum]
