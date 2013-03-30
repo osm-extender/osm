@@ -58,7 +58,7 @@ module Osm
       data = api.perform_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}")
       dates_s = get_structure(api, section, term, options)
       dates_s = dates_s.map{ |f| f.id }.select{ |f| f.match(Osm::OSM_DATE_REGEX) }
-      dates_d = dates_s.map{ |d| date = Date.strptime(d, Osm::OSM_DATE_FORMAT) }
+      dates_d = dates_s.map{ |d| Osm::parse_date(d) }
 
       to_return = []
       if data.is_a?(Hash) && data['items'].is_a?(Array)
