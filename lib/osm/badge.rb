@@ -120,7 +120,8 @@ module Osm
       data['items'].each do |d|
         datas.push Osm::Badge::Data.new(
           :member_id => d['scoutid'],
-          :completed => d['completed'].eql?('1'),
+          :completed => d['completed'].to_i,
+          :awarded => d['awarded'].to_i,
           :awarded_date => Osm.parse_date(d['awardeddate']),
           :requirements => d.select{ |k,v| k.include?('_') },
           :section_id => section.id,
@@ -203,7 +204,9 @@ module Osm
       # @!attribute [rw] member_id
       #   @return [Fixnum] ID of the member this data relates to
       # @!attribute [rw] completed
-      #   @return [Boolean] whether this badge has been completed (i.e. it is due?)
+      #   @return [Fixnum] whether this badge has been completed (i.e. it is due?), number indicates stage if appropriate
+      # @!attribute [rw] awarded
+      #   @return [Date] the last stage awarded
       # @!attribute [rw] awarded_date
       #   @return [Date] when the badge was awarded
       # @!attribute [rw] requirements
@@ -214,16 +217,18 @@ module Osm
       #   @return [Osm::Badge] the badge that the data belongs to
 
       attribute :member_id, :type => Integer
-      attribute :completed, :type => Boolean
-      attribute :awarded_date, :type => Date
+      attribute :completed, :type => Integer, :default => 0
+      attribute :awarded, :type => Integer, :default => 0
+      attribute :awarded_date, :type => Date, :default => nil
       attribute :requirements, :type => Object, :default => DirtyHashy.new
       attribute :section_id, :type => Integer
       attribute :badge, :type => Object
 
-      attr_accessible :member_id, :completed, :awarded_date, :requirements, :section_id, :badge
+      attr_accessible :member_id, :completed, :awarded, :awarded_date, :requirements, :section_id, :badge
 
       validates_presence_of :badge
-      validates_inclusion_of :completed, :in => [true, false]
+      validates_numericality_of :completed, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :awarded, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
       validates :requirements, :hash => {:key_type => String, :value_type => String}

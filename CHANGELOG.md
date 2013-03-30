@@ -1,6 +1,8 @@
 ## Version 0.5.1
 
-  * 
+  * Badge::Data
+    * completed attribute is now a Fixnum not Boolean (fixes staged badges)
+    * awarded attribute added (the last level awarded)
 
 ## Version 0.5.0
 

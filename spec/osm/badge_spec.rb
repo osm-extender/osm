@@ -44,7 +44,8 @@ describe "Badge" do
   it "Create Data" do
     data = Osm::Badge::Data.new(
       :member_id => 1,
-      :completed => true,
+      :completed => 4,
+      :awarded => 3,
       :awarded_date => Date.new(2000, 1, 2),
       :requirements => {},
       :section_id => 2,
@@ -52,7 +53,8 @@ describe "Badge" do
     )
 
     data.member_id.should == 1
-    data.completed.should == true
+    data.completed.should == 4
+    data.awarded.should == 3
     data.awarded_date.should == Date.new(2000, 1, 2)
     data.requirements.should == {}
     data.section_id.should == 2
@@ -274,8 +276,8 @@ describe "Badge" do
             'firstname' => 'fn',
             'lastname' => 'ln',
             'sid' => '',
-            'completed' => '1',
-            'awarded' => '',
+            'completed' => '2',
+            'awarded' => '1',
             'awardeddate' => '2000-01-02',
             'patrolid' => 4,
             'a_1' => 'd',
@@ -290,7 +292,8 @@ describe "Badge" do
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
-        data.completed.should == true
+        data.completed.should == 2
+        data.awarded.should == 1
         data.awarded_date.should == Date.new(2000, 1, 2)
         data.requirements.should == {'a_1' => 'd'}
         data.section_id.should == 1
@@ -303,7 +306,8 @@ describe "Badge" do
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
-        data.completed.should == true
+        data.completed.should == 2
+        data.awarded.should == 1
         data.awarded_date.should == Date.new(2000, 1, 2)
         data.requirements.should == {'a_1' => 'd'}
         data.section_id.should == 1
@@ -316,7 +320,8 @@ describe "Badge" do
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
-        data.completed.should == true
+        data.completed.should == 2
+        data.awarded.should == 1
         data.awarded_date.should == Date.new(2000, 1, 2)
         data.requirements.should == {'a_1' => 'd'}
         data.section_id.should == 1
@@ -329,7 +334,8 @@ describe "Badge" do
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
-        data.completed.should == true
+        data.completed.should == 2
+        data.awarded.should == 1
         data.awarded_date.should == Date.new(2000, 1, 2)
         data.requirements.should == {'a_1' => 'd'}
         data.section_id.should == 1
@@ -368,7 +374,7 @@ describe "Badge" do
               Osm::Badge::Requirement.new(:field => 'a', :editable => true),
               Osm::Badge::Requirement.new(:field => 'b', :editable => true),
             ]),
-          :completed => false,
+          :completed => 0,
         )
 
         url = "https://www.onlinescoutmanager.co.uk/challenges.php?type=core&section=beavers"
@@ -390,7 +396,7 @@ describe "Badge" do
               Osm::Badge::Requirement.new(:field => 'a', :editable => true),
               Osm::Badge::Requirement.new(:field => 'b', :editable => true),
             ]),
-          :completed => false,
+          :completed => 0,
         )
 
         url = "https://www.onlinescoutmanager.co.uk/challenges.php?type=challenge&section=beavers"
@@ -412,7 +418,7 @@ describe "Badge" do
               Osm::Badge::Requirement.new(:field => 'a', :editable => true),
               Osm::Badge::Requirement.new(:field => 'b', :editable => true),
             ]),
-          :completed => false,
+          :completed => 0,
         )
 
         url = "https://www.onlinescoutmanager.co.uk/challenges.php?type=staged&section=beavers"
@@ -434,7 +440,7 @@ describe "Badge" do
               Osm::Badge::Requirement.new(:field => 'a', :editable => true),
               Osm::Badge::Requirement.new(:field => 'b', :editable => true),
             ]),
-          :completed => false,
+          :completed => 0,
         )
 
         url = "https://www.onlinescoutmanager.co.uk/challenges.php?type=activity&section=beavers"
