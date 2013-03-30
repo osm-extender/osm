@@ -120,6 +120,8 @@ module Osm
       data['items'].each do |d|
         datas.push Osm::Badge::Data.new(
           :member_id => d['scoutid'],
+          :first_name => d['firstname'],
+          :last_name => d['lastname'],
           :completed => d['completed'].to_i,
           :awarded => d['awarded'].to_i,
           :awarded_date => Osm.parse_date(d['awardeddate']),
@@ -211,6 +213,10 @@ module Osm
 
       # @!attribute [rw] member_id
       #   @return [Fixnum] ID of the member this data relates to
+      # @!attribute [rw] first_name
+      #   @return [Fixnum] the member's first name
+      # @!attribute [rw] last_name
+      #   @return [Fixnum] Ithe member's last name
       # @!attribute [rw] completed
       #   @return [Fixnum] whether this badge has been completed (i.e. it is due?), number indicates stage if appropriate
       # @!attribute [rw] awarded
@@ -225,6 +231,8 @@ module Osm
       #   @return [Osm::Badge] the badge that the data belongs to
 
       attribute :member_id, :type => Integer
+      attribute :first_name, :type => String
+      attribute :last_name, :type => String
       attribute :completed, :type => Integer, :default => 0
       attribute :awarded, :type => Integer, :default => 0
       attribute :awarded_date, :type => Date, :default => nil
@@ -232,9 +240,11 @@ module Osm
       attribute :section_id, :type => Integer
       attribute :badge, :type => Object
 
-      attr_accessible :member_id, :completed, :awarded, :awarded_date, :requirements, :section_id, :badge
+      attr_accessible :member_id, :first_name, :last_name, :completed, :awarded, :awarded_date, :requirements, :section_id, :badge
 
       validates_presence_of :badge
+      validates_presence_of :first_name
+      validates_presence_of :last_name
       validates_numericality_of :completed, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :awarded, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0

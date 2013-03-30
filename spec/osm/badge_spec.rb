@@ -44,6 +44,8 @@ describe "Badge" do
   it "Create Data" do
     data = Osm::Badge::Data.new(
       :member_id => 1,
+      :first_name => 'First',
+      :last_name => 'Last',
       :completed => 4,
       :awarded => 3,
       :awarded_date => Date.new(2000, 1, 2),
@@ -53,6 +55,8 @@ describe "Badge" do
     )
 
     data.member_id.should == 1
+    data.first_name.should == 'First'
+    data.last_name.should == 'Last'
     data.completed.should == 4
     data.awarded.should == 3
     data.awarded_date.should == Date.new(2000, 1, 2)
@@ -298,6 +302,8 @@ describe "Badge" do
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
+        data.first_name.should == 'fn'
+        data.last_name.should == 'ln'
         data.completed.should == 2
         data.awarded.should == 1
         data.awarded_date.should == Date.new(2000, 1, 2)
@@ -312,6 +318,8 @@ describe "Badge" do
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
+        data.first_name.should == 'fn'
+        data.last_name.should == 'ln'
         data.completed.should == 2
         data.awarded.should == 1
         data.awarded_date.should == Date.new(2000, 1, 2)
@@ -326,6 +334,8 @@ describe "Badge" do
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
+        data.first_name.should == 'fn'
+        data.last_name.should == 'ln'
         data.completed.should == 2
         data.awarded.should == 1
         data.awarded_date.should == Date.new(2000, 1, 2)
@@ -340,6 +350,8 @@ describe "Badge" do
         datas.size.should == 1
         data = datas[0]
         data.member_id.should == 3
+        data.first_name.should == 'fn'
+        data.last_name.should == 'ln'
         data.completed.should == 2
         data.awarded.should == 1
         data.awarded_date.should == Date.new(2000, 1, 2)
@@ -372,6 +384,8 @@ describe "Badge" do
       it "Core badge" do
         data = Osm::Badge::Data.new(
           :member_id => 1,
+          :first_name => 'fn',
+          :last_name => 'ln',
           :section_id => 2,
           :requirements => {'a' => '1', 'b' => '2'},
           :badge => Osm::CoreBadge.new(
@@ -394,6 +408,8 @@ describe "Badge" do
       it "Challenge badge" do
         data = Osm::Badge::Data.new(
           :member_id => 1,
+          :first_name => 'fn',
+          :last_name => 'ln',
           :section_id => 2,
           :requirements => {'a' => '1', 'b' => '2'},
           :badge => Osm::ChallengeBadge.new(
@@ -416,6 +432,8 @@ describe "Badge" do
       it "Staged badge" do
         data = Osm::Badge::Data.new(
           :member_id => 1,
+          :first_name => 'fn',
+          :last_name => 'ln',
           :section_id => 2,
           :requirements => {'a' => '1', 'b' => '2'},
           :badge => Osm::StagedBadge.new(
@@ -438,6 +456,8 @@ describe "Badge" do
       it "Activity badge" do
         data = Osm::Badge::Data.new(
           :member_id => 1,
+          :first_name => 'fn',
+          :last_name => 'ln',
           :section_id => 2,
           :requirements => {'a' => '1', 'b' => '2'},
           :badge => Osm::ActivityBadge.new(
