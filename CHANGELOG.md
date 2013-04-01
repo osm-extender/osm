@@ -10,6 +10,7 @@
   * Badge
     * Make get\_badge\_data\_for\_section an instance not class method (called get\_data\_for\_section)
     * Add get\_summary\_for\_section(api, section, term=nil, options={}) method
+    * Add optional section\_type parameter to get\_badges\_for\_section method
 
 ## Version 0.5.0
 

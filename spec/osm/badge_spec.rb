@@ -304,6 +304,14 @@ describe "Badge" do
         requirement.badge.osm_key.should == 'badge'
       end
 
+      it "For a different section type" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=activity&sectionid=1&section=cubs&termid=2", :body => @data)
+        Osm::Term.stub(:get_current_term_for_section){ Osm::Term.new(:id => 2) }
+
+        badges = Osm::ActivityBadge.get_badges_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), :cubs)
+        badges.size.should == 1
+      end
+
     end
 
 

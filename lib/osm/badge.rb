@@ -45,13 +45,15 @@ module Osm
     # Get badges
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
+    # @param [Symbol] section_type The type of section to get badges for (if nil uses the type of the section param)
     # @!macro options_get
     # @return [Array<Osm::Badge>]
-    def self.get_badges_for_section(api, section, options={})
+    def self.get_badges_for_section(api, section, section_type=nil, options={})
       raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
       require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
-      cache_key = ['badges', section.type, type]
+      section_type ||= section.type
+      cache_key = ['badges', section_type, type]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
@@ -60,7 +62,7 @@ module Osm
       term_id = Osm::Term.get_current_term_for_section(api, section, options).to_i
       badges = []
 
-      data = api.perform_query("challenges.php?action=getInitialBadges&type=#{type}&sectionid=#{section.id}&section=#{section.type}&termid=#{term_id}")
+      data = api.perform_query("challenges.php?action=getInitialBadges&type=#{type}&sectionid=#{section.id}&section=#{section_type}&termid=#{term_id}")
       badge_order = data["badgeOrder"].to_s.split(',')
       structures = data["structure"] || {}
       details = data["details"] || {}
