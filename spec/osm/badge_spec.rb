@@ -141,6 +141,37 @@ describe "Badge" do
     Osm::Badge::Data.new(:completed => 2, :awarded => 1).due?.should be_true
   end
 
+  it "Works out if the badge has been started" do
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}).started?.should be_true
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}, :completed => 1).started?.should be_false
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'xNo', 'a_02' => ''}).started?.should be_false
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => '', 'a_02' => ''}).started?.should be_false
+    # Staged Badge
+    Osm::Badge::Data.new(
+      :badge => Osm::StagedBadge.new,
+      :requirements => {'a_01' => 'Yes', 'b_01' => 'Yes', 'b_02' => ''},
+      :completed => 1,
+    ).started?.should be_true
+  end
+
+  it "Works out what stage of the badge has been started" do
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}).started.should == 1
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}, :completed => 1).started.should == 0
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'xNo', 'a_02' => ''}).started.should == 0
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => '', 'a_02' => ''}).started.should == 0
+    # Staged Badge
+    Osm::Badge::Data.new(
+      :badge => Osm::StagedBadge.new,
+      :requirements => {'a_01' => 'Yes', 'b_01' => 'Yes', 'b_02' => ''},
+      :completed => 1,
+    ).started.should == 2
+    Osm::Badge::Data.new(
+      :badge => Osm::StagedBadge.new,
+      :requirements => {'a_01' => 'Yes', 'b_01' => 'Yes', 'b_02' => '', 'c_01' => 'Yes', 'c_02' => ''},
+      :completed => 1,
+    ).started.should == 2
+  end
+
   describe "Using the OSM API" do
 
     describe "Get Badges" do

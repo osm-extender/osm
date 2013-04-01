@@ -48,10 +48,10 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Badge>]
     def self.get_badges_for_section(api, section, options={})
-      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if badge_type.nil?
+      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
       require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
-      cache_key = ['badges', section.type, badge_type]
+      cache_key = ['badges', section.type, type]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
@@ -60,7 +60,7 @@ module Osm
       term_id = Osm::Term.get_current_term_for_section(api, section, options).to_i
       badges = []
 
-      data = api.perform_query("challenges.php?action=getInitialBadges&type=#{badge_type}&sectionid=#{section.id}&section=#{section.type}&termid=#{term_id}")
+      data = api.perform_query("challenges.php?action=getInitialBadges&type=#{type}&sectionid=#{section.id}&section=#{section.type}&termid=#{term_id}")
       badge_order = data["badgeOrder"].to_s.split(',')
       structures = data["structure"] || {}
       details = data["details"] || {}
@@ -104,18 +104,18 @@ module Osm
     # @!macro options_get
     # @return [Array<Hash>]
     def self.get_summary_for_section(api, section, term=nil, options={})
-      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if badge_type.nil?
+      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
       require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
-      cache_key = ['badge-summary', section.id, term_id, badge_type]
+      cache_key = ['badge-summary', section.id, term_id, type]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
       summary = []
-      data = api.perform_query("challenges.php?action=summary&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}&type=#{badge_type}")
+      data = api.perform_query("challenges.php?action=summary&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}&type=#{type}")
       data['items'].each do |item|
         new_item = {
           :first_name => item['firstname'],
@@ -138,7 +138,7 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Badge::Data>]
     def get_data_for_section(api, section, term=nil, options={})
-      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if badge_type.nil?
+      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
       Osm::Model.require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
@@ -149,7 +149,7 @@ module Osm
       end
 
       datas = []
-      data = api.perform_query("challenges.php?termid=#{term_id}&type=#{badge_type}&section=#{section.type}&c=#{osm_key}&sectionid=#{section.id}")
+      data = api.perform_query("challenges.php?termid=#{term_id}&type=#{type}&section=#{section.type}&c=#{osm_key}&sectionid=#{section.id}")
       data['items'].each do |d|
         datas.push Osm::Badge::Data.new(
           :member_id => d['scoutid'],
@@ -176,21 +176,20 @@ module Osm
     end
 
 
-    private
-    def self.badge_type
+    def self.type
       nil
     end
+    def type
+      self.class.type
+    end
+
+    private
     def self.subscription_required
       :bronze
     end
-
-    # Make selected class methods instance methods too
-    [:badge_type, :subscription_required].each do |method_name|
-      define_method method_name do |*options|
-        self.class.send(method_name, *options)
-      end
+    def subscription_required
+      self.class.subscription_required
     end
-
 
 
     class Requirement
@@ -302,7 +301,7 @@ module Osm
       def total_gained
         count = 0
         requirements.each do |field, data|
-          next if data.blank? || data.downcase[0].eql?('x')
+          next if data.blank? || data[0].downcase.eql?('x')
           count += 1
         end
         return count
@@ -329,16 +328,53 @@ module Osm
         requirements.each do |field, data|
           field = field.split('_')[0]
           count[field] ||= 0
-          next if data.blank? || data.downcase[0].eql?('x')
+          next if data.blank? || data[0].downcase.eql?('x')
           count[field] += 1
         end
         return count
       end
 
-      # Check if this bade is due
+      # Check if this badge is due
       # @return [Boolean] whether the badge is due to the member
       def due?
         completed > awarded
+      end
+
+      # Check if this badge has been started
+      # @return [Boolean] whether the badge has been started by the member (always false if the badge has been completed)
+      def started?
+        unless badge.type == :staged
+          return false if completed?
+          requirements.each do |key, value|
+            return true unless value.blank? || value[0].downcase.eql?('x')
+          end
+        else
+          # Staged badge
+          start_group = 'abcde'[completed] # Requirements use the group letter to denote stage
+          requirements.each do |key, value|
+            next if key[0] < start_group # This stage is marked as completed
+            return true unless value.blank? || value[0].downcase.eql?('x')
+          end
+        end
+        return false
+      end
+
+      # Get shich stage has been started
+      # @return [Fixnum] which stage of the badge has been started by the member (lowest)
+      def started
+        unless badge.type == :staged
+          return started? ? 1 : 0
+        else
+          # Staged badge
+          start_group = 'abcde'[completed] # Requirements use the group letter to denote stage
+          started = 'z'
+          requirements.each do |key, value|
+            next if key[0] < start_group # This stage is marked as completed
+            next if key[0] > started     # This stage is after the stage currently started
+            started = key[0] unless value.blank? || value[0].downcase.eql?('x')
+          end
+          return started.eql?('z') ? 0 : 'abcde'.index(started)+1 
+        end
       end
 
       # Update data in OSM
@@ -354,7 +390,7 @@ module Osm
         editable_fields = badge.requirements.select{ |r| r.editable }.map{ |r| r.field}
         requirements.changes.each do |field, (was,now)|
           if editable_fields.include?(field)
-            result = api.perform_query("challenges.php?type=#{badge.class.badge_type}&section=#{section.type}", {
+            result = api.perform_query("challenges.php?type=#{badge.class.type}&section=#{section.type}", {
               'action' => 'updatesingle',
               'id' => member_id,
               'col' => field,
@@ -395,28 +431,28 @@ module Osm
 
   class CoreBadge < Osm::Badge
     private
-    def self.badge_type
+    def self.type
       :core
     end
   end # Class CoreBadge
 
   class ChallengeBadge < Osm::Badge
     private
-    def self.badge_type
+    def self.type
       :challenge
     end
   end # Class ChallengeBadge
 
   class StagedBadge < Osm::Badge
     private
-    def self.badge_type
+    def self.type
       :staged
     end
   end # Class StagedBadge
 
   class ActivityBadge < Osm::Badge
     private
-    def self.badge_type
+    def self.type
       :activity
     end
     def self.subscription_required

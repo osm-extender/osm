@@ -2,12 +2,14 @@
 
   * Badge::Data
     * completed attribute is now a Fixnum not Boolean (fixes staged badges)
-    * awarded attribute added (the last level awarded)
-    * due? method added
-    * add first\_name and last\_name attributes
+    * Add awarded attribute (the last level awarded)
+    * Add due? method to tell if the badge is due
+    * Add started? method to tell if the badge has been started
+    * Add started method to tell which stage has been started
+    * Add first\_name and last\_name attributes
   * Badge
-    * make get\_badge\_data\_for\_section an instance not class method (called get\_data\_for\_section)
-    * add get\_summary\_for\_section(api, section, term=nil, options={}) method
+    * Make get\_badge\_data\_for\_section an instance not class method (called get\_data\_for\_section)
+    * Add get\_summary\_for\_section(api, section, term=nil, options={}) method
 
 ## Version 0.5.0
 
