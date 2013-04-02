@@ -352,11 +352,7 @@ module Osm
           end
         else
           # Staged badge
-          start_group = 'abcde'[completed] # Requirements use the group letter to denote stage
-          requirements.each do |key, value|
-            next if key[0] < start_group # This stage is marked as completed
-            return true unless value.blank? || value[0].downcase.eql?('x')
-          end
+          return (started > completed)
         end
         return false
       end
@@ -368,14 +364,28 @@ module Osm
           return started? ? 1 : 0
         else
           # Staged badge
-          start_group = 'abcde'[completed] # Requirements use the group letter to denote stage
-          started = 'z'
-          requirements.each do |key, value|
-            next if key[0] < start_group # This stage is marked as completed
-            next if key[0] > started     # This stage is after the stage currently started
-            started = key[0] unless value.blank? || value[0].downcase.eql?('x')
+          if ['nightsaway', 'hikes'].include?(badge.osm_key) # Special staged badges
+            stages = [1, 5, 10, 20, 35, 50, 75, 100, 125, 150, 175, 200] if badge.osm_key.eql?('nightsaway')
+            stages = [1, 5, 10, 20, 35, 50] if badge.osm_key.eql?('hikes')
+            done = requirements['y_01'].to_i
+            return 0 if done < stages[0]                # Not started the first stage
+            return 0 if done >= stages[stages.size - 1] # No more stages can be started
+            (1..stages.size-1).reverse_each do |index|
+              if (done < stages[index]) && (done > stages[index-1])
+                return stages[index]
+              end
+            end
+          else
+            start_group = 'abcde'[completed] # Requirements use the group letter to denote stage
+            started = 'z'
+            requirements.each do |key, value|
+              next if key[0] < start_group # This stage is marked as completed
+              next if key[0] > started     # This stage is after the stage currently started
+              started = key[0] unless value.blank? || value[0].downcase.eql?('x')
+            end
+            return started.eql?('z') ? 0 : 'abcde'.index(started)+1
           end
-          return started.eql?('z') ? 0 : 'abcde'.index(started)+1 
+          return 0
         end
       end
 

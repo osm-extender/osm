@@ -152,6 +152,16 @@ describe "Badge" do
       :requirements => {'a_01' => 'Yes', 'b_01' => 'Yes', 'b_02' => ''},
       :completed => 1,
     ).started?.should be_true
+    Osm::Badge::Data.new(
+      :badge => Osm::StagedBadge.new(:osm_key => 'nightsaway'),
+      :requirements => {'a_01' => 5, 'y_01' => '5', 'custom_26695' => ''},
+      :completed => 5,
+    ).started?.should be_false
+    Osm::Badge::Data.new(
+      :badge => Osm::StagedBadge.new(:osm_key => 'hikes'),
+      :requirements => {'a_01' => 2, 'y_01' => '2', 'custom_26695' => ''},
+      :completed => 1,
+    ).started?.should be_true
   end
 
   it "Works out what stage of the badge has been started" do
@@ -159,17 +169,28 @@ describe "Badge" do
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}, :completed => 1).started.should == 0
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'xNo', 'a_02' => ''}).started.should == 0
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => '', 'a_02' => ''}).started.should == 0
+
     # Staged Badge
     Osm::Badge::Data.new(
-      :badge => Osm::StagedBadge.new,
+      :badge => Osm::StagedBadge.new(:osm_key => 'test'),
       :requirements => {'a_01' => 'Yes', 'b_01' => 'Yes', 'b_02' => ''},
       :completed => 1,
     ).started.should == 2
     Osm::Badge::Data.new(
-      :badge => Osm::StagedBadge.new,
+      :badge => Osm::StagedBadge.new(:osm_key => 'test'),
       :requirements => {'a_01' => 'Yes', 'b_01' => 'Yes', 'b_02' => '', 'c_01' => 'Yes', 'c_02' => ''},
       :completed => 1,
     ).started.should == 2
+    Osm::Badge::Data.new(
+      :badge => Osm::StagedBadge.new(:osm_key => 'nightsaway'),
+      :requirements => {'a_01' => 7, 'y_01' => '7', 'custom_26695' => ''},
+      :completed => 5,
+    ).started.should == 10
+    Osm::Badge::Data.new(
+      :badge => Osm::StagedBadge.new(:osm_key => 'hikes'),
+      :requirements => {'a_01' => 2, 'y_01' => '2', 'custom_26695' => ''},
+      :completed => 1,
+    ).started.should == 5
   end
 
   describe "Using the OSM API" do
