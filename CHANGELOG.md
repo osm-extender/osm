@@ -7,6 +7,8 @@
     * Add started? method to tell if the badge has been started
     * Add started method to tell which stage has been started
     * Add first\_name and last\_name attributes
+    * Add mark\_awarded method
+    * Add mark\_due method
   * Badge
     * Make get\_badge\_data\_for\_section an instance not class method (called get\_data\_for\_section)
     * Add get\_summary\_for\_section(api, section, term=nil, options={}) method

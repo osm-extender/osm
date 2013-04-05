@@ -241,10 +241,7 @@ module Osm
     end # Class Requirement
 
 
-    class Data
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
-
+    class Data < Osm::Model
       # @!attribute [rw] member_id
       #   @return [Fixnum] ID of the member this data relates to
       # @!attribute [rw] first_name
@@ -357,7 +354,7 @@ module Osm
         return false
       end
 
-      # Get shich stage has been started
+      # Get which stage has been started
       # @return [Fixnum] which stage of the badge has been started by the member (lowest)
       def started
         unless badge.type == :staged
@@ -389,6 +386,51 @@ module Osm
         end
       end
 
+      # Mark the badge as awarded in OSM
+      # @param [Osm::Api] api The api to use to make the request
+      # @param [Date] date The date to mark the badge as awarded
+      # @param [Fixnum] level The level of the badge to award (1 for non-staged badges)
+      # @param [Symbol] mark_as :awarded or :due
+      # @return [Boolean] whether the data was updated in OSM
+      def mark_awarded(api, date=Date.today, level=completed, mark_as=:awarded)
+        raise ArgumentError, 'date is not a Date' unless date.is_a?(Date)
+        raise ArgumentError, 'mark_as is not an allowed value, use :awarded or :du' unless [:awarded, :due].include?(mark_as)
+        raise ArgumentError, 'level can not be negative' if level < 0
+        section = Osm::Section.get(api, section_id)
+        require_ability_to(api, :write, :badge, section)
+
+        date_formatted = date.strftime(Osm::OSM_DATE_FORMAT)
+
+        result = api.perform_query("challenges.php?action=award", {
+          'dateAwarded' => date_formatted,
+          'sectionid' => section_id,
+          'section' => section.type,
+          'chal' => badge.osm_key,
+          'type' => badge.type,
+          'stagedLevel' => level,
+          'due' => mark_as,
+        })
+        updated = result.is_a?(Array) &&
+                  result[0].is_a?(Hash) &&
+                  (result[0]['sid'].to_i == member_id) &&
+                  (result[0]['awarded'].to_i == level) &&
+                  (result[0]['awardeddate'] == date_formatted)
+
+        if updated
+          awarded = level
+          awarded_date = date
+        end
+        return updated
+      end
+
+      # Mark the badge as due in OSM
+      # @param [Osm::Api] api The api to use to make the request
+      # @param [Fixnum] level The level of the badge to mark as due (1 for non-staged badges)
+      # @return [Boolean] whether the data was updated in OSM
+      def mark_due(api, level)
+        mark_awarded(api, Date.today, level, :due)
+      end
+
       # Update data in OSM
       # @param [Osm::Api] api The api to use to make the request
       # @return [Boolean] whether the data was updated in OSM
@@ -396,7 +438,7 @@ module Osm
       def update(api)
         raise Osm::ObjectIsInvalid, 'data is invalid' unless valid?
         section = Osm::Section.get(api, section_id)
-        Osm::Model.require_ability_to(api, :write, :badge, section)
+        require_ability_to(api, :write, :badge, section)
 
         updated = true
         editable_fields = badge.requirements.select{ |r| r.editable }.map{ |r| r.field}
@@ -416,9 +458,16 @@ module Osm
           end
         end
 
-
         if updated
           requirements.clean_up!
+        end
+
+        if changed_attributes.include?('awarded') || changed_attributes.include?('awarded_date')
+          if mark_awarded(api, awarded_date, awarded)
+            reset_changed_attributes
+          else
+            updated = false
+          end
         end
 
         return updated
