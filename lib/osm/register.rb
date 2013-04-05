@@ -56,7 +56,9 @@ module Osm
       end
 
       data = api.perform_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}")
-      dates = get_structure(api, section, term, options).map{ |f| f.id }.select{ |f| f.match(Osm::OSM_DATE_REGEX) }
+      dates_s = get_structure(api, section, term, options)
+      dates_s = dates_s.map{ |f| f.id }.select{ |f| f.match(Osm::OSM_DATE_REGEX) }
+      dates_d = dates_s.map{ |d| Osm::parse_date(d) }
 
       to_return = []
       if data.is_a?(Hash) && data['items'].is_a?(Array)
@@ -65,9 +67,8 @@ module Osm
           if item.is_a?(Hash)
             unless item['scoutid'].to_i < 0  # It's a total row
               attendance = {}
-              dates.each do |date|
-                item_attendance = item[date]
-                date = Date.strptime(date, Osm::OSM_DATE_FORMAT)
+              dates_d.each_with_index do |date, index|
+                item_attendance = item[dates_s[index]]
                 attendance[date] = :unadvised_absent
                 attendance[date] = :yes if item_attendance.eql?('Yes')
                 attendance[date] = :advised_absent if item_attendance.eql?('No')
