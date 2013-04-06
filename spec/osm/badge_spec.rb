@@ -146,6 +146,7 @@ describe "Badge" do
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}, :completed => 1).started?.should be_false
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'xNo', 'a_02' => ''}).started?.should be_false
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => '', 'a_02' => ''}).started?.should be_false
+
     # Staged Badge
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new,
@@ -162,6 +163,30 @@ describe "Badge" do
       :requirements => {'a_01' => 2, 'y_01' => '2', 'custom_26695' => ''},
       :completed => 1,
     ).started?.should be_true
+
+    # Scout's adventure challenge
+    Osm::Badge::Data.new(
+      :badge => Osm::ChallengeBadge.new(:osm_key => 'adventure'),
+      :requirements => {'y_01' => 5, 'custom_26695' => 'Text'},
+      :completed => 0,
+    ).started?.should be_true
+    Osm::Badge::Data.new(
+      :badge => Osm::ChallengeBadge.new(:osm_key => 'adventure'),
+      :requirements => {'y_01' => '', 'custom_26695' => ''},
+      :completed => 0,
+    ).started?.should be_false
+
+    # Beaver's adventure activity
+    Osm::Badge::Data.new(
+      :badge => Osm::ActivityBadge.new(:osm_key => 'adventure'),
+      :requirements => {'y_01' => 5, 'custom_26695' => 'Text'},
+      :completed => 0,
+    ).started?.should be_true
+    Osm::Badge::Data.new(
+      :badge => Osm::ActivityBadge.new(:osm_key => 'adventure'),
+      :requirements => {'y_01' => '', 'custom_26695' => ''},
+      :completed => 0,
+    ).started?.should be_false
   end
 
   it "Works out what stage of the badge has been started" do

@@ -344,8 +344,14 @@ module Osm
       def started?
         unless badge.type == :staged
           return false if completed?
-          requirements.each do |key, value|
-            return true unless value.blank? || value[0].downcase.eql?('x')
+          if badge.osm_key == 'adventure'
+            # Badge requires completing a number of activities
+            return (requirements['y_01'].to_i > 0)
+          else
+            # 'Normal' nonstaged badge
+            requirements.each do |key, value|
+              return true unless value.blank? || value[0].downcase.eql?('x')
+            end
           end
         else
           # Staged badge
@@ -373,6 +379,7 @@ module Osm
               end
             end
           else
+            # 'Normal' staged badge
             start_group = 'abcde'[completed] # Requirements use the group letter to denote stage
             started = 'z'
             requirements.each do |key, value|
