@@ -1,3 +1,7 @@
+## Version 0.6.1
+
+  * Fixes to adventure badges
+
 ## Version 0.6.0
 
   * Badge::Data
