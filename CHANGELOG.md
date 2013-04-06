@@ -1,3 +1,7 @@
+## Version 0.6.2
+
+  * 
+
 ## Version 0.6.1
 
   * Fixes to adventure badges
