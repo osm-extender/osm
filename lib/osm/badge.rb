@@ -326,9 +326,14 @@ module Osm
         count = {}
         requirements.each do |field, data|
           field = field.split('_')[0]
-          count[field] ||= 0
-          next if data.blank? || data[0].downcase.eql?('x')
-          count[field] += 1
+          unless field.eql?('y')
+            count[field] ||= 0
+            next if data.blank? || data[0].downcase.eql?('x')
+            count[field] += 1
+          else
+            # A total 'section'
+            count['a'] = data.to_i
+          end
         end
         return count
       end
