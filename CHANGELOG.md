@@ -1,6 +1,6 @@
 ## Version 0.6.2
 
-  * 
+  * Fix items not relevant to API appearing in permissions for a Section
 
 ## Version 0.6.1
 
