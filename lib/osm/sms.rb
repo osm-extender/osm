@@ -2,6 +2,37 @@ module Osm
 
   class Sms
 
+    # Get delivery reports
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to send the message to
+    # @param [Array<Osm::Member, Fixnum, #to_i>, Osm::Member, Fixnum, #to_i] members The members (or their IDs) to send the message to
+    # @param [Symbol] all_or_one Wheather to send the message to all numbers for a member (:all) or just the first mobile one (:one)
+    # @param [String, #to_s] source_address The number to claim the message is from
+    # @param [String, #to_s] message The text of the message to send
+    # @return [Hash] with keys :sent (Fixnum), :result (Boolean) and :message (String)
+    def self.send_sms(api, section, members, all_or_one, source_address, message)
+      raise ArgumentError, 'all_or_one must be either :all or :one' unless [:all, :one].include?(all_or_one)
+      Osm::Model.require_access_to_section(api, section)
+
+      data = api.perform_query("sms.php?action=sendText&sectionid=#{section.to_i}", {
+        'msg' => message,
+        'scouts' => [*members].join(','),
+        'source' => source_address,
+        'all' => all_or_one,
+        'scheduled' => 'now',
+      })
+
+      data.select!{ |k,v| !['debug', 'config'].include?(k) }
+      data = data.map do |k,v|
+        k = 'message' if k.eql?('msg')
+        k = 'sent' if k.eql?('sent_to')
+        [k.to_sym, v]
+      end
+      return Hash[*data.flatten]
+    end
+
+
+
     class DeliveryReport < Osm::Model
       # @!attribute [rw] sms_id
       #   @return [Fixnum] the id of the SMS

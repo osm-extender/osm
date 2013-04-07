@@ -3,6 +3,40 @@ require 'spec_helper'
 
 describe "SMS" do
 
+  describe "Send an SMS" do
+
+    it "Success" do
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/sms.php?action=sendText&sectionid=1', {:body => {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'msg' => 'Test message.',
+        'scouts' => '2,3',
+        'source' => '441234567890',
+        'all' => :one,
+        'scheduled' => 'now',
+      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>{'result'=>true,'sent'=>2,'message'=>'Success','debug'=>nil,'config'=>{}}.to_json}) }
+
+      result = Osm::Sms.send_sms(
+        @api,
+        1,      # Section
+        [2, 3], # Members
+        :one,
+        '441234567890', # Source address
+        'Test message.' # Message text
+      )
+
+      result.should == {
+        :result => true,
+        :sent => 2,
+        :message => 'Success'
+      }
+    end
+
+  end
+
+
   describe "Delivery Report" do
 
     it "Create" do
