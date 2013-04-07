@@ -108,6 +108,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Roles
   * Section
   * Sections
+  * SMS Delivery Reports
   * Term
   * Terms
 
@@ -141,15 +142,13 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 ### Actions
   * Authorise an app to use the API on a user's behalf
   * Add activity to programme
+  * Send an SMS to member(s)
 
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
 See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadmap) for more details.
 
-  * SMS:
-    * Retrieval of delivery reports [issue 54]
-    * Sending a message [issue 54]
   * Gift aid (Everything) (Gold required) [issue 75]
   * Finances (Everything) (Gold required) [issues 76 & 77]]
   * MyScout (Everything) (Maybe)
