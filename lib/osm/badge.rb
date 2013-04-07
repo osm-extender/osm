@@ -347,20 +347,15 @@ module Osm
       # Check if this badge has been started
       # @return [Boolean] whether the badge has been started by the member (always false if the badge has been completed)
       def started?
-        unless badge.type == :staged
-          return false if completed?
-          if badge.osm_key == 'adventure'
-            # Badge requires completing a number of activities
-            return (requirements['y_01'].to_i > 0)
-          else
-            # 'Normal' nonstaged badge
-            requirements.each do |key, value|
+        return (started > completed) if badge.type.eql?(:staged) # It's a staged badge
+        return false if completed?
+        requirements.each do |key, value|
+          case key.split('_')[0]
+            when 'a'
               return true unless value.blank? || value[0].downcase.eql?('x')
-            end
+            when 'y'
+              return true if (requirements['y_01'].to_i > 0)
           end
-        else
-          # Staged badge
-          return (started > completed)
         end
         return false
       end
