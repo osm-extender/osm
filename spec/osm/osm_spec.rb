@@ -83,4 +83,31 @@ describe "Online Scout Manager" do
 
   end
 
+
+  describe "Make permissions Hash" do
+
+    it "Make the hash" do
+      from_osm = {
+        'badge' => 100,
+        'programme' => 20,
+        'events' => 10,
+      }
+      Osm.make_permissions_hash(from_osm).should == {
+        :badge => [:read, :write, :administer],
+        :programme => [:read, :write],
+        :events => [:read],
+      }
+    end
+
+    it "Includes only relevant permissions" do
+      from_osm = {
+        't' => true,
+        'f' => false,
+        'badge' => 100,
+      }
+      Osm.make_permissions_hash(from_osm).keys.should == [:badge]
+    end
+
+  end
+
 end

@@ -385,6 +385,7 @@ module Osm
             end
           else
             # 'Normal' staged badge
+            return 0 if completed == 5 || awarded == 5 # No more stages can be started
             start_group = 'abcde'[completed] # Requirements use the group letter to denote stage
             started = 'z'
             requirements.each do |key, value|
