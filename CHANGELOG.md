@@ -2,6 +2,9 @@
 
   * SMS text messages:
     * Section gains sms\_sent\_test, sms\_messages\_sent and sms\_messages\_remaining attributes
+    * Add Sms class:
+      * With DeliveryReport Model subclass
+        * With get\_for\_section(api, section) class method
 
 ## Version 0.6.3
 
