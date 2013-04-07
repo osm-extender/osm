@@ -207,6 +207,11 @@ describe "Badge" do
       :completed => 1,
     ).started.should == 2
     Osm::Badge::Data.new(
+      :badge => Osm::StagedBadge.new(:osm_key => 'test'),
+      :requirements => {'a_01' => '', 'b_01' => '', 'c_01' => '', 'd_01' => '', 'e_01' => ''},
+      :completed => 5,
+    ).started.should == 0 # No more stages to do
+    Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'nightsaway'),
       :requirements => {'a_01' => 7, 'y_01' => '7', 'custom_26695' => ''},
       :completed => 5,
