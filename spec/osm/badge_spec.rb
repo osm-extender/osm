@@ -176,6 +176,23 @@ describe "Badge" do
       :completed => 0,
     ).started?.should be_false
 
+    # Scout's community challenge
+    Osm::Badge::Data.new(
+      :badge => Osm::ChallengeBadge.new(:osm_key => 'community'),
+      :requirements => {'y_01' => 5, 'a_01' => '', 'custom_26695' => 'Text'},
+      :completed => 0,
+    ).started?.should be_true
+    Osm::Badge::Data.new(
+      :badge => Osm::ChallengeBadge.new(:osm_key => 'community'),
+      :requirements => {'y_01' => '', 'a_01' => '4', 'custom_26695' => 'Text'},
+      :completed => 0,
+    ).started?.should be_true
+    Osm::Badge::Data.new(
+      :badge => Osm::ChallengeBadge.new(:osm_key => 'community'),
+      :requirements => {'y_01' => '', 'a_01' => '', 'custom_26695' => ''},
+      :completed => 0,
+    ).started?.should be_false
+
     # Beaver's adventure activity
     Osm::Badge::Data.new(
       :badge => Osm::ActivityBadge.new(:osm_key => 'adventure'),

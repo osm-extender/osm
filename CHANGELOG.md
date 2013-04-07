@@ -1,3 +1,7 @@
+## Version 0.6.3
+
+  * Fix started? and started methods for badges with a combination of custom and normal requirements
+
 ## Version 0.6.2
 
   * Fix items not relevant to API appearing in permissions for a Section
