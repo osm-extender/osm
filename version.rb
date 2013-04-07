@@ -1,3 +1,3 @@
 module Osm
-  VERSION = "0.6.3.dev"
+  VERSION = "0.6.3"
 end
