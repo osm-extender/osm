@@ -1,4 +1,4 @@
-## Version 0.6.4
+## Version 1.0.0
 
   * SMS text messages:
     * Section gains sms\_sent\_test, sms\_messages\_sent and sms\_messages\_remaining attributes
