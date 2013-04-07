@@ -150,6 +150,6 @@ See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadm
   * SMS:
     * Retrieval of delivery reports [issue 54]
     * Sending a message [issue 54]
-  * Gift aid (Everything) (Gold required)
-  * Finances (Everything) (Gold required)
+  * Gift aid (Everything) (Gold required) [issue 75]
+  * Finances (Everything) (Gold required) [issues 76 & 77]]
   * MyScout (Everything) (Maybe)
