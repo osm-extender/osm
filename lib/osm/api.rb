@@ -50,6 +50,19 @@ module Osm
       nil
     end
 
+    # Configure the debug option
+    # @param [Boolean] debug whether to display debugging information
+    # @return nil
+    def self.debug=(debug)
+      @@debug = !!debug
+    end
+
+    # The debug option
+    # @return Boolean whether debugging output is enabled
+    def self.debug
+      @@debug
+    end
+
     # Initialize a new API connection
     # @param [String] user_id OSM userid of the user to act as (get this by using the authorize method)
     # @param [String] secret OSM secret of the user to act as (get this by using the authorize method)

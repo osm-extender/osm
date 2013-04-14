@@ -2,6 +2,7 @@
 
   * Fix Osm::Term date helping methods when term contains nil dates
   * Fix fetching event attendance when no attendance has been set for any members
+  * Osm::Api exposes the debug option as a psudo class attribute
 
 ## Version 1.0.0
 
