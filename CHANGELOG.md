@@ -1,6 +1,7 @@
 ## Version 1.0.1
 
   * Fix Osm::Term date helping methods when term contains nil dates
+  * Fix fetching event attendance when no attendance has been set for any members
 
 ## Version 1.0.0
 

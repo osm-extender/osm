@@ -256,7 +256,7 @@ module Osm
       end
 
       data = api.perform_query("events.php?action=getEventAttendance&eventid=#{id}&sectionid=#{section_id}&termid=#{term_id}")
-      data = data['items']
+      data = data['items'] || []
 
       payment_values = {
         'Manual' => :manual,
