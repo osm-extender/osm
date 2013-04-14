@@ -1,3 +1,7 @@
+## Version 1.0.2
+
+  * 
+
 ## Version 1.0.1
 
   * Fix Osm::Term date helping methods when term contains nil dates
