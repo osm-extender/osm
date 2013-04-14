@@ -151,4 +151,4 @@ See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadm
 
   * Gift aid (Everything) (Gold required) [issue 75]
   * Finances (Everything) (Gold required) [issues 76 & 77]]
-  * MyScout (Everything) (Maybe)
+  * MyScout (Everything)
