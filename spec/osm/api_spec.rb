@@ -25,6 +25,14 @@ describe "API" do
     expect{ Osm::Api.configure(@CONFIGURATION[:api].merge(:ogm => @CONFIGURATION[:api][:ogm].select{ |k,v| (k != :name)})) }.to raise_error(ArgumentError, ':ogm must contain a key :name')
   end
 
+  it "Exposes the debug option seperatly too" do
+    Osm::Api.debug.should be_false
+    Osm::Api.debug = true
+    Osm::Api.debug.should be_true
+    Osm::Api.debug = false
+    Osm::Api.debug.should be_false
+  end
+
 
   it "Raises errors on bad arguments to create" do
     # Both userid and secret must be passed

@@ -680,7 +680,6 @@ describe "Event" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json)
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
-      event.should_not be_nil
       attendance = event.get_attendance(@api, 3)
       attendance.is_a?(Array).should be_true
       ea = attendance[0]
@@ -697,6 +696,19 @@ describe "Event" do
         1 => '',
       }
       ea.row.should == 0
+    end
+
+    it "Get attendance (no items)" do
+      attendance_body = {
+	'identifier' => 'scoutid',
+	'eventid' => '2',
+      }
+
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json)
+
+      event = Osm::Event.new(:id => 2, :section_id => 1)
+      attendance = event.get_attendance(@api, 3)
+      attendance.should == []
     end
 
     it "Update attendance (succeded)" do

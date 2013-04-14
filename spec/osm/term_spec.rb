@@ -108,6 +108,16 @@ describe "Term" do
     term3.contains_date?(Date.today).should == false
   end
 
+  it "Date helpers return false for nil dates" do
+    term = Osm::Term.new
+    term.before?(Date.today).should be_false
+    term.after?(Date.today).should be_false
+    term.past?.should be_false
+    term.future?.should be_false
+    term.current?.should be_false
+    term.contains_date?(Date.today).should be_false
+  end
+
 
   describe "Using the API" do
 

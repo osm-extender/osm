@@ -32,7 +32,7 @@ Use the [Online Scout Manager](https://www.onlinescoutmanager.co.uk) API.
 Add to your Gemfile and run the `bundle` command to install it.
 
 ```ruby
-gem 'osm', '~> 1.0.0'
+gem 'osm', '~> 1.0'
 ```
 
 Configure the gem during the initalization of the app (e.g. if using rails then config/initializers/osm.rb would look like):
