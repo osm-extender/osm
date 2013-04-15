@@ -1,6 +1,6 @@
 ## Version 1.2.0
 
-  * 
+  * Register - get\_structure now only includes dates
 
 ## Version 1.0.6
 

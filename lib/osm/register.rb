@@ -22,15 +22,14 @@ module Osm
 
       structure = []
       if data.is_a?(Array)
-        data.each do |item|
-          if item.is_a?(Hash) && item['rows'].is_a?(Array)
-            item['rows'].each do |row|
-              structure.push Field.new(
-                :id => row['field'],
-                :name => row['name'],
-                :tooltip => row['tooltip'],
-              )
-            end
+        data = (data.size == 2) ? data[1] : []
+        if data.is_a?(Hash) && data['rows'].is_a?(Array)
+          data['rows'].each do |row|
+            structure.push Field.new(
+              :id => row['field'],
+              :name => row['name'],
+              :tooltip => row['tooltip'],
+            )
           end
         end
       end
@@ -57,7 +56,7 @@ module Osm
 
       data = api.perform_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}")
       dates_s = get_structure(api, section, term, options)
-      dates_s = dates_s.map{ |f| f.id }.select{ |f| f.match(Osm::OSM_DATE_REGEX) }
+      dates_s = dates_s.map{ |f| f.id }
       dates_d = dates_s.map{ |d| Osm::parse_date(d) }
 
       to_return = []
