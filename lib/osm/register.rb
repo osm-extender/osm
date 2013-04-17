@@ -72,7 +72,6 @@ module Osm
                 attendance[date] = :yes if item_attendance.eql?('Yes')
                 attendance[date] = :advised_absent if item_attendance.eql?('No')
               end
-              item.select{}
               to_return.push Osm::Register::Attendance.new(
                 :member_id => Osm::to_i_or_nil(item['scoutid']),
                 :grouping_id => Osm::to_i_or_nil(item ['patrolid']),

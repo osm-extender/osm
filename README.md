@@ -98,6 +98,8 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Event Attendance (Silver required)
   * Flexi Record Data
   * Flexi Record Structure
+  * Gift Aid Data
+  * Gift Aid Structure
   * Groupings (e.g. Sixes, Patrols)
   * Members
   * Notepad
@@ -122,6 +124,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Event Column (Silver required)
   * Flexi Record Column
   * Flexi Record Data
+  * Gift Aid Payment
   * Grouping
   * Member
   * Register Attendance
@@ -130,8 +133,9 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Evening
   * Event (Silver required)
   * Event Column (Silver required)
-  * Member
   * Flexi Record Column
+  * Gift Aid Payment
+  * Member
 
 ### Delete
   * Evening
@@ -144,11 +148,12 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Add activity to programme
   * Send an SMS to member(s)
 
+## Parts not/never supported
+  * Campsite Directory
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
 See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadmap) for more details.
 
-  * Gift aid (Everything) (Gold required) [issue 75]
   * Finances (Everything) (Gold required) [issues 76 & 77]]
   * MyScout (Everything)
