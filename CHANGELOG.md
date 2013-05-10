@@ -1,6 +1,7 @@
 ## Version 1.0.2
 
   * Fix Regex for checking dates from OSM
+  * Don't use ActiveAttr >= 0.8 (incompatabillity to be fixed)
 
 ## Version 1.0.1
 
