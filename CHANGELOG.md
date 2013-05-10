@@ -1,3 +1,7 @@
+## Version 1.0.3
+
+  * 
+
 ## Version 1.0.2
 
   * Fix Regex for checking dates from OSM
