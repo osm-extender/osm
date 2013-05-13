@@ -258,8 +258,8 @@ module Osm
 
     private
     class Activity
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
+      include ActiveModel::MassAssignmentSecurity
+      include ActiveAttr::Model
 
       # @!attribute [rw] activity_id
       #   @return [Fixnum] the activity being done

@@ -195,8 +195,8 @@ module Osm
 
 
     class Requirement
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
+      include ActiveModel::MassAssignmentSecurity
+      include ActiveAttr::Model
 
       # @!attribute [rw] badge
       #   @return [Osm::Badge] the badge the requirement belongs to
