@@ -300,7 +300,7 @@ module Osm
       def total_gained
         count = 0
         requirements.each do |field, data|
-          next if data.blank? || data[0].downcase.eql?('x')
+          next if data.blank? || data.to_s[0].downcase.eql?('x')
           count += 1
         end
         return count
@@ -328,7 +328,7 @@ module Osm
           field = field.split('_')[0]
           unless field.eql?('y')
             count[field] ||= 0
-            next if data.blank? || data[0].downcase.eql?('x')
+            next if data.blank? || data.to_s[0].downcase.eql?('x')
             count[field] += 1
           else
             # A total 'section'
@@ -352,7 +352,7 @@ module Osm
         requirements.each do |key, value|
           case key.split('_')[0]
             when 'a'
-              return true unless value.blank? || value[0].downcase.eql?('x')
+              return true unless value.blank? || value.to_s[0].downcase.eql?('x')
             when 'y'
               return true if (requirements['y_01'].to_i > 0)
           end
@@ -386,7 +386,7 @@ module Osm
             requirements.each do |key, value|
               next if key[0] < start_group # This stage is marked as completed
               next if key[0] > started     # This stage is after the stage currently started
-              started = key[0] unless value.blank? || value[0].downcase.eql?('x')
+              started = key[0] unless value.blank? || value.to_s[0].downcase.eql?('x')
             end
             return started.eql?('z') ? 0 : 'abcde'.index(started)+1
           end

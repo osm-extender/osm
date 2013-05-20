@@ -1,6 +1,7 @@
 ## Version 1.0.3
 
-  * 
+  * Fix "undefined method 'downcase' for 0:Fixnum" caused by some badge requirement data being a Fixnum when a String contains just numbers.
+  * Update to use ActiveAttr gem version 0.8
 
 ## Version 1.0.2
 
