@@ -263,8 +263,8 @@ module Osm
 
     private
     class File
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
+      include ActiveModel::MassAssignmentSecurity
+      include ActiveAttr::Model
 
       # @!attribute [rw] id
       #   @return [Fixnum] the OSM ID for the file
@@ -301,8 +301,8 @@ module Osm
     end # Class Activity::File
 
     class Badge
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
+      include ActiveModel::MassAssignmentSecurity
+      include ActiveAttr::Model
 
       # @!attribute [rw] activity_id
       #   @return [Fixnum] the activity being done
@@ -342,8 +342,8 @@ module Osm
     end # Class Activity::Badge
 
     class Version
-      include ::ActiveAttr::MassAssignmentSecurity
-      include ::ActiveAttr::Model
+      include ActiveModel::MassAssignmentSecurity
+      include ActiveAttr::Model
 
       # @!attribute [rw] version
       #   @return [Fixnum] the version of the activity

@@ -20,14 +20,14 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'activesupport', '~> 3.2'  # Used to parse JSON from OSM
   s.add_runtime_dependency 'httparty', '~> 0.9'       # Used to make web requests to the API
-  s.add_runtime_dependency 'active_attr', '~> 0.6', '< 0.8'
+  s.add_runtime_dependency 'active_attr', '~> 0.8'
   s.add_runtime_dependency 'activemodel', '~> 3.2'
-  s.add_runtime_dependency 'dirty_hashy', '~> 0.2.1'  # Used to trach changed data in Badge::Data and FlexiRecord::Data
+  s.add_runtime_dependency 'dirty_hashy', '~> 0.2.1'  # Used to track changed data in Badge::Data and FlexiRecord::Data
 
   s.add_development_dependency 'rake', '~> 10.0'
   s.add_development_dependency 'rspec', '~> 2.11'
   s.add_development_dependency 'fakeweb', '~> 1.3'
-  s.add_development_dependency 'guard-rspec', '~> 2.4'
+  s.add_development_dependency 'guard-rspec', '~> 3.0'
   s.add_development_dependency 'rb-inotify', '~> 0.9'
 
 end

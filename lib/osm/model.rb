@@ -8,8 +8,8 @@ module Osm
   # This class is expected to be inherited from.
   # It provides the caching and permission handling for model objects.
   class Model
-    include ::ActiveAttr::MassAssignmentSecurity
-    include ::ActiveAttr::Model
+    include ActiveModel::MassAssignmentSecurity
+    include ActiveAttr::Model
 
     @@cache = nil               # Class to use for caching
     @@cache_prepend = 'OSMAPI'  # Prepended to the key
