@@ -1,3 +1,7 @@
+## Version 1.0.4
+
+  * 
+
 ## Version 1.0.3
 
   * Fix "undefined method 'downcase' for 0:Fixnum" caused by some badge requirement data being a Fixnum when a String contains just numbers.
