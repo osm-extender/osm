@@ -1,6 +1,6 @@
 ## Version 1.0.4
 
-  * 
+  * Add notice board option to getting My.SCOUT link for a member (pass :notice as the parameter)
 
 ## Version 1.0.3
 
