@@ -28,7 +28,9 @@ describe "Gift Aid" do
       :member_id => 1,
       :first_name => 'A',
       :last_name => 'B',
-      :tax_payer => 'C',
+      :tax_payer_name => 'C',
+      :tax_payer_address => 'D',
+      :tax_payer_postcode => 'E',
       :section_id => 2,
       :grouping_id => 3,
       :total => '2.34',
@@ -42,7 +44,9 @@ describe "Gift Aid" do
     d.grouping_id.should == 3
     d.first_name.should == 'A'
     d.last_name.should == 'B'
-    d.tax_payer.should == 'C'
+    d.tax_payer_name.should == 'C'
+    d.tax_payer_address.should == 'D'
+    d.tax_payer_postcode.should == 'E'
     d.total.should == '2.34'
     d.donations.should == {
       Date.new(2012, 1, 2) => '1.23',
@@ -103,7 +107,7 @@ describe "Gift Aid" do
       }
       data.first_name.should == 'First'
       data.last_name.should == 'Last'
-      data.tax_payer.should == 'Tax'
+      data.tax_payer_name.should == 'Tax'
       data.grouping_id.should == 3
       data.member_id.should == 2
       data.total.should == '2.34'
@@ -145,7 +149,9 @@ describe "Gift Aid" do
           :member_id => 1,
           :first_name => 'A',
           :last_name => 'B',
-          :tax_payer => 'C',
+          :tax_payer_name => 'C',
+          :tax_payer_address => 'D',
+          :tax_payer_postcode => 'E',
           :section_id => 2,
           :grouping_id => 3,
           :total => '2.34',
@@ -165,21 +171,23 @@ describe "Gift Aid" do
           'secret' => 'secret',
           'scoutid' => 1,
           'termid' => 4,
-          'column' => 'parentname',
-          'value' => 'TAX',
           'sectionid' => 2,
           'row' => 0,
         }
         body_data = {
           "items" => [
-            {"parentname" => "TAX","scoutid" => "1"},
+            {"parentname" => "n", "address" => "a", "postcode" => "pc", "scoutid" => "1"},
             {"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 0}
           ]
         }
         url = "https://www.onlinescoutmanager.co.uk/giftaid.php?action=updateScout"
-        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body_data.to_json}) }
+        HTTParty.should_receive(:post).with(url, {:body => post_data.merge({'column' => 'parentname', 'value' => 'n'})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body_data.to_json}) }
+        HTTParty.should_receive(:post).with(url, {:body => post_data.merge({'column' => 'address', 'value' => 'a'})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body_data.to_json}) }
+        HTTParty.should_receive(:post).with(url, {:body => post_data.merge({'column' => 'postcode', 'value' => 'pc'})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body_data.to_json}) }
 
-        @data.tax_payer = 'TAX'
+        @data.tax_payer_name = 'n'
+        @data.tax_payer_address = 'a'
+        @data.tax_payer_postcode = 'pc'
         @data.update(@api).should be_true
       end
 

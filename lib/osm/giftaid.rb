@@ -72,7 +72,9 @@ module Osm
                 :section_id => section_id,
                 :first_name => item['firstname'],
                 :last_name => item['lastname'],
-                :tax_payer => item['parentname'],
+                :tax_payer_name => item['parentname'],
+                :tax_payer_address => item['address'],
+                :tax_payer_postcode => item['postcode'],
                 :total => item['total'],
                 :donations => donations,
               )
@@ -166,8 +168,12 @@ module Osm
       #   @return [String] The member's first name
       # @!attribute [rw] last_name
       #   @return [String] The member's last name
-      # @!attribute [rw] tax_payer
+      # @!attribute [rw] tax_payer_name
       #   @return [String] The tax payer's name
+      # @!attribute [rw] tax_payer_address
+      #   @return [String] The tax payer's street address
+      # @!attribute [rw] tax_payer_postcode
+      #   @return [String] The tax payer's postcode
       # @!attribute [rw] total
       #   @return [String] Total
       # @!attribute [rw] donations
@@ -178,11 +184,13 @@ module Osm
       attribute :section_id, :type => Integer
       attribute :first_name, :type => String
       attribute :last_name, :type => String
-      attribute :tax_payer, :type => String
+      attribute :tax_payer_name, :type => String
+      attribute :tax_payer_address, :type => String
+      attribute :tax_payer_postcode, :type => String
       attribute :total, :type => String
       attribute :donations, :type => Object, :default => DirtyHashy.new
 
-      attr_accessible :member_id, :first_name, :last_name, :section_id, :grouping_id, :total, :tax_payer, :donations
+      attr_accessible :member_id, :first_name, :last_name, :section_id, :grouping_id, :total, :tax_payer_name, :tax_payer_address, :tax_payer_postcode, :donations
 
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
@@ -216,19 +224,26 @@ module Osm
         term_id = Osm::Term.get_current_term_for_section(api, section_id).id
 
         updated = true
-        if changed_attributes.include?('tax_payer')
-          result = api.perform_query("giftaid.php?action=updateScout", {
-            'scoutid' => member_id,
-            'termid' => term_id,
-            'column' => 'parentname',
-            'value' => tax_payer,
-            'sectionid' => section_id,
-            'row' => 0,
-          })
-          if result.is_a?(Hash)
-            (result['items'] || []).each do |i|
-              if i['scoutid'] == member_id.to_s
-                updated = false unless i['parentname'] == tax_payer
+        fields = [
+          ['tax_payer_name', 'parentname', tax_payer_name],
+          ['tax_payer_address', 'address', tax_payer_address],
+          ['tax_payer_postcode', 'postcode', tax_payer_postcode],
+        ]
+        fields.each do |field|
+          if changed_attributes.include?(field[0])
+            result = api.perform_query("giftaid.php?action=updateScout", {
+              'scoutid' => member_id,
+              'termid' => term_id,
+              'column' => field[1],
+              'value' => field[2],
+              'sectionid' => section_id,
+              'row' => 0,
+            })
+            if result.is_a?(Hash)
+              (result['items'] || []).each do |i|
+                if i['scoutid'] == member_id.to_s
+                  updated = false unless i[field[1]] == field[2]
+                end
               end
             end
           end
