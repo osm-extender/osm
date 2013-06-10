@@ -1,6 +1,6 @@
 ## Version 1.0.5
 
-  * 
+  * Fix undefined method youth_section? within Model.require\_ability\_to
 
 ## Version 1.0.4
 

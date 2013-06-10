@@ -190,6 +190,7 @@ module Osm
     # @param [Osm::Section, Fixnum, #to_i] section The Section (or its ID) the permission is required on
     # @!macro options_get
     def self.require_ability_to(api, to, on, section, options={})
+      section = Osm::Section.get(api, section, options) if section.is_a?(Fixnum)
       require_permission(api, to, on, section, options)
       if section.youth_section? && [:register, :contact, :events, :flexi].include?(on)
         require_subscription(api, :silver, section, options)
