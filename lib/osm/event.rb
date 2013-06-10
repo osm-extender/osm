@@ -298,15 +298,17 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @param [String] label The label for the field in OSM
     # @param [String] name The label for the field in My.SCOUT (if this is blank then parents can't edit it)
+    # @param [Boolean] required Whether the parent is required to enter something
     # @return [Boolean] whether the update succedded
     # @raise [Osm::ArgumentIsInvalid] If the name is blank
-    def add_column(api, name, label='')
+    def add_column(api, name, label='', required=false)
       require_ability_to(api, :write, :events, section_id)
       raise Osm::ArgumentIsInvalid, 'name is invalid' if name.blank?
 
       data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
         'columnName' => name,
-        'parentLabel' => label
+        'parentLabel' => label,
+        'parentRequire' => (required ? 1 : 0),
       })
 
       # The cached events for the section will be out of date - remove them
@@ -397,7 +399,7 @@ module Osm
       column_data = ActiveSupport::JSON.decode(event_data['config'] || '[]')
       column_data = [] unless column_data.is_a?(Array)
       column_data.each do |field|
-        columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :event => event)
+        columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :parent_required => field['pR'].to_s.eql?('1'), :event => event)
       end
       event.columns = columns
       return event
@@ -412,15 +414,18 @@ module Osm
       #   @return [String] name for the column (displayed in OSM)
       # @!attribute [rw] label
       #   @return [String] label to display in My.SCOUT ("" prevents display in My.SCOUT)
+      # @!attribute [rw] parent_required
+      #   @return [Boolean] whether the parent is required to enter something
       # @!attriute [rw] event
       #   @return [Osm::Event] the event that this column belongs to
 
       attribute :id, :type => String
       attribute :name, :type => String
       attribute :label, :type => String, :default => ''
+      attribute :parent_required, :type => Boolean, :default => false
       attribute :event
 
-      attr_accessible :id, :name, :label, :event
+      attr_accessible :id, :name, :label, :parent_required, :event
 
       validates_presence_of :id
       validates_presence_of :name
@@ -440,12 +445,13 @@ module Osm
         data = api.perform_query("events.php?action=renameColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
           'columnId' => id,
           'columnName' => name,
-          'pL' => label
+          'pL' => label,
+          'pR' => (parent_required ? 1 : 0),
         })
 
         (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
           if i['id'] == id
-            if i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label))
+            if i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label)) && (i['pR'].eql?('1') == parent_required)
               reset_changed_attributes
                 # The cached event will be out of date - remove it
                 cache_delete(api, ['event', event.id])

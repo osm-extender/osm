@@ -155,7 +155,7 @@ describe "Event" do
         'notes' => 'Notes',
         'notepad' => 'notepad',
         'publicnotes' => 'public notepad',
-        'config' => '[{"id":"f_1","name":"Name","pL":"Label"}]',
+        'config' => '[{"id":"f_1","name":"Name","pL":"Label","pR":"1"}]',
         'sectionid' => '1',
         'googlecalendar' => nil,
         'archived' => '0',
@@ -200,6 +200,7 @@ describe "Event" do
         event.columns[0].id.should == 'f_1'
         event.columns[0].name.should == 'Name'
         event.columns[0].label.should == 'Label'
+        event.columns[0].parent_required.should == true
         event.valid?.should be_true
       end
 
@@ -778,6 +779,7 @@ describe "Event" do
         'secret' => 'secret',
         'columnName' => 'Test name',
         'parentLabel' => 'Test label',
+        'parentRequire' => 1
       }
       body = {
         'eventid' => '2',
@@ -787,7 +789,7 @@ describe "Event" do
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
-      event.add_column(@api, 'Test name', 'Test label').should be_true
+      event.add_column(@api, 'Test name', 'Test label', true).should be_true
       column = event.columns[0]
       column.id.should == 'f_1'
       column.name.should == 'Test name'
@@ -813,10 +815,11 @@ describe "Event" do
         'columnId' => 'f_1',
         'columnName' => 'New name',
         'pL' => 'New label',
+        'pR' => 1
       }
       body = {
         'eventid' => '2',
-        'config' => '[{"id":"f_1","name":"New name","pL":"New label"}]'
+        'config' => '[{"id":"f_1","name":"New name","pL":"New label","pR":"1"}]'
       }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
 
@@ -825,6 +828,7 @@ describe "Event" do
       column = event.columns[0]
       column.name = 'New name'
       column.label = 'New label'
+      column.parent_required = true
 
       column.update(@api).should be_true
 
