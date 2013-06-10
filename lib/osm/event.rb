@@ -267,6 +267,7 @@ module Osm
         'No' => :no,
         'Invited' => :invited,
         'Show in My.SCOUT' => :shown,
+        'Reserved' => :reserved,
       }
 
       attendance = []
@@ -513,7 +514,7 @@ module Osm
       # @!attribute [rw] date_of_birth
       #   @return [Date] the member's date of birth
       # @!attribute [rw] attending
-      #   @return [Symbol] whether the member is attending (either :yes, :no, :invited, :shown or nil)
+      #   @return [Symbol] whether the member is attending (either :yes, :no, :invited, :shown, :reserved or nil)
       # @!attribute [rw] payments
       #   @return [Hash] keys are the payment's id, values are the payment state
       # @!attribute [rw] payment_control
@@ -545,7 +546,7 @@ module Osm
       validates_presence_of :last_name
       validates_presence_of :date_of_birth
       validates_inclusion_of :payment_control, :in => [:manual, :automatic, nil]
-      validates_inclusion_of :attending, :in => [:yes, :no, :invited, :shown, nil]
+      validates_inclusion_of :attending, :in => [:yes, :no, :invited, :shown, :reserved, nil]
 
 
       # @!method initialize
@@ -575,6 +576,7 @@ module Osm
           :no => 'No',
           :invited => 'Invited',
           :shown => 'Show in My.SCOUT',
+          :reserved => 'Reserved',
         }
 
         updated = true
@@ -645,8 +647,10 @@ module Osm
       #  @return [Boolean]
       # @! method is_shown?
       #  Check wether the member can see the event in My.SCOUT
+      # @! method is_reserved?
+      #  Check wether the member has reserved a space when one becomes availible
       #  @return [Boolean]
-      [:attending, :not_attending, :invited, :shown].each do |attending_type|
+      [:attending, :not_attending, :invited, :shown, :reserved].each do |attending_type|
         define_method "is_#{attending_type}?" do
           attending == attending_type
         end
