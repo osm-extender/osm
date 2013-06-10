@@ -1,3 +1,11 @@
+## Version 1.0.6
+
+  * 
+
+## Version 1.0.5
+
+  * Fix undefined method youth_section? within Model.require\_ability\_to
+
 ## Version 1.0.4
 
   * Add notice board option to getting My.SCOUT link for a member (pass :notice as the parameter)

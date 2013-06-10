@@ -178,8 +178,8 @@ module Osm
         end
       end
       if section.nil? || section.subscription_level < level
-        level_name = ['Unknown', 'Bronze', 'Silver', 'Gold'][level]
-        raise Osm::Forbidden, "Insufficent OSM subscription level (#{level} required for #{section.name})"
+        level_name = ['Unknown', 'Bronze', 'Silver', 'Gold'][level] || level
+        raise Osm::Forbidden, "Insufficent OSM subscription level (#{level_name} required for #{section.name})"
       end
     end
 
@@ -190,6 +190,7 @@ module Osm
     # @param [Osm::Section, Fixnum, #to_i] section The Section (or its ID) the permission is required on
     # @!macro options_get
     def self.require_ability_to(api, to, on, section, options={})
+      section = Osm::Section.get(api, section, options) if section.is_a?(Fixnum)
       require_permission(api, to, on, section, options)
       if section.youth_section? && [:register, :contact, :events, :flexi].include?(on)
         require_subscription(api, :silver, section, options)
