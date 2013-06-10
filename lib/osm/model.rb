@@ -178,8 +178,8 @@ module Osm
         end
       end
       if section.nil? || section.subscription_level < level
-        level_name = ['Unknown', 'Bronze', 'Silver', 'Gold'][level]
-        raise Osm::Forbidden, "Insufficent OSM subscription level (#{level} required for #{section.name})"
+        level_name = ['Unknown', 'Bronze', 'Silver', 'Gold'][level] || level
+        raise Osm::Forbidden, "Insufficent OSM subscription level (#{level_name} required for #{section.name})"
       end
     end
 
