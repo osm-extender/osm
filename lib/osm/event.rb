@@ -630,6 +630,56 @@ module Osm
         return updated
       end
 
+      # Get audit trail
+      # @param [Osm::Api] api The api to use to make the request
+      # @!macro options_get
+      # @return [Array<Hash>]
+      def get_audit_trail(api, options={})
+        require_ability_to(api, :read, :events, event.section_id, options)
+        cache_key = ['event\_attendance\_audit', event.id, member_id]
+
+        if !options[:no_cache] && cache_exist?(api, cache_key)
+          return cache_read(api, cache_key)
+        end
+
+        data = api.perform_query("events.php?action=getEventAudit&sectionid=#{event.section_id}&scoutid=#{member_id}&eventid=#{event.id}")
+        data ||= []
+
+        attending_values = {
+          'Yes' => :yes,
+          'No' => :no,
+          'Invited' => :invited,
+          'Show in My.SCOUT' => :shown,
+          'Reserved' => :reserved,
+        }
+
+        trail = []
+        data.each do |item|
+          this_item = {
+            :at => DateTime.strptime(item['date'], '%d/%m/%Y %H:%M'),
+            :by => item['updatedby'].strip,
+            :type => item['type'].to_sym,
+            :description => item['desc'],
+            :event_id => event.id,
+            :member_id => member_id,
+            :event_attendance => self,
+          }
+          if this_item[:type].eql?(:detail)
+            results = this_item[:description].match(/\ASet '(?<label>.+)' to '(?<value>.+)'\Z/)
+            this_item[:label] = results[:label]
+            this_item[:value] = results[:value]
+          end
+          if this_item[:type].eql?(:attendance)
+            results = this_item[:description].match(/\AAttendance: (?<attending>.+)\Z/)
+            this_item[:attendance] = attending_values[results[:attending]]
+          end
+          trail.push this_item
+        end
+
+        cache_write(api, cache_key, trail)
+        return trail
+      end
+
       # @! method automatic_payments?
       #  Check wether payments are made automatically for this member
       #  @return [Boolean]

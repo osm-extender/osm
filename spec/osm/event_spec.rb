@@ -877,6 +877,41 @@ describe "Event" do
       column.delete(@api).should be_false
     end
 
+    it "Get audit trail" do
+      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3'
+      post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+      }
+      data = [
+	{"date" => "10/06/2013 19:17","updatedby" => "My.SCOUT","type" => "detail","desc" => "Set 'Test' to 'Test data'"},
+	{"date" => "10/06/2013 19:16","updatedby" => "My.SCOUT","type" => "attendance","desc" => "Attendance: Yes"},
+	{"date" => "10/06/2013 19:15","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Reserved"},
+	{"date" => "10/06/2013 19:14","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: No"},
+	{"date" => "10/06/2013 19:13","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Yes"},
+	{"date" => "10/06/2013 19:12","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Invited"},
+	{"date" => "10/06/2013 19:11","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Show in My.SCOUT"},
+      ]
+
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+
+      ea = Osm::Event::Attendance.new(
+        :event => Osm::Event.new(:id => 3, :section_id => 1),
+        :member_id => 2,
+      )
+      ea.get_audit_trail(@api).should == [
+        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 17), :by => 'My.SCOUT', :type => :detail, :description => "Set 'Test' to 'Test data'", :label => 'Test', :value => 'Test data'},
+        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 16), :by => 'My.SCOUT', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
+        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 15), :by => 'A Leader', :type => :attendance, :description => "Attendance: Reserved", :attendance => :reserved},
+        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 14), :by => 'A Leader', :type => :attendance, :description => "Attendance: No", :attendance => :no},
+        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 13), :by => 'A Leader', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
+        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 12), :by => 'A Leader', :type => :attendance, :description => "Attendance: Invited", :attendance => :invited},
+        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 11), :by => 'A Leader', :type => :attendance, :description => "Attendance: Show in My.SCOUT", :attendance => :shown},
+      ]
+    end
+
   end
 
 

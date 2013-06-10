@@ -94,7 +94,7 @@ module Osm
   def self.parse_datetime(date_time)
     return nil if date_time.nil? || date_time.empty?
     begin
-      return DateTime.strptime((date_time), OSM_DATETIME_FORMAT)
+      return DateTime.strptime(date_time, OSM_DATETIME_FORMAT)
     rescue ArgumentError
       return nil
     end
