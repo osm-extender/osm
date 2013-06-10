@@ -1,3 +1,8 @@
+## Version 1.0.4
+
+  * Add notice board option to getting My.SCOUT link for a member (pass :notice as the parameter)
+  * Model.require\_ability\_to now only checks subscription level for youth sections
+
 ## Version 1.0.3
 
   * Fix "undefined method 'downcase' for 0:Fixnum" caused by some badge requirement data being a Fixnum when a String contains just numbers.
