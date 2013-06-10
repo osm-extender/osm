@@ -178,6 +178,7 @@ module Osm
         end
       end
       if section.nil? || section.subscription_level < level
+        level_name = ['Unknown', 'Bronze', 'Silver', 'Gold'][level]
         raise Osm::Forbidden, "Insufficent OSM subscription level (#{level} required for #{section.name})"
       end
     end
@@ -190,8 +191,12 @@ module Osm
     # @!macro options_get
     def self.require_ability_to(api, to, on, section, options={})
       require_permission(api, to, on, section, options)
-      require_subscription(api, :silver, section, options) if [:register, :contact, :events, :flexi].include?(on)
-      require_subscription(api, :gold, section, options) if [:finance].include?(on)
+      if section.youth_section? && [:register, :contact, :events, :flexi].include?(on)
+        require_subscription(api, :silver, section, options)
+      end
+      if section.youth_section? && [:finance].include?(on)
+        require_subscription(api, :gold, section, options)
+      end
     end
 
 
