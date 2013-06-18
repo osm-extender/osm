@@ -1,3 +1,7 @@
+## Version 1.0.7
+
+  * 
+
 ## Version 1.0.6
 
   * Add badge\_links to Meeting
