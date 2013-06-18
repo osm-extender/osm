@@ -2,6 +2,7 @@ module Osm
 
   class Meeting < Osm::Model
     class Activity; end # Ensure the constant exists for the validators
+    class BadgeLink; end # Ensure the constant exists for the validators
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id of the meeting
@@ -23,6 +24,8 @@ module Osm
     #   @return [Date] the date of the meeting
     # @!attribute [rw] activities
     #   @return [Array<Activity>] list of activities being done during the meeting
+    # @!attribute [rw] badge_links
+    #   @return [Array<BadgeLink>] list of badge links added to the meeting
     # @!attribute [rw] start_time
     #   @return [String] the start time (hh:mm)
     # @!attribute [rw] finish_time
@@ -40,8 +43,9 @@ module Osm
     attribute :start_time, :type => String
     attribute :finish_time, :type => String
     attribute :activities, :default => []
+    attribute :badge_links, :default => []
 
-    attr_accessible :id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :date, :activities, :start_time, :finish_time
+    attr_accessible :id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :date, :activities, :start_time, :finish_time, :badge_links
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -49,8 +53,8 @@ module Osm
     validates_presence_of :date
     validates_format_of :start_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
     validates_format_of :finish_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
-
     validates :activities, :array_of => {:item_type => Osm::Meeting::Activity, :item_valid => true}
+    validates :badge_links, :array_of => {:item_type => Osm::Meeting::BadgeLink, :item_valid => true}
 
     # @!method initialize
     #   Initialize a new Meeting
@@ -79,6 +83,7 @@ module Osm
       data = {'items'=>[],'activities'=>{}} if data.is_a? Array
       items = data['items'] || []
       activities = data['activities'] || {}
+      badge_links = data['badgelinks'] || {}
 
       items.each do |item|
         attributes = {}
@@ -93,7 +98,7 @@ module Osm
         attributes[:start_time] = item['starttime'].nil? ? nil : item['starttime'][0..4]
         attributes[:finish_time] = item['endtime'].nil? ? nil : item['endtime'][0..4]
         attributes[:date] = Osm::parse_date(item['meetingdate'])
-  
+
         our_activities = activities[item['eveningid']]
         attributes[:activities] = Array.new
         unless our_activities.nil?
@@ -105,7 +110,21 @@ module Osm
             )
           end
         end
-  
+
+        our_badge_links = badge_links[item['eveningid']]
+        attributes[:badge_links] = Array.new
+        unless our_badge_links.nil?
+          our_badge_links.each do |badge_link_data|
+            attributes[:badge_links].push Osm::Meeting::BadgeLink.new(
+              :badge_key => badge_link_data['badge'],
+              :badge_type => badge_link_data['badgetype'].downcase.to_sym,
+              :requirement_key => badge_link_data['columnname'],
+              :badge_section => badge_link_data['section'].downcase.to_sym,
+              :label => badge_link_data['label'],
+            )
+          end
+        end
+
         result.push new(attributes)
       end
 
@@ -156,7 +175,17 @@ module Osm
         }
         activities_data.push this_activity
       end
-      activities_data = ActiveSupport::JSON.encode(activities_data)
+
+      badge_links_data = Array.new
+      badge_links.each do |badge_link|
+        this_badge_link = {
+          'section' => badge_link.badge_section,
+          'badge' => badge_link.badge_key,
+          'columnname' => badge_link.requirement_key,
+          'badgetype' => badge_link.badge_type,
+        }
+        badge_links_data.push this_badge_link
+      end
 
       api_data = {
         'eveningid' => id,
@@ -170,7 +199,8 @@ module Osm
         'postnotes' => post_notes,
         'games' => games,
         'leaders' => leaders,
-        'activity' => activities_data,
+        'activity' => ActiveSupport::JSON.encode(activities_data),
+        'badgelinks' => ActiveSupport::JSON.encode(badge_links_data),
       }
       response = api.perform_query("programme.php?action=editEvening", api_data)
 
@@ -289,6 +319,46 @@ module Osm
       end
 
     end # Class Meeting::Activity
+
+
+    class BadgeLink
+      include ActiveModel::MassAssignmentSecurity
+      include ActiveAttr::Model
+
+      # @!attribute [rw] badge_key
+      #   @return [String] the badge being done
+      # @!attribute [rw] badge_type
+      #   @return [Symbol] the type of badge
+      # @!attribute [rw] requirement_key
+      #   @return [String] the requirement being done
+      # @!attribute [rw] badge_section
+      #   @return [Symbol] the section type that the badge belongs to
+      # @!attribute [rw] label
+      #   @return [String] human firendly label for the badge and requirement
+
+      attribute :badge_key, :type => String
+      attribute :badge_type, :type => Object
+      attribute :requirement_key, :type => String
+      attribute :badge_section, :type => Object
+      attribute :label, :type => String
+
+      attr_accessible :badge_key, :badge_type, :requirement_key, :badge_section, :label
+
+      validates_presence_of :badge_key
+      validates_format_of :requirement_key, :with => /\A[a-z]_\d{2}\Z/, :message => 'is not in the correct format (e.g. "a_01")'
+      validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers]
+      validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
+
+      # @!method initialize
+      #   Initialize a new Meeting::Activity
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+      # Compare BadgeLink based on title then activity_id
+      def <=>(another)
+        return self.label <=> another.try(:label)
+      end
+
+    end # Class Meeting::BadgeLink
 
   end # Class Meeting
 

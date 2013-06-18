@@ -267,6 +267,7 @@ module Osm
         'No' => :no,
         'Invited' => :invited,
         'Show in My.SCOUT' => :shown,
+        'Reserved' => :reserved,
       }
 
       attendance = []
@@ -297,15 +298,17 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @param [String] label The label for the field in OSM
     # @param [String] name The label for the field in My.SCOUT (if this is blank then parents can't edit it)
+    # @param [Boolean] required Whether the parent is required to enter something
     # @return [Boolean] whether the update succedded
     # @raise [Osm::ArgumentIsInvalid] If the name is blank
-    def add_column(api, name, label='')
+    def add_column(api, name, label='', required=false)
       require_ability_to(api, :write, :events, section_id)
       raise Osm::ArgumentIsInvalid, 'name is invalid' if name.blank?
 
       data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
         'columnName' => name,
-        'parentLabel' => label
+        'parentLabel' => label,
+        'parentRequire' => (required ? 1 : 0),
       })
 
       # The cached events for the section will be out of date - remove them
@@ -396,7 +399,7 @@ module Osm
       column_data = ActiveSupport::JSON.decode(event_data['config'] || '[]')
       column_data = [] unless column_data.is_a?(Array)
       column_data.each do |field|
-        columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :event => event)
+        columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :parent_required => field['pR'].to_s.eql?('1'), :event => event)
       end
       event.columns = columns
       return event
@@ -411,15 +414,18 @@ module Osm
       #   @return [String] name for the column (displayed in OSM)
       # @!attribute [rw] label
       #   @return [String] label to display in My.SCOUT ("" prevents display in My.SCOUT)
+      # @!attribute [rw] parent_required
+      #   @return [Boolean] whether the parent is required to enter something
       # @!attriute [rw] event
       #   @return [Osm::Event] the event that this column belongs to
 
       attribute :id, :type => String
       attribute :name, :type => String
       attribute :label, :type => String, :default => ''
+      attribute :parent_required, :type => Boolean, :default => false
       attribute :event
 
-      attr_accessible :id, :name, :label, :event
+      attr_accessible :id, :name, :label, :parent_required, :event
 
       validates_presence_of :id
       validates_presence_of :name
@@ -439,12 +445,13 @@ module Osm
         data = api.perform_query("events.php?action=renameColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
           'columnId' => id,
           'columnName' => name,
-          'pL' => label
+          'pL' => label,
+          'pR' => (parent_required ? 1 : 0),
         })
 
         (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
           if i['id'] == id
-            if i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label))
+            if i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label)) && (i['pR'].eql?('1') == parent_required)
               reset_changed_attributes
                 # The cached event will be out of date - remove it
                 cache_delete(api, ['event', event.id])
@@ -513,7 +520,7 @@ module Osm
       # @!attribute [rw] date_of_birth
       #   @return [Date] the member's date of birth
       # @!attribute [rw] attending
-      #   @return [Symbol] whether the member is attending (either :yes, :no, :invited, :shown or nil)
+      #   @return [Symbol] whether the member is attending (either :yes, :no, :invited, :shown, :reserved or nil)
       # @!attribute [rw] payments
       #   @return [Hash] keys are the payment's id, values are the payment state
       # @!attribute [rw] payment_control
@@ -545,7 +552,7 @@ module Osm
       validates_presence_of :last_name
       validates_presence_of :date_of_birth
       validates_inclusion_of :payment_control, :in => [:manual, :automatic, nil]
-      validates_inclusion_of :attending, :in => [:yes, :no, :invited, :shown, nil]
+      validates_inclusion_of :attending, :in => [:yes, :no, :invited, :shown, :reserved, nil]
 
 
       # @!method initialize
@@ -575,6 +582,7 @@ module Osm
           :no => 'No',
           :invited => 'Invited',
           :shown => 'Show in My.SCOUT',
+          :reserved => 'Reserved',
         }
 
         updated = true
@@ -622,6 +630,56 @@ module Osm
         return updated
       end
 
+      # Get audit trail
+      # @param [Osm::Api] api The api to use to make the request
+      # @!macro options_get
+      # @return [Array<Hash>]
+      def get_audit_trail(api, options={})
+        require_ability_to(api, :read, :events, event.section_id, options)
+        cache_key = ['event\_attendance\_audit', event.id, member_id]
+
+        if !options[:no_cache] && cache_exist?(api, cache_key)
+          return cache_read(api, cache_key)
+        end
+
+        data = api.perform_query("events.php?action=getEventAudit&sectionid=#{event.section_id}&scoutid=#{member_id}&eventid=#{event.id}")
+        data ||= []
+
+        attending_values = {
+          'Yes' => :yes,
+          'No' => :no,
+          'Invited' => :invited,
+          'Show in My.SCOUT' => :shown,
+          'Reserved' => :reserved,
+        }
+
+        trail = []
+        data.each do |item|
+          this_item = {
+            :at => DateTime.strptime(item['date'], '%d/%m/%Y %H:%M'),
+            :by => item['updatedby'].strip,
+            :type => item['type'].to_sym,
+            :description => item['desc'],
+            :event_id => event.id,
+            :member_id => member_id,
+            :event_attendance => self,
+          }
+          if this_item[:type].eql?(:detail)
+            results = this_item[:description].match(/\ASet '(?<label>.+)' to '(?<value>.+)'\Z/)
+            this_item[:label] = results[:label]
+            this_item[:value] = results[:value]
+          end
+          if this_item[:type].eql?(:attendance)
+            results = this_item[:description].match(/\AAttendance: (?<attending>.+)\Z/)
+            this_item[:attendance] = attending_values[results[:attending]]
+          end
+          trail.push this_item
+        end
+
+        cache_write(api, cache_key, trail)
+        return trail
+      end
+
       # @! method automatic_payments?
       #  Check wether payments are made automatically for this member
       #  @return [Boolean]
@@ -645,8 +703,10 @@ module Osm
       #  @return [Boolean]
       # @! method is_shown?
       #  Check wether the member can see the event in My.SCOUT
+      # @! method is_reserved?
+      #  Check wether the member has reserved a space when one becomes availible
       #  @return [Boolean]
-      [:attending, :not_attending, :invited, :shown].each do |attending_type|
+      [:attending, :not_attending, :invited, :shown, :reserved].each do |attending_type|
         define_method "is_#{attending_type}?" do
           attending == attending_type
         end
