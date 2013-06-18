@@ -1,5 +1,6 @@
 ## Version 1.0.6
 
+  * Add badge\_links to Meeting
   * Event.add\_column method gains a required attirbute (default false) to control whether parents are required to enter something
   * Event::Column gains parent\_required attribute (default false)
   * Event::Attendance gains get\_audit\_trail(api) method

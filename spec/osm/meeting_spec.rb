@@ -17,7 +17,8 @@ describe "Meeting" do
       :start_time => '19:00',
       :finish_time => '21:00',
       :date => Date.new(2000, 01, 02),
-      :activities => []
+      :activities => [],
+      :badge_links => []
     )
 
     e.id.should == 1
@@ -32,6 +33,7 @@ describe "Meeting" do
     e.finish_time.should == '21:00'
     e.date.should == Date.new(2000, 1, 2)
     e.activities.should == []
+    e.badge_links.should == []
     e.valid?.should be_true
   end
 
@@ -49,7 +51,7 @@ describe "Meeting" do
 
   describe "Meeting::Activity" do
 
-    it "Create Meeting::Activity" do
+    it "Create" do
       ea = Osm::Meeting::Activity.new(
         :activity_id => 2,
         :title => 'Activity Name',
@@ -74,21 +76,84 @@ describe "Meeting" do
   end
 
 
+  describe "Meeting::BadgeLink" do
+
+    it "Create" do
+      bl = Osm::Meeting::BadgeLink.new(
+        :badge_key => 'artist',
+        :badge_type => :activity,
+        :requirement_key => 'a_01',
+        :badge_section => :cubs,
+        :label => 'Cubs Artist Activity - A: Poster',
+      )
+
+      bl.badge_key.should == 'artist'
+      bl.badge_type.should == :activity
+      bl.requirement_key.should == 'a_01'
+      bl.badge_section.should == :cubs
+      bl.label.should == 'Cubs Artist Activity - A: Poster'
+      bl.valid?.should be_true
+    end
+
+    it "Sorts by label" do
+      a1 = Osm::Meeting::BadgeLink.new(:label => 'a')
+      a2 = Osm::Meeting::BadgeLink.new(:label => 'b')
+
+      data = [a2, a1]
+      data.sort.should == [a1, a2]
+    end
+
+  end
+
+
   describe 'Using the API' do
 
     it "Fetch the term's programme for a section" do
-      items = [{"eveningid" => "5", "sectionid" =>"3", "title" => "Weekly Meeting 1", "notesforparents" => "", "games" => "", "prenotes" => "", "postnotes" => "", "leaders" => "", "meetingdate" => "2001-02-03", "starttime" => "19:15:00", "endtime" => "20:30:00", "googlecalendar" => ""}]
-      activities = {"5" => [
-        {"activityid" => "6", "title" => "Activity 6", "notes" => "", "eveningid" => "5"},
-        {"activityid" => "7", "title" => "Activity 7", "notes" => "", "eveningid" => "5"}
-      ]}
-      body = {"items" => items, "activities" => activities}
+      body = {
+        "items" => [{"eveningid" => "5", "sectionid" =>"3", "title" => "Weekly Meeting 1", "notesforparents" => "parents", "games" => "games", "prenotes" => "before", "postnotes" => "after", "leaders" => "leaders", "meetingdate" => "2001-02-03", "starttime" => "19:15:00", "endtime" => "20:30:00", "googlecalendar" => ""}],
+        "activities" => {"5" => [
+          {"activityid" => "6", "title" => "Activity 6", "notes" => "Some notes", "eveningid" => "5"},
+          {"activityid" => "7", "title" => "Activity 7", "notes" => "", "eveningid" => "5"}
+        ]},
+        "badgelinks" => {"5" => [{
+          "badge" => "artist",
+          "badgetype" => "activity",
+          "columnname" => "a_01",
+          "eveningid" => "5",
+          "label" => "Cubs Artist Activity - A: Poster",
+          "section" => "cubs",
+          "sectionid" => "3",
+         }]},
+      }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getProgramme&sectionid=3&termid=4", :body => body.to_json)
 
       programme = Osm::Meeting.get_for_section(@api, 3, 4)
       programme.size.should == 1
-      programme[0].is_a?(Osm::Meeting).should be_true
-      programme[0].activities.size.should == 2
+      meeting = programme[0]
+      meeting.is_a?(Osm::Meeting).should be_true
+      meeting.id.should == 5
+      meeting.section_id.should == 3
+      meeting.title.should == 'Weekly Meeting 1'
+      meeting.notes_for_parents.should == 'parents'
+      meeting.games.should == 'games'
+      meeting.pre_notes.should == 'before'
+      meeting.post_notes.should == 'after'
+      meeting.leaders.should == 'leaders'
+      meeting.date.should == Date.new(2001, 2, 3)
+      meeting.start_time.should == '19:15'
+      meeting.finish_time.should == '20:30'
+      meeting.activities.size.should == 2
+      activity = meeting.activities[0]
+      activity.activity_id.should == 6
+      activity.title.should == 'Activity 6'
+      activity.notes.should == 'Some notes'
+      meeting.badge_links.size.should == 1
+      badge_link = meeting.badge_links[0]
+      badge_link.badge_key.should == 'artist'
+      badge_link.badge_type.should == :activity
+      badge_link.requirement_key.should == 'a_01'
+      badge_link.badge_section.should == :cubs
+      badge_link.label.should == 'Cubs Artist Activity - A: Poster'
     end
 
     it "Fetch badge requirements for a meeting" do
@@ -181,12 +246,20 @@ describe "Meeting" do
         'secret' => 'secret',
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
-        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
+        'postnotes' => '', 'games' => '', 'leaders' => '',
+        'activity' => '[{"activityid":3,"notes":"Some notes"}]',
+        'badgelinks' => '[{"section":"beavers","badge":"badge","columnname":"b_03","badgetype":"activity"}]',
       }
       Osm::Term.stub(:get_for_section) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
 
-      meeting = Osm::Meeting.new(:id=>1, :section_id=>2, :date=>Date.new(2000, 01, 02))
+      meeting = Osm::Meeting.new(
+        :id=>1,
+        :section_id=>2,
+        :date=>Date.new(2000, 01, 02),
+        :activities => [Osm::Meeting::Activity.new(:activity_id => 3, :title => 'Activity Title', :notes => 'Some notes')],
+        :badge_links => [Osm::Meeting::BadgeLink.new(:badge_key => 'badge', :badge_type => :activity, :requirement_key => 'b_03', :badge_section => :beavers, :label => 'Label')]
+      )
       meeting.update(@api).should be_true
     end
 
@@ -199,7 +272,7 @@ describe "Meeting" do
         'secret' => 'secret',
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
-        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]',
+        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'badgelinks' => '[]',
       }
       Osm::Term.stub(:get_for_section) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
