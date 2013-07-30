@@ -1,11 +1,17 @@
 ## Version 1.2.0
 
   * Register - get\_structure now only includes dates
-  * Gift Aid:
+  * Add Gift Aid:
     * Get Payments
     * Update Payments
     * Get Payment/Member Data
     * Update Payment/Member Data
+  * Add Finances:
+    * Budget
+      * Get
+      * Add
+      * Update
+      * Delete
 
 ## Version 1.0.6
 

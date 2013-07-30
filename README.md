@@ -90,6 +90,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Details for each badge
     * Requirements for evening
     * Badge stock levels
+  * Budgets
   * Due Badges
   * Evening
   * Event (Silver required)
@@ -118,6 +119,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Activity
   * Badges (Silver required for activity, Bronze for core, challenge and staged):
     * Which requirements each member has met
+  * Budget
   * Evening
   * Event (Silver required)
   * Event Attendance (Silver required)
@@ -130,6 +132,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Register Attendance
 
 ### Create
+  * Budget
   * Evening
   * Event (Silver required)
   * Event Column (Silver required)
@@ -138,6 +141,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Member
 
 ### Delete
+  * Budget
   * Evening
   * Event (Silver required)
   * Event Column (Silver required)
@@ -155,5 +159,5 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadmap) for more details.
 
-  * Finances (Everything) (Gold required) [issues 76 & 77]]
+  * Finances (Invoices) (Gold required) [issue 77]
   * MyScout (Everything)
