@@ -122,9 +122,8 @@ module Osm
     # Get an event
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
-    # @param [Fixnum] event_id The id of the event to get
+    # @param [Fixnum, #to_i] event_id The id of the event to get
     # @!macro options_get
-    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @return [Osm::Event, nil] the event (or nil if it couldn't be found
     def self.get(api, section, event_id, options={})
       require_ability_to(api, :read, :events, section, options)
