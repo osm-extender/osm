@@ -395,7 +395,7 @@ module Osm
       result = self.grouping_id <=> another.try(:grouping_id) if result == 0
       result = -(self.grouping_leader <=> another.try(:grouping_leader)) if result == 0
       result = self.last_name <=> another.try(:last_name) if result == 0
-      result = self.first_name <=> another.try(:last_name) if result == 0
+      result = self.first_name <=> another.try(:first_name) if result == 0
       return result
     end
 
