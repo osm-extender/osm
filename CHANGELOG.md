@@ -7,11 +7,9 @@
     * Get Payment/Member Data
     * Update Payment/Member Data
   * Add Finances:
-    * Budget
-      * Get
-      * Add
-      * Update
-      * Delete
+    * Budget (Get, Add, Update, Delete)
+    * Invoices (Get, Add, Update, Delete)
+    * Invoice Items (Get, Add, Update, Delete)
 
 ## Version 1.0.6
 

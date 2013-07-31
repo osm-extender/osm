@@ -90,7 +90,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Details for each badge
     * Requirements for evening
     * Badge stock levels
-  * Budgets
+  * Budgets (Gold required)
   * Due Badges
   * Evening
   * Event (Silver required)
@@ -102,6 +102,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Gift Aid Data
   * Gift Aid Structure
   * Groupings (e.g. Sixes, Patrols)
+  * Invoices (Gold required)
   * Members
   * Notepad
   * Notepads
@@ -119,7 +120,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Activity
   * Badges (Silver required for activity, Bronze for core, challenge and staged):
     * Which requirements each member has met
-  * Budget
+  * Budget (Gold required)
   * Evening
   * Event (Silver required)
   * Event Attendance (Silver required)
@@ -128,24 +129,27 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Flexi Record Data
   * Gift Aid Payment
   * Grouping
+  * Invoices (Gold required)
   * Member
   * Register Attendance
 
 ### Create
-  * Budget
+  * Budget (Gold required)
   * Evening
   * Event (Silver required)
   * Event Column (Silver required)
   * Flexi Record Column
   * Gift Aid Payment
+  * Invoices (Gold required)
   * Member
 
 ### Delete
-  * Budget
+  * Budget (Gold required)
   * Evening
   * Event (Silver required)
   * Event Column (Silver required)
   * Flexi Record Column
+  * Invoices (Gold required)
 
 ### Actions
   * Authorise an app to use the API on a user's behalf
@@ -159,5 +163,4 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadmap) for more details.
 
-  * Finances (Invoices) (Gold required) [issue 77]
   * MyScout (Everything)

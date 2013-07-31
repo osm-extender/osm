@@ -84,7 +84,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
     # @!macro options_get
-    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
+    # @option options [Boolean] :include_archived (optional) if true then archived events will also be returned
     # @return [Array<Osm::Event>]
     def self.get_for_section(api, section, options={})
       require_ability_to(api, :read, :events, section, options)
@@ -128,6 +128,7 @@ module Osm
     def self.get(api, section, event_id, options={})
       require_ability_to(api, :read, :events, section, options)
       section_id = section.to_i
+      event_id = event_id.to_i
       cache_key = ['event', event_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
@@ -402,7 +403,6 @@ module Osm
       end
       event.columns = columns
       return event
-
     end
 
 

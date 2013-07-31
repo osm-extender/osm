@@ -14,7 +14,7 @@ module Osm
 
     attr_accessible :id, :section_id, :name
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :name
 
@@ -64,7 +64,6 @@ module Osm
     # @raise [Osm::Error] If the budget already exists in OSM
     def create(api)
       raise Osm::Error, 'the budget already exists in OSM' unless id.nil?
-      self.id = 1
       raise Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
       Osm::Model.require_ability_to(api, :write, :finance, section_id)
 
