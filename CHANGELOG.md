@@ -1,7 +1,8 @@
 ## Version 1.2.0
 
   * Osm::Member
-    * myscout\_link methods now accepts :details to get a link to the "Perosnal details" page
+    * myscout\_link method now accepts :details to get a link to the "Perosnal details" page
+    * myscout\_link method can now link to a specific event by also passing in the id (optional 3rd parameter)
     * Addition of myscout\_link\_key method to get the member's unique key for use in myscout links
     * section.subscription\_level\_name is marked as depricated, ready for removal in version 2.0 -> replace with Osm::SUBSCRIPTION\_LEVEL\_NAMES[section.subscription\_level]
   * Addition of two new constants:

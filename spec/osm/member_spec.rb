@@ -524,6 +524,11 @@ describe "Member" do
         @member.myscout_link(@api, :events).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE'
       end
 
+      it "Specific Event" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
+        @member.myscout_link(@api, :events, 2).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE&e=2'
+      end
+
       it "Programme" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
         @member.myscout_link(@api, :programme).should == 'https://www.onlinescoutmanager.co.uk/parents/programme.php?sc=1&se=2&c=KEY-HERE'
