@@ -10,7 +10,7 @@ module Osm
     # @!attribute [rw] group_name
     #   @return [String] the group name
     # @!attribute [rw] subscription_level
-    #   @return [Fixnum] what subscription the section has to OSM (1-bronze, 2-silver, 3-gold)
+    #   @return [Fixnum] what subscription the section has to OSM (1-bronze, 2-silver, 3-gold, 4-gold+)
     # @!attribute [rw] subscription_expires
     #   @return [Date] when the section's subscription to OSM expires
     # @!attribute [rw] type
@@ -348,12 +348,10 @@ module Osm
 
     # Get the name for the section's subscription level
     # @return [String, nil] the name of the subscription level (nil if no name exists)
+    # @deprecated Please use Osm::SUBSCRIPTION_LEVEL_NAMES[section.subscription_level instead
     def subscription_level_name
-      return {
-        1 => 'Bronze',
-        2 => 'Silver',
-        3 => 'Gold',
-      }[subscription_level]
+      warn "[DEPRECATION] `subscription_level_name` is deprecated.  Please use `Osm::SUBSCRIPTION_LEVEL_NAMES[section.subscription_level` instead."
+      Osm::SUBSCRIPTION_LEVEL_NAMES[subscription_level]
     end
 
     # Compare Section based on group_name type (age order), then name
