@@ -369,7 +369,7 @@ module Osm
 
     # Get the My.SCOUT link for this member
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme, :badges or :notice)
+    # @param [Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme, :badges, :notice or :details)
     # @return [String] the link for this member's My.SCOUT
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     # @raise [Osm::ArgumentIsInvalid] If link_to is not an allowed Symbol
@@ -378,7 +378,7 @@ module Osm
       raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
       raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
-      raise Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice].include?(link_to)
+      raise Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice, :details].include?(link_to)
 
       if @myscout_link_key.nil?
         data = api.perform_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{self.id}")

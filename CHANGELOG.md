@@ -1,9 +1,11 @@
 ## Version 1.2.0
 
+  * Osm::Member
+    * myscout\_link methods now accepts :details to get a link to the "Perosnal details" page
+    * section.subscription\_level\_name is marked as depricated, ready for removal in version 2.0 -> replace with Osm::SUBSCRIPTION\_LEVEL\_NAMES[section.subscription\_level]
   * Addition of two new constants:
     * Osm::SUBSCRIPTION\_LEVEL\_NAMES - an Array of Strings containing the human name of each subscription level (starts with "Unknown" to make indexing work nicely)
     * Osm::SUBSCRIPTION\_LEVELS - an Array of Symbols for each level (starts with nil to make indexing work nicely)
-    * section.subscription\_level\_name is marked as depricated, ready for removal in version 2.0 -> replace with Osm::SUBSCRIPTION\_LEVEL\_NAMES[section.subscription\_level]
   * Register - get\_structure now only includes dates
   * Add Gift Aid:
     * Get Payments

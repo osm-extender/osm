@@ -529,6 +529,10 @@ describe "Member" do
         @member.myscout_link(@api, :notice).should == 'https://www.onlinescoutmanager.co.uk/parents/notice.php?sc=1&se=2&c=KEY-HERE'
       end
 
+      it "Personal details" do
+        @member.myscout_link(@api, :details).should == 'https://www.onlinescoutmanager.co.uk/parents/details.php?sc=1&se=2&c=KEY-HERE'
+      end
+
     end
 
   end
