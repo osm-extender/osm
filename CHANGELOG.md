@@ -1,5 +1,9 @@
 ## Version 1.2.0
 
+  * Add personal details options to Section:
+    * myscout\_details attribute [Boolean] for whether personal details are enabled
+    * myscout\_details\_expires attribute [Date] for expiry date of subscription
+    * myscout\_details\_email\_changes\_to attribute [String] where to send update emails to
   * Osm::Member
     * myscout\_link method now accepts :details to get a link to the "Perosnal details" page
     * myscout\_link method can now link to a specific event by also passing in the id (optional 3rd parameter)
