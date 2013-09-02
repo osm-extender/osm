@@ -23,6 +23,7 @@ describe "Event" do
       :reminders => false,
       :attendance_limit => 3,
       :attendance_limit_includes_leaders => true,
+      :attendance_reminder => 14,
       :allow_booking => false,
     }
     event = Osm::Event.new(data)
@@ -44,6 +45,7 @@ describe "Event" do
     event.reminders.should == false
     event.attendance_limit.should == 3
     event.attendance_limit_includes_leaders.should == true
+    event.attendance_reminder.should == 14
     event.allow_booking.should be_false
     event.valid?.should be_true
   end
@@ -138,6 +140,7 @@ describe "Event" do
           'allowchanges' => '1',
           'disablereminders' => '1',
           'attendancelimit' => '3',
+          'attendancereminder' => '7',
           'limitincludesleaders' => '1',
           'allowbooking' => '1',
         }]
@@ -165,6 +168,7 @@ describe "Event" do
         'pnnotepad' => '',
         'structure' => [],
         'attendancelimit' => '3',
+        'attendancereminder' => '7',
         'limitincludesleaders' => '1',
         'allowbooking' => '1',
       }
@@ -196,6 +200,7 @@ describe "Event" do
         event.reminders.should == false
         event.attendance_limit.should == 3
         event.attendance_limit_includes_leaders.should == true
+        event.attendance_reminder.should == 7
         event.allow_booking.should == true
         event.columns[0].id.should == 'f_1'
         event.columns[0].name.should == 'Name'
@@ -398,6 +403,7 @@ describe "Event" do
           'attendancelimit' => 3,
           'limitincludesleaders' => 'true',
           'allowbooking' => 'true',
+          'attendancereminder' => 1,
         }
 
         Osm::Event.stub(:get_for_section) { [] }
@@ -419,6 +425,7 @@ describe "Event" do
           :reminders => true,
           :attendance_limit => 3,
           :attendance_limit_includes_leaders => true,
+          :attendance_reminder => 1,
           :allow_booking => true,
         })
         event.should_not be_nil
@@ -444,6 +451,7 @@ describe "Event" do
           'allowChanges' => 'true',
           'disablereminders' => 'false',
           'attendancelimit' => 3,
+          'attendancereminder' => 0,
           'limitincludesleaders' => 'true',
           'allowbooking' => 'true',
         }
@@ -520,6 +528,7 @@ describe "Event" do
           'allowChanges' => 'true',
           'disablereminders' => 'false',
           'attendancelimit' => 3,
+          'attendancereminder' => 2,
           'limitincludesleaders' => 'true',
           'allowbooking' => 'true',
         }
@@ -544,6 +553,7 @@ describe "Event" do
           :public_notepad => '',
           :attendance_limit => 3,
           :attendance_limit_includes_leaders => true,
+          :attendance_reminder => 2,
           :allow_booking => true,
         )
         event.notepad = 'notepad'
@@ -571,6 +581,7 @@ describe "Event" do
           'allowChanges' => 'true',
           'disablereminders' => 'false',
           'attendancelimit' => 3,
+          'attendancereminder' => 1,
           'limitincludesleaders' => 'true',
           'allowbooking' => 'true',
         }
@@ -593,6 +604,7 @@ describe "Event" do
           :public_notepad => '',
           :attendance_limit => 3,
           :attendance_limit_includes_leaders => true,
+          :attendance_reminder => 1,
           :allow_booking => true,
         )
         event.cost = 'TBC'
