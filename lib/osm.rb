@@ -11,9 +11,10 @@ module Osm
   # Declare exceptions
   class Error < Exception; end
   class ConnectionError < Error; end
-  class Forbidden < Error; end
+  class Forbidden < Osm::Error; end
   class ArgumentIsInvalid < ArgumentError; end
   class ObjectIsInvalid < Error; end
+  class Osm::Error::NoCurrentTerm < Osm::Error; end
 
   private
   # Set constants
