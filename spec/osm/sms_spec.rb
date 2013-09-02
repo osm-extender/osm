@@ -5,7 +5,7 @@ describe "SMS" do
 
   describe "Send an SMS" do
 
-    it "Success" do
+    it "First" do
       HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/sms.php?action=sendText&sectionid=1', {:body => {
         'apiid' => @CONFIGURATION[:api][:osm][:id],
         'token' => @CONFIGURATION[:api][:osm][:token],
@@ -14,7 +14,7 @@ describe "SMS" do
         'msg' => 'Test message.',
         'scouts' => '2,3',
         'source' => '441234567890',
-        'all' => :one,
+        'type' => :one,
         'scheduled' => 'now',
       }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>{'result'=>true,'sent'=>2,'message'=>'Success','debug'=>nil,'config'=>{}}.to_json}) }
 
@@ -22,7 +22,94 @@ describe "SMS" do
         @api,
         1,      # Section
         [2, 3], # Members
-        :one,
+        :first,
+        '441234567890', # Source address
+        'Test message.' # Message text
+      )
+
+      result.should == {
+        :result => true,
+        :sent => 2,
+        :message => 'Success'
+      }
+    end
+
+    it "All" do
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/sms.php?action=sendText&sectionid=1', {:body => {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'msg' => 'Test message.',
+        'scouts' => '2,3',
+        'source' => '441234567890',
+        'type' => :all,
+        'scheduled' => 'now',
+      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>{'result'=>true,'sent'=>2,'message'=>'Success','debug'=>nil,'config'=>{}}.to_json}) }
+
+      result = Osm::Sms.send_sms(
+        @api,
+        1,      # Section
+        [2, 3], # Members
+        :all,
+        '441234567890', # Source address
+        'Test message.' # Message text
+      )
+
+      result.should == {
+        :result => true,
+        :sent => 2,
+        :message => 'Success'
+      }
+    end
+
+    it "2 & 3" do
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/sms.php?action=sendText&sectionid=1', {:body => {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'msg' => 'Test message.',
+        'scouts' => '2,3',
+        'source' => '441234567890',
+        'type' => '23',
+        'scheduled' => 'now',
+      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>{'result'=>true,'sent'=>2,'message'=>'Success','debug'=>nil,'config'=>{}}.to_json}) }
+
+      result = Osm::Sms.send_sms(
+        @api,
+        1,      # Section
+        [2, 3], # Members
+        '23',
+        '441234567890', # Source address
+        'Test message.' # Message text
+      )
+
+      result.should == {
+        :result => true,
+        :sent => 2,
+        :message => 'Success'
+      }
+    end
+
+    it "1 & 4" do
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/sms.php?action=sendText&sectionid=1', {:body => {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'msg' => 'Test message.',
+        'scouts' => '2,3',
+        'source' => '441234567890',
+        'type' => '14',
+        'scheduled' => 'now',
+      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>{'result'=>true,'sent'=>2,'message'=>'Success','debug'=>nil,'config'=>{}}.to_json}) }
+
+      result = Osm::Sms.send_sms(
+        @api,
+        1,      # Section
+        [2, 3], # Members
+        '14',
         '441234567890', # Source address
         'Test message.' # Message text
       )

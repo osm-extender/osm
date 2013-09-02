@@ -104,7 +104,7 @@ module Osm
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID)  to get terms for
     # @!macro options_get 
     # @return [Osm::Term, nil] The current term or nil if the user can not access that section
-    # @raise [Osm::Error] If the term doesn't have a Term which is current
+    # @raise [Osm::Error::NoCurrentTerm] If the Section doesn't have a Term which is current
     def self.get_current_term_for_section(api, section, options={})
       section_id = section.to_i
       terms = get_for_section(api, section_id, options)
@@ -114,7 +114,7 @@ module Osm
         return term if term.current?
       end
 
-      raise Osm::Error, 'There is no current term for the section.'
+      raise Osm::Error::NoCurrentTerm, 'There is no current term for the section.'
     end
 
     # Create a term in OSM

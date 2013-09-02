@@ -37,6 +37,8 @@ module Osm
     #   @return [Fixnum] the maximum number of people who can attend the event (0 = no limit)
     # @!attendance [rw] attendance_limit_includes_leaders
     #   @return [Boolean] whether the attendance limit includes leaders
+    # @!attribute [rw] attendance_reminder
+    #   @return [Fixnum] how many days before the event to send a reminder to those attending (0 (off), 1, 3, 7, 14, 21, 28)
     # @!attribute [rw] allow_booking
     #   @return [Boolean] whether booking is allowed through My.SCOUT
 
@@ -57,11 +59,13 @@ module Osm
     attribute :reminders, :type => Boolean, :default => true
     attribute :attendance_limit, :type => Integer, :default => 0
     attribute :attendance_limit_includes_leaders, :type => Boolean, :default => false
+    attribute :attendance_reminder, :type => Integer, :default => 0
     attribute :allow_booking, :type => Boolean, :default => true
 
     attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
                     :fields, :columns, :notepad, :public_notepad, :confirm_by_date, :allow_changes,
-                    :reminders, :attendance_limit, :attendance_limit_includes_leaders, :allow_booking
+                    :reminders, :attendance_limit, :attendance_limit_includes_leaders,
+                    :attendance_reminder, :allow_booking
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -72,6 +76,7 @@ module Osm
     validates_inclusion_of :reminders, :in => [true, false]
     validates_inclusion_of :attendance_limit_includes_leaders, :in => [true, false]
     validates_inclusion_of :allow_booking, :in => [true, false]
+    validates_inclusion_of :attendance_reminder, :in => [0, 1, 3, 7, 14, 21, 28]
     validates_format_of :cost, :with => /\A(?:\d+\.\d{2}|TBC)\Z/
 
 
@@ -84,7 +89,7 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
     # @!macro options_get
-    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
+    # @option options [Boolean] :include_archived (optional) if true then archived events will also be returned
     # @return [Array<Osm::Event>]
     def self.get_for_section(api, section, options={})
       require_ability_to(api, :read, :events, section, options)
@@ -122,13 +127,13 @@ module Osm
     # Get an event
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
-    # @param [Fixnum] event_id The id of the event to get
+    # @param [Fixnum, #to_i] event_id The id of the event to get
     # @!macro options_get
-    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @return [Osm::Event, nil] the event (or nil if it couldn't be found
     def self.get(api, section, event_id, options={})
       require_ability_to(api, :read, :events, section, options)
       section_id = section.to_i
+      event_id = event_id.to_i
       cache_key = ['event', event_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
@@ -162,6 +167,7 @@ module Osm
         'allowChanges' => event.allow_changes ? 'true' : 'false',
         'disablereminders' => !event.reminders ? 'true' : 'false',
         'attendancelimit' => event.attendance_limit,
+        'attendancereminder' => event.attendance_reminder,
         'limitincludesleaders' => event.attendance_limit_includes_leaders ? 'true' : 'false',
         'allowbooking' => event.allow_booking ? 'true' : 'false',
       })
@@ -200,6 +206,7 @@ module Osm
         'allowChanges' => allow_changes ? 'true' : 'false',
         'disablereminders' => !reminders ? 'true' : 'false',
         'attendancelimit' => attendance_limit,
+        'attendancereminder' => attendance_reminder,
         'limitincludesleaders' => attendance_limit_includes_leaders ? 'true' : 'false',
         'allowbooking' => allow_booking ? 'true' : 'false',
       })
@@ -392,6 +399,7 @@ module Osm
         :reminders => !event_data['disablereminders'].eql?('1'),
         :attendance_limit => event_data['attendancelimit'].to_i,
         :attendance_limit_includes_leaders => event_data['limitincludesleaders'].eql?('1'),
+        :attendance_reminder => event_data['attendancereminder'].to_i,
         :allow_booking => event_data['allowbooking'].eql?('1'),
       )
 
@@ -403,7 +411,6 @@ module Osm
       end
       event.columns = columns
       return event
-
     end
 
 

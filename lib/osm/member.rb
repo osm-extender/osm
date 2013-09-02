@@ -367,18 +367,15 @@ module Osm
       return "#{first_name}#{seperator.to_s}#{last_name}"
     end
 
-    # Get the My.SCOUT link for this member
+    # Get the Key to use in My.SCOUT links for this member
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme, :badges or :notice)
-    # @return [String] the link for this member's My.SCOUT
+    # @return [String] the key
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
-    # @raise [Osm::ArgumentIsInvalid] If link_to is not an allowed Symbol
     # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
-    def myscout_link(api, link_to=:badges)
+    def myscout_link_key(api)
       raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
       raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
-      raise Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice].include?(link_to)
 
       if @myscout_link_key.nil?
         data = api.perform_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{self.id}")
@@ -386,7 +383,26 @@ module Osm
         @myscout_link_key = data['key']
       end
 
-      return "https://www.onlinescoutmanager.co.uk/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{@myscout_link_key}"
+      return @myscout_link_key
+    end
+
+    # Get the My.SCOUT link for this member
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme, :badges, :notice or :details)
+    # @param [#to_i] item_id Allows you to link to a specfic item (only for :events)
+    # @return [String] the link for this member's My.SCOUT
+    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
+    # @raise [Osm::ArgumentIsInvalid] If link_to is not an allowed Symbol
+    # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
+    def myscout_link(api, link_to=:badges, item_id=nil)
+      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      require_ability_to(api, :read, :member, section_id)
+      raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
+      raise Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice, :details].include?(link_to)
+
+      link = "https://www.onlinescoutmanager.co.uk/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{myscout_link_key(api)}"
+      link += "&e=#{item_id.to_i}" if item_id && link_to.eql?(:events)
+      return link
     end
 
     # Compare Activity based on section_id, grouping_id, grouping_leader (descending), last_name then first_name
@@ -395,7 +411,7 @@ module Osm
       result = self.grouping_id <=> another.try(:grouping_id) if result == 0
       result = -(self.grouping_leader <=> another.try(:grouping_leader)) if result == 0
       result = self.last_name <=> another.try(:last_name) if result == 0
-      result = self.first_name <=> another.try(:last_name) if result == 0
+      result = self.first_name <=> another.try(:first_name) if result == 0
       return result
     end
 

@@ -6,19 +6,20 @@ module Osm
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to send the message to
     # @param [Array<Osm::Member, Fixnum, #to_i>, Osm::Member, Fixnum, #to_i] members The members (or their IDs) to send the message to
-    # @param [Symbol] all_or_one Wheather to send the message to all numbers for a member (:all) or just the first mobile one (:one)
+    # @param [Symbol, String] mobile_numbers Wheather to send the message to all numbers for a member (:all) or just the first mobile one (:first) or a selection (e.g. "12", "24" etc.)
     # @param [String, #to_s] source_address The number to claim the message is from
     # @param [String, #to_s] message The text of the message to send
     # @return [Hash] with keys :sent (Fixnum), :result (Boolean) and :message (String)
-    def self.send_sms(api, section, members, all_or_one, source_address, message)
-      raise ArgumentError, 'all_or_one must be either :all or :one' unless [:all, :one].include?(all_or_one)
-      Osm::Model.require_access_to_section(api, section)
+    def self.send_sms(api, section, members, mobile_numbers, source_address, message)
+      raise ArgumentError, 'mobile_numbers must be either :all, :first or a String containing numbers 1-4' unless ([:all, :first, :one].include?(mobile_numbers) || mobile_numbers.match(/[1234]{1,4}/))
+      Osm::Model.require_access_to_section(api, section)      
+      mobile_numbers = :one if mobile_numbers.eql?(:first)
 
       data = api.perform_query("sms.php?action=sendText&sectionid=#{section.to_i}", {
         'msg' => message,
         'scouts' => [*members].join(','),
         'source' => source_address,
-        'all' => all_or_one,
+        'type' => mobile_numbers,
         'scheduled' => 'now',
       })
 

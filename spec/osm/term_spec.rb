@@ -191,7 +191,7 @@ describe "Term" do
         body += ']}'
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getTerms", :body => body)
     
-        expect{ Osm::Term.get_current_term_for_section(@api, 9) }.to raise_error(Osm::Error, 'There is no current term for the section.')
+        expect{ Osm::Term.get_current_term_for_section(@api, 9) }.to raise_error(Osm::Error::NoCurrentTerm, 'There is no current term for the section.')
       end
     end
 

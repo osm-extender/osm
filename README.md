@@ -32,7 +32,7 @@ Use the [Online Scout Manager](https://www.onlinescoutmanager.co.uk) API.
 Add to your Gemfile and run the `bundle` command to install it.
 
 ```ruby
-gem 'osm', '~> 1.0'
+gem 'osm', '~> 1.2'
 ```
 
 Configure the gem during the initalization of the app (e.g. if using rails then config/initializers/osm.rb would look like):
@@ -90,6 +90,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Details for each badge
     * Requirements for evening
     * Badge stock levels
+  * Budgets (Gold required)
   * Due Badges
   * Evening
   * Event (Silver required)
@@ -98,7 +99,10 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Event Attendance (Silver required)
   * Flexi Record Data
   * Flexi Record Structure
+  * Gift Aid Data
+  * Gift Aid Structure
   * Groupings (e.g. Sixes, Patrols)
+  * Invoices (Gold required)
   * Members
   * Notepad
   * Notepads
@@ -116,39 +120,48 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Activity
   * Badges (Silver required for activity, Bronze for core, challenge and staged):
     * Which requirements each member has met
+  * Budget (Gold required)
   * Evening
   * Event (Silver required)
   * Event Attendance (Silver required)
   * Event Column (Silver required)
   * Flexi Record Column
   * Flexi Record Data
+  * Gift Aid Payment
   * Grouping
+  * Invoices (Gold required)
   * Member
   * Register Attendance
 
 ### Create
+  * Budget (Gold required)
   * Evening
   * Event (Silver required)
   * Event Column (Silver required)
-  * Member
   * Flexi Record Column
+  * Gift Aid Payment
+  * Invoices (Gold required)
+  * Member
 
 ### Delete
+  * Budget (Gold required)
   * Evening
   * Event (Silver required)
   * Event Column (Silver required)
   * Flexi Record Column
+  * Invoices (Gold required)
 
 ### Actions
   * Authorise an app to use the API on a user's behalf
   * Add activity to programme
   * Send an SMS to member(s)
 
+## Parts not/never supported
+  * Campsite Directory
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
 See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadmap) for more details.
 
-  * Gift aid (Everything) (Gold required) [issue 75]
-  * Finances (Everything) (Gold required) [issues 76 & 77]]
   * MyScout (Everything)
+  * Adult Section Specific Stuff
