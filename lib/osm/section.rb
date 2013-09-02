@@ -57,6 +57,8 @@ module Osm
     #   @return [Boolean] Wether parents can see summary of programme items
     # @!attribute [rw] myscout_programme_times
     #   @return [Boolean] Whether parents can see times of programme items
+    # @!attribute [rw] myscout_programme_show
+    #   @return [Fixnum] How many programme itemms parents can see (the next 5, 10, 15, 20 meetings, -1 (whole term), 0 (remaining this term) or -2 (all future))
     # @!attribute [rw] myscout_event_reminder_count
     #   @return [Fixnum] How many event reminders to send to parents who haven't responded
     # @!attribute [rw] myscout_event_reminder_frequency
@@ -102,6 +104,7 @@ module Osm
     attribute :myscout_badges_partial, :type => Boolean
     attribute :myscout_programme_summary, :type => Boolean
     attribute :myscout_programme_times, :type => Boolean
+    attribute :myscout_programme_show, :type => Integer, :default => 0
     attribute :myscout_event_reminder_count, :type => Integer
     attribute :myscout_event_reminder_frequency, :type => Integer
     attribute :myscout_payment_reminder_count, :type => Integer
@@ -118,9 +121,9 @@ module Osm
                     :myscout_badges, :myscout_programme, :myscout_payments, :myscout_details,
                     :myscout_emails, :myscout_email_address_from, :myscout_email_address_copy,
                     :myscout_badges_partial, :myscout_programme_summary, :myscout_programme_times,
-                    :myscout_event_reminder_count, :myscout_event_reminder_frequency,
-                    :myscout_payment_reminder_count, :myscout_payment_reminder_frequency,
-                    :myscout_details_email_changes_to,
+                    :myscout_programme_show, :myscout_event_reminder_count,
+                    :myscout_event_reminder_frequency, :myscout_payment_reminder_count,
+                    :myscout_payment_reminder_frequency, :myscout_details_email_changes_to,
                     :sms_sent_test, :sms_messages_sent, :sms_messages_remaining
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
@@ -153,6 +156,7 @@ module Osm
     validates_inclusion_of :myscout_badges_partial, :in => [true, false]
     validates_inclusion_of :myscout_programme_summary, :in => [true, false]
     validates_inclusion_of :myscout_programme_times, :in => [true, false]
+    validates_inclusion_of :myscout_programme_show, :in => [-2, -1, 0, 5, 10, 15, 20]
     validates_inclusion_of :sms_sent_test, :in => [true, false]
 
     validates :column_names, :hash => {:key_type => Symbol, :value_type => String}
@@ -238,6 +242,7 @@ module Osm
             :myscout_badges_partial => myscout_data['badgesPartial'] == 1,
             :myscout_programme_summary => myscout_data['programmeSummary'] == 1,
             :myscout_programme_times => myscout_data['programmeTimes'] == 1,
+            :myscout_programme_show => myscout_data['programmeShow'].to_i,
             :myscout_event_reminder_count => myscout_data['eventRemindCount'].to_i,
             :myscout_event_reminder_frequency => myscout_data['eventRemindFrequency'].to_i,
             :myscout_payment_reminder_count => myscout_data['paymentRemindCount'].to_i,
