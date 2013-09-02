@@ -16,7 +16,8 @@
     * Osm::SUBSCRIPTION\_LEVEL\_NAMES - an Array of Strings containing the human name of each subscription level (starts with "Unknown" to make indexing work nicely)
     * Osm::SUBSCRIPTION\_LEVELS - an Array of Symbols for each level (starts with nil to make indexing work nicely)
   * Register - get\_structure now only includes dates
-  * Addition of attendance\_reminder attribute to event.
+  * Addition of attendance\_reminder attribute to event
+  * Abillity to send Sms messages to multiple numbers
   * Add Gift Aid:
     * Get Payments
     * Update Payments
