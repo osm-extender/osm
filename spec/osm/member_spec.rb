@@ -482,7 +482,7 @@ describe "Member" do
     end
 
     describe "Get My.SCOUT link" do
-      
+
       before :each do
         @member = Osm::Member.new(
           :id => 1,
@@ -495,7 +495,9 @@ describe "Member" do
           :grouping_id => '3',
           :grouping_leader => 0,
         )
+      end
 
+      it "Get the key" do
         url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getMyScoutKey&sectionid=2&scoutid=1'
         HTTParty.should_receive(:post).with(url, {:body => {
           'apiid' => @CONFIGURATION[:api][:osm][:id],
@@ -503,30 +505,48 @@ describe "Member" do
           'userid' => 'user_id',
           'secret' => 'secret',
         }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true,"key":"KEY-HERE"}'}) }
+
+        @member.myscout_link_key(@api).should == 'KEY-HERE'
       end
 
       it "Default" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
         @member.myscout_link(@api).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Payments" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
         @member.myscout_link(@api, :payments).should == 'https://www.onlinescoutmanager.co.uk/parents/payments.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Events" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
         @member.myscout_link(@api, :events).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE'
       end
 
+      it "Specific Event" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
+        @member.myscout_link(@api, :events, 2).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE&e=2'
+      end
+
       it "Programme" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
         @member.myscout_link(@api, :programme).should == 'https://www.onlinescoutmanager.co.uk/parents/programme.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Badges" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
         @member.myscout_link(@api, :badges).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Notice board" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
         @member.myscout_link(@api, :notice).should == 'https://www.onlinescoutmanager.co.uk/parents/notice.php?sc=1&se=2&c=KEY-HERE'
+      end
+
+      it "Personal details" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
+        @member.myscout_link(@api, :details).should == 'https://www.onlinescoutmanager.co.uk/parents/details.php?sc=1&se=2&c=KEY-HERE'
       end
 
     end

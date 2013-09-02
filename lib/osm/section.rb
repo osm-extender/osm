@@ -10,7 +10,7 @@ module Osm
     # @!attribute [rw] group_name
     #   @return [String] the group name
     # @!attribute [rw] subscription_level
-    #   @return [Fixnum] what subscription the section has to OSM (1-bronze, 2-silver, 3-gold)
+    #   @return [Fixnum] what subscription the section has to OSM (1-bronze, 2-silver, 3-gold, 4-gold+)
     # @!attribute [rw] subscription_expires
     #   @return [Date] when the section's subscription to OSM expires
     # @!attribute [rw] type
@@ -33,14 +33,18 @@ module Osm
     #   @return [Date] when the subscription to Badges in My.SCOUT expires
     # @!attribute [rw] myscout_programme_expires
     #   @return [Date] when the subscription to Badges in My.SCOUT expires
-    # @!attribute [rw] myscout_events
-    #   @return [Boolean] whether the section uses the Events part of My.SCOUT
+    # @!attribute [rw] myscout_events_expires
+    #   @return [Date] when the subscription to Events in My.SCOUT expires
+    # @!attribute [rw] myscout_details_expires
+    #   @return [Boolean] whether the section uses the Personal Details part of My.SCOUT
     # @!attribute [rw] myscout_badges
     #   @return [Boolean] whether the section uses the Badges part of My.SCOUT
     # @!attribute [rw] myscout_programme
     #   @return [Boolean] whether the section uses the Programme part of My.SCOUT
     # @!attribute [rw] myscout_payments
     #   @return [Boolean] whether the section uses the Payments part of My.SCOUT
+    # @!attribute [rw] myscout_details
+    #   @return [Boolean] whether the section uses the Personal Details part of My.SCOUT
     # @!attribute [rw] myscout_emails
     #   @return [Hash of Symbol to Boolean] which email addresses are linked to MyScout for each Member
     # @!attribute [rw] myscout_email_address_from
@@ -52,7 +56,9 @@ module Osm
     # @!attribute [rw] myscout_programme_summary
     #   @return [Boolean] Wether parents can see summary of programme items
     # @!attribute [rw] myscout_programme_times
-    #   @return [Boolean] Wether parents can see times of programme items
+    #   @return [Boolean] Whether parents can see times of programme items
+    # @!attribute [rw] myscout_programme_show
+    #   @return [Fixnum] How many programme itemms parents can see (the next 5, 10, 15, 20 meetings, -1 (whole term), 0 (remaining this term) or -2 (all future))
     # @!attribute [rw] myscout_event_reminder_count
     #   @return [Fixnum] How many event reminders to send to parents who haven't responded
     # @!attribute [rw] myscout_event_reminder_frequency
@@ -61,6 +67,8 @@ module Osm
     #   @return [Fixnum] How many payment reminders to send to parents who haven't paid yet
     # @!attribute [rw] myscout_payment_reminder_frequency
     #   @return [Fixnum] How many days to leave between payment reminder emails
+    # @!attribute [rw] myscout_details_email_changes_to
+    #   @return [String] email address to send changes to personal details made through My.SCOUT to
     # @!attribute [rw] sms_sent_test
     #   @return [Boolean] Whether the section has sent their test SMS message
     # @!attribute [rw] sms_messages_sent
@@ -84,20 +92,24 @@ module Osm
     attribute :myscout_events_expires, :type => Date
     attribute :myscout_badges_expires, :type => Date
     attribute :myscout_programme_expires, :type => Date
+    attribute :myscout_details_expires, :type => Date
     attribute :myscout_events, :type => Boolean
     attribute :myscout_badges, :type => Boolean
     attribute :myscout_programme, :type => Boolean
     attribute :myscout_payments, :type => Boolean
+    attribute :myscout_details, :type => Boolean
     attribute :myscout_emails, :default => {}
     attribute :myscout_email_address_from, :type => String, :default => ''
     attribute :myscout_email_address_copy, :type => String, :default => ''
     attribute :myscout_badges_partial, :type => Boolean
     attribute :myscout_programme_summary, :type => Boolean
     attribute :myscout_programme_times, :type => Boolean
+    attribute :myscout_programme_show, :type => Integer, :default => 0
     attribute :myscout_event_reminder_count, :type => Integer
     attribute :myscout_event_reminder_frequency, :type => Integer
     attribute :myscout_payment_reminder_count, :type => Integer
     attribute :myscout_payment_reminder_frequency, :type => Integer
+    attribute :myscout_details_email_changes_to, :type => String, :default => ''
     attribute :sms_sent_test, :type => Boolean, :default => false
     attribute :sms_messages_sent, :type => Integer, :default => 0
     attribute :sms_messages_remaining, :type => Integer, :default => 0
@@ -105,12 +117,13 @@ module Osm
     attr_accessible :id, :name, :group_id, :group_name, :subscription_level, :subscription_expires,
                     :type, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records,
                     :gocardless, :myscout_events_expires, :myscout_badges_expires,
-                    :myscout_programme_expires, :myscout_events, :myscout_badges,
-                    :myscout_programme, :myscout_payments, :myscout_emails,
-                    :myscout_email_address_from, :myscout_email_address_copy,
+                    :myscout_programme_expires, :myscout_details_expires, :myscout_events,
+                    :myscout_badges, :myscout_programme, :myscout_payments, :myscout_details,
+                    :myscout_emails, :myscout_email_address_from, :myscout_email_address_copy,
                     :myscout_badges_partial, :myscout_programme_summary, :myscout_programme_times,
-                    :myscout_event_reminder_count, :myscout_event_reminder_frequency,
-                    :myscout_payment_reminder_count, :myscout_payment_reminder_frequency,
+                    :myscout_programme_show, :myscout_event_reminder_count,
+                    :myscout_event_reminder_frequency, :myscout_payment_reminder_count,
+                    :myscout_payment_reminder_frequency, :myscout_details_email_changes_to,
                     :sms_sent_test, :sms_messages_sent, :sms_messages_remaining
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
@@ -127,11 +140,11 @@ module Osm
     validates_presence_of :subscription_level
     validates_presence_of :subscription_expires
     validates_presence_of :type
-    validates_presence_of :column_names, :unless => Proc.new { |a| a.column_names == {} }
-    validates_presence_of :fields, :unless => Proc.new { |a| a.fields == {} }
-    validates_presence_of :intouch_fields, :unless => Proc.new { |a| a.intouch_fields == {} }
-    validates_presence_of :mobile_fields, :unless => Proc.new { |a| a.mobile_fields == {} }
-    validates_presence_of :flexi_records, :unless => Proc.new { |a| a.flexi_records == [] }
+#    validates_presence_of :column_names, :unless => Proc.new { |a| a.column_names == {} }
+#    validates_presence_of :fields, :unless => Proc.new { |a| a.fields == {} }
+#    validates_presence_of :intouch_fields, :unless => Proc.new { |a| a.intouch_fields == {} }
+#    validates_presence_of :mobile_fields, :unless => Proc.new { |a| a.mobile_fields == {} }
+#    validates_presence_of :flexi_records, :unless => Proc.new { |a| a.flexi_records == [] }
 
     validates_inclusion_of :subscription_level, :in => (1..3), :message => 'is not a valid subscription level'
     validates_inclusion_of :gocardless, :in => [true, false]
@@ -139,9 +152,11 @@ module Osm
     validates_inclusion_of :myscout_badges, :in => [true, false]
     validates_inclusion_of :myscout_programme, :in => [true, false]
     validates_inclusion_of :myscout_payments, :in => [true, false]
+    validates_inclusion_of :myscout_details, :in => [true, false]
     validates_inclusion_of :myscout_badges_partial, :in => [true, false]
     validates_inclusion_of :myscout_programme_summary, :in => [true, false]
     validates_inclusion_of :myscout_programme_times, :in => [true, false]
+    validates_inclusion_of :myscout_programme_show, :in => [-2, -1, 0, 5, 10, 15, 20]
     validates_inclusion_of :sms_sent_test, :in => [true, false]
 
     validates :column_names, :hash => {:key_type => Symbol, :value_type => String}
@@ -215,20 +230,24 @@ module Osm
             :myscout_events_expires => Osm::parse_date(section_data['portalExpires']['events']),
             :myscout_badges_expires => Osm::parse_date(section_data['portalExpires']['badges']),
             :myscout_programme_expires => Osm::parse_date(section_data['portalExpires']['programme']),
+            :myscout_details_expires => Osm::parse_date(section_data['portalExpires']['details']),
             :myscout_events => myscout_data['events'] == 1,
             :myscout_badges => myscout_data['badges'] == 1,
             :myscout_programme => myscout_data['programme'] == 1,
             :myscout_payments => myscout_data['payments'] == 1,
+            :myscout_details => myscout_data['details'] == 1,
             :myscout_emails => (myscout_data['emails'] || {}).inject({}) { |n,(k,v)| n[k.to_sym] = v.eql?('true'); n},
             :myscout_email_address_from => myscout_data['emailAddress'] ? myscout_data['emailAddress'] : '',
             :myscout_email_address_copy => myscout_data['emailAddressCopy'] ? myscout_data['emailAddressCopy'] : '',
             :myscout_badges_partial => myscout_data['badgesPartial'] == 1,
             :myscout_programme_summary => myscout_data['programmeSummary'] == 1,
             :myscout_programme_times => myscout_data['programmeTimes'] == 1,
+            :myscout_programme_show => myscout_data['programmeShow'].to_i,
             :myscout_event_reminder_count => myscout_data['eventRemindCount'].to_i,
             :myscout_event_reminder_frequency => myscout_data['eventRemindFrequency'].to_i,
             :myscout_payment_reminder_count => myscout_data['paymentRemindCount'].to_i,
             :myscout_payment_reminder_frequency => myscout_data['paymentRemindFrequency'].to_i,
+            :myscout_details_email_changes_to => myscout_data['contactNotificationEmail'],
             :sms_sent_test => section_data['hasSentTestSMS'],
             :sms_messages_sent => section_data['sms_sent'],
             :sms_messages_remaining => section_data['sms_remaining'],
@@ -348,12 +367,10 @@ module Osm
 
     # Get the name for the section's subscription level
     # @return [String, nil] the name of the subscription level (nil if no name exists)
+    # @deprecated Please use Osm::SUBSCRIPTION_LEVEL_NAMES[section.subscription_level instead
     def subscription_level_name
-      return {
-        1 => 'Bronze',
-        2 => 'Silver',
-        3 => 'Gold',
-      }[subscription_level]
+      warn "[DEPRECATION] `subscription_level_name` is deprecated.  Please use `Osm::SUBSCRIPTION_LEVEL_NAMES[section.subscription_level` instead."
+      Osm::SUBSCRIPTION_LEVEL_NAMES[subscription_level]
     end
 
     # Compare Section based on group_name type (age order), then name

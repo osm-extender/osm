@@ -1,3 +1,33 @@
+## Version 1.2.0
+
+  * Trying to fetch the currrent Term for a Section which doesn;t have one now raises an Osm::Error::NoCurrentTerm instead of an Osm::Error 
+  * Add personal details options to Section:
+    * myscout\_details attribute [Boolean] for whether personal details are enabled
+    * myscout\_details\_expires attribute [Date] for expiry date of subscription
+    * myscout\_details\_email\_changes\_to attribute [String] where to send update emails to
+  * Osm::Member
+    * myscout\_link method now accepts :details to get a link to the "Perosnal details" page
+    * myscout\_link method can now link to a specific event by also passing in the id (optional 3rd parameter)
+    * Addition of myscout\_link\_key method to get the member's unique key for use in myscout links
+  * Osm::Section
+    * subscription\_level\_name method is marked as depricated, ready for removal in version 2.0 -> replace with Osm::SUBSCRIPTION\_LEVEL\_NAMES[section.subscription\_level]
+    * myscout\_programme\_show attribute added - how much of the programme do parents see?
+  * Addition of two new constants:
+    * Osm::SUBSCRIPTION\_LEVEL\_NAMES - an Array of Strings containing the human name of each subscription level (starts with "Unknown" to make indexing work nicely)
+    * Osm::SUBSCRIPTION\_LEVELS - an Array of Symbols for each level (starts with nil to make indexing work nicely)
+  * Register - get\_structure now only includes dates
+  * Addition of attendance\_reminder attribute to event
+  * Abillity to send Sms messages to multiple numbers
+  * Add Gift Aid:
+    * Get Payments
+    * Update Payments
+    * Get Payment/Member Data
+    * Update Payment/Member Data
+  * Add Finances:
+    * Budget (Get, Add, Update, Delete)
+    * Invoices (Get, Add, Update, Delete)
+    * Invoice Items (Get, Add, Update, Delete)
+
 ## Version 1.0.6
 
   * Add badge\_links to Meeting

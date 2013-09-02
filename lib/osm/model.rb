@@ -159,7 +159,7 @@ module Osm
 
     # Raise an exception if the user does not have the relevant permission
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Symbol] level The OSM subscription level required (e.g. :gold)
+    # @param [Symbol] level The OSM subscription level required (:bronze, :silver, :gold, :gold_plus)
     # @param [Osm::Section, Fixnum, #to_i] section The Section (or its ID) the subscription is required on
     # @!macro options_get
     # @raise [Osm::Forbidden] If the Section does not have the required OSM Subscription (or higher)
@@ -173,12 +173,14 @@ module Osm
           level = 2
         when :gold
           level = 3
+        when :gold_plus
+          level = 4
         else
           level = 0
         end
       end
       if section.nil? || section.subscription_level < level
-        level_name = ['Unknown', 'Bronze', 'Silver', 'Gold'][level] || level
+        level_name = Osm::SUBSCRIPTION_LEVEL_NAMES[level] || level
         raise Osm::Forbidden, "Insufficent OSM subscription level (#{level_name} required for #{section.name})"
       end
     end
