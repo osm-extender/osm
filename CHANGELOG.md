@@ -1,3 +1,7 @@
+## Version 1.2.1
+
+  * 
+
 ## Version 1.2.0
 
   * Trying to fetch the currrent Term for a Section which doesn;t have one now raises an Osm::Error::NoCurrentTerm instead of an Osm::Error 
