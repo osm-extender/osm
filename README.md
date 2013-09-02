@@ -164,3 +164,4 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadmap) for more details.
 
   * MyScout (Everything)
+  * Adult Section Specific Stuff
