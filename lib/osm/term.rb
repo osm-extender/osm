@@ -114,7 +114,7 @@ module Osm
         return term if term.current?
       end
 
-      raise Osm::Error::NoCurrentTerm, 'There is no current term for the section.'
+      raise Osm::Error::NoCurrentTerm.new('There is no current term for the section.', section_id)
     end
 
     # Create a term in OSM

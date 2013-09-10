@@ -1,6 +1,6 @@
 ## Version 1.2.1
 
-  * 
+  * Add section\_id read-only attribute to Osm::Error::NoCurrentTerm
 
 ## Version 1.2.0
 
