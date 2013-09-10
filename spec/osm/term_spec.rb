@@ -190,8 +190,12 @@ describe "Term" do
         body += '{"termid":"1","name":"Term 1","sectionid":"9","startdate":"' + (Date.today + 31).strftime('%Y-%m-%d') + '","enddate":"' + (Date.today + 90).strftime('%Y-%m-%d') + '"}'
         body += ']}'
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getTerms", :body => body)
-    
-        expect{ Osm::Term.get_current_term_for_section(@api, 9) }.to raise_error(Osm::Error::NoCurrentTerm, 'There is no current term for the section.')
+
+        expect{ Osm::Term.get_current_term_for_section(@api, 9) }.to raise_error do |error|
+          error.should be_a(Osm::Error::NoCurrentTerm)
+          error.message.should == 'There is no current term for the section.'
+          error.section_id.should == 9
+        end
       end
     end
 

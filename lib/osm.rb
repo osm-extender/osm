@@ -14,7 +14,15 @@ module Osm
   class Forbidden < Osm::Error; end
   class ArgumentIsInvalid < ArgumentError; end
   class ObjectIsInvalid < Error; end
-  class Osm::Error::NoCurrentTerm < Osm::Error; end
+  class Osm::Error::NoCurrentTerm < Osm::Error
+    # @!attribute [r] section_id
+    #   @return [Fixnum] the id of the section causing the error
+    attr_reader :section_id
+    def initialize(message = nil, section_id = nil)
+      super(message)
+      @section_id = section_id
+    end
+  end
 
   private
   # Set constants
