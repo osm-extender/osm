@@ -139,6 +139,20 @@ module Osm
       return self
     end
 
+    # Get the base URL for requests to OSM/OGM
+    # @param [Symbol] site For OSM or OGM (:osm or :ogm)
+    # @return [String] The base URL for requests
+    def self.base_url(site)
+      BASE_URLS[site]
+    end
+
+    # Get the base URL for requests to OSM.OGM
+    # @param site For OSM or OGM (:osm or :ogm), defaults to the default for this api object
+    # @return [String] The base URL for requests
+    def base_url(site=@site)
+      raise ArgumentError, "Invalid site" unless [:osm, :ogm].include?(site)
+      self.class.base_url(site)
+    end
 
     # Make a query to the OSM/OGM API
     # @param [String] url The script on the remote server to invoke

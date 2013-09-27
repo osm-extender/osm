@@ -1,6 +1,6 @@
 ## Version 1.2.2
 
-  * 
+  * Add base\_url method to Api class and instances
 
 ## Version 1.2.1
 

@@ -122,6 +122,20 @@ describe "API" do
   end
 
 
+  describe "Get base URL" do
+    it "For the class" do
+      Osm::Api.base_url(:osm).should == 'https://www.onlinescoutmanager.co.uk'
+      Osm::Api.base_url(:ogm).should == 'http://www.onlineguidemanager.co.uk'
+    end
+
+    it "For an instance" do
+      @api.base_url.should == 'https://www.onlinescoutmanager.co.uk'
+      @api.base_url(:osm).should == 'https://www.onlinescoutmanager.co.uk'
+      @api.base_url(:ogm).should == 'http://www.onlineguidemanager.co.uk'
+    end
+  end
+
+
   describe "OSM and Internet error conditions:" do
     it "Raises a connection error if the HTTP status code was not 'OK'" do
       HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'500'}) }
