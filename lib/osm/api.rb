@@ -142,7 +142,8 @@ module Osm
     # Get the base URL for requests to OSM/OGM
     # @param [Symbol] site For OSM or OGM (:osm or :ogm)
     # @return [String] The base URL for requests
-    def self.base_url(site)
+    def self.base_url(site=@@site)
+      raise ArgumentError, "Invalid site" unless [:osm, :ogm].include?(site)
       BASE_URLS[site]
     end
 
@@ -231,15 +232,23 @@ module Osm
 
       if @@debug
         puts "Result from :#{site} request to #{url}"
+        puts "#{result.response.content_type}"
         puts result.response.body
       end
 
       return nil if result.response.body.empty?
-      raise Osm::Error, result.response.body unless looks_like_json?(result.response.body)
-      decoded = ActiveSupport::JSON.decode(result.response.body)
-      osm_error = get_osm_error(decoded)
-      raise Osm::Error, osm_error if osm_error
-      return decoded        
+      case result.response.content_type
+        when 'application/json', 'text/html'
+          raise Osm::Error, result.response.body unless looks_like_json?(result.response.body)
+          decoded = ActiveSupport::JSON.decode(result.response.body)
+          osm_error = get_osm_error(decoded)
+          raise Osm::Error, osm_error if osm_error
+          return decoded
+        when 'image/jpeg'
+          return result.response.body
+        else
+          raise Osm::Error, "Unhandled content-type: #{result.response.content_type}"
+      end
     end
 
     # Check if text looks like it's JSON

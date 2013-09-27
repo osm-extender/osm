@@ -487,7 +487,7 @@ describe "Invoice" do
         data = {"identifier" => "id","items" => [
           {"id" => "1","invoiceid" => "2","recordid" => "3","sectionid" => "4","entrydate" => "2012-01-02","amount" => "1.23","type" => "Expense","payto_userid" => "John Smith","comments" => "Comment","categoryid" => "Default","firstname" => "John Smith"}
         ]}
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoiceRecords&invoiceid=2&sectionid=4&dateFormat=generic", :body => data.to_json)
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoiceRecords&invoiceid=2&sectionid=4&dateFormat=generic", :body => data.to_json, :content_type => 'application/json')
 
         invoice = Osm::Invoice.new(:id => 2, :section_id => 4)
         items = invoice.get_items(@api)

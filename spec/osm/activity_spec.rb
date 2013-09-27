@@ -102,7 +102,7 @@ describe "Activity" do
           }
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getActivity&id=1", :body => body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getActivity&id=1", :body => body.to_json, :content_type => 'application/json')
   
   
       activity = Osm::Activity.get(@api, 1)

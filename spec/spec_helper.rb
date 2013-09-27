@@ -91,5 +91,8 @@ module OsmTest
     def body
       @options[:body]
     end
+    def content_type
+      @options[:content_type] || 'text/html'
+    end
   end
 end

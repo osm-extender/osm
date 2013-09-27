@@ -173,8 +173,8 @@ describe "Event" do
         'allowbooking' => '1',
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => @events_body.to_json)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => @events_body.to_json, :content_type => 'application/json')
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.to_json, :content_type => 'application/json')
 
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
     end
@@ -210,7 +210,7 @@ describe "Event" do
       end
 
       it 'Handles cost of "-1" for TBC' do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.merge({'cost' => '-1'}).to_json)
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.merge({'cost' => '-1'}).to_json, :content_type => 'application/json')
 
         events = Osm::Event.get_for_section(@api, 1)
         event = events[0]
@@ -257,9 +257,9 @@ describe "Event" do
           }]
         }
 
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json)
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json)
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json)
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json, :content_type => 'application/json')
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json, :content_type => 'application/json')
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json, :content_type => 'application/json')
 
         events = Osm::Event.get_for_section(@api, 1)
         OsmTest::Cache.clear
@@ -300,7 +300,7 @@ describe "Event" do
               'f_1' => 'a',
             },
           ]
-        }.to_json)
+        }.to_json, :content_type => 'application/json')
         Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
         event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
@@ -339,7 +339,7 @@ describe "Event" do
               'f_1' => 'a',
             }
           ]
-        }.to_json)
+        }.to_json, :content_type => 'application/json')
         Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
         event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
@@ -370,7 +370,7 @@ describe "Event" do
               'f_1' => 'a',
             }
           ]
-        }.to_json)
+        }.to_json, :content_type => 'application/json')
         Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
         event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
@@ -690,7 +690,7 @@ describe "Event" do
         ]
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json, :content_type => 'application/json')
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       attendance = event.get_attendance(@api, 3)
@@ -717,7 +717,7 @@ describe "Event" do
 	'eventid' => '2',
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json, :content_type => 'application/json')
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       attendance = event.get_attendance(@api, 3)
@@ -931,7 +931,7 @@ describe "Event" do
 
     it "handles a non existant array when no events" do
       data = '{"identifier":"eventid","label":"name"}'
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => data)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => data, :content_type => 'application/json')
       events = Osm::Event.get_for_section(@api, 1).should == []
     end
 
@@ -962,8 +962,8 @@ describe "Event" do
         'limitincludesleaders' => '1',
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body)
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => event_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body, :content_type => 'application/json')
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => event_body.to_json, :content_type => 'application/json')
 
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
 

@@ -21,7 +21,7 @@ describe "Grouping" do
         'active' => 1,
         'points' => '3',
       }]}
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getPatrols&sectionid=2", :body => body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getPatrols&sectionid=2", :body => body.to_json, :content_type => 'application/json')
 
       patrols = Osm::Grouping.get_for_section(@api, 2)
       patrols.size.should == 1
@@ -35,7 +35,7 @@ describe "Grouping" do
     end
 
     it "Handles no data" do
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getPatrols&sectionid=2", :body => '')
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getPatrols&sectionid=2", :body => '', :content_type => 'application/json')
       patrols = Osm::Grouping.get_for_section(@api, 2)
       patrols.size.should == 0
     end

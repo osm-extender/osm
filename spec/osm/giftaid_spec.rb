@@ -80,7 +80,7 @@ describe "Gift Aid" do
           {"name" => "2000-01-02", "field" => "2000-01-02", "width" => "110px", "editable" => true, "formatter" => "boldFormatter"}
 	]}
       ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/giftaid.php?action=getStructure&sectionid=1&termid=2", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/giftaid.php?action=getStructure&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
 
       donations = Osm::GiftAid.get_donations(@api, 1, 2)
       donations.should == [Osm::GiftAid::Donation.new(:donation_date => Date.new(2000, 1, 2))]
@@ -96,7 +96,7 @@ describe "Gift Aid" do
 	]
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/giftaid.php?action=getGrid&sectionid=1&termid=2", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/giftaid.php?action=getGrid&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
 
       data = Osm::GiftAid.get_data(@api, 1, 2)
       data.is_a?(Array).should be_true
