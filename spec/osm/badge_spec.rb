@@ -201,6 +201,14 @@ describe "Badge" do
       badge = Osm::ActivityBadge.new(:total_needed => 1, :sections_needed => 1, :needed_from_section => {'a' => 2, 'b' => 1})
       data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
       data.earnt?.should be_true
+
+      badge = Osm::ActivityBadge.new(:total_needed => 0, :sections_needed => -1, :needed_from_section => {'a' => 2, 'b' => 1})
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
+      data.earnt?.should be_true
+
+      badge = Osm::ActivityBadge.new(:total_needed => 0, :sections_needed => -1, :needed_from_section => {'a' => 2, 'b' => 1})
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'x', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
+      data.earnt?.should be_false
     end
   end
 

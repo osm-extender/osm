@@ -357,7 +357,11 @@ module Osm
         end
         return false if (completed.eql?(1) && awarded.eql?(1))
         return true if (completed.eql?(1) && awarded.eql?(0))
-        return (total_gained >= badge.total_needed) && (sections_gained >= badge.sections_needed)
+        if badge.sections_needed == -1 # require all sections
+          return (sections_gained == badge.needed_from_section.keys.size)
+        else
+          return (total_gained >= badge.total_needed) && (sections_gained >= badge.sections_needed)
+        end
       end
 
       # Get what stage which has most recently been earnt
