@@ -314,7 +314,7 @@ module Osm
         count = 0
 
         required.each do |section, needed|
-          next if gained[section] >= needed
+          next if gained[section] < needed
           count += 1
         end
         return count

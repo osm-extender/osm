@@ -119,19 +119,20 @@ describe "Badge" do
 
   it "Get number of sections met for a member" do
     badge = Osm::Badge.new(
-      :needed_from_section => {'a' => 1, 'b' => 2},
+      :needed_from_section => {'a' => 1, 'b' => 2, 'c' => 1},
       :requirements => [
         Osm::Badge::Requirement.new(:field => 'a_1'),
         Osm::Badge::Requirement.new(:field => 'a_2'),
         Osm::Badge::Requirement.new(:field => 'b_1'),
         Osm::Badge::Requirement.new(:field => 'b_2'),
+        Osm::Badge::Requirement.new(:field => 'c_1'),
       ]
     )
     data = Osm::Badge::Data.new(
       :badge => badge,
-      :requirements => {'a_1' => 'x', 'a_2' => '', 'b_1' => 'yes', 'b_2' => '2000-01-02'}
+      :requirements => {'a_1' => 'x', 'a_2' => '', 'b_1' => 'yes', 'b_2' => '2000-01-02', 'c_1' => 'yes'}
     )
-    data.sections_gained.should == 1
+    data.sections_gained.should == 2
   end
 
   it "Works out if the badge is due" do
