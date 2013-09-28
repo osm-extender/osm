@@ -1,3 +1,7 @@
+## Version 1.2.3
+
+  * Fix bug determining if a badge has been earnt (-1 sections required = all required)
+
 ## Version 1.2.2
 
   * Add base\_url method to Api class and instances
