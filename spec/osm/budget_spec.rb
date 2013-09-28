@@ -41,7 +41,7 @@ describe "Budget" do
           }
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/finances.php?action=getCategories&sectionid=3", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/finances.php?action=getCategories&sectionid=3", :body => data.to_json, :content_type => 'application/json')
 
       budgets = Osm::Budget.get_for_section(@api, 3)
       budgets.should == [Osm::Budget.new(:id => 2, :section_id => 3, :name => 'Name')]

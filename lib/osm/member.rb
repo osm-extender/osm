@@ -80,6 +80,8 @@ module Osm
     #   @return [String] the member's current age (yy/mm)
     # @!attribute [rw] joined_years
     #   @return [Fixnum] how many years the member has been in Scouting
+    # @!attribute [rw] has_photo
+    #   @return [Boolean] whether the scout has a photo in OSM
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -120,12 +122,14 @@ module Osm
     attribute :joined, :type => Date
     attribute :age, :type => String
     attribute :joined_years, :type => Integer
+    attribute :has_photo, :type => Boolean, :default => false
 
     attr_accessible :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4,
                     :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started,
                     :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs,
                     :custom1, :custom2, :custom3, :custom4, :custom5, :custom6, :custom7, :custom8, :custom9,
-                    :grouping_id, :grouping_leader, :joined, :age, :joined_years
+                    :grouping_id, :grouping_leader, :joined, :age, :joined_years,
+                    :has_photo
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -139,6 +143,7 @@ module Osm
     validates_presence_of :started
     validates_presence_of :joined
     validates_format_of :age, :with => /\A[0-9]{2}\/(0[0-9]|1[012])\Z/, :message => 'age is not in the correct format (yy/mm)', :allow_blank => true
+    validates_inclusion_of :has_photo, :in => [true, false]
 
 
     # Get members for a section
@@ -159,12 +164,17 @@ module Osm
       end
 
       data = api.perform_query("users.php?action=getUserDetails&sectionid=#{section.id}&termid=#{term_id}")
+      summary_data = api.perform_query("ext/members/contact/?action=getListOfMembers&sort=patrolid&sectionid=#{section.id}&termid=#{term_id}&section=#{section.type}") || {}
+
+      summary_data = summary_data['items'] || []
+      summary_data = Hash[summary_data.map { |i| [i['scoutid'].to_i, i] }]
 
       result = Array.new
       data['items'].each do |item|
+        id = Osm::to_i_or_nil(item['scoutid'])
         result.push Osm::Member.new(
           :section_id => section.id,
-          :id => Osm::to_i_or_nil(item['scoutid']),
+          :id => id,
           :type => item['type'],
           :first_name => item['firstname'],
           :last_name => item['lastname'],
@@ -202,6 +212,7 @@ module Osm
           :joined => Osm::parse_date(item['joined']),
           :age => item['age'].gsub(' ', ''),
           :joined_years => item['yrs'].to_i,
+          :has_photo => summary_data[id]['pic']
         )
       end
 
@@ -386,11 +397,36 @@ module Osm
       return @myscout_link_key
     end
 
+    # Get the member's photo
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Boolean] black_and_white Whether you want the photo in blank and white
+    # @!macro options_get
+    # @raise [Osm:Error] if the member has no photo or doesn't exist in OSM
+    # @return the photo of the member
+    def get_photo(api, black_and_white=false, options={})
+      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      require_ability_to(api, :read, :member, section_id)
+      raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
+      raise Osm::Error, "the member doesn't have a photo in OSM" unless has_photo
+
+      cache_key = ['member_photo', self.id, black_and_white]
+
+      if !options[:no_cache] && cache_exist?(api, cache_key)
+        return cache_read(api, cache_key)
+      end
+
+      url = "ext/members/contact/images/member.php?sectionid=#{section_id}&scoutid=#{self.id}&bw=#{black_and_white}"
+      image = api.perform_query(url)
+
+      cache_write(api, cache_key, image) unless image.nil?
+      return image
+    end
+
     # Get the My.SCOUT link for this member
     # @param [Osm::Api] api The api to use to make the request
     # @param [Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme, :badges, :notice or :details)
     # @param [#to_i] item_id Allows you to link to a specfic item (only for :events)
-    # @return [String] the link for this member's My.SCOUT
+    # @return [String] the URL for this member's My.SCOUT
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     # @raise [Osm::ArgumentIsInvalid] If link_to is not an allowed Symbol
     # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
@@ -400,7 +436,7 @@ module Osm
       raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
       raise Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice, :details].include?(link_to)
 
-      link = "https://www.onlinescoutmanager.co.uk/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{myscout_link_key(api)}"
+      link = "#{api.base_url}/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{myscout_link_key(api)}"
       link += "&e=#{item_id.to_i}" if item_id && link_to.eql?(:events)
       return link
     end

@@ -132,7 +132,7 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtra&sectionid=1&extraid=2", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtra&sectionid=1&extraid=2", :body => data.to_json, :content_type => 'application/json')
 
       fields = @flexi_record.get_columns(@api)
       fields.is_a?(Array).should be_true
@@ -388,7 +388,7 @@ describe "Flexi Record" do
           "patrol" => "Green"
         }]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json, :content_type => 'application/json')
       Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
 
       records = @flexi_record.get_data(@api, 3)
@@ -516,7 +516,7 @@ describe "Flexi Record" do
           "patrol" => "Green"
         }]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json, :content_type => 'application/json')
       Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
 
       records = @flexi_record.get_data(@api, 3)

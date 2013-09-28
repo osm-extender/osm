@@ -48,7 +48,7 @@ describe "Badges" do
           }
         }
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
 
       db = Osm::Badges.get_due_badges(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
       db.empty?.should == false
@@ -60,7 +60,7 @@ describe "Badges" do
     end
 
     it "handles an empty array representing no due badges" do
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => '[]')
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => '[]', :content_type => 'application/json')
       db = Osm::Badges.get_due_badges(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
       db.should_not == nil
     end
@@ -74,7 +74,7 @@ describe "Badges" do
           'badge_2' => '2'
         }
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=core&sectionid=1&section=beavers&termid=2", :body => badges_body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=core&sectionid=1&section=beavers&termid=2", :body => badges_body.to_json, :content_type => 'application/json')
       Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 2) }
 
       section = Osm::Section.new(:id => 1, :type => :beavers)

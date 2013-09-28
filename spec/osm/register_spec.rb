@@ -87,7 +87,7 @@ describe "Register" do
         {"rows" => [{"name"=>"First name","field"=>"firstname","width"=>"100px"},{"name"=>"Last name","field"=>"lastname","width"=>"100px"},{"name"=>"Total","field"=>"total","width"=>"60px"}],"noscroll"=>true},
         {"rows" => []}
       ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
 
       register_structure = Osm::Register.get_structure(@api, 1, 2)
       register_structure.is_a?(Array).should be_true
@@ -109,7 +109,7 @@ describe "Register" do
           }
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
       Osm::Register.stub(:get_structure) { [
         Osm::Register::Field.new(:id => '2000-01-01', :name => 'Name', :tooltip => 'Tooltip'),
         Osm::Register::Field.new(:id => '2000-01-02', :name => 'Name', :tooltip => 'Tooltip'),
@@ -182,7 +182,7 @@ describe "Register" do
           }
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
       Osm::Register.stub(:get_structure) { [] }
 
       register = Osm::Register.get_attendance(@api, 1, 2)
@@ -194,13 +194,13 @@ describe "Register" do
     end
 
     it "Handles no data getting structure" do
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => '')
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => '', :content_type => 'application/json')
       register_structure = Osm::Register.get_structure(@api, 1, 2)
       register_structure.is_a?(Array).should be_true
       register_structure.size.should == 0
 
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => '')
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => '', :content_type => 'application/json')
       register = Osm::Register.get_attendance(@api, 1, 2)
       register.is_a?(Array).should be_true
       register.size.should == 0

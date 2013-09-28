@@ -1,3 +1,9 @@
+## Version 1.2.2
+
+  * Add base\_url method to Api class and instances
+  * Add get_photo method to member
+  * Add earnt and earnt? methods to Osm::Badge::Data to get the stage which has been earnt (based on the requirements hash)
+
 ## Version 1.2.1
 
   * Add section\_id read-only attribute to Osm::Error::NoCurrentTerm

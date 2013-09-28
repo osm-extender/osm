@@ -191,7 +191,7 @@ describe "SMS" do
           "to" => "To Name 441234567890"
         }]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/sms.php?action=deliveryReports&sectionid=1&dateFormat=generic", :body => data.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/sms.php?action=deliveryReports&sectionid=1&dateFormat=generic", :body => data.to_json, :content_type => 'application/json')
 
       reports = Osm::Sms::DeliveryReport.get_for_section(@api, 1)
       reports.size.should == 1

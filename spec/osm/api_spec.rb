@@ -79,7 +79,7 @@ describe "API" do
         {"sectionid"=>"1", "permissions"=>{"badge"=>20}},
         {"sectionid"=>"2", "permissions"=>{"badge"=>10}}
       ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
 
       permissions = {1 => {:badge => [:read, :write]}, 2 => {:badge => [:read]}}
       OsmTest::Cache.should_not_receive('read')
@@ -119,6 +119,20 @@ describe "API" do
       @api.set_user_permissions(3, {:a => [:read]})
     end
 
+  end
+
+
+  describe "Get base URL" do
+    it "For the class" do
+      Osm::Api.base_url(:osm).should == 'https://www.onlinescoutmanager.co.uk'
+      Osm::Api.base_url(:ogm).should == 'http://www.onlineguidemanager.co.uk'
+    end
+
+    it "For an instance" do
+      @api.base_url.should == 'https://www.onlinescoutmanager.co.uk'
+      @api.base_url(:osm).should == 'https://www.onlinescoutmanager.co.uk'
+      @api.base_url(:ogm).should == 'http://www.onlineguidemanager.co.uk'
+    end
   end
 
 

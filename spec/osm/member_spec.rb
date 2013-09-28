@@ -133,7 +133,7 @@ describe "Member" do
       body = [
         {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"beavers\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"1", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
       ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
 
       body = {
         'identifier' => 'scoutid',
@@ -182,8 +182,11 @@ describe "Member" do
           'patrolleaderO' => 0,
         }]
       }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getUserDetails&sectionid=1&termid=2", :body => body.to_json, :content_type => 'application/json')
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getUserDetails&sectionid=1&termid=2", :body => body.to_json)
+      body = {'items' => [{'scoutid'=>'1', 'pic'=>true}]}
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=getListOfMembers&sort=patrolid&sectionid=1&termid=2&section=beavers", :body => body.to_json, :content_type => 'application/json') 
+
       members = Osm::Member.get_for_section(@api, 1, 2)
       members.size.should == 1
       members[0].id.should == 1
@@ -193,14 +196,17 @@ describe "Member" do
       body = [
         {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"waiting\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"1", "sectionname"=>"Section 1", "section"=>"waiting", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
       ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json)
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
 
       body = {
         'identifier' => 'scoutid',
         'items' => []
       }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getUserDetails&sectionid=1&termid=-1", :body => body.to_json, :content_type => 'application/json')
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getUserDetails&sectionid=1&termid=-1", :body => body.to_json)
+      body = {'items' => [{'scoutid'=>'1', 'pic'=>true}]}
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=getListOfMembers&sort=patrolid&sectionid=1&termid=-1&section=waiting", :body => body.to_json, :content_type => 'application/json')
+
       members = Osm::Member.get_for_section(@api, 1, 2)
       members.size.should == 0
     end
@@ -479,6 +485,41 @@ describe "Member" do
 
       HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
       member.update(@api).should be_false
+    end
+
+    it "Get Photo link" do
+      member = Osm::Member.new(
+        :id => 1,
+        :section_id => 2,
+        :first_name => 'First',
+        :last_name => 'Last',
+        :date_of_birth => '2000-01-02',
+        :started => '2006-01-02',
+        :joined => '2006-01-03',
+        :grouping_id => '3',
+        :grouping_leader => 0,
+        :has_photo => true,
+      )
+      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :content_type=>'image/jpeg', :body=>'abcdef'}) }
+
+      member.get_photo(@api).should == "abcdef"
+    end
+
+    it "Get Photo link when no photo uploaded" do
+      member = Osm::Member.new(
+        :id => 1,
+        :section_id => 2,
+        :first_name => 'First',
+        :last_name => 'Last',
+        :date_of_birth => '2000-01-02',
+        :started => '2006-01-02',
+        :joined => '2006-01-03',
+        :grouping_id => '3',
+        :grouping_leader => 0,
+        :has_photo => false,
+      )
+
+      expect{ member.get_photo(@api) }.to raise_error(Osm::Error, "the member doesn't have a photo in OSM")
     end
 
     describe "Get My.SCOUT link" do
