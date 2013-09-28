@@ -282,6 +282,10 @@ module Osm
       validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
       validates :requirements, :hash => {:key_type => String, :value_type => String}
 
+      STAGES_NIGHTSAWAY = [1, 5, 10, 20, 35, 50, 75, 100, 125, 150, 175, 200]
+      STAGES_HIKESAWAY = [1, 5, 10, 20, 35, 50]
+
+
       # @!method initialize
       #   Initialize a new Badge
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
@@ -300,7 +304,7 @@ module Osm
       def total_gained
         count = 0
         requirements.each do |field, data|
-          next if data.blank? || data.to_s[0].downcase.eql?('x')
+          next unless reguiremet_met?(data)
           count += 1
         end
         return count
@@ -328,20 +332,57 @@ module Osm
           field = field.split('_')[0]
           unless field.eql?('y')
             count[field] ||= 0
-            next if data.blank? || data.to_s[0].downcase.eql?('x')
+            next unless reguiremet_met?(data)
             count[field] += 1
           else
             # A total 'section'
-            count['a'] = data.to_i
+            count['y'] = data.to_i
           end
         end
         return count
       end
 
-      # Check if this badge is due
+      # Check if this badge is due (according data retrieved from OSM)
       # @return [Boolean] whether the badge is due to the member
       def due?
         completed > awarded
+      end
+
+
+      # Check if this badge has been earnt
+      # @return [Boolean] whether the badge is due to the member
+      def earnt?
+        if badge.type == :staged
+          return (earnt > awarded)
+        end
+        return false if (completed.eql?(1) && awarded.eql?(1))
+        return true if (completed.eql?(1) && awarded.eql?(0))
+        return (total_gained >= badge.total_needed) && (sections_gained >= badge.sections_needed)
+      end
+
+      # Get what stage which has most recently been earnt
+      # (using #earnt? will tell you if it's still due (not yet awarded))
+      # @return [Fixnum] the stage which has most recently been due
+      def earnt
+        unless badge.type == :staged
+          return earnt? ? 1 : 0
+        end
+        if ['nightsaway', 'hikes'].include?(badge.osm_key)
+          total_done = requirements['y_01']
+          stages = STAGES_NIGHTSAWAY if badge.osm_key.eql?('nightsaway')
+          stages = STAGES_HIKESAWAY if badge.osm_key.eql?('hikes')
+          stages.reverse_each do |stage|
+            return stage if total_done >= stage
+          end
+        else
+          (awarded..5).reverse_each do |stage|
+            group = 'abcde'[stage - 1]
+            if gained_in_sections[group] >= badge.needed_from_section[group]
+              return stage
+            end
+          end
+        end
+        return 0
       end
 
       # Check if this badge has been started
@@ -352,9 +393,9 @@ module Osm
         requirements.each do |key, value|
           case key.split('_')[0]
             when 'a'
-              return true unless value.blank? || value.to_s[0].downcase.eql?('x')
+              return true if reguiremet_met?(value)
             when 'y'
-              return true if (requirements['y_01'].to_i > 0)
+              return true if (value.to_i > 0)
           end
         end
         return false
@@ -368,8 +409,8 @@ module Osm
         else
           # Staged badge
           if ['nightsaway', 'hikes'].include?(badge.osm_key) # Special staged badges
-            stages = [1, 5, 10, 20, 35, 50, 75, 100, 125, 150, 175, 200] if badge.osm_key.eql?('nightsaway')
-            stages = [1, 5, 10, 20, 35, 50] if badge.osm_key.eql?('hikes')
+            stages = STAGES_NIGHTSAWAY if badge.osm_key.eql?('nightsaway')
+            stages = STAGES_HIKESAWAY if badge.osm_key.eql?('hikes')
             done = requirements['y_01'].to_i
             return 0 if done < stages[0]                # Not started the first stage
             return 0 if done >= stages[stages.size - 1] # No more stages can be started
@@ -491,6 +532,12 @@ module Osm
 
       def inspect
         Osm.inspect_instance(self, options={:replace_with => {'badge' => :osm_key}})
+      end
+
+      private
+      def reguiremet_met?(data)
+        return false if data == 0
+        !(data.blank? || data.to_s[0].downcase.eql?('x'))
       end
 
     end # Class Data
