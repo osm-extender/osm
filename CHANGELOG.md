@@ -1,3 +1,7 @@
+## Version 1.2.5
+
+  * 
+
 ## Version 1.2.4
 
   * Remove support for ruby 1.9.2 (listen gem requires >= 1.9.3)
