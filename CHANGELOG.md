@@ -1,5 +1,6 @@
 ## Version 1.2.4
 
+  * Remove support for ruby 1.9.2 (listen gem requires >= 1.9.3).
   * Fix exception when OSM returns a number (instead of a string) for total/completed columns of a flexi record
 
 ## Version 1.2.3
