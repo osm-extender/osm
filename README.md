@@ -15,7 +15,6 @@ Staging [![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch
 ## Ruby Versions
 This gem supports the following versions of ruby, it may work on other versions but is not tested against them so don't rely on it.
 
-  * 1.9.2
   * 1.9.3
   * 2.0.0
 

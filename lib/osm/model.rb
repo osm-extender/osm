@@ -131,6 +131,49 @@ module Osm
       api.get_user_permissions(options).keys.include?(section.to_i)
     end
 
+    # Check if the user has the relevant permission
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Symbol] to What action is required to be done (e.g. :read or :write)
+    # @param [Symbol] on What the OSM permission is required on (e.g. :member or :programme)
+    # @param [Osm::Section, Fixnum, #to_i] section The Section (or its ID) the permission is required on
+    # @!macro options_get
+    def self.has_permission?(api, to, on, section, options={})
+      user_has_permission(api, to, on, section, options) && api_has_permission(api, to, on, section, options)
+    end
+
+    # Check if the user has the relevant permission within OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Symbol] to What action is required to be done (e.g. :read or :write)
+    # @param [Symbol] on What the OSM permission is required on (e.g. :member or :programme)
+    # @param [Osm::Section, Fixnum, #to_i] section The Section (or its ID) the permission is required on
+    # @!macro options_get
+    def self.user_has_permission?(api, to, on, section, options={})
+      section_id = section.to_i
+      permissions = api.get_user_permissions(options)
+      permissions = permissions[section_id] || {}
+      permissions = permissions[on] || []
+      unless permissions.include?(to)
+        return false
+      end
+      return true
+    end
+
+    # Check if the user has granted the relevant permission to the API
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Symbol] to What action is required to be done (e.g. :read or :write)
+    # @param [Symbol] on What the OSM permission is required on (e.g. :member or :programme)
+    # @param [Osm::Section, Fixnum, #to_i] section The Section (or its ID) the permission is required on
+    # @!macro options_get
+    def self.api_has_permission?(api, to, on, section, options={})
+      section_id = section.to_i
+      permissions = Osm::ApiAccess.get_ours(api, section_id, options).permissions
+      permissions = permissions[on] || []
+      unless permissions.include?(to)
+        return false
+      end
+      return true
+    end
+
     # Raise an exception if the user does not have the relevant permission
     # @param [Osm::Api] api The api to use to make the request
     # @param [Symbol] to What action is required to be done (e.g. :read or :write)
@@ -139,20 +182,10 @@ module Osm
     # @!macro options_get
     # @raise [Osm::Forbidden] If the Api user does not have the required permission
     def self.require_permission(api, to, on, section, options={})
-      section_id = section.to_i
-
-      # Check user's permissions in OSM
-      permissions = api.get_user_permissions(options)
-      permissions = permissions[section_id] || {}
-      permissions = permissions[on] || []
-      unless permissions.include?(to)
+      unless user_has_permission?(api, to, on, section, options)
         raise Osm::Forbidden, "Your OSM user does not have permission to #{to} on #{on} for #{Osm::Section.get(api, section_id, options).try(:name)}"
       end
-
-      # Check what the user gave our API
-      permissions = Osm::ApiAccess.get_ours(api, section_id, options).permissions
-      permissions = permissions[on] || []
-      unless permissions.include?(to)
+      unless api_has_permission?(api, to, on, section, options)
         raise Osm::Forbidden, "You have not granted the #{to} permissions on #{on} to the #{api.api_name} API for #{Osm::Section.get(api, section_id, options).try(:name)}"
       end
     end
@@ -229,7 +262,8 @@ module Osm
     # Make selected class methods instance methods too
     %w{
       cache_read cache_write cache_exist? cache_delete require_access_to_section
-      can_access_section? require_permission require_subscription require_ability_to
+      can_access_section? has_permission? user_has_permission? api_has_permission?
+      require_permission require_subscription require_ability_to
     }.each do |method_name|
       define_method method_name do |*options|
         self.class.send(method_name, *options)
