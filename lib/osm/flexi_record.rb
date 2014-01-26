@@ -98,8 +98,8 @@ module Osm
           }
           fields.merge!(
             'dob' => item['dob'].empty? ? nil : item['dob'],
-            'total' => item['total'].empty? ? nil : item['total'],
-            'completed' => item['completed'].empty? ? nil : item['completed'],
+            'total' => item['total'].to_s.empty? ? nil : item['total'],
+            'completed' => item['completed'].to_s.empty? ? nil : item['completed'],
             'age' => item['age'].empty? ? nil : item['age'],
           )
   

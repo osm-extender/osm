@@ -531,4 +531,37 @@ describe "Flexi Record" do
 
   end
 
+  describe "API Strangeness" do
+
+    it "Calculated columns containing numbers not strings" do
+      data = {
+        'identifier' => 'scoutid',
+        'label' => "name",
+        'items' => [{
+          "scoutid" => "1",
+          "firstname" => "First",
+          "lastname" => "Last",
+          "dob" => "",
+          "patrolid" => "2",
+          "total" => 3,
+          "completed" => 4,
+          "f_1" => "A",
+          "f_2" => "B",
+          "age" => "",
+          "patrol" => "Green"
+        }]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs", :body => data.to_json, :content_type => 'application/json')
+      Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
+
+      flexi_record = Osm::FlexiRecord.new(:section_id => 1, :id => 2, :name => 'A Flexi Record')
+      records = flexi_record.get_data(@api, 3)
+      record = records[0]
+      record.fields['total'].should == 3
+      record.fields['completed'].should == 4
+    end
+
+  end
+
 end
+

@@ -1,6 +1,6 @@
 ## Version 1.2.4
 
-  * 
+  * Fix exception when OSM returns a number (instead of a string) for total/completed columns of a flexi record
 
 ## Version 1.2.3
 
