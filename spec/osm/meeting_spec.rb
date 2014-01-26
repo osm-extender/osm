@@ -156,16 +156,77 @@ describe "Meeting" do
       badge_link.label.should == 'Cubs Artist Activity - A: Poster'
     end
 
-    it "Fetch badge requirements for a meeting" do
+    it "Fetch badge requirements for a meeting (from API)" do
       badges_body = [{'a'=>'a'},{'a'=>'A'}]
       FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs', :body => badges_body.to_json, :content_type => 'application/json')
       roles_body = [
-        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"3", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
+        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"3", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>100, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
       ]
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => roles_body.to_json, :content_type => 'application/json')
 
       meeting = Osm::Meeting.new(:date => Date.new(2000, 1, 2), :section_id => 3)
       meeting.get_badge_requirements(@api).should == badges_body
+    end
+
+    it "Fetch badge requirements for a meeting (iterating through activities)" do
+      roles_body = [
+        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"3", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>10, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
+      ]
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => roles_body.to_json, :content_type => 'application/json')
+
+      activity_body = {
+        'details' => {
+          'activityid' => '4',
+          'version' => '0',
+          'groupid' => '2',
+          'userid' => '3',
+          'title' => 'Activity Name',
+          'description' => 'Description',
+          'resources' => 'Resources',
+          'instructions' => 'Instructions',
+          'runningtime' => '15',
+          'location' => 'indoors',
+          'shared' => '0',
+          'rating' => '4',
+          'facebook' => ''
+        },
+        'editable' => true,
+        'deletable' => false,
+        'used' => 3,
+        'versions' => [
+          {
+            'value' => '0',
+            'userid' => '1',
+            'firstname' => 'Alice',
+            'label' => 'Current version - Alice',
+            'selected' => 'selected'
+          }
+        ],
+        'sections' => ['beavers', 'cubs'],
+        'tags' => ['Tag 1', 'Tag2'],
+        'files' => [
+          {
+            'fileid' => '6',
+            'activityid' => '4',
+            'filename' => 'File Name',
+            'name' => 'Name',
+          }
+        ],
+        'badges' => [
+          {
+            'activityid' => '4',
+            'section' => 'section',
+            'badgetype' => 'type',
+            'badge' => 'badge',
+            'columnname' => 'col_name',
+            'label' => 'This is a label',
+          }
+        ]
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getActivity&id=4", :body => activity_body.to_json, :content_type => 'application/json')
+  
+      meeting = Osm::Meeting.new(:id => 2, :date => Date.new(2000, 1, 2), :section_id => 3, :activities=>[Osm::Meeting::Activity.new(:activity_id => 4)])
+      meeting.get_badge_requirements(@api).should == [{"name"=>"This is a label", "badgeName"=>"badge", "sectionid"=>"3", "eveningid"=>"2", "section"=>:section, "badgetype"=>:type, "badge"=>"badge", "columnname"=>"col_name"}]
     end
 
     it "Create a meeting (succeded)" do

@@ -1,6 +1,7 @@
 ## Version 1.2.4
 
-  * Remove support for ruby 1.9.2 (listen gem requires >= 1.9.3).
+  * Remove support for ruby 1.9.2 (listen gem requires >= 1.9.3)
+  * Activity's get\_badge\_requirements method now will iterate through activities if there's no permission to use the existing one OSM query trick
   * Fix exception when OSM returns a number (instead of a string) for total/completed columns of a flexi record
 
 ## Version 1.2.3

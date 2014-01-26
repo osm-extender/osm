@@ -253,22 +253,47 @@ module Osm
 
 
     # Get the badge requirements met on a specific meeting
+    # Requires either write permission to badges (prefered as it's one OSM query)
+    # or read permission to programme.
     # @param [Osm::Api] api The api to use to make the request
     # @!macro options_get
     # @return [Array<Hash>] hashes ready to pass into the update_register method
+    # @return [nil] if something went wrong
     def get_badge_requirements(api, options={})
-      require_ability_to(api, :read, :programme, section_id, options)
       section = Osm::Section.get(api, section_id)
       cache_key = ['badge_requirements', section.id, id]
-
       if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
+      badges = nil
 
-      data = api.perform_query("users.php?action=getActivityRequirements&date=#{date.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
+      if user_has_permission?(api, :write, :badge, section_id, options)
+        # We can shortcut and do it in one query
+        badges = api.perform_query("users.php?action=getActivityRequirements&date=#{date.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
 
-      cache_write(api, cache_key, data)
-      return data
+      else
+        # We'll have to iterate through the activities
+        require_ability_to(api, :read, :programme, section_id, options)
+        badges = []
+        activities.each do |activity|
+          activity = Osm::Activity.get(api, activity.activity_id, nil, options)
+          activity.badges.each do |badge|
+            badges.push ({
+              'name' => badge.label,
+              'badgeName' => badge.badge,
+              'sectionid' => section_id.to_s,
+              'eveningid' => id.to_s,
+              'section' => badge.section_type,
+              'badgetype' => badge.type,
+              'badge' => badge.badge,
+              'columnname' => badge.requirement,
+            })
+          end
+        end
+      end
+
+      cache_write(api, cache_key, badges) unless badges.nil?
+      return badges
     end
 
     # Compare Meeting based on section_id, date, start_time then id
