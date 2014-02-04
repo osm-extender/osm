@@ -1,3 +1,7 @@
+## Version 1.2.5
+
+  * Fix undefined local variable or method 'section_id' in Osm::Model require_permission
+
 ## Version 1.2.4
 
   * Remove support for ruby 1.9.2 (listen gem requires >= 1.9.3)

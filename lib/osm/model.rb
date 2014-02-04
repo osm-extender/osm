@@ -183,10 +183,10 @@ module Osm
     # @raise [Osm::Forbidden] If the Api user does not have the required permission
     def self.require_permission(api, to, on, section, options={})
       unless user_has_permission?(api, to, on, section, options)
-        raise Osm::Forbidden, "Your OSM user does not have permission to #{to} on #{on} for #{Osm::Section.get(api, section_id, options).try(:name)}"
+        raise Osm::Forbidden, "Your OSM user does not have permission to #{to} on #{on} for #{Osm::Section.get(api, section.to_i, options).try(:name)}"
       end
       unless api_has_permission?(api, to, on, section, options)
-        raise Osm::Forbidden, "You have not granted the #{to} permissions on #{on} to the #{api.api_name} API for #{Osm::Section.get(api, section_id, options).try(:name)}"
+        raise Osm::Forbidden, "You have not granted the #{to} permissions on #{on} to the #{api.api_name} API for #{Osm::Section.get(api, section.to_i, options).try(:name)}"
       end
     end
 
