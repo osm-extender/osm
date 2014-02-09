@@ -19,7 +19,9 @@ module Osm
     attribute :start, :type => Date
     attribute :finish, :type => Date
 
-    attr_accessible :id, :section_id, :name, :start, :finish
+    if ActiveModel::VERSION::MAJOR < 4
+      attr_accessible :id, :section_id, :name, :start, :finish
+    end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0

@@ -62,10 +62,12 @@ module Osm
     attribute :attendance_reminder, :type => Integer, :default => 0
     attribute :allow_booking, :type => Boolean, :default => true
 
-    attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
-                    :fields, :columns, :notepad, :public_notepad, :confirm_by_date, :allow_changes,
-                    :reminders, :attendance_limit, :attendance_limit_includes_leaders,
-                    :attendance_reminder, :allow_booking
+    if ActiveModel::VERSION::MAJOR < 4
+      attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
+                      :fields, :columns, :notepad, :public_notepad, :confirm_by_date, :allow_changes,
+                      :reminders, :attendance_limit, :attendance_limit_includes_leaders,
+                      :attendance_reminder, :allow_booking
+    end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -432,7 +434,9 @@ module Osm
       attribute :parent_required, :type => Boolean, :default => false
       attribute :event
 
-      attr_accessible :id, :name, :label, :parent_required, :event
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :id, :name, :label, :parent_required, :event
+      end
 
       validates_presence_of :id
       validates_presence_of :name
@@ -545,7 +549,9 @@ module Osm
       attribute :payments, :default => {}
       attribute :payment_control
 
-      attr_accessible :member_id, :grouping_id, :fields, :row, :event, :first_name, :last_name, :date_of_birth, :attending, :payments, :payment_control
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :member_id, :grouping_id, :fields, :row, :event, :first_name, :last_name, :date_of_birth, :attending, :payments, :payment_control
+      end
 
       validates_numericality_of :row, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0

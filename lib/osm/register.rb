@@ -145,7 +145,9 @@ module Osm
       attribute :name, :type => String
       attribute :tooltip, :type => String, :default => ''
 
-      attr_accessible :id, :name, :tooltip
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :id, :name, :tooltip
+      end
 
       validates_presence_of :id
       validates_presence_of :name
@@ -189,7 +191,9 @@ module Osm
       attribute :total, :type => Integer
       attribute :attendance, :default => {}
 
-      attr_accessible :member_id, :first_name, :last_name, :section_id, :grouping_id, :total, :attendance
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :member_id, :first_name, :last_name, :section_id, :grouping_id, :total, :attendance
+      end
 
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2

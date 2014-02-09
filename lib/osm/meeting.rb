@@ -45,7 +45,9 @@ module Osm
     attribute :activities, :default => []
     attribute :badge_links, :default => []
 
-    attr_accessible :id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :date, :activities, :start_time, :finish_time, :badge_links
+    if ActiveModel::VERSION::MAJOR < 4
+      attr_accessible :id, :section_id, :title, :notes_for_parents, :games, :pre_notes, :post_notes, :leaders, :date, :activities, :start_time, :finish_time, :badge_links
+    end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -313,7 +315,7 @@ module Osm
 
     private
     class Activity
-      include ActiveModel::MassAssignmentSecurity
+      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] activity_id
@@ -327,7 +329,9 @@ module Osm
       attribute :title, :type => String
       attribute :notes, :type => String, :default => ''
 
-      attr_accessible :activity_id, :title, :notes
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :activity_id, :title, :notes
+      end
 
       validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
       validates_presence_of :title
@@ -347,7 +351,7 @@ module Osm
 
 
     class BadgeLink
-      include ActiveModel::MassAssignmentSecurity
+      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] badge_key
@@ -367,7 +371,9 @@ module Osm
       attribute :badge_section, :type => Object
       attribute :label, :type => String
 
-      attr_accessible :badge_key, :badge_type, :requirement_key, :badge_section, :label
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :badge_key, :badge_type, :requirement_key, :badge_section, :label
+      end
 
       validates_presence_of :badge_key
       validates_format_of :requirement_key, :with => /\A[a-z]_\d{2}\Z/, :message => 'is not in the correct format (e.g. "a_01")'

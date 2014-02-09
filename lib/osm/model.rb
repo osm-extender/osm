@@ -8,7 +8,7 @@ module Osm
   # This class is expected to be inherited from.
   # It provides the caching and permission handling for model objects.
   class Model
-    include ActiveModel::MassAssignmentSecurity
+    include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
     include ActiveAttr::Model
 
     @@cache = nil               # Class to use for caching

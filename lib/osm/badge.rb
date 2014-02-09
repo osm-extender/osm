@@ -26,7 +26,9 @@ module Osm
     attribute :needed_from_section, :type => Object
     attribute :requirements, :type => Object
 
-    attr_accessible :name, :requirement_notes, :osm_key, :sections_needed, :total_needed, :needed_from_section, :requirements
+    if ActiveModel::VERSION::MAJOR < 4
+      attr_accessible :name, :requirement_notes, :osm_key, :sections_needed, :total_needed, :needed_from_section, :requirements
+    end
 
     validates_numericality_of :sections_needed, :only_integer=>true, :greater_than_or_equal_to=>-1
     validates_numericality_of :total_needed, :only_integer=>true, :greater_than_or_equal_to=>-1
@@ -195,7 +197,7 @@ module Osm
 
 
     class Requirement
-      include ActiveModel::MassAssignmentSecurity
+      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] badge
@@ -215,7 +217,9 @@ module Osm
       attribute :field, :type => String
       attribute :editable, :type => Boolean
 
-      attr_accessible :name, :description, :field, :editable, :badge
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :name, :description, :field, :editable, :badge
+      end
 
       validates_presence_of :name
       validates_presence_of :description
@@ -271,7 +275,9 @@ module Osm
       attribute :section_id, :type => Integer
       attribute :badge, :type => Object
 
-      attr_accessible :member_id, :first_name, :last_name, :completed, :awarded, :awarded_date, :requirements, :section_id, :badge
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :member_id, :first_name, :last_name, :completed, :awarded, :awarded_date, :requirements, :section_id, :badge
+      end
 
       validates_presence_of :badge
       validates_presence_of :first_name

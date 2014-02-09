@@ -24,7 +24,9 @@ module Osm
     attribute :archived, :type => Boolean, :default => false
     attribute :finalised, :type => Boolean, :default => false
 
-    attr_accessible :id, :section_id, :name, :extra_details, :date, :archived, :finalised
+    if ActiveModel::VERSION::MAJOR < 4
+      attr_accessible :id, :section_id, :name, :extra_details, :date, :archived, :finalised
+    end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -293,7 +295,9 @@ module Osm
       attribute :description, :type => String
       attribute :budget_name, :type => String, :default => 'Default'
 
-      attr_accessible :id, :invoice, :record_id, :date, :amount, :type, :payto, :description, :budget_name
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :id, :invoice, :record_id, :date, :amount, :type, :payto, :description, :budget_name
+      end
 
       validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
       validates_numericality_of :record_id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.record_id.nil? }
