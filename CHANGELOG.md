@@ -1,3 +1,7 @@
+## Version 1.2.6
+
+  * Update dependancies to allow using with a rails 4 app (rails 3 is still tested against by travis)
+
 ## Version 1.2.5
 
   * Fix undefined local variable or method 'section_id' in Osm::Model require_permission

@@ -19,7 +19,9 @@ module Osm
     attribute :active, :type => Boolean
     attribute :points, :type => Integer
 
-    attr_accessible :id, :section_id, :name, :active, :points
+    if ActiveModel::VERSION::MAJOR < 4
+      attr_accessible :id, :section_id, :name, :active, :points
+    end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>-2
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0

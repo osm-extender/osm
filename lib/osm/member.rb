@@ -124,12 +124,14 @@ module Osm
     attribute :joined_years, :type => Integer
     attribute :has_photo, :type => Boolean, :default => false
 
-    attr_accessible :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4,
-                    :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started,
-                    :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs,
-                    :custom1, :custom2, :custom3, :custom4, :custom5, :custom6, :custom7, :custom8, :custom9,
-                    :grouping_id, :grouping_leader, :joined, :age, :joined_years,
-                    :has_photo
+    if ActiveModel::VERSION::MAJOR < 4
+      attr_accessible :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4,
+                      :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started,
+                      :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs,
+                      :custom1, :custom2, :custom3, :custom4, :custom5, :custom6, :custom7, :custom8, :custom9,
+                      :grouping_id, :grouping_leader, :joined, :age, :joined_years,
+                      :has_photo
+    end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0

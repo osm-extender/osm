@@ -12,7 +12,9 @@ module Osm
     attribute :section_id, :type => Integer
     attribute :name, :type => String
 
-    attr_accessible :id, :section_id, :name
+    if ActiveModel::VERSION::MAJOR < 4
+      attr_accessible :id, :section_id, :name
+    end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0

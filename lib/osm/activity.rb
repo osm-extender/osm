@@ -67,9 +67,12 @@ module Osm
     attribute :files, :default => []
     attribute :badges, :default => []
 
-    attr_accessible :id, :version, :group_id, :user_id, :title, :description, :resources, :instructions,
-                    :running_time, :location, :shared, :rating, :editable, :deletable, :used, :versions,
-                    :sections, :tags, :files, :badges
+    if ActiveModel::VERSION::MAJOR < 4
+      attr_accessible :id, :version, :group_id, :user_id, :title, :description,
+                      :resources, :instructions, :running_time, :location,
+                      :shared, :rating, :editable, :deletable, :used, :versions,
+                      :sections, :tags, :files, :badges
+    end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
@@ -263,7 +266,7 @@ module Osm
 
     private
     class File
-      include ActiveModel::MassAssignmentSecurity
+      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] id
@@ -280,7 +283,9 @@ module Osm
       attribute :file_name, :type => String
       attribute :name, :type => String
 
-      attr_accessible :id, :activity_id, :file_name, :name
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :id, :activity_id, :file_name, :name
+      end
 
       validates_numericality_of :id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
@@ -301,7 +306,7 @@ module Osm
     end # Class Activity::File
 
     class Badge
-      include ActiveModel::MassAssignmentSecurity
+      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] activity_id
@@ -324,7 +329,9 @@ module Osm
       attribute :requirement, :type => String
       attribute :label, :type => String
 
-      attr_accessible :activity_id, :section_type, :type, :badge, :requirement, :label
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :activity_id, :section_type, :type, :badge, :requirement, :label
+      end
 
       validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
       validates_presence_of :badge
@@ -342,7 +349,7 @@ module Osm
     end # Class Activity::Badge
 
     class Version
-      include ActiveModel::MassAssignmentSecurity
+      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] version
@@ -359,7 +366,9 @@ module Osm
       attribute :created_by_name, :type => String
       attribute :label, :type => String
 
-      attr_accessible :version, :created_by, :created_by_name, :label
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :version, :created_by, :created_by_name, :label
+      end
 
       validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :created_by, :only_integer=>true, :greater_than=>0

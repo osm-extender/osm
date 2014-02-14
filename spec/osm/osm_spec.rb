@@ -61,12 +61,12 @@ describe "Online Scout Manager" do
     class TestA < Osm::Model
       attribute :id
       attribute :b
-      attr_accessible :id, :b
+      attr_accessible :id, :b if ActiveModel::VERSION::MAJOR < 4
     end
     class TestB < Osm::Model
       attribute :id
       attribute :a
-      attr_accessible :id, :a
+      attr_accessible :id, :a if ActiveModel::VERSION::MAJOR < 4
     end
 
     it "Returns a string" do

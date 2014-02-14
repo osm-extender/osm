@@ -139,7 +139,9 @@ module Osm
 
       attribute :donation_date, :type => Date
 
-      attr_accessible :note, :donation_date
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :note, :donation_date
+      end
 
       validates_presence_of :donation_date
 
@@ -190,7 +192,9 @@ module Osm
       attribute :total, :type => String
       attribute :donations, :type => Object, :default => DirtyHashy.new
 
-      attr_accessible :member_id, :first_name, :last_name, :section_id, :grouping_id, :total, :tax_payer_name, :tax_payer_address, :tax_payer_postcode, :donations
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :member_id, :first_name, :last_name, :section_id, :grouping_id, :total, :tax_payer_name, :tax_payer_address, :tax_payer_postcode, :donations
+      end
 
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
