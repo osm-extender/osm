@@ -16,6 +16,7 @@ require 'active_model'
 require 'osm'
 
 FakeWeb.allow_net_connect = false
+FakeWeb.allow_net_connect = %r[^https://coveralls.io] # Allow coveralls to report coverage
 
 
 RSpec.configure do |config|
