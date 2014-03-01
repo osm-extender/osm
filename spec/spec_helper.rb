@@ -1,3 +1,12 @@
+require 'simplecov'
+SimpleCov.coverage_dir(File.join('tmp', 'coverage'))
+SimpleCov.start do
+  add_filter 'spec/'
+end
+
+require 'coveralls' and Coveralls.wear! if ENV['TRAVIS']
+
+
 require 'fakeweb'
 require 'httparty'
 require 'active_support'
