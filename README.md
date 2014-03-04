@@ -1,6 +1,8 @@
 [![Gem Version](https://badge.fury.io/rb/osm.png)](http://badge.fury.io/rb/osm)
 [![Dependency Status](https://gemnasium.com/robertgauld/osm.png)](https://gemnasium.com/robertgauld/osm)
 [![Coveralls Status](https://coveralls.io/repos/roebrtgauld/osm/badge.png)](https://coveralls.io/r/robertgauld/osm)
+[![Code Climate](https://codeclimate.com/github/robertgauld/osm.png)](https://codeclimate.com/github/robertgauld/osm)
+
 
 ##Build State
 This project uses continuous integration to help ensure that a quality product is delivered.
