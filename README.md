@@ -1,15 +1,27 @@
 [![Gem Version](https://badge.fury.io/rb/osm.png)](http://badge.fury.io/rb/osm)
 [![Dependency Status](https://gemnasium.com/robertgauld/osm.png)](https://gemnasium.com/robertgauld/osm)
-[![Coveralls Status](https://coveralls.io/repos/roebrtgauld/osm/badge.png)](https://coveralls.io/r/robertgauld/osm)
+
+Master branch:
+[![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=master)](http://travis-ci.org/robertgauld/osm)
+[![Coveralls Status](https://coveralls.io/repos/robertgauld/osm/badge.png?branch=master)](https://coveralls.io/r/robertgauld/osm)
+[![Code Climate](https://codeclimate.com/github/robertgauld/osm.png?branch=master)](https://codeclimate.com/github/robertgauld/osm)
+
+Staging branch:
+[![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=staging)](http://travis-ci.org/robertgauld/o
+[![Coveralls Status](https://coveralls.io/repos/robertgauld/osm/badge.png?branch=master)](https://coveralls.io/r/robertgauld/osm)
+[![Code Climate](https://codeclimate.com/github/robertgauld/osm.png?branch=staging)](https://codeclimate.com/github/robertgauld/osm)
+
 
 ##Build State
 This project uses continuous integration to help ensure that a quality product is delivered.
 Travis CI monitors two branches (versions) of the code - Master (which is what gets released)
 and Staging (which is what is currently being developed ready for moving to master).
 
-Master [![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=master)](http://travis-ci.org/robertgauld/osm)
+[![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?
+branch=master)](http://travis-ci.org/robertgauld/osm)
 
-Staging [![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=staging)](http://travis-ci.org/robertgauld/osm)
+[![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?
+branch=staging)](http://travis-ci.org/robertgauld/osm)
 
 
 ## Ruby Versions
