@@ -1,3 +1,7 @@
+## Version 1.2.8
+
+  * 
+
 ## Version 1.2.7
 
   * Fix can't compare exception when a FlexiRecord has a nil name.
