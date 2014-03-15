@@ -118,10 +118,10 @@ module Osm
       return to_return
     end
 
-    # Compare Activity based on section_id then name
+    # Compare FlexiRecord based on section_id then name
     def <=>(another)
-      result = self.section_id <=> another.try(:section_id)
-      result = self.name <=> another.try(:name) if result == 0
+      result = self.section_id.to_i <=> another.try(:section_id).to_i
+      result = self.name.to_s <=> another.try(:name).to_s if result == 0
       return result
     end
 
