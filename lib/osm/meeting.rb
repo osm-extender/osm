@@ -269,7 +269,7 @@ module Osm
       end
       badges = nil
 
-      if user_has_permission?(api, :write, :badge, section_id, options)
+      if has_permission?(api, :write, :badge, section_id, options)
         # We can shortcut and do it in one query
         badges = api.perform_query("users.php?action=getActivityRequirements&date=#{date.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
 

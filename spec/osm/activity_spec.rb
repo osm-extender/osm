@@ -119,8 +119,8 @@ describe "Activity" do
       activity.location.should == :indoors
       activity.shared.should == 0
       activity.rating.should == 4
-      activity.editable.should == true
-      activity.deletable.should == false
+      activity.editable.should be_true
+      activity.deletable.should be_false
       activity.used.should == 3
       activity.versions[0].version.should == 0
       activity.versions[0].created_by.should == 1

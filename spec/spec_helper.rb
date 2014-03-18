@@ -20,6 +20,7 @@ FakeWeb.allow_net_connect = %r[^https://coveralls.io] # Allow coveralls to repor
 
 
 RSpec.configure do |config|
+
   # == Mock Framework
   #
   # If you prefer to use mocha, flexmock or RR, uncomment the appropriate line:
@@ -27,7 +28,17 @@ RSpec.configure do |config|
   # config.mock_with :mocha
   # config.mock_with :flexmock
   # config.mock_with :rr
-  config.mock_with :rspec
+  config.mock_with :rspec  do |configuration|
+    # Using the expect syntax is preferable to the should syntax in some cases.
+    # The problem here is that the :should syntax that RSpec uses can fail in
+    # the case of proxy objects, and objects that include the delegate module.
+    # Essentially it requires that we define methods on every object in the
+    # system. Not owning every object means that we cannot ensure this works in
+    # a consistent manner. The expect syntax gets around this problem by not
+    # relying on RSpec specific methods being defined on every object in the
+    # system.
+    configuration.syntax = [:expect, :should]
+  end
 
   config.before(:each) do
     FakeWeb.clean_registry
@@ -54,8 +65,8 @@ RSpec.configure do |config|
     Osm::configure(@CONFIGURATION)
     
     @api = Osm::Api.new('user_id', 'secret')
-    Osm::Model.stub(:require_ability_to) {}
-    Osm::Model.stub(:require_access_to_section) {}
+    Osm::Model.stub(:require_ability_to).and_return(nil)
+    Osm::Model.stub(:require_access_to_section).and_return(nil)
   end
 end
 

@@ -53,9 +53,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.before?(Date.today).should == true
-    term2.before?(Date.today).should == false
-    term3.before?(Date.today).should == false
+    term1.before?(Date.today).should be_true
+    term2.before?(Date.today).should be_false
+    term3.before?(Date.today).should be_false
   end
 
   it "Works out if it is completly after a date" do
@@ -63,9 +63,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.after?(Date.today).should == false
-    term2.after?(Date.today).should == false
-    term3.after?(Date.today).should == true
+    term1.after?(Date.today).should be_false
+    term2.after?(Date.today).should be_false
+    term3.after?(Date.today).should be_true
   end
 
   it "Works out if it has passed" do
@@ -73,9 +73,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.past?().should == true
-    term2.past?().should == false
-    term3.past?().should == false
+    term1.past?().should be_true
+    term2.past?().should be_false
+    term3.past?().should be_false
   end
 
   it "Works out if it is in the future" do
@@ -83,9 +83,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.future?().should == false
-    term2.future?().should == false
-    term3.future?().should == true
+    term1.future?().should be_false
+    term2.future?().should be_false
+    term3.future?().should be_true
   end
 
   it "Works out if it is the current term" do
@@ -93,9 +93,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start=> (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.current?().should == false
-    term2.current?().should == true
-    term3.current?().should == false
+    term1.current?().should be_false
+    term2.current?().should be_true
+    term3.current?().should be_false
   end
 
   it "Works out if it contains a date" do
@@ -103,9 +103,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.contains_date?(Date.today).should == false
-    term2.contains_date?(Date.today).should == true
-    term3.contains_date?(Date.today).should == false
+    term1.contains_date?(Date.today).should be_false
+    term2.contains_date?(Date.today).should be_true
+    term3.contains_date?(Date.today).should be_false
   end
 
   it "Date helpers return false for nil dates" do

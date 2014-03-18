@@ -29,7 +29,7 @@ describe "Grouping" do
       patrol.id.should == 1
       patrol.section_id.should == 2
       patrol.name.should == 'Patrol Name'
-      patrol.active.should == true
+      patrol.active.should be_true
       patrol.points.should == 3
       patrol.valid?.should be_true
     end

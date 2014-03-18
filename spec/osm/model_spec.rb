@@ -179,4 +179,232 @@ describe "Model" do
 
   end
 
+  describe "Access control" do
+
+    describe "user_has_permission?" do
+
+      before :each do
+        @api.stub(:get_user_permissions).and_return( { 1 => {foo: [:bar]} } )
+      end
+
+      it "Has permission" do
+        Osm::Model.user_has_permission?(@api, :bar, :foo, 1).should be_true
+      end
+
+      it "Doesn't have the level of permission" do
+        Osm::Model.user_has_permission?(@api, :barbar, :foo, 1).should be_false
+      end
+
+      it "Doesn't have access to section" do
+        Osm::Model.user_has_permission?(@api, :bar, :foo, 2).should be_false
+      end
+
+    end
+
+    describe "api_has_permission?" do
+
+      before :each do
+        Osm::ApiAccess.stub(:get_ours).and_return(Osm::ApiAccess.new(
+          id: @api.api_id,
+          name: @api.api_name,
+          permissions: {foo: [:bar]}
+        ))
+      end
+
+      it "Has permission" do
+        Osm::Model.api_has_permission?(@api, :bar, :foo, 1).should be_true
+      end
+
+      it "Doesn't have the level of permission" do
+        Osm::Model.api_has_permission?(@api, :barbar, :foo, 1).should be_false
+      end
+
+      it "Doesn't have access to the section" do
+        Osm::ApiAccess.stub(:get_ours).and_return(nil)
+        Osm::Model.api_has_permission?(@api, :bar, :foo, 2).should be_false
+      end
+
+    end
+
+    describe "has_permission?" do
+
+      it "Only returns true if the user can and they have granted the api permission" do
+        section = Osm::Section.new
+        options = {:foo => :bar}
+        expect(Osm::Model).to receive('user_has_permission?').with(@api, :can_do, :can_to, section, options).and_return(true)
+        expect(Osm::Model).to receive('api_has_permission?').with(@api, :can_do, :can_to, section, options).and_return(true)
+        Osm::Model.has_permission?(@api, :can_do, :can_to, section, options).should be_true
+      end
+
+      describe "Otherwise returns false" do
+        [ [true,false], [false, true], [false, false] ].each do |user, api|
+          it "User #{user ? 'can' : "can't"} and #{api ? 'has' : "hasn't"} given access" do
+            Osm::Model.stub('user_has_permission?').and_return(user)
+            Osm::Model.stub('api_has_permission?').and_return(api)
+            Osm::Model.has_permission?(@api, :can_do, :can_to, Osm::Section.new).should be_false
+          end
+        end
+      end
+
+    end
+
+    describe "has_access_to_section?" do
+
+      before :each do
+        @api.stub(:get_user_permissions).and_return( {1=>{}} )
+      end
+
+      it "Has access" do
+        Osm::Model.has_access_to_section?(@api, 1).should be_true
+      end
+
+      it "Doesn't have access" do
+        Osm::Model.has_access_to_section?(@api, 2).should be_false
+      end 
+
+    end
+
+    describe "require_access_to_section" do
+
+      before :each do
+        Osm::Model.unstub(:require_access_to_section)
+      end
+
+      it "Does nothing when access is allowed" do
+        Osm::Model.stub('has_access_to_section?') { true }
+        expect{ Osm::Model.require_access_to_section(@api, 1) }.not_to raise_error
+      end
+
+      it "Raises exception when access is not allowed" do
+        Osm::Model.stub('has_access_to_section?') { false }
+        expect{ Osm::Model.require_access_to_section(@api, 1) }.to raise_error(Osm::Forbidden, "You do not have access to that section")
+      end
+
+    end
+
+    describe "require_permission" do
+
+      it "Does nothing when access is allowed" do
+        Osm::Model.stub('user_has_permission?').and_return(true)
+        Osm::Model.stub('api_has_permission?').and_return(true)
+        section = Osm::Section.new(name: 'A SECTION')
+        expect{ Osm::Model.require_permission(@api, :to, :on, section) }.not_to raise_error
+      end
+
+      it "Raises exception when user doesn't have access" do
+        Osm::Model.stub('user_has_permission?').and_return(false)
+        Osm::Model.stub('api_has_permission?').and_return(true)
+        section = Osm::Section.new(name: 'A SECTION')
+        expect{ Osm::Model.require_permission(@api, :can_do, :can_on, section) }.to raise_error(Osm::Forbidden, "Your OSM user does not have permission to can_do on can_on for A SECTION.")
+      end
+
+      it "Raises exception when api doesn't have access" do
+        Osm::Model.stub('user_has_permission?').and_return(true)
+        Osm::Model.stub('api_has_permission?').and_return(false)
+        section = Osm::Section.new(name: 'A SECTION')
+        expect{ Osm::Model.require_permission(@api, :can_to, :can_on, section) }.to raise_error(Osm::Forbidden, "You have not granted the can_to permissions on can_on to the API NAME API for A SECTION.")
+      end
+
+    end
+
+    describe "require_subscription" do
+
+      it "Checks against a number" do
+        section1 = Osm::Section.new(subscription_level: 1, name: 'NAME') # Bronze
+        section2 = Osm::Section.new(subscription_level: 2, name: 'NAME') # Silver
+        section3 = Osm::Section.new(subscription_level: 3, name: 'NAME') # Gold
+        section4 = Osm::Section.new(subscription_level: 4, name: 'NAME') # Gold+
+
+        expect{ Osm::Model.require_subscription(@api, 1, section1) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, 2, section1) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Silver required for NAME).")
+        expect{ Osm::Model.require_subscription(@api, 3, section1) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold required for NAME).")
+        expect{ Osm::Model.require_subscription(@api, 4, section1) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold+ required for NAME).")
+
+        expect{ Osm::Model.require_subscription(@api, 1, section2) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, 2, section2) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, 3, section2) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold required for NAME).")
+        expect{ Osm::Model.require_subscription(@api, 4, section2) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold+ required for NAME).")
+
+        expect{ Osm::Model.require_subscription(@api, 1, section3) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, 2, section3) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, 3, section3) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, 4, section3) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold+ required for NAME).")
+
+        expect{ Osm::Model.require_subscription(@api, 1, section4) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, 2, section4) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, 3, section4) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, 4, section4) }.not_to raise_error
+      end
+
+      it "Checks against a symbol" do
+        section1 = Osm::Section.new(subscription_level: 1, name: 'NAME') # Bronze
+        section2 = Osm::Section.new(subscription_level: 2, name: 'NAME') # Silver
+        section3 = Osm::Section.new(subscription_level: 3, name: 'NAME') # Gold
+        section4 = Osm::Section.new(subscription_level: 4, name: 'NAME') # Gold+
+
+        expect{ Osm::Model.require_subscription(@api, :bronze, section1) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, :silver, section1) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Silver required for NAME).")
+        expect{ Osm::Model.require_subscription(@api, :gold, section1) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold required for NAME).")
+        expect{ Osm::Model.require_subscription(@api, :gold_plus, section1) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold+ required for NAME).")
+
+        expect{ Osm::Model.require_subscription(@api, :bronze, section2) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, :silver, section2) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, :gold, section2) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold required for NAME).")
+        expect{ Osm::Model.require_subscription(@api, :gold_plus, section2) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold+ required for NAME).")
+
+        expect{ Osm::Model.require_subscription(@api, :bronze, section3) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, :silver, section3) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, :gold, section3) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, :gold_plus, section3) }.to raise_error(Osm::Forbidden, "Insufficent OSM subscription level (Gold+ required for NAME).")
+
+        expect{ Osm::Model.require_subscription(@api, :bronze, section4) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, :silver, section4) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, :gold, section4) }.not_to raise_error
+        expect{ Osm::Model.require_subscription(@api, :gold_plus, section4) }.not_to raise_error
+      end
+
+    end
+
+    describe "Require_abillity_to" do
+
+      before :each do
+        Osm::Model.unstub(:require_ability_to)
+      end
+
+      it "Requires permission" do
+        section = Osm::Section.new(type: :waiting)
+        options = {foo: 'bar'}
+        expect(Osm::Model).to receive(:require_permission).with(@api, :can_do, :can_on, section, options).and_return(true)
+        expect(Osm::Model).not_to receive(:require_subscription)
+        expect{ Osm::Model.require_ability_to(@api, :can_do, :can_on, section, options) }.not_to raise_error
+      end
+
+      describe "Requires the right subscription level for" do
+
+        before :each do
+          @section = Osm::Section.new(type: :beavers)
+          @options = {bar: 'foo'}
+          Osm::Model.stub(:require_permission).and_return(nil)
+        end
+
+        [:register, :contact, :events, :flexi].each do |can_on|
+          it ":#{can_on.to_s} (Silver)" do
+            expect(Osm::Model).to receive(:require_subscription).with(@api, :silver, @section, @options).and_return(true)
+            expect{ Osm::Model.require_ability_to(@api, :read, can_on, @section, @options) }.to_not raise_error
+          end
+        end
+
+        [:finance].each do |can_on|
+          it ":#{can_on.to_s} (Gold)" do
+            expect(Osm::Model).to receive(:require_subscription).with(@api, :gold, @section, @options).and_return(true)
+            expect{ Osm::Model.require_ability_to(@api, :read, can_on, @section, @options) }.to_not raise_error
+          end
+        end
+
+      end
+
+    end
+
+  end
+
 end

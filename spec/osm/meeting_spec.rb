@@ -157,6 +157,7 @@ describe "Meeting" do
     end
 
     it "Fetch badge requirements for a meeting (from API)" do
+      Osm::Model.stub('has_permission?').and_return(true)
       badges_body = [{'a'=>'a'},{'a'=>'A'}]
       FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs', :body => badges_body.to_json, :content_type => 'application/json')
       roles_body = [
@@ -169,6 +170,7 @@ describe "Meeting" do
     end
 
     it "Fetch badge requirements for a meeting (iterating through activities)" do
+      Osm::Model.stub('has_permission?').with(@api, :write, :badge, 3, {}).and_return(false)
       roles_body = [
         {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"3", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>10, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
       ]
@@ -253,7 +255,7 @@ describe "Meeting" do
         :start_time => '11:11',
         :finish_time => '22:22',
         :title => 'Title',
-      }).should be_true
+      }).is_a?(Osm::Meeting).should be_true
     end
 
     it "Create a meeting (failed)" do
@@ -265,7 +267,7 @@ describe "Meeting" do
         :start_time => '11:11',
         :finish_time => '22:22',
         :title => 'Title',
-      }).should be_false
+      }).should be_nil
     end
 
 
