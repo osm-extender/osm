@@ -51,7 +51,7 @@ describe "Badges" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
 
       db = Osm::Badges.get_due_badges(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
-      db.empty?.should == false
+      db.empty?.should be_false
       db.badge_names.should == {'badge_name_1'=>'Badge Name', 'staged_staged_participation_2'=>'Participation (Level 2)'}
       db.by_member.should == {1=>['badge_name_1', 'staged_staged_participation_2'], 2=>['staged_staged_participation_2']}
       db.member_names.should == {1 => 'John Doe', 2 => 'Jane Doe'}
@@ -62,7 +62,7 @@ describe "Badges" do
     it "handles an empty array representing no due badges" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=outstandingBadges&section=cubs&sectionid=1&termid=2", :body => '[]', :content_type => 'application/json')
       db = Osm::Badges.get_due_badges(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
-      db.should_not == nil
+      db.should_not be_nil
     end
 
 

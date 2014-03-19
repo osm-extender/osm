@@ -36,7 +36,7 @@ describe "Badge" do
     requirement.name.should == 'name'
     requirement.description.should == 'description'
     requirement.field.should == 'field'
-    requirement.editable.should == true
+    requirement.editable.should be_true
     requirement.badge.osm_key.should == 'key'
     requirement.valid?.should be_true
   end
@@ -423,7 +423,7 @@ describe "Badge" do
         requirement.name.should == 'r_name'
         requirement.description.should == 'r_description'
         requirement.field.should == 'r_field'
-        requirement.editable.should == true
+        requirement.editable.should be_true
         requirement.badge.osm_key.should == 'badge'
       end
 
@@ -445,7 +445,7 @@ describe "Badge" do
         requirement.name.should == 'r_name'
         requirement.description.should == 'r_description'
         requirement.field.should == 'r_field'
-        requirement.editable.should == true
+        requirement.editable.should be_true
         requirement.badge.osm_key.should == 'badge'
       end
 
@@ -467,7 +467,7 @@ describe "Badge" do
         requirement.name.should == 'r_name'
         requirement.description.should == 'r_description'
         requirement.field.should == 'r_field'
-        requirement.editable.should == true
+        requirement.editable.should be_true
         requirement.badge.osm_key.should == 'badge'
       end
 
@@ -489,7 +489,7 @@ describe "Badge" do
         requirement.name.should == 'r_name'
         requirement.description.should == 'r_description'
         requirement.field.should == 'r_field'
-        requirement.editable.should == true
+        requirement.editable.should be_true
         requirement.badge.osm_key.should == 'badge'
       end
 

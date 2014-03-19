@@ -20,8 +20,8 @@ describe "Invoice" do
     i.name.should == 'Name'
     i.extra_details.should == 'Extra Details'
     i.date.should == Date.new(2001, 2, 3)
-    i.archived.should == true
-    i.finalised.should == true
+    i.archived.should be_true
+    i.finalised.should be_true
     i.valid?.should be_true
   end
 
@@ -168,8 +168,8 @@ describe "Invoice" do
           invoice.name.should == 'Invoice 1'
           invoice.extra_details.should == 'Some more details'
           invoice.date.should == Date.new(2010, 1, 1)
-          invoice.archived.should == false
-          invoice.finalised.should == false
+          invoice.archived.should be_false
+          invoice.finalised.should be_false
           invoice.valid?.should be_true
         end
 

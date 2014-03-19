@@ -22,19 +22,19 @@ describe "Online Scout Manager" do
     end
 
     it "is given neither" do
-      Osm::make_datetime('', '').should == nil
+      Osm::make_datetime('', '').should be_nil
     end
 
     it "is given an invalid date" do
-      Osm::make_datetime('No date here1', '04:05:06').should == nil
+      Osm::make_datetime('No date here1', '04:05:06').should be_nil
     end
 
     it "is given an invalid time" do
-      Osm::make_datetime('2001-02-03', 'No time here!').should == nil
+      Osm::make_datetime('2001-02-03', 'No time here!').should be_nil
     end
 
     it "is given just an invalid date" do
-      Osm::make_datetime('No date here1', nil).should == nil
+      Osm::make_datetime('No date here1', nil).should be_nil
     end
   end
 

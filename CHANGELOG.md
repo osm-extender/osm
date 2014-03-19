@@ -1,3 +1,8 @@
+## Version 1.2.8
+
+  * api.get\_user\_permissions now includes the quartermaster permission
+  * Fix administer permission level excluded from ApiAccess
+
 ## Version 1.2.7
 
   * Fix can't compare exception when a FlexiRecord has a nil name.

@@ -42,6 +42,7 @@ module Osm
       permissions_map = {
         10  => [:read],
         20  => [:read, :write],
+        100 => [:read, :write, :administer]
       }
       result = Array.new
       ids = Array.new

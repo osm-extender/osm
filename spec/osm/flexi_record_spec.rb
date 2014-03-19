@@ -103,6 +103,18 @@ describe "Flexi Record" do
     records.sort.should == [fr1, fr2, fr3]
   end
 
+  it "Compare handles a nil name" do
+    fr1 = Osm::FlexiRecord.new(section_id: 1, name: nil)
+    fr2 = Osm::FlexiRecord.new(section_id: 1, name: 'Something')
+    (fr1 <=> fr2).should == -1
+  end
+
+  it "Compare handles a nil section_id" do
+    fr1 = Osm::FlexiRecord.new(section_id: nil, name: 'a')
+    fr2 = Osm::FlexiRecord.new(section_id: 1, name: 'a')
+    (fr1 <=> fr2).should == -1
+  end
+
 
   describe "Using the API" do
 

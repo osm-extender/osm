@@ -64,29 +64,29 @@ describe "Section" do
     section.group_id.should == 3
     section.group_name.should == '3rd Somewhere'
     section.flexi_records.should == []
-    section.gocardless.should == true
+    section.gocardless.should be_true
     section.myscout_events_expires.should == Date.today + 61
     section.myscout_badges_expires.should == Date.today + 62
     section.myscout_programme_expires.should == Date.today + 63
     section.myscout_details_expires.should == Date.today + 64
-    section.myscout_events.should == true
-    section.myscout_badges.should == true
-    section.myscout_programme.should == true
-    section.myscout_payments.should == true
+    section.myscout_events.should be_true
+    section.myscout_badges.should be_true
+    section.myscout_programme.should be_true
+    section.myscout_payments.should be_true
     section.myscout_emails.should == {:email1 => true, :email2 => false}
     section.myscout_email_address_from.should == 'send_from@example.com'
     section.myscout_email_address_copy.should == ''
-    section.myscout_badges_partial.should == true
-    section.myscout_programme_summary.should == true
-    section.myscout_programme_times.should == true
+    section.myscout_badges_partial.should be_true
+    section.myscout_programme_summary.should be_true
+    section.myscout_programme_times.should be_true
     section.myscout_programme_show.should == 20
     section.myscout_event_reminder_count.should == 4
     section.myscout_event_reminder_frequency.should == 5
     section.myscout_payment_reminder_count.should == 6
     section.myscout_payment_reminder_frequency.should == 7
-    section.myscout_details.should == true
+    section.myscout_details.should be_true
     section.myscout_details_email_changes_to.should == 'notify-changes-to@example.com'
-    section.sms_sent_test.should == true
+    section.sms_sent_test.should be_true
     section.sms_messages_sent.should == 8
     section.sms_messages_remaining.should == 9
     section.valid?.should be_true
@@ -97,7 +97,7 @@ describe "Section" do
     section = Osm::Section.new
 
     section.subscription_level.should == 1
-    section.subscription_expires.should == nil
+    section.subscription_expires.should be_nil
     section.type.should == :unknown
     section.column_names.should == {}
     section.fields.should == {}
@@ -108,7 +108,7 @@ describe "Section" do
     section.myscout_email_address_copy.should == ''
     section.myscout_details_email_changes_to.should == ''
     section.myscout_programme_show.should == 0
-    section.sms_sent_test.should == false
+    section.sms_sent_test.should be_false
     section.sms_messages_sent.should == 0
     section.sms_messages_remaining.should == 0
   end
@@ -144,29 +144,29 @@ describe "Section" do
         section.flexi_records.size.should == 1
         section.flexi_records[0].id.should == 111
         section.flexi_records[0].name.should == 'Flexi Record 1'
-        section.gocardless.should == true
+        section.gocardless.should be_true
         section.myscout_events_expires.should == Date.new(2013, 1, 6)
         section.myscout_badges_expires.should == Date.new(2013, 1, 7)
         section.myscout_programme_expires.should == Date.new(2013, 1, 8)
         section.myscout_programme_show.should == 10
         section.myscout_details_expires.should == Date.new(2013, 1, 9)
-        section.myscout_events.should == true
-        section.myscout_badges.should == true
-        section.myscout_programme.should == true
-        section.myscout_payments.should == true
+        section.myscout_events.should be_true
+        section.myscout_badges.should be_true
+        section.myscout_programme.should be_true
+        section.myscout_payments.should be_true
         section.myscout_emails.should == {:email1 => true, :email2 => false}
         section.myscout_email_address_from.should == 'send_from@example.com'
         section.myscout_email_address_copy.should == ''
-        section.myscout_badges_partial.should == true
-        section.myscout_programme_summary.should == true
-        section.myscout_programme_times.should == true
+        section.myscout_badges_partial.should be_true
+        section.myscout_programme_summary.should be_true
+        section.myscout_programme_times.should be_true
         section.myscout_event_reminder_count.should == 4
         section.myscout_event_reminder_frequency.should == 5
         section.myscout_payment_reminder_count.should == 6
         section.myscout_payment_reminder_frequency.should == 7
-        section.myscout_details.should == true
+        section.myscout_details.should be_true
         section.myscout_details_email_changes_to.should == 'notify-changes-to@example.com'
-        section.sms_sent_test.should == true
+        section.sms_sent_test.should be_true
         section.sms_messages_remaining.should == 8
         section.sms_messages_sent.should == 9
         section.valid?.should be_true

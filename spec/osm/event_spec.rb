@@ -32,7 +32,7 @@ describe "Event" do
     event.section_id.should == 2
     event.name.should == 'Event name'
     event.start.should == DateTime.new(2001, 1, 2, 12, 0, 0)
-    event.finish.should == nil
+    event.finish.should be_nil
     event.cost.should == '1.23'
     event.location.should == 'Somewhere'
     event.notes.should == 'None'
@@ -41,10 +41,10 @@ describe "Event" do
     event.notepad.should == 'notepad'
     event.public_notepad.should == 'public notepad'
     event.confirm_by_date.should == Date.new(2002, 1, 2)
-    event.allow_changes.should == true
-    event.reminders.should == false
+    event.allow_changes.should be_true
+    event.reminders.should be_false
     event.attendance_limit.should == 3
-    event.attendance_limit_includes_leaders.should == true
+    event.attendance_limit_includes_leaders.should be_true
     event.attendance_reminder.should == 14
     event.allow_booking.should be_false
     event.valid?.should be_true
@@ -196,16 +196,16 @@ describe "Event" do
         event.notepad.should == 'notepad'
         event.public_notepad.should == 'public notepad'
         event.confirm_by_date.should == Date.new(2002, 1, 2)
-        event.allow_changes.should == true
-        event.reminders.should == false
+        event.allow_changes.should be_true
+        event.reminders.should be_false
         event.attendance_limit.should == 3
-        event.attendance_limit_includes_leaders.should == true
+        event.attendance_limit_includes_leaders.should be_true
         event.attendance_reminder.should == 7
-        event.allow_booking.should == true
+        event.allow_booking.should be_true
         event.columns[0].id.should == 'f_1'
         event.columns[0].name.should == 'Name'
         event.columns[0].label.should == 'Label'
-        event.columns[0].parent_required.should == true
+        event.columns[0].parent_required.should be_true
         event.valid?.should be_true
       end
 
@@ -282,7 +282,7 @@ describe "Event" do
       it "No limit" do
         event = Osm::Event.new(:attendance_limit => 0, :id => 1, :section_id => 2)
         event.spaces?(@api).should be_true
-        event.spaces(@api).should == nil
+        event.spaces(@api).should be_nil
       end
 
       it "Under limit" do

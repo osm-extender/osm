@@ -35,7 +35,7 @@ describe "API Access" do
           {
             'apiid' => '1',
             'name' => 'API Name',
-            'permissions' => { 'read' => '10', 'readwrite' => '20' }
+            'permissions' => { 'read' => '10', 'readwrite' => '20', 'administer' => '100' }
           }, {
             'apiid' => '2',
             'name' => 'API 2 Name',
@@ -54,7 +54,7 @@ describe "API Access" do
         api_access = api_accesses[0]
         api_access.id.should == 1
         api_access.name.should == 'API Name'
-        api_access.permissions.should == {:read => [:read], :readwrite => [:read, :write]}
+        api_access.permissions.should == {:read => [:read], :readwrite => [:read, :write], :administer => [:read, :write, :administer]}
       end
 
       it "From cache" do
