@@ -150,7 +150,7 @@ module Osm
     }
 
     return permissions.inject({}) do |new_hash, (key, value)|
-      if ["badge", "member", "user", "register", "contact", "programme","events", "flexi", "finance"].include?(key)
+      if ["badge", "member", "user", "register", "contact", "programme","events", "flexi", "finance", "quartermaster"].include?(key)
         # This is a permission we care about
         new_hash[key.to_sym] = permissions_map[value.to_i]
       end
