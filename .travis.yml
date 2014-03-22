@@ -9,4 +9,6 @@ branches:
   only:
     - master
     - staging
+    - /gh(?:\d)+(?:-.+)?/
+    - /dev_ver_\d+\.\d+/
 script: rake ci:travis
