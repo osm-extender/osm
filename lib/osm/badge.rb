@@ -9,6 +9,8 @@ module Osm
     #   @return [String] a description of the badge
     # @!attribute [rw] osm_key
     #   @return [String] the key for the badge in OSM
+    # @!attribute [rw] osm_long_key
+    #   @return [String] the long key for the badge in osm (used for getting stock)
     # @!attribute [rw] sections_needed
     #   @return [Fixnum]
     # @!attribute [rw] total_needed
@@ -21,13 +23,14 @@ module Osm
     attribute :name, :type => String
     attribute :requirement_notes, :type => String
     attribute :osm_key, :type => String
+    attribute :osm_long_key, :type => String
     attribute :sections_needed, :type => Integer
     attribute :total_needed, :type => Integer
     attribute :needed_from_section, :type => Object
     attribute :requirements, :type => Object
 
     if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :name, :requirement_notes, :osm_key, :sections_needed, :total_needed, :needed_from_section, :requirements
+      attr_accessible :name, :requirement_notes, :osm_key, :osm_long_key, :sections_needed, :total_needed, :needed_from_section, :requirements
     end
 
     validates_numericality_of :sections_needed, :only_integer=>true, :greater_than_or_equal_to=>-1
@@ -35,6 +38,7 @@ module Osm
     validates_presence_of :name
     validates_presence_of :requirement_notes
     validates_presence_of :osm_key
+    validates_presence_of :osm_long_key
     validates :needed_from_section, :hash => {:key_type => String, :value_type => Fixnum}
     validates :requirements, :array_of => {:item_type => Osm::Badge::Requirement, :item_valid => true}
 
@@ -77,6 +81,7 @@ module Osm
           :name => detail['name'],
           :requirement_notes => detail['description'],
           :osm_key => detail['shortname'],
+          :osm_long_key => detail['table'],
           :sections_needed => config['sectionsneeded'].to_i,
           :total_needed => config['totalneeded'].to_i,
           :needed_from_section => (config['sections'] || {}).inject({}) { |h,(k,v)| h[k] = v.to_i; h },

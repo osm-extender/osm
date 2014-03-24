@@ -8,6 +8,7 @@ describe "Badge" do
       :name => 'name',
       :requirement_notes => 'notes',
       :osm_key => 'key',
+      :osm_long_key => 'long_key',
       :sections_needed => 1,
       :total_needed => 2,
       :needed_from_section => {'a' => 1},
@@ -17,6 +18,7 @@ describe "Badge" do
     badge.name.should == 'name'
     badge.requirement_notes.should == 'notes'
     badge.osm_key.should == 'key'
+    badge.osm_long_key.should == 'long_key'
     badge.sections_needed.should == 1
     badge.total_needed.should == 2
     badge.needed_from_section.should == {'a' => 1}
@@ -415,6 +417,7 @@ describe "Badge" do
         badge.name.should == 'b_name'
         badge.requirement_notes.should == 'b_req_notes'
         badge.osm_key.should == 'badge'
+        badge.osm_long_key.should == 'table'
         badge.sections_needed.should == 1
         badge.total_needed.should == 2
         badge.needed_from_section.should == {'a' => 1}
@@ -437,6 +440,7 @@ describe "Badge" do
         badge.name.should == 'b_name'
         badge.requirement_notes.should == 'b_req_notes'
         badge.osm_key.should == 'badge'
+        badge.osm_long_key.should == 'table'
         badge.sections_needed.should == 1
         badge.total_needed.should == 2
         badge.needed_from_section.should == {'a' => 1}
@@ -459,6 +463,7 @@ describe "Badge" do
         badge.name.should == 'b_name'
         badge.requirement_notes.should == 'b_req_notes'
         badge.osm_key.should == 'badge'
+        badge.osm_long_key.should == 'table'
         badge.sections_needed.should == 1
         badge.total_needed.should == 2
         badge.needed_from_section.should == {'a' => 1}
@@ -481,6 +486,7 @@ describe "Badge" do
         badge.name.should == 'b_name'
         badge.requirement_notes.should == 'b_req_notes'
         badge.osm_key.should == 'badge'
+        badge.osm_long_key.should == 'table'
         badge.sections_needed.should == 1
         badge.total_needed.should == 2
         badge.needed_from_section.should == {'a' => 1}
