@@ -1,3 +1,7 @@
+## Version 1.2.9
+
+ * Add osm\_long\_key to badges to make getting badge stock easier
+
 ## Version 1.2.8
 
   * api.get\_user\_permissions now includes the quartermaster permission
