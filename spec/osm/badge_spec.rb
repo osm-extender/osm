@@ -234,18 +234,27 @@ describe "Badge" do
     it "Nights away" do
       badge = Osm::StagedBadge.new(:osm_key => 'nightsaway')
 
-      Osm::Badge::Data.new(:requirements => {'y_01'=>3}, :badge => badge).earnt.should == 1
-      Osm::Badge::Data.new(:requirements => {'y_01'=>5}, :badge => badge).earnt.should == 5
-      Osm::Badge::Data.new(:requirements => {'y_01'=>6}, :badge => badge).earnt.should == 5
-      Osm::Badge::Data.new(:requirements => {'y_01'=>199}, :badge => badge).earnt.should == 175
-      Osm::Badge::Data.new(:requirements => {'y_01'=>200}, :badge => badge).earnt.should == 200
+      Osm::Badge::Data.new(:requirements => {'y_01'=>9}, :badge => badge).earnt.should == 5
+      Osm::Badge::Data.new(:requirements => {'y_01'=>10}, :badge => badge).earnt.should == 10
+      Osm::Badge::Data.new(:requirements => {'y_01'=>11}, :badge => badge).earnt.should == 10
       Osm::Badge::Data.new(:requirements => {'y_01'=>999}, :badge => badge).earnt.should == 200
     end
 
     it "Hikes away" do
       badge = Osm::StagedBadge.new(:osm_key => 'hikes')
 
-      Osm::Badge::Data.new(:requirements => {'y_01'=>3}, :badge => badge).earnt.should == 1
+      Osm::Badge::Data.new(:requirements => {'y_01'=>3}, :badge => badge).earnt.should == 2
+      Osm::Badge::Data.new(:requirements => {'y_01'=>5}, :badge => badge).earnt.should == 5
+      Osm::Badge::Data.new(:requirements => {'y_01'=>6}, :badge => badge).earnt.should == 5
+      Osm::Badge::Data.new(:requirements => {'y_01'=>49}, :badge => badge).earnt.should == 35
+      Osm::Badge::Data.new(:requirements => {'y_01'=>50}, :badge => badge).earnt.should == 50
+      Osm::Badge::Data.new(:requirements => {'y_01'=>999}, :badge => badge).earnt.should == 50
+    end
+
+    it "Time on the water" do
+      badge = Osm::StagedBadge.new(:osm_key => 'timeonthewater')
+
+      Osm::Badge::Data.new(:requirements => {'y_01'=>3}, :badge => badge).earnt.should == 2
       Osm::Badge::Data.new(:requirements => {'y_01'=>5}, :badge => badge).earnt.should == 5
       Osm::Badge::Data.new(:requirements => {'y_01'=>6}, :badge => badge).earnt.should == 5
       Osm::Badge::Data.new(:requirements => {'y_01'=>49}, :badge => badge).earnt.should == 35
@@ -283,7 +292,7 @@ describe "Badge" do
     ).started?.should be_false
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'hikes'),
-      :requirements => {'a_01' => 2, 'y_01' => '2', 'custom_26695' => ''},
+      :requirements => {'a_01' => 3, 'y_01' => '3', 'custom_26695' => ''},
       :completed => 1,
     ).started?.should be_true
 
@@ -358,7 +367,7 @@ describe "Badge" do
     ).started.should == 10
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'hikes'),
-      :requirements => {'a_01' => 2, 'y_01' => '2', 'custom_26695' => ''},
+      :requirements => {'a_01' => 3, 'y_01' => '3', 'custom_26695' => ''},
       :completed => 1,
     ).started.should == 5
   end
