@@ -1,6 +1,7 @@
 ## Version 1.2.10
 
- * 
+ * Update levels for Hikes and Nights away staged badges (released April 2014)
+ * Add levels for new Time on the water staged badge (released April 2014)
 
 ## Version 1.2.9
 

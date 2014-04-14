@@ -293,9 +293,11 @@ module Osm
       validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
       validates :requirements, :hash => {:key_type => String, :value_type => String}
 
-      STAGES_NIGHTSAWAY = [1, 5, 10, 20, 35, 50, 75, 100, 125, 150, 175, 200]
-      STAGES_HIKESAWAY = [1, 5, 10, 20, 35, 50]
-
+      STAGES = {
+        'nightsaway' => [1, 2, 3, 4, 5, 10, 15, 20, 35, 50, 75, 100, 125, 150, 175, 200],
+        'hikes' => [1, 2, 5, 10, 15, 20, 35, 50],
+        'timeonthewater' => [1, 2, 5, 10, 15, 20, 35, 50],
+      }
 
       # @!method initialize
       #   Initialize a new Badge
@@ -382,10 +384,9 @@ module Osm
         unless badge.type == :staged
           return earnt? ? 1 : 0
         end
-        if ['nightsaway', 'hikes'].include?(badge.osm_key)
+        if STAGES.keys.include?(badge.osm_key)
           total_done = requirements['y_01']
-          stages = STAGES_NIGHTSAWAY if badge.osm_key.eql?('nightsaway')
-          stages = STAGES_HIKESAWAY if badge.osm_key.eql?('hikes')
+          stages = STAGES[badge.osm_key]
           stages.reverse_each do |stage|
             return stage if total_done >= stage
           end
@@ -423,9 +424,8 @@ module Osm
           return started? ? 1 : 0
         else
           # Staged badge
-          if ['nightsaway', 'hikes'].include?(badge.osm_key) # Special staged badges
-            stages = STAGES_NIGHTSAWAY if badge.osm_key.eql?('nightsaway')
-            stages = STAGES_HIKESAWAY if badge.osm_key.eql?('hikes')
+          if STAGES.keys.include?(badge.osm_key) # Special staged badges
+            stages = STAGES[badge.osm_key]
             done = requirements['y_01'].to_i
             return 0 if done < stages[0]                # Not started the first stage
             return 0 if done >= stages[stages.size - 1] # No more stages can be started
