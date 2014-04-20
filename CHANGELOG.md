@@ -1,6 +1,6 @@
 ## Version 1.2.11
 
- * 
+ * Fix handling blank event config from OSM (JSON parse error)
 
 ## Version 1.2.10
 

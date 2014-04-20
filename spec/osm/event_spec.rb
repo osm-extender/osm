@@ -209,6 +209,13 @@ describe "Event" do
         event.valid?.should be_true
       end
 
+      it "Handles a blank config" do
+        @event_body['config'] = ''
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.to_json,:content_type => 'application/json')
+        expect { @event = Osm::Event.get(@api, 1, 2) }.to_not raise_error
+        @event.columns.should == []
+      end
+
       it 'Handles cost of "-1" for TBC' do
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.merge({'cost' => '-1'}).to_json, :content_type => 'application/json')
 

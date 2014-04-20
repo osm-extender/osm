@@ -406,7 +406,9 @@ module Osm
       )
 
       columns = []
-      column_data = ActiveSupport::JSON.decode(event_data['config'] || '[]')
+      config_raw = event_data['config']
+      config_raw = '[]' if config_raw.blank?
+      column_data = ActiveSupport::JSON.decode(config_raw)
       column_data = [] unless column_data.is_a?(Array)
       column_data.each do |field|
         columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :parent_required => field['pR'].to_s.eql?('1'), :event => event)
