@@ -82,7 +82,7 @@ module Osm
     old_initialize = instance_method(:initialize)
     define_method :initialize do |*args|
       ret_val = old_initialize.bind(self).call(*args)
-      @original_attributes = attributes
+      @original_attributes = Hash[ attributes.map{ |k,v| [k, ([Array, Hash].include?(v.class) ? v.clone : v)] } ] # Deep(ish) clone
       return ret_val
     end
 

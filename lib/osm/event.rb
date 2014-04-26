@@ -1,6 +1,7 @@
 module Osm
 
   class Event < Osm::Model
+    class BadgeLink < Osm::Model; end # Ensure the constant exists for the validators
     class Column < Osm::Model; end # Ensure the constant exists for the validators
 
     # @!attribute [rw] id
@@ -21,6 +22,8 @@ module Osm
     #   @return [String] notes about the event
     # @!attribute [rw] archived
     #   @return [Boolean] if the event has been archived
+    # @!attribute [rw] badges
+    #   @return [Array<Osm::Event::BadgeLink>] the badge links for the event
     # @!attribute [rw] columns
     #   @return [Array<Osm::Event::Column>] the custom columns for the event
     # @!attribute [rw] notepad
@@ -51,6 +54,7 @@ module Osm
     attribute :location, :type => String, :default => ''
     attribute :notes, :type => String, :default => ''
     attribute :archived, :type => Boolean, :default => false
+    attribute :badges, :default => []
     attribute :columns, :default => []
     attribute :notepad, :type => String, :default => ''
     attribute :public_notepad, :type => String, :default => ''
@@ -64,7 +68,7 @@ module Osm
 
     if ActiveModel::VERSION::MAJOR < 4
       attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
-                      :fields, :columns, :notepad, :public_notepad, :confirm_by_date, :allow_changes,
+                      :fields, :badges, :columns, :notepad, :public_notepad, :confirm_by_date, :allow_changes,
                       :reminders, :attendance_limit, :attendance_limit_includes_leaders,
                       :attendance_reminder, :allow_booking
     end
@@ -73,6 +77,7 @@ module Osm
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :attendance_limit, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_presence_of :name
+    validates :badges, :array_of => {:item_type => Osm::Event::BadgeLink, :item_valid => true}
     validates :columns, :array_of => {:item_type => Osm::Event::Column, :item_valid => true}
     validates_inclusion_of :allow_changes, :in => [true, false]
     validates_inclusion_of :reminders, :in => [true, false]
@@ -148,6 +153,7 @@ module Osm
 
 
     # Create an event in OSM
+    # If something goes wrong adding badges to OSM then the event returned will have been read from OSM
     # @param [Osm::Api] api The api to use to make the request
     # @return [Osm::Event, nil] the created event, nil if failed
     # @raise [Osm::ObjectIsInvalid] If the Event is invalid
@@ -174,13 +180,33 @@ module Osm
         'allowbooking' => event.allow_booking ? 'true' : 'false',
       })
 
-      # The cached events for the section will be out of date - remove them
-      cache_delete(api, ['events', event.section_id])
-      cache_write(api, ['event', event.id], event)
-
       if (data.is_a?(Hash) && data.has_key?('id'))
         event.id = data['id'].to_i
-        return event
+
+        # The cached events for the section will be out of date - remove them
+        cache_delete(api, ['events', event.section_id])
+        cache_write(api, ['event', event.id], event)
+
+        # Add badge links to OSM
+        badges_created = true
+        event.badges.each do |badge|
+          badge_data = data = api.perform_query("ext/events/event/index.php?action=badgeAddToEvent&sectionid=#{event.section_id}&eventid=#{event.id}", {
+            'section' => badge.badge_section,
+            'badgetype' => badge.badge_type,
+            'badge' => badge.badge_key,
+            'columnname' => badge.requirement_key,
+            'data' => badge.data,
+            'newcolumnname' => badge.label,
+          })
+          badges_created = false unless badge_data.is_a?(Hash) && badge_data['ok']
+        end
+
+        if badges_created
+          return event
+        else
+          # Someting went wrong adding badges so return what OSM has
+          return get(api, event.section_id, event.id)
+        end
       else
         return nil
       end
@@ -188,42 +214,107 @@ module Osm
 
     # Update event in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @return [Boolean] whether the update succedded
+    # @return [Boolean] whether the update succedded (will return true if no updates needed to be made)
     def update(api)
       require_ability_to(api, :write, :events, section_id)
+       updated = true
 
-      to_update = changed_attributes
+      # Update main attributes
+      update_main_attributes = false
+      %w{ id name location start finish cost cost_tbc notes confirm_by_date allow_changes reminders attendance_limit attendance_limit_includes_leaders allow_booking }.each do |a|
+        if changed_attributes.include?(a)
+          update_main_attributes = true
+          break # no use checking the others
+        end
+      end
+      if update_main_attributes
+        data = api.perform_query("events.php?action=addEvent&sectionid=#{section_id}", {
+          'eventid' => id,
+          'name' => name,
+          'location' => location,
+          'startdate' => start? ? start.strftime(Osm::OSM_DATE_FORMAT) : '',
+          'enddate' => finish? ? finish.strftime(Osm::OSM_DATE_FORMAT) : '',
+          'cost' => cost_tbc? ? '-1' : cost,
+          'notes' => notes,
+          'starttime' => start? ? start.strftime(Osm::OSM_TIME_FORMAT) : '',
+          'endtime' => finish? ? finish.strftime(Osm::OSM_TIME_FORMAT) : '',
+          'confdate' => confirm_by_date? ? confirm_by_date.strftime(Osm::OSM_DATE_FORMAT) : '',
+          'allowChanges' => allow_changes ? 'true' : 'false',
+          'disablereminders' => !reminders ? 'true' : 'false',
+          'attendancelimit' => attendance_limit,
+          'attendancereminder' => attendance_reminder,
+          'limitincludesleaders' => attendance_limit_includes_leaders ? 'true' : 'false',
+          'allowbooking' => allow_booking ? 'true' : 'false',
+        })
+        updated &= data.is_a?(Hash) && (data['id'].to_i == id)
+      end
 
-      data = api.perform_query("events.php?action=addEvent&sectionid=#{section_id}", {
-        'eventid' => id,
-        'name' => name,
-        'location' => location,
-        'startdate' => start? ? start.strftime(Osm::OSM_DATE_FORMAT) : '',
-        'enddate' => finish? ? finish.strftime(Osm::OSM_DATE_FORMAT) : '',
-        'cost' => cost_tbc? ? '-1' : cost,
-        'notes' => notes,
-        'starttime' => start? ? start.strftime(Osm::OSM_TIME_FORMAT) : '',
-        'endtime' => finish? ? finish.strftime(Osm::OSM_TIME_FORMAT) : '',
-        'confdate' => confirm_by_date? ? confirm_by_date.strftime(Osm::OSM_DATE_FORMAT) : '',
-        'allowChanges' => allow_changes ? 'true' : 'false',
-        'disablereminders' => !reminders ? 'true' : 'false',
-        'attendancelimit' => attendance_limit,
-        'attendancereminder' => attendance_reminder,
-        'limitincludesleaders' => attendance_limit_includes_leaders ? 'true' : 'false',
-        'allowbooking' => allow_booking ? 'true' : 'false',
-      })
+      # Private notepad
+      if changed_attributes.include?('notepad')
+        data = api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
+          'eventid' => id,
+          'notepad' => notepad,
+        })
+        updated &= data.is_a?(Hash)
+      end
 
-      api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
-        'eventid' => id,
-        'notepad' => notepad,
-      }) if to_update.include?('notepad')
+      # MySCOUT notepad
+      if changed_attributes.include?('public_notepad')
+        data = api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
+          'eventid' => id,
+          'pnnotepad' => public_notepad,
+        })
+        updated &= data.is_a?(Hash)
+      end
 
-      api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
-        'eventid' => id,
-        'pnnotepad' => public_notepad,
-      }) if to_update.include?('public_notepad')
+      # Badges
+      if changed_attributes.include?('badges')
+        original_badges = @original_attributes['badges'] || []
 
-      if data.is_a?(Hash) && (data['id'].to_i == id)
+        # Deleted badges
+        badges_to_delete = []
+        original_badges.each do |badge|
+          unless badges.include?(badge)
+            badges_to_delete.push({
+              'section' => badge.badge_section,
+              'badge' => badge.badge_key,
+              'columnname' => badge.requirement_key,
+              'data' => badge.data,
+              'newcolumnname' => badge.label,
+              'badgetype' => badge.badge_type,
+            })
+          end
+        end
+        unless badges_to_delete.empty?
+          data = api.perform_query("ext/events/event/index.php?action=badgeDeleteFromEvent&sectionid=#{section_id}&eventid=#{id}", {
+            'badgelinks' => badges_to_delete,
+          })
+          updated &= data.is_a?(Hash) && data['ok']
+        end
+
+        # Added badges
+        badges_to_add = []
+        badges.each do |badge|
+          unless original_badges.include?(badge)
+            badges_to_add.push({
+              'section' => badge.badge_section,
+              'badge' => badge.badge_key,
+              'columnname' => badge.requirement_key,
+              'data' => badge.data,
+              'newcolumnname' => badge.label,
+              'badgetype' => badge.badge_type,
+            })
+          end
+        end
+        unless badges_to_add.empty?
+          data = api.perform_query("ext/events/event/index.php?action=badgeAddToEvent&sectionid=#{section_id}&eventid=#{id}", {
+            'badgelinks' => badges_to_add,
+          })
+          updated &= data.is_a?(Hash) && data['ok']
+        end
+      end # includes badges
+
+      if updated
         reset_changed_attributes
         # The cached event will be out of date - remove it
         cache_delete(api, ['event', id])
@@ -414,8 +505,70 @@ module Osm
         columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :parent_required => field['pR'].to_s.eql?('1'), :event => event)
       end
       event.columns = columns
+
+      badges = []
+      badges_data = event_data['badgelinks']
+      badges_data = [] unless badges_data.is_a?(Array)
+      badges_data.each do |field|
+        badges.push BadgeLink.new(badge_key: field['badge'], badge_type: field['badgetype'].to_sym, badge_section: field['section'].to_sym, requirement_key: field['columnname'], label: field['columnnameLongName'], data: field['data'])
+      end
+      event.badges = badges
+
       return event
     end
+
+
+    # When creating a BadgeLink for an existing column in a hikes/nights badge the label is optional
+    # When creating a BadgeLink for a new column in a hikes/nights badge the requirement_key MUST be blank
+# TODO : Add validation for above statements
+    class BadgeLink
+      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
+      include ActiveAttr::Model
+
+      # @!attribute [rw] badge_key
+      #   @return [String] the badge being done
+      # @!attribute [rw] badge_type
+      #   @return [Symbol] the type of badge
+      # @!attribute [rw] requirement_key
+      #   @return [String] the requirement being done
+      # @!attribute [rw] badge_section
+      #   @return [Symbol] the section type that the badge belongs to
+      # @!attribute [rw] label
+      #   @return [String] human firendly label for the badge and requirement
+      # @!attribute [rw] data
+      #   @return [String] what to put in the column when the badge records are updated
+
+      attribute :badge_key, :type => String
+      attribute :badge_type, :type => Object
+      attribute :requirement_key, :type => String
+      attribute :badge_section, :type => Object
+      attribute :label, :type => String
+      attribute :data, :type => String
+
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :badge_key, :badge_type, :requirement_key, :badge_section, :label, :data
+      end
+
+      validates_presence_of :badge_key
+      validates_format_of :requirement_key, :with => /\A(?:[a-z]_\d{2})|(?:custom_\d+)\Z/, :allow_blank => true, :message => 'is not in the correct format (e.g. "a_01")'
+      validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
+      validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
+      validates_presence_of :data, :allow_blank => true
+
+      # @!method initialize
+      #   Initialize a new Meeting::Activity
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+      # Compare BadgeLink based on section, type, key, requirement, data
+      def <=>(another)
+        [:badge_section, :badge_type, :badge_key, :requirement_key].each do |attribute|
+          result = self.try(:data) <=> another.try(:data)
+          return result unless result == 0
+        end
+        return self.try(:data) <=> another.try(:data)
+      end
+
+    end # Class Event::BadgeLink
 
 
     class Column < Osm::Model

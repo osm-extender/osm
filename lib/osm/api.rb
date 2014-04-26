@@ -264,6 +264,7 @@ module Osm
     # @return [String] the error message
     def self.get_osm_error(data)
       return false unless data.is_a?(Hash)
+      return false if data['ok']
       to_return = data['error'] || data['err'] || false
       to_return = false if to_return.blank?
       return to_return

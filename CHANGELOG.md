@@ -1,6 +1,9 @@
 ## Version 1.2.11
 
  * Fix handling blank event config from OSM (JSON parse error)
+ * Add retrieving of badge links to events
+ * When creating an event in OSM badge links are also added
+ * When updating an event in OSM badge links are also updated
 
 ## Version 1.2.10
 
