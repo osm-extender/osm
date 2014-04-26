@@ -553,7 +553,6 @@ module Osm
       validates_format_of :requirement_key, :with => /\A(?:[a-z]_\d{2})|(?:custom_\d+)\Z/, :allow_blank => true, :message => 'is not in the correct format (e.g. "a_01")'
       validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
       validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
-      validates_presence_of :data, :allow_blank => true
 
       # @!method initialize
       #   Initialize a new Meeting::Activity
