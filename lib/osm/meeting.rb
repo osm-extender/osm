@@ -377,7 +377,7 @@ module Osm
 
       validates_presence_of :badge_key
       validates_format_of :requirement_key, :with => /\A[a-z]_\d{2}\Z/, :message => 'is not in the correct format (e.g. "a_01")'
-      validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers]
+      validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
       validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
 
       # @!method initialize
