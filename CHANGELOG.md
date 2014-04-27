@@ -4,6 +4,7 @@
  * Add retrieving of badge links to events
  * When creating an event in OSM badge links are also added
  * When updating an event in OSM badge links are also updated
+ * Add get\_list method to Event (get basic event details, should cutout the need to get all events all the time)
 
 ## Version 1.2.10
 

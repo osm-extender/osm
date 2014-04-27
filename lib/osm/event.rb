@@ -4,6 +4,9 @@ module Osm
     class BadgeLink < Osm::Model; end # Ensure the constant exists for the validators
     class Column < Osm::Model; end # Ensure the constant exists for the validators
 
+    LIST_ATTRIBUTES = [:id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived, :public_notepad, :confirm_by_date, :allow_changes, :reminders, :attendance_limit, :attendance_limit_includes_leaders, :attendance_reminder, :allow_booking]
+    EXTRA_ATTRIBUTES = [:notepad, :columns, :badges]
+
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the event
     # @!attribute [rw] section_id
@@ -129,6 +132,52 @@ module Osm
       return events.reject do |event|
         event.archived?
       end
+    end
+
+    # Get event list for a section (not all details for each event)
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
+    # @!macro options_get
+    # @return [Array<Hash>]
+    def self.get_list(api, section, options={})
+      require_ability_to(api, :read, :events, section, options)
+      section_id = section.to_i
+      cache_key = ['events_list', section_id]
+      events_cache_key = ['events', section_id]
+      events = nil
+
+      unless options[:no_cache]
+
+        # Try getting from cache
+        if cache_exist?(api, cache_key)
+          return cache_read(api, cache_key)
+        end
+  
+        # Try generating from cached events
+        if cache_exist?(api, events_cache_key)
+          ids = cache_read(api, events_cache_key)
+          events = get_from_ids(api, ids, 'event', section, options, :get_for_section).map do |e|
+            e.attributes.symbolize_keys.select do |k,v|
+              LIST_ATTRIBUTES.include?(k)
+            end
+          end
+        end
+
+      end
+
+      # Fetch from OSM
+      if events.nil?
+        data = api.perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
+        events = Array.new
+        unless data['items'].nil?
+          data['items'].map do |event_data|
+            events.push(attributes_from_data(event_data))
+          end
+        end
+      end
+
+      cache_write(api, cache_key, events)
+      return events
     end
 
     # Get an event
@@ -474,8 +523,8 @@ module Osm
       return attendees
     end
 
-    def self.new_event_from_data(event_data)
-      event = Osm::Event.new(
+    def self.attributes_from_data(event_data)
+      {
         :id => Osm::to_i_or_nil(event_data['eventid']),
         :section_id => Osm::to_i_or_nil(event_data['sectionid']),
         :name => event_data['name'],
@@ -485,7 +534,6 @@ module Osm
         :location => event_data['location'],
         :notes => event_data['notes'],
         :archived => event_data['archived'].eql?('1'),
-        :notepad => event_data['notepad'],
         :public_notepad => event_data['publicnotes'],
         :confirm_by_date => Osm::parse_date(event_data['confdate']),
         :allow_changes => event_data['allowchanges'].eql?('1'),
@@ -494,7 +542,12 @@ module Osm
         :attendance_limit_includes_leaders => event_data['limitincludesleaders'].eql?('1'),
         :attendance_reminder => event_data['attendancereminder'].to_i,
         :allow_booking => event_data['allowbooking'].eql?('1'),
-      )
+      }
+    end
+
+    def self.new_event_from_data(event_data)
+      event = Osm::Event.new(attributes_from_data(event_data))
+      event.notepad = event_data['notepad']
 
       columns = []
       config_raw = event_data['config']

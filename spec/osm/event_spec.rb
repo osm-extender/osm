@@ -318,6 +318,28 @@ describe "Event" do
       end
     end
 
+    describe "Get events list for section" do
+      it "From OSM" do
+        events = Osm::Event.get_list(@api, 1)
+        events.map{ |e| e[:id]}.should == [2]
+      end
+
+      it "From cache" do
+        events = Osm::Event.get_list(@api, 1)
+        HTTParty.should_not_receive(:post)
+        Osm::Event.get_list(@api, 1).should == events
+      end
+
+      it "From cached events" do
+        Osm::Event.get_for_section(@api, 1)
+        HTTParty.should_not_receive(:post)
+        events = Osm::Event.get_list(@api, 1)
+        events.map{ |e| e[:id]}.should == [2]
+      end
+
+    end
+
+
     it "Get event" do
       event = Osm::Event.get(@api, 1, 2)
       event.should_not be_nil

@@ -74,7 +74,11 @@ module Osm
 
     # Reset the list of attributes which have changed
     def reset_changed_attributes
-      @original_attributes = attributes
+      classes_to_clone = [Array, Hash]
+      attributes_now = attributes.map do |k,v|
+        [k, (classes_to_clone.include?(v.class) ? v.clone : v)]
+      end # Deep(ish) clone
+      @original_attributes = Hash[attributes_now]
     end
 
 
@@ -82,7 +86,7 @@ module Osm
     old_initialize = instance_method(:initialize)
     define_method :initialize do |*args|
       ret_val = old_initialize.bind(self).call(*args)
-      @original_attributes = Hash[ attributes.map{ |k,v| [k, ([Array, Hash].include?(v.class) ? v.clone : v)] } ] # Deep(ish) clone
+      reset_changed_attributes
       return ret_val
     end
 
@@ -252,7 +256,7 @@ module Osm
     # @param [Symbol] get_all_method The method to get all items (either :get_all or :get_for_section)
     # @return [Array] An array of the items
     def self.get_from_ids(api, ids, key, arguments=[], options, get_all_method)
-      raise ArgumentError, "get_al_method is invalid" unless [:get_all, :get_for_section].include?(get_all_method)
+      raise ArgumentError, "get_all_method is invalid" unless [:get_all, :get_for_section].include?(get_all_method)
       items = Array.new
       ids.each do |id|
         if cache_exist?(api, [key, id])
