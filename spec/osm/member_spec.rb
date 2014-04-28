@@ -107,6 +107,12 @@ describe "Member" do
     Osm::Member.new(grouping_id: 0).leader?.should be_false  # Not in a grouping
   end
 
+  it "Tells if member is a youth member" do
+    Osm::Member.new(grouping_id: -2).youth?.should be_false  # In the leader grouping
+    Osm::Member.new(grouping_id: 2).youth?.should be_true  # In a youth grouping
+    Osm::Member.new(grouping_id: 0).youth?.should be_false  # Not in a grouping
+  end
+
   it "Provides each part of age" do
     data = {
       :age => '06/07',

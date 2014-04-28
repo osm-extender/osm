@@ -1,6 +1,7 @@
 ## Version 1.2.12
 
  * Add leader? method to member (true if member is in the leaders grouping)
+ * Add youth? method to member (true if member is in a non-leaders grouping)
 
 ## Version 1.2.11
 
