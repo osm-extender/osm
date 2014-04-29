@@ -1,3 +1,7 @@
+## Version 1.2.13
+
+  * 
+
 ## Version 1.2.12
 
  * Add leader? method to member (true if member is in the leaders grouping)
