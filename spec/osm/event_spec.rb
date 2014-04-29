@@ -127,7 +127,8 @@ describe "Event" do
         :badge_type => :activity,
         :requirement_key => 'a_01',
         :badge_section => :cubs,
-        :label => 'Cubs Artist Activity - A: Poster',
+        :requirement_label => 'A: Poster',
+        :badge_label => 'Artist',
         :data => 'abc'
       )
   
@@ -135,7 +136,8 @@ describe "Event" do
       bl.badge_type.should == :activity
       bl.requirement_key.should == 'a_01'
       bl.badge_section.should == :cubs
-      bl.label.should == 'Cubs Artist Activity - A: Poster'
+      bl.badge_label.should == 'Artist'
+      bl.requirement_label.should == 'A: Poster'
       bl.data.should == 'abc'
       bl.valid?.should be_true
     end
@@ -236,11 +238,12 @@ describe "Event" do
         event.columns[0].label.should == 'Label'
         event.columns[0].parent_required.should be_true
         event.badges[0].badge_key.should == 'athletics'
+        event.badges[0].badge_label.should == 'Athletics'
         event.badges[0].badge_section.should == :cubs
         event.badges[0].badge_type.should == :activity
         event.badges[0].requirement_key.should == 'b_06'
         event.badges[0].data.should == ''
-        event.badges[0].label.should == 'B: Run'
+        event.badges[0].requirement_label.should == 'B: Run'
         event.badges[1].badge_key.should == 'hikes'
         event.badges[1].badge_section.should == :staged
         event.badges[1].badge_type.should == :staged
@@ -624,7 +627,7 @@ describe "Event" do
             badge_type: :activity,
             requirement_key: 'a_01',
             badge_section: :beavers,
-            label: '',
+            requirement_label: '',
             data: '',
           )]
           event = Osm::Event.create(@api, @attributes)
@@ -652,7 +655,7 @@ describe "Event" do
             badge_type: :staged,
             requirement_key: '',
             badge_section: :staged,
-            label: 'Label for added column',
+            requirement_label: 'Label for added column',
             data: '1',
           )]
           event = Osm::Event.create(@api, @attributes)
@@ -680,7 +683,7 @@ describe "Event" do
             badge_type: :staged,
             requirement_key: 'custom_01234',
             badge_section: :staged,
-            label: '',
+            requirement_label: '',
             data: '2',
           )]
           event = Osm::Event.create(@api, @attributes)

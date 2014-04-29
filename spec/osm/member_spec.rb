@@ -101,6 +101,17 @@ describe "Member" do
     member.name('_').should == 'First_Last'
   end
 
+  it "Tells if member is a leader" do
+    Osm::Member.new(grouping_id: -2).leader?.should be_true  # In the leader grouping
+    Osm::Member.new(grouping_id: 2).leader?.should be_false  # In a youth grouping
+    Osm::Member.new(grouping_id: 0).leader?.should be_false  # Not in a grouping
+  end
+
+  it "Tells if member is a youth member" do
+    Osm::Member.new(grouping_id: -2).youth?.should be_false  # In the leader grouping
+    Osm::Member.new(grouping_id: 2).youth?.should be_true  # In a youth grouping
+    Osm::Member.new(grouping_id: 0).youth?.should be_false  # Not in a grouping
+  end
 
   it "Provides each part of age" do
     data = {

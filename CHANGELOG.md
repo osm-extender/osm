@@ -1,3 +1,9 @@
+## Version 1.2.12
+
+ * Add leader? method to member (true if member is in the leaders grouping)
+ * Add youth? method to member (true if member is in a non-leaders grouping)
+ * Adjust Osm::Event::BadgeLink attributes (label becomes requirement\_label, add badge\_label)
+
 ## Version 1.2.11
 
  * Fix handling blank event config from OSM (JSON parse error)

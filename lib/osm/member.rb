@@ -380,6 +380,18 @@ module Osm
       return "#{first_name}#{seperator.to_s}#{last_name}"
     end
 
+    # Check if the member is in the leaders grouping
+    # @return [Boolean]
+    def leader?
+      grouping_id.eql?(-2)
+    end
+
+    # Check if the member is in a non-leaders grouping
+    # @return [Boolean]
+    def youth?
+      grouping_id > 0
+    end
+
     # Get the Key to use in My.SCOUT links for this member
     # @param [Osm::Api] api The api to use to make the request
     # @return [String] the key

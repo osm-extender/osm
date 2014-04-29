@@ -245,7 +245,7 @@ module Osm
             'badge' => badge.badge_key,
             'columnname' => badge.requirement_key,
             'data' => badge.data,
-            'newcolumnname' => badge.label,
+            'newcolumnname' => badge.requirement_label,
           })
           badges_created = false unless badge_data.is_a?(Hash) && badge_data['ok']
         end
@@ -329,7 +329,7 @@ module Osm
               'badge' => badge.badge_key,
               'columnname' => badge.requirement_key,
               'data' => badge.data,
-              'newcolumnname' => badge.label,
+              'newcolumnname' => badge.requirement_label,
               'badgetype' => badge.badge_type,
             })
           end
@@ -350,7 +350,7 @@ module Osm
               'badge' => badge.badge_key,
               'columnname' => badge.requirement_key,
               'data' => badge.data,
-              'newcolumnname' => badge.label,
+              'newcolumnname' => badge.requirement_label,
               'badgetype' => badge.badge_type,
             })
           end
@@ -563,7 +563,7 @@ module Osm
       badges_data = event_data['badgelinks']
       badges_data = [] unless badges_data.is_a?(Array)
       badges_data.each do |field|
-        badges.push BadgeLink.new(badge_key: field['badge'], badge_type: field['badgetype'].to_sym, badge_section: field['section'].to_sym, requirement_key: field['columnname'], label: field['columnnameLongName'], data: field['data'])
+        badges.push BadgeLink.new(badge_key: field['badge'], badge_type: field['badgetype'].to_sym, badge_section: field['section'].to_sym, requirement_key: field['columnname'], badge_label: field['badgeLongName'], requirement_label: field['columnnameLongName'], data: field['data'])
       end
       event.badges = badges
 
@@ -571,7 +571,7 @@ module Osm
     end
 
 
-    # When creating a BadgeLink for an existing column in a hikes/nights badge the label is optional
+    # When creating a BadgeLink for an existing column in a hikes/nights badge the requirement_label is optional
     # When creating a BadgeLink for a new column in a hikes/nights badge the requirement_key MUST be blank
 # TODO : Add validation for above statements
     class BadgeLink
@@ -582,12 +582,14 @@ module Osm
       #   @return [String] the badge being done
       # @!attribute [rw] badge_type
       #   @return [Symbol] the type of badge
+      # @!attribute [rw] badge_label
+      #   @return [String] human friendly badge name
       # @!attribute [rw] requirement_key
       #   @return [String] the requirement being done
       # @!attribute [rw] badge_section
       #   @return [Symbol] the section type that the badge belongs to
-      # @!attribute [rw] label
-      #   @return [String] human firendly label for the badge and requirement
+      # @!attribute [rw] requirement_label
+      #   @return [String] human firendly requirement label
       # @!attribute [rw] data
       #   @return [String] what to put in the column when the badge records are updated
 
@@ -595,11 +597,12 @@ module Osm
       attribute :badge_type, :type => Object
       attribute :requirement_key, :type => String
       attribute :badge_section, :type => Object
-      attribute :label, :type => String
+      attribute :badge_label, :type => String
+      attribute :requirement_label, :type => String
       attribute :data, :type => String
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :badge_key, :badge_type, :requirement_key, :badge_section, :label, :data
+        attr_accessible :badge_key, :badge_type, :requirement_key, :badge_section, :badge_label, :requirement_label, :data
       end
 
       validates_presence_of :badge_key
