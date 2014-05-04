@@ -1,6 +1,6 @@
 ## Version 1.2.13
 
-  * 
+  * Fix event.get\_attendance ignoring term in building the cache key
 
 ## Version 1.2.12
 

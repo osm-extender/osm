@@ -398,7 +398,7 @@ module Osm
     def get_attendance(api, term=nil, options={})
       require_ability_to(api, :read, :events, section_id, options)
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section_id).id : term.to_i
-      cache_key = ['event_attendance', id]
+      cache_key = ['event_attendance', id, term_id]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
