@@ -1,3 +1,7 @@
+## Version 1.2.14
+
+  * Fix fetching sections when user doesn't have access to any
+
 ## Version 1.2.13
 
   * Fix event.get\_attendance ignoring term in building the cache key

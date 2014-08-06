@@ -192,74 +192,75 @@ module Osm
       ids = Array.new
       permissions = Hash.new
       data.each do |role_data|
-        unless role_data['section'].eql?('discount')  # It's not an actual section
-          section_data = role_data['sectionConfig'].is_a?(String) ? ActiveSupport::JSON.decode(role_data['sectionConfig']) : role_data['sectionConfig']
-          myscout_data = section_data['portal'] || {}
-          section_data['portalExpires'] ||= {}
-          section_id = Osm::to_i_or_nil(role_data['sectionid'])
+        next if role_data['section'].eql?('discount')  # It's not an actual section
+        next if role_data['sectionConfig'].nil? # No config for the section = user hasn't got access
 
-          # Make sense of flexi records
-          fr_data = []
-          flexi_records = []
-          fr_data = section_data['extraRecords'] if section_data['extraRecords'].is_a?(Array)
-          fr_data = section_data['extraRecords'].values if section_data['extraRecords'].is_a?(Hash)
-          fr_data.each do |record_data|
-            # Expect item to be: {:name=>String, :extraid=>Fixnum}
-            # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
-            record_data = record_data[1] if record_data.is_a?(Array)
-            flexi_records.push Osm::FlexiRecord.new(
-              :id => Osm::to_i_or_nil(record_data['extraid']),
-              :name => record_data['name'],
-              :section_id => section_id,
-            )
-          end
+        section_data = role_data['sectionConfig'].is_a?(String) ? ActiveSupport::JSON.decode(role_data['sectionConfig']) : role_data['sectionConfig']
+        myscout_data = section_data['portal'] || {}
+        section_data['portalExpires'] ||= {}
+        section_id = Osm::to_i_or_nil(role_data['sectionid'])
 
-          section = new(
-            :id => section_id,
-            :name => role_data['sectionname'],
-            :subscription_level => Osm::to_i_or_nil(section_data['subscription_level']),
-            :subscription_expires => Osm::parse_date(section_data['subscription_expires']),
-            :type => !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : (!section_data['section'].nil? ? section_data['section'].to_sym : :unknown),
-            :num_scouts => section_data['numscouts'],
-            :column_names => section_data['columnNames'].is_a?(Hash) ? Osm::symbolize_hash(section_data['columnNames']) : {},
-            :fields => section_data['fields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['fields']) : {},
-            :intouch_fields => section_data['intouch'].is_a?(Hash) ? Osm::symbolize_hash(section_data['intouch']) : {},
-            :mobile_fields => section_data['mobFields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['mobFields']) : {},
-            :flexi_records => flexi_records.sort,
-            :group_id => role_data['groupid'],
-            :group_name => role_data['groupname'],
-            :gocardless => (section_data['gocardless'] || 'false').downcase.eql?('true'),
-            :myscout_events_expires => Osm::parse_date(section_data['portalExpires']['events']),
-            :myscout_badges_expires => Osm::parse_date(section_data['portalExpires']['badges']),
-            :myscout_programme_expires => Osm::parse_date(section_data['portalExpires']['programme']),
-            :myscout_details_expires => Osm::parse_date(section_data['portalExpires']['details']),
-            :myscout_events => myscout_data['events'] == 1,
-            :myscout_badges => myscout_data['badges'] == 1,
-            :myscout_programme => myscout_data['programme'] == 1,
-            :myscout_payments => myscout_data['payments'] == 1,
-            :myscout_details => myscout_data['details'] == 1,
-            :myscout_emails => (myscout_data['emails'] || {}).inject({}) { |n,(k,v)| n[k.to_sym] = v.eql?('true'); n},
-            :myscout_email_address_from => myscout_data['emailAddress'] ? myscout_data['emailAddress'] : '',
-            :myscout_email_address_copy => myscout_data['emailAddressCopy'] ? myscout_data['emailAddressCopy'] : '',
-            :myscout_badges_partial => myscout_data['badgesPartial'] == 1,
-            :myscout_programme_summary => myscout_data['programmeSummary'] == 1,
-            :myscout_programme_times => myscout_data['programmeTimes'] == 1,
-            :myscout_programme_show => myscout_data['programmeShow'].to_i,
-            :myscout_event_reminder_count => myscout_data['eventRemindCount'].to_i,
-            :myscout_event_reminder_frequency => myscout_data['eventRemindFrequency'].to_i,
-            :myscout_payment_reminder_count => myscout_data['paymentRemindCount'].to_i,
-            :myscout_payment_reminder_frequency => myscout_data['paymentRemindFrequency'].to_i,
-            :myscout_details_email_changes_to => myscout_data['contactNotificationEmail'],
-            :sms_sent_test => section_data['hasSentTestSMS'],
-            :sms_messages_sent => section_data['sms_sent'],
-            :sms_messages_remaining => section_data['sms_remaining'],
+        # Make sense of flexi records
+        fr_data = []
+        flexi_records = []
+        fr_data = section_data['extraRecords'] if section_data['extraRecords'].is_a?(Array)
+        fr_data = section_data['extraRecords'].values if section_data['extraRecords'].is_a?(Hash)
+        fr_data.each do |record_data|
+          # Expect item to be: {:name=>String, :extraid=>Fixnum}
+          # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
+          record_data = record_data[1] if record_data.is_a?(Array)
+          flexi_records.push Osm::FlexiRecord.new(
+            :id => Osm::to_i_or_nil(record_data['extraid']),
+            :name => record_data['name'],
+            :section_id => section_id,
           )
-
-          result.push section
-          ids.push section.id
-          cache_write(api, ['section', section.id], section)
-          permissions.merge!(section.id => Osm.make_permissions_hash(role_data['permissions']))
         end
+
+        section = new(
+          :id => section_id,
+          :name => role_data['sectionname'],
+          :subscription_level => Osm::to_i_or_nil(section_data['subscription_level']),
+          :subscription_expires => Osm::parse_date(section_data['subscription_expires']),
+          :type => !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : (!section_data['section'].nil? ? section_data['section'].to_sym : :unknown),
+          :num_scouts => section_data['numscouts'],
+          :column_names => section_data['columnNames'].is_a?(Hash) ? Osm::symbolize_hash(section_data['columnNames']) : {},
+          :fields => section_data['fields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['fields']) : {},
+          :intouch_fields => section_data['intouch'].is_a?(Hash) ? Osm::symbolize_hash(section_data['intouch']) : {},
+          :mobile_fields => section_data['mobFields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['mobFields']) : {},
+          :flexi_records => flexi_records.sort,
+          :group_id => role_data['groupid'],
+          :group_name => role_data['groupname'],
+          :gocardless => (section_data['gocardless'] || 'false').downcase.eql?('true'),
+          :myscout_events_expires => Osm::parse_date(section_data['portalExpires']['events']),
+          :myscout_badges_expires => Osm::parse_date(section_data['portalExpires']['badges']),
+          :myscout_programme_expires => Osm::parse_date(section_data['portalExpires']['programme']),
+          :myscout_details_expires => Osm::parse_date(section_data['portalExpires']['details']),
+          :myscout_events => myscout_data['events'] == 1,
+          :myscout_badges => myscout_data['badges'] == 1,
+          :myscout_programme => myscout_data['programme'] == 1,
+          :myscout_payments => myscout_data['payments'] == 1,
+          :myscout_details => myscout_data['details'] == 1,
+          :myscout_emails => (myscout_data['emails'] || {}).inject({}) { |n,(k,v)| n[k.to_sym] = v.eql?('true'); n},
+          :myscout_email_address_from => myscout_data['emailAddress'] ? myscout_data['emailAddress'] : '',
+          :myscout_email_address_copy => myscout_data['emailAddressCopy'] ? myscout_data['emailAddressCopy'] : '',
+          :myscout_badges_partial => myscout_data['badgesPartial'] == 1,
+          :myscout_programme_summary => myscout_data['programmeSummary'] == 1,
+          :myscout_programme_times => myscout_data['programmeTimes'] == 1,
+          :myscout_programme_show => myscout_data['programmeShow'].to_i,
+          :myscout_event_reminder_count => myscout_data['eventRemindCount'].to_i,
+          :myscout_event_reminder_frequency => myscout_data['eventRemindFrequency'].to_i,
+          :myscout_payment_reminder_count => myscout_data['paymentRemindCount'].to_i,
+          :myscout_payment_reminder_frequency => myscout_data['paymentRemindFrequency'].to_i,
+          :myscout_details_email_changes_to => myscout_data['contactNotificationEmail'],
+          :sms_sent_test => section_data['hasSentTestSMS'],
+          :sms_messages_sent => section_data['sms_sent'],
+          :sms_messages_remaining => section_data['sms_remaining'],
+        )
+
+        result.push section
+        ids.push section.id
+        cache_write(api, ['section', section.id], section)
+        permissions.merge!(section.id => Osm.make_permissions_hash(role_data['permissions']))
       end
 
       permissions.each do |s_id, perms|
