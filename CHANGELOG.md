@@ -1,6 +1,6 @@
 ## Version 1.2.14
 
-  * 
+  * Fix fetching sections when user doesn't have access to any
 
 ## Version 1.2.13
 

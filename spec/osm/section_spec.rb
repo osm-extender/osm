@@ -385,4 +385,11 @@ describe "Online Scout Manager API Strangeness" do
     sections[1].should_not be_nil
   end
 
+  it "Handles user having access to no sections" do
+    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => '[{"isDefault":"1"}]', :content_type => 'application/json')
+
+    sections = Osm::Section.get_all(@api)
+    sections.should == []
+  end
+
 end
