@@ -1,6 +1,6 @@
 ## Version 1.2.15
 
-  * 
+  * Add support for census and giftaid link generation for members
 
 ## Version 1.2.14
 
