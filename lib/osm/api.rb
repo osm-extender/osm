@@ -12,6 +12,7 @@ module Osm
     BASE_URLS = {
       :osm => 'https://www.onlinescoutmanager.co.uk',
       :ogm => 'http://www.onlineguidemanager.co.uk',
+      :osm_staging => 'http://staging.onlinescoutmanager.co.uk'
     }
 
 
@@ -31,7 +32,7 @@ module Osm
     def self.configure(options)
       raise ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm' unless [:osm, :ogm].include?(options[:default_site])
       raise ArgumentError, ':osm and/or :ogm must be present' if options[:osm].nil? && options[:ogm].nil?
-      [:osm, :ogm].each do |api_key|
+      [:osm, :ogm, :osm_staging].each do |api_key|
         if options[api_key]
           api_data = options[api_key]
           raise ArgumentError, ":#{api_key} must be a Hash" unless api_data.is_a?(Hash)
@@ -46,6 +47,7 @@ module Osm
       @@api_details = {
         :osm => (options[:osm] || {}),
         :ogm => (options[:ogm] || {}),
+        :osm_staging => (options[:osm_staging] || {})
       }
       nil
     end
@@ -71,7 +73,7 @@ module Osm
     def initialize(user_id, secret, site=@@site)
       raise ArgumentError, 'You must pass a secret (get this by using the authorize method)' if secret.nil?
       raise ArgumentError, 'You must pass a user_id (get this by using the authorize method)' if user_id.nil?
-      raise ArgumentError, 'site is invalid, if passed it should be either :osm or :ogm, if not passed then you forgot to run Api.configure' unless [:osm, :ogm].include?(site)
+      raise ArgumentError, 'site is invalid, if passed it should be either :osm or :ogm, if not passed then you forgot to run Api.configure' unless [:osm, :ogm, :osm_staging].include?(site)
 
       @site = site
       set_user(user_id, secret)
@@ -209,7 +211,7 @@ module Osm
     # @raise [Osm::Error] If an error was returned by OSM
     # @raise [Osm::ConnectionError] If an error occured connecting to OSM
     def self.perform_query(site, url, api_data={})
-      raise ArgumentError, 'site is invalid, this should be set to either :osm or :ogm' unless [:osm, :ogm].include?(site)
+      raise ArgumentError, 'site is invalid, this should be set to either :osm or :ogm' unless [:osm, :ogm, :osm_staging].include?(site)
  
       data = api_data.merge({
         'apiid' => @@api_details[site][:id],

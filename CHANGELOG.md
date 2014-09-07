@@ -1,6 +1,7 @@
 ## Version 1.2.15
 
   * Add support for census and giftaid link generation for members
+  * Add :osm_Staging as a site to point the gem at. Really only useful for gem development.
 
 ## Version 1.2.14
 
