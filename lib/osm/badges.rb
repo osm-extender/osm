@@ -29,22 +29,25 @@ module Osm
     # Update badge stock levels
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to update ther badge stock for
-    # @param [Sring, #to_s] badge_key The badge to set the stock level for
+    # @param [Fixnum, #to_i] badge_id The badge to set the stock level for
+    # @param [Fixnum, #to_i] badge_level The level of a staged badge to set the stock for (default 1)
     # @param [Fixnum, #to_i] stock_level How many of the provided badge there are
     # @return [Boolan] whether the update was successfull or not
-    def self.update_stock(api, section, badge_key, stock_level)
+    def self.update_stock(api, section, badge_id, badge_level=1, stock_level)
       Osm::Model.require_ability_to(api, :write, :badge, section)
       section = Osm::Section.get(api, section) unless section.is_a?(Osm::Section)
 
       Osm::Model.cache_delete(api, ['badge_stock', section.id])
 
-      data = api.perform_query("challenges.php?action=updateStock", {
+      data = api.perform_query("ext/badges.php?action=updateStock", {
         'stock' => stock_level,
-        'table' => badge_key,
         'sectionid' => section.id,
         'section' => section.type,
+        'type' => 'current',
+        'level' => badge_level.to_i,
+        'badge_id' => badge_id.to_i,
       })
-      return data.is_a?(Hash) && (data['sectionid'].to_i == section.id) && (data[badge_key.to_s].to_i == stock_level)
+      return data.is_a?(Hash) && data['ok']
     end
 
 

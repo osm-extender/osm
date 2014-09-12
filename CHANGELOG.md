@@ -4,6 +4,7 @@
   * Add :osm_staging as a site to point the gem at. Really only useful for gem development.
   * Update to match OSM's new badge system:
     * Retrieving badge stock
+    * Updating badge stock
 
 ## Version 1.2.14
 

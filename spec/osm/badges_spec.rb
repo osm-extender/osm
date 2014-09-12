@@ -71,7 +71,7 @@ describe "Badges" do
         'identifier' => 'badge_id_level',
         'items' => [
           { 'shortname' => 'badge_1', 'stock' => 1, 'desired' => 0, 'due' => 0 },
-          { 'shortname' => 'badge_1', 'stock' => 1, 'desired' => 0, 'due' => 0 },
+          { 'shortname' => 'badge_2', 'stock' => 2, 'desired' => 0, 'due' => 0 },
         ]
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/stock/?action=getBadgeStock&section=beavers&section_id=1&term_id=2", :body => badges_body.to_json, :content_type => 'application/json')
@@ -84,26 +84,28 @@ describe "Badges" do
     describe "Update badge stock levels" do
 
       it "Succeds" do
-        url = "https://www.onlinescoutmanager.co.uk/challenges.php?action=updateStock"
+        url = "https://www.onlinescoutmanager.co.uk/ext/badges.php?action=updateStock"
         HTTParty.should_receive(:post).with(url, {:body => {
           'apiid' => @CONFIGURATION[:api][:osm][:id],
           'token' => @CONFIGURATION[:api][:osm][:token],
           'userid' => 'user_id',
           'secret' => 'secret',
           'stock' => 10,
-          'table' => 'badge',
-          'sectionid' => 1,
+          'sectionid' => 2,
           'section' => :beavers,
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"sectionid":"1","badge":"10"}'}) }
+          'type' => 'current',
+          'level' => 1,
+          'badge_id' => 3
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
 
-        section = Osm::Section.new(:id => 1, :type => :beavers)
-        Osm::Badges.update_stock(@api, section, 'badge', 10).should be_true
+        section = Osm::Section.new(:id => 2, :type => :beavers)
+        Osm::Badges.update_stock(@api, section, 3, 10).should be_true
       end
 
       it "Fails" do
-        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"sectionid":"1","badge":"1"}'}) }
+        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
         section = Osm::Section.new(:id => 1, :type => :beavers)
-        Osm::Badges.update_stock(@api, section, 'badge', 10).should be_false
+        Osm::Badges.update_stock(@api, section, 3, 10).should be_false
       end
 
     end
