@@ -17,9 +17,10 @@ module Osm
         return Osm::Model.cache_read(api, cache_key)
       end
 
-      data = api.perform_query("challenges.php?action=getInitialBadges&type=core&sectionid=#{section.id}&section=#{section.type}&termid=#{term_id}")
-      data = (data['stock'] || {}).select{ |k,v| !k.eql?('sectionid') }.
-                                   inject({}){ |new_hash,(badge, level)| new_hash[badge] = level.to_i; new_hash }
+      data = api.perform_query("ext/badges/stock/?action=getBadgeStock&section=#{section.type}&section_id=#{section.id}&term_id=#{term_id}")
+      data = (data['items'] || [])
+      data.map!{ |i| [i['shortname'], i['stock']] }
+      data = Hash[data]
 
       Osm::Model.cache_write(api, cache_key, data)
       return data

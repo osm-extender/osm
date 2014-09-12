@@ -68,13 +68,13 @@ describe "Badges" do
 
     it "Fetch badge stock levels" do
       badges_body = {
-        'stock' => {
-          'sectionid' => '1',
-          'badge_1' => '1',
-          'badge_2' => '2'
-        }
+        'identifier' => 'badge_id_level',
+        'items' => [
+          { 'shortname' => 'badge_1', 'stock' => 1, 'desired' => 0, 'due' => 0 },
+          { 'shortname' => 'badge_1', 'stock' => 1, 'desired' => 0, 'due' => 0 },
+        ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=core&sectionid=1&section=beavers&termid=2", :body => badges_body.to_json, :content_type => 'application/json')
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/stock/?action=getBadgeStock&section=beavers&section_id=1&term_id=2", :body => badges_body.to_json, :content_type => 'application/json')
       Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 2) }
 
       section = Osm::Section.new(:id => 1, :type => :beavers)
