@@ -67,24 +67,25 @@ module Osm
         return Osm::Model.cache_read(api, cache_key)
       end
 
-      data = api.perform_query("challenges.php?action=outstandingBadges&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
+      data = api.perform_query("ext/badges/due/?action=get&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
 
       data = {} unless data.is_a?(Hash) # OSM/OGM returns an empty array to represent no badges
-      pending_raw = data['pending'] || {}
-      descriptions_raw = data['description'] || {}
+      pending = data['pending'] || {}
 
       by_member = {}
       member_names = {}
       badge_names = {}
-      pending_raw.each do |key, members|
+      badge_stock = {}
+
+      pending.each do |badge_identifier, members|
         members.each do |member|
-          id = Osm.to_i_or_nil(member['scoutid'])
-          description = descriptions_raw[key]['name'] + (descriptions_raw[key]['section'].eql?('staged') ? " (Level #{member['level']})" : '')
-          description_key = key + (descriptions_raw[key]['section'].eql?('staged') ? "_#{member['level']}" : '_1')
-          badge_names[description_key] = description
-          by_member[id] ||= []
-          by_member[id].push(description_key)
-          member_names[id] = "#{member['firstname']} #{member['lastname']}"
+          badge_level_identifier = badge_identifier + "_#{member['completed']}"
+          member_id = Osm.to_i_or_nil(member['scout_id'])
+          badge_names[badge_level_identifier] = "#{member['label']} - #{member['name']}" + (!member['extra'].nil? ? " (#{member['extra']})" : '')
+          badge_stock[badge_level_identifier] = member['current_stock'].to_i
+          by_member[member_id] ||= []
+          by_member[member_id].push(badge_level_identifier)
+          member_names[member_id] = "#{member['firstname']} #{member['lastname']}"
         end
       end
 
@@ -92,6 +93,7 @@ module Osm
         :by_member => by_member,
         :member_names => member_names,
         :badge_names => badge_names,
+        :badge_stock => badge_stock,
       )
       Osm::Model.cache_write(api, cache_key, due_badges)
       return due_badges
@@ -109,13 +111,15 @@ module Osm
       attribute :badge_names, :default => {}
       attribute :by_member, :default => {}
       attribute :member_names, :default => {}
+      attribute :badge_stock, :default => {}
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :badge_names, :by_member, :member_names
+        attr_accessible :badge_names, :by_member, :member_names, :badge_stock
       end
 
       validates :badge_names, :hash => {:key_type => String, :value_type => String}
       validates :member_names, :hash => {:key_type => Fixnum, :value_type => String}
+      validates :badge_stock, :hash => {:key_type => String, :value_type => Fixnum}
 
       validates_each :by_member do |record, attr, value|
         badge_names_keys = record.badge_names.keys

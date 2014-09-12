@@ -5,6 +5,7 @@
   * Update to match OSM's new badge system:
     * Retrieving badge stock
     * Updating badge stock
+    * Fetching due badges (added stock\_levels attribute, since OSM now gives it)
 
 ## Version 1.2.14
 
