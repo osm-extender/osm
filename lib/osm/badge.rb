@@ -113,26 +113,41 @@ module Osm
     # @!macro options_get
     # @return [Array<Hash>]
     def self.get_summary_for_section(api, section, term=nil, options={})
-      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
+      raise Error, 'This method must NOT be called on one of the subclasses(CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' unless type.nil?
       require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
-      cache_key = ['badge-summary', section.id, term_id, type]
+      cache_key = ['badge-summary', section.id, term_id]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
       summary = []
-      data = api.perform_query("challenges.php?action=summary&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}&type=#{type}")
+      data = api.perform_query("ext/badges/records/summary/?action=get&mode=verbose&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
       data['items'].each do |item|
         new_item = {
           :first_name => item['firstname'],
           :last_name => item['lastname'],
+          :name => "#{item['firstname']} #{item['lastname']}",
+          :member_id => Osm.to_i_or_nil(item['scout_id']),
         }
-        (item.keys - ['firstname', 'lastname']).each do |key|
-          new_item[key] = item[key]
+
+        badge_data = Hash[item.to_a.select{ |k,v| !!k.match(/\d+_\d+/) }]
+        badge_data.each do |badge_identifier, status|
+          if status.is_a?(String)
+            # Possible statuses: 'Started', 'Due', 'Awarded', 'Due Lvl ?' & 'Awarded Lvl ?'
+            case status[0]
+              when 'S'
+                new_item[badge_identifier] = :started
+              when 'D'
+                new_item[badge_identifier] = :due
+              when 'A'
+                new_item[badge_identifier] = :awarded
+            end
+          end
         end
+
         summary.push new_item
       end
 

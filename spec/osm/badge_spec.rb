@@ -832,69 +832,41 @@ describe "Badge" do
     end
 
 
-    describe "Get summary data for a section" do
+    it "Get summary data for a section" do
 
-      before :each do
-        @data = {
-          'items' => [
-            {
-              'firstname' => 'First',
-              'lastname' => 'Last',
-              'badge_none' => '',
-              'badge_earnt' => '2000-01-02',
-            }
-          ]
-        }
-        @data = @data.to_json
-      end
+      data = {
+        'identifier' => 'scout_id',
+        'items' => [
+          {
+            'firstname' => 'First',
+            'lastname' => 'Last',
+            'scout_id' => 1,
+            '92_0' => nil,
+            '93_0' => '',
+            '94_0' => 'Started',
+            '95_0' => 'Due',
+            '96_0' => 'Awarded',
+            '97_0' => 'Awarded Lvl 2',
+            '98_0' => 'Due Lvl 3',
+          }
+        ]
+      }
+      data = data.to_json
 
-      it "Core badge" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=summary&section=beavers&sectionid=1&termid=2&type=core", :body => @data, :content_type => 'application/json')
-        summary = Osm::CoreBadge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
-        summary.size.should == 1
-        summary[0].should == {
-          :first_name => 'First',
-          :last_name => 'Last',
-          'badge_none' => '',
-          'badge_earnt' => '2000-01-02',
-        }
-      end
-
-      it "Challenge badge" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=summary&section=beavers&sectionid=1&termid=2&type=challenge", :body => @data, :content_type => 'application/json')
-        summary = Osm::ChallengeBadge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
-        summary.size.should == 1
-        summary[0].should == {
-          :first_name => 'First',
-          :last_name => 'Last',
-          'badge_none' => '',
-          'badge_earnt' => '2000-01-02',
-        }
-      end
-
-      it "Staged badge" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=summary&section=beavers&sectionid=1&termid=2&type=staged", :body => @data, :content_type => 'application/json')
-        summary = Osm::StagedBadge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
-        summary.size.should == 1
-        summary[0].should == {
-          :first_name => 'First',
-          :last_name => 'Last',
-          'badge_none' => '',
-          'badge_earnt' => '2000-01-02',
-        }
-      end
-
-      it "Activity badge" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=summary&section=beavers&sectionid=1&termid=2&type=activity", :body => @data, :content_type => 'application/json')
-        summary = Osm::ActivityBadge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
-        summary.size.should == 1
-        summary[0].should == {
-          :first_name => 'First',
-          :last_name => 'Last',
-          'badge_none' => '',
-          'badge_earnt' => '2000-01-02',
-        }
-      end
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/records/summary/?action=get&mode=verbose&section=beavers&sectionid=1&termid=2", :body => data, :content_type => 'application/json')
+      summary = Osm::Badge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
+      summary.size.should == 1
+      summary[0].should == {
+        :first_name => 'First',
+        :last_name => 'Last',
+        :name => 'First Last',
+        :member_id => 1,
+        '94_0' => :started,
+        '95_0' => :due,
+        '96_0' => :awarded,
+        '97_0' => :awarded,
+        '98_0' => :due,
+      }
     end
 
   end
