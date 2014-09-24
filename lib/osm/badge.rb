@@ -195,7 +195,8 @@ module Osm
       end
 
       datas = []
-      data = api.perform_query("challenges.php?termid=#{term_id}&type=#{type}&section=#{section.type}&c=#{identifier}&sectionid=#{section.id}")
+      data = api.perform_query("ext/badges/records/?action=getBadgeRecords&term_id=#{term_id}&section=#{section.type}&badge_id=#{id}&section_id=#{section.id}&badge_version=#{version}")
+
       data['items'].each do |d|
         datas.push Osm::Badge::Data.new(
           :member_id => d['scoutid'],
@@ -204,7 +205,7 @@ module Osm
           :completed => d['completed'].to_i,
           :awarded => d['awarded'].to_i,
           :awarded_date => Osm.parse_date(d['awardeddate']),
-          :requirements => d.select{ |k,v| k.include?('_') },
+          :requirements => Hash[d.select{ |k,v| k.match(/\A\d+\Z/) }.map{ |k,v| [k.to_i, v] }],
           :section_id => section.id,
           :badge => self,
         )
@@ -620,7 +621,7 @@ module Osm
     def self.type
       :challenge
     end
-    def self.type_id
+    def self.type_id 
       1
     end
   end # Class ChallengeBadge
@@ -630,7 +631,7 @@ module Osm
     def self.type
       :staged
     end
-    def self.type_id
+    def self.type_id 
       3
     end
   end # Class StagedBadge
@@ -640,7 +641,7 @@ module Osm
     def self.type
       :activity
     end
-    def self.type_id
+    def self.type_id 
       2
     end
     def self.subscription_required

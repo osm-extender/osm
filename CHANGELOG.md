@@ -5,6 +5,7 @@
   * Update to match OSM's new badge system:
     * Retrieving badge stock
     * Updating badge stock
+    * Fetching badge data
     * Fetching due badges (added stock\_levels attribute, since OSM now gives it)
     * Summary now returns all started/completed/awarded badges (it can't filter by type) so can only be called from Osm::Badge
     * Osm::Badge
