@@ -337,7 +337,7 @@ module Osm
       validates_numericality_of :awarded, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
-      validates :requirements, :hash => {:key_type => String, :value_type => String}
+      validates :requirements, :hash => {:key_type => Fixnum, :value_type => String}
 
       STAGES = {
         'nightsaway' => [1, 2, 3, 4, 5, 10, 15, 20, 35, 50, 75, 100, 125, 150, 175, 200],
@@ -578,37 +578,47 @@ module Osm
         section = Osm::Section.get(api, section_id)
         require_ability_to(api, :write, :badge, section)
 
-        updated = true
-        editable_fields = badge.requirements.select{ |r| r.editable }.map{ |r| r.field}
+        # Update requirements that changed
+        requirements_updated = true
+        editable_fields = badge.requirements.select{ |r| r.editable }.map{ |r| r.field }
         requirements.changes.each do |field, (was,now)|
           if editable_fields.include?(field)
-            result = api.perform_query("challenges.php?type=#{badge.class.type}&section=#{section.type}", {
-              'action' => 'updatesingle',
-              'id' => member_id,
-              'col' => field,
-              'value' => now,
-              'chal' => badge.osm_key,
-              'sectionid' => section_id,
+            result = api.perform_query("ext/badges/records/?action=updateSingleRecord", {
+              'scoutid' => member_id,
+              'section_id' => section_id,
+              'badge_id' => badge.id,
+              'badge_version' => badge.version,
+              'field' => field,
+              'value' => now
             })
-            updated = false unless result.is_a?(Hash) &&
-                                   (result['sid'].to_i == member_id) &&
-                                   (result[field] == now)
+            requirements_updated = false unless result.is_a?(Hash) &&
+                                   (result['scoutid'].to_i == member_id) &&
+                                   (result[field.to_s] == now)
           end
         end
 
-        if updated
+        if requirements_updated
           requirements.clean_up!
         end
 
-        if changed_attributes.include?('awarded') || changed_attributes.include?('awarded_date')
-          if mark_awarded(api, awarded_date, awarded)
-            reset_changed_attributes
-          else
-            updated = false
-          end
+        # Update completed if it changed
+        completed_updated = true
+        if changed_attributes.include?('completed')
+          completed_updated = mark_due(api, completed)
         end
 
-        return updated
+        # Update awarded if it changed 
+        awarded_updated = true
+        if changed_attributes.include?('awarded') || changed_attributes.include?('awarded_date')
+          awarded_updated = mark_awarded(api, awarded_date, awarded)
+        end
+
+        # reset changed attributes if everything was updated ok
+        if completed_updated && awarded_updated
+          reset_changed_attributes
+        end
+
+        return requirements_updated && completed_updated && awarded_updated
       end
 
       # Compare Badge::Data based on badge, section_id then member_id

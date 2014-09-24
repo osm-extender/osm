@@ -519,7 +519,7 @@ describe "Badge" do
       data.badge.id.should == 123
     end
 
-    describe "Update badge data for a section/member" do
+    describe "Update badge data in OSM" do
 
       before :each do
         @update_post_data = {
@@ -527,137 +527,121 @@ describe "Badge" do
           'token' => @CONFIGURATION[:api][:osm][:token],
           'userid' => 'user_id',
           'secret' => 'secret',
-          'action' => 'updatesingle',
-          'id' => 1,
-          'col' => 'a',
-          'value' => '2',
-          'chal' => 'badge',
-          'sectionid' => 2,
+          'scoutid' => 1,
+          'section_id' => 2,
+          'badge_id' => 123,
+          'badge_version' => 0,
+          'field' => 2345,
+          'value' => '2'
         }
-        @update_body_data = {'sid' => '1', 'a' => '2', 'b' => '2'}
+        @update_body_data = {'scoutid' => '1', '2345' => '2', 'completed' => '0', 'awarded' => '0', 'firstname' => 'fn', 'lastname' => 'ln'}
 
-        @awarded_post_data = {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-          'dateAwarded' => '2000-01-02',
-          'sectionid' => 2,
-          'section' => :beavers,
-          'chal' => 'badge',
-          'stagedLevel' => 1,
-          'due' => :awarded,
-        }
-        @awarded_body_data = [{'sid'=>'1', 'awarded'=>'1', 'awardeddate'=>'2000-01-02'}]
-        @awarded_url = "https://www.onlinescoutmanager.co.uk/challenges.php?action=award"
-      end
-
-      it "Core badge" do
-        data = Osm::Badge::Data.new(
+        @data = Osm::Badge::Data.new(
           :member_id => 1,
           :first_name => 'fn',
           :last_name => 'ln',
           :section_id => 2,
-          :requirements => {'a' => '1', 'b' => '2'},
+          :requirements => {2345 => '1', 6789 => '2'},
           :badge => Osm::CoreBadge.new(
-            :osm_key => 'badge',
+            :id => 123,
+            :version => 0,
             :requirements => [
-              Osm::Badge::Requirement.new(:field => 'a', :editable => true),
-              Osm::Badge::Requirement.new(:field => 'b', :editable => true),
+              Osm::Badge::Requirement.new(:field => 2345, :editable => true),
+              Osm::Badge::Requirement.new(:field => 6789, :editable => true),
             ]),
           :completed => 0,
         )
+     end
 
-        update_url = "https://www.onlinescoutmanager.co.uk/challenges.php?type=core&section=beavers"
-        HTTParty.should_receive(:post).with(update_url, {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
-        HTTParty.should_receive(:post).with(@awarded_url, {:body => @awarded_post_data.merge({'type' => :core})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@awarded_body_data.to_json}) }
+     it "Success (requirmeent, due & awarded)" do
+        date = Date.new(2000, 1, 2)
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+        @data.should_receive(:mark_awarded).with(@api, date, 1) { true }
+        @data.should_receive(:mark_due).with(@api, 1) { true }
 
-        data.requirements['a'] = '2'
-        data.awarded = 1
-        data.awarded_date = Date.new(2000, 1, 2)
-        data.update(@api).should be_true
+        @data.requirements[2345] = '2'
+        @data.completed = 1
+        @data.awarded = 1
+        @data.awarded_date = date
+        @data.update(@api).should be_true
       end
 
-      it "Challenge badge" do
-        data = Osm::Badge::Data.new(
-          :member_id => 1,
-          :first_name => 'fn',
-          :last_name => 'ln',
-          :section_id => 2,
-          :requirements => {'a' => '1', 'b' => '2'},
-          :badge => Osm::ChallengeBadge.new(
-            :osm_key => 'badge',
-            :requirements => [
-              Osm::Badge::Requirement.new(:field => 'a', :editable => true),
-              Osm::Badge::Requirement.new(:field => 'b', :editable => true),
-            ]),
-          :completed => 0,
-        )
-
-        update_url = "https://www.onlinescoutmanager.co.uk/challenges.php?type=challenge&section=beavers"
-        HTTParty.should_receive(:post).with(update_url, {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
-        HTTParty.should_receive(:post).with(@awarded_url, {:body => @awarded_post_data.merge({'type' => :challenge})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@awarded_body_data.to_json}) }
+      it "Success (just requirement)" do
+        date = Date.new(2000, 1, 2)
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+        @data.should_not_receive(:mark_awarded)
+        @data.should_not_receive(:mark_due)
 
-        data.requirements['a'] = '2'
-        data.awarded = 1
-        data.awarded_date = Date.new(2000, 1, 2)
-        data.update(@api).should be_true
+        @data.requirements[2345] = '2'
+        @data.update(@api).should be_true
       end
 
-      it "Staged badge" do
-        data = Osm::Badge::Data.new(
-          :member_id => 1,
-          :first_name => 'fn',
-          :last_name => 'ln',
-          :section_id => 2,
-          :requirements => {'a' => '1', 'b' => '2'},
-          :badge => Osm::StagedBadge.new(
-            :osm_key => 'badge',
-            :requirements => [
-              Osm::Badge::Requirement.new(:field => 'a', :editable => true),
-              Osm::Badge::Requirement.new(:field => 'b', :editable => true),
-            ]),
-          :completed => 0,
-        )
-
-        update_url = "https://www.onlinescoutmanager.co.uk/challenges.php?type=staged&section=beavers"
-        HTTParty.should_receive(:post).with(update_url, {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
-        HTTParty.should_receive(:post).with(@awarded_url, {:body => @awarded_post_data.merge({'type' => :staged})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@awarded_body_data.to_json}) }
+      it "Success (just due)" do
+        date = Date.new(2000, 1, 2)
+        HTTParty.should_not_receive(:post)
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+        @data.should_not_receive(:mark_awarded)
+        @data.should_receive(:mark_due).with(@api, 1) { true }
 
-        data.requirements['a'] = '2'
-        data.awarded = 1
-        data.awarded_date = Date.new(2000, 1, 2)
-        data.update(@api).should be_true
+        @data.completed = 1
+        @data.update(@api).should be_true
       end
 
-      it "Activity badge" do
-        data = Osm::Badge::Data.new(
-          :member_id => 1,
-          :first_name => 'fn',
-          :last_name => 'ln',
-          :section_id => 2,
-          :requirements => {'a' => '1', 'b' => '2'},
-          :badge => Osm::ActivityBadge.new(
-            :osm_key => 'badge',
-            :requirements => [
-              Osm::Badge::Requirement.new(:field => 'a', :editable => true),
-              Osm::Badge::Requirement.new(:field => 'b', :editable => true),
-            ]),
-          :completed => 0,
-        )
-
-        update_url = "https://www.onlinescoutmanager.co.uk/challenges.php?type=activity&section=beavers"
-        HTTParty.should_receive(:post).with(update_url, {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
-        HTTParty.should_receive(:post).with(@awarded_url, {:body => @awarded_post_data.merge({'type' => :activity})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@awarded_body_data.to_json}) }
+      it "Success (just awarded)" do
+        date = Date.new(2000, 1, 2)
+        HTTParty.should_not_receive(:post)
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+        @data.should_receive(:mark_awarded).with(@api, date, 1) { true }
+        @data.should_not_receive(:mark_due).with(@api, 1) { true }
 
-        data.requirements['a'] = '2'
-        data.awarded = 1
-        data.awarded_date = Date.new(2000, 1, 2)
-        data.update(@api).should be_true
+        @data.awarded = 1
+        @data.awarded_date = date
+        @data.update(@api).should be_true
+      end
+
+      it "Failed (requirement)" do
+        date = Date.new(2000, 1, 2)
+        @update_body_data['2345'] = '1'
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
+        Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+        @data.should_receive(:mark_awarded).with(@api, date, 1) { true }
+        @data.should_receive(:mark_due).with(@api, 1) { true }
+
+        @data.requirements[2345] = '2'
+        @data.completed = 1
+        @data.awarded = 1
+        @data.awarded_date = date
+        @data.update(@api).should be_false
+      end
+
+      it "Failed (due)" do
+        date = Date.new(2000, 1, 2)
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
+        Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+        @data.should_receive(:mark_awarded).with(@api, date, 1) { true }
+        @data.should_receive(:mark_due).with(@api, 1) { false }
+
+        @data.requirements[2345] = '2'
+        @data.completed = 1
+        @data.awarded = 1
+        @data.awarded_date = date
+        @data.update(@api).should be_false
+      end
+
+      it "Failed (awarded)" do
+        date = Date.new(2000, 1, 2)
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
+        Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+        @data.should_receive(:mark_awarded).with(@api, date, 1) { false }
+        @data.should_receive(:mark_due).with(@api, 1) { true }
+
+        @data.requirements[2345] = '2'
+        @data.completed = 1
+        @data.awarded = 1
+        @data.awarded_date = date
+        @data.update(@api).should be_false
       end
 
     end
