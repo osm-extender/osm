@@ -663,86 +663,33 @@ describe "Badge" do
     end
 
 
-    describe "Mark badge awarded" do
+    it "Mark badge awarded" do
 
-      before :each do
-        @awarded_post_data = {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-          'dateAwarded' => '2000-01-02',
-          'sectionid' => 2,
-          'section' => :beavers,
-          'chal' => 'badge',
-          'stagedLevel' => 1,
-          'due' => :awarded,
-        }
-        @awarded_body_data = [{'sid'=>'1', 'awarded'=>'1', 'awardeddate'=>'2000-01-02'}]
-        @awarded_url = "https://www.onlinescoutmanager.co.uk/challenges.php?action=award"
-      end
+      awarded_post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'date' => '2000-01-02',
+        'sectionid' => 2,
+        'entries' => '[{"badge_id":"123","badge_version":"0","scout_id":"1","level":"1"}]',
+      }
+      awarded_body_data = {'scoutid'=>'1', 'completed'=>'1', 'awarded' => '1', 'awardeddate'=>'2000-01-02', 'firstname' => 'fn', 'lastname' => 'ln'}
+      awarded_url = "https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=awardBadge"
 
-      it "Core badge" do
-        data = Osm::Badge::Data.new(
-          :member_id => 1,
-          :section_id => 2,
-          :badge => Osm::CoreBadge.new(
-            :osm_key => 'badge',
-          )
+      data = Osm::Badge::Data.new(
+        :member_id => 1,
+        :section_id => 2,
+        :badge => Osm::CoreBadge.new(
+          :id => 123,
+          :version => 0
         )
+      )
 
-        HTTParty.should_receive(:post).with(@awarded_url, {:body => @awarded_post_data.merge({'type' => :core})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@awarded_body_data.to_json}) }
-        Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+      HTTParty.should_receive(:post).with(awarded_url, {:body => awarded_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>awarded_body_data.to_json}) }
+      Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
 
-        data.mark_awarded(@api, Date.new(2000, 1, 2), 1).should be_true
-      end
-
-      it "Challenge badge" do
-        data = Osm::Badge::Data.new(
-          :member_id => 1,
-          :section_id => 2,
-          :badge => Osm::ChallengeBadge.new(
-            :osm_key => 'badge',
-          )
-        )
-
-        HTTParty.should_receive(:post).with(@awarded_url, {:body => @awarded_post_data.merge({'type' => :challenge})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@awarded_body_data.to_json}) }
-        Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
-
-        data.mark_awarded(@api, Date.new(2000, 1, 2), 1).should be_true
-      end
-
-      it "Staged badge" do
-        data = Osm::Badge::Data.new(
-          :member_id => 1,
-          :section_id => 2,
-          :badge => Osm::StagedBadge.new(
-            :osm_key => 'badge',
-          )
-        )
-
-        @awarded_body_data[0].merge!({'awarded' => '4'})
-        HTTParty.should_receive(:post).with(@awarded_url, {:body => @awarded_post_data.merge({'type' => :staged, 'stagedLevel' => 4})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@awarded_body_data.to_json}) }
-        Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
-
-        data.mark_awarded(@api, Date.new(2000, 1, 2), 4).should be_true
-      end
-
-      it "Activity badge" do
-        data = Osm::Badge::Data.new(
-          :member_id => 1,
-          :section_id => 2,
-          :badge => Osm::ActivityBadge.new(
-            :osm_key => 'badge',
-          )
-        )
-
-        HTTParty.should_receive(:post).with(@awarded_url, {:body => @awarded_post_data.merge({'type' => :activity})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@awarded_body_data.to_json}) }
-        Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
-
-        data.mark_awarded(@api, Date.new(2000, 1, 2), 1).should be_true
-      end
-
+      data.mark_awarded(@api, Date.new(2000, 1, 2), 1).should be_true
     end
 
 
