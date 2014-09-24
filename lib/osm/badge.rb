@@ -7,40 +7,51 @@ module Osm
     #   @return [String] the name of the badge
     # @!attribute [rw] requirement_notes
     #   @return [String] a description of the badge
-    # @!attribute [rw] osm_key
-    #   @return [String] the key for the badge in OSM
-    # @!attribute [rw] osm_long_key
-    #   @return [String] the long key for the badge in osm (used for getting stock)
-    # @!attribute [rw] sections_needed
-    #   @return [Fixnum]
-    # @!attribute [rw] total_needed
-    #   @return [Fixnum]
-    # @!attribute [rw] needed_from_section
-    #   @return [Hash]
     # @!attribute [rw] requirements
-    #   @return [Array<Osm::Badge::Requirement>]
+    #   @return [Array<Osm::Badge::Requirement>] the requirements of the badge
+    # @!attribute [rw] id
+    #   @return [Fixnum] the badge's id in OSM
+    # @!attribute [rw] version
+    #   @return [Fixnum] the version of the badge
+    # @!attribute [rw] identifier
+    #   @return [String] the identifier used by OSM for this badge & version
+    # @!attribute [rw] group_name
+    #   @return [String] what group (if any) this badge belongs to (eg Core, Partnership), used only for display sorting
+    # @!attribute [rw] latest
+    #   @return [Boolean] whether this is the latest version of the badge
+    # @!attribute [rw] sharing
+    #   @return [Symbol] the sharing status of this badge (:draft, :private, :optin, :default_locked, :optin_locked)
+    # @!attribute [rw] user_id
+    #   @return [Fixnum] the OSM user who created this (version of the) badge
+    # @!attribute [rw] levels
+    #   @return [Array<Fixnum>, nil] the levels available, nil if it's a single level badge
 
     attribute :name, :type => String
     attribute :requirement_notes, :type => String
-    attribute :osm_key, :type => String
-    attribute :osm_long_key, :type => String
-    attribute :sections_needed, :type => Integer
-    attribute :total_needed, :type => Integer
-    attribute :needed_from_section, :type => Object
     attribute :requirements, :type => Object
+    attribute :id, :type => Integer
+    attribute :version, :type => Integer
+    attribute :identifier, :type => String
+    attribute :group_name, :type => String
+    attribute :latest, :type => Boolean
+    attribute :sharing, :type => Object
+    attribute :user_id, :type => Integer
+    attribute :levels, :type => Object
 
     if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :name, :requirement_notes, :osm_key, :osm_long_key, :sections_needed, :total_needed, :needed_from_section, :requirements
+      attr_accessible :name, :requirement_notes, :requirements, :id, :version, :identifier, :group_name, :latest, :sharing, :user_id, :levels
     end
 
-    validates_numericality_of :sections_needed, :only_integer=>true, :greater_than_or_equal_to=>-1
-    validates_numericality_of :total_needed, :only_integer=>true, :greater_than_or_equal_to=>-1
     validates_presence_of :name
     validates_presence_of :requirement_notes
-    validates_presence_of :osm_key
-    validates_presence_of :osm_long_key
-    validates :needed_from_section, :hash => {:key_type => String, :value_type => Fixnum}
+    validates_presence_of :id
+    validates_presence_of :version
+    validates_presence_of :identifier
+    validates_inclusion_of :sharing, :in => [:draft, :private, :optin, :optin_locked, :default_locked]
+    validates_presence_of :user_id
     validates :requirements, :array_of => {:item_type => Osm::Badge::Requirement, :item_valid => true}
+    validates_inclusion_of :latest, :in => [true, false]
+    validates :levels, :array_of => {:item_type => Fixnum}, :allow_nil => true
 
 
     # @!method initialize
@@ -67,8 +78,15 @@ module Osm
 
       term_id = Osm::Term.get_current_term_for_section(api, section, options).to_i
       badges = []
+      badge_sharing_map = {
+        'draft' => :draft,
+        'private' => :private,
+        'optin' => :optin,
+        'optin-locked' => :optin_locked,
+        'default-locked' => :default_locked
+      }
 
-      data = api.perform_query("challenges.php?action=getInitialBadges&type=#{type}&sectionid=#{section.id}&section=#{section_type}&termid=#{term_id}")
+      data = api.perform_query("ext/badges/records/?action=getBadgeStructureByType&section=#{section_type}&type_id=#{type_id}&term_id=#{term_id}&section_id=#{section.id}")
       badge_order = data["badgeOrder"].to_s.split(',')
       structures = data["structure"] || {}
       details = data["details"] || {}
@@ -78,13 +96,16 @@ module Osm
         config = ActiveSupport::JSON.decode(detail['config'] || '{}')
 
         badge = new(
+          :id => detail['badge_id'],
+          :version => detail['badge_version'],
+          :identifier => detail['badge_identifier'],
           :name => detail['name'],
           :requirement_notes => detail['description'],
-          :osm_key => detail['shortname'],
-          :osm_long_key => detail['table'],
-          :sections_needed => config['sectionsneeded'].to_i,
-          :total_needed => config['totalneeded'].to_i,
-          :needed_from_section => (config['sections'] || {}).inject({}) { |h,(k,v)| h[k] = v.to_i; h },
+          :group_name => detail['group_name'],
+          :latest => detail['latest'].to_i.eql?(1),
+          :sharing => badge_sharing_map[detail['sharing']],
+          :user_id => Osm.to_i_or_nil(detail['userid']),
+          :levels => config['levelslist'],
         )
 
         requirements = []
@@ -93,8 +114,9 @@ module Osm
             :badge => badge,
             :name => r['name'],
             :description => r['tooltip'],
-            :field => r['field'],
-            :editable => r['editable'].eql?('true'),
+            :module => r['module'],
+            :field => Osm::to_i_or_nil(r['field']),
+            :editable => r['editable'].to_s.eql?('true'),
           )
         end
         badge.requirements = requirements
@@ -166,14 +188,14 @@ module Osm
       Osm::Model.require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
-      cache_key = ['badge_data', section.id, term_id, osm_key]
+      cache_key = ['badge_data', section.id, term_id, identifier]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
       datas = []
-      data = api.perform_query("challenges.php?termid=#{term_id}&type=#{type}&section=#{section.type}&c=#{osm_key}&sectionid=#{section.id}")
+      data = api.perform_query("challenges.php?termid=#{term_id}&type=#{type}&section=#{section.type}&c=#{identifier}&sectionid=#{section.id}")
       data['items'].each do |d|
         datas.push Osm::Badge::Data.new(
           :member_id => d['scoutid'],
@@ -192,10 +214,16 @@ module Osm
       return datas
     end
 
-    # Compare Badge based on name then osm_key
+
+    def has_levels?
+      !levels.nil?
+    end
+
+    # Compare Badge based on name then id then version (desc)
     def <=>(another)
       result = self.name <=> another.try(:name)
-      result = self.osm_key <=> another.try(:osm_key) if result == 0
+      result = self.id <=> another.try(:id) if result == 0
+      result = another.try(:version) <=> self.version if result == 0
       return result
     end
 
@@ -227,22 +255,24 @@ module Osm
       # @!attribute [rw] description
       #   @return [String] a description of the badge
       # @!attribute [rw] field
-      #   @return [String] the field for the requirement (passed to OSM)
+      #   @return [Fixnum] the field for the requirement (passed to OSM)
       # @!attribute [rw] editable
       #   @return [Boolean]
 
       attribute :badge, :type => Object
       attribute :name, :type => String
       attribute :description, :type => String
-      attribute :field, :type => String
+      attribute :module, :type => String
+      attribute :field, :type => Integer
       attribute :editable, :type => Boolean
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :name, :description, :field, :editable, :badge
+        attr_accessible :name, :description, :field, :editable, :badge, :module
       end
 
       validates_presence_of :name
       validates_presence_of :description
+      validates_presence_of :module
       validates_presence_of :field
       validates_presence_of :badge
       validates_inclusion_of :editable, :in => [true, false]
@@ -259,7 +289,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options={:replace_with => {'badge' => :osm_key}})
+        Osm.inspect_instance(self, options={:replace_with => {'badge' => :identifier}})
       end
 
     end # Class Requirement
@@ -580,12 +610,18 @@ module Osm
     def self.type
       :core
     end
+    def self.type_id
+      4
+    end
   end # Class CoreBadge
 
   class ChallengeBadge < Osm::Badge
     private
     def self.type
       :challenge
+    end
+    def self.type_id
+      1
     end
   end # Class ChallengeBadge
 
@@ -594,12 +630,18 @@ module Osm
     def self.type
       :staged
     end
+    def self.type_id
+      3
+    end
   end # Class StagedBadge
 
   class ActivityBadge < Osm::Badge
     private
     def self.type
       :activity
+    end
+    def self.type_id
+      2
     end
     def self.subscription_required
       :silver

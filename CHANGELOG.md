@@ -7,6 +7,11 @@
     * Updating badge stock
     * Fetching due badges (added stock\_levels attribute, since OSM now gives it)
     * Summary now returns all started/completed/awarded badges (it can't filter by type) so can only be called from Osm::Badge
+    * Osm::Badge
+      * osm\_key, osm\_long\_key and competion criteria attributes are gone
+      * id, version, identifier, group\_name, latest, user\_id, levels, sharing attributes added
+      * OSM Changed how completion criteria are retrieved (this gem now uses a special peice of OSM's API just for this purpose) so:
+        * Osm::Badge attributes sections\_needed, total\_needed and needed\_from\_section are gone
 
 ## Version 1.2.14
 

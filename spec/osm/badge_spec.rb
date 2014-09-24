@@ -3,43 +3,64 @@ require 'spec_helper'
 
 describe "Badge" do
 
-  it "Create" do
-    badge = Osm::Badge.new(
-      :name => 'name',
-      :requirement_notes => 'notes',
-      :osm_key => 'key',
-      :osm_long_key => 'long_key',
-      :sections_needed => 1,
-      :total_needed => 2,
-      :needed_from_section => {'a' => 1},
-      :requirements => [],
-    )
+  describe "Create" do
 
-    badge.name.should == 'name'
-    badge.requirement_notes.should == 'notes'
-    badge.osm_key.should == 'key'
-    badge.osm_long_key.should == 'long_key'
-    badge.sections_needed.should == 1
-    badge.total_needed.should == 2
-    badge.needed_from_section.should == {'a' => 1}
-    badge.requirements.should == []
-    badge.valid?.should be_true
+    before :each do
+      @badge_options = {
+        :name => 'name',
+        :identifier => '12_3',
+        :id => 12,
+        :version => 3,
+        :group_name => '',
+        :latest => true,
+        :sharing => :draft,
+        :user_id => 4,
+        :levels => [1, 2, 3],
+        :requirement_notes => 'notes',
+        :requirements => [],
+      }
+    end
+
+    it "Attributes set" do
+      badge = Osm::Badge.new(@badge_options)
+      badge.name.should == 'name'
+      badge.identifier.should == '12_3'
+      badge.id.should == 12
+      badge.version.should == 3
+      badge.group_name.should == ''
+      badge.latest.should be_true
+      badge.sharing.should == :draft
+      badge.user_id.should == 4
+      badge.levels.should == [1, 2, 3]
+      badge.requirement_notes.should == 'notes'
+      badge.requirements.should == []
+      badge.valid?.should be_true
+    end
+
+    it "Valid with nil for levels" do
+      badge = Osm::Badge.new(@badge_options.merge(levels: nil))
+      badge.levels.should be_nil
+      badge.valid?.should be_true
+    end
+
   end
 
   it "Create Requirement" do
     requirement = Osm::Badge::Requirement.new(
       :name => 'name',
       :description => 'description',
-      :field => 'field',
+      :module => 'a',
+      :field => 1,
       :editable => true,
-      :badge => Osm::Badge.new(:osm_key => 'key'),
+      :badge => Osm::Badge.new(:identifier => 'key'),
     )
 
     requirement.name.should == 'name'
     requirement.description.should == 'description'
-    requirement.field.should == 'field'
+    requirement.module.should == 'a'
+    requirement.field.should == 1
     requirement.editable.should be_true
-    requirement.badge.osm_key.should == 'key'
+    requirement.badge.identifier.should == 'key'
     requirement.valid?.should be_true
   end
 
@@ -53,7 +74,7 @@ describe "Badge" do
       :awarded_date => Date.new(2000, 1, 2),
       :requirements => {},
       :section_id => 2,
-      :badge => Osm::Badge.new(:osm_key => 'key'),
+      :badge => Osm::Badge.new(:identifier => 'key'),
     )
 
     data.member_id.should == 1
@@ -64,17 +85,18 @@ describe "Badge" do
     data.awarded_date.should == Date.new(2000, 1, 2)
     data.requirements.should == {}
     data.section_id.should == 2
-    data.badge.osm_key.should == 'key'
+    data.badge.identifier.should == 'key'
     data.valid?.should be_true
   end
 
 
-  it "Compare badges by name then osm_key" do
-    b1 = Osm::Badge.new(:name => 'A', :osm_key => 'a')
-    b2 = Osm::Badge.new(:name => 'B', :osm_key => 'a')
-    b3 = Osm::Badge.new(:name => 'B', :osm_key => 'b')
-    badges = [b3, b1, b2]
-    badges.sort.should == [b1, b2, b3]
+  it "Compare badges by name then id then version (descending)" do
+    b1 = Osm::Badge.new(:name => 'A', :id => 1, :version => 1)
+    b2 = Osm::Badge.new(:name => 'B', :id => 1, :version => 1)
+    b3 = Osm::Badge.new(:name => 'B', :id => 2, :version => 2)
+    b4 = Osm::Badge.new(:name => 'B', :id => 2, :version => 1)
+    badges = [b3, b1, b4, b2]
+    badges.sort.should == [b1, b2, b3, b4]
   end
 
   it "Compare badge requirements by badge then field" do
@@ -378,11 +400,31 @@ describe "Badge" do
 
       before :each do
         @data = {
-          "badgeOrder" => "badge",
-          "structure" => {
-            "badge" => [
+          'badgeOrder' => '123_0',
+          'details' => {
+            '123_0' => {
+              'badge_id' => '123',
+              'badge_id_version' => '123_0',
+              'badge_identifier' => '123_0',
+              'badge_order' => '4',
+              'badge_version' => '0',
+              'config' => '{"numModulesRequired":1}',
+              'description' => 'b_req_notes',
+              'group_name' => '',
+              'lastupdated' => '2014-09-14 02:32:05',
+              'latest' => '1',
+              'name' => 'b_name',
+              'picture' => 'path/to/image.gif',
+              'portal_config' => '{"position":{"x":58,"y":282,"w":20,"h":20,"r":6}}',
+              'sharing' => 'default-locked',
+              'shortname' => '00',
+              'userid' => '0',
+            }
+          },
+          'structure' => {
+            '123_0' => [
               {
-                "rows" => [
+                'rows' => [
                   {"name" => "First name","field" => "firstname","width" => "120px"},
                   {"name" => "Last name","field" => "lastname","width" => "120px"},
                   {"name" => "Done","field" => "completed","width" => "70px","formatter" => "doneFormatter"},
@@ -390,126 +432,54 @@ describe "Badge" do
                 ],
                 "numactivities" => "23",
                 "noscroll" => true
-	      },{
-                "rows" => [
-                  {"name" => "r_name","field" => "r_field","width" => "80px","formatter" => "cellFormatter","tooltip" => "r_description","editable" => "true"}
-		]
+               },{
+                'rows' => [
+                  {"name" => "r_name","field" => "2345","width" => "80px","formatter" => "cellFormatter","tooltip" => "r_description","editable" => "true","module"=>"a"}
+                ]
               }
             ],
-          },
-          "details" => {
-            "badge" => {
-              "shortname" => "badge",
-              "name" => "b_name",
-              "description" => "b_req_notes",
-              "picture" => "badge.png",
-              "config" => "{\"sectionsneeded\":\"1\",\"totalneeded\":\"2\",\"sections\":{\"a\":\"1\"}}",
-              "order" => "1",
-              "groupname" => nil,
-              "status" => "3",
-              "userid" => "0",
-              "table" => "table"
-            },
-          },
-          "stock" => {"sectionid" => "1","badge" => "3"}
+          }
         }
         @data = @data.to_json
       end
 
-      it "Core" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=core&sectionid=1&section=beavers&termid=2", :body => @data, :content_type => 'application/json')
-        Osm::Term.stub(:get_current_term_for_section){ Osm::Term.new(:id => 2) }
+      urls = {
+        Osm::CoreBadge => 'https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=4&term_id=2&section_id=1',
+        Osm::ChallengeBadge => 'https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=1&term_id=2&section_id=1',
+        Osm::StagedBadge => 'https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=3&term_id=2&section_id=1',
+        Osm::ActivityBadge => 'https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=2&term_id=2&section_id=1',
+      }
+      urls.each do |type, url|
+        it type.type.to_s.titleize do
+          FakeWeb.register_uri(:post, url, :body => @data, :content_type => 'application/json')
+          Osm::Term.stub(:get_current_term_for_section){ Osm::Term.new(:id => 2) }
 
-        badges = Osm::CoreBadge.get_badges_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers))
-        badges.size.should == 1
-        badge = badges[0]
-        badge.name.should == 'b_name'
-        badge.requirement_notes.should == 'b_req_notes'
-        badge.osm_key.should == 'badge'
-        badge.osm_long_key.should == 'table'
-        badge.sections_needed.should == 1
-        badge.total_needed.should == 2
-        badge.needed_from_section.should == {'a' => 1}
-        badge.requirements.size.should == 1
-        requirement = badge.requirements[0]
-        requirement.name.should == 'r_name'
-        requirement.description.should == 'r_description'
-        requirement.field.should == 'r_field'
-        requirement.editable.should be_true
-        requirement.badge.osm_key.should == 'badge'
-      end
-
-      it "Challenge" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=challenge&sectionid=1&section=beavers&termid=2", :body => @data, :content_type => 'application/json')
-        Osm::Term.stub(:get_current_term_for_section){ Osm::Term.new(:id => 2) }
-
-        badges = Osm::ChallengeBadge.get_badges_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers))
-        badges.size.should == 1
-        badge = badges[0]
-        badge.name.should == 'b_name'
-        badge.requirement_notes.should == 'b_req_notes'
-        badge.osm_key.should == 'badge'
-        badge.osm_long_key.should == 'table'
-        badge.sections_needed.should == 1
-        badge.total_needed.should == 2
-        badge.needed_from_section.should == {'a' => 1}
-        badge.requirements.size.should == 1
-        requirement = badge.requirements[0]
-        requirement.name.should == 'r_name'
-        requirement.description.should == 'r_description'
-        requirement.field.should == 'r_field'
-        requirement.editable.should be_true
-        requirement.badge.osm_key.should == 'badge'
-      end
-
-      it "Staged" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=staged&sectionid=1&section=beavers&termid=2", :body => @data, :content_type => 'application/json')
-        Osm::Term.stub(:get_current_term_for_section){ Osm::Term.new(:id => 2) }
-
-        badges = Osm::StagedBadge.get_badges_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers))
-        badges.size.should == 1
-        badge = badges[0]
-        badge.name.should == 'b_name'
-        badge.requirement_notes.should == 'b_req_notes'
-        badge.osm_key.should == 'badge'
-        badge.osm_long_key.should == 'table'
-        badge.sections_needed.should == 1
-        badge.total_needed.should == 2
-        badge.needed_from_section.should == {'a' => 1}
-        badge.requirements.size.should == 1
-        requirement = badge.requirements[0]
-        requirement.name.should == 'r_name'
-        requirement.description.should == 'r_description'
-        requirement.field.should == 'r_field'
-        requirement.editable.should be_true
-        requirement.badge.osm_key.should == 'badge'
-      end
-
-      it "Activity" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=activity&sectionid=1&section=beavers&termid=2", :body => @data, :content_type => 'application/json')
-        Osm::Term.stub(:get_current_term_for_section){ Osm::Term.new(:id => 2) }
-
-        badges = Osm::ActivityBadge.get_badges_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers))
-        badges.size.should == 1
-        badge = badges[0]
-        badge.name.should == 'b_name'
-        badge.requirement_notes.should == 'b_req_notes'
-        badge.osm_key.should == 'badge'
-        badge.osm_long_key.should == 'table'
-        badge.sections_needed.should == 1
-        badge.total_needed.should == 2
-        badge.needed_from_section.should == {'a' => 1}
-        badge.requirements.size.should == 1
-        requirement = badge.requirements[0]
-        requirement.name.should == 'r_name'
-        requirement.description.should == 'r_description'
-        requirement.field.should == 'r_field'
-        requirement.editable.should be_true
-        requirement.badge.osm_key.should == 'badge'
+          badges = type.get_badges_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers))
+          badges.size.should == 1
+          badge = badges[0]
+          badge.name.should == 'b_name'
+          badge.requirement_notes.should == 'b_req_notes'
+          badge.identifier.should == '123_0'
+          badge.id.should == 123
+          badge.version.should == 0
+          badge.latest.should be_true
+          badge.user_id.should == 0
+          badge.sharing.should == :default_locked
+          badge.requirements.size.should == 1
+          badge.valid?.should be_true
+          requirement = badge.requirements[0]
+          requirement.name.should == 'r_name'
+          requirement.description.should == 'r_description'
+          requirement.field.should == 2345
+          requirement.module.should == 'a'
+          requirement.editable.should be_true
+          requirement.badge.should == badge
+          requirement.valid?.should be_true
+        end
       end
 
       it "For a different section type" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/challenges.php?action=getInitialBadges&type=activity&sectionid=1&section=cubs&termid=2", :body => @data, :content_type => 'application/json')
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeStructureByType&section=cubs&type_id=2&term_id=2&section_id=1", :body => @data, :content_type => 'application/json')
         Osm::Term.stub(:get_current_term_for_section){ Osm::Term.new(:id => 2) }
 
         badges = Osm::ActivityBadge.get_badges_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), :cubs)
