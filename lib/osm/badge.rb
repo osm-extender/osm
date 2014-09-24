@@ -534,19 +534,39 @@ module Osm
 
       # Mark the badge as not awarded in OSM
       # @param [Osm::Api] api The api to use to make the request
-      # @param [Date] date The date to mark the badge as unawarded
       # @return [Boolean] whether the data was updated in OSM
-      def mark_not_awarded(api, date=Date.today)
-        mark_awarded(api, date, 0)
+      def mark_not_awarded(api)
+        mark_awarded(api, Date.today, 0)
       end
 
 
       # Mark the badge as due in OSM
       # @param [Osm::Api] api The api to use to make the request
-      # @param [Fixnum] level The level of the badge to mark as due (1 for non-staged badges)
+      # @param [Fixnum] level The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return [Boolean] whether the data was updated in OSM
-      def mark_due(api, level)
-        mark_awarded(api, Date.today, level, :due)
+      def mark_due(api, level=completed)
+        raise ArgumentError, 'level can not be negative' if level < 0
+        section = Osm::Section.get(api, section_id)
+        require_ability_to(api, :write, :badge, section)
+
+        result = api.perform_query("ext/badges/records/?action=overrideCompletion", {
+          'section_id' => section.id,
+          'badge_id' => badge.id,
+          'badge_version' => badge.version,
+          'scoutid' => member_id,
+          'level' => level
+        })
+        updated = result.is_a?(Hash) &&
+                  (result['scoutid'].to_i == member_id) &&
+                  (result['completed'].to_i == level)
+        return updated
+      end
+
+      # Mark the badge as not due in OSM
+      # @param [Osm::Api] api The api to use to make the request
+      # @return [Boolean] whether the data was updated in OSM
+      def mark_not_due(api)
+        mark_due(api, 0)
       end
 
       # Update data in OSM

@@ -692,6 +692,36 @@ describe "Badge" do
       data.mark_awarded(@api, Date.new(2000, 1, 2), 1).should be_true
     end
 
+    it "Mark badge due" do
+
+      awarded_post_data = {
+        'apiid' => @CONFIGURATION[:api][:osm][:id],
+        'token' => @CONFIGURATION[:api][:osm][:token],
+        'userid' => 'user_id',
+        'secret' => 'secret',
+        'section_id' => 2,
+        'badge_id' => 123,
+        'badge_version' => 0,
+        'scoutid' => 1,
+        'level' => 1
+      }
+      awarded_body_data = {'scoutid'=>'1', 'completed'=>'1', 'awarded' => '1', 'awardeddate'=>'2000-01-02', 'firstname' => 'fn', 'lastname' => 'ln'}
+      awarded_url = "https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=overrideCompletion"
+
+      data = Osm::Badge::Data.new(
+        :member_id => 1,
+        :section_id => 2,
+        :badge => Osm::CoreBadge.new(
+          :id => 123,
+          :version => 0
+        )
+      )
+
+      HTTParty.should_receive(:post).with(awarded_url, {:body => awarded_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>awarded_body_data.to_json}) }
+      Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+
+      data.mark_due(@api, 1).should be_true
+    end
 
     it "Get summary data for a section" do
 
