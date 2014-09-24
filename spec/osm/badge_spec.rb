@@ -69,7 +69,7 @@ describe "Badge" do
       :member_id => 1,
       :first_name => 'First',
       :last_name => 'Last',
-      :completed => 4,
+      :due => 4,
       :awarded => 3,
       :awarded_date => Date.new(2000, 1, 2),
       :requirements => {},
@@ -80,7 +80,7 @@ describe "Badge" do
     data.member_id.should == 1
     data.first_name.should == 'First'
     data.last_name.should == 'Last'
-    data.completed.should == 4
+    data.due.should == 4
     data.awarded.should == 3
     data.awarded_date.should == Date.new(2000, 1, 2)
     data.requirements.should == {}
@@ -194,44 +194,44 @@ describe "Badge" do
 
     it "Non staged" do
       badge = Osm::ActivityBadge.new()
-      data = Osm::Badge::Data.new(:completed => 1, :awarded => 1, :badge => badge)
+      data = Osm::Badge::Data.new(:due => 1, :awarded => 1, :badge => badge)
       data.earnt?.should be_false
 
       badge = Osm::ActivityBadge.new()
-      data = Osm::Badge::Data.new(:completed => 1, :awarded => 0, :badge => badge)
+      data = Osm::Badge::Data.new(:due => 1, :awarded => 0, :badge => badge)
       data.earnt?.should be_true
 
 
       badge = Osm::ActivityBadge.new(:total_needed => 0, :sections_needed => 2, :needed_from_section => {'a' => 2, 'b' => 1})
-      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :due => 0, :awarded => 0, :badge => badge)
       data.earnt?.should be_true
 
       badge = Osm::ActivityBadge.new(:total_needed => 0, :sections_needed => 2, :needed_from_section => {'a' => 2, 'b' => 1})
-      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'x'}, :completed => 0, :awarded => 0, :badge => badge)
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'x'}, :due => 0, :awarded => 0, :badge => badge)
       data.earnt?.should be_false
 
       badge = Osm::ActivityBadge.new(:total_needed => 3, :sections_needed => 0, :needed_from_section => {'a' => 2, 'b' => 1})
-      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :due => 0, :awarded => 0, :badge => badge)
       data.earnt?.should be_true
 
       badge = Osm::ActivityBadge.new(:total_needed => 3, :sections_needed => 0, :needed_from_section => {'a' => 2, 'b' => 1})
-      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'x', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'x', 'b_01' => 'y'}, :due => 0, :awarded => 0, :badge => badge)
       data.earnt?.should be_false
 
       badge = Osm::ActivityBadge.new(:total_needed => 3, :sections_needed => 2, :needed_from_section => {'a' => 2, 'b' => 1})
-      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :due => 0, :awarded => 0, :badge => badge)
       data.earnt?.should be_true
 
       badge = Osm::ActivityBadge.new(:total_needed => 1, :sections_needed => 1, :needed_from_section => {'a' => 2, 'b' => 1})
-      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :due => 0, :awarded => 0, :badge => badge)
       data.earnt?.should be_true
 
       badge = Osm::ActivityBadge.new(:total_needed => 0, :sections_needed => -1, :needed_from_section => {'a' => 2, 'b' => 1})
-      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'y', 'b_01' => 'y'}, :due => 0, :awarded => 0, :badge => badge)
       data.earnt?.should be_true
 
       badge = Osm::ActivityBadge.new(:total_needed => 0, :sections_needed => -1, :needed_from_section => {'a' => 2, 'b' => 1})
-      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'x', 'b_01' => 'y'}, :completed => 0, :awarded => 0, :badge => badge)
+      data = Osm::Badge::Data.new(:requirements => {'a_01'=>'y', 'a_02'=>'x', 'b_01' => 'y'}, :due => 0, :awarded => 0, :badge => badge)
       data.earnt?.should be_false
     end
   end
@@ -297,7 +297,7 @@ describe "Badge" do
 
   it "Works out if the badge has been started" do
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}).started?.should be_true
-    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}, :completed => 1).started?.should be_false
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}, :due => 1).started?.should be_false
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'xNo', 'a_02' => ''}).started?.should be_false
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => '', 'a_02' => ''}).started?.should be_false
 
@@ -305,64 +305,64 @@ describe "Badge" do
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new,
       :requirements => {'a_01' => 'Yes', 'b_01' => 'Yes', 'b_02' => ''},
-      :completed => 1,
+      :due => 1,
     ).started?.should be_true
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'nightsaway'),
       :requirements => {'a_01' => 5, 'y_01' => '5', 'custom_26695' => ''},
-      :completed => 5,
+      :due => 5,
     ).started?.should be_false
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'hikes'),
       :requirements => {'a_01' => 3, 'y_01' => '3', 'custom_26695' => ''},
-      :completed => 1,
+      :due => 1,
     ).started?.should be_true
 
     # Scout's adventure challenge
     Osm::Badge::Data.new(
       :badge => Osm::ChallengeBadge.new(:osm_key => 'adventure'),
       :requirements => {'y_01' => 5, 'custom_26695' => 'Text'},
-      :completed => 0,
+      :due => 0,
     ).started?.should be_true
     Osm::Badge::Data.new(
       :badge => Osm::ChallengeBadge.new(:osm_key => 'adventure'),
       :requirements => {'y_01' => '', 'custom_26695' => ''},
-      :completed => 0,
+      :due => 0,
     ).started?.should be_false
 
     # Scout's community challenge
     Osm::Badge::Data.new(
       :badge => Osm::ChallengeBadge.new(:osm_key => 'community'),
       :requirements => {'y_01' => 5, 'a_01' => '', 'custom_26695' => 'Text'},
-      :completed => 0,
+      :due => 0,
     ).started?.should be_true
     Osm::Badge::Data.new(
       :badge => Osm::ChallengeBadge.new(:osm_key => 'community'),
       :requirements => {'y_01' => '', 'a_01' => '4', 'custom_26695' => 'Text'},
-      :completed => 0,
+      :due => 0,
     ).started?.should be_true
     Osm::Badge::Data.new(
       :badge => Osm::ChallengeBadge.new(:osm_key => 'community'),
       :requirements => {'y_01' => '', 'a_01' => '', 'custom_26695' => ''},
-      :completed => 0,
+      :due => 0,
     ).started?.should be_false
 
     # Beaver's adventure activity
     Osm::Badge::Data.new(
       :badge => Osm::ActivityBadge.new(:osm_key => 'adventure'),
       :requirements => {'y_01' => 5, 'custom_26695' => 'Text'},
-      :completed => 0,
+      :due => 0,
     ).started?.should be_true
     Osm::Badge::Data.new(
       :badge => Osm::ActivityBadge.new(:osm_key => 'adventure'),
       :requirements => {'y_01' => '', 'custom_26695' => ''},
-      :completed => 0,
+      :due => 0,
     ).started?.should be_false
   end
 
   it "Works out what stage of the badge has been started" do
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}).started.should == 1
-    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}, :completed => 1).started.should == 0
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'Yes', 'a_02' => ''}, :due => 1).started.should == 0
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => 'xNo', 'a_02' => ''}).started.should == 0
     Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {'a_01' => '', 'a_02' => ''}).started.should == 0
 
@@ -370,27 +370,27 @@ describe "Badge" do
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'test'),
       :requirements => {'a_01' => 'Yes', 'b_01' => 'Yes', 'b_02' => ''},
-      :completed => 1,
+      :due => 1,
     ).started.should == 2
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'test'),
       :requirements => {'a_01' => 'Yes', 'b_01' => 'Yes', 'b_02' => '', 'c_01' => 'Yes', 'c_02' => ''},
-      :completed => 1,
+      :due => 1,
     ).started.should == 2
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'test'),
       :requirements => {'a_01' => '', 'b_01' => '', 'c_01' => '', 'd_01' => '', 'e_01' => ''},
-      :completed => 5,
+      :due => 5,
     ).started.should == 0 # No more stages to do
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'nightsaway'),
       :requirements => {'a_01' => 7, 'y_01' => '7', 'custom_26695' => ''},
-      :completed => 5,
+      :due => 5,
     ).started.should == 10
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:osm_key => 'hikes'),
       :requirements => {'a_01' => 3, 'y_01' => '3', 'custom_26695' => ''},
-      :completed => 1,
+      :due => 1,
     ).started.should == 5
   end
 
@@ -511,7 +511,7 @@ describe "Badge" do
       data.member_id.should == 3
       data.first_name.should == 'fn'
       data.last_name.should == 'ln'
-      data.completed.should == 2
+      data.due.should == 2
       data.awarded.should == 1
       data.awarded_date.should == Date.new(2000, 1, 2)
       data.requirements.should == {2345 => 'd'}
@@ -549,7 +549,7 @@ describe "Badge" do
               Osm::Badge::Requirement.new(:field => 2345, :editable => true),
               Osm::Badge::Requirement.new(:field => 6789, :editable => true),
             ]),
-          :completed => 0,
+          :due => 0,
         )
      end
 
@@ -561,7 +561,7 @@ describe "Badge" do
         @data.should_receive(:mark_due).with(@api, 1) { true }
 
         @data.requirements[2345] = '2'
-        @data.completed = 1
+        @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
         @data.update(@api).should be_true
@@ -585,7 +585,7 @@ describe "Badge" do
         @data.should_not_receive(:mark_awarded)
         @data.should_receive(:mark_due).with(@api, 1) { true }
 
-        @data.completed = 1
+        @data.due = 1
         @data.update(@api).should be_true
       end
 
@@ -610,7 +610,7 @@ describe "Badge" do
         @data.should_receive(:mark_due).with(@api, 1) { true }
 
         @data.requirements[2345] = '2'
-        @data.completed = 1
+        @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
         @data.update(@api).should be_false
@@ -624,7 +624,7 @@ describe "Badge" do
         @data.should_receive(:mark_due).with(@api, 1) { false }
 
         @data.requirements[2345] = '2'
-        @data.completed = 1
+        @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
         @data.update(@api).should be_false
@@ -638,7 +638,7 @@ describe "Badge" do
         @data.should_receive(:mark_due).with(@api, 1) { true }
 
         @data.requirements[2345] = '2'
-        @data.completed = 1
+        @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
         @data.update(@api).should be_false

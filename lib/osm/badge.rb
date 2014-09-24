@@ -202,7 +202,7 @@ module Osm
           :member_id => d['scoutid'],
           :first_name => d['firstname'],
           :last_name => d['lastname'],
-          :completed => d['completed'].to_i,
+          :due => d['completed'].to_i,
           :awarded => d['awarded'].to_i,
           :awarded_date => Osm.parse_date(d['awardeddate']),
           :requirements => Hash[d.select{ |k,v| k.match(/\A\d+\Z/) }.map{ |k,v| [k.to_i, v] }],
@@ -303,8 +303,8 @@ module Osm
       #   @return [Fixnum] the member's first name
       # @!attribute [rw] last_name
       #   @return [Fixnum] Ithe member's last name
-      # @!attribute [rw] completed
-      #   @return [Fixnum] whether this badge has been completed (i.e. it is due?), number indicates stage if appropriate
+      # @!attribute [rw] due
+      #   @return [Fixnum] whether this badge is due according to OSM, number indicates stage if appropriate
       # @!attribute [rw] awarded
       #   @return [Date] the last stage awarded
       # @!attribute [rw] awarded_date
@@ -319,7 +319,7 @@ module Osm
       attribute :member_id, :type => Integer
       attribute :first_name, :type => String
       attribute :last_name, :type => String
-      attribute :completed, :type => Integer, :default => 0
+      attribute :due, :type => Integer, :default => 0
       attribute :awarded, :type => Integer, :default => 0
       attribute :awarded_date, :type => Date, :default => nil
       attribute :requirements, :type => Object, :default => DirtyHashy.new
@@ -327,13 +327,13 @@ module Osm
       attribute :badge, :type => Object
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :member_id, :first_name, :last_name, :completed, :awarded, :awarded_date, :requirements, :section_id, :badge
+        attr_accessible :member_id, :first_name, :last_name, :due, :awarded, :awarded_date, :requirements, :section_id, :badge
       end
 
       validates_presence_of :badge
       validates_presence_of :first_name
       validates_presence_of :last_name
-      validates_numericality_of :completed, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :due, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :awarded, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
@@ -401,12 +401,6 @@ module Osm
         return count
       end
 
-      # Check if this badge is due (according data retrieved from OSM)
-      # @return [Boolean] whether the badge is due to the member
-      def due?
-        completed > awarded
-      end
-
 
       # Check if this badge has been earnt
       # @return [Boolean] whether the badge is due to the member
@@ -414,8 +408,8 @@ module Osm
         if badge.type == :staged
           return (earnt > awarded)
         end
-        return false if (completed.eql?(1) && awarded.eql?(1))
-        return true if (completed.eql?(1) && awarded.eql?(0))
+        return false if (due.eql?(1) && awarded.eql?(1))
+        return true if (due.eql?(1) && awarded.eql?(0))
         if badge.sections_needed == -1 # require all sections
           return (sections_gained == badge.needed_from_section.keys.size)
         else
@@ -450,8 +444,8 @@ module Osm
       # Check if this badge has been started
       # @return [Boolean] whether the badge has been started by the member (always false if the badge has been completed)
       def started?
-        return (started > completed) if badge.type.eql?(:staged) # It's a staged badge
-        return false if completed?
+        return (started > due) if badge.type.eql?(:staged) # It's a staged badge
+        return false if due?
         requirements.each do |key, value|
           case key.split('_')[0]
             when 'a'
@@ -482,11 +476,11 @@ module Osm
             end
           else
             # 'Normal' staged badge
-            return 0 if completed == 5 || awarded == 5 # No more stages can be started
-            start_group = 'abcde'[completed] # Requirements use the group letter to denote stage
+            return 0 if due == 5 || awarded == 5 # No more stages can be started
+            start_group = 'abcde'[due] # Requirements use the group letter to denote stage
             started = 'z'
             requirements.each do |key, value|
-              next if key[0] < start_group # This stage is marked as completed
+              next if key[0] < start_group # This stage is marked as due
               next if key[0] > started     # This stage is after the stage currently started
               started = key[0] unless value.blank? || value.to_s[0].downcase.eql?('x')
             end
@@ -501,7 +495,7 @@ module Osm
       # @param [Date] date The date to mark the badge as awarded
       # @param [Fixnum] level The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return [Boolean] whether the data was updated in OSM
-      def mark_awarded(api, date=Date.today, level=completed)
+      def mark_awarded(api, date=Date.today, level=due)
         raise ArgumentError, 'date is not a Date' unless date.is_a?(Date)
         raise ArgumentError, 'level can not be negative' if level < 0
         section = Osm::Section.get(api, section_id)
@@ -601,10 +595,10 @@ module Osm
           requirements.clean_up!
         end
 
-        # Update completed if it changed
-        completed_updated = true
-        if changed_attributes.include?('completed')
-          completed_updated = mark_due(api, completed)
+        # Update due if it changed
+        due_updated = true
+        if changed_attributes.include?('due')
+          due_updated = mark_due(api, due)
         end
 
         # Update awarded if it changed 
@@ -614,11 +608,11 @@ module Osm
         end
 
         # reset changed attributes if everything was updated ok
-        if completed_updated && awarded_updated
+        if due_updated && awarded_updated
           reset_changed_attributes
         end
 
-        return requirements_updated && completed_updated && awarded_updated
+        return requirements_updated && due_updated && awarded_updated
       end
 
       # Compare Badge::Data based on badge, section_id then member_id

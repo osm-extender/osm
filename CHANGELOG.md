@@ -17,6 +17,7 @@
       * mark\_awarded method now only marks as awarded (the optional mark\_as parameter is gone)
       * mark\_not\_awarded method added
       * mark\_due and mark\_not\_due methods added
+      * completed attribute renamed to due
 
 
 ## Version 1.2.14
