@@ -30,8 +30,8 @@ module Osm
     # @option options [Boolean] :debug if true debugging info is output (optional, default = false)
     # @return nil
     def self.configure(options)
-      raise ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm' unless [:osm, :ogm].include?(options[:default_site])
-      raise ArgumentError, ':osm and/or :ogm must be present' if options[:osm].nil? && options[:ogm].nil?
+      raise ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm' unless [:osm, :ogm, :osm_staging].include?(options[:default_site])
+      raise ArgumentError, ":#{options[:default_site]} does not exist in options hash" if options[options[:default_site]].nil?
       [:osm, :ogm, :osm_staging].each do |api_key|
         if options[api_key]
           api_data = options[api_key]
