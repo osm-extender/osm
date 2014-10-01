@@ -76,36 +76,6 @@ describe "Meeting" do
   end
 
 
-  describe "Meeting::BadgeLink" do
-
-    it "Create" do
-      bl = Osm::Meeting::BadgeLink.new(
-        :badge_key => 'artist',
-        :badge_type => :activity,
-        :requirement_key => 'a_01',
-        :badge_section => :cubs,
-        :label => 'Cubs Artist Activity - A: Poster',
-      )
-
-      bl.badge_key.should == 'artist'
-      bl.badge_type.should == :activity
-      bl.requirement_key.should == 'a_01'
-      bl.badge_section.should == :cubs
-      bl.label.should == 'Cubs Artist Activity - A: Poster'
-      bl.valid?.should be_true
-    end
-
-    it "Sorts by label" do
-      a1 = Osm::Meeting::BadgeLink.new(:label => 'a')
-      a2 = Osm::Meeting::BadgeLink.new(:label => 'b')
-
-      data = [a2, a1]
-      data.sort.should == [a1, a2]
-    end
-
-  end
-
-
   describe 'Using the API' do
 
     it "Fetch the term's programme for a section" do
@@ -116,13 +86,19 @@ describe "Meeting" do
           {"activityid" => "7", "title" => "Activity 7", "notes" => "", "eveningid" => "5"}
         ]},
         "badgelinks" => {"5" => [{
-          "badge" => "artist",
-          "badgetype" => "activity",
-          "columnname" => "a_01",
-          "eveningid" => "5",
-          "label" => "Cubs Artist Activity - A: Poster",
-          "section" => "cubs",
-          "sectionid" => "3",
+          'badge' => 'artist',
+          'badgeLongName' => 'Artist',
+          'badge_id' => '180',
+          'badge_version' => '0',
+          'badgetype' => 'activity',
+          'badgetypeLongName' => 'Activity',
+          'column_id' => '1234',
+          'columnname' => '1234',
+          'columnnameLongName' => 'Guide Dogs',
+          'data' => '',
+          'label' => 'Disability Awareness Activity Guide dogs',
+          'section' => 'cubs',
+          'sectionLongName' => 'Cubs',
          }]},
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getProgramme&sectionid=3&termid=4", :body => body.to_json, :content_type => 'application/json')
@@ -149,11 +125,14 @@ describe "Meeting" do
       activity.notes.should == 'Some notes'
       meeting.badge_links.size.should == 1
       badge_link = meeting.badge_links[0]
-      badge_link.badge_key.should == 'artist'
       badge_link.badge_type.should == :activity
-      badge_link.requirement_key.should == 'a_01'
       badge_link.badge_section.should == :cubs
-      badge_link.label.should == 'Cubs Artist Activity - A: Poster'
+      badge_link.badge_name.should == 'Artist'
+      badge_link.badge_id.should == 180
+      badge_link.badge_version.should == 0
+      badge_link.requirement_id.should == 1234
+      badge_link.requirement_label.should == 'Guide Dogs'
+      badge_link.data.should == ''
     end
 
     it "Fetch badge requirements for a meeting (from API)" do
@@ -216,19 +195,34 @@ describe "Meeting" do
         ],
         'badges' => [
           {
-            'activityid' => '4',
-            'section' => 'section',
-            'badgetype' => 'type',
-            'badge' => 'badge',
-            'columnname' => 'col_name',
-            'label' => 'This is a label',
+            'badge' => 'activity_firesafety',
+            'badgeLongName' => 'Fire Safety',
+            'badge_id' => '181',
+            'badge_version' => '0',
+            'badgetype' => 'activity',
+            'badgetypeLongName' => 'Activity',
+            'column_id' => '12345',
+            'columnname' => 'b_01',
+            'columnnameLongName' => 'B: Fire drill',
+            'data' => 'Yes',
+            'section' => 'cubs',
+            'sectionLongName' => 'Cubs',
           }
         ]
       }
+
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getActivity&id=4", :body => activity_body.to_json, :content_type => 'application/json')
+      Osm::Activity.stub(:get) { Osm::Activity.new(:badges => [3]) }
   
-      meeting = Osm::Meeting.new(:id => 2, :date => Date.new(2000, 1, 2), :section_id => 3, :activities=>[Osm::Meeting::Activity.new(:activity_id => 4)])
-      meeting.get_badge_requirements(@api).should == [{"name"=>"This is a label", "badgeName"=>"badge", "sectionid"=>"3", "eveningid"=>"2", "section"=>:section, "badgetype"=>:type, "badge"=>"badge", "columnname"=>"col_name"}]
+      meeting = Osm::Meeting.new(
+        :id => 2,
+        :date => Date.new(2000, 1, 2),
+        :section_id => 3,
+        :activities => [Osm::Meeting::Activity.new(:activity_id => 4)],
+        :badge_links => [1, 2],
+      )
+
+      meeting.get_badge_requirements(@api).should == [1, 2, 3]
     end
 
     it "Create a meeting (succeded)" do
@@ -311,7 +305,7 @@ describe "Meeting" do
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '',
         'activity' => '[{"activityid":3,"notes":"Some notes"}]',
-        'badgelinks' => '[{"section":"beavers","badge":"badge","columnname":"b_03","badgetype":"activity"}]',
+        'badgelinks' => '[{"badge_id":"181","badge_version":"0","column_id":"93384","badge":null,"badgeLongName":"Badge name","columnname":null,"columnnameLongName":"l","data":"","section":"beavers","sectionLongName":null,"badgetype":"activity","badgetypeLongName":null}]',
       }
       Osm::Term.stub(:get_for_section) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
@@ -321,7 +315,16 @@ describe "Meeting" do
         :section_id=>2,
         :date=>Date.new(2000, 01, 02),
         :activities => [Osm::Meeting::Activity.new(:activity_id => 3, :title => 'Activity Title', :notes => 'Some notes')],
-        :badge_links => [Osm::Meeting::BadgeLink.new(:badge_key => 'badge', :badge_type => :activity, :requirement_key => 'b_03', :badge_section => :beavers, :label => 'Label')]
+        :badge_links => [Osm::Meeting::BadgeLink.new(
+          :badge_type => :activity,
+          :badge_section => :beavers,
+          :requirement_label => 'l',
+          :data => '',
+          :badge_name => 'Badge name',
+          :badge_id => 181,
+          :badge_version => 0,
+          :requirement_id => 93384,
+        )]
       )
       meeting.update(@api).should be_true
     end

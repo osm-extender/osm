@@ -9,6 +9,7 @@
     * Fetching due badges (added stock\_levels attribute, since OSM now gives it)
     * Fetching & updating badge links for Events
     * Fetching & updating badge links for Activities
+    * Fetching & updating badge links for Meetings
     * Summary now returns all started/completed/awarded badges (it can't filter by type) so can only be called from Osm::Badge
     * Osm::Badge
       * osm\_key, osm\_long\_key and competion criteria attributes are gone
@@ -25,6 +26,7 @@
       * Attributes removed: badge\_label, badge\_key, requirement\_key
       * Attributes untouched: badge\_type, badge\_section, data, requirement\_label
     * Osm::Activity::Badge attributes now match Osm::Event::BadgeLink
+    * Osm::Meeting::BadgeLink attributes now match Osm::Event::badgeLink
 
 
 ## Version 1.2.14

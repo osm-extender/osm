@@ -116,13 +116,16 @@ module Osm
         our_badge_links = badge_links[item['eveningid']]
         attributes[:badge_links] = Array.new
         unless our_badge_links.nil?
-          our_badge_links.each do |badge_link_data|
+          our_badge_links.each do |badge_data|
             attributes[:badge_links].push Osm::Meeting::BadgeLink.new(
-              :badge_key => badge_link_data['badge'],
-              :badge_type => badge_link_data['badgetype'].downcase.to_sym,
-              :requirement_key => badge_link_data['columnname'],
-              :badge_section => badge_link_data['section'].downcase.to_sym,
-              :label => badge_link_data['label'],
+              :badge_type => badge_data['badgetype'].to_sym,
+              :badge_section => badge_data['section'].to_sym,
+              :badge_name => badge_data['badgeLongName'],
+              :badge_id => Osm::to_i_or_nil(badge_data['badge_id']),
+              :badge_version => Osm::to_i_or_nil(badge_data['badge_version']),
+              :requirement_id => Osm::to_i_or_nil(badge_data['column_id']),
+              :requirement_label => badge_data['columnnameLongName'],
+              :data => badge_data['data'],
             )
           end
         end
@@ -178,17 +181,6 @@ module Osm
         activities_data.push this_activity
       end
 
-      badge_links_data = Array.new
-      badge_links.each do |badge_link|
-        this_badge_link = {
-          'section' => badge_link.badge_section,
-          'badge' => badge_link.badge_key,
-          'columnname' => badge_link.requirement_key,
-          'badgetype' => badge_link.badge_type,
-        }
-        badge_links_data.push this_badge_link
-      end
-
       api_data = {
         'eveningid' => id,
         'sectionid' => section_id,
@@ -202,7 +194,22 @@ module Osm
         'games' => games,
         'leaders' => leaders,
         'activity' => ActiveSupport::JSON.encode(activities_data),
-        'badgelinks' => ActiveSupport::JSON.encode(badge_links_data),
+        'badgelinks' => ActiveSupport::JSON.encode(badge_links.map{ |b|
+          {
+            'badge_id' => b.badge_id.to_s,
+            'badge_version' => b.badge_version.to_s,
+            'column_id' => b.requirement_id.to_s,
+            'badge' => nil,
+            'badgeLongName' => b.badge_name,
+            'columnname' => nil,
+            'columnnameLongName' => b.requirement_label,
+            'data' => b.data,
+            'section' => b.badge_section,
+            'sectionLongName' => nil,
+            'badgetype' => b.badge_type.to_s,
+            'badgetypeLongName' => nil,
+          }
+        })
       }
       response = api.perform_query("programme.php?action=editEvening", api_data)
 
@@ -276,20 +283,11 @@ module Osm
       else
         # We'll have to iterate through the activities
         require_ability_to(api, :read, :programme, section_id, options)
-        badges = []
+        badges = badge_links
         activities.each do |activity|
           activity = Osm::Activity.get(api, activity.activity_id, nil, options)
           activity.badges.each do |badge|
-            badges.push ({
-              'name' => badge.label,
-              'badgeName' => badge.badge,
-              'sectionid' => section_id.to_s,
-              'eveningid' => id.to_s,
-              'section' => badge.section_type,
-              'badgetype' => badge.type,
-              'badge' => badge.badge,
-              'columnname' => badge.requirement,
-            })
+            badges.push badge
           end
         end
       end
@@ -354,39 +352,54 @@ module Osm
       include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
-      # @!attribute [rw] badge_key
-      #   @return [String] the badge being done
       # @!attribute [rw] badge_type
       #   @return [Symbol] the type of badge
-      # @!attribute [rw] requirement_key
-      #   @return [String] the requirement being done
       # @!attribute [rw] badge_section
       #   @return [Symbol] the section type that the badge belongs to
-      # @!attribute [rw] label
-      #   @return [String] human firendly label for the badge and requirement
+      # @!attribute [rw] requirement_label
+      #   @return [String] human firendly requirement label
+      # @!attribute [rw] data
+      #   @return [String] what to put in the column when the badge records are updated
+      # @!attribute [rw] badge_name
+      #   @return [String] the badge's name
+      # @!attribute [rw] badge_id
+      #   @return [Fixnum] the badge's ID in OSM
+      # @!attribute [rw] badge_version
+      #   @return [Fixnum] the version of the badge
+      # @!attribute [rw] requirement_id
+      #   @return [Fixnum] the requirement's ID in OSM
 
-      attribute :badge_key, :type => String
       attribute :badge_type, :type => Object
-      attribute :requirement_key, :type => String
       attribute :badge_section, :type => Object
-      attribute :label, :type => String
+      attribute :requirement_label, :type => String
+      attribute :data, :type => String
+      attribute :badge_name, :type => String
+      attribute :badge_id, :type => Integer
+      attribute :badge_version, :type => Integer
+      attribute :requirement_id, :type => Integer
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :badge_key, :badge_type, :requirement_key, :badge_section, :label
+        attr_accessible :badge_type, :badge_section, :requirement_label, :data, :badge_name, :badge_id, :badge_version, :requirement_id
       end
 
-      validates_presence_of :badge_key
-      validates_format_of :requirement_key, :with => /\A[a-z]_\d{2}\Z/, :message => 'is not in the correct format (e.g. "a_01")'
+      validates_presence_of :badge_name
       validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
       validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
+      validates_numericality_of :badge_id, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :badge_version, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :requirement_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
 
       # @!method initialize
       #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-      # Compare BadgeLink based on title then activity_id
+      # Compare BadgeLink based on section, type, badge_name, requirement_label, data
       def <=>(another)
-        return self.label <=> another.try(:label)
+        [:badge_section, :badge_type, :badge_name, :requirement_label].each do |attribute|
+          result = self.try(:data) <=> another.try(:data)
+          return result unless result == 0
+        end
+        return self.try(:data) <=> another.try(:data)
       end
 
     end # Class Meeting::BadgeLink
