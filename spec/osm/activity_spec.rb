@@ -93,18 +93,24 @@ describe "Activity" do
         ],
         'badges' => [
           {
-            'activityid' => '1',
-            'section' => 'section',
-            'badgetype' => 'type',
-            'badge' => 'badge',
-            'columnname' => 'col_name',
-            'label' => 'This is a label',
+            'badge' => 'activity_firesafety',
+            'badgeLongName' => 'Fire Safety',
+            'badge_id' => '181',
+            'badge_version' => '0',
+            'badgetype' => 'activity',
+            'badgetypeLongName' => 'Activity',
+            'column_id' => '93384',
+            'columnname' => 'b_01',
+            'columnnameLongName' => 'B: Fire drill',
+            'data' => 'Yes',
+            'section' => 'cubs',
+            'sectionLongName' => 'Cubs',
           }
         ]
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getActivity&id=1", :body => body.to_json, :content_type => 'application/json')
-  
-  
+
+
       activity = Osm::Activity.get(@api, 1)
   
       activity.id.should == 1
@@ -132,13 +138,14 @@ describe "Activity" do
       activity.files[0].activity_id.should == 1
       activity.files[0].file_name.should == 'File Name'
       activity.files[0].name.should == 'Name'
-      activity.badges[0].activity_id.should == 1
-      activity.badges[0].section_type.should == :section
-      activity.badges[0].type.should == :type
-      activity.badges[0].badge.should == 'badge'
-      activity.badges[0].requirement.should == 'col_name'
-      activity.badges[0].label.should == 'This is a label'
-  
+      activity.badges[0].badge_type.should == :activity
+      activity.badges[0].badge_section.should == :cubs
+      activity.badges[0].badge_name.should == 'Fire Safety'
+      activity.badges[0].badge_id.should == 181
+      activity.badges[0].badge_version.should == 0
+      activity.badges[0].requirement_id.should == 93384
+      activity.badges[0].requirement_label.should == 'B: Fire drill'
+      activity.badges[0].data.should == 'Yes'
       activity.valid?.should be_true
     end
   
@@ -185,7 +192,7 @@ describe "Activity" do
         'location' => :indoors,
         'sections' => '["beavers","cubs"]',
         'tags' => '["tag1","tag2"]',
-        'links' => '[{"activityid":"2","section":"beavers","badgetype":"t","badge":"b","columnname":"r","label":"l"}]',
+        'links' => '[{"badge_id":"181","badge_version":"0","column_id":"93384","badge":null,"badgeLongName":"Badge name","columnname":null,"columnnameLongName":"l","data":"","section":"beavers","sectionLongName":null,"sections":["beavers","cubs"],"badgetype":"activity","badgetypeLongName":null}]',
         'shared' => 0,
         'sectionid' => 1,
         'secretEdit' => true,
@@ -203,7 +210,16 @@ describe "Activity" do
         :location => :indoors,
         :sections => [:beavers, :cubs],
         :tags => ['tag1', 'tag2'],
-        :badges => [Osm::Activity::Badge.new(:activity_id=>2, :section_type=>:beavers, :type=>:t, :badge=>'b', :requirement=>'r', :label=>'l')],
+        :badges => [Osm::Activity::Badge.new(
+          :badge_type => :activity,
+          :badge_section => :beavers,
+          :requirement_label => 'l',
+          :data => '',
+          :badge_name => 'Badge name',
+          :badge_id => 181,
+          :badge_version => 0,
+          :requirement_id => 93384,
+        )],
         :shared => 0,
         :section_id => 1,
       )

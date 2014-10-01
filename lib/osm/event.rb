@@ -596,7 +596,7 @@ module Osm
       # @!attribute [rw] badge_version
       #   @return [Fixnum] the version of the badge
       # @!attribute [rw] requirement_id
-      #   @return [Fixnum] the requirement's IS in OSM
+      #   @return [Fixnum] the requirement's ID in OSM
 
       attribute :badge_type, :type => Object
       attribute :badge_section, :type => Object
