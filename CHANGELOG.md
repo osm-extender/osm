@@ -21,13 +21,14 @@
       * mark\_not\_awarded method added
       * mark\_due and mark\_not\_due methods added
       * completed attribute renamed to due
+      * sections_gained method renamed to modules_gained, now returns an array of letters
+      * gained_in_sections renamed to gained_in_modules
     * Osm::Event::BadgeLink
       * Attributes added: badge\_name, badge\_id, badge\_version, requirement\_id
       * Attributes removed: badge\_label, badge\_key, requirement\_key
       * Attributes untouched: badge\_type, badge\_section, data, requirement\_label
     * Osm::Activity::Badge attributes now match Osm::Event::BadgeLink
     * Osm::Meeting::BadgeLink attributes now match Osm::Event::badgeLink
-
 
 ## Version 1.2.14
 

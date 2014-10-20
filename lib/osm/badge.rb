@@ -37,9 +37,10 @@ module Osm
     attribute :sharing, :type => Object
     attribute :user_id, :type => Integer
     attribute :levels, :type => Object
+    attribute :completion_criteria, :type => Object
 
     if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :name, :requirement_notes, :requirements, :id, :version, :identifier, :group_name, :latest, :sharing, :user_id, :levels
+      attr_accessible :name, :requirement_notes, :requirements, :id, :version, :identifier, :group_name, :latest, :sharing, :user_id, :levels, :completion_criteria
     end
 
     validates_presence_of :name
@@ -57,7 +58,6 @@ module Osm
     # @!method initialize
     #   Initialize a new Badge
     #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
 
     # Get badges
     # @param [Osm::Api] api The api to use to make the request
@@ -90,6 +90,7 @@ module Osm
       badge_order = data["badgeOrder"].to_s.split(',')
       structures = data["structure"] || {}
       details = data["details"] || {}
+
       badge_order.each do |b|
         structure = structures[b]
         detail = details[b]
@@ -106,6 +107,16 @@ module Osm
           :sharing => badge_sharing_map[detail['sharing']],
           :user_id => Osm.to_i_or_nil(detail['userid']),
           :levels => config['levelslist'],
+          :completion_criteria => {
+            :min_modules_required => config['numModulesRequired'].to_i,
+            :fields_required => (config['columnsRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i} },
+            :badges_required => (config['badgesRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i} },
+            :min_requirements_completed => config['minRequirementsCompleted'].to_i,
+            :requires => config['requires'],
+            :add_columns_to_module => Osm.to_i_or_nil(config['addcolumns']),
+            :levels_column => Osm.to_i_or_nil(config['levels_column_id']),
+            :show_letters => !!config['shownumbers'],
+          },
         )
 
         requirements = []
@@ -114,12 +125,13 @@ module Osm
             :badge => badge,
             :name => r['name'],
             :description => r['tooltip'],
-            :module => r['module'],
+            :module_letter => r['module'],
             :field => Osm::to_i_or_nil(r['field']),
             :editable => r['editable'].to_s.eql?('true'),
           )
         end
         badge.requirements = requirements
+        badge.completion_criteria[:modules] = module_completion_data(api, badge, options)
 
         badges.push badge
       end
@@ -188,7 +200,7 @@ module Osm
       Osm::Model.require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
-      cache_key = ['badge_data', section.id, term_id, identifier]
+      cache_key = ['badge_data', section.id, term_id, id, version]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
@@ -205,7 +217,7 @@ module Osm
           :due => d['completed'].to_i,
           :awarded => d['awarded'].to_i,
           :awarded_date => Osm.parse_date(d['awardeddate']),
-          :requirements => Hash[d.select{ |k,v| k.match(/\A\d+\Z/) }.map{ |k,v| [k.to_i, v] }],
+          :requirements => Hash[d.map{ |k,v| [k.to_i, v] }].except(0),
           :section_id => section.id,
           :badge => self,
         )
@@ -220,6 +232,21 @@ module Osm
       !levels.nil?
     end
 
+    def module_map
+      @module_map ||= Hash[
+        *completion_criteria[:modules].map{ |m| 
+          [m[:module_id], m[:module_letter], m[:module_letter], m[:module_id]]
+        }.flatten
+      ].except('z')
+    end
+
+    def needed_per_module
+      @needed_per_module ||= Hash[*completion_criteria[:modules].map{ |m|
+        [m[:module_id], m[:min_required], m[:module_letter], m[:min_required]]
+      }.flatten].except('z')
+    end
+
+
     # Compare Badge based on name then id then version (desc)
     def <=>(another)
       result = self.name <=> another.try(:name)
@@ -229,6 +256,65 @@ module Osm
     end
 
 
+    private
+    # return an array of hashes representing the modules of the badge
+    def self.module_completion_data(api, badge, options={})
+      fetched_this_time = @module_completion_data.nil? # Flag to ensure we only get the data once (at most) per invocation
+      @module_completion_data = get_module_completion_data(api, options) if fetched_this_time
+
+      if @module_completion_data[badge.id].nil? && !fetched_this_time
+        @module_completion_data = fetch_from_osm
+        fetched_this_time = true
+      end
+      data = @module_completion_data[badge.id]
+      raise ArgumentError, "That badge does't exist (bad ID)." if data.nil?
+
+      if data[badge.version].nil? && !fetched_this_time
+        @module_completion_data = fetch_from_osm
+        data = @module_completion_data[badge.id]
+        fetched_this_time = true
+      end
+      data = data[badge.version]
+      raise ArgumentError, "That badge does't exist (bad version)." if data.nil?
+      return data
+    end
+
+    # Return a 2 dimensional hash/array (badge ID, badge version) of hashes representing the modules
+    def self.get_module_completion_data(api, options={})
+      cache_key = ['badge_module_completion_data']
+      if !options[:no_cache] && cache_exist?(api, cache_key)
+        return cache_read(api, cache_key)
+      end
+
+      osm_data = api.perform_query('ext/badges/records/?action=_getModuleDetails')
+      osm_data = (osm_data || {})['items'] || []
+      osm_data.map! do |i|
+        {
+          badge_id: Osm.to_i_or_nil(i['badge_id']),
+          badge_version: Osm.to_i_or_nil(i['badge_version']),
+          module_id: Osm.to_i_or_nil(i['module_id']),
+          module_letter: i['module_letter'],
+          min_required: i['num_required'].to_i,
+          custom_columns: i['custom_columns'].to_i,
+          completed_into_column: i['completed_into_column_id'].to_i.eql?(0) ? nil : i['completed_into_column_id'].to_i,
+          numeric_into_column: i['numeric_into_column_id'].to_i.eql?(0) ? nil : i['numeric_into_column_id'].to_i,
+          add_column_id_to_numeric: i['add_column_id_to_numeric'].to_i.eql?(0) ? nil : i['add_column_id_to_numeric'].to_i,
+        }
+      end
+
+      data = {}
+      osm_data.each do |i|
+        id, version = i.values_at(:badge_id, :badge_version)
+        data[id] ||= []
+        data[id][version] ||= []
+        data[id][version].push i
+      end
+
+      cache_write(api, cache_key, data, {expires_in: 864000}) # Expire in 24 hours as this data changes really slowly
+      return data
+    end
+
+    public
     def self.type
       nil
     end
@@ -263,17 +349,17 @@ module Osm
       attribute :badge, :type => Object
       attribute :name, :type => String
       attribute :description, :type => String
-      attribute :module, :type => String
+      attribute :module_letter, :type => String
       attribute :field, :type => Integer
       attribute :editable, :type => Boolean
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :name, :description, :field, :editable, :badge, :module
+        attr_accessible :name, :description, :field, :editable, :badge, :module_letter
       end
 
       validates_presence_of :name
       validates_presence_of :description
-      validates_presence_of :module
+      validates_presence_of :module_letter
       validates_presence_of :field
       validates_presence_of :badge
       validates_inclusion_of :editable, :in => [true, false]
@@ -339,11 +425,6 @@ module Osm
       validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
       validates :requirements, :hash => {:key_type => Fixnum, :value_type => String}
 
-      STAGES = {
-        'nightsaway' => [1, 2, 3, 4, 5, 10, 15, 20, 35, 50, 75, 100, 125, 150, 175, 200],
-        'hikes' => [1, 2, 5, 10, 15, 20, 35, 50],
-        'timeonthewater' => [1, 2, 5, 10, 15, 20, 35, 50],
-      }
 
       # @!method initialize
       #   Initialize a new Badge
@@ -362,133 +443,151 @@ module Osm
       # @return [Fixnum] the total number of requirements considered gained
       def total_gained
         count = 0
-        requirements.each do |field, data|
-          next unless reguiremet_met?(data)
+        requirements.each do |field_id, data|
+          next unless requirement_met?(data)
           count += 1
         end
         return count
       end
 
-      # Get the total number of sections gained
-      # @return [Hash]
-      def sections_gained
-        required = badge.needed_from_section
-        gained = gained_in_sections
-        count = 0
+      # Get the number of modules gained
+      # @return [Fixnum]
+      def modules_gained
+        needed = badge.needed_per_module
+        modules = []
 
-        required.each do |section, needed|
-          next if gained[section] < needed
-          count += 1
+        gained_in_modules.each do |module_id, gained|
+          next unless module_id.is_a?(Fixnum)
+          next if gained < needed[module_id]
+          module_letter = badge.module_map[module_id]
+          modules.push module_letter unless module_letter >= 'y'
         end
-        return count
+
+        return modules
       end
 
-      # Get the number of requirements gained in each section
+      # Get the number of requirements gained in each module
       # @return [Hash]
-      def gained_in_sections
+      def gained_in_modules
         count = {}
-        requirements.each do |field, data|
-          field = field.split('_')[0]
-          unless field.eql?('y')
-            count[field] ||= 0
-            next unless reguiremet_met?(data)
-            count[field] += 1
-          else
-            # A total 'section'
-            count['y'] = data.to_i
-          end
+        badge.requirements.each do |requirement|
+          count[requirement.module_letter] ||= 0
+          next unless requirement_met?(requirements[requirement.field])
+          count[requirement.module_letter] += 1
         end
-        return count
+        Hash[*count.map{ |k,v| [badge.module_map[k], v, k, v] }.flatten]
       end
 
 
       # Check if this badge has been earnt
-      # @return [Boolean] whether the badge is due to the member
+      # @return [Boolean] whether the badge has been earnt (ignores other badge's and their requirements which might be needed)
       def earnt?
-        if badge.type == :staged
-          return (earnt > awarded)
-        end
-        return false if (due.eql?(1) && awarded.eql?(1))
-        return true if (due.eql?(1) && awarded.eql?(0))
-        if badge.sections_needed == -1 # require all sections
-          return (sections_gained == badge.needed_from_section.keys.size)
+        if badge.has_levels?
+          return earnt > awarded
         else
-          return (total_gained >= badge.total_needed) && (sections_gained >= badge.sections_needed)
+          return false if (due.eql?(1) && awarded.eql?(1))
+          return true if (due.eql?(1) && awarded.eql?(0))
+
+          criteria = badge.completion_criteria
+          earnt = true
+          if criteria[:min_modules_required] > 0
+            earnt &= (modules_gained.size >= criteria[:min_modules_required])
+          end
+          if criteria[:min_requirements_completed] > 0
+            earnt &= (total_gained >= criteria[:min_requirements_completed])
+          end
+          if criteria[:requires]
+            # [['a'], ['b', 'c']] = a and (b or c)
+            requires = criteria[:requires].clone
+            modules = modules_gained
+            requires.map!{ |a| a.map{ |b| modules.include?(b) } } # Replace letters with true/false
+            requires.map!{ |a| a.include?(true) } # Replace each combination with true/false
+            earnt &= !requires.include?(false) # Only earnt if all combinations are met
+          end
+          criteria[:badges_required].each do |b|
+            # {:id => ###, :version => #}
+            #TODO
+          end
+          criteria[:fields_required].each do |c|
+            # {:id => ###, :min => #}
+            #TODO
+          end
+          return earnt
         end
       end
+
 
       # Get what stage which has most recently been earnt
       # (using #earnt? will tell you if it's still due (not yet awarded))
       # @return [Fixnum] the stage which has most recently been due
       def earnt
-        unless badge.type == :staged
+        unless badge.has_levels?
           return earnt? ? 1 : 0
         end
-        if STAGES.keys.include?(badge.osm_key)
-          total_done = requirements['y_01']
-          stages = STAGES[badge.osm_key]
-          stages.reverse_each do |stage|
-            return stage if total_done >= stage
+
+        levels_column = badge.completion_criteria[:levels_column_id]
+        unless badge.completion_criteria[:show_letters] # It's a hikes, nights type badge
+          badge.levels.reverse_each do |level|
+            return level if requirements[levels_column].to_i >= level
           end
-        else
-          (awarded..5).reverse_each do |stage|
-            group = 'abcde'[stage - 1]
-            if gained_in_sections[group] >= badge.needed_from_section[group]
-              return stage
-            end
+        else # It's an activity type badge
+          modules = modules_gained
+          letters = ('a'..'z').to_a
+          (awarded..badge.levels.last).reverse_each do |level|
+            return level if modules.include?(letters[level - 1])
           end
         end
         return 0
       end
 
+
       # Check if this badge has been started
       # @return [Boolean] whether the badge has been started by the member (always false if the badge has been completed)
       def started?
-        return (started > due) if badge.type.eql?(:staged) # It's a staged badge
+        if badge.has_levels?
+          return (started > due)
+        end
         return false if due?
         requirements.each do |key, value|
-          case key.split('_')[0]
-            when 'a'
-              return true if reguiremet_met?(value)
-            when 'y'
-              return true if (value.to_i > 0)
-          end
+          return true if requirement_met?(value)
         end
         return false
       end
 
+
       # Get which stage has been started
       # @return [Fixnum] which stage of the badge has been started by the member (lowest)
       def started
-        unless badge.type == :staged
+        unless badge.has_levels?
           return started? ? 1 : 0
-        else
-          # Staged badge
-          if STAGES.keys.include?(badge.osm_key) # Special staged badges
-            stages = STAGES[badge.osm_key]
-            done = requirements['y_01'].to_i
-            return 0 if done < stages[0]                # Not started the first stage
-            return 0 if done >= stages[stages.size - 1] # No more stages can be started
-            (1..stages.size-1).reverse_each do |index|
-              if (done < stages[index]) && (done > stages[index-1])
-                return stages[index]
-              end
-            end
-          else
-            # 'Normal' staged badge
-            return 0 if due == 5 || awarded == 5 # No more stages can be started
-            start_group = 'abcde'[due] # Requirements use the group letter to denote stage
-            started = 'z'
-            requirements.each do |key, value|
-              next if key[0] < start_group # This stage is marked as due
-              next if key[0] > started     # This stage is after the stage currently started
-              started = key[0] unless value.blank? || value.to_s[0].downcase.eql?('x')
-            end
-            return started.eql?('z') ? 0 : 'abcde'.index(started)+1
+        end
+        unless badge.completion_criteria[:show_letters]
+          # Nights, Hikes or Water
+          done = requirements[badge.completion_criteria[:levels_column_id]].to_i
+          levels = badge.levels                    # e.g. [0,1,2,3,4,5,10]
+          return 0 if levels.include?(done)        # Has achieved a level (and not started next )
+          return 0 if done >= levels[-1]           # No more levels to do
+          (1..(levels.size-1)).to_a.reverse_each do |i|  # indexes from last to 2nd
+            this_level = levels[i]
+            previous_level = levels[i-1]
+            return this_level if (done < this_level && done > previous_level) # this_level has been started (and not finished)
           end
-          return 0
+          return 0 # No reason we should ever get here
+        else
+          # 'Normal' staged
+          letters = ('a'..'z').to_a
+          top_level = badge.levels[-1]
+          return 0 if due == top_level || awarded == top_level # No more levels to do
+          ((due + 1)..top_level).reverse_each do |level|
+            badge.requirements.each do |requirement|
+              next unless requirement.module_letter.eql?(letters[level - 1]) # Not interested in other levels
+              return level if requirement_met?(requirements[requirement.field])
+            end
+          end
+          return 0 # No levels started
         end
       end
+
 
       # Mark the badge as awarded in OSM
       # @param [Osm::Api] api The api to use to make the request
@@ -624,11 +723,11 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options={:replace_with => {'badge' => :osm_key}})
+        Osm.inspect_instance(self, options={:replace_with => {'badge' => :name}})
       end
 
       private
-      def reguiremet_met?(data)
+      def requirement_met?(data)
         return false if data == 0
         !(data.blank? || data.to_s[0].downcase.eql?('x'))
       end
