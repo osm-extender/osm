@@ -283,12 +283,31 @@ module Osm
       else
         # We'll have to iterate through the activities
         require_ability_to(api, :read, :programme, section_id, options)
-        badges = badge_links
+
+        links = badge_links
         activities.each do |activity|
           activity = Osm::Activity.get(api, activity.activity_id, nil, options)
-          activity.badges.each do |badge|
-            badges.push badge
-          end
+          links += activity.badges
+        end
+
+        badges = []
+        links.each do |badge|
+          badges.push({
+            "badge" => nil,#"activity_animalcarer",
+            "badge_id" => badge.badge_id,
+            "badge_version" => badge.badge_version,
+            "column_id" => badge.requirement_id,
+            "badgeName" => badge.badge_name,
+            "badgetype" => badge.badge_type,
+            "columngroup" => nil,#"A",
+            "columnname" => nil,#"a",
+            "data" => badge.data,
+            "eveningid" => id,
+            "meetingdate" => date,
+            "name" => badge.requirement_label,
+            "section" => badge.badge_section,
+            "sectionid" => section_id
+          })
         end
       end
 

@@ -155,74 +155,24 @@ describe "Meeting" do
       ]
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => roles_body.to_json, :content_type => 'application/json')
 
-      activity_body = {
-        'details' => {
-          'activityid' => '4',
-          'version' => '0',
-          'groupid' => '2',
-          'userid' => '3',
-          'title' => 'Activity Name',
-          'description' => 'Description',
-          'resources' => 'Resources',
-          'instructions' => 'Instructions',
-          'runningtime' => '15',
-          'location' => 'indoors',
-          'shared' => '0',
-          'rating' => '4',
-          'facebook' => ''
-        },
-        'editable' => true,
-        'deletable' => false,
-        'used' => 3,
-        'versions' => [
-          {
-            'value' => '0',
-            'userid' => '1',
-            'firstname' => 'Alice',
-            'label' => 'Current version - Alice',
-            'selected' => 'selected'
-          }
-        ],
-        'sections' => ['beavers', 'cubs'],
-        'tags' => ['Tag 1', 'Tag2'],
-        'files' => [
-          {
-            'fileid' => '6',
-            'activityid' => '4',
-            'filename' => 'File Name',
-            'name' => 'Name',
-          }
-        ],
-        'badges' => [
-          {
-            'badge' => 'activity_firesafety',
-            'badgeLongName' => 'Fire Safety',
-            'badge_id' => '181',
-            'badge_version' => '0',
-            'badgetype' => 'activity',
-            'badgetypeLongName' => 'Activity',
-            'column_id' => '12345',
-            'columnname' => 'b_01',
-            'columnnameLongName' => 'B: Fire drill',
-            'data' => 'Yes',
-            'section' => 'cubs',
-            'sectionLongName' => 'Cubs',
-          }
-        ]
-      }
-
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getActivity&id=4", :body => activity_body.to_json, :content_type => 'application/json')
-      Osm::Activity.stub(:get) { Osm::Activity.new(:badges => [3]) }
+      Osm::Activity.stub(:get) { Osm::Activity.new(:badges => [
+        Osm::Activity::Badge.new(badge_type: :activity, badge_section: :beavers, requirement_label: 'label', data: 'data', badge_name: 'badge', badge_id: 2, badge_version: 0, requirement_id: 200)
+      ]) }
   
       meeting = Osm::Meeting.new(
         :id => 2,
         :date => Date.new(2000, 1, 2),
         :section_id => 3,
         :activities => [Osm::Meeting::Activity.new(:activity_id => 4)],
-        :badge_links => [1, 2],
+        :badge_links => [
+          Osm::Activity::Badge.new(badge_type: :activity, badge_section: :beavers, requirement_label: 'label 2', data: 'data 2', badge_name: 'badge 2', badge_id: 4, badge_version: 1, requirement_id: 400)
+        ],
       )
 
-      meeting.get_badge_requirements(@api).should == [1, 2, 3]
+      meeting.get_badge_requirements(@api).should == [
+        {"badge"=>nil, "badge_id"=>4, "badge_version"=>1, "column_id"=>400, "badgeName"=>"badge 2", "badgetype"=>:activity, "columngroup"=>nil, "columnname"=>nil, "data"=>"data 2", "eveningid"=>2, "meetingdate"=>Date.new(2000, 1, 2), "name"=>"label 2", "section"=>:beavers, "sectionid"=>3},
+        {"badge"=>nil, "badge_id"=>2, "badge_version"=>0, "column_id"=>200, "badgeName"=>"badge", "badgetype"=>:activity, "columngroup"=>nil, "columnname"=>nil, "data"=>"data", "eveningid"=>2, "meetingdate"=>Date.new(2000, 1, 2), "name"=>"label", "section"=>:beavers, "sectionid"=>3}
+      ]
     end
 
     it "Create a meeting (succeded)" do
