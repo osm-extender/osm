@@ -443,8 +443,8 @@ module Osm
       # @return [Fixnum] the total number of requirements considered gained
       def total_gained
         count = 0
-        requirements.each do |field_id, data|
-          next unless requirement_met?(data)
+        badge.requirements.each do |requirement|
+          next unless requirement_met?(requirements[requirement.field])
           count += 1
         end
         return count

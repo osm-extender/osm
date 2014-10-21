@@ -119,16 +119,29 @@ describe "Badge" do
 
   it "Get total requirements gained for a member" do
     data = Osm::Badge::Data.new(
+      :badge => Osm::Badge.new(
+        :requirements => [
+          Osm::Badge::Requirement.new(field: 1),
+          Osm::Badge::Requirement.new(field: 2),
+          Osm::Badge::Requirement.new(field: 3),
+          Osm::Badge::Requirement.new(field: 4),
+          Osm::Badge::Requirement.new(field: 5),
+          Osm::Badge::Requirement.new(field: 6),
+          Osm::Badge::Requirement.new(field: 7),
+          Osm::Badge::Requirement.new(field: 8),
+          Osm::Badge::Requirement.new(field: 9),
+        ]
+      ),
       :requirements => {
-        'a_1' => 'a',
-        'a_2' => 'yes',
-        'a_3' => '2000-01-02',
-        'a_4' => 1,
-        'b_1' => 'x',
-        'b_2' => 'xYES',
-        'b_3' => '',
-        'b_4' => nil,
-        'b_5' => 0,
+        1 => 'a',
+        2 => 'yes',
+        3 => '2000-01-02',
+        4 => 1,
+        5 => 'x',
+        6 => 'xYES',
+        7 => '',
+        8 => nil,
+        9 => 0,
       }
     )
     data.total_gained.should == 4
