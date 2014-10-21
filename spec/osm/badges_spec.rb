@@ -109,15 +109,15 @@ describe "Badges" do
       badges_body = {
         'identifier' => 'badge_id_level',
         'items' => [
-          { 'shortname' => 'badge_1', 'stock' => 1, 'desired' => 0, 'due' => 0 },
-          { 'shortname' => 'badge_2', 'stock' => 2, 'desired' => 0, 'due' => 0 },
+          { 'shortname' => 'badge_1', 'stock' => 1, 'desired' => 0, 'due' => 0, 'badge_id_level' => '100_1' },
+          { 'shortname' => 'badge_2', 'stock' => 2, 'desired' => 0, 'due' => 0, 'badge_id_level' => '200_2' },
         ]
       }
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/stock/?action=getBadgeStock&section=beavers&section_id=1&term_id=2", :body => badges_body.to_json, :content_type => 'application/json')
       Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 2) }
 
       section = Osm::Section.new(:id => 1, :type => :beavers)
-      Osm::Badges.get_stock(@api, section).should == {'badge_1' => 1, 'badge_2' => 2}
+      Osm::Badges.get_stock(@api, section).should == {'100_1' => 1, '200_2' => 2}
     end
 
     describe "Update badge stock levels" do

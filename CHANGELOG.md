@@ -29,6 +29,7 @@
       * Attributes untouched: badge\_type, badge\_section, data, requirement\_label
     * Osm::Activity::Badge attributes now match Osm::Event::BadgeLink
     * Osm::Meeting::BadgeLink attributes now match Osm::Event::badgeLink
+    * Osm::badges.get_badge_stock returns a Hash, keys are now "#{badge_id}_#{level}"
 
 ## Version 1.2.14
 
