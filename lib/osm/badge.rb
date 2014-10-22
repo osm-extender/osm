@@ -170,14 +170,13 @@ module Osm
         badge_data = Hash[item.to_a.select{ |k,v| !!k.match(/\d+_\d+/) }]
         badge_data.each do |badge_identifier, status|
           if status.is_a?(String)
-            # Possible statuses: 'Started', 'Due', 'Awarded', 'Due Lvl ?' & 'Awarded Lvl ?'
-            case status[0]
-              when 'S'
-                new_item[badge_identifier] = :started
-              when 'D'
-                new_item[badge_identifier] = :due
-              when 'A'
-                new_item[badge_identifier] = :awarded
+            # Possible statuses: 'Started', 'Due', 'Awarded', 'Due Lvl ?', 'Awarded Lvl ?' & '01/02/2003'
+            if status[0].eql?('S')
+              new_item[badge_identifier] = :started
+            elsif status[0].eql?('D')
+              new_item[badge_identifier] = :due
+            elsif status[0].eql?('A') || status.match(Osm::OSM_DATE_REGEX)
+              new_item[badge_identifier] = :awarded
             end
           end
         end

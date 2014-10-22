@@ -820,7 +820,8 @@ describe "Badge" do
             '95_0' => 'Due',
             '96_0' => 'Awarded',
             '97_0' => 'Awarded Lvl 2',
-            '98_0' => 'Due Lvl 3',
+            '98_0' => '01/02/2003',
+            '99_0' => 'Due Lvl 3',
           }
         ]
       }
@@ -838,7 +839,8 @@ describe "Badge" do
         '95_0' => :due,
         '96_0' => :awarded,
         '97_0' => :awarded,
-        '98_0' => :due,
+        '98_0' => :awarded,
+        '99_0' => :due,
       }
     end
 
