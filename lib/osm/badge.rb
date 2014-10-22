@@ -175,8 +175,11 @@ module Osm
               new_item[badge_identifier] = :started
             elsif status[0].eql?('D')
               new_item[badge_identifier] = :due
-            elsif status[0].eql?('A') || status.match(Osm::OSM_DATE_REGEX)
+            elsif status[0].eql?('A')
               new_item[badge_identifier] = :awarded
+            elsif status.match(Osm::OSM_DATE_REGEX)
+              new_item[badge_identifier] = :awarded
+              new_item["#{badge_identifier}_date"] = Osm.parse_date(status)
             end
           end
         end

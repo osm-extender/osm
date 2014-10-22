@@ -841,6 +841,7 @@ describe "Badge" do
         '97_0' => :awarded,
         '98_0' => :awarded,
         '99_0' => :due,
+        '98_0_date' => Date.new(2003, 2, 1),
       }
     end
 
