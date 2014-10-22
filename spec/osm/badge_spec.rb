@@ -117,6 +117,18 @@ describe "Badge" do
   end
 
 
+  it "Works out if a requirement has been met" do
+    data = Osm::Badge::Data.new(requirements: {1 => ''}).requirement_met?(1).should be_false
+    data = Osm::Badge::Data.new(requirements: {1 => 'xStuff'}).requirement_met?(1).should be_false
+    data = Osm::Badge::Data.new(requirements: {1 => '0'}).requirement_met?(1).should be_false
+    data = Osm::Badge::Data.new(requirements: {1 => 0}).requirement_met?(1).should be_false
+    data = Osm::Badge::Data.new(requirements: {}).requirement_met?(1).should be_false
+    data = Osm::Badge::Data.new(requirements: {1 => 'Stuff'}).requirement_met?(1).should be_true
+    data = Osm::Badge::Data.new(requirements: {1 => '1'}).requirement_met?(1).should be_true
+    data = Osm::Badge::Data.new(requirements: {1 => 1}).requirement_met?(1).should be_true
+  end
+
+
   it "Get total requirements gained for a member" do
     data = Osm::Badge::Data.new(
       :badge => Osm::Badge.new(

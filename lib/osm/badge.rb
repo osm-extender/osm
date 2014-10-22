@@ -444,7 +444,7 @@ module Osm
       def total_gained
         count = 0
         badge.requirements.each do |requirement|
-          next unless requirement_met?(requirements[requirement.field])
+          next unless requirement_met?(requirement.field)
           count += 1
         end
         return count
@@ -472,7 +472,7 @@ module Osm
         count = {}
         badge.requirements.each do |requirement|
           count[requirement.module_letter] ||= 0
-          next unless requirement_met?(requirements[requirement.field])
+          next unless requirement_met?(requirement.field)
           count[requirement.module_letter] += 1
         end
         Hash[*count.map{ |k,v| [badge.module_map[k], v, k, v] }.flatten]
@@ -549,7 +549,7 @@ module Osm
         end
         return false if due?
         requirements.each do |key, value|
-          return true if requirement_met?(value)
+          return true if requirement_met?(key)
         end
         return false
       end
@@ -581,7 +581,7 @@ module Osm
           ((due + 1)..top_level).reverse_each do |level|
             badge.requirements.each do |requirement|
               next unless requirement.module_letter.eql?(letters[level - 1]) # Not interested in other levels
-              return level if requirement_met?(requirements[requirement.field])
+              return level if requirement_met?(requirement.field)
             end
           end
           return 0 # No levels started
@@ -726,10 +726,13 @@ module Osm
         Osm.inspect_instance(self, options={:replace_with => {'badge' => :name}})
       end
 
-      private
-      def requirement_met?(data)
-        return false if data == 0
-        !(data.blank? || data.to_s[0].downcase.eql?('x'))
+      # Work out if the requirmeent has been met
+      # @param [Fixnum, #to_i] field_id The id of the field to evaluate (e.g. "12", "xSomething", "Yes" or "")
+      # @return [Boolean] whether the requirmeent has been met
+      def requirement_met?(field_id)
+        data = requirements[field_id.to_i].to_s
+        return false if data == '0'
+        !(data.blank? || data[0].downcase.eql?('x'))
       end
 
     end # Class Data
