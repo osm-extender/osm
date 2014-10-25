@@ -16,6 +16,7 @@
       * id, version, identifier, group\_name, latest, user\_id, levels, sharing attributes added
       * OSM Changed how completion criteria are retrieved (this gem now uses a special peice of OSM's API just for this purpose) so:
         * Osm::Badge attributes sections\_needed, total\_needed and needed\_from\_section are gone
+      * New methods modules, module_letters and module_ids
     * Osm::Badge::Data
       * mark\_awarded method now only marks as awarded (the optional mark\_as parameter is gone)
       * mark\_not\_awarded method added

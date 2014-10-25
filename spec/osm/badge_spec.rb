@@ -64,6 +64,38 @@ describe "Badge" do
     requirement.valid?.should be_true
   end
 
+  it "Produces a map of module letter <-> module id" do
+    badge = Osm::Badge.new(completion_criteria:{ modules: [
+      {module_id: 2, module_letter: 'c'},
+      {module_id: 10, module_letter: 'b'},
+      {module_id: 1, module_letter: 'a'}
+    ]})
+
+    badge.module_map.should == {1=>'a', 10=>'b', 2=>'c', 'a'=>1, 'b'=>10, 'c'=>2}
+  end
+
+  it "Gets the number of requirements needed per module" do
+    badge = Osm::Badge.new(completion_criteria:{ modules: [
+      {module_id: 2, module_letter: 'c', min_required: 5},
+      {module_id: 10, module_letter: 'b', min_required: 4},
+      {module_id: 1, module_letter: 'a', min_required: 3}
+    ]})
+
+    badge.needed_per_module.should == {'a'=>3, 'b'=>4, 'c'=>5, 2=>5, 10=>4, 1=>3}
+  end
+
+  it "Produces a list of modules" do
+    badge = Osm::Badge.new(completion_criteria:{ modules: [
+      {module_id: 2, module_letter: 'c'},
+      {module_id: 10, module_letter: 'b'},
+      {module_id: 1, module_letter: 'a'}
+    ]})
+
+    badge.module_letters.should == ['a', 'b', 'c']
+    badge.module_ids.should == [1, 2, 10]
+  end
+
+
   it "Create Data" do
     data = Osm::Badge::Data.new(
       :member_id => 1,

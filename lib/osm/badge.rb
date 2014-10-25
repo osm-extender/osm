@@ -248,6 +248,18 @@ module Osm
       }.flatten].except('z')
     end
 
+    def module_letters
+      @module_letters ||= completion_criteria[:modules].map{ |m| m[:module_letter] }.sort
+    end
+
+    def module_ids
+      @module_ids ||= completion_criteria[:modules].map{ |m| m[:module_id] }.sort
+    end
+
+    def modules
+      completion_criteria[:modules] || []
+    end
+
 
     # Compare Badge based on name then id then version (desc)
     def <=>(another)
