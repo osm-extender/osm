@@ -170,16 +170,29 @@ module Osm
         badge_data = Hash[item.to_a.select{ |k,v| !!k.match(/\d+_\d+/) }]
         badge_data.each do |badge_identifier, status|
           if status.is_a?(String)
-            # Possible statuses: 'Started', 'Due', 'Awarded', 'Due Lvl ?', 'Awarded Lvl ?' & '01/02/2003'
-            if status[0].eql?('S')
+            # Possible statuses: 
+            # 'Started',
+            # 'Due', 'Due Lvl 2'
+            # 'Awarded', 'Awarded Lvl 2', '01/02/2003', '02/03/2004 (Lvl 2)'
+            if status.eql?('Started')
               new_item[badge_identifier] = :started
-            elsif status[0].eql?('D')
+            elsif status.eql?('Due')
               new_item[badge_identifier] = :due
-            elsif status[0].eql?('A')
+            elsif match_data = status.match(/\ADue Lvl (\d+)\Z/)
+              new_item[badge_identifier] = :due
+              new_item["#{badge_identifier}_level"] = match_data[1].to_i
+            elsif status.eql?('Awarded')
               new_item[badge_identifier] = :awarded
-            elsif status.match(Osm::OSM_DATE_REGEX)
+            elsif match_data = status.match(/\AAwarded Lvl (\d+)\Z/)
               new_item[badge_identifier] = :awarded
-              new_item["#{badge_identifier}_date"] = Osm.parse_date(status)
+              new_item["#{badge_identifier}_level"] = match_data[1].to_i
+            elsif match_data = status.match(Osm::OSM_DATE_REGEX)
+              new_item[badge_identifier] = :awarded
+              new_item["#{badge_identifier}_date"] = Osm.parse_date(match_data[0])
+            elsif match_data = status.match(/\A(#{Osm::OSM_DATE_REGEX_UNANCHORED.to_s}) \(Lvl (\d+)\)\Z/)
+              new_item[badge_identifier] = :awarded
+              new_item["#{badge_identifier}_date"] = Osm.parse_date(match_data[1])
+              new_item["#{badge_identifier}_level"] = match_data[2].to_i
             end
           end
         end
