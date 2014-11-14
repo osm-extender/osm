@@ -9,6 +9,8 @@ module Osm
     #   @return [String] a description of the badge
     # @!attribute [rw] requirements
     #   @return [Array<Osm::Badge::Requirement>] the requirements of the badge
+    # @!attribute [rw] modules
+    #   @return [Array<Hash>] Details of the modules which make up the badge
     # @!attribute [rw] id
     #   @return [Fixnum] the badge's id in OSM
     # @!attribute [rw] version
@@ -25,6 +27,22 @@ module Osm
     #   @return [Fixnum] the OSM user who created this (version of the) badge
     # @!attribute [rw] levels
     #   @return [Array<Fixnum>, nil] the levels available, nil if it's a single level badge
+    # @!attribute [rw] min_modules_required
+    #   @return [Fixnum] the minimum number of modules which must be completed to earn the badge
+    # @!attribute [rw] min_fields_required
+    #   @return [Fixnum] the minimum number of fields which must be completed to earn the badge
+    # @!attribute [rw] add_columns_to_module
+    #   @return [Fixnum, nil] the module to add columns to for nights away type badges
+    # @!attribute [rw] level_field
+    #   @return [Fixnum, nil] the column which stores the currently earnt level of nights away type badges
+    # @!attribute [rw] requires_modules
+    #   @return [Array<Array<String>>, nil] the module letters required to gain the badge, at least one from each inner Array
+    # @!attribute [rw] fields_required
+    #   @return [Array<Hash>] the fields (from other badges) required to complete this badge, {id: field ID, min: the minimum numerical value of the field's data}
+    # @!attribute [rw] badges_required
+    #   @return [Array<Hash>] the other badges required to complete this badge, {id: The ID of the badge, version: The version of the badge}
+    # @!attribute [rw] show_level_letters
+    #   @return [Boolean] Whether to show letters not numbers for the levels of a staged badge
 
     attribute :name, :type => String
     attribute :requirement_notes, :type => String
@@ -37,22 +55,36 @@ module Osm
     attribute :sharing, :type => Object
     attribute :user_id, :type => Integer
     attribute :levels, :type => Object
-    attribute :completion_criteria, :type => Object
+    attribute :modules, :type => Object
+    attribute :min_modules_required, :type => Integer
+    attribute :min_fields_required, :type => Integer
+    attribute :add_columns_to_module, :type => Integer
+    attribute :level_field, :type => Integer
+    attribute :requires_modules, :type => Object
+    attribute :fields_required, :type => Object
+    attribute :badges_required, :type => Object
+    attribute :show_level_letters, :type => Boolean
 
     if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :name, :requirement_notes, :requirements, :id, :version, :identifier, :group_name, :latest, :sharing, :user_id, :levels, :completion_criteria
+      attr_accessible :name, :requirement_notes, :requirements, :id, :version, :identifier, :group_name, :latest, :sharing, :user_id, :levels, :modules, :min_modules_required, :min_fields_required, :add_columns_to_module, :level_field, :requires_modules, :fields_required, :badges_required, :show_level_letters
     end
 
     validates_presence_of :name
     validates_presence_of :requirement_notes
-    validates_presence_of :id
-    validates_presence_of :version
+    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>1
+    validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_presence_of :identifier
     validates_inclusion_of :sharing, :in => [:draft, :private, :optin, :optin_locked, :default_locked]
     validates_presence_of :user_id
     validates :requirements, :array_of => {:item_type => Osm::Badge::Requirement, :item_valid => true}
+    validates :modules, :array_of => {:item_type => Hash}
     validates_inclusion_of :latest, :in => [true, false]
     validates :levels, :array_of => {:item_type => Fixnum}, :allow_nil => true
+    validates_numericality_of :min_modules_required, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :min_fields_required, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :add_columns_to_module, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+    validates_numericality_of :level_field, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+    validates_inclusion_of :show_level_letters, :in => [true, false]
 
 
     # @!method initialize
@@ -107,16 +139,14 @@ module Osm
           :sharing => badge_sharing_map[detail['sharing']],
           :user_id => Osm.to_i_or_nil(detail['userid']),
           :levels => config['levelslist'],
-          :completion_criteria => {
-            :min_modules_required => config['numModulesRequired'].to_i,
-            :fields_required => (config['columnsRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i} },
-            :badges_required => (config['badgesRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i} },
-            :min_requirements_completed => config['minRequirementsCompleted'].to_i,
-            :requires => config['requires'],
-            :add_columns_to_module => Osm.to_i_or_nil(config['addcolumns']),
-            :levels_column => Osm.to_i_or_nil(config['levels_column_id']),
-            :show_letters => !!config['shownumbers'],
-          },
+          :min_modules_required => config['numModulesRequired'].to_i,
+          :min_fields_required => config['minRequirementsCompleted'].to_i,
+          :add_columns_to_module => Osm.to_i_or_nil(config['addcolumns']),
+          :level_field => Osm.to_i_or_nil(config['levels_column_id']),
+          :requires_modules => config['requires'],
+          :fields_required => (config['columnsRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i} },
+          :badges_required => (config['badgesRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i} },
+          :show_level_letters => !!config['shownumbers'],
         )
 
         requirements = []
@@ -131,7 +161,7 @@ module Osm
           )
         end
         badge.requirements = requirements
-        badge.completion_criteria[:modules] = module_completion_data(api, badge, options)
+        badge.modules = module_completion_data(api, badge, options)
 
         badges.push badge
       end
@@ -247,30 +277,30 @@ module Osm
       !levels.nil?
     end
 
+    def add_columns?
+      !add_columns_to_module.nil?
+    end
+
     def module_map
       @module_map ||= Hash[
-        *completion_criteria[:modules].map{ |m| 
+        *modules.map{ |m| 
           [m[:module_id], m[:module_letter], m[:module_letter], m[:module_id]]
         }.flatten
       ].except('z')
     end
 
     def needed_per_module
-      @needed_per_module ||= Hash[*completion_criteria[:modules].map{ |m|
+      @needed_per_module ||= Hash[*modules.map{ |m|
         [m[:module_id], m[:min_required], m[:module_letter], m[:min_required]]
       }.flatten].except('z')
     end
 
     def module_letters
-      @module_letters ||= completion_criteria[:modules].map{ |m| m[:module_letter] }.sort
+      @module_letters ||= modules.map{ |m| m[:module_letter] }.sort
     end
 
     def module_ids
-      @module_ids ||= completion_criteria[:modules].map{ |m| m[:module_id] }.sort
-    end
-
-    def modules
-      completion_criteria[:modules] || []
+      @module_ids ||= modules.map{ |m| m[:module_id] }.sort
     end
 
 
@@ -515,31 +545,29 @@ module Osm
           return false if (due.eql?(1) && awarded.eql?(1))
           return true if (due.eql?(1) && awarded.eql?(0))
 
-          criteria = badge.completion_criteria
-          earnt = true
-          if criteria[:min_modules_required] > 0
-            earnt &= (modules_gained.size >= criteria[:min_modules_required])
+          if badge.min_modules_required > 0
+            return false unless modules_gained.size >= badge.min_modules_required
           end
-          if criteria[:min_requirements_completed] > 0
-            earnt &= (total_gained >= criteria[:min_requirements_completed])
+          if badge.min_fields_required > 0
+            return false unless total_gained >= badge.min_fields_required
           end
-          if criteria[:requires]
+          if badge.requires_modules
             # [['a'], ['b', 'c']] = a and (b or c)
-            requires = criteria[:requires].clone
+            requires = badge.requires_modules.clone
             modules = modules_gained
             requires.map!{ |a| a.map{ |b| modules.include?(b) } } # Replace letters with true/false
             requires.map!{ |a| a.include?(true) } # Replace each combination with true/false
-            earnt &= !requires.include?(false) # Only earnt if all combinations are met
+            return false if requires.include?(false) # Only earnt if all combinations are met
           end
-          criteria[:badges_required].each do |b|
+          badge.badges_required.each do |b|
             # {:id => ###, :version => #}
             #TODO
           end
-          criteria[:fields_required].each do |c|
+          badge.fields_required.each do |c|
             # {:id => ###, :min => #}
             #TODO
           end
-          return earnt
+          return true
         end
       end
 
@@ -552,8 +580,8 @@ module Osm
           return earnt? ? 1 : 0
         end
 
-        levels_column = badge.completion_criteria[:levels_column_id]
-        unless badge.completion_criteria[:show_letters] # It's a hikes, nights type badge
+        levels_column = badge.level_field
+        unless badge.show_level_letters # It's a hikes, nights type badge
           badge.levels.reverse_each do |level|
             return level if requirements[levels_column].to_i >= level
           end
@@ -588,9 +616,9 @@ module Osm
         unless badge.has_levels?
           return started? ? 1 : 0
         end
-        unless badge.completion_criteria[:show_letters]
+        unless badge.show_level_letters
           # Nights, Hikes or Water
-          done = requirements[badge.completion_criteria[:levels_column_id]].to_i
+          done = requirements[badge.level_field].to_i
           levels = badge.levels                    # e.g. [0,1,2,3,4,5,10]
           return 0 if levels.include?(done)        # Has achieved a level (and not started next )
           return 0 if done >= levels[-1]           # No more levels to do
