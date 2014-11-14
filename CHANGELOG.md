@@ -14,9 +14,9 @@
     * Osm::Badge
       * osm\_key, osm\_long\_key and competion criteria attributes are gone
       * id, version, identifier, group\_name, latest, user\_id, levels, sharing attributes added
-      * min_modules_required, min_fields_required, add_columns_to_module, level_field, fields_required, badges_required, show_level_letters, requires_modules and modules attributes added
+      * min_modules_required, min_requirements_required, add_columns_to_module, level_requirement, other_requirements_required, badges_required, show_level_letters, requires_modules and modules attributes added
       * OSM Changed how completion criteria are retrieved (this gem now uses a special peice of OSM's API just for this purpose) so:
-        * Osm::Badge attributes sections\_needed, total\_needed and needed\_from\_section are gone
+      * attributes sections\_needed, total\_needed and needed\_from\_section are gone
       * New methods modules, module_letters, module_ids and add_columns?
     * Osm::Badge::Data
       * mark\_awarded method now only marks as awarded (the optional mark\_as parameter is gone)

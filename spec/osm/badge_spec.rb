@@ -20,9 +20,9 @@ describe "Badge" do
         :requirements => [],
         :modules => [{}],
         :min_modules_required => 5,
-        :min_fields_required => 6,
+        :min_requirements_required => 6,
         :add_columns_to_module => 7,
-        :level_field => 8,
+        :level_requirement => 8,
         :requires_modules => [['A'], ['B', 'C']],
         :show_level_letters => true,
       }
@@ -43,9 +43,9 @@ describe "Badge" do
       badge.requirements.should == []
       badge.modules.should == [{}]
       badge.min_modules_required.should == 5
-      badge.min_fields_required.should == 6
+      badge.min_requirements_required.should == 6
       badge.add_columns_to_module.should == 7
-      badge.level_field.should == 8
+      badge.level_requirement.should == 8
       badge.requires_modules.should == [['A'], ['B', 'C']]
       badge.show_level_letters.should == true
       badge.valid?.should be_true
@@ -57,9 +57,9 @@ describe "Badge" do
       badge.valid?.should be_true
     end
 
-    it "Valid with nil for level_field" do
-      badge = Osm::Badge.new(@badge_options.merge(level_field: nil))
-      badge.level_field.should be_nil
+    it "Valid with nil for level_requirement" do
+      badge = Osm::Badge.new(@badge_options.merge(level_requirement: nil))
+      badge.level_requirement.should be_nil
       badge.valid?.should be_true
     end
     
@@ -76,7 +76,7 @@ describe "Badge" do
       :name => 'name',
       :description => 'description',
       :module_letter => 'a',
-      :field => 1,
+      :id => 1,
       :editable => true,
       :badge => Osm::Badge.new(:identifier => 'key'),
     )
@@ -84,7 +84,7 @@ describe "Badge" do
     requirement.name.should == 'name'
     requirement.description.should == 'description'
     requirement.module_letter.should == 'a'
-    requirement.field.should == 1
+    requirement.id.should == 1
     requirement.editable.should be_true
     requirement.badge.identifier.should == 'key'
     requirement.valid?.should be_true
@@ -162,10 +162,10 @@ describe "Badge" do
     badges.sort.should == [b1, b2, b3, b4]
   end
 
-  it "Compare badge requirements by badge then field" do
-    b1 = Osm::Badge::Requirement.new(:badge => Osm::Badge.new(:name => 'A'), :field => 'a')
-    b2 = Osm::Badge::Requirement.new(:badge => Osm::Badge.new(:name => 'B'), :field => 'a')
-    b3 = Osm::Badge::Requirement.new(:badge => Osm::Badge.new(:name => 'B'), :field => 'b')
+  it "Compare badge requirements by badge then id" do
+    b1 = Osm::Badge::Requirement.new(:badge => Osm::Badge.new(:name => 'A'), :id => 1)
+    b2 = Osm::Badge::Requirement.new(:badge => Osm::Badge.new(:name => 'B'), :id => 1)
+    b3 = Osm::Badge::Requirement.new(:badge => Osm::Badge.new(:name => 'B'), :id => 2)
     badges = [b3, b1, b2]
     badges.sort.should == [b1, b2, b3]
   end
@@ -196,15 +196,15 @@ describe "Badge" do
     data = Osm::Badge::Data.new(
       :badge => Osm::Badge.new(
         :requirements => [
-          Osm::Badge::Requirement.new(field: 1),
-          Osm::Badge::Requirement.new(field: 2),
-          Osm::Badge::Requirement.new(field: 3),
-          Osm::Badge::Requirement.new(field: 4),
-          Osm::Badge::Requirement.new(field: 5),
-          Osm::Badge::Requirement.new(field: 6),
-          Osm::Badge::Requirement.new(field: 7),
-          Osm::Badge::Requirement.new(field: 8),
-          Osm::Badge::Requirement.new(field: 9),
+          Osm::Badge::Requirement.new(id: 1),
+          Osm::Badge::Requirement.new(id: 2),
+          Osm::Badge::Requirement.new(id: 3),
+          Osm::Badge::Requirement.new(id: 4),
+          Osm::Badge::Requirement.new(id: 5),
+          Osm::Badge::Requirement.new(id: 6),
+          Osm::Badge::Requirement.new(id: 7),
+          Osm::Badge::Requirement.new(id: 8),
+          Osm::Badge::Requirement.new(id: 9),
         ]
       ),
       :requirements => {
@@ -226,12 +226,12 @@ describe "Badge" do
     badge = Osm::Badge.new(
       :needed_from_section => {'a' => 1, 'b' => 2},
       :requirements => [
-        Osm::Badge::Requirement.new(:module_letter=> 'a', :field => '1'),
-        Osm::Badge::Requirement.new(:module_letter=> 'a', :field => '2'),
-        Osm::Badge::Requirement.new(:module_letter=> 'b', :field => '3'),
-        Osm::Badge::Requirement.new(:module_letter=> 'b', :field => '4'),
-        Osm::Badge::Requirement.new(:module_letter=> 'c', :field => '5'),
-        Osm::Badge::Requirement.new(:module_letter=> 'c', :field => '6'),
+        Osm::Badge::Requirement.new(:module_letter=> 'a', :id => 1),
+        Osm::Badge::Requirement.new(:module_letter=> 'a', :id => 2),
+        Osm::Badge::Requirement.new(:module_letter=> 'b', :id => 3),
+        Osm::Badge::Requirement.new(:module_letter=> 'b', :id => 4),
+        Osm::Badge::Requirement.new(:module_letter=> 'c', :id => 5),
+        Osm::Badge::Requirement.new(:module_letter=> 'c', :id => 6),
       ],
       :modules => [
         { module_letter: 'a', module_id: 100 },
@@ -249,11 +249,11 @@ describe "Badge" do
   it "Get modules met for a member" do
     badge = Osm::Badge.new(
       :requirements => [
-        Osm::Badge::Requirement.new(:module_letter=> 'a', :field => '1'),
-        Osm::Badge::Requirement.new(:module_letter=> 'a', :field => '2'),
-        Osm::Badge::Requirement.new(:module_letter=> 'b', :field => '3'),
-        Osm::Badge::Requirement.new(:module_letter=> 'b', :field => '4'),
-        Osm::Badge::Requirement.new(:module_letter=> 'c', :field => '5'),
+        Osm::Badge::Requirement.new(:module_letter=> 'a', :id => 1),
+        Osm::Badge::Requirement.new(:module_letter=> 'a', :id => 2),
+        Osm::Badge::Requirement.new(:module_letter=> 'b', :id => 3),
+        Osm::Badge::Requirement.new(:module_letter=> 'b', :id => 4),
+        Osm::Badge::Requirement.new(:module_letter=> 'c', :id => 5),
       ],
       :modules => [
         { module_letter: 'a', module_id: 1000, min_required: 1 },
@@ -286,21 +286,21 @@ describe "Badge" do
     it "Non staged" do
       badge = Osm::ActivityBadge.new(
         :min_modules_required => 0,
-        :min_fields_required => 0,
+        :min_requirements_required => 0,
         :modules => [
           {module_id: 1, module_letter: 'a', min_required: 2},
           {module_id: 2, module_letter: 'b', min_required: 1},
           {module_id: 3, module_letter: 'c', min_required: 1},
         ],
         :badges_required => [],
-        :fields_required => [],
+        :other_requirements_required => [],
         :requirements => [
-          Osm::Badge::Requirement.new(badge: badge, module_letter: 'a', field: 10),
-          Osm::Badge::Requirement.new(badge: badge, module_letter: 'a', field: 11),
-          Osm::Badge::Requirement.new(badge: badge, module_letter: 'b', field: 20),
-          Osm::Badge::Requirement.new(badge: badge, module_letter: 'b', field: 21),
-          Osm::Badge::Requirement.new(badge: badge, module_letter: 'c', field: 30),
-          Osm::Badge::Requirement.new(badge: badge, module_letter: 'c', field: 31),
+          Osm::Badge::Requirement.new(badge: badge, module_letter: 'a', id: 10),
+          Osm::Badge::Requirement.new(badge: badge, module_letter: 'a', id: 11),
+          Osm::Badge::Requirement.new(badge: badge, module_letter: 'b', id: 20),
+          Osm::Badge::Requirement.new(badge: badge, module_letter: 'b', id: 21),
+          Osm::Badge::Requirement.new(badge: badge, module_letter: 'c', id: 30),
+          Osm::Badge::Requirement.new(badge: badge, module_letter: 'c', id: 31),
         ],
       )
 
@@ -325,7 +325,7 @@ describe "Badge" do
       # Number of requirements needed
       this_badge = badge.clone
       this_badge.min_modules_required = 0
-      this_badge.min_fields_required = 2
+      this_badge.min_requirements_required = 2
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'y', 20=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
       data.earnt?.should be_true
@@ -370,12 +370,12 @@ describe "Badge" do
         :show_level_letters => true,
       )
       badge.requirements = [
-        Osm::Badge::Requirement.new(badge: badge, module_letter: 'a', field: 10),
-        Osm::Badge::Requirement.new(badge: badge, module_letter: 'a', field: 11),
-        Osm::Badge::Requirement.new(badge: badge, module_letter: 'b', field: 20),
-        Osm::Badge::Requirement.new(badge: badge, module_letter: 'b', field: 21),
-        Osm::Badge::Requirement.new(badge: badge, module_letter: 'c', field: 30),
-        Osm::Badge::Requirement.new(badge: badge, module_letter: 'c', field: 31),
+        Osm::Badge::Requirement.new(badge: badge, module_letter: 'a', id: 10),
+        Osm::Badge::Requirement.new(badge: badge, module_letter: 'a', id: 11),
+        Osm::Badge::Requirement.new(badge: badge, module_letter: 'b', id: 20),
+        Osm::Badge::Requirement.new(badge: badge, module_letter: 'b', id: 21),
+        Osm::Badge::Requirement.new(badge: badge, module_letter: 'c', id: 30),
+        Osm::Badge::Requirement.new(badge: badge, module_letter: 'c', id: 31),
       ]
 
       requirements = {10=>'',11=>'',20=>'',21=>'',30=>'',31=>''}
@@ -403,7 +403,7 @@ describe "Badge" do
       badge = Osm::StagedBadge.new(
         :levels => [0,1,2,3,4,5,10,15,20],
         :show_level_letters => false,
-        :level_field => 3000,
+        :level_requirement => 3000,
         :requirements => []
       )
 
@@ -436,9 +436,9 @@ describe "Badge" do
         :levels => [0,1,2],
         :show_level_letters => true,
         :requirements => [
-          Osm::Badge::Requirement.new(:module_letter => 'a', :field => 1000),
-          Osm::Badge::Requirement.new(:module_letter => 'b', :field => 2000),
-          Osm::Badge::Requirement.new(:module_letter => 'b', :field => 2001),
+          Osm::Badge::Requirement.new(:module_letter => 'a', :id => 1000),
+          Osm::Badge::Requirement.new(:module_letter => 'b', :id => 2000),
+          Osm::Badge::Requirement.new(:module_letter => 'b', :id => 2001),
         ]
       ),
       :requirements => {1000 => 'Yes', 2000 => 'Yes', 2001 => ''},
@@ -447,13 +447,13 @@ describe "Badge" do
 
     # Staged Count Badge
     Osm::Badge::Data.new(
-      :badge => Osm::StagedBadge.new(:levels => [0,1,2,3,4,5,10,15,20], :show_level_letters => false, :level_field => 1000),
+      :badge => Osm::StagedBadge.new(:levels => [0,1,2,3,4,5,10,15,20], :show_level_letters => false, :level_requirement => 1000),
       :requirements => {1000 => 5, 2000 => '5', 3000 => ''},
       :due => 5,
       :awarded => 4,
     ).started?.should be_false # Finished lvl 5 & not started lvl 10
     Osm::Badge::Data.new(
-      :badge => Osm::StagedBadge.new(:levels => [0,1,2,3,4,5,10,15,20], :show_level_letters => false, :level_field => 1000),
+      :badge => Osm::StagedBadge.new(:levels => [0,1,2,3,4,5,10,15,20], :show_level_letters => false, :level_requirement => 1000),
       :requirements => {1000 => 6, 2000 => '6', 3000 => ''},
       :due => 5,
       :awarded => 3,
@@ -473,9 +473,9 @@ describe "Badge" do
       :levels => [0,1,2],
       :show_level_letters => true,
       :requirements => [
-        Osm::Badge::Requirement.new(:module_letter => 'a', :field => 100),
-        Osm::Badge::Requirement.new(:module_letter => 'b', :field => 200),
-        Osm::Badge::Requirement.new(:module_letter => 'b', :field => 201),
+        Osm::Badge::Requirement.new(:module_letter => 'a', :id => 100),
+        Osm::Badge::Requirement.new(:module_letter => 'b', :id => 200),
+        Osm::Badge::Requirement.new(:module_letter => 'b', :id => 201),
       ]
     )
 
@@ -500,7 +500,7 @@ describe "Badge" do
     staged_count = Osm::StagedBadge.new(
       :levels => [0,1,2,3,4,5,10,15,20],
       :show_level_letters => false,
-      :level_field => 3000,
+      :level_requirement => 3000,
       :requirements => []
     )
 
@@ -605,18 +605,18 @@ describe "Badge" do
           badge.sharing.should == :default_locked
           badge.requirements.size.should == 1
           badge.min_modules_required.should == 1
-          badge.min_fields_required.should == 0
+          badge.min_requirements_required.should == 0
           badge.add_columns_to_module.should == nil
-          badge.level_field.should == nil
+          badge.level_requirement.should == nil
           badge.requires_modules.should == nil
-          badge.fields_required.should == []
+          badge.other_requirements_required.should == []
           badge.badges_required.should == []
           badge.show_level_letters.should == true
           badge.valid?.should be_true
           requirement = badge.requirements[0]
           requirement.name.should == 'r_name'
           requirement.description.should == 'r_description'
-          requirement.field.should == 2345
+          requirement.id.should == 2345
           requirement.module_letter.should == 'a'
           requirement.editable.should be_true
           requirement.badge.should == badge
@@ -697,8 +697,8 @@ describe "Badge" do
             :id => 123,
             :version => 0,
             :requirements => [
-              Osm::Badge::Requirement.new(:field => 2345, :editable => true),
-              Osm::Badge::Requirement.new(:field => 6789, :editable => true),
+              Osm::Badge::Requirement.new(:id => 2345, :editable => true),
+              Osm::Badge::Requirement.new(:id => 6789, :editable => true),
             ]),
           :due => 0,
         )
