@@ -2,6 +2,7 @@ module Osm
 
   class Badge < Osm::Model
     class Requirement; end # Ensure the constant exists for the validators
+    class RequirementModule; end # Ensure the constant exists for the validators
 
     # @!attribute [rw] name
     #   @return [String] the name of the badge
@@ -77,7 +78,7 @@ module Osm
     validates_inclusion_of :sharing, :in => [:draft, :private, :optin, :optin_locked, :default_locked]
     validates_presence_of :user_id
     validates :requirements, :array_of => {:item_type => Osm::Badge::Requirement, :item_valid => true}
-    validates :modules, :array_of => {:item_type => Hash}
+    validates :modules, :array_of => {:item_type => Osm::Badge::RequirementModule, :item_valid => true}
     validates_inclusion_of :latest, :in => [true, false]
     validates :levels, :array_of => {:item_type => Fixnum}, :allow_nil => true
     validates_numericality_of :min_modules_required, :only_integer=>true, :greater_than_or_equal_to=>0
@@ -149,19 +150,22 @@ module Osm
           :show_level_letters => !!config['shownumbers'],
         )
 
+        modules = module_completion_data(api, badge, options)
+        badge.modules = modules
+        modules = Hash[*modules.map{|m| [m.letter, m]}.flatten]
+
         requirements = []
         ((structure[1] || {})['rows'] || []).each do |r|
           requirements.push Osm::Badge::Requirement.new(
             :badge => badge,
             :name => r['name'],
             :description => r['tooltip'],
-            :module_letter => r['module'],
+            :mod => modules[r['module']],
             :id => Osm::to_i_or_nil(r['field']),
             :editable => r['editable'].to_s.eql?('true'),
           )
         end
         badge.requirements = requirements
-        badge.modules = module_completion_data(api, badge, options)
 
         badges.push badge
       end
@@ -284,23 +288,23 @@ module Osm
     def module_map
       @module_map ||= Hash[
         *modules.map{ |m| 
-          [m[:module_id], m[:module_letter], m[:module_letter], m[:module_id]]
+          [m.id, m.letter, m.letter, m.id]
         }.flatten
       ].except('z')
     end
 
     def needed_per_module
       @needed_per_module ||= Hash[*modules.map{ |m|
-        [m[:module_id], m[:min_required], m[:module_letter], m[:min_required]]
+        [m.id, m.min_required, m.letter, m.min_required]
       }.flatten].except('z')
     end
 
     def module_letters
-      @module_letters ||= modules.map{ |m| m[:module_letter] }.sort
+      @module_letters ||= modules.map{ |m| m.letter }.sort
     end
 
     def module_ids
-      @module_ids ||= modules.map{ |m| m[:module_id] }.sort
+      @module_ids ||= modules.map{ |m| m.id }.sort
     end
 
 
@@ -333,6 +337,8 @@ module Osm
       end
       data = data[badge.version]
       raise ArgumentError, "That badge does't exist (bad version)." if data.nil?
+
+      data.each{ |i| i.badge = badge }
       return data
     end
 
@@ -346,25 +352,26 @@ module Osm
       osm_data = api.perform_query('ext/badges/records/?action=_getModuleDetails')
       osm_data = (osm_data || {})['items'] || []
       osm_data.map! do |i|
-        {
-          badge_id: Osm.to_i_or_nil(i['badge_id']),
-          badge_version: Osm.to_i_or_nil(i['badge_version']),
-          module_id: Osm.to_i_or_nil(i['module_id']),
-          module_letter: i['module_letter'],
-          min_required: i['num_required'].to_i,
-          custom_columns: i['custom_columns'].to_i,
-          completed_into_column: i['completed_into_column_id'].to_i.eql?(0) ? nil : i['completed_into_column_id'].to_i,
-          numeric_into_column: i['numeric_into_column_id'].to_i.eql?(0) ? nil : i['numeric_into_column_id'].to_i,
-          add_column_id_to_numeric: i['add_column_id_to_numeric'].to_i.eql?(0) ? nil : i['add_column_id_to_numeric'].to_i,
-        }
+        [
+          Osm.to_i_or_nil(i['badge_id']),
+          Osm.to_i_or_nil(i['badge_version']),
+          Osm::Badge::RequirementModule.new({
+            id: Osm.to_i_or_nil(i['module_id']),
+            letter: i['module_letter'],
+            min_required: i['num_required'].to_i,
+            custom_columns: i['custom_columns'].to_i,
+            completed_into_column: i['completed_into_column_id'].to_i.eql?(0) ? nil : i['completed_into_column_id'].to_i,
+            numeric_into_column: i['numeric_into_column_id'].to_i.eql?(0) ? nil : i['numeric_into_column_id'].to_i,
+            add_column_id_to_numeric: i['add_column_id_to_numeric'].to_i.eql?(0) ? nil : i['add_column_id_to_numeric'].to_i,
+          })
+        ]
       end
 
       data = {}
-      osm_data.each do |i|
-        id, version = i.values_at(:badge_id, :badge_version)
+      osm_data.each do |id, version, m|
         data[id] ||= []
         data[id][version] ||= []
-        data[id][version].push i
+        data[id][version].push m
       end
 
       cache_write(api, cache_key, data, {expires_in: 864000}) # Expire in 24 hours as this data changes really slowly
@@ -395,34 +402,36 @@ module Osm
       # @!attribute [rw] badge
       #   @return [Osm::Badge] the badge the requirement belongs to
       # @!attribute [rw] name
-      #   @return [String] the name of the badge
+      #   @return [String] the name of the badge requirement
       # @!attribute [rw] description
-      #   @return [String] a description of the badge
-      # @!attribute [rw] requirement
+      #   @return [String] a description of the badge requirement
+      # @!attribute [rw] id
       #   @return [Fixnum] the id for the requirement (passed to OSM)
+      # @!attribute [rw] mod
+      #   @return [Osm::Badge::RequirementModule] the module the requirement belongs to
       # @!attribute [rw] editable
       #   @return [Boolean]
 
       attribute :badge, :type => Object
       attribute :name, :type => String
       attribute :description, :type => String
-      attribute :module_letter, :type => String
+      attribute :mod, :type => Object
       attribute :id, :type => Integer
       attribute :editable, :type => Boolean
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :name, :description, :id, :editable, :badge, :module_letter
+        attr_accessible :name, :description, :id, :editable, :badge, :mod
       end
 
       validates_presence_of :name
       validates_presence_of :description
-      validates_presence_of :module_letter
+      validates_presence_of :mod
       validates_numericality_of :id, :only_integer=>true, :greater_than=>0
       validates_presence_of :badge
       validates_inclusion_of :editable, :in => [true, false]
 
       # @!method initialize
-      #   Initialize a new Badge
+      #   Initialize a new Badge::Requirement
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
       # Compare Badge::Requirement based on badge then requirement
@@ -433,10 +442,72 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options={:replace_with => {'badge' => :identifier}})
+        Osm.inspect_instance(self, {:replace_with => {'badge' => :identifier}})
       end
 
     end # Class Requirement
+
+
+    class RequirementModule
+      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
+      include ActiveAttr::Model
+
+      # @!attribute [rw] badge
+      #   @return [Osm::Badge] the badge the requirement module belongs to
+      # @!attribute [rw] letter
+      #   @return [String] the letter of the module
+      # @!attribute [rw] id
+      #   @return [Fixnum] the id for the module
+      # @!attribute [rw] min_required
+      #   @return [Fixnum] the minimum number of requirements which must be met to achieve this module
+      # @!attribute [rw] custom_columns
+      #   @return [Fixnum, nil] ?
+      # @!attribute [rw] completed_into_column
+      #   @return [Fixnum, nil] ?
+      # @!attribute [rw] numeric_into_column
+      #   @return [Fixnum, nil] ?
+      # @!attribute [rw] add_column_id_to_numeric
+      #   @return [Fixnum, nil] ?
+
+      attribute :badge, :type => Object
+      attribute :letter, :type => String
+      attribute :id, :type => Integer
+      attribute :min_required, :type => Integer
+      attribute :custom_columns, :type => Integer
+      attribute :completed_into_column, :type => Integer
+      attribute :numeric_into_column, :type => Integer
+      attribute :add_column_id_to_numeric, :type => Integer
+
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :badge, :letter, :id, :min_required, :custom_columns, :completed_into_column, :numeric_into_column, :add_column_id_to_numeric
+      end
+
+      validates_presence_of :badge
+      validates_presence_of :letter
+      validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :min_required, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :custom_columns, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
+      validates_numericality_of :completed_into_column, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+      validates_numericality_of :numeric_into_column, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+      validates_numericality_of :add_column_id_to_numeric, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+
+      # @!method initialize
+      #   Initialize a new Badge::RequirementModule
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+      # Compare Badge::RequirementModule based on badge then letter
+      def <=>(another)
+        result = self.badge <=> another.try(:badge)
+        result = self.letter <=> another.try(:letter) if result == 0
+        result = self.id <=> another.try(:id) if result == 0
+        return result
+      end
+
+      def inspect
+        Osm.inspect_instance(self, {:replace_with => {'badge' => :identifier}})
+      end
+
+    end # Class RequirementModule
 
 
     class Data < Osm::Model
@@ -484,7 +555,7 @@ module Osm
 
 
       # @!method initialize
-      #   Initialize a new Badge
+      #   Initialize a new Badge::Data
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
       # Override initialize to set @orig_attributes
       old_initialize = instance_method(:initialize)
@@ -507,20 +578,16 @@ module Osm
         return count
       end
 
-      # Get the number of modules gained
-      # @return [Fixnum]
+      # Get the letters of modules gained
+      # @return [Array<Stirng>]
       def modules_gained
-        needed = badge.needed_per_module
-        modules = []
-
-        gained_in_modules.each do |module_id, gained|
-          next unless module_id.is_a?(Fixnum)
-          next if gained < needed[module_id]
-          module_letter = badge.module_map[module_id]
-          modules.push module_letter unless module_letter >= 'y'
+        g_i_m = gained_in_modules
+        gained = []
+        badge.modules.each do |mod|
+          next if g_i_m[mod.id] < mod.min_required
+          gained.push mod.letter
         end
-
-        return modules
+        gained
       end
 
       # Get the number of requirements gained in each module
@@ -528,11 +595,13 @@ module Osm
       def gained_in_modules
         count = {}
         badge.requirements.each do |requirement|
-          count[requirement.module_letter] ||= 0
+          count[requirement.mod.id] ||= 0
+          count[requirement.mod.letter] ||= 0
           next unless requirement_met?(requirement.id)
-          count[requirement.module_letter] += 1
+          count[requirement.mod.id] += 1
+          count[requirement.mod.letter] += 1
         end
-        Hash[*count.map{ |k,v| [badge.module_map[k], v, k, v] }.flatten]
+        count
       end
 
 
@@ -635,7 +704,7 @@ module Osm
           return 0 if due == top_level || awarded == top_level # No more levels to do
           ((due + 1)..top_level).reverse_each do |level|
             badge.requirements.each do |requirement|
-              next unless requirement.module_letter.eql?(letters[level - 1]) # Not interested in other levels
+              next unless requirement.mod.letter.eql?(letters[level - 1]) # Not interested in other levels
               return level if requirement_met?(requirement.id)
             end
           end
@@ -778,7 +847,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options={:replace_with => {'badge' => :name}})
+        Osm.inspect_instance(self, {:replace_with => {'badge' => :name}})
       end
 
       # Work out if the requirmeent has been met

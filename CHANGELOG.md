@@ -25,6 +25,8 @@
       * completed attribute renamed to due
       * sections_gained method renamed to modules_gained, now returns an array of letters
       * gained_in_sections renamed to gained_in_modules
+    * Osm::Badge::Requirement gains a mod attribute to hold the Osm::Badge::RequirementModule
+    * Osm::Badge::RequirementModule added
     * Osm::Event::BadgeLink
       * Attributes added: badge\_name, badge\_id, badge\_version, requirement\_id
       * Attributes removed: badge\_label, badge\_key, requirement\_key
