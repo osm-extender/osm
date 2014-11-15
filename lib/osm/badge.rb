@@ -628,12 +628,15 @@ module Osm
             requires.map!{ |a| a.include?(true) } # Replace each combination with true/false
             return false if requires.include?(false) # Only earnt if all combinations are met
           end
-          badge.badges_required.each do |b|
-            # {:id => ###, :version => #}
-            #TODO
-          end
           badge.other_requirements_required.each do |c|
             # {:id => ###, :min => #}
+            if requirements.has_key?(c[:id]) # Only check it if the data is in the requirements Hash
+              return false unless requirement_met?(c[:id])
+              return false if requirements[c[:id]].to_i < c[:min]
+            end
+          end
+          badge.badges_required.each do |b|
+            # {:id => ###, :version => #}
             #TODO
           end
           return true

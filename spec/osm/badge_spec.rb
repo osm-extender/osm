@@ -386,6 +386,32 @@ describe "Badge" do
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'y', 20=>'x', 30=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
       data.earnt?.should be_true
+
+      # Requirements from another badge
+      this_badge = badge.clone
+      this_badge.min_modules_required = 0
+      this_badge.min_requirements_required = 1
+      this_badge.requires_modules = nil
+      # Simply met
+      this_badge.other_requirements_required = [{id: 100, min: 0}]
+      data = Osm::Badge::Data.new(:requirements => {10=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
+      data.earnt?.should be_true # Assume met if not in requirements Hash
+      data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'x'}, :due => 0, :awarded => 0, :badge => this_badge)
+      data.earnt?.should be_false
+      data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
+      data.earnt?.should be_true
+      # Minimum value
+      this_badge.other_requirements_required = [{id: 100, min: 2}]
+      data = Osm::Badge::Data.new(:requirements => {10=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
+      data.earnt?.should be_true # Assume met if not in requirements Hash
+      data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'x'}, :due => 0, :awarded => 0, :badge => this_badge)
+      data.earnt?.should be_false
+      data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'1'}, :due => 0, :awarded => 0, :badge => this_badge)
+      data.earnt?.should be_false
+      data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'2'}, :due => 0, :awarded => 0, :badge => this_badge)
+      data.earnt?.should be_true
+      data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'3'}, :due => 0, :awarded => 0, :badge => this_badge)
+      data.earnt?.should be_true
     end
   end
 
