@@ -594,9 +594,11 @@ module Osm
       # @return [Hash]
       def gained_in_modules
         count = {}
+        badge.modules.each do |mod|
+          count[mod.id] ||= 0
+          count[mod.letter] ||= 0
+        end
         badge.requirements.each do |requirement|
-          count[requirement.mod.id] ||= 0
-          count[requirement.mod.letter] ||= 0
           next unless requirement_met?(requirement.id)
           count[requirement.mod.id] += 1
           count[requirement.mod.letter] += 1
