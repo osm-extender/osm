@@ -99,7 +99,7 @@ module Osm
     end
     def self.cache_write(api, key, data, options={})
       return false if @@cache.nil?
-      options.merge!(:expires_in => @@cache_ttl)
+      options.reverse_merge!(expires_in: @@cache_ttl)
       @@cache.write(cache_key(api, key), data, options)
     end
     def self.cache_exist?(api, key)

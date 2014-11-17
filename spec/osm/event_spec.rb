@@ -123,20 +123,22 @@ describe "Event" do
   
     it "Create" do
       bl = Osm::Event::BadgeLink.new(
-        :badge_key => 'artist',
         :badge_type => :activity,
-        :requirement_key => 'a_01',
         :badge_section => :cubs,
         :requirement_label => 'A: Poster',
-        :badge_label => 'Artist',
-        :data => 'abc'
+        :data => 'abc',
+        :badge_name => 'Artist',
+        :badge_id => 1,
+        :badge_version => 0,
+        :requirement_id => 2,
       )
   
-      bl.badge_key.should == 'artist'
       bl.badge_type.should == :activity
-      bl.requirement_key.should == 'a_01'
       bl.badge_section.should == :cubs
-      bl.badge_label.should == 'Artist'
+      bl.badge_name.should == 'Artist'
+      bl.badge_id.should == 1
+      bl.badge_version.should == 0
+      bl.requirement_id.should == 2
       bl.requirement_label.should == 'A: Poster'
       bl.data.should == 'abc'
       bl.valid?.should be_true
@@ -187,8 +189,8 @@ describe "Event" do
         'publicnotes' => 'public notepad',
         'config' => '[{"id":"f_1","name":"Name","pL":"Label","pR":"1"}]',
         'badgelinks' => [
-          {"section"=>"cubs", "badgetype"=>"activity", "badge"=>"athletics", "columnname"=>"b_06", "data"=>"", "badgeLongName"=>"Athletics", "columnnameLongName"=>"B: Run", "sectionLongName"=>"Cubs", "badgetypeLongName"=>"Activity"},
-          {"section"=>"staged", "badgetype"=>"staged", "badge"=>"hikes", "columnname"=>"custom_69153", "data"=>"1", "badgeLongName"=>"Hikes", "columnnameLongName"=>"C: Hike name = 1", "sectionLongName"=>"Staged", "badgetypeLongName"=>"Staged"},
+          {"section"=>"cubs", "badgetype"=>"activity", "badge"=>"activity_athletics", "columnname"=>"b", "data"=>"Yes", "badgeLongName"=>"Athletics", "columnnameLongName"=>"B: Run", "sectionLongName"=>"Cubs", "badgetypeLongName"=>"Activity", "badge_id"=>"179", "badge_version"=>"0", "column_id"=>"3"},
+          {"section"=>"staged", "badgetype"=>"staged", "badge"=>"hikes", "columnname"=>"custom", "data"=>"1", "badgeLongName"=>"Hikes", "columnnameLongName"=>"C: Hike name = 1", "sectionLongName"=>"Staged", "badgetypeLongName"=>"Staged", "badge_id"=>"197", "badge_version"=>"0", "column_id"=>"4"},
         ],
         'sectionid' => '1',
         'googlecalendar' => nil,
@@ -237,17 +239,18 @@ describe "Event" do
         event.columns[0].name.should == 'Name'
         event.columns[0].label.should == 'Label'
         event.columns[0].parent_required.should be_true
-        event.badges[0].badge_key.should == 'athletics'
-        event.badges[0].badge_label.should == 'Athletics'
+        event.badges[0].badge_name.should == 'Athletics'
         event.badges[0].badge_section.should == :cubs
         event.badges[0].badge_type.should == :activity
-        event.badges[0].requirement_key.should == 'b_06'
-        event.badges[0].data.should == ''
+        event.badges[0].requirement_id.should == 3
+        event.badges[0].data.should == 'Yes'
         event.badges[0].requirement_label.should == 'B: Run'
-        event.badges[1].badge_key.should == 'hikes'
+        event.badges[0].badge_id.should == 179
+        event.badges[0].badge_version.should == 0
+        event.badges[1].badge_name.should == 'Hikes'
         event.badges[1].badge_section.should == :staged
         event.badges[1].badge_type.should == :staged
-        event.badges[1].requirement_key.should == 'custom_69153'
+        event.badges[1].requirement_id.should == 4
         event.badges[1].data.should == '1'
         event.valid?.should be_true
       end
@@ -604,7 +607,7 @@ describe "Event" do
             :attendance_reminder => 1,
             :allow_booking => true,
           }
-          @badge_url = 'https://www.onlinescoutmanager.co.uk/ext/events/event/index.php?action=badgeAddToEvent&sectionid=1&eventid=2'
+          @badge_url = 'https://www.onlinescoutmanager.co.uk/ext/badges/records/index.php?action=linkBadgeToItem&sectionid=1'
         end
 
         it "'Normal badge'" do
@@ -613,22 +616,27 @@ describe "Event" do
             'token' => @CONFIGURATION[:api][:osm][:token],
             'userid' => 'user_id',
             'secret' => 'secret',
+            'type' => 'event',
+            'id' => 2,
             'section' => :beavers,
-            'badgetype' => :activity,
-            'badge' => 'test',
-            'columnname' => 'a_01',
-            'data' => '',
-            'newcolumnname' => '',
+            'sectionid' => 1,
+            'badge_id' => 3,
+            'badge_version' => 2,
+            'column_id' => 1,
+            'column_data' => '',
+            'new_column_name' => '',
           }
-          HTTParty.should_receive(:post).with(@badge_url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+          HTTParty.should_receive(:post).with(@badge_url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
-            badge_key: 'test',
             badge_type: :activity,
-            requirement_key: 'a_01',
             badge_section: :beavers,
             requirement_label: '',
             data: '',
+            badge_name: 'Test badge',
+            badge_id: 3,
+            badge_version: 2,
+            requirement_id: 1,
           )]
           event = Osm::Event.create(@api, @attributes)
           event.should_not be_nil
@@ -641,22 +649,26 @@ describe "Event" do
             'token' => @CONFIGURATION[:api][:osm][:token],
             'userid' => 'user_id',
             'secret' => 'secret',
-            'section' => :staged,
-            'badgetype' => :staged,
-            'badge' => 'hikes',
-            'columnname' => '',
-            'data' => '1',
-            'newcolumnname' => 'Label for added column',
+            'type' => 'event',
+            'id' => 2,
+            'section' => :beavers,
+            'sectionid' => 1,
+            'badge_id' => 3,
+            'badge_version' => 2,
+            'column_id' => -2,
+            'column_data' => '1',
+            'new_column_name' => 'Label for added column',
           }
-          HTTParty.should_receive(:post).with(@badge_url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+          HTTParty.should_receive(:post).with(@badge_url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
-            badge_key: 'hikes',
             badge_type: :staged,
-            requirement_key: '',
-            badge_section: :staged,
+            badge_section: :beavers,
             requirement_label: 'Label for added column',
             data: '1',
+            badge_name: 'Test badge',
+            badge_id: 3,
+            badge_version: 2,
           )]
           event = Osm::Event.create(@api, @attributes)
           event.should_not be_nil
@@ -669,22 +681,27 @@ describe "Event" do
             'token' => @CONFIGURATION[:api][:osm][:token],
             'userid' => 'user_id',
             'secret' => 'secret',
-            'section' => :staged,
-            'badgetype' => :staged,
-            'badge' => 'nights',
-            'columnname' => 'custom_01234',
-            'data' => '2',
-            'newcolumnname' => '',
+            'type' => 'event',
+            'id' => 2,
+            'section' => :beavers,
+            'sectionid' => 1,
+            'badge_id' => 3,
+            'badge_version' => 2,
+            'column_id' => 4,
+            'column_data' => '2',
+            'new_column_name' => '',
           }
-          HTTParty.should_receive(:post).with(@badge_url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+          HTTParty.should_receive(:post).with(@badge_url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
-            badge_key: 'nights',
             badge_type: :staged,
-            requirement_key: 'custom_01234',
-            badge_section: :staged,
+            badge_section: :beavers,
             requirement_label: '',
             data: '2',
+            badge_name: 'Test badge',
+            badge_id: 3,
+            badge_version: 2,
+            requirement_id: 4,
           )]
           event = Osm::Event.create(@api, @attributes)
           event.should_not be_nil
@@ -836,7 +853,16 @@ describe "Event" do
             :cost => '1.23',
             :location => 'Somewhere',
             :notes => 'none',
-            :badges => [Osm::Event::BadgeLink.new(badge_key: 'test')],
+            :badges => [Osm::Event::BadgeLink.new(
+              badge_type: :activity,
+              badge_section: :scouts,
+              requirement_label: 'A: Paint',
+              data: 'Yes',
+              badge_name: 'Artist',
+              badge_id: 3,
+              badge_version: 2,
+              requirement_id: 4,
+            )],
             :columns => [],
             :notepad => '',
             :public_notepad => '',
@@ -851,44 +877,38 @@ describe "Event" do
         end
 
         it "Added" do
-          url = 'https://www.onlinescoutmanager.co.uk/ext/events/event/index.php?action=badgeAddToEvent&sectionid=1&eventid=2'
-          post_data = {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-            'badgelinks' => [{
-              'section' => nil,
-              'badgetype' => nil,
-              'badge' => 'test2',
-              'columnname' => nil,
-              'data' => nil,
-              'newcolumnname' => nil,
-            }],
-          }
-          HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true,"error":"Update Error"}'}) }
+          badge = Osm::Event::BadgeLink.new(
+            badge_type: :activity,
+            badge_section: :scouts,
+            requirement_label: 'A: Draw',
+            data: 'Yes',
+            badge_name: 'Artist',
+            badge_id: 3,
+            badge_version: 2,
+            requirement_id: 6,
+          )
+          @event.should_receive(:add_badge_link).with(@api, badge) { true }
 
-          @event.badges.push(Osm::Event::BadgeLink.new(badge_key: 'test2'))
+          @event.badges.push(badge)
           @event.update(@api).should be_true
         end
 
         it "Removed" do
-          url = 'https://www.onlinescoutmanager.co.uk/ext/events/event/index.php?action=badgeDeleteFromEvent&sectionid=1&eventid=2'
+          url = 'https://www.onlinescoutmanager.co.uk/ext/badges/records/index.php?action=deleteBadgeLink&sectionid=1'
           post_data = {
             'apiid' => @CONFIGURATION[:api][:osm][:id],
             'token' => @CONFIGURATION[:api][:osm][:token],
             'userid' => 'user_id',
             'secret' => 'secret',
-            'badgelinks' => [{
-              'section' => nil,
-              'badgetype' => nil,
-              'badge' => 'test',
-              'columnname' => nil,
-              'data' => nil,
-              'newcolumnname' => nil,
-            }],
+            'section' => :scouts,
+            'sectionid' => 1,
+            'type' => 'event',
+            'id' => 2,
+            'badge_id' => 3,
+            'badge_version' => 2,
+            'column_id' => 4,
           }
-          HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true,"error":"Update Error"}'}) }
+          HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
 
           @event.badges = []
           @event.update(@api).should be_true
@@ -1215,13 +1235,13 @@ describe "Event" do
 
   describe "API Strangeness" do
 
-    it "handles a non existant array when no events" do
+    it "Handles a non existant array when no events" do
       data = '{"identifier":"eventid","label":"name"}'
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => data, :content_type => 'application/json')
       events = Osm::Event.get_for_section(@api, 1).should == []
     end
 
-    it "handles missing config from OSM" do
+    it "Handles missing config from OSM" do
       events_body = '{"identifier":"eventid","label":"name","items":[{"eventid":"2","name":"An Event","startdate":"2001-02-03","enddate":"2001-02-05","starttime":"00:00:00","endtime":"12:00:00","cost":"0.00","location":"Somewhere","notes":"Notes","sectionid":1,"googlecalendar":null,"archived":"0","confdate":null,"allowchanges":"1","disablereminders":"1","attendancelimit":"3","limitincludesleaders":"1"}]}'
 
       event_body = {

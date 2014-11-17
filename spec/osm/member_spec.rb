@@ -601,6 +601,16 @@ describe "Member" do
         @member.myscout_link(@api, :details).should == 'https://www.onlinescoutmanager.co.uk/parents/details.php?sc=1&se=2&c=KEY-HERE'
       end
 
+      it "Census detail entry" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
+        @member.myscout_link(@api, :census).should == 'https://www.onlinescoutmanager.co.uk/parents/census.php?sc=1&se=2&c=KEY-HERE'
+      end
+
+      it "Gift Aid consent" do
+        @member.stub(:myscout_link_key) { 'KEY-HERE' }
+        @member.myscout_link(@api, :giftaid).should == 'https://www.onlinescoutmanager.co.uk/parents/giftaid.php?sc=1&se=2&c=KEY-HERE'
+      end
+
     end
 
   end

@@ -14,7 +14,7 @@ describe "API" do
     expect{ Osm::Api.configure(@CONFIGURATION[:api].select{ |k,v| (k != :default_site)}) }.to raise_error(ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm')
     expect{ Osm::Api.configure(@CONFIGURATION[:api].merge(:default_site => :invalid)) }.to raise_error(ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm')
 
-    expect{ Osm::Api.configure(@CONFIGURATION[:api].select{ |k,v| (k != :ogm) && (k != :osm)}) }.to raise_error(ArgumentError, ':osm and/or :ogm must be present')
+    expect{ Osm::Api.configure(@CONFIGURATION[:api].select{ |k,v| (k != :ogm) && (k != :osm)}) }.to raise_error(ArgumentError, ':osm does not exist in options hash')
     expect{ Osm::Api.configure(@CONFIGURATION[:api].merge(:osm => '')) }.to raise_error(ArgumentError, ':osm must be a Hash')
     expect{ Osm::Api.configure(@CONFIGURATION[:api].merge(:osm => @CONFIGURATION[:api][:osm].select{ |k,v| (k != :id)})) }.to raise_error(ArgumentError, ':osm must contain a key :id')
     expect{ Osm::Api.configure(@CONFIGURATION[:api].merge(:osm => @CONFIGURATION[:api][:osm].select{ |k,v| (k != :token)})) }.to raise_error(ArgumentError, ':osm must contain a key :token')

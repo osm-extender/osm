@@ -156,12 +156,14 @@ module Osm
       end
       (data['badges'].is_a?(Array) ? data['badges'] : []).each do |badge_data|
         attributes[:badges].push Badge.new(
-          :activity_id => Osm::to_i_or_nil(badge_data['activityid']),
-          :section_type => badge_data['section'].to_sym,
-          :type => badge_data['badgetype'].to_sym,
-          :badge => badge_data['badge'],
-          :requirement => badge_data['columnname'],
-          :label => badge_data['label']
+          :badge_type => badge_data['badgetype'].to_sym,
+          :badge_section => badge_data['section'].to_sym,
+          :badge_name => badge_data['badgeLongName'],
+          :badge_id => Osm::to_i_or_nil(badge_data['badge_id']),
+          :badge_version => Osm::to_i_or_nil(badge_data['badge_version']),
+          :requirement_id => Osm::to_i_or_nil(badge_data['column_id']),
+          :requirement_label => badge_data['columnnameLongName'],
+          :data => badge_data['data'],
         )
       end
       (data['versions'].is_a?(Array) ? data['versions'] : []).each do |version_data|
@@ -241,7 +243,23 @@ module Osm
         'location' => location,
         'sections' => sections.to_json,
         'tags' => tags.to_json,
-        'links' => badges.map{ |b| {'activityid'=>b.activity_id.to_s, 'section'=>b.section_type, 'badgetype'=>b.type, 'badge'=>b.badge, 'columnname'=>b.requirement, 'label'=>b.label}}.to_json,
+        'links' => badges.map{ |b|
+          {
+            'badge_id' => b.badge_id.to_s,
+            'badge_version' => b.badge_version.to_s,
+            'column_id' => b.requirement_id.to_s,
+            'badge' => nil,
+            'badgeLongName' => b.badge_name,
+            'columnname' => nil,
+            'columnnameLongName' => b.requirement_label,
+            'data' => b.data,
+            'section' => b.badge_section,
+            'sectionLongName' => nil,
+            'sections' => sections.map{ |s| s.to_s },
+            'badgetype' => b.badge_type.to_s,
+            'badgetypeLongName' => nil,
+          }
+        }.to_json,
         'shared' => shared,
         'sectionid' => section.to_i,
         'secretEdit' => secret_update,
@@ -309,42 +327,55 @@ module Osm
       include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
-      # @!attribute [rw] activity_id
-      #   @return [Fixnum] the activity being done
-      # @!attribute [rw] section_type
-      #   @return [Symbol] the section the badge 'belongs' to
-      # @!attribute [rw] type
+      # @!attribute [rw] badge_type
       #   @return [Symbol] the type of badge
-      # @!attribute [rw] badge
-      #   @return [String] short name of the badge
-      # @!attribute [rw] requirement
-      #   @return [String] OSM reference to this badge requirement
-      # @!attribute [rw] label
-      #   @return [String] human readable label for the requirement
+      # @!attribute [rw] badge_section
+      #   @return [Symbol] the section type that the badge belongs to
+      # @!attribute [rw] requirement_label
+      #   @return [String] human firendly requirement label
+      # @!attribute [rw] data
+      #   @return [String] what to put in the column when the badge records are updated
+      # @!attribute [rw] badge_name
+      #   @return [String] the badge's name
+      # @!attribute [rw] badge_id
+      #   @return [Fixnum] the badge's ID in OSM
+      # @!attribute [rw] badge_version
+      #   @return [Fixnum] the version of the badge
+      # @!attribute [rw] requirement_id
+      #   @return [Fixnum] the requirement's ID in OSM
 
-      attribute :activity_id, :type => Integer
-      attribute :section_type
-      attribute :type
-      attribute :badge, :type => String
-      attribute :requirement, :type => String
-      attribute :label, :type => String
+      attribute :badge_type, :type => Object
+      attribute :badge_section, :type => Object
+      attribute :requirement_label, :type => String
+      attribute :data, :type => String
+      attribute :badge_name, :type => String
+      attribute :badge_id, :type => Integer
+      attribute :badge_version, :type => Integer
+      attribute :requirement_id, :type => Integer
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :activity_id, :section_type, :type, :badge, :requirement, :label
+        attr_accessible :badge_type, :badge_section, :requirement_label, :data, :badge_name, :badge_id, :badge_version, :requirement_id
       end
 
-      validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
-      validates_presence_of :badge
-      validates_presence_of :requirement
-      validates_presence_of :label
-
-      validates_each :type, :section_type do |record, attr, value|
-        record.errors.add(attr, 'must be a Symbol') unless value.is_a?(Symbol)
-      end
+      validates_presence_of :badge_name
+      validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
+      validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
+      validates_numericality_of :badge_id, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :badge_version, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :requirement_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
 
       # @!method initialize
-      #   Initialize a new Badge
+      #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+      # Compare BadgeLink based on section, type, badge_name, requirement_label, data
+      def <=>(another)
+        [:badge_section, :badge_type, :badge_name, :requirement_label].each do |attribute|
+          result = self.try(:data) <=> another.try(:data)
+          return result unless result == 0
+        end
+        return self.try(:data) <=> another.try(:data)
+      end
 
     end # Class Activity::Badge
 

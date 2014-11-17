@@ -17,9 +17,10 @@ module Osm
         return Osm::Model.cache_read(api, cache_key)
       end
 
-      data = api.perform_query("challenges.php?action=getInitialBadges&type=core&sectionid=#{section.id}&section=#{section.type}&termid=#{term_id}")
-      data = (data['stock'] || {}).select{ |k,v| !k.eql?('sectionid') }.
-                                   inject({}){ |new_hash,(badge, level)| new_hash[badge] = level.to_i; new_hash }
+      data = api.perform_query("ext/badges/stock/?action=getBadgeStock&section=#{section.type}&section_id=#{section.id}&term_id=#{term_id}")
+      data = (data['items'] || [])
+      data.map!{ |i| [i['badge_id_level'], i['stock']] }
+      data = Hash[data]
 
       Osm::Model.cache_write(api, cache_key, data)
       return data
@@ -28,22 +29,25 @@ module Osm
     # Update badge stock levels
     # @param [Osm::Api] api The api to use to make the request
     # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to update ther badge stock for
-    # @param [Sring, #to_s] badge_key The badge to set the stock level for
+    # @param [Fixnum, #to_i] badge_id The badge to set the stock level for
+    # @param [Fixnum, #to_i] badge_level The level of a staged badge to set the stock for (default 1)
     # @param [Fixnum, #to_i] stock_level How many of the provided badge there are
     # @return [Boolan] whether the update was successfull or not
-    def self.update_stock(api, section, badge_key, stock_level)
+    def self.update_stock(api, section, badge_id, badge_level=1, stock_level)
       Osm::Model.require_ability_to(api, :write, :badge, section)
       section = Osm::Section.get(api, section) unless section.is_a?(Osm::Section)
 
       Osm::Model.cache_delete(api, ['badge_stock', section.id])
 
-      data = api.perform_query("challenges.php?action=updateStock", {
+      data = api.perform_query("ext/badges.php?action=updateStock", {
         'stock' => stock_level,
-        'table' => badge_key,
         'sectionid' => section.id,
         'section' => section.type,
+        'type' => 'current',
+        'level' => badge_level.to_i,
+        'badge_id' => badge_id.to_i,
       })
-      return data.is_a?(Hash) && (data['sectionid'].to_i == section.id) && (data[badge_key.to_s].to_i == stock_level)
+      return data.is_a?(Hash) && data['ok']
     end
 
 
@@ -63,24 +67,25 @@ module Osm
         return Osm::Model.cache_read(api, cache_key)
       end
 
-      data = api.perform_query("challenges.php?action=outstandingBadges&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
+      data = api.perform_query("ext/badges/due/?action=get&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
 
       data = {} unless data.is_a?(Hash) # OSM/OGM returns an empty array to represent no badges
-      pending_raw = data['pending'] || {}
-      descriptions_raw = data['description'] || {}
+      pending = data['pending'] || {}
 
       by_member = {}
       member_names = {}
       badge_names = {}
-      pending_raw.each do |key, members|
+      badge_stock = {}
+
+      pending.each do |badge_identifier, members|
         members.each do |member|
-          id = Osm.to_i_or_nil(member['scoutid'])
-          description = descriptions_raw[key]['name'] + (descriptions_raw[key]['section'].eql?('staged') ? " (Level #{member['level']})" : '')
-          description_key = key + (descriptions_raw[key]['section'].eql?('staged') ? "_#{member['level']}" : '_1')
-          badge_names[description_key] = description
-          by_member[id] ||= []
-          by_member[id].push(description_key)
-          member_names[id] = "#{member['firstname']} #{member['lastname']}"
+          badge_level_identifier = badge_identifier + "_#{member['completed']}"
+          member_id = Osm.to_i_or_nil(member['scout_id'])
+          badge_names[badge_level_identifier] = "#{member['label']} - #{member['name']}" + (!member['extra'].nil? ? " (#{member['extra']})" : '')
+          badge_stock[badge_level_identifier] = member['current_stock'].to_i
+          by_member[member_id] ||= []
+          by_member[member_id].push(badge_level_identifier)
+          member_names[member_id] = "#{member['firstname']} #{member['lastname']}"
         end
       end
 
@@ -88,6 +93,7 @@ module Osm
         :by_member => by_member,
         :member_names => member_names,
         :badge_names => badge_names,
+        :badge_stock => badge_stock,
       )
       Osm::Model.cache_write(api, cache_key, due_badges)
       return due_badges
@@ -105,13 +111,15 @@ module Osm
       attribute :badge_names, :default => {}
       attribute :by_member, :default => {}
       attribute :member_names, :default => {}
+      attribute :badge_stock, :default => {}
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :badge_names, :by_member, :member_names
+        attr_accessible :badge_names, :by_member, :member_names, :badge_stock
       end
 
       validates :badge_names, :hash => {:key_type => String, :value_type => String}
       validates :member_names, :hash => {:key_type => Fixnum, :value_type => String}
+      validates :badge_stock, :hash => {:key_type => String, :value_type => Fixnum}
 
       validates_each :by_member do |record, attr, value|
         badge_names_keys = record.badge_names.keys

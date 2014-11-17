@@ -34,7 +34,8 @@ module Osm
   OSM_DATE_FORMAT_HUMAN = '%d/%m/%Y'
   OSM_DATETIME_FORMAT_HUMAN = '%d/%m/%Y %H:%M:%S'
   OSM_TIME_REGEX = /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/
-  OSM_DATE_REGEX = /\A(?:[1-9]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1]))|(?:(?:0?[1-9]|[1-2][0-9]|3[0-1])\/(?:0?[1-9]|1[0-2])\/(?:\d{2}|[1-9]\d{3}))\Z/
+  OSM_DATE_REGEX_UNANCHORED = /(?:[1-9]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1]))|(?:(?:0?[1-9]|[1-2][0-9]|3[0-1])\/(?:0?[1-9]|1[0-2])\/(?:\d{2}|[1-9]\d{3}))/
+  OSM_DATE_REGEX = /\A#{Osm::OSM_DATE_REGEX_UNANCHORED.to_s}\Z/
   SUBSCRIPTION_LEVEL_NAMES = ['Unknown', 'Bronze', 'Silver', 'Gold', 'Gold+']
   SUBSCRIPTION_LEVELS = [nil, :bronze, :silver, :gold, :gold_plus]
 end
