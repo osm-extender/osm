@@ -234,23 +234,15 @@ module Osm
 
         # The cached events for the section will be out of date - remove them
         cache_delete(api, ['events', event.section_id])
-        cache_write(api, ['event', event.id], event)
 
         # Add badge links to OSM
         badges_created = true
         event.badges.each do |badge|
-          badge_data = data = api.perform_query("ext/events/event/index.php?action=badgeAddToEvent&sectionid=#{event.section_id}&eventid=#{event.id}", {
-            'section' => badge.badge_section,
-            'badgetype' => badge.badge_type,
-            'badge' => badge.badge_key,
-            'columnname' => badge.requirement_key,
-            'data' => badge.data,
-            'newcolumnname' => badge.requirement_label,
-          })
-          badges_created = false unless badge_data.is_a?(Hash) && badge_data['ok']
+          badges_created &= event.add_badge_link(api, badge)
         end
 
         if badges_created
+          cache_write(api, ['event', event.id], event)
           return event
         else
           # Someting went wrong adding badges so return what OSM has
@@ -324,42 +316,27 @@ module Osm
         badges_to_delete = []
         original_badges.each do |badge|
           unless badges.include?(badge)
-            badges_to_delete.push({
-              'section' => badge.badge_section,
-              'badge' => badge.badge_key,
-              'columnname' => badge.requirement_key,
-              'data' => badge.data,
-              'newcolumnname' => badge.requirement_label,
-              'badgetype' => badge.badge_type,
-            })
+            badges_to_delete.push badge
           end
         end
-        unless badges_to_delete.empty?
-          data = api.perform_query("ext/events/event/index.php?action=badgeDeleteFromEvent&sectionid=#{section_id}&eventid=#{id}", {
-            'badgelinks' => badges_to_delete,
+        badges_to_delete.each do |badge|
+          data = api.perform_query("ext/badges/records/index.php?action=deleteBadgeLink&sectionid=#{section_id}", {
+            'section' => badge.badge_section,
+            'sectionid' => section_id,
+            'type' => 'event',
+            'id' => id,
+            'badge_id' => badge.badge_id,
+            'badge_version' => badge.badge_version,
+            'column_id' => badge.requirement_id,
           })
-          updated &= data.is_a?(Hash) && data['ok']
+          updated &= data.is_a?(Hash) && data['status']
         end
 
         # Added badges
-        badges_to_add = []
         badges.each do |badge|
           unless original_badges.include?(badge)
-            badges_to_add.push({
-              'section' => badge.badge_section,
-              'badge' => badge.badge_key,
-              'columnname' => badge.requirement_key,
-              'data' => badge.data,
-              'newcolumnname' => badge.requirement_label,
-              'badgetype' => badge.badge_type,
-            })
+            updated &= add_badge_link(api, badge)
           end
-        end
-        unless badges_to_add.empty?
-          data = api.perform_query("ext/events/event/index.php?action=badgeAddToEvent&sectionid=#{section_id}&eventid=#{id}", {
-            'badgelinks' => badges_to_add,
-          })
-          updated &= data.is_a?(Hash) && data['ok']
         end
       end # includes badges
 
@@ -442,6 +419,26 @@ module Osm
       return attendance
     end
 
+    # Add a badge link to the event in OSM
+    # @param [Osm::Api] api The api to use to make the request
+    # @param [Osm::Event::BadgeLink] link The badge link to add, if column_id is nil then a new column is created with requirement_label as the name
+    # @return [Boolean] whether the update succedded
+    def add_badge_link(api, link)
+      raise Osm::ObjectIsInvalid, 'link is invalid' unless link.valid?
+
+      data = api.perform_query("ext/badges/records/index.php?action=linkBadgeToItem&sectionid=#{section_id}", {
+        'section' => link.badge_section,
+        'sectionid' => section_id,
+        'type' => 'event',
+        'id' => id,
+        'badge_id' => link.badge_id,
+        'badge_version' => link.badge_version,
+        'column_id' => link.requirement_id.to_i.eql?(0) ? -2 : link.requirement_id,
+        'column_data' => link.data,
+        'new_column_name' => link.requirement_id.to_i.eql?(0) ? link.requirement_label : '',
+      })
+      return (data.is_a?(Hash) && data['status'])
+    end
 
     # Add a column to the event in OSM
     # @param [Osm::Api] api The api to use to make the request
@@ -563,7 +560,16 @@ module Osm
       badges_data = event_data['badgelinks']
       badges_data = [] unless badges_data.is_a?(Array)
       badges_data.each do |field|
-        badges.push BadgeLink.new(badge_key: field['badge'], badge_type: field['badgetype'].to_sym, badge_section: field['section'].to_sym, requirement_key: field['columnname'], badge_label: field['badgeLongName'], requirement_label: field['columnnameLongName'], data: field['data'])
+        badges.push BadgeLink.new(
+          badge_type: field['badgetype'].to_sym,
+          badge_section: field['section'].to_sym,
+          requirement_id: field['column_id'],
+          badge_name: field['badgeLongName'],
+          requirement_label: field['columnnameLongName'],
+          data: field['data'],
+          badge_id: field['badge_id'],
+          badge_version: field['badge_version'],
+        )
       end
       event.badges = badges
 
@@ -571,52 +577,54 @@ module Osm
     end
 
 
-    # When creating a BadgeLink for an existing column in a hikes/nights badge the requirement_label is optional
-    # When creating a BadgeLink for a new column in a hikes/nights badge the requirement_key MUST be blank
-# TODO : Add validation for above statements
     class BadgeLink
       include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
-      # @!attribute [rw] badge_key
-      #   @return [String] the badge being done
       # @!attribute [rw] badge_type
       #   @return [Symbol] the type of badge
-      # @!attribute [rw] badge_label
-      #   @return [String] human friendly badge name
-      # @!attribute [rw] requirement_key
-      #   @return [String] the requirement being done
       # @!attribute [rw] badge_section
       #   @return [Symbol] the section type that the badge belongs to
       # @!attribute [rw] requirement_label
       #   @return [String] human firendly requirement label
       # @!attribute [rw] data
       #   @return [String] what to put in the column when the badge records are updated
+      # @!attribute [rw] badge_name
+      #   @return [String] the badge's name
+      # @!attribute [rw] badge_id
+      #   @return [Fixnum] the badge's ID in OSM
+      # @!attribute [rw] badge_version
+      #   @return [Fixnum] the version of the badge
+      # @!attribute [rw] requirement_id
+      #   @return [Fixnum] the requirement's ID in OSM
 
-      attribute :badge_key, :type => String
       attribute :badge_type, :type => Object
-      attribute :requirement_key, :type => String
       attribute :badge_section, :type => Object
-      attribute :badge_label, :type => String
       attribute :requirement_label, :type => String
       attribute :data, :type => String
+      attribute :badge_name, :type => String
+      attribute :badge_id, :type => Integer
+      attribute :badge_version, :type => Integer
+      attribute :requirement_id, :type => Integer
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :badge_key, :badge_type, :requirement_key, :badge_section, :badge_label, :requirement_label, :data
+        attr_accessible :badge_type, :badge_section, :requirement_label, :data, :badge_name, :badge_id, :badge_version, :requirement_id
       end
 
-      validates_presence_of :badge_key
-      validates_format_of :requirement_key, :with => /\A(?:[a-z]_\d{2})|(?:custom_\d+)\Z/, :allow_blank => true, :message => 'is not in the correct format (e.g. "a_01")'
+      validates_presence_of :badge_name
       validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
       validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
+      validates_numericality_of :badge_id, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :badge_version, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :requirement_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
 
       # @!method initialize
       #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-      # Compare BadgeLink based on section, type, key, requirement, data
+      # Compare BadgeLink based on section, type, badge_name, requirement_label, data
       def <=>(another)
-        [:badge_section, :badge_type, :badge_key, :requirement_key].each do |attribute|
+        [:badge_section, :badge_type, :badge_name, :requirement_label].each do |attribute|
           result = self.try(:data) <=> another.try(:data)
           return result unless result == 0
         end

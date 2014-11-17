@@ -1,7 +1,40 @@
 ## Version 1.2.15
 
   * Add support for census and giftaid link generation for members
-  * Add :osm_Staging as a site to point the gem at. Really only useful for gem development.
+  * Add :osm_staging as a site to point the gem at. Really only useful for gem development.
+  * Update to match OSM's new badge system:
+    * Retrieving badge stock
+    * Updating badge stock
+    * Fetching badge data
+    * Fetching due badges (added stock\_levels attribute, since OSM now gives it)
+    * Fetching & updating badge links for Events
+    * Fetching & updating badge links for Activities
+    * Fetching & updating badge links for Meetings
+    * Summary now returns all started/completed/awarded badges (it can't filter by type) so can only be called from Osm::Badge
+    * Osm::Badge
+      * osm\_key, osm\_long\_key and competion criteria attributes are gone
+      * id, version, identifier, group\_name, latest, user\_id, levels, sharing attributes added
+      * min_modules_required, min_requirements_required, add_columns_to_module, level_requirement, other_requirements_required, badges_required, show_level_letters, requires_modules and modules attributes added
+      * OSM Changed how completion criteria are retrieved (this gem now uses a special peice of OSM's API just for this purpose) so:
+      * attributes sections\_needed, total\_needed and needed\_from\_section are gone
+      * New methods modules, module_letters, module_ids and add_columns?
+    * Osm::Badge::Data
+      * mark\_awarded method now only marks as awarded (the optional mark\_as parameter is gone)
+      * mark\_not\_awarded method added
+      * mark\_due and mark\_not\_due methods added
+      * completed attribute renamed to due
+      * sections_gained method renamed to modules_gained, now returns an array of letters
+      * gained_in_sections renamed to gained_in_modules
+    * Osm::Badge::Requirement gains a mod attribute to hold the Osm::Badge::RequirementModule
+    * Osm::Badge::RequirementModule added
+    * Osm::Event::BadgeLink
+      * Attributes added: badge\_name, badge\_id, badge\_version, requirement\_id
+      * Attributes removed: badge\_label, badge\_key, requirement\_key
+      * Attributes untouched: badge\_type, badge\_section, data, requirement\_label
+    * Osm::Activity::Badge attributes now match Osm::Event::BadgeLink
+    * Osm::Meeting::BadgeLink attributes now match Osm::Event::badgeLink
+    * Osm::Badges.get_badge_stock returns a Hash, keys are now "#{badge_id}_#{level}"
+    * Osm::Badge::Data instance method requirement_met?(field_id) method made public
 
 ## Version 1.2.14
 
