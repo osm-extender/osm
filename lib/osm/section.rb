@@ -376,6 +376,47 @@ module Osm
       Osm::SUBSCRIPTION_LEVEL_NAMES[subscription_level]
     end
 
+    # Check if the section has a subscription of a given level (or higher)
+    # @param level [Fixnum, Symbol] the subscription level required
+    # @return [Boolean] Whether the section has a subscription of level (or higher)
+    def subscription_at_least?(level)
+      if level.is_a?(Symbol) # Convert to Fixnum
+        case level
+        when :bronze
+          level = 1
+        when :silver
+          level = 2
+        when :gold
+          level = 3
+        when :gold_plus
+          level = 4
+        else
+          level = 0
+        end
+      end
+
+      return subscription_level >= level
+    end
+
+    # @!method bronze?
+    #   Check if this has a Bronze level subscription
+    #   @return (Boolean)
+    # @!method silver?
+    #   Check if this has a Silver level subscription
+    #   @return (Boolean)
+    # @!method gold?
+    #   Check if this has a Gold level subscription
+    #   @return (Boolean)
+    # @!method gold_plus?
+    #   Check if this has a Gold+ level subscription
+    #   @return (Boolean)
+    Osm::SUBSCRIPTION_LEVELS[1..-1].each_with_index do |attribute, index|
+      define_method "#{attribute}?" do
+        subscription_level == (index + 1)
+      end
+    end
+
+
     # Compare Section based on group_name type (age order), then name
     def <=>(another)
       result = self.group_name <=> another.try(:group_name)
