@@ -1,3 +1,13 @@
+## Version 1.2.16
+
+  * Osm::Section gains instance methods:
+    * bronze?
+    * silver?
+    * gold?
+    * gold_plus?
+    * subscription_at_least?(level)
+  * Osm::SUBSCRIPTION_LEVEL_NAMES is now a Hash not an Array
+
 ## Version 1.2.15
 
   * Add support for census and giftaid link generation for members

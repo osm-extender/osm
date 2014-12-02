@@ -295,6 +295,114 @@ describe "Section" do
     end
   end
 
+  describe "Corretly works out the subscription level" do
+
+    it "Bronze" do
+      section = Osm::Section.new(subscription_level: 1)
+      section.bronze?.should == true
+      section.silver?.should == false
+      section.gold?.should == false
+      section.gold_plus?.should == false
+    end
+
+    it "Silver" do
+      section = Osm::Section.new(subscription_level: 2)
+      section.bronze?.should == false
+      section.silver?.should == true
+      section.gold?.should == false
+      section.gold_plus?.should == false
+    end
+
+    it "Gold" do
+      section = Osm::Section.new(subscription_level: 3)
+      section.bronze?.should == false
+      section.silver?.should == false
+      section.gold?.should == true
+      section.gold_plus?.should == false
+    end
+
+    it "Gold+" do
+      section = Osm::Section.new(subscription_level: 4)
+      section.bronze?.should == false
+      section.silver?.should == false
+      section.gold?.should == false
+      section.gold_plus?.should == true
+    end
+
+    it "Unknown" do
+      section = Osm::Section.new(subscription_level: 0)
+      section.bronze?.should == false
+      section.silver?.should == false
+      section.gold?.should == false
+      section.gold_plus?.should == false
+    end
+
+  end # describe
+
+  describe "Correctly works out if a section has a subscription of at least" do
+
+    it "Bronze" do
+      section = Osm::Section.new(subscription_level: 1)
+      section.subscription_at_least?(:bronze).should == true
+      section.subscription_at_least?(:silver).should == false
+      section.subscription_at_least?(:gold).should == false
+      section.subscription_at_least?(:gold_plus).should == false
+      section.subscription_at_least?(1).should == true
+      section.subscription_at_least?(2).should == false
+      section.subscription_at_least?(3).should == false
+      section.subscription_at_least?(4).should == false
+    end
+
+    it "Silver" do
+      section = Osm::Section.new(subscription_level: 2)
+      section.subscription_at_least?(:bronze).should == true
+      section.subscription_at_least?(:silver).should == true
+      section.subscription_at_least?(:gold).should == false
+      section.subscription_at_least?(:gold_plus).should == false
+      section.subscription_at_least?(1).should == true
+      section.subscription_at_least?(2).should == true
+      section.subscription_at_least?(3).should == false 
+      section.subscription_at_least?(4).should == false 
+    end
+
+    it "Gold" do
+      section = Osm::Section.new(subscription_level: 3)
+      section.subscription_at_least?(:bronze).should == true
+      section.subscription_at_least?(:silver).should == true
+      section.subscription_at_least?(:gold).should == true
+      section.subscription_at_least?(:gold_plus).should == false
+      section.subscription_at_least?(1).should == true
+      section.subscription_at_least?(2).should == true
+      section.subscription_at_least?(3).should == true 
+      section.subscription_at_least?(4).should == false 
+    end
+
+    it "Gold+" do
+      section = Osm::Section.new(subscription_level: 4)
+      section.subscription_at_least?(:bronze).should == true
+      section.subscription_at_least?(:silver).should == true
+      section.subscription_at_least?(:gold).should == true
+      section.subscription_at_least?(:gold_plus).should == true
+      section.subscription_at_least?(1).should == true
+      section.subscription_at_least?(2).should == true
+      section.subscription_at_least?(3).should == true 
+      section.subscription_at_least?(4).should == true 
+    end
+
+    it "Unknown" do
+      section = Osm::Section.new(subscription_level: 0)
+      section.subscription_at_least?(:bronze).should == false
+      section.subscription_at_least?(:silver).should == false
+      section.subscription_at_least?(:gold).should == false
+      section.subscription_at_least?(:gold_plus).should == false
+      section.subscription_at_least?(1).should == false
+      section.subscription_at_least?(2).should == false
+      section.subscription_at_least?(3).should == false 
+      section.subscription_at_least?(4).should == false 
+    end
+
+  end # describe
+
 end
 
 

@@ -209,23 +209,8 @@ module Osm
     # @raise [Osm::Forbidden] If the Section does not have the required OSM Subscription (or higher)
     def self.require_subscription(api, level, section, options={})
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
-      if level.is_a?(Symbol) # Convert to Fixnum
-        case level
-        when :bronze
-          level = 1
-        when :silver
-          level = 2
-        when :gold
-          level = 3
-        when :gold_plus
-          level = 4
-        else
-          level = 0
-        end
-      end
-      if section.nil? || section.subscription_level < level
-        level_name = Osm::SUBSCRIPTION_LEVEL_NAMES[level] || level
-        raise Osm::Forbidden, "Insufficent OSM subscription level (#{level_name} required for #{section.name})."
+      if section.nil? || !section.subscription_at_least?(level)
+        raise Osm::Forbidden, "Insufficent OSM subscription level (#{Osm::SUBSCRIPTION_LEVEL_NAMES[level]} required for #{section.name})."
       end
     end
 
