@@ -1,3 +1,7 @@
+## Version 1.2.17
+
+  * 
+
 ## Version 1.2.16
 
   * Osm::Section gains instance methods:
