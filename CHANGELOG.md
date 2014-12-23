@@ -1,3 +1,7 @@
+## Version 1.2.17
+
+  * Update to match how OSM now lists activities within meetings.
+
 ## Version 1.2.16
 
   * Osm::Section gains instance methods:

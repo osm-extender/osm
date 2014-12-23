@@ -318,5 +318,29 @@ describe "Meeting" do
       meeting.delete(@api).should be_true
     end
 
+  end # Describe using API
+
+  describe "API Strangeness" do
+    it "Activity details is an Array [id, Hash]" do
+      body = {
+        "items" => [{"eveningid" => "5", "sectionid" =>"3", "title" => "Weekly Meeting 1", "notesforparents" => "parents", "games" => "games", "prenotes" => "before", "postnotes" => "after", "leaders" => "leaders", "meetingdate" => "2001-02-03", "starttime" => "19:15:00", "endtime" => "20:30:00", "googlecalendar" => ""}],
+        "activities" => {"5" => [
+          ["6", {"activityid" => "6", "title" => "Activity 6", "notes" => "Some notes", "eveningid" => "5"}],
+        ]},
+        "badgelinks" => {"5" => []},
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getProgramme&sectionid=3&termid=4", :body => body.to_json, :content_type => 'application/json')
+
+      programme = Osm::Meeting.get_for_section(@api, 3, 4)
+      programme.size.should == 1
+      meeting = programme[0]
+      meeting.activities.size.should == 1
+      activity = meeting.activities[0]
+      activity.activity_id.should == 6
+      activity.title.should == 'Activity 6'
+      activity.notes.should == 'Some notes'
+      meeting.valid?.should be_true
+    end
   end
+
 end
