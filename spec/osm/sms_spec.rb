@@ -156,7 +156,7 @@ describe "SMS" do
       report.last_updated.should == DateTime.new(2000, 1, 2, 3, 5, 6)
       report.credits.should == 7
       report.status.should == :delivered
-      report.valid?.should be_true
+      report.valid?.should == true
     end
 
     describe "Status helpers" do

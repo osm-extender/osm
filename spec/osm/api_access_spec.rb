@@ -15,7 +15,7 @@ describe "API Access" do
     api_access.id.should == 1
     api_access.name.should == 'Name'
     api_access.permissions.should == {:permission => [:read]}
-    api_access.valid?.should be_true
+    api_access.valid?.should == true
   end
 
   it "Sorts by id" do

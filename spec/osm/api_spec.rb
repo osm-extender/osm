@@ -26,11 +26,11 @@ describe "API" do
   end
 
   it "Exposes the debug option seperatly too" do
-    Osm::Api.debug.should be_false
+    Osm::Api.debug.should == false
     Osm::Api.debug = true
-    Osm::Api.debug.should be_true
+    Osm::Api.debug.should == true
     Osm::Api.debug = false
-    Osm::Api.debug.should be_false
+    Osm::Api.debug.should == false
   end
 
 
@@ -60,7 +60,7 @@ describe "API" do
   end
 
   it "sets a new API user" do
-    @api.set_user('1', '2').is_a?(Osm::Api).should be_true
+    @api.set_user('1', '2').is_a?(Osm::Api).should == true
 
     HTTParty.should_receive(:post).with("https://www.onlinescoutmanager.co.uk/test", {:body => {
       'apiid' => @CONFIGURATION[:api][:osm][:id],

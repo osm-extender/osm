@@ -22,7 +22,7 @@ describe "Term" do
     term.name.should == 'Term name'
     term.start.should == Date.new(2001, 1, 1)
     term.finish.should == Date.new(2001, 3, 31)
-    term.valid?.should be_true
+    term.valid?.should == true
   end
 
   it "Compares two matching terms" do
@@ -53,9 +53,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.before?(Date.today).should be_true
-    term2.before?(Date.today).should be_false
-    term3.before?(Date.today).should be_false
+    term1.before?(Date.today).should == true
+    term2.before?(Date.today).should == false
+    term3.before?(Date.today).should == false
   end
 
   it "Works out if it is completly after a date" do
@@ -63,9 +63,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.after?(Date.today).should be_false
-    term2.after?(Date.today).should be_false
-    term3.after?(Date.today).should be_true
+    term1.after?(Date.today).should == false
+    term2.after?(Date.today).should == false
+    term3.after?(Date.today).should == true
   end
 
   it "Works out if it has passed" do
@@ -73,9 +73,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.past?().should be_true
-    term2.past?().should be_false
-    term3.past?().should be_false
+    term1.past?().should == true
+    term2.past?().should == false
+    term3.past?().should == false
   end
 
   it "Works out if it is in the future" do
@@ -83,9 +83,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.future?().should be_false
-    term2.future?().should be_false
-    term3.future?().should be_true
+    term1.future?().should == false
+    term2.future?().should == false
+    term3.future?().should == true
   end
 
   it "Works out if it is the current term" do
@@ -93,9 +93,9 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start=> (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.current?().should be_false
-    term2.current?().should be_true
-    term3.current?().should be_false
+    term1.current?().should == false
+    term2.current?().should == true
+    term3.current?().should == false
   end
 
   it "Works out if it contains a date" do
@@ -103,19 +103,19 @@ describe "Term" do
     term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
     term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
 
-    term1.contains_date?(Date.today).should be_false
-    term2.contains_date?(Date.today).should be_true
-    term3.contains_date?(Date.today).should be_false
+    term1.contains_date?(Date.today).should == false
+    term2.contains_date?(Date.today).should == true
+    term3.contains_date?(Date.today).should == false
   end
 
   it "Date helpers return false for nil dates" do
     term = Osm::Term.new
-    term.before?(Date.today).should be_false
-    term.after?(Date.today).should be_false
-    term.past?.should be_false
-    term.future?.should be_false
-    term.current?.should be_false
-    term.contains_date?(Date.today).should be_false
+    term.before?(Date.today).should == false
+    term.after?(Date.today).should == false
+    term.past?.should == false
+    term.future?.should == false
+    term.current?.should == false
+    term.contains_date?(Date.today).should == false
   end
 
 
@@ -147,7 +147,7 @@ describe "Term" do
         terms.size.should == 3
         terms.map{ |i| i.id }.should == [1, 2, 3]
         term = terms[0]
-        term.is_a?(Osm::Term).should be_true
+        term.is_a?(Osm::Term).should == true
         term.id.should == 1
         term.name.should == 'Term 1'
         term.start.should == (Date.today + 31)
@@ -169,7 +169,7 @@ describe "Term" do
 
     it "Gets a term" do
       term = Osm::Term.get(@api, 2)
-      term.is_a?(Osm::Term).should be_true
+      term.is_a?(Osm::Term).should == true
       term.id.should == 2
     end
 
@@ -220,7 +220,7 @@ describe "Term" do
         :name => 'A Term',
         :start => Date.new(2010, 01, 01),
         :finish => Date.new(2010, 12, 31),
-      }).should be_true
+      }).should == true
     end
 
     it "Create a term (failed)" do
@@ -244,7 +244,7 @@ describe "Term" do
         :name => 'A Term',
         :start => Date.new(2010, 01, 01),
         :finish => Date.new(2010, 12, 31),
-      }).should be_false
+      }).should == false
     end
 
     it "Update a term" do
@@ -263,7 +263,7 @@ describe "Term" do
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"terms":{}}'}) }
 
       term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
-      term.update(@api).should be_true
+      term.update(@api).should == true
     end
 
     it "Update a term (failed)" do
@@ -282,7 +282,7 @@ describe "Term" do
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
       term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
-      term.update(@api).should be_false
+      term.update(@api).should == false
     end
 
     it "Update a term (invalid term)" do

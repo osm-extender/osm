@@ -14,7 +14,7 @@ describe "Budget" do
     b.id.should == 1
     b.section_id.should == 2
     b.name.should == 'Name'
-    b.valid?.should be_true
+    b.valid?.should == true
   end
 
   it "Sorts Budget by section ID then name" do
@@ -74,7 +74,7 @@ describe "Budget" do
         'row' => 0,
       }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
 
-      budget.create(@api).should be_true
+      budget.create(@api).should == true
       budget.id.should == 4
     end
 
@@ -93,7 +93,7 @@ describe "Budget" do
       }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
       Osm::Budget.should_receive(:get_for_section).with(@api, 2, {:no_cache=>true}) { [Osm::Budget.new(:id => 3, :section_id => 2, :name => 'Existing budget')] }
 
-      budget.create(@api).should be_false
+      budget.create(@api).should == false
     end
     
     it "Create budget (failure (not updated))" do
@@ -123,7 +123,7 @@ describe "Budget" do
         'row' => 0,
       }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
 
-      budget.create(@api).should be_false
+      budget.create(@api).should == false
     end
     
     it "Update budget (success)" do
@@ -146,7 +146,7 @@ describe "Budget" do
         'row' => 0,
       }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
     
-      budget.update(@api).should be_true
+      budget.update(@api).should == true
     end
     
     it "Update budget (failure)" do
@@ -158,7 +158,7 @@ describe "Budget" do
 
       HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
     
-      budget.update(@api).should be_false
+      budget.update(@api).should == false
     end
     
     it "Delete budget (success)" do
@@ -177,7 +177,7 @@ describe "Budget" do
         'categoryid' => 1,
       }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
     
-      budget.delete(@api).should be_true
+      budget.delete(@api).should == true
     end
     
     it "Delete budget (failure)" do
@@ -196,7 +196,7 @@ describe "Budget" do
         'categoryid' => 1,
       }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
     
-      budget.delete(@api).should be_false
+      budget.delete(@api).should == false
     end
     
   end

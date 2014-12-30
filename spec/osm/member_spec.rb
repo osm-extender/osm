@@ -86,7 +86,7 @@ describe "Member" do
     member.joined.should == Date.new(2006, 1, 7)
     member.age.should == '06/07'
     member.joined_years.should == 1
-    member.valid?.should be_true
+    member.valid?.should == true
   end
 
 
@@ -102,15 +102,15 @@ describe "Member" do
   end
 
   it "Tells if member is a leader" do
-    Osm::Member.new(grouping_id: -2).leader?.should be_true  # In the leader grouping
-    Osm::Member.new(grouping_id: 2).leader?.should be_false  # In a youth grouping
-    Osm::Member.new(grouping_id: 0).leader?.should be_false  # Not in a grouping
+    Osm::Member.new(grouping_id: -2).leader?.should == true  # In the leader grouping
+    Osm::Member.new(grouping_id: 2).leader?.should == false  # In a youth grouping
+    Osm::Member.new(grouping_id: 0).leader?.should == false  # Not in a grouping
   end
 
   it "Tells if member is a youth member" do
-    Osm::Member.new(grouping_id: -2).youth?.should be_false  # In the leader grouping
-    Osm::Member.new(grouping_id: 2).youth?.should be_true  # In a youth grouping
-    Osm::Member.new(grouping_id: 0).youth?.should be_false  # Not in a grouping
+    Osm::Member.new(grouping_id: -2).youth?.should == false  # In the leader grouping
+    Osm::Member.new(grouping_id: 2).youth?.should == true  # In a youth grouping
+    Osm::Member.new(grouping_id: 0).youth?.should == false  # Not in a grouping
   end
 
   it "Provides each part of age" do
@@ -304,7 +304,7 @@ describe "Member" do
 
       Osm::Term.stub(:get_for_section) { [] }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":1}'}) }
-      member.create(@api).should be_true
+      member.create(@api).should == true
       member.id.should == 1
     end
 
@@ -321,7 +321,7 @@ describe "Member" do
       )
 
       HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":-1}'}) }
-      member.create(@api).should be_false
+      member.create(@api).should == false
     end
 
 
@@ -427,7 +427,7 @@ describe "Member" do
       }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
       Osm::Term.stub(:get_for_section) { [] }
 
-      member.update(@api).should be_true
+      member.update(@api).should == true
     end
 
     it "Update in OSM (only updated fields)" do
@@ -478,7 +478,7 @@ describe "Member" do
       }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
       Osm::Term.stub(:get_for_section) { [] }
 
-      member.update(@api).should be_true
+      member.update(@api).should == true
     end
 
     it "Update in OSM (failed)" do
@@ -495,7 +495,7 @@ describe "Member" do
       member.first_name = 'First'
 
       HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-      member.update(@api).should be_false
+      member.update(@api).should == false
     end
 
     it "Get Photo link" do

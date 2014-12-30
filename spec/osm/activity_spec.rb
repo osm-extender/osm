@@ -125,8 +125,8 @@ describe "Activity" do
       activity.location.should == :indoors
       activity.shared.should == 0
       activity.rating.should == 4
-      activity.editable.should be_true
-      activity.deletable.should be_false
+      activity.editable.should == true
+      activity.deletable.should == false
       activity.used.should == 3
       activity.versions[0].version.should == 0
       activity.versions[0].created_by.should == 1
@@ -146,7 +146,7 @@ describe "Activity" do
       activity.badges[0].requirement_id.should == 93384
       activity.badges[0].requirement_label.should == 'B: Fire drill'
       activity.badges[0].data.should == 'Yes'
-      activity.valid?.should be_true
+      activity.valid?.should == true
     end
   
   
@@ -165,13 +165,13 @@ describe "Activity" do
   
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
       activity = Osm::Activity.new(:id => 2)
-      activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should be_true
+      activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should == true
     end
   
     it "Add activity to programme (failed)" do
       HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
       activity = Osm::Activity.new(:id => 2)
-      activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should be_false
+      activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should == false
     end
   
   
@@ -223,7 +223,7 @@ describe "Activity" do
         :shared => 0,
         :section_id => 1,
       )
-      activity.update(@api, 1, true).should be_true
+      activity.update(@api, 1, true).should == true
     end
   
     it "Update activity in OSM (failed)" do
@@ -237,7 +237,7 @@ describe "Activity" do
         :location => :indoors,
         :running_time => 0,
       )
-      activity.update(@api, 1, true).should be_false
+      activity.update(@api, 1, true).should == false
     end
   
   end

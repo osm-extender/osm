@@ -15,7 +15,7 @@ describe "Register" do
     field.id.should == 'machine_name'
     field.name.should == 'Human name'
     field.tooltip.should == 'Tooltip'
-    field.valid?.should be_true
+    field.valid?.should == true
   end
 
   it "Sorts Field by id" do
@@ -51,7 +51,7 @@ describe "Register" do
       Date.new(2012, 01, 10) => :yes,
       Date.new(2012, 01, 24) => :unadvised_absent
     }
-    rd.valid?.should be_true
+    rd.valid?.should == true
   end
 
   it "Sorts Attendance by section_id, grouping_id, last_name then first_name" do
@@ -67,16 +67,16 @@ describe "Register" do
 
   it "Reports if a member was present on a date" do
     date = Date.new(2000, 1, 1)
-    Osm::Register::Attendance.new(:attendance => {date => :yes}).present_on?(date).should be_true
-    Osm::Register::Attendance.new(:attendance => {date => :known_absent}).present_on?(date).should be_false
-    Osm::Register::Attendance.new(:attendance => {date => :unknown_absent}).present_on?(date).should be_false
+    Osm::Register::Attendance.new(:attendance => {date => :yes}).present_on?(date).should == true
+    Osm::Register::Attendance.new(:attendance => {date => :known_absent}).present_on?(date).should == false
+    Osm::Register::Attendance.new(:attendance => {date => :unknown_absent}).present_on?(date).should == false
   end
 
   it "Reports if a member was absent on a date" do
     date = Date.new(2000, 1, 1)
-    Osm::Register::Attendance.new(:attendance => {date => :yes}).absent_on?(date).should be_false
-    Osm::Register::Attendance.new(:attendance => {date => :known_absent}).absent_on?(date).should be_true
-    Osm::Register::Attendance.new(:attendance => {date => :unknown_absent}).absent_on?(date).should be_true
+    Osm::Register::Attendance.new(:attendance => {date => :yes}).absent_on?(date).should == false
+    Osm::Register::Attendance.new(:attendance => {date => :known_absent}).absent_on?(date).should == true
+    Osm::Register::Attendance.new(:attendance => {date => :unknown_absent}).absent_on?(date).should == true
   end
 
 
@@ -90,7 +90,7 @@ describe "Register" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
 
       register_structure = Osm::Register.get_structure(@api, 1, 2)
-      register_structure.is_a?(Array).should be_true
+      register_structure.is_a?(Array).should == true
     end
 
     it "Fetch the register data for a section" do
@@ -117,7 +117,7 @@ describe "Register" do
       ] }
 
       register = Osm::Register.get_attendance(@api, 1, 2)
-      register.is_a?(Array).should be_true
+      register.is_a?(Array).should == true
       register.size.should == 1
       reg = register[0]
       reg.attendance.should == {
@@ -131,7 +131,7 @@ describe "Register" do
       reg.member_id.should == 2
       reg.total.should == 4
       reg.section_id.should == 1
-      reg.valid?.should be_true
+      reg.valid?.should == true
     end
 
     it "Update register attendance" do
@@ -158,7 +158,7 @@ describe "Register" do
         :attendance => :yes,
         :members => 3,
         :completed_badge_requirements => [{'a'=>'A'}, {'b'=>'B'}]
-      }).should be_true
+      }).should == true
     end
 
     it "Handles the total row" do
@@ -186,7 +186,7 @@ describe "Register" do
       Osm::Register.stub(:get_structure) { [] }
 
       register = Osm::Register.get_attendance(@api, 1, 2)
-      register.is_a?(Array).should be_true
+      register.is_a?(Array).should == true
       register.size.should == 1
       reg = register[0]
       reg.first_name.should == 'First'
@@ -196,13 +196,13 @@ describe "Register" do
     it "Handles no data getting structure" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => '', :content_type => 'application/json')
       register_structure = Osm::Register.get_structure(@api, 1, 2)
-      register_structure.is_a?(Array).should be_true
+      register_structure.is_a?(Array).should == true
       register_structure.size.should == 0
 
 
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => '', :content_type => 'application/json')
       register = Osm::Register.get_attendance(@api, 1, 2)
-      register.is_a?(Array).should be_true
+      register.is_a?(Array).should == true
       register.size.should == 0
     end
 

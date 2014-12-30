@@ -34,7 +34,7 @@ describe "Meeting" do
     e.date.should == Date.new(2000, 1, 2)
     e.activities.should == []
     e.badge_links.should == []
-    e.valid?.should be_true
+    e.valid?.should == true
   end
 
   it "Sorts by Section ID, Meeting date, Start time and then Meeting ID" do
@@ -61,7 +61,7 @@ describe "Meeting" do
       ea.activity_id.should == 2
       ea.title.should == 'Activity Name'
       ea.notes.should == 'Notes'
-      ea.valid?.should be_true
+      ea.valid?.should == true
     end
 
     it "Sorts by title then activity_id" do
@@ -106,7 +106,7 @@ describe "Meeting" do
       programme = Osm::Meeting.get_for_section(@api, 3, 4)
       programme.size.should == 1
       meeting = programme[0]
-      meeting.is_a?(Osm::Meeting).should be_true
+      meeting.is_a?(Osm::Meeting).should == true
       meeting.id.should == 5
       meeting.section_id.should == 3
       meeting.title.should == 'Weekly Meeting 1'
@@ -199,7 +199,7 @@ describe "Meeting" do
         :start_time => '11:11',
         :finish_time => '22:22',
         :title => 'Title',
-      }).is_a?(Osm::Meeting).should be_true
+      }).is_a?(Osm::Meeting).should == true
     end
 
     it "Create a meeting (failed)" do
@@ -232,7 +232,7 @@ describe "Meeting" do
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
       activity = Osm::Activity.new(:id => 2, :title => 'Title')
       meeting = Osm::Meeting.new(:section_id => 1, :date => Date.new(2000, 1, 2))
-      meeting.add_activity(@api, activity, 'Notes').should be_true
+      meeting.add_activity(@api, activity, 'Notes').should == true
       meeting.activities[0].activity_id.should == 2
     end
 
@@ -240,7 +240,7 @@ describe "Meeting" do
       HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
       activity = Osm::Activity.new(:id => 2, :title => 'Title')
       meeting = Osm::Meeting.new(:section_id => 1, :date => Date.new(2000, 1, 2))
-      meeting.add_activity(@api, activity, 'Notes').should be_false
+      meeting.add_activity(@api, activity, 'Notes').should == false
     end
 
 
@@ -276,7 +276,7 @@ describe "Meeting" do
           :requirement_id => 93384,
         )]
       )
-      meeting.update(@api).should be_true
+      meeting.update(@api).should == true
     end
 
     it "Update a meeting (failed)" do
@@ -294,7 +294,7 @@ describe "Meeting" do
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
 
       meeting = Osm::Meeting.new(:id=>1, :section_id=>2, :date=>Date.new(2000, 01, 02))
-      meeting.update(@api).should be_false
+      meeting.update(@api).should == false
     end
 
     it "Update a meeting (invalid meeting)" do
@@ -315,7 +315,7 @@ describe "Meeting" do
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>''}) }
 
       meeting = Osm::Meeting.new(:id=>1, :section_id=>2)
-      meeting.delete(@api).should be_true
+      meeting.delete(@api).should == true
     end
 
   end # Describe using API
@@ -339,7 +339,7 @@ describe "Meeting" do
       activity.activity_id.should == 6
       activity.title.should == 'Activity 6'
       activity.notes.should == 'Some notes'
-      meeting.valid?.should be_true
+      meeting.valid?.should == true
     end
   end
 

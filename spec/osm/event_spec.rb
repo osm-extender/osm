@@ -37,35 +37,35 @@ describe "Event" do
     event.cost.should == '1.23'
     event.location.should == 'Somewhere'
     event.notes.should == 'None'
-    event.archived.should be_false
+    event.archived.should == false
     event.badges.should == []
     event.columns.should == []
     event.notepad.should == 'notepad'
     event.public_notepad.should == 'public notepad'
     event.confirm_by_date.should == Date.new(2002, 1, 2)
-    event.allow_changes.should be_true
-    event.reminders.should be_false
+    event.allow_changes.should == true
+    event.reminders.should == false
     event.attendance_limit.should == 3
-    event.attendance_limit_includes_leaders.should be_true
+    event.attendance_limit_includes_leaders.should == true
     event.attendance_reminder.should == 14
-    event.allow_booking.should be_false
-    event.valid?.should be_true
+    event.allow_booking.should == false
+    event.valid?.should == true
   end
 
   it "Tells if attendance is limited" do
-    Osm::Event.new(:attendance_limit => 0).limited_attendance?.should be_false
-    Osm::Event.new(:attendance_limit => 1).limited_attendance?.should be_true
+    Osm::Event.new(:attendance_limit => 0).limited_attendance?.should == false
+    Osm::Event.new(:attendance_limit => 1).limited_attendance?.should == true
   end
 
   it "Tells if the cost is TBC" do
-    Osm::Event.new(:cost => 'TBC').cost_tbc?.should be_true
-    Osm::Event.new(:cost => '1.23').cost_tbc?.should be_false
+    Osm::Event.new(:cost => 'TBC').cost_tbc?.should == true
+    Osm::Event.new(:cost => '1.23').cost_tbc?.should == false
   end
 
   it "Tells if the cost is free" do
-    Osm::Event.new(:cost => 'TBC').cost_free?.should be_false
-    Osm::Event.new(:cost => '1.23').cost_free?.should be_false
-    Osm::Event.new(:cost => '0.00').cost_free?.should be_true
+    Osm::Event.new(:cost => 'TBC').cost_free?.should == false
+    Osm::Event.new(:cost => '1.23').cost_free?.should == false
+    Osm::Event.new(:cost => '0.00').cost_free?.should == true
   end
 
   it "Sorts by start, name then ID (unless IDs are equal)" do
@@ -105,7 +105,7 @@ describe "Event" do
       ea.last_name.should == 'Last'
       ea.date_of_birth.should == Date.new(2000, 1, 2)
       ea.attending.should == :yes
-      ea.valid?.should be_true
+      ea.valid?.should == true
     end
 
     it "Sorts by event ID then row" do
@@ -141,7 +141,7 @@ describe "Event" do
       bl.requirement_id.should == 2
       bl.requirement_label.should == 'A: Poster'
       bl.data.should == 'abc'
-      bl.valid?.should be_true
+      bl.valid?.should == true
     end
   
   end
@@ -225,20 +225,20 @@ describe "Event" do
         event.cost.should == '0.00'
         event.location.should == 'Somewhere'
         event.notes.should == 'Notes'
-        event.archived.should be_false
+        event.archived.should == false
         event.notepad.should == 'notepad'
         event.public_notepad.should == 'public notepad'
         event.confirm_by_date.should == Date.new(2002, 1, 2)
-        event.allow_changes.should be_true
-        event.reminders.should be_false
+        event.allow_changes.should == true
+        event.reminders.should == false
         event.attendance_limit.should == 3
-        event.attendance_limit_includes_leaders.should be_true
+        event.attendance_limit_includes_leaders.should == true
         event.attendance_reminder.should == 7
-        event.allow_booking.should be_true
+        event.allow_booking.should == true
         event.columns[0].id.should == 'f_1'
         event.columns[0].name.should == 'Name'
         event.columns[0].label.should == 'Label'
-        event.columns[0].parent_required.should be_true
+        event.columns[0].parent_required.should == true
         event.badges[0].badge_name.should == 'Athletics'
         event.badges[0].badge_section.should == :cubs
         event.badges[0].badge_type.should == :activity
@@ -252,7 +252,7 @@ describe "Event" do
         event.badges[1].badge_type.should == :staged
         event.badges[1].requirement_id.should == 4
         event.badges[1].data.should == '1'
-        event.valid?.should be_true
+        event.valid?.should == true
       end
 
       it "Handles a blank config" do
@@ -268,7 +268,7 @@ describe "Event" do
         events = Osm::Event.get_for_section(@api, 1)
         event = events[0]
         event.cost.should == 'TBC'
-        event.valid?.should be_true
+        event.valid?.should == true
       end
 
       it "From cache" do
@@ -356,7 +356,7 @@ describe "Event" do
 
       it "No limit" do
         event = Osm::Event.new(:attendance_limit => 0, :id => 1, :section_id => 2)
-        event.spaces?(@api).should be_true
+        event.spaces?(@api).should == true
         event.spaces(@api).should be_nil
       end
 
@@ -379,7 +379,7 @@ describe "Event" do
         Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
         event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
-        event.spaces?(@api).should be_true
+        event.spaces?(@api).should == true
         event.spaces(@api).should == 1
       end
 
@@ -418,7 +418,7 @@ describe "Event" do
         Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
         event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
-        event.spaces?(@api).should be_false
+        event.spaces?(@api).should == false
         event.spaces(@api).should == -1
       end
 
@@ -449,7 +449,7 @@ describe "Event" do
         Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
         event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
-        event.spaces?(@api).should be_false
+        event.spaces?(@api).should == false
         event.spaces(@api).should == 0
       end
 
@@ -788,7 +788,7 @@ describe "Event" do
         event.name = 'Test event'
         event.notepad = 'notepad'
         event.public_notepad = 'public notepad'
-        event.update(@api).should be_true
+        event.update(@api).should == true
       end
 
       it "TBC cost" do
@@ -838,7 +838,7 @@ describe "Event" do
           :allow_booking => true,
         )
         event.cost = 'TBC'
-        event.update(@api).should be_true
+        event.update(@api).should == true
       end
 
       describe "Badge links" do
@@ -890,7 +890,7 @@ describe "Event" do
           @event.should_receive(:add_badge_link).with(@api, badge) { true }
 
           @event.badges.push(badge)
-          @event.update(@api).should be_true
+          @event.update(@api).should == true
         end
 
         it "Removed" do
@@ -911,7 +911,7 @@ describe "Event" do
           HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
 
           @event.badges = []
-          @event.update(@api).should be_true
+          @event.update(@api).should == true
         end
 
       end
@@ -932,7 +932,7 @@ describe "Event" do
         :id => 2
       )
       event.id = 22
-      event.update(@api).should be_false
+      event.update(@api).should == false
     end
 
 
@@ -957,7 +957,7 @@ describe "Event" do
         :notes => 'none',
         :id => 2
       )
-      event.delete(@api).should be_true
+      event.delete(@api).should == true
     end
 
     it "Delete (failed)" do
@@ -973,7 +973,7 @@ describe "Event" do
         :notes => 'none',
         :id => 2
       )
-      event.delete(@api).should be_false
+      event.delete(@api).should == false
     end
 
 
@@ -1000,7 +1000,7 @@ describe "Event" do
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       attendance = event.get_attendance(@api, 3)
-      attendance.is_a?(Array).should be_true
+      attendance.is_a?(Array).should == true
       ea = attendance[0]
       ea.member_id.should == 1
       ea.grouping_id.should == 2
@@ -1084,7 +1084,7 @@ describe "Event" do
         }}
       ) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
-      ea.update(@api).should be_true
+      ea.update(@api).should == true
     end
 
 
@@ -1107,7 +1107,7 @@ describe "Event" do
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
-      event.add_column(@api, 'Test name', 'Test label', true).should be_true
+      event.add_column(@api, 'Test name', 'Test label', true).should == true
       column = event.columns[0]
       column.id.should == 'f_1'
       column.name.should == 'Test name'
@@ -1119,7 +1119,7 @@ describe "Event" do
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
-      event.add_column(@api, 'Test name', 'Test label').should be_false
+      event.add_column(@api, 'Test name', 'Test label').should == false
     end
 
 
@@ -1148,7 +1148,7 @@ describe "Event" do
       column.label = 'New label'
       column.parent_required = true
 
-      column.update(@api).should be_true
+      column.update(@api).should == true
 
       column.name.should == 'New name'
       column.label.should == 'New label'
@@ -1162,7 +1162,7 @@ describe "Event" do
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
       event.columns = [column]
-      column.update(@api).should be_false
+      column.update(@api).should == false
     end
 
 
@@ -1182,7 +1182,7 @@ describe "Event" do
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
       event.columns = [column]
 
-      column.delete(@api).should be_true
+      column.delete(@api).should == true
       event.columns.should == []
     end
 
@@ -1192,7 +1192,7 @@ describe "Event" do
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
       event.columns = [column]
-      column.delete(@api).should be_false
+      column.delete(@api).should == false
     end
 
     it "Get audit trail" do
