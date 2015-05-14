@@ -1,6 +1,6 @@
 ## Version 1.2.18
 
-  * 
+  * Osm::Section - removal of column_names, fields, intouch_fields, mobile_fields attributes
 
 ## Version 1.2.17
 

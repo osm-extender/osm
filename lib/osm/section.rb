@@ -15,14 +15,6 @@ module Osm
     #   @return [Date] when the section's subscription to OSM expires
     # @!attribute [rw] type
     #   @return [Symbol] the section type (:beavers, :cubs, :scouts, :exporers, :network, :adults, :waiting, :unknown)
-    # @!attribute [rw] column_names
-    #   @return [Hash] custom names to use for the data columns
-    # @!attribute [rw] fields
-    #   @return [Hash] which columns are shown in OSM
-    # @!attribute [rw] intouch_fields
-    #   @return [Hash] which columns are shown in OSM's in touch reports
-    # @!attribute [rw] mobile_fields
-    #   @return [Hash] which columns are shown in the OSM mobile app
     # @!attribute [rw] flexi_records
     #   @return [Array<FlexiRecord>] list of the extra records the section has
     # @!attribute [rw] gocardless
@@ -83,10 +75,6 @@ module Osm
     attribute :subscription_level, :default => 1
     attribute :subscription_expires, :type => Date
     attribute :type, :default => :unknown
-    attribute :column_names, :default => {}
-    attribute :fields, :default => {}
-    attribute :intouch_fields, :default => {}
-    attribute :mobile_fields, :default => {}
     attribute :flexi_records, :default => []
     attribute :gocardless, :type => Boolean
     attribute :myscout_events_expires, :type => Date
@@ -116,7 +104,7 @@ module Osm
 
     if ActiveModel::VERSION::MAJOR < 4
       attr_accessible :id, :name, :group_id, :group_name, :subscription_level, :subscription_expires,
-                      :type, :column_names, :fields, :intouch_fields, :mobile_fields, :flexi_records,
+                      :type, :flexi_records,
                       :gocardless, :myscout_events_expires, :myscout_badges_expires,
                       :myscout_programme_expires, :myscout_details_expires, :myscout_events,
                       :myscout_badges, :myscout_programme, :myscout_payments, :myscout_details,
@@ -136,16 +124,11 @@ module Osm
     validates_numericality_of :myscout_payment_reminder_frequency, :only_integer=>true, :greater_than_or_equal_to=>-1
     validates_numericality_of :sms_messages_sent, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_numericality_of :sms_messages_remaining, :only_integer=>true, :greater_than_or_equal_to=>0
-
     validates_presence_of :name
     validates_presence_of :group_name
     validates_presence_of :subscription_level
     validates_presence_of :subscription_expires
     validates_presence_of :type
-#    validates_presence_of :column_names, :unless => Proc.new { |a| a.column_names == {} }
-#    validates_presence_of :fields, :unless => Proc.new { |a| a.fields == {} }
-#    validates_presence_of :intouch_fields, :unless => Proc.new { |a| a.intouch_fields == {} }
-#    validates_presence_of :mobile_fields, :unless => Proc.new { |a| a.mobile_fields == {} }
 #    validates_presence_of :flexi_records, :unless => Proc.new { |a| a.flexi_records == [] }
 
     validates_inclusion_of :subscription_level, :in => (1..3), :message => 'is not a valid subscription level'
@@ -161,10 +144,6 @@ module Osm
     validates_inclusion_of :myscout_programme_show, :in => [-2, -1, 0, 5, 10, 15, 20]
     validates_inclusion_of :sms_sent_test, :in => [true, false]
 
-    validates :column_names, :hash => {:key_type => Symbol, :value_type => String}
-    validates :fields, :hash => {:key_type => Symbol, :value_in => [true, false]}
-    validates :intouch_fields, :hash => {:key_type => Symbol, :value_in => [true, false]}
-    validates :mobile_fields, :hash => {:key_type => Symbol, :value_in => [true, false]}
     validates :myscout_emails, :hash => {:key_in => [:email1, :email2, :email3, :email4], :value_in => [true, false]}
     validates :flexi_records, :array_of => {:item_type => Osm::FlexiRecord, :item_valid => true}
 
@@ -223,10 +202,6 @@ module Osm
           :subscription_expires => Osm::parse_date(section_data['subscription_expires']),
           :type => !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : (!section_data['section'].nil? ? section_data['section'].to_sym : :unknown),
           :num_scouts => section_data['numscouts'],
-          :column_names => section_data['columnNames'].is_a?(Hash) ? Osm::symbolize_hash(section_data['columnNames']) : {},
-          :fields => section_data['fields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['fields']) : {},
-          :intouch_fields => section_data['intouch'].is_a?(Hash) ? Osm::symbolize_hash(section_data['intouch']) : {},
-          :mobile_fields => section_data['mobFields'].is_a?(Hash) ? Osm::symbolize_hash(section_data['mobFields']) : {},
           :flexi_records => flexi_records.sort,
           :group_id => role_data['groupid'],
           :group_name => role_data['groupname'],
