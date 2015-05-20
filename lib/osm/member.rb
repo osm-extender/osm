@@ -1,151 +1,130 @@
 module Osm
 
   class Member < Osm::Model
+    # Constants for group id
+    GID_PRIMARY_CONTACT = 1
+    GID_SECONDARY_CONTACT = 2
+    GID_EMERGENCY_CONTACT = 3
+    GID_DOCTOR_CONTACT = 4
+    GID_CUSTOM = 5
+    GID_MEMBER_CONTACT = 6
+    GID_FLOATING = 7
+
+    # Constants for column id
+    CUSTOM_FIELD_IDS_START_AT = 55
+    CORE_FIELD_IDS_FINISH_AT = CUSTOM_FIELD_IDS_START_AT - 1
+    CORE_FIELD_IDS = (1..54).to_a
+    CID_FIRST_NAME = 2
+    CID_LAST_NAME = 3
+    CID_ADDRESS_1 = 7
+    CID_ADDRESS_2 = 8
+    CID_ADDRESS_3 = 9
+    CID_ADDRESS_4 = 10
+    CID_POSTCODE = 11
+    CID_EMAIL_1 = 12
+    CID_RECIEVE_EMAIL_1 = 13
+    CID_EMAIL_2 = 14
+    CID_RECIEVE_EMAIL_2 = 15
+    CID_PHONE_1 = 18
+    CID_RECIEVE_PHONE_1 = 19
+    CID_PHONE_2 = 20
+    CID_RECIEVE_PHONE_2 = 21
+    CID_GENDER = 34
+    CID_SURGERY = 54
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the member
     # @!attribute [rw] section_id
     #   @return [Fixnum] the section the member belongs to
-    # @!attribute [rw] type
-    #   @return [String] ?
     # @!attribute [rw] first_name
     #   @return [String] the member's first name
     # @!attribute [rw] last_name
     #   @return [String] the member's last name
-    # @!attribute [rw] email1
-    #   @return [String] the 1st email address for the member
-    # @!attribute [rw] email2
-    #   @return [String] the 2nd email address for the member
-    # @!attribute [rw] email3
-    #   @return [String] the 3rd email address for the member
-    # @!attribute [rw] email4
-    #   @return [String] the 4th email address for the member
-    # @!attribute [rw] phone1
-    #   @return [String] the 1st phone number for the member
-    # @!attribute [rw] phone2
-    #   @return [String] the 2nd phone number for the member
-    # @!attribute [rw] phone3
-    #   @return [String] the 3rd phone number for the member
-    # @!attribute [rw] phone4
-    #   @return [String] the 4th phone number for the member
-    # @!attribute [rw] address
-    #   @return [String] the member's address
-    # @!attribute [rw] address2
-    #   @return [String] the member's 2nd address
+    # @!attribute [rw] grouping_id
+    #   @return [Fixnum] the ID of the grouping within the section that the member belongs to
+    # @!attribute [rw] grouping_label
+    #   @return [String] the name of the grouping within the section that the member belongs to
+    # @!attribute [rw] grouping_leader
+    #   @return [Fixnum] whether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL, 3=senior PL)
+    # @!attribute [rw] grouping_leader_label
+    #   @return [String] whether the member is the grouping leader
+    # @!attribute [rw] age
+    #   @return [String] the member's current age (yy/mm) 
+    # @!attribute [rw] gender
+    #   @return [Symbol] the member's gender (:male, :female, :other or :unspecified)
     # @!attribute [rw] date_of_birth
     #   @return [Date] the member's date of birth
-    # @!attribute [rw] started
-    #   @return [Date] when the member started Scouting
-    # @!attribute [rw] joining_in_years
-    #   @return [Fixnum] ?
-    # @!attribute [rw] parents
-    #   @return [String] the member's parent's names
-    # @!attribute [rw] notes
-    #   @return [String] notes relating to the member
-    # @!attribute [rw] medical
-    #   @return [String] the member's key medical details
-    # @!attribute [rw] religion
-    #   @return [String] the member's religion
-    # @!attribute [rw] school
-    #   @return [String] the school the member attends
-    # @!attribute [rw] ethnicity
-    #   @return [String] the member's ethnicity
-    # @!attribute [rw] subs
-    #   @return [String] details about the member's subs
-    # @!attribute [rw] custom1
-    #   @return [String] the custom1 data for the member
-    # @!attribute [rw] custom2
-    #   @return [String] the custom2 data for the member
-    # @!attribute [rw] custom3
-    #   @return [String] the custom3 data for the member
-    # @!attribute [rw] custom4
-    #   @return [String] the custom4 data for the member
-    # @!attribute [rw] custom5
-    #   @return [String] the custom5 data for the member
-    # @!attribute [rw] custom6
-    #   @return [String] the custom6 data for the member
-    # @!attribute [rw] custom7
-    #   @return [String] the custom7 data for the member
-    # @!attribute [rw] custom8
-    #   @return [String] the custom8 data for the member
-    # @!attribute [rw] custom9
-    #   @return [String] the custom9 data for the member
-    # @!attribute [rw] grouping_id
-    #   @return [Fixnum] the grouping within the section that the member belongs to
-    # @!attribute [rw] grouping_leader
-    #   @return [Fixnum] whether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL)
-    # @!attribute [rw] joined
-    #   @return [Date] when the member joined the section
-    # @!attribute [rw] age
-    #   @return [String] the member's current age (yy/mm)
-    # @!attribute [rw] joined_years
-    #   @return [Fixnum] how many years the member has been in Scouting
-    # @!attribute [rw] has_photo
-    #   @return [Boolean] whether the scout has a photo in OSM
+    # @!attribute [rw] started_section
+    #   @return [Date] when the member started the section they were retrieved for
+    # @!attribute [rw] finished_section
+    #   @return [Date] when the member finished the section they were retrieved for
+    # @!attribute [rw] joined_movement
+    #   @return [Date] when the member joined the movement
+    # @!attribute [rw] custom
+    #   @return [DirtyHashy] the custom data (key is OSM's variable name, value is the data)
+    # @!attribute [rw] custom_labels
+    #   @return [DirtyHashy] the labels for the custom data (key is OSM's variable name, value is the label)
+    # @!attribute [rw] contact
+    #   @return [Osm::Member::MemberContact] the member's contact details
+    # @!attribute [rw] primary_contact
+    #   @return [Osm::Member::PrimaryContact] the member's primary contact (primary contact 1 in OSM)
+    # @!attribute [rw] secondary_contact
+    #   @return [Osm::Member::PrimaryContact] the member's secondary contact (primary contact 2 in OSM)
+    # @!attribute [rw] emergency_contact
+    #   @return [Osm::Member::EmergencyContact] the member's emergency contact
+    # @!attribute [rw] doctor
+    #   @return [Osm::Member::DoctorContact] the member's doctor
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
-    attribute :type, :type => String
     attribute :first_name, :type => String
     attribute :last_name, :type => String
-    attribute :email1, :type => String, :default => ''
-    attribute :email2, :type => String, :default => ''
-    attribute :email3, :type => String, :default => ''
-    attribute :email4, :type => String, :default => ''
-    attribute :phone1, :type => String, :default => ''
-    attribute :phone2, :type => String, :default => ''
-    attribute :phone3, :type => String, :default => ''
-    attribute :phone4, :type => String, :default => ''
-    attribute :address, :type => String, :default => ''
-    attribute :address2, :type => String, :default => ''
-    attribute :date_of_birth, :type => Date
-    attribute :started, :type => Date
-    attribute :joining_in_years, :type => Integer
-    attribute :parents, :type => String, :default => ''
-    attribute :notes, :type => String, :default => ''
-    attribute :medical, :type => String, :default => ''
-    attribute :religion, :type => String, :default => ''
-    attribute :school, :type => String, :default => ''
-    attribute :ethnicity, :type => String, :default => ''
-    attribute :subs, :type => String, :default => ''
-    attribute :custom1, :type => String, :default => ''
-    attribute :custom2, :type => String, :default => ''
-    attribute :custom3, :type => String, :default => ''
-    attribute :custom4, :type => String, :default => ''
-    attribute :custom5, :type => String, :default => ''
-    attribute :custom6, :type => String, :default => ''
-    attribute :custom7, :type => String, :default => ''
-    attribute :custom8, :type => String, :default => ''
-    attribute :custom9, :type => String, :default => ''
     attribute :grouping_id, :type => Integer
+    attribute :grouping_label, :type => String
     attribute :grouping_leader, :type => Integer
-    attribute :joined, :type => Date
+    attribute :grouping_leader_label, :type => String
     attribute :age, :type => String
-    attribute :joined_years, :type => Integer
-    attribute :has_photo, :type => Boolean, :default => false
+    attribute :date_of_birth, :type => Date
+    attribute :started_section, :type => Date
+    attribute :finished_section, :type => Date
+    attribute :joined_movement, :type => Date
+    attribute :gender, :type => Object
+    attribute :custom, :type => Object, :default => DirtyHashy.new
+    attribute :custom_labels, :type => Object, :default => DirtyHashy.new
+    attribute :contact, :type => Object
+    attribute :primary_contact, :type => Object
+    attribute :secondary_contact, :type => Object
+    attribute :emergency_contact, :type => Object
+    attribute :doctor, :type => Object
 
     if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :id, :section_id, :type, :first_name, :last_name, :email1, :email2, :email3, :email4,
-                      :phone1, :phone2, :phone3, :phone4, :address, :address2, :date_of_birth, :started,
-                      :joining_in_years, :parents, :notes, :medical, :religion, :school, :ethnicity, :subs,
-                      :custom1, :custom2, :custom3, :custom4, :custom5, :custom6, :custom7, :custom8, :custom9,
-                      :grouping_id, :grouping_leader, :joined, :age, :joined_years,
-                      :has_photo
+      attr_accessible :id, :section_id, :first_name, :last_name, :grouping_id, :grouping_leader,
+                      :date_of_birth, :started_section, :finished_section, :joined_movement, :age,
+                      :grouping_label, :grouping_leader_label, :gender, :custom, :custom_labels,
+                      :contact, :primary_contact, :secondary_contact, :emergency_contact, :doctor
     end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-    validates_numericality_of :grouping_leader, :only_integer=>true, :greater_than_or_equal_to=>0, :less_than_or_equal_to=>2
-    validates_numericality_of :joined_years, :only_integer=>true, :greater_than_or_equal_to=>-1, :allow_nil=>true
-    validates_numericality_of :joining_in_years, :only_integer=>true, :greater_than_or_equal_to=>-1, :allow_nil=>true
+    validates_numericality_of :grouping_leader, :only_integer=>true, :greater_than_or_equal_to=>0, :less_than_or_equal_to=>14, :allow_nil => true
     validates_presence_of :first_name
     validates_presence_of :last_name
+    validates_presence_of :grouping_label, :allow_blank => true
+    validates_presence_of :grouping_leader_label, :allow_blank => true
+    validates_presence_of :custom, :allow_blank => true
+    validates_presence_of :custom_labels, :allow_blank => true
     validates_presence_of :date_of_birth
-    validates_presence_of :started
-    validates_presence_of :joined
-    validates_format_of :age, :with => /\A[0-9]{2}\/(0[0-9]|1[012])\Z/, :message => 'age is not in the correct format (yy/mm)', :allow_blank => true
-    validates_inclusion_of :has_photo, :in => [true, false]
+    validates_presence_of :started_section
+    validates_presence_of :finished_section, :allow_nil=>true
+    validates_presence_of :joined_movement
+    validates_format_of :age, :with => /\A[0-9]{1,3} \/ (?:0?[0-9]|1[012])\Z/, :message => 'age is not in the correct format (yy / mm)', :allow_blank => true
+    validates_inclusion_of :gender, :in => [:male, :female, :other, :unspecified], :allow_nil => true
+    validates :contact, :validity=>true
+    validates :primary_contact, :validity=>true
+    validates :secondary_contact, :validity=>true
+    validates :emergency_contact, :validity=>true
+    validates :doctor, :validity=>true
 
 
     # Get members for a section
@@ -156,65 +135,148 @@ module Osm
     # @return [Array<Osm::Member>]
     def self.get_for_section(api, section, term=nil, options={})
       require_ability_to(api, :read, :member, section, options)
-      section = Osm::Section.get(api, section) if section.is_a?(Fixnum)
-      term = -1 if section.waiting?
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
-      cache_key = ['members', section.id, term_id]
+      if term.nil?
+        section = Osm::Section.get(api, section) if section.is_a?(Fixnum)
+        term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api, section)
+      end
+      cache_key = ['members', section.to_i, term.to_i]
 
       if !options[:no_cache] && cache_exist?(api, cache_key)
         return cache_read(api, cache_key)
       end
 
-      data = api.perform_query("users.php?action=getUserDetails&sectionid=#{section.id}&termid=#{term_id}")
-      summary_data = api.perform_query("ext/members/contact/?action=getListOfMembers&sort=patrolid&sectionid=#{section.id}&termid=#{term_id}&section=#{section.type}") || {}
-
-      summary_data = summary_data['items'] || []
-      summary_data = Hash[summary_data.map { |i| [i['scoutid'].to_i, i] }]
-
       result = Array.new
-      data['items'].each do |item|
-        id = Osm::to_i_or_nil(item['scoutid'])
+
+      api_response = api.perform_query('ext/members/contact/grid/?action=getMembers', {
+        'section_id' => section.to_i,
+        'term_id' => term.to_i,
+      })
+
+      data = api_response['data'].is_a?(Hash) ? api_response['data'].values : []
+      structure = (api_response['meta'] || {})['structure'] || []
+      structure = Hash[ structure.map{ |i| [i['group_id'].to_i, i ] } ] # Make a hash of identifier to group data hash
+
+      custom_labels = {}
+      structure.each do |gid, group|
+        columns = group['columns']
+        columns.map!{ |c| [c['column_id'].to_i, c['label']] }
+        columns.select!{ |a| (gid == GID_CUSTOM) || (a[0] > CORE_FIELD_IDS_FINISH_AT) }
+        labels = DirtyHashy[ columns ]
+        custom_labels[gid.to_i] = labels
+      end
+
+      data.each do |item|
+        item_data = Hash[ item['custom_data'].map{ |k,v| [k.to_i, v] } ]
+        member_contact = Hash[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        primary_contact = Hash[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        secondary_contact = Hash[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        emergency_contact = Hash[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        doctor_contact = Hash[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        floating_data = Hash[ item_data[GID_FLOATING].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+
         result.push Osm::Member.new(
-          :section_id => section.id,
-          :id => id,
-          :type => item['type'],
-          :first_name => item['firstname'],
-          :last_name => item['lastname'],
-          :email1 => item['email1'],
-          :email2 => item['email2'],
-          :email3 => item['email3'],
-          :email4 => item['email4'],
-          :phone1 => item['phone1'],
-          :phone2 => item['phone2'],
-          :phone3 => item['phone3'],
-          :phone4 => item['phone4'],
-          :address => item['address'],
-          :address2 => item['address2'],
-          :date_of_birth => Osm::parse_date(item['dob'], :ignore_epoch => true),
-          :started => Osm::parse_date(item['started']),
-          :joining_in_years => item['joining_in_yrs'].to_i,
-          :parents => item['parents'],
-          :notes => item['notes'],
-          :medical => item['medical'],
-          :religion => item['religion'],
-          :school => item['school'],
-          :ethnicity => item['ethnicity'],
-          :subs => item['subs'],
-          :custom1 => item['custom1'],
-          :custom2 => item['custom2'],
-          :custom3 => item['custom3'],
-          :custom4 => item['custom4'],
-          :custom5 => item['custom5'],
-          :custom6 => item['custom6'],
-          :custom7 => item['custom7'],
-          :custom8 => item['custom8'],
-          :custom9 => item['custom9'],
-          :grouping_id => Osm::to_i_or_nil(item['patrolid']),
-          :grouping_leader => Osm::to_i_or_nil(item['patrolleader']),
-          :joined => Osm::parse_date(item['joined']),
-          :age => item['age'].gsub(' ', ''),
-          :joined_years => item['yrs'].to_i,
-          :has_photo => summary_data[id]['pic']
+          :id => Osm::to_i_or_nil(item['member_id']),
+          :section_id => Osm::to_i_or_nil(item['section_id']),
+          :first_name => item['first_name'],
+          :last_name => item['last_name'],
+          :grouping_id => Osm::to_i_or_nil(item['patrol_id']),
+          :grouping_label => item['patrol'],
+          :grouping_leader => item['patrol_role_level'],
+          :grouping_leader_label => item['patrol_role_level_label'],
+          :age => item['age'],
+          :date_of_birth => Osm::parse_date(item['date_of_birth'], :ignore_epoch => true),
+          :started_section => Osm::parse_date(item['joined']),
+          :finished_section => Osm::parse_date(item['end_date']),
+          :joined_movement => Osm::parse_date(item['started']),
+          :gender => {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[floating_data[CID_GENDER].downcase],
+          :contact => MemberContact.new(
+            first_name: item['first_name'],
+            last_name: item['last_name'],
+            address_1: member_contact[CID_ADDRESS_1],
+            address_2: member_contact[CID_ADDRESS_2],
+            address_3: member_contact[CID_ADDRESS_3],
+            address_4: member_contact[CID_ADDRESS_4],
+            postcode: member_contact[CID_POSTCODE],
+            phone_1: member_contact[CID_PHONE_1],
+            phone_2: member_contact[CID_PHONE_2],
+            email_1: member_contact[CID_EMAIL_1],
+            email_2: member_contact[CID_EMAIL_2],
+            receive_phone_1: member_contact[CID_RECIEVE_PHONE_1],
+            receive_phone_2: member_contact[CID_RECIEVE_PHONE_2],
+            receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
+            receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
+            custom: DirtyHashy[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
+            custom_labels: custom_labels[GID_MEMBER_CONTACT],
+          ),
+          :primary_contact => PrimaryContact.new(
+            first_name: primary_contact[CID_FIRST_NAME],
+            last_name: primary_contact[CID_LAST_NAME],
+            address_1: primary_contact[CID_ADDRESS_1],
+            address_2: primary_contact[CID_ADDRESS_2],
+            address_3: primary_contact[CID_ADDRESS_3],
+            address_4: primary_contact[CID_ADDRESS_4],
+            postcode: primary_contact[CID_POSTCODE],
+            phone_1: primary_contact[CID_PHONE_1],
+            phone_2: primary_contact[CID_PHONE_2],
+            email_1: primary_contact[CID_EMAIL_1],
+            email_2: primary_contact[CID_EMAIL_2],
+            receive_phone_1: primary_contact[CID_RECIEVE_PHONE_1],
+            receive_phone_2: primary_contact[CID_RECIEVE_PHONE_2],
+            receive_email_1: primary_contact[CID_RECIEVE_EMAIL_1],
+            receive_email_2: primary_contact[CID_RECIEVE_EMAIL_2],
+            custom: DirtyHashy[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
+            custom_labels: custom_labels[GID_PRIMARY_CONTACT],
+          ),
+          :secondary_contact => PrimaryContact.new(
+            first_name: secondary_contact[CID_FIRST_NAME],
+            last_name: secondary_contact[CID_LAST_NAME],
+            address_1: secondary_contact[CID_ADDRESS_1],
+            address_2: secondary_contact[CID_ADDRESS_2],
+            address_3: secondary_contact[CID_ADDRESS_3],
+            address_4: secondary_contact[CID_ADDRESS_4],
+            postcode: secondary_contact[CID_POSTCODE],
+            phone_1: secondary_contact[CID_PHONE_1],
+            phone_2: secondary_contact[CID_PHONE_2],
+            email_1: secondary_contact[CID_EMAIL_1],
+            email_2: secondary_contact[CID_EMAIL_2],
+            receive_phone_1: secondary_contact[CID_RECIEVE_PHONE_1],
+            receive_phone_2: secondary_contact[CID_RECIEVE_PHONE_2],
+            receive_email_1: secondary_contact[CID_RECIEVE_EMAIL_1],
+            receive_email_2: secondary_contact[CID_RECIEVE_EMAIL_2],
+            custom: DirtyHashy[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
+            custom_labels: custom_labels[GID_SECONDARY_CONTACT],
+          ),
+          :emergency_contact => EmergencyContact.new(
+            first_name: emergency_contact[CID_FIRST_NAME],
+            last_name: emergency_contact[CID_LAST_NAME],
+            address_1: emergency_contact[CID_ADDRESS_1],
+            address_2: emergency_contact[CID_ADDRESS_2],
+            address_3: emergency_contact[CID_ADDRESS_3],
+            address_4: emergency_contact[CID_ADDRESS_4],
+            postcode: emergency_contact[CID_POSTCODE],
+            phone_1: emergency_contact[CID_PHONE_1],
+            phone_2: emergency_contact[CID_PHONE_2],
+            email_1: emergency_contact[CID_EMAIL_1],
+            email_2: emergency_contact[CID_EMAIL_2],
+            custom: DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
+            custom_labels: custom_labels[GID_EMERGENCY_CONTACT],
+          ),
+          :doctor => DoctorContact.new(
+            first_name: doctor_contact[CID_FIRST_NAME],
+            last_name: doctor_contact[CID_LAST_NAME],
+            surgery: doctor_contact[CID_SURGERY],
+            address_1: doctor_contact[CID_ADDRESS_1],
+            address_2: doctor_contact[CID_ADDRESS_2],
+            address_3: doctor_contact[CID_ADDRESS_3],
+            address_4: doctor_contact[CID_ADDRESS_4],
+            postcode: doctor_contact[CID_POSTCODE],
+            phone_1: doctor_contact[CID_PHONE_1],
+            phone_2: doctor_contact[CID_PHONE_2],
+            custom: DirtyHashy[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
+            custom_labels: custom_labels[GID_DOCTOR_CONTACT],
+          ),
+          custom: DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ],
+          custom_labels: custom_labels[GID_CUSTOM],
         )
       end
 
@@ -392,6 +454,57 @@ module Osm
       grouping_id > 0
     end
 
+    # Check if the member is male
+    # @return [Boolean]
+    def male?
+      gender == :male
+    end
+
+    # Check if the member is male
+    # @return [Boolean]
+    def female?
+      gender == :female
+    end
+
+    # Check if this is a current member of the section they were retrieved for
+    # @param [Date] date The date to check membership status for
+    # @return [Boolean]
+    def current?(date=Date.today)
+      if finished_section.nil?
+        return (started_section <= date)
+      else
+        return (started_section <= date) && (finished_section >= date)
+      end
+    end
+
+    # @!method all_emails
+    # Get an array of all email addresses from all contacts for the member (not emergency or doctor)
+    # @return [Array<String>]
+    # @!method all_emails_with_name
+    # Get an array of all email addresses from all contacts for the member in a format which includes the contact's name (not emergency or doctor)
+    # @return [Array<String>]
+    # @!method enabled_emails
+    # Get an array of all email addresses from all contacts for the member (not emergency or doctor)
+    # @return [Array<String>]
+    # @!method enabled_emails_with_name
+    # Get an array of all email addresses from all contacts for the member in a format which includes the contact's name (not emergency or doctor)
+    # @return [Array<String>]
+    # @!method all_phones
+    # Get an array of all phone numbers from all contacts for the member (not emergency or doctor)
+    # @return [Array<String>]
+    # @!method enabled_phones
+    # Get an array of enabled phone numbers from all contacts for the member (not emergency or doctor)
+    # @return [Array<String>]
+    [:all_emails, :all_emails_with_name, :enabled_emails, :enabled_emails_with_name, :all_phones, :enabled_phones].each do |meth|
+      define_method meth do
+        items = []
+        [:contact, :primary_contact, :secondary_contact].each do |cont|
+          items.push *send(cont).send(meth)
+        end
+        return items
+      end
+    end
+
     # Get the Key to use in My.SCOUT links for this member
     # @param [Osm::Api] api The api to use to make the request
     # @return [String] the key
@@ -413,15 +526,14 @@ module Osm
 
     # Get the member's photo
     # @param [Osm::Api] api The api to use to make the request
-    # @param [Boolean] black_and_white Whether you want the photo in blank and white
+    # @param [Boolean] black_and_white Whether you want the photo in blank and white (defaults to false unless the member is not active)
     # @!macro options_get
-    # @raise [Osm:Error] if the member has no photo or doesn't exist in OSM
+    # @raise [Osm:Error] if the member doesn't exist in OSM
     # @return the photo of the member
-    def get_photo(api, black_and_white=false, options={})
+    def get_photo(api, black_and_white=!current?, options={})
       raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
       raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
-      raise Osm::Error, "the member doesn't have a photo in OSM" unless has_photo
 
       cache_key = ['member_photo', self.id, black_and_white]
 
@@ -455,7 +567,7 @@ module Osm
       return link
     end
 
-    # Compare Activity based on section_id, grouping_id, grouping_leader (descending), last_name then first_name
+    # Compare member based on section_id, grouping_id, grouping_leader (descending), last_name then first_name
     def <=>(another)
       result = self.section_id <=> another.try(:section_id)
       result = self.grouping_id <=> another.try(:grouping_id) if result == 0
@@ -464,6 +576,226 @@ module Osm
       result = self.first_name <=> another.try(:first_name) if result == 0
       return result
     end
+
+
+    module EmailableContact
+      # Get an array of all emails for the contact
+      # @return [Array<String>]
+      def all_emails
+        [email_1, email_2].select{ |e| !e.blank? }
+      end
+
+      # Get an array of enabled emails for the contact
+      # @return [Array<String>]
+      def enabled_emails
+        emails = []
+        emails.push email_1 if receive_email_1
+        emails.push email_2 if receive_email_2
+        emails.select{ |e| !e.blank? }
+      end
+
+      # Get an array of all emails for the contact in a format which includes their name
+      # @return [Array<String>]
+      def all_emails_with_name
+        [email_1, email_2].select{ |e| !e.blank? }.map{ |e| "\"#{name}\" <#{e}>" }
+      end
+
+      # Get an array of enabled emails for the contact in a format which includes their name
+      # @return [Array<String>]
+      def enabled_emails_with_name
+        emails = []
+        emails.push email_1 if receive_email_1
+        emails.push email_2 if receive_email_2
+        emails.select{ |e| !e.blank? }.map{ |e| "\"#{name}\" <#{e}>" }
+      end
+    end
+
+    module PhoneableContact
+      # Get an array of enabled phone numbers for the contact
+      def enabled_phones
+        phones = []
+        phones.push phone_1.gsub(/[^\d\+]/, '') if receive_phone_1
+        phones.push phone_2.gsub(/[^\d\+]/, '') if receive_phone_2
+        phones.select{ |n| !n.blank? }.map{ |n| n }
+      end
+    end
+
+
+    class Contact < Osm::Model
+      # @!attribute [rw] first_name
+      #   @return [String] the contact's first name
+      # @!attribute [rw] last_name
+      #   @return [String] the contact's last name
+      # @!attribute [rw] address_1
+      #   @return [String] the 1st line of the address
+      # @!attribute [rw] address_2
+      #   @return [String] the 2nd line of the address
+      # @!attribute [rw] address_3
+      #   @return [String] the 3rd line of the address
+      # @!attribute [rw] address_4
+      #   @return [String] the 4th line of the address
+      # @!attribute [rw] postcode
+      #   @return [String] the postcode of the address
+      # @!attribute [rw] phone_1
+      #   @return [String] the primary phone number
+      # @!attribute [rw] phone_2
+      #   @return [String] the secondary phone number
+      # @!attribute [rw] custom
+      #   @return [DirtyHashy] the custom data (key is OSM's variable name, value is the data)
+      # @!attribute [rw] custom_labels
+      #   @return [DirtyHashy] the labels for the custom data (key is OSM's variable name, value is the label)
+
+      attribute :first_name, :type => String
+      attribute :last_name, :type => String
+      attribute :address_1, :type => String
+      attribute :address_2, :type => String
+      attribute :address_3, :type => String
+      attribute :address_4, :type => String
+      attribute :postcode, :type => String
+      attribute :phone_1, :type => String
+      attribute :phone_2, :type => String
+      attribute :custom, :type => Object, :default => DirtyHashy.new
+      attribute :custom_labels, :type => Object, :default => DirtyHashy.new
+
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :first_name, :last_name, :address_1, :address_2, :address_3, :address_4,
+                        :postcode, :phone_1, :phone_2, :custom, :custom_labels
+      end
+
+      # @!method initialize
+      #   Initialize a new Contact
+      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+      # Get the full name
+      # @param [String] seperator What to split the scout's first name and last name with
+      # @return [String] this scout's full name seperated by the optional seperator
+      def name(seperator=' ')
+        return "#{first_name}#{seperator.to_s}#{last_name}"
+      end
+
+      # Get an array of all phone numbers for the contact
+      # @return [Array<String>]
+      def all_phones
+        [phone_1, phone_2].select{ |n| !n.blank? }.map{ |n| n.gsub(/[^\d\+]/, '') }
+      end
+    end
+
+
+    class MemberContact < Osm::Member::Contact
+      include EmailableContact
+      include PhoneableContact
+      # @!attribute [rw] email_1
+      #   @return [String] the primary email address for the member
+      # @!attribute [rw] email_2
+      #   @return [String] the secondary email address for the member
+      # @!attribute [rw] receive_email_1
+      #   @return [Boolean] whether the member should receive emails from leaders on their primary email address
+      # @!attribute [rw] receive_email_2
+      #   @return [Boolean] whether the member should receive emails from leaders on their secondary email address
+      # @!attribute [rw] receive_phone_1
+      #   @return [Boolean] whether the member should receive SMSs from leaders on their primary phone number
+      # @!attribute [rw] receive_phone_2
+      #   @return [Boolean] whether the member should receive SMSs from leaders on their secondary phone number
+
+      attribute :email_1, :type => String
+      attribute :receive_email_1, :type => Boolean, :default => false
+      attribute :email_2, :type => String
+      attribute :receive_email_2, :type => Boolean, :default => false
+      attribute :receive_phone_1, :type => Boolean, :default => false
+      attribute :receive_phone_2, :type => Boolean, :default => false
+
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :email_1, :email_2, :receive_email_1, :receive_email_2,
+                        :receive_phone_1, :receive_phone_2
+      end
+
+      validates_inclusion_of :receive_email_1, :in => [true, false]
+      validates_inclusion_of :receive_email_2, :in => [true, false]
+      validates_inclusion_of :receive_phone_1, :in => [true, false]
+      validates_inclusion_of :receive_phone_2, :in => [true, false]
+    end
+
+
+    class PrimaryContact < Osm::Member::Contact
+      include EmailableContact
+      include PhoneableContact
+      # @!attribute [rw] email_1
+      #   @return [String] the primary email address for the contact
+      # @!attribute [rw] email_2
+      #   @return [String] the secondary email address for the contact
+      # @!attribute [rw] receive_email_1
+      #   @return [Boolean] whether the contact should receive emails from leaders on their primary email address
+      # @!attribute [rw] receive_email_2
+      #   @return [Boolean] whether the contact should receive emails from leaders on their secondary email address
+      # @!attribute [rw] receive_phone_1
+      #   @return [Boolean] whether the contact should receive SMSs from leaders on their primary phone number
+      # @!attribute [rw] receive_phone_2
+      #   @return [Boolean] whether the contact should receive SMSs from leaders on their secondary phone number
+
+      attribute :email_1, :type => String
+      attribute :receive_email_1, :type => Boolean, :default => false
+      attribute :email_2, :type => String
+      attribute :receive_email_2, :type => Boolean, :default => false
+      attribute :receive_phone_1, :type => Boolean, :default => false
+      attribute :receive_phone_2, :type => Boolean, :default => false
+
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :email_1, :email_2,
+                        :receive_email_1, :receive_email_2, :receive_phone_1, :receive_phone_2
+      end
+
+      validates_inclusion_of :receive_email_1, :in => [true, false]
+      validates_inclusion_of :receive_email_2, :in => [true, false]
+      validates_inclusion_of :receive_phone_1, :in => [true, false]
+      validates_inclusion_of :receive_phone_2, :in => [true, false]
+    end # class PrimaryContact
+
+
+    class EmergencyContact < Osm::Member::Contact
+      # @!attribute [rw] email_1
+      #   @return [String] the primary email address for the contact
+      # @!attribute [rw] email_2
+      #   @return [String] the secondary email address for the contact
+
+      attribute :email_1, :type => String
+      attribute :email_2, :type => String
+
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :email_1, :email_2
+      end
+
+      # Get the full name
+      # @param [String] seperator What to split the scout's first name and last name with
+      # @return [String] this scout's full name seperated by the optional seperator
+      def name(seperator=' ')
+        return "#{first_name}#{seperator.to_s}#{last_name}"
+      end
+    end # class EmergencyContact
+
+
+    class DoctorContact < Osm::Member::Contact
+      # @!attribute [rw] first_name
+      #   @return [String] the contact's first name
+      # @!attribute [rw] last_name
+      #   @return [String] the contact's last name
+      # @!attribute [rw] surgery
+      #   @return [String] the surgery name
+
+      attribute :first_name, :type => String
+      attribute :last_name, :type => String
+      attribute :surgery, :type => String
+
+      if ActiveModel::VERSION::MAJOR < 4
+        attr_accessible :first_name, :last_name, :surgery
+      end
+
+      # Get the full name
+      # @param [String] seperator What to split the scout's first name and last name with
+      # @return [String] this scout's full name seperated by the optional seperator
+      def name(seperator=' ')
+        return "Dr. #{first_name}#{seperator.to_s}#{last_name}"
+      end
+    end # class DoctorContact
 
   end # Class Member
 
