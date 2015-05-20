@@ -32,7 +32,7 @@ class NovalidTestModel < Osm::Model
 end
 
 
-describe "array_of validator" do
+describe "Array of validator" do
 
   it "Allows an empty array" do
     i = FixnumTestModel.new(array: [])
