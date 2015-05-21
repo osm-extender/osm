@@ -188,7 +188,7 @@ module Osm
           :started_section => Osm::parse_date(item['joined']),
           :finished_section => Osm::parse_date(item['end_date']),
           :joined_movement => Osm::parse_date(item['started']),
-          :gender => {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[floating_data[CID_GENDER].downcase],
+          :gender => {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[(floating_data[CID_GENDER] || '').downcase],
           :contact => MemberContact.new(
             first_name: item['first_name'],
             last_name: item['last_name'],
