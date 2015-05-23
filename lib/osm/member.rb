@@ -206,7 +206,7 @@ module Osm
             receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
             custom: DirtyHashy[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_MEMBER_CONTACT],
+            custom_labels: custom_labels[GID_MEMBER_CONTACT] || DirtyHashy.new,
           ),
           :primary_contact => PrimaryContact.new(
             first_name: primary_contact[CID_FIRST_NAME],
@@ -225,7 +225,7 @@ module Osm
             receive_email_1: primary_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: primary_contact[CID_RECIEVE_EMAIL_2],
             custom: DirtyHashy[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_PRIMARY_CONTACT],
+            custom_labels: custom_labels[GID_PRIMARY_CONTACT] || DirtyHashy.new,
           ),
           :secondary_contact => PrimaryContact.new(
             first_name: secondary_contact[CID_FIRST_NAME],
@@ -244,7 +244,7 @@ module Osm
             receive_email_1: secondary_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: secondary_contact[CID_RECIEVE_EMAIL_2],
             custom: DirtyHashy[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_SECONDARY_CONTACT],
+            custom_labels: custom_labels[GID_SECONDARY_CONTACT] || DirtyHashy.new,
           ),
           :emergency_contact => EmergencyContact.new(
             first_name: emergency_contact[CID_FIRST_NAME],
@@ -259,7 +259,7 @@ module Osm
             email_1: emergency_contact[CID_EMAIL_1],
             email_2: emergency_contact[CID_EMAIL_2],
             custom: DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_EMERGENCY_CONTACT],
+            custom_labels: custom_labels[GID_EMERGENCY_CONTACT] || DirtyHashy.new,
           ),
           :doctor => DoctorContact.new(
             first_name: doctor_contact[CID_FIRST_NAME],
@@ -273,10 +273,10 @@ module Osm
             phone_1: doctor_contact[CID_PHONE_1],
             phone_2: doctor_contact[CID_PHONE_2],
             custom: DirtyHashy[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_DOCTOR_CONTACT],
+            custom_labels: custom_labels[GID_DOCTOR_CONTACT] || DirtyHashy.new,
           ),
           custom: DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ],
-          custom_labels: custom_labels[GID_CUSTOM],
+          custom_labels: custom_labels[GID_CUSTOM] || DirtyHashy.new,
         )
       end
 
