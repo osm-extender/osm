@@ -585,6 +585,17 @@ module Osm
         [email_1, email_2].select{ |e| !e.blank? }
       end
 
+      # Get an array of all emails for the contact in a format which includes their name
+      # @return [Array<String>]
+      def all_emails_with_name
+        [email_1, email_2].select{ |e| !e.blank? }.map{ |e| "\"#{name}\" <#{e}>" }
+      end
+
+    end
+
+    module EnableableEmailableContact
+      include EmailableContact
+
       # Get an array of enabled emails for the contact
       # @return [Array<String>]
       def enabled_emails
@@ -592,12 +603,6 @@ module Osm
         emails.push email_1 if receive_email_1
         emails.push email_2 if receive_email_2
         emails.select{ |e| !e.blank? }
-      end
-
-      # Get an array of all emails for the contact in a format which includes their name
-      # @return [Array<String>]
-      def all_emails_with_name
-        [email_1, email_2].select{ |e| !e.blank? }.map{ |e| "\"#{name}\" <#{e}>" }
       end
 
       # Get an array of enabled emails for the contact in a format which includes their name
@@ -610,7 +615,7 @@ module Osm
       end
     end
 
-    module PhoneableContact
+    module EnableablePhoneableContact
       # Get an array of enabled phone numbers for the contact
       def enabled_phones
         phones = []
@@ -682,8 +687,8 @@ module Osm
 
 
     class MemberContact < Osm::Member::Contact
-      include EmailableContact
-      include PhoneableContact
+      include EnableableEmailableContact
+      include EnableablePhoneableContact
       # @!attribute [rw] email_1
       #   @return [String] the primary email address for the member
       # @!attribute [rw] email_2
@@ -717,8 +722,8 @@ module Osm
 
 
     class PrimaryContact < Osm::Member::Contact
-      include EmailableContact
-      include PhoneableContact
+      include EnableableEmailableContact
+      include EnableablePhoneableContact
       # @!attribute [rw] email_1
       #   @return [String] the primary email address for the contact
       # @!attribute [rw] email_2
@@ -752,6 +757,7 @@ module Osm
 
 
     class EmergencyContact < Osm::Member::Contact
+      include EmailableContact
       # @!attribute [rw] email_1
       #   @return [String] the primary email address for the contact
       # @!attribute [rw] email_2
