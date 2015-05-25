@@ -158,7 +158,7 @@ module Osm
 
       custom_labels = {}
       structure.each do |gid, group|
-        columns = group['columns']
+        columns = group['columns'] || []
         columns.map!{ |c| [c['column_id'].to_i, c['label']] }
         columns.select!{ |a| (gid == GID_CUSTOM) || (a[0] > CORE_FIELD_IDS_FINISH_AT) }
         labels = DirtyHashy[ columns ]
