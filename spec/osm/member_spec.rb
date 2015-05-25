@@ -103,6 +103,7 @@ describe "Member" do
     Osm::Member.new(gender: nil).female?.should == false
   end
 
+
   describe "Tells if the member is currently in the section" do
     it "Today" do
       Osm::Member.new(started_section: Date.yesterday).current?.should == true
@@ -149,7 +150,7 @@ describe "Member" do
         'error' => nil,
         'data' => {
           '123' => {
-            'acive' => true,
+            'active' => true,
             'age' => '12 / 00',
             'date_of_birth' => '2000-03-08',
             'end_date' => '2010-06-03',
@@ -354,6 +355,60 @@ describe "Member" do
       member.doctor.phone_2.should == '0987 654321'
       member.doctor.custom.should == {8444=>"Data for 8444"}
       member.doctor.custom_labels.should == {8444=>"Label for 8444"}
+      member.valid?.should == true
+    end
+
+    it "Get from OSM (handles disabled contacts)" do
+      body = {
+        'status' => true,
+        'error' => nil,
+        'data' => {
+          '123' => {
+            'active' => true,
+            'age' => '12 / 00',
+            'date_of_birth' => '2000-03-08',
+            'end_date' => '2010-06-03',
+            'first_name' => 'John',
+            'joined' => '2008-07-12',
+            'last_name' => 'Smith',
+            'member_id' => 123,
+            'patrol' => 'Leaders',
+            'patrol_id' => -2,
+            'patrol_role_level' => 1,
+            'patrol_role_level_label' => 'Assistant leader',
+            'section_id' => 1,
+            'started' => '2006-07-17',
+            'custom_data' => {
+              '5' => {'4848' => 'Data for 4848'},
+              '7' => {'34' => 'Unspecified'},
+            },
+          }
+        },
+        'meta' => {
+          'leader_count' => 20,
+          'member_count' => 30,
+          'status' => true,
+          'structure' => [
+            {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+              {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+            ]},
+            {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+              {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+            ]},
+          ],
+        },
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+
+      members = Osm::Member.get_for_section(@api, 1, 2)
+      members.size.should == 1
+      member = members[0]
+      member.id.should == 123
+      member.contact.should == nil
+      member.primary_contact.should == nil
+      member.secondary_contact.should == nil
+      member.emergency_contact.should == nil
+      member.doctor.should == nil
       member.valid?.should == true
     end
 

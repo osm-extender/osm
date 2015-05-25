@@ -65,15 +65,15 @@ module Osm
     # @!attribute [rw] custom_labels
     #   @return [DirtyHashy] the labels for the custom data (key is OSM's variable name, value is the label)
     # @!attribute [rw] contact
-    #   @return [Osm::Member::MemberContact] the member's contact details
+    #   @return [Osm::Member::MemberContact, nil] the member's contact details (nil if hidden in OSM)
     # @!attribute [rw] primary_contact
-    #   @return [Osm::Member::PrimaryContact] the member's primary contact (primary contact 1 in OSM)
+    #   @return [Osm::Member::PrimaryContact, nil] the member's primary contact (primary contact 1 in OSM) (nil if hidden in OSM)
     # @!attribute [rw] secondary_contact
-    #   @return [Osm::Member::PrimaryContact] the member's secondary contact (primary contact 2 in OSM)
+    #   @return [Osm::Member::PrimaryContact, nil] the member's secondary contact (primary contact 2 in OSM) (nil if hidden in OSM)
     # @!attribute [rw] emergency_contact
-    #   @return [Osm::Member::EmergencyContact] the member's emergency contact
+    #   @return [Osm::Member::EmergencyContact, nil] the member's emergency contact (nil if hidden in OSM)
     # @!attribute [rw] doctor
-    #   @return [Osm::Member::DoctorContact] the member's doctor
+    #   @return [Osm::Member::DoctorContact, nil] the member's doctor (nil if hidden in OSM)
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -120,11 +120,11 @@ module Osm
     validates_presence_of :joined_movement
     validates_format_of :age, :with => /\A[0-9]{1,3} \/ (?:0?[0-9]|1[012])\Z/, :message => 'age is not in the correct format (yy / mm)', :allow_blank => true
     validates_inclusion_of :gender, :in => [:male, :female, :other, :unspecified], :allow_nil => true
-    validates :contact, :validity=>true
-    validates :primary_contact, :validity=>true
-    validates :secondary_contact, :validity=>true
-    validates :emergency_contact, :validity=>true
-    validates :doctor, :validity=>true
+    validates :contact, :validity=>{allow_nil: true}
+    validates :primary_contact, :validity=>{allow_nil: true}
+    validates :secondary_contact, :validity=>{allow_nil: true}
+    validates :emergency_contact, :validity=>{allow_nil: true}
+    validates :doctor, :validity=>{allow_nil: true}
 
 
     # Get members for a section
@@ -167,11 +167,11 @@ module Osm
 
       data.each do |item|
         item_data = Hash[ item['custom_data'].map{ |k,v| [k.to_i, v] } ]
-        member_contact = Hash[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        primary_contact = Hash[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        secondary_contact = Hash[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        emergency_contact = Hash[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        doctor_contact = Hash[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        member_contact = item_data[GID_MEMBER_CONTACT].nil? ? nil : Hash[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        primary_contact = item_data[GID_PRIMARY_CONTACT].nil? ? nil : Hash[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : Hash[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : Hash[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : Hash[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
         floating_data = Hash[ item_data[GID_FLOATING].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
 
         result.push Osm::Member.new(
@@ -189,7 +189,7 @@ module Osm
           :finished_section => Osm::parse_date(item['end_date']),
           :joined_movement => Osm::parse_date(item['started']),
           :gender => {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[(floating_data[CID_GENDER] || '').downcase],
-          :contact => MemberContact.new(
+          :contact => member_contact.nil? ? nil : MemberContact.new(
             first_name: item['first_name'],
             last_name: item['last_name'],
             address_1: member_contact[CID_ADDRESS_1],
@@ -208,7 +208,7 @@ module Osm
             custom: DirtyHashy[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
             custom_labels: custom_labels[GID_MEMBER_CONTACT] || DirtyHashy.new,
           ),
-          :primary_contact => PrimaryContact.new(
+          :primary_contact => primary_contact.nil? ? nil : PrimaryContact.new(
             first_name: primary_contact[CID_FIRST_NAME],
             last_name: primary_contact[CID_LAST_NAME],
             address_1: primary_contact[CID_ADDRESS_1],
@@ -227,7 +227,7 @@ module Osm
             custom: DirtyHashy[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
             custom_labels: custom_labels[GID_PRIMARY_CONTACT] || DirtyHashy.new,
           ),
-          :secondary_contact => PrimaryContact.new(
+          :secondary_contact => secondary_contact.nil? ? nil : PrimaryContact.new(
             first_name: secondary_contact[CID_FIRST_NAME],
             last_name: secondary_contact[CID_LAST_NAME],
             address_1: secondary_contact[CID_ADDRESS_1],
@@ -246,7 +246,7 @@ module Osm
             custom: DirtyHashy[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
             custom_labels: custom_labels[GID_SECONDARY_CONTACT] || DirtyHashy.new,
           ),
-          :emergency_contact => EmergencyContact.new(
+          :emergency_contact => emergency_contact.nil? ? nil : EmergencyContact.new(
             first_name: emergency_contact[CID_FIRST_NAME],
             last_name: emergency_contact[CID_LAST_NAME],
             address_1: emergency_contact[CID_ADDRESS_1],
@@ -261,7 +261,7 @@ module Osm
             custom: DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
             custom_labels: custom_labels[GID_EMERGENCY_CONTACT] || DirtyHashy.new,
           ),
-          :doctor => DoctorContact.new(
+          :doctor => doctor_contact.nil? ? nil : DoctorContact.new(
             first_name: doctor_contact[CID_FIRST_NAME],
             last_name: doctor_contact[CID_LAST_NAME],
             surgery: doctor_contact[CID_SURGERY],
