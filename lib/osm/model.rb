@@ -112,7 +112,7 @@ module Osm
     end
     def self.cache_key(api, key)
       key = key.join('-') if key.is_a?(Array)
-      "#{@@cache_prepend.empty? ? '' : "#{@@cache_prepend}-"}#{api.site}-#{key}"
+      "#{@@cache_prepend.empty? ? '' : "#{@@cache_prepend}-"}#{Osm::VERSION}-#{api.site}-#{key}"
     end
 
 

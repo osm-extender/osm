@@ -1,6 +1,6 @@
 ## Version 1.2.18
 
-  * 
+  * Add version of this gem to the cache key
 
 ## Version 1.2.17
 

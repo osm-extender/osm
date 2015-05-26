@@ -66,22 +66,22 @@ describe "Model" do
   describe "Caching" do
 
     it "Checks for existance" do
-      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-key') { true }
+      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
       ModelTester.cache('exist?', @api, 'key').should == true
     end
 
     it "Writes" do
-      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-key', 'data', {:expires_in=>600}) { true }
+      OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', {:expires_in=>600}) { true }
       ModelTester.cache('write', @api, 'key', 'data').should == true
     end
 
     it "Reads" do
-      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-key') { 'data' }
+      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-key") { 'data' }
       ModelTester.cache('read', @api, 'key').should == 'data'
     end
 
     it "Deletes" do
-      OsmTest::Cache.should_receive('delete').with('OSMAPI-osm-key') { true }
+      OsmTest::Cache.should_receive('delete').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
       ModelTester.cache('delete', @api, 'key').should == true
     end
 
@@ -94,7 +94,7 @@ describe "Model" do
     end
 
     it "Builds a key from an array" do
-      ModelTester.cache('key', @api, ['a', 'b']).should == 'OSMAPI-osm-a-b'
+      ModelTester.cache('key', @api, ['a', 'b']).should == "OSMAPI-#{Osm::VERSION}-osm-a-b"
     end
 
   end
@@ -103,15 +103,15 @@ describe "Model" do
   describe "Get items from ids" do
 
     it "All items in cache" do
-      OsmTest::Cache.write('OSMAPI-osm-items', [1, 2])
-      OsmTest::Cache.write('OSMAPI-osm-item-1', '1')
-      OsmTest::Cache.write('OSMAPI-osm-item-2', '2')
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-items", [1, 2])
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-1", '1')
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-2", '2')
       ModelTester.test_get_all(@api, 'items', 'item').should == ['1', '2']
     end
     
     it "An item not in cache" do
-      OsmTest::Cache.write('OSMAPI-osm-items', [1, 2])
-      OsmTest::Cache.write('OSMAPI-osm-item-1', '1')
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-items", [1, 2])
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-1", '1')
       ModelTester.stub(:get_all) { ['A', 'B'] }
       ModelTester.test_get_all(@api, 'items', 'item').should == ['A', 'B']
     end
