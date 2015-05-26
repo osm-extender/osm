@@ -38,9 +38,6 @@ describe "Section" do
       :myscout_payment_reminder_frequency => 7,
       :myscout_details => true,
       :myscout_details_email_changes_to => 'notify-changes-to@example.com',
-      :sms_sent_test => true,
-      :sms_messages_sent => 8,
-      :sms_messages_remaining => 9,
     }
   end
 
@@ -78,9 +75,6 @@ describe "Section" do
     section.myscout_payment_reminder_frequency.should == 7
     section.myscout_details.should == true
     section.myscout_details_email_changes_to.should == 'notify-changes-to@example.com'
-    section.sms_sent_test.should == true
-    section.sms_messages_sent.should == 8
-    section.sms_messages_remaining.should == 9
     section.valid?.should == true
   end
 
@@ -96,9 +90,6 @@ describe "Section" do
     section.myscout_email_address_copy.should == ''
     section.myscout_details_email_changes_to.should == ''
     section.myscout_programme_show.should == 0
-    section.sms_sent_test.should == false
-    section.sms_messages_sent.should == 0
-    section.sms_messages_remaining.should == 0
   end
 
 
@@ -150,9 +141,6 @@ describe "Section" do
         section.myscout_payment_reminder_frequency.should == 7
         section.myscout_details.should == true
         section.myscout_details_email_changes_to.should == 'notify-changes-to@example.com'
-        section.sms_sent_test.should == true
-        section.sms_messages_remaining.should == 8
-        section.sms_messages_sent.should == 9
         section.valid?.should == true
       end
 

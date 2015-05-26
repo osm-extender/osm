@@ -61,12 +61,7 @@ module Osm
     #   @return [Fixnum] How many days to leave between payment reminder emails
     # @!attribute [rw] myscout_details_email_changes_to
     #   @return [String] email address to send changes to personal details made through My.SCOUT to
-    # @!attribute [rw] sms_sent_test
-    #   @return [Boolean] Whether the section has sent their test SMS message
-    # @!attribute [rw] sms_messages_sent
-    #   @return [Fixnum] How many SMS messages have been sent by the section
-    # @!attribute [rw] sms_messages_remaining
-    #   @return [Fixnum] How many SMS messages the section can send before needing to topup
+
 
     attribute :id, :type => Integer
     attribute :name, :type => String
@@ -98,9 +93,6 @@ module Osm
     attribute :myscout_payment_reminder_count, :type => Integer
     attribute :myscout_payment_reminder_frequency, :type => Integer
     attribute :myscout_details_email_changes_to, :type => String, :default => ''
-    attribute :sms_sent_test, :type => Boolean, :default => false
-    attribute :sms_messages_sent, :type => Integer, :default => 0
-    attribute :sms_messages_remaining, :type => Integer, :default => 0
 
     if ActiveModel::VERSION::MAJOR < 4
       attr_accessible :id, :name, :group_id, :group_name, :subscription_level, :subscription_expires,
@@ -112,8 +104,7 @@ module Osm
                       :myscout_badges_partial, :myscout_programme_summary, :myscout_programme_times,
                       :myscout_programme_show, :myscout_event_reminder_count,
                       :myscout_event_reminder_frequency, :myscout_payment_reminder_count,
-                      :myscout_payment_reminder_frequency, :myscout_details_email_changes_to,
-                      :sms_sent_test, :sms_messages_sent, :sms_messages_remaining
+                      :myscout_payment_reminder_frequency, :myscout_details_email_changes_to
     end
 
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
@@ -122,8 +113,6 @@ module Osm
     validates_numericality_of :myscout_event_reminder_frequency, :only_integer=>true, :greater_than_or_equal_to=>-1
     validates_numericality_of :myscout_payment_reminder_count, :only_integer=>true, :greater_than_or_equal_to=>-1
     validates_numericality_of :myscout_payment_reminder_frequency, :only_integer=>true, :greater_than_or_equal_to=>-1
-    validates_numericality_of :sms_messages_sent, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :sms_messages_remaining, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_presence_of :name
     validates_presence_of :group_name
     validates_presence_of :subscription_level
@@ -142,7 +131,6 @@ module Osm
     validates_inclusion_of :myscout_programme_summary, :in => [true, false]
     validates_inclusion_of :myscout_programme_times, :in => [true, false]
     validates_inclusion_of :myscout_programme_show, :in => [-2, -1, 0, 5, 10, 15, 20]
-    validates_inclusion_of :sms_sent_test, :in => [true, false]
 
     validates :myscout_emails, :hash => {:key_in => [:email1, :email2, :email3, :email4], :value_in => [true, false]}
     validates :flexi_records, :array_of => {:item_type => Osm::FlexiRecord, :item_valid => true}
@@ -227,9 +215,6 @@ module Osm
           :myscout_payment_reminder_count => myscout_data['paymentRemindCount'].to_i,
           :myscout_payment_reminder_frequency => myscout_data['paymentRemindFrequency'].to_i,
           :myscout_details_email_changes_to => myscout_data['contactNotificationEmail'],
-          :sms_sent_test => section_data['hasSentTestSMS'],
-          :sms_messages_sent => section_data['sms_sent'],
-          :sms_messages_remaining => section_data['sms_remaining'],
         )
 
         result.push section

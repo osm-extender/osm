@@ -1,7 +1,7 @@
 ## Version 1.2.18
 
   * THIS IS A DEVELOPMENT VERSION OF THIS RELEASE. IT EXISTS ONLY SO YOU CAN PLAY WITH THE NEW STRUCTIRE OF MEMBERS YOU'LL GET WHEN OSM CHANGES. WRITING CHANGES BACK TO OSM HAS NOT YET BEEN UPDATED.
-  * Osm::Section - removal of column_names, fields, intouch_fields, mobile_fields attributes
+  * Osm::Section - removal of column_names, fields, intouch_fields, mobile_fields and sms_* attributes
   * Osm::Member - lots of changes to reflect OSM's new structure for member's details (main ones listed below):
     * Removal of type attribute (I never could work out what it represented)
     * Removal of data attributes except:
