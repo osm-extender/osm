@@ -32,6 +32,11 @@
       * all_phones, enabled_phones
     * Validation changes:
       * age should now be in the format 'yy / mm' not 'yy/mm'
+  * Osm::Sms:
+    * send_sms method losses mobile_numbers argumant (OSM now sends to all enabled numbers for all contacts for the member)
+    * send_sms method now just returns a boolean to indicate success/failure
+    * Addition of remaining_credits(api, section, options={}) method
+    * Addition of number_selected(api, section, members, options={}) method to tell how many numbers a message would be sent to
 
 ## Version 1.2.17
 
