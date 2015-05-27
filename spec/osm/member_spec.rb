@@ -524,198 +524,87 @@ describe "Member" do
     end
 
 
-    it "Create in OSM (succeded)" do
-      member = Osm::Member.new(
-        :section_id => 2,
-        :first_name => 'First',
-        :last_name => 'Last',
-        :email1 => 'email1@example.com',
-        :email2 => 'email2@example.com',
-        :email3 => 'email3@example.com',
-        :email4 => 'email4@example.com',
-        :phone1 => '11111 111111',
-        :phone2 => '222222',
-        :phone3 => '+33 3333 333333',
-        :phone4 => '4444 444 444',
-        :address => '1 Some Road',
-        :address2 => 'Address 2',
-        :date_of_birth => '2000-01-02',
-        :started => '2006-01-02',
-        :joined => '2006-01-03',
-        :parents => 'John and Jane Doe',
-        :notes => 'None',
-        :medical => 'Nothing',
-        :religion => 'Unknown',
-        :school => 'Some School',
-        :ethnicity => 'Yes',
-        :subs => 'Upto end of 2007',
-        :custom1 => 'Custom Field 1',
-        :custom2 => 'Custom Field 2',
-        :custom3 => 'Custom Field 3',
-        :custom4 => 'Custom Field 4',
-        :custom5 => 'Custom Field 5',
-        :custom6 => 'Custom Field 6',
-        :custom7 => 'Custom Field 7',
-        :custom8 => 'Custom Field 8',
-        :custom9 => 'Custom Field 9',
-        :grouping_id => '3',
-        :grouping_leader => 0,
-      )
+    describe "Create in OSM" do
 
-      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=newMember'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'sectionid' => 2,
-        'firstname' => 'First',
-        'lastname' => 'Last',
-        'email1' => 'email1@example.com',
-        'email2' => 'email2@example.com',
-        'email3' => 'email3@example.com',
-        'email4' => 'email4@example.com',
-        'phone1' => '11111 111111',
-        'phone2' => '222222',
-        'phone3' => '+33 3333 333333',
-        'phone4' => '4444 444 444',
-        'address' => '1 Some Road',
-        'address2' => 'Address 2',
-        'dob' => '2000-01-02',
-        'started' => '2006-01-02',
-        'startedsection' => '2006-01-03',
-        'parents' => 'John and Jane Doe',
-        'notes' => 'None',
-        'medical' => 'Nothing',
-        'religion' => 'Unknown',
-        'school' => 'Some School',
-        'ethnicity' => 'Yes',
-        'subs' => 'Upto end of 2007',
-        'custom1' => 'Custom Field 1',
-        'custom2' => 'Custom Field 2',
-        'custom3' => 'Custom Field 3',
-        'custom4' => 'Custom Field 4',
-        'custom5' => 'Custom Field 5',
-        'custom6' => 'Custom Field 6',
-        'custom7' => 'Custom Field 7',
-        'custom8' => 'Custom Field 8',
-        'custom9' => 'Custom Field 9',
-        'patrolid' => 3,
-        'patrolleader' => 0,
-      }
+      before :each do
+        attributes = {
+          :section_id => 2,
+          :first_name => 'First',
+          :last_name => 'Last',
+          :date_of_birth => '2000-01-02',
+          :grouping_id => '3',
+          :grouping_leader => 0,
+          :grouping_label => 'Grouping',
+          :grouping_leader_label => '6er',
+          :age => '06 / 07',
+          :gender => :other,
+          :joined_movement => '2006-01-02',
+          :started_section => '2006-01-07',
+          :finished_section => '2007-12-31',
+          :custom => {'12_3' => '123'},
+          :custom_labels => {'12_3' => 'Label for 123'},
+          :contact => Osm::Member::MemberContact.new(postcode: 'A'),
+          :primary_contact => Osm::Member::PrimaryContact.new(postcode: 'B'),
+          :secondary_contact => Osm::Member::PrimaryContact.new(postcode: 'C'),
+          :emergency_contact => Osm::Member::EmergencyContact.new(postcode: 'D'),
+          :doctor => Osm::Member::DoctorContact.new(postcode: 'E'),
+        }
+        @member = Osm::Member.new(attributes)
+      end
 
-      Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":1}'}) }
-      member.create(@api).should == true
-      member.id.should == 1
-    end
+      it "Success" do
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/users.php?action=newMember', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "sectionid" => 2,
+          "firstname" => "First",
+          "lastname" => "Last",
+          "dob" => "2000-01-02",
+          "started" => "2006-01-02",
+          "startedsection" => "2006-01-07",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":577743}'}) }
 
-    it "Create in OSM (failed)" do
-      member = Osm::Member.new(
-        :section_id => 2,
-        :first_name => 'First',
-        :last_name => 'Last',
-        :date_of_birth => '2000-01-02',
-        :started => '2006-01-02',
-        :joined => '2006-01-03',
-        :grouping_id => '3',
-        :grouping_leader => 0,
-      )
+        @member.stub(:update) { true }
+        Osm::Term.stub(:get_for_section) { [] }
 
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":-1}'}) }
-      member.create(@api).should == false
-    end
+        @member.create(@api).should == true
+        @member.id.should == 577743
+      end
 
+      it "Failed the create stage in OSM" do
+        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+        @member.create(@api).should == false
+      end
 
-    it "Update in OSM (succeded)" do
-      member = Osm::Member.new()
-      member.id = 1
-      member.section_id = 2
-      member.first_name = 'First'
-      member.last_name = 'Last'
-      member.email1 = 'email1@example.com'
-      member.email2 = 'email2@example.com'
-      member.email3 = 'email3@example.com'
-      member.email4 = 'email4@example.com'
-      member.phone1 = '11111 111111'
-      member.phone2 = '222222'
-      member.phone3 = '+33 3333 333333'
-      member.phone4 = '4444 444 444'
-      member.address = '1 Some Road'
-      member.address2 = 'Address 2'
-      member.date_of_birth = '2000-01-02'
-      member.started = '2006-01-02'
-      member.joined = '2006-01-03'
-      member.parents = 'John and Jane Doe'
-      member.notes = 'None'
-      member.medical = 'Nothing'
-      member.religion = 'Unknown'
-      member.school = 'Some School'
-      member.ethnicity = 'Yes'
-      member.subs = 'Upto end of 2007'
-      member.custom1 = 'Custom Field 1'
-      member.custom2 = 'Custom Field 2'
-      member.custom3 = 'Custom Field 3'
-      member.custom4 = 'Custom Field 4'
-      member.custom5 = 'Custom Field 5'
-      member.custom6 = 'Custom Field 6'
-      member.custom7 = 'Custom Field 7'
-      member.custom8 = 'Custom Field 8'
-      member.custom9 = 'Custom Field 9'
-      member.grouping_id = 3
-      member.grouping_leader = 0
+      it "Failed the update stage in OSM" do
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/users.php?action=newMember', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "sectionid" => 2,
+          "firstname" => "First",
+          "lastname" => "Last",
+          "dob" => "2000-01-02",
+          "started" => "2006-01-02",
+          "startedsection" => "2006-01-07",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":577743}'}) }
 
-      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=updateMember&dateFormat=generic'
-      body_data = {
-        'firstname' => 'First',
-        'lastname' => 'Last',
-        'email1' => 'email1@example.com',
-        'email2' => 'email2@example.com',
-        'email3' => 'email3@example.com',
-        'email4' => 'email4@example.com',
-        'phone1' => '11111 111111',
-        'phone2' => '222222',
-        'phone3' => '+33 3333 333333',
-        'phone4' => '4444 444 444',
-        'address' => '1 Some Road',
-        'address2' => 'Address 2',
-        'dob' => '2000-01-02',
-        'started' => '2006-01-02',
-        'startedsection' => '2006-01-03',
-        'parents' => 'John and Jane Doe',
-        'notes' => 'None',
-        'medical' => 'Nothing',
-        'religion' => 'Unknown',
-        'school' => 'Some School',
-        'ethnicity' => 'Yes',
-        'subs' => 'Upto end of 2007',
-        'custom1' => 'Custom Field 1',
-        'custom2' => 'Custom Field 2',
-        'custom3' => 'Custom Field 3',
-        'custom4' => 'Custom Field 4',
-        'custom5' => 'Custom Field 5',
-        'custom6' => 'Custom Field 6',
-        'custom7' => 'Custom Field 7',
-        'custom8' => 'Custom Field 8',
-        'custom9' => 'Custom Field 9',
-        'patrolid' => 3,
-        'patrolleader' => 0,
-      }
-      body = (body_data.inject({}) {|h,(k,v)| h[k]=v.to_s; h}).to_json
+        @member.stub(:update) { false }
+        Osm::Term.stub(:get_for_section) { [] }
 
-      body_data.each do |column, value|
-        unless ['patrolid', 'patrolleader'].include?(column)
-          HTTParty.should_receive(:post).with(url, {:body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-            'scoutid' => member.id,
-            'column' => column,
-            'value' => value,
-            'sectionid' => member.section_id,
-          }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
-        end
+        @member.create(@api).should == nil
+        @member.id.should == 577743
+      end
+
+      it "Raises error if member is invalid" do
+        expect{ Osm::Member.new.create(@api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
+      end
+
+      it "Raises error if member exists in OSM (has an ID)" do
+        expect{ Osm::Member.new(id: 12345).create(@api) }.to raise_error(Osm::Error, 'the member already exists in OSM')
       end
 
     end
@@ -786,7 +675,7 @@ describe "Member" do
           "group_id" => 6,
           "data[address1]" => "Address 1",
         }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
-        
+
         HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
           "apiid" => "1",
           "token" => "API TOKEN",
