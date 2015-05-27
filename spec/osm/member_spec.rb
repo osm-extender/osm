@@ -412,6 +412,105 @@ describe "Member" do
       member.valid?.should == true
     end
 
+    it "Get from OSM (handles no custom data)" do
+      body = {
+        'status' => true,
+        'error' => nil,
+        'data' => {
+          '123' => {
+            'active' => true,
+            'age' => '12 / 00',
+            'date_of_birth' => '2000-03-08',
+            'end_date' => '2010-06-03',
+            'first_name' => 'John',
+            'joined' => '2008-07-12',
+            'last_name' => 'Smith',
+            'member_id' => 123,
+            'patrol' => 'Leaders',
+            'patrol_id' => -2,
+            'patrol_role_level' => 1,
+            'patrol_role_level_label' => 'Assistant leader',
+            'section_id' => 1,
+            'started' => '2006-07-17',
+            'custom_data' => {
+              '7' => {'34' => 'Unspecified'},
+            },
+          }
+        },
+        'meta' => {
+          'leader_count' => 20,
+          'member_count' => 30,
+          'status' => true,
+          'structure' => [
+            {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+              {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+            ]},
+            {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+              {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+            ]},
+          ],
+        },
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+
+      members = Osm::Member.get_for_section(@api, 1, 2)
+      members.size.should == 1
+      member = members[0]
+      member.id.should == 123
+      member.custom.should == {}
+      member.valid?.should == true
+    end
+
+    it "Get from OSM (handles missing floating data)" do
+      body = {
+        'status' => true,
+        'error' => nil,
+        'data' => {
+          '123' => {
+            'active' => true,
+            'age' => '12 / 00',
+            'date_of_birth' => '2000-03-08',
+            'end_date' => '2010-06-03',
+            'first_name' => 'John',
+            'joined' => '2008-07-12',
+            'last_name' => 'Smith',
+            'member_id' => 123,
+            'patrol' => 'Leaders',
+            'patrol_id' => -2,
+            'patrol_role_level' => 1,
+            'patrol_role_level_label' => 'Assistant leader',
+            'section_id' => 1,
+            'started' => '2006-07-17',
+            'custom_data' => {
+              '5' => {'4848' => 'Data for 4848'},
+            },
+          }
+        },
+        'meta' => {
+          'leader_count' => 20,
+          'member_count' => 30,
+          'status' => true,
+          'structure' => [
+            {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+              {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+            ]},
+            {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+              {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+            ]},
+          ],
+        },
+      }
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+
+      members = Osm::Member.get_for_section(@api, 1, 2)
+      members.size.should == 1
+      member = members[0]
+      member.id.should == 123
+      member.gender.should == nil
+      member.valid?.should == true
+    end
+
+
     it "Get from OSM (handles an empty data array)" do
       body = {
         'status' => true,

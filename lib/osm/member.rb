@@ -172,7 +172,8 @@ module Osm
         secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : Hash[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
         emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : Hash[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
         doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : Hash[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        floating_data = Hash[ item_data[GID_FLOATING].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        floating_data = item_data[GID_FLOATING].nil? ? {} : Hash[ item_data[GID_FLOATING].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
+        custom_data = item_data[GID_CUSTOM].nil? ? {} : Hash[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ]
 
         result.push Osm::Member.new(
           :id => Osm::to_i_or_nil(item['member_id']),
@@ -275,7 +276,7 @@ module Osm
             custom: DirtyHashy[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
             custom_labels: custom_labels[GID_DOCTOR_CONTACT] || DirtyHashy.new,
           ),
-          custom: DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ],
+          custom: DirtyHashy[ custom_data.map{ |k,v| [k.to_i, v] } ],
           custom_labels: custom_labels[GID_CUSTOM] || DirtyHashy.new,
         )
       end
