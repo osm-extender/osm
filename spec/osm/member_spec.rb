@@ -277,8 +277,8 @@ describe "Member" do
       member.joined_movement.should == Date.new(2006, 7, 17)
       member.started_section.should == Date.new(2008, 7, 12)
       member.finished_section.should == Date.new(2010, 6, 3)
-      member.custom.should == {4848 => 'Data for 4848'}
-      member.custom_labels.should == {4848 => 'Label for 4848'}
+      member.custom.should == {"label_for_4848" => "Data for 4848"}
+      member.custom_labels.should == {"label_for_4848" => 'Label for 4848'}
       member.contact.first_name.should == 'John'
       member.contact.last_name.should == 'Smith'
       member.contact.address_1.should == 'Address 1'
@@ -294,8 +294,8 @@ describe "Member" do
       member.contact.receive_email_1.should == true
       member.contact.email_2.should == ''
       member.contact.receive_email_2.should == false
-      member.contact.custom.should == {8446=>"Data for 8446"}
-      member.contact.custom_labels.should == {8446=>"Label for 8446"}
+      member.contact.custom.should == {"label_for_8446"=>"Data for 8446"}
+      member.contact.custom_labels.should == {"label_for_8446"=>"Label for 8446"}
       member.primary_contact.first_name.should == 'Primary'
       member.primary_contact.last_name.should == 'Contact'
       member.primary_contact.address_1.should == 'Address 1'
@@ -311,8 +311,8 @@ describe "Member" do
       member.primary_contact.receive_email_1.should == true
       member.primary_contact.email_2.should == ''
       member.primary_contact.receive_email_2.should == false
-      member.primary_contact.custom.should == {8441=>"Data for 8441"}
-      member.primary_contact.custom_labels.should == {8441=>"Label for 8441"}
+      member.primary_contact.custom.should == {"label_for_8441"=>"Data for 8441"}
+      member.primary_contact.custom_labels.should == {"label_for_8441"=>"Label for 8441"}
       member.secondary_contact.first_name.should == 'Secondary'
       member.secondary_contact.last_name.should == 'Contact'
       member.secondary_contact.address_1.should == 'Address 1'
@@ -328,8 +328,8 @@ describe "Member" do
       member.secondary_contact.receive_email_1.should == true
       member.secondary_contact.email_2.should == ''
       member.secondary_contact.receive_email_2.should == false
-      member.secondary_contact.custom.should == {8442=>"Data for 8442"}
-      member.secondary_contact.custom_labels.should == {8442=>"Label for 8442"}
+      member.secondary_contact.custom.should == {"label_for_8442"=>"Data for 8442"}
+      member.secondary_contact.custom_labels.should == {"label_for_8442"=>"Label for 8442"}
       member.emergency_contact.first_name.should == 'Emergency'
       member.emergency_contact.last_name.should == 'Contact'
       member.emergency_contact.address_1.should == 'Address 1'
@@ -341,8 +341,8 @@ describe "Member" do
       member.emergency_contact.phone_2.should == '0987 654321'
       member.emergency_contact.email_1.should == 'emergency@example.com'
       member.emergency_contact.email_2.should == ''
-      member.emergency_contact.custom.should == {8443=>"Data for 8443"}
-      member.emergency_contact.custom_labels.should == {8443=>"Label for 8443"}
+      member.emergency_contact.custom.should == {"label_for_8443"=>"Data for 8443"}
+      member.emergency_contact.custom_labels.should == {"label_for_8443"=>"Label for 8443"}
       member.doctor.first_name.should == 'Doctor'
       member.doctor.last_name.should == 'Contact'
       member.doctor.surgery.should == 'Surgery'
@@ -353,8 +353,8 @@ describe "Member" do
       member.doctor.postcode.should == 'Postcode'
       member.doctor.phone_1.should == '01234 567890'
       member.doctor.phone_2.should == '0987 654321'
-      member.doctor.custom.should == {8444=>"Data for 8444"}
-      member.doctor.custom_labels.should == {8444=>"Label for 8444"}
+      member.doctor.custom.should == {"label_for_8444"=>"Data for 8444"}
+      member.doctor.custom_labels.should == {"label_for_8444"=>"Label for 8444"}
       member.valid?.should == true
     end
 
@@ -717,87 +717,262 @@ describe "Member" do
           }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
         end
       end
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/users.php?action=updateMemberPatrol', {:body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'scoutid' => member.id,
-        'patrolid' => member.grouping_id,
-        'pl' => member.grouping_leader,
-        'sectionid' => member.section_id,
-      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
-      Osm::Term.stub(:get_for_section) { [] }
 
-      member.update(@api).should == true
     end
 
-    it "Update in OSM (only updated fields)" do
-      member = Osm::Member.new(
-        :id => 1,
-        :section_id => 2,
-        :date_of_birth => '2000-01-02',
-        :started => '2006-01-02',
-        :joined => '2006-01-03',
-        :grouping_leader => 0,
-      )
-      member.first_name = 'First'
-      member.last_name = 'Last'
-      member.grouping_id = 3
 
-      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=updateMember&dateFormat=generic'
-      body_data = {
-        'firstname' => 'First',
-        'lastname' => 'Last',
-        'patrolid' => 3,
-        'patrolleader' => 0,
-      }
-      body = (body_data.inject({}) {|h,(k,v)| h[k]=v.to_s; h}).to_json
+    describe "Update in OSM" do
 
-      body_data.each do |column, value|
-        unless ['patrolid', 'patrolleader'].include?(column)
-          HTTParty.should_receive(:post).with(url, {:body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-            'scoutid' => member.id,
-            'column' => column,
-            'value' => value,
-            'sectionid' => member.section_id,
-          }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
-        end
+      before :each do
+        attributes = {
+          :id => 1,
+          :section_id => 2,
+          :first_name => 'First',
+          :last_name => 'Last',
+          :date_of_birth => '2000-01-02',
+          :grouping_id => '3',
+          :grouping_leader => 0,
+          :grouping_label => 'Grouping',
+          :grouping_leader_label => '6er',
+          :age => '06 / 07',
+          :gender => :other,
+          :joined_movement => '2006-01-02',
+          :started_section => '2006-01-07',
+          :finished_section => '2007-12-31',
+          :custom => DirtyHashy[ '12_3' => '123' ],
+          :custom_labels => {'12_3' => 'Label for 123'},
+          :contact => Osm::Member::MemberContact.new(postcode: 'A'),
+          :primary_contact => Osm::Member::PrimaryContact.new(postcode: 'B'),
+          :secondary_contact => Osm::Member::SecondaryContact.new(postcode: 'C'),
+          :emergency_contact => Osm::Member::EmergencyContact.new(postcode: 'D'),
+          :doctor => Osm::Member::DoctorContact.new(postcode: 'E'),
+        }
+        @member = Osm::Member.new(attributes)
       end
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/users.php?action=updateMemberPatrol', {:body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'scoutid' => member.id,
-        'patrolid' => member.grouping_id,
-        'pl' => member.grouping_leader,
-        'sectionid' => member.section_id,
-      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body}) }
-      Osm::Term.stub(:get_for_section) { [] }
 
-      member.update(@api).should == true
-    end
+      it "Only updated fields" do
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "sectionid" => 2,
+          "scoutid" => 1,
+          "column" => "firstname",
+          "value" => "John",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
 
-    it "Update in OSM (failed)" do
-      member = Osm::Member.new(
-        :id => 1,
-        :section_id => 2,
-        :last_name => 'Last',
-        :date_of_birth => '2000-01-02',
-        :started => '2006-01-02',
-        :joined => '2006-01-03',
-        :grouping_id => '3',
-        :grouping_leader => 0,
-      )
-      member.first_name = 'First'
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 7,
+          "column_id" => 34,
+          "value" => "Unspecified",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":"Unspecified"}}'}) }
 
-      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-      member.update(@api).should == false
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 6,
+          "data[address1]" => "Address 1",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+        
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 1,
+          "data[address2]" => "Address 2",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 2,
+          "data[address3]" => "Address 3",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 3,
+          "data[address4]" => "Address 4",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 4,
+          "data[surgery]" => "Surgery",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+
+        Osm::Term.stub(:get_for_section) { [] }
+
+        @member.first_name = 'John'
+        @member.gender = :unspecified
+        @member.contact.address_1 = 'Address 1'
+        @member.primary_contact.address_2 = 'Address 2'
+        @member.secondary_contact.address_3 = 'Address 3'
+        @member.emergency_contact.address_4 = 'Address 4'
+        @member.doctor.surgery = 'Surgery'
+        @member.update(@api).should == true
+      end
+
+      it "All fields" do
+        {'firstname'=>'First', 'lastname'=>'Last', 'patrolid'=>3, 'patrolleader'=>0, 'dob'=>'2000-01-02', 'startedsection'=>'2006-01-07', 'started'=>'2006-01-02'}.each do |key, value|
+          HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
+            "apiid" => "1",
+            "token" => "API TOKEN",
+            "userid" => "user_id",
+            "secret" => "secret",
+            "sectionid" => 2,
+            "scoutid" => 1,
+            "column" => key,
+            "value" => value,
+          }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+        end
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 7,
+          "column_id" => 34,
+          "value" => "Other",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":"Other"}}'}) }
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 5,
+          "column_id" => "12_3",
+          "value" => "123",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":"123"}}'}) }
+
+        {6=>'A', 1=>'B', 2=>'C'}.each do |group_id, postcode|
+          HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
+            "apiid" => "1",
+            "token" => "API TOKEN",
+            "userid" => "user_id",
+            "secret" => "secret",
+            "context" => "members",
+            "associated_type" => "member",
+            "associated_id" => 1,
+            "group_id" => group_id,
+            "data[firstname]" => nil,
+            "data[lastname]" => nil,
+            "data[address1]" => nil,
+            "data[address2]" => nil,
+            "data[address3]" => nil,
+            "data[address4]" => nil,
+            "data[postcode]" => postcode,
+            "data[phone1]" => nil,
+            "data[phone2]" => nil,
+            "data[email1]" => nil,
+            "data[email1_leaders]" => false,
+            "data[email2]" => nil,
+            "data[email2_leaders]" => false,
+            "data[phone1_sms]" => false,
+            "data[phone2_sms]" => false,
+          }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+        end
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 3,
+          "data[firstname]" => nil,
+          "data[lastname]" => nil,
+          "data[address1]" => nil,
+          "data[address2]" => nil,
+          "data[address3]" => nil,
+          "data[address4]" => nil,
+          "data[postcode]" => "D",
+          "data[phone1]" => nil,
+          "data[phone2]" => nil,
+          "data[email1]" => nil,
+          "data[email2]" => nil,
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 4,
+          "data[firstname]" => nil,
+          "data[lastname]" => nil,
+          "data[surgery]" => nil,
+          "data[address1]" => nil,
+          "data[address2]" => nil,
+          "data[address3]" => nil,
+          "data[address4]" => nil,
+          "data[postcode]" => "E",
+          "data[phone1]" => nil,
+          "data[phone2]" => nil,
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+
+        Osm::Term.stub(:get_for_section) { [] }
+
+        @member.update(@api, true).should == true
+      end
+
+      it "Failed to update in OSM" do
+        @member.first_name = 'John'
+        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+        @member.update(@api).should == false
+      end
+
+      it "Raises error if member is invalid" do
+        expect{ Osm::Member.new.create(@api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
+      end
+
     end
 
     it "Get Photo link" do

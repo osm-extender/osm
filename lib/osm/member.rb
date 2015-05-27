@@ -32,6 +32,7 @@ module Osm
     CID_GENDER = 34
     CID_SURGERY = 54
 
+
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the member
     # @!attribute [rw] section_id
@@ -69,7 +70,7 @@ module Osm
     # @!attribute [rw] primary_contact
     #   @return [Osm::Member::PrimaryContact, nil] the member's primary contact (primary contact 1 in OSM) (nil if hidden in OSM)
     # @!attribute [rw] secondary_contact
-    #   @return [Osm::Member::PrimaryContact, nil] the member's secondary contact (primary contact 2 in OSM) (nil if hidden in OSM)
+    #   @return [Osm::Member::SecondaryContact, nil] the member's secondary contact (primary contact 2 in OSM) (nil if hidden in OSM)
     # @!attribute [rw] emergency_contact
     #   @return [Osm::Member::EmergencyContact, nil] the member's emergency contact (nil if hidden in OSM)
     # @!attribute [rw] doctor
@@ -157,23 +158,28 @@ module Osm
       structure = Hash[ structure.map{ |i| [i['group_id'].to_i, i ] } ] # Make a hash of identifier to group data hash
 
       custom_labels = {}
+      var_names = {}
       structure.each do |gid, group|
         columns = group['columns'] || []
-        columns.map!{ |c| [c['column_id'].to_i, c['label']] }
-        columns.select!{ |a| (gid == GID_CUSTOM) || (a[0] > CORE_FIELD_IDS_FINISH_AT) }
-        labels = DirtyHashy[ columns ]
-        custom_labels[gid.to_i] = labels
+        columns.select!{ |a| (gid == GID_CUSTOM) || (a['column_id'].to_i > CORE_FIELD_IDS_FINISH_AT) }
+        custom_labels[gid.to_i] = Hash[ columns.map{ |c| [c['varname'], c['label']] } ]
+        var_names[gid.to_i] = DirtyHashy[ columns.map{ |c| [c['column_id'].to_i, c['varname']] } ]
       end
 
       data.each do |item|
         item_data = Hash[ item['custom_data'].map{ |k,v| [k.to_i, v] } ]
-        member_contact = item_data[GID_MEMBER_CONTACT].nil? ? nil : Hash[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        primary_contact = item_data[GID_PRIMARY_CONTACT].nil? ? nil : Hash[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : Hash[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : Hash[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : Hash[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        floating_data = item_data[GID_FLOATING].nil? ? {} : Hash[ item_data[GID_FLOATING].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] < CUSTOM_FIELD_IDS_START_AT } ]
-        custom_data = item_data[GID_CUSTOM].nil? ? {} : Hash[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ]
+        member_contact = item_data[GID_MEMBER_CONTACT].nil? ? nil : Hash[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| k < CUSTOM_FIELD_IDS_START_AT } ]
+        member_custom = item_data[GID_MEMBER_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_MEMBER_CONTACT].select{ |k,v| k.to_i >= CUSTOM_FIELD_IDS_START_AT }.map{ |k,v| [var_names[GID_MEMBER_CONTACT][k.to_i], v] } ]
+        primary_contact = item_data[GID_PRIMARY_CONTACT].nil? ? nil : Hash[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| k < CUSTOM_FIELD_IDS_START_AT } ]
+        primary_custom = item_data[GID_PRIMARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_PRIMARY_CONTACT].select{ |k,v| k.to_i >= CUSTOM_FIELD_IDS_START_AT }.map{ |k,v| [var_names[GID_PRIMARY_CONTACT][k.to_i], v] } ]
+        secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : Hash[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| k < CUSTOM_FIELD_IDS_START_AT } ]
+        secondary_custom = item_data[GID_SECONDARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_SECONDARY_CONTACT].select{ |k,v| k.to_i >= CUSTOM_FIELD_IDS_START_AT }.map{ |k,v| [var_names[GID_SECONDARY_CONTACT][k.to_i], v] } ]
+        emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : Hash[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| k < CUSTOM_FIELD_IDS_START_AT } ]
+        emergency_custom = item_data[GID_EMERGENCY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].select{ |k,v| k.to_i >= CUSTOM_FIELD_IDS_START_AT }.map{ |k,v| [var_names[GID_EMERGENCY_CONTACT][k.to_i], v] } ]
+        doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : Hash[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| k < CUSTOM_FIELD_IDS_START_AT } ]
+        doctor_custom = item_data[GID_DOCTOR_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_DOCTOR_CONTACT].select{ |k,v| k.to_i >= CUSTOM_FIELD_IDS_START_AT }.map{ |k,v| [var_names[GID_DOCTOR_CONTACT][k.to_i], v] } ]
+        floating_data = item_data[GID_FLOATING].nil? ? {} : Hash[ item_data[GID_FLOATING].map{ |k,v| [k.to_i, v] }.select{ |k,v| k < CUSTOM_FIELD_IDS_START_AT } ]
+        custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [var_names[GID_CUSTOM][k.to_i], v] } ]
 
         result.push Osm::Member.new(
           :id => Osm::to_i_or_nil(item['member_id']),
@@ -206,8 +212,8 @@ module Osm
             receive_phone_2: member_contact[CID_RECIEVE_PHONE_2],
             receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
-            custom: DirtyHashy[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_MEMBER_CONTACT] || DirtyHashy.new,
+            custom: member_custom,
+            custom_labels: custom_labels[GID_MEMBER_CONTACT],
           ),
           :primary_contact => primary_contact.nil? ? nil : PrimaryContact.new(
             first_name: primary_contact[CID_FIRST_NAME],
@@ -225,10 +231,10 @@ module Osm
             receive_phone_2: primary_contact[CID_RECIEVE_PHONE_2],
             receive_email_1: primary_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: primary_contact[CID_RECIEVE_EMAIL_2],
-            custom: DirtyHashy[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_PRIMARY_CONTACT] || DirtyHashy.new,
+            custom: primary_custom,
+            custom_labels: custom_labels[GID_PRIMARY_CONTACT],
           ),
-          :secondary_contact => secondary_contact.nil? ? nil : PrimaryContact.new(
+          :secondary_contact => secondary_contact.nil? ? nil : SecondaryContact.new(
             first_name: secondary_contact[CID_FIRST_NAME],
             last_name: secondary_contact[CID_LAST_NAME],
             address_1: secondary_contact[CID_ADDRESS_1],
@@ -244,8 +250,8 @@ module Osm
             receive_phone_2: secondary_contact[CID_RECIEVE_PHONE_2],
             receive_email_1: secondary_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: secondary_contact[CID_RECIEVE_EMAIL_2],
-            custom: DirtyHashy[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_SECONDARY_CONTACT] || DirtyHashy.new,
+            custom: secondary_custom,
+            custom_labels: custom_labels[GID_SECONDARY_CONTACT],
           ),
           :emergency_contact => emergency_contact.nil? ? nil : EmergencyContact.new(
             first_name: emergency_contact[CID_FIRST_NAME],
@@ -259,8 +265,8 @@ module Osm
             phone_2: emergency_contact[CID_PHONE_2],
             email_1: emergency_contact[CID_EMAIL_1],
             email_2: emergency_contact[CID_EMAIL_2],
-            custom: DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_EMERGENCY_CONTACT] || DirtyHashy.new,
+            custom: emergency_custom,
+            custom_labels: custom_labels[GID_EMERGENCY_CONTACT],
           ),
           :doctor => doctor_contact.nil? ? nil : DoctorContact.new(
             first_name: doctor_contact[CID_FIRST_NAME],
@@ -273,11 +279,11 @@ module Osm
             postcode: doctor_contact[CID_POSTCODE],
             phone_1: doctor_contact[CID_PHONE_1],
             phone_2: doctor_contact[CID_PHONE_2],
-            custom: DirtyHashy[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |i| i[0] > CORE_FIELD_IDS_FINISH_AT } ],
-            custom_labels: custom_labels[GID_DOCTOR_CONTACT] || DirtyHashy.new,
+            custom:doctor_custom,
+            custom_labels: custom_labels[GID_DOCTOR_CONTACT],
           ),
-          custom: DirtyHashy[ custom_data.map{ |k,v| [k.to_i, v] } ],
-          custom_labels: custom_labels[GID_CUSTOM] || DirtyHashy.new,
+          custom: custom_data,
+          custom_labels: custom_labels[GID_CUSTOM],
         )
       end
 
@@ -352,76 +358,80 @@ module Osm
 
     # Update the member in OSM
     # @param [Osm::Api] api The api to use to make the request
-    # @return [Boolan] whether the member was successfully updated or not
+    # @param [Boolean] force Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
+    # @return [Boolean] whether the member was successfully updated or not
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
-    def update(api)
+    def update(api, force=false)
       raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :write, :member, section_id)
 
-      to_update = changed_attributes
-      values = {}
-      values['firstname']      = first_name if to_update.include?('first_name')
-      values['lastname']       = last_name  if to_update.include?('last_name')
-      values['dob']            = date_of_birth.strftime(Osm::OSM_DATE_FORMAT) if to_update.include?('date_of_birth')
-      values['started']        = started.strftime(Osm::OSM_DATE_FORMAT) if to_update.include?('started')
-      values['startedsection'] = joined.strftime(Osm::OSM_DATE_FORMAT) if to_update.include?('joined')
-      values['email1']         = email1     if to_update.include?('email1')
-      values['email2']         = email2     if to_update.include?('email2')
-      values['email3']         = email3     if to_update.include?('email3')
-      values['email4']         = email4     if to_update.include?('email4')
-      values['phone1']         = phone1     if to_update.include?('phone1')
-      values['phone2']         = phone2     if to_update.include?('phone2')
-      values['phone3']         = phone3     if to_update.include?('phone3')
-      values['phone4']         = phone4     if to_update.include?('phone3')
-      values['address']        = address    if to_update.include?('address')
-      values['address2']       = address2   if to_update.include?('address2')
-      values['parents']        = parents    if to_update.include?('parents')
-      values['notes']          = notes      if to_update.include?('notes')
-      values['medical']        = medical    if to_update.include?('medical')
-      values['religion']       = religion   if to_update.include?('religion')
-      values['school']         = school     if to_update.include?('school')
-      values['ethnicity']      = ethnicity  if to_update.include?('ethnicity')
-      values['subs']           = subs       if to_update.include?('subs')
-      values['custom1']        = custom1    if to_update.include?('custom1')
-      values['custom2']        = custom2    if to_update.include?('custom2')
-      values['custom3']        = custom3    if to_update.include?('custom3')
-      values['custom4']        = custom4    if to_update.include?('custom4')
-      values['custom5']        = custom5    if to_update.include?('custom5')
-      values['custom6']        = custom6    if to_update.include?('custom6')
-      values['custom7']        = custom7    if to_update.include?('custom7')
-      values['custom8']        = custom8    if to_update.include?('custom8')
-      values['custom9']        = custom9    if to_update.include?('custom9')
+      updated = true
 
-      result = true
-      values.each do |column, value|
-        data = api.perform_query("users.php?action=updateMember&dateFormat=generic", {
+      # Do core attributes
+      attribute_map = [
+        ['first_name', 'firstname', first_name],
+        ['last_name', 'lastname', last_name],
+        ['grouping_id', 'patrolid', grouping_id],
+        ['grouping_leader', 'patrolleader', grouping_leader],
+        ['date_of_birth', 'dob', date_of_birth.strftime(Osm::OSM_DATE_FORMAT)],
+        ['started_section', 'startedsection', started_section.strftime(Osm::OSM_DATE_FORMAT)],
+        ['joined_movement', 'started', joined_movement.strftime(Osm::OSM_DATE_FORMAT)],
+      ] # our name => OSM name
+      attribute_map.select{ |attr,col,val| force || changed_attributes.include?(attr) }.each do |attr,col,val|
+        data = api.perform_query("ext/members/contact/?action=update", {
           'scoutid' => self.id,
-          'column' => column,
-          'value' => value,
+          'column' => col,
+          'value' => val,
           'sectionid' => section_id,
         })
-        result &= (data[column] == value.to_s)
-      end
+        updated = updated && data.is_a?(Hash) && data['ok'].eql?(true)
+      end # each attr to update
 
-      if to_update.include?('grouping_id') || to_update.include?('grouping_leader')
-        data = api.perform_query("users.php?action=updateMemberPatrol", {
-          'scoutid' => self.id,
-          'patrolid' => grouping_id,
-          'pl' => grouping_leader,
-          'sectionid' => section_id,
+      # Do 'floating' attributes
+      if force || changed_attributes.include?('gender')
+        new_value = {male: 'Male', female: 'Female', other: 'Other'}[gender] || 'Unspecified'
+        data = api.perform_query("ext/members/contact/?action=update", {
+          'associated_id' => self.id,
+          'associated_type' => 'member',
+          'value' => new_value,
+          'column_id' => CID_GENDER,
+          'group_id' => GID_FLOATING,
+          'context' => 'members',
         })
-        result &= ((data['patrolid'].to_i == grouping_id) && (data['patrolleader'].to_i == grouping_leader))
+        updated = updated && data.is_a?(Hash) && data['data'].is_a?(Hash) && data['data']['value'].eql?(new_value)
       end
 
-      if result
+      # Do custom attributes
+      custom.keys.select{ |a| force || custom.changes.keys.include?(a) }.each do |attr|
+        new_value = custom[attr]
+        data = api.perform_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", {
+          'associated_id' => self.id,
+          'associated_type' => 'member',
+          'value' => new_value,
+          'column_id' => attr,
+          'group_id' => GID_CUSTOM,
+          'context' => 'members',
+        })
+        updated = updated && data.is_a?(Hash) && data['data'].is_a?(Hash) && data['data']['value'].eql?(new_value)
+      end # each attr to update
+
+      # Do contacts
+      updated = contact.update(api, self, force) && updated
+      updated = primary_contact.update(api, self, force) && updated
+      updated = secondary_contact.update(api, self, force) && updated
+      updated = emergency_contact.update(api, self, force) && updated
+      updated = doctor.update(api, self, force) && updated
+
+      # Finish off
+      if updated
         reset_changed_attributes
-        # The cached columns for the flexi record will be out of date - remove them
+        custom.clean_up!
+        # The cached columns for the members will be out of date - remove them
         Osm::Term.get_for_section(api, section_id).each do |term|
           Osm::Model.cache_delete(api, ['members', section_id, term.id])
         end
       end
-
-      return result
+      return updated
     end
 
     # Get the years element of this scout's age
@@ -684,12 +694,74 @@ module Osm
       def all_phones
         [phone_1, phone_2].select{ |n| !n.blank? }.map{ |n| n.gsub(/[^\d\+]/, '') }
       end
+
+      # Update the contact in OSM
+      # @param [Osm::Api] api The api to use to make the request
+      # @param [Osm::Member] section The member to update the contact for
+      # @param [Boolean] force Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
+      # @return [Boolean] whether the member was successfully updated or not
+      # @raise [Osm::ObjectIsInvalid] If the Contact is invalid
+      def update(api, member, force=false)
+        raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+        require_ability_to(api, :write, :member, member.section_id)
+
+        attribute_map = {
+          'first_name' => 'data[firstname]',
+          'last_name' => 'data[lastname]',
+          'surgery' => 'data[surgery]',
+          'address_1' => 'data[address1]',
+          'address_2' => 'data[address2]',
+          'address_3' => 'data[address3]',
+          'address_4' => 'data[address4]',
+          'postcode' => 'data[postcode]',
+          'phone_1' => 'data[phone1]',
+          'receive_phone_1' => 'data[phone1_sms]',
+          'phone_2' => 'data[phone2]',
+          'receive_phone_2' => 'data[phone2_sms]',
+          'email_1' => 'data[email1]',
+          'receive_email_1' => 'data[email1_leaders]',
+          'email_2' => 'data[email2]',
+          'receive_email_2' => 'data[email2_leaders]',
+        } # our name => OSM name
+
+        data = {}
+        attributes.keys.select{ |a| !['custom', 'custom_labels'].include?(a) }.select{ |a| force || changed_attributes.include?(a) }.each do |attr|
+          value = send(attr)
+          value = 'yes' if value.eql?(true)
+          data[attribute_map[attr]] = value
+        end
+        custom.keys.select{ |a| force || custom.changes.keys.include?(a) }.each do |attr|
+          data["data[#{key}]"] = custom[key]
+        end
+
+        updated = false
+        unless data.empty?
+          result = api.perform_query("ext/customdata/?action=update&section_id=#{member.section_id}", {
+            'associated_id' => member.id,
+            'associated_type' => 'member',
+            'context' => 'members',
+            'group_id' => self.class::GROUP_ID,
+          }.merge(data))
+          updated = result.is_a?(Hash) && result['status'].eql?(true)
+        end
+
+        # Finish off
+        if updated
+          reset_changed_attributes
+          custom.clean_up!
+        end
+        return updated
+      end
+
     end
 
 
     class MemberContact < Osm::Member::Contact
       include EnableableEmailableContact
       include EnableablePhoneableContact
+
+      GROUP_ID = Osm::Member::GID_MEMBER_CONTACT
+
       # @!attribute [rw] email_1
       #   @return [String] the primary email address for the member
       # @!attribute [rw] email_2
@@ -725,6 +797,9 @@ module Osm
     class PrimaryContact < Osm::Member::Contact
       include EnableableEmailableContact
       include EnableablePhoneableContact
+
+      GROUP_ID = Osm::Member::GID_PRIMARY_CONTACT
+
       # @!attribute [rw] email_1
       #   @return [String] the primary email address for the contact
       # @!attribute [rw] email_2
@@ -756,9 +831,15 @@ module Osm
       validates_inclusion_of :receive_phone_2, :in => [true, false]
     end # class PrimaryContact
 
+    class SecondaryContact < Osm::Member::PrimaryContact
+      GROUP_ID = Osm::Member::GID_SECONDARY_CONTACT
+    end # class SecondaryContact
 
     class EmergencyContact < Osm::Member::Contact
       include EmailableContact
+
+      GROUP_ID = Osm::Member::GID_EMERGENCY_CONTACT
+
       # @!attribute [rw] email_1
       #   @return [String] the primary email address for the contact
       # @!attribute [rw] email_2
@@ -781,6 +862,8 @@ module Osm
 
 
     class DoctorContact < Osm::Member::Contact
+      GROUP_ID = Osm::Member::GID_DOCTOR_CONTACT
+
       # @!attribute [rw] first_name
       #   @return [String] the contact's first name
       # @!attribute [rw] last_name
