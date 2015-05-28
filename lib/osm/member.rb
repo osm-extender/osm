@@ -390,11 +390,11 @@ module Osm
       end # each attr to update
 
       # Do contacts
-      updated = contact.update(api, self, force) && updated
-      updated = primary_contact.update(api, self, force) && updated
-      updated = secondary_contact.update(api, self, force) && updated
-      updated = emergency_contact.update(api, self, force) && updated
-      updated = doctor.update(api, self, force) && updated
+      updated = (contact.nil? || contact.update(api, self, force)) && updated
+      updated = (primary_contact.nil? || primary_contact.update(api, self, force)) && updated
+      updated = (secondary_contact.nil? || secondary_contact.update(api, self, force)) && updated
+      updated = (emergency_contact.nil? ||emergency_contact.update(api, self, force)) && updated
+      updated = (doctor.nil? || doctor.update(api, self, force)) && updated
 
       # Finish off
       if updated
