@@ -705,7 +705,7 @@ module Osm
           data[attribute_map[attr]] = value
         end
         custom.keys.select{ |a| force || custom.changes.keys.include?(a) }.each do |attr|
-          data["data[#{key}]"] = custom[key]
+          data["data[#{attr}]"] = custom[attr]
         end
 
         updated = false
