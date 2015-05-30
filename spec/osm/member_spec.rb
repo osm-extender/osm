@@ -631,13 +631,13 @@ describe "Member" do
           :joined_movement => '2006-01-02',
           :started_section => '2006-01-07',
           :finished_section => '2007-12-31',
-          :custom => DirtyHashy[ '12_3' => '123' ],
+          :custom => DirtyHashy[ '12_3', '123' ],
           :custom_labels => {'12_3' => 'Label for 123'},
           :contact => Osm::Member::MemberContact.new(postcode: 'A'),
           :primary_contact => Osm::Member::PrimaryContact.new(postcode: 'B'),
           :secondary_contact => Osm::Member::SecondaryContact.new(postcode: 'C'),
           :emergency_contact => Osm::Member::EmergencyContact.new(postcode: 'D'),
-          :doctor => Osm::Member::DoctorContact.new(postcode: 'E'),
+          :doctor => Osm::Member::DoctorContact.new(postcode: 'E', custom: DirtyHashy['test_var', 'This is a test']),
         }
         @member = Osm::Member.new(attributes)
       end
@@ -725,17 +725,33 @@ describe "Member" do
           "associated_id" => 1,
           "group_id" => 4,
           "data[surgery]" => "Surgery",
+          "data[test_var]" => "This is still a test",
         }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 5,
+          "column_id" => "12_3",
+          "value" => "321",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":"321"}}'}) }
 
         Osm::Term.stub(:get_for_section) { [] }
 
         @member.first_name = 'John'
         @member.gender = :unspecified
+        @member.custom['12_3'] = '321'
         @member.contact.address_1 = 'Address 1'
         @member.primary_contact.address_2 = 'Address 2'
         @member.secondary_contact.address_3 = 'Address 3'
         @member.emergency_contact.address_4 = 'Address 4'
         @member.doctor.surgery = 'Surgery'
+        @member.doctor.custom['test_var'] = 'This is still a test'
         @member.update(@api).should == true
       end
 
@@ -848,6 +864,7 @@ describe "Member" do
           "data[postcode]" => "E",
           "data[phone1]" => nil,
           "data[phone2]" => nil,
+          "data[test_var]" => "This is a test",
         }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
 
         Osm::Term.stub(:get_for_section) { [] }
@@ -863,6 +880,16 @@ describe "Member" do
 
       it "Raises error if member is invalid" do
         expect{ Osm::Member.new.create(@api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
+      end
+
+      it "Handles disabled contacts" do
+        @member.contact = nil
+        @member.primary_contact = nil
+        @member.secondary_contact = nil
+        @member.emergency_contact = nil
+        @member.doctor = nil
+        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+        @member.update(@api).should == true
       end
 
     end
