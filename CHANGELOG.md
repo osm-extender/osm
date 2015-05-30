@@ -16,8 +16,8 @@
     * Addition of attibutes:
       * gender (Symbol - :male, :female, :other or :unspecified)
       * finished_section (Date, nil)
-      * custom (DirtyHashy) - The customisable data part from OSM
-      * custom_labels (DirtyHashy) - The labels which belong to the data in custom
+      * additional_information (DirtyHashy) - The customisable data part from OSM
+      * additional_information_labels (DirtyHashy) - The labels which belong to the data in custom
       * primary_contact, secondary_contact, emergency_contact and doctor - the relevant parts from OSM
       * grouping_label
       * grouping_leader_label

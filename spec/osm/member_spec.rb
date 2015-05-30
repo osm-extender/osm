@@ -19,8 +19,8 @@ describe "Member" do
       :joined_movement => '2006-01-02',
       :started_section => '2006-01-07',
       :finished_section => '2007-12-31',
-      :custom => {'12_3' => '123'},
-      :custom_labels => {'12_3' => 'Label for 123'},
+      :additional_information => {'12_3' => '123'},
+      :additional_information_labels => {'12_3' => 'Label for 123'},
       :contact => Osm::Member::MemberContact.new(postcode: 'A'),
       :primary_contact => Osm::Member::PrimaryContact.new(postcode: 'B'),
       :secondary_contact => Osm::Member::PrimaryContact.new(postcode: 'C'),
@@ -43,8 +43,8 @@ describe "Member" do
     member.joined_movement.should == Date.new(2006, 1, 2)
     member.started_section.should == Date.new(2006, 1, 7)
     member.finished_section.should == Date.new(2007, 12, 31)
-    member.custom.should == {'12_3' => '123'}
-    member.custom_labels.should == {'12_3' => 'Label for 123'}
+    member.additional_information.should == {'12_3' => '123'}
+    member.additional_information_labels.should == {'12_3' => 'Label for 123'}
     member.contact.postcode.should == 'A'
     member.primary_contact.postcode.should == 'B'
     member.secondary_contact.postcode.should == 'C'
@@ -279,8 +279,8 @@ describe "Member" do
         member.joined_movement.should == Date.new(2006, 7, 17)
         member.started_section.should == Date.new(2008, 7, 12)
         member.finished_section.should == Date.new(2010, 6, 3)
-        member.custom.should == {"label_for_4848" => "Data for 4848"}
-        member.custom_labels.should == {"label_for_4848" => 'Label for 4848'}
+        member.additional_information.should == {"label_for_4848" => "Data for 4848"}
+        member.additional_information_labels.should == {"label_for_4848" => 'Label for 4848'}
         member.contact.first_name.should == 'John'
         member.contact.last_name.should == 'Smith'
         member.contact.address_1.should == 'Address 1'
@@ -296,8 +296,8 @@ describe "Member" do
         member.contact.receive_email_1.should == true
         member.contact.email_2.should == ''
         member.contact.receive_email_2.should == false
-        member.contact.custom.should == {"label_for_8446"=>"Data for 8446"}
-        member.contact.custom_labels.should == {"label_for_8446"=>"Label for 8446"}
+        member.contact.additional_information.should == {"label_for_8446"=>"Data for 8446"}
+        member.contact.additional_information_labels.should == {"label_for_8446"=>"Label for 8446"}
         member.primary_contact.first_name.should == 'Primary'
         member.primary_contact.last_name.should == 'Contact'
         member.primary_contact.address_1.should == 'Address 1'
@@ -313,8 +313,8 @@ describe "Member" do
         member.primary_contact.receive_email_1.should == true
         member.primary_contact.email_2.should == ''
         member.primary_contact.receive_email_2.should == false
-        member.primary_contact.custom.should == {"label_for_8441"=>"Data for 8441"}
-        member.primary_contact.custom_labels.should == {"label_for_8441"=>"Label for 8441"}
+        member.primary_contact.additional_information.should == {"label_for_8441"=>"Data for 8441"}
+        member.primary_contact.additional_information_labels.should == {"label_for_8441"=>"Label for 8441"}
         member.secondary_contact.first_name.should == 'Secondary'
         member.secondary_contact.last_name.should == 'Contact'
         member.secondary_contact.address_1.should == 'Address 1'
@@ -330,8 +330,8 @@ describe "Member" do
         member.secondary_contact.receive_email_1.should == true
         member.secondary_contact.email_2.should == ''
         member.secondary_contact.receive_email_2.should == false
-        member.secondary_contact.custom.should == {"label_for_8442"=>"Data for 8442"}
-        member.secondary_contact.custom_labels.should == {"label_for_8442"=>"Label for 8442"}
+        member.secondary_contact.additional_information.should == {"label_for_8442"=>"Data for 8442"}
+        member.secondary_contact.additional_information_labels.should == {"label_for_8442"=>"Label for 8442"}
         member.emergency_contact.first_name.should == 'Emergency'
         member.emergency_contact.last_name.should == 'Contact'
         member.emergency_contact.address_1.should == 'Address 1'
@@ -343,8 +343,8 @@ describe "Member" do
         member.emergency_contact.phone_2.should == '0987 654321'
         member.emergency_contact.email_1.should == 'emergency@example.com'
         member.emergency_contact.email_2.should == ''
-        member.emergency_contact.custom.should == {"label_for_8443"=>"Data for 8443"}
-        member.emergency_contact.custom_labels.should == {"label_for_8443"=>"Label for 8443"}
+        member.emergency_contact.additional_information.should == {"label_for_8443"=>"Data for 8443"}
+        member.emergency_contact.additional_information_labels.should == {"label_for_8443"=>"Label for 8443"}
         member.doctor.first_name.should == 'Doctor'
         member.doctor.last_name.should == 'Contact'
         member.doctor.surgery.should == 'Surgery'
@@ -355,8 +355,8 @@ describe "Member" do
         member.doctor.postcode.should == 'Postcode'
         member.doctor.phone_1.should == '01234 567890'
         member.doctor.phone_2.should == '0987 654321'
-        member.doctor.custom.should == {"label_for_8444"=>"Data for 8444"}
-        member.doctor.custom_labels.should == {"label_for_8444"=>"Label for 8444"}
+        member.doctor.additional_information.should == {"label_for_8444"=>"Data for 8444"}
+        member.doctor.additional_information_labels.should == {"label_for_8444"=>"Label for 8444"}
         member.valid?.should == true
       end
 
@@ -459,7 +459,7 @@ describe "Member" do
         members.size.should == 1
         member = members[0]
         member.id.should == 123
-        member.custom.should == {}
+        member.additional_information.should == {}
         member.valid?.should == true
       end
 
@@ -544,8 +544,8 @@ describe "Member" do
           :joined_movement => '2006-01-02',
           :started_section => '2006-01-07',
           :finished_section => '2007-12-31',
-          :custom => {'12_3' => '123'},
-          :custom_labels => {'12_3' => 'Label for 123'},
+          :additional_information => {'12_3' => '123'},
+          :additional_information_labels => {'12_3' => 'Label for 123'},
           :contact => Osm::Member::MemberContact.new(postcode: 'A'),
           :primary_contact => Osm::Member::PrimaryContact.new(postcode: 'B'),
           :secondary_contact => Osm::Member::PrimaryContact.new(postcode: 'C'),
@@ -631,13 +631,13 @@ describe "Member" do
           :joined_movement => '2006-01-02',
           :started_section => '2006-01-07',
           :finished_section => '2007-12-31',
-          :custom => DirtyHashy[ '12_3', '123' ],
-          :custom_labels => {'12_3' => 'Label for 123'},
+          :additional_information => DirtyHashy[ '12_3', '123' ],
+          :additional_information_labels => {'12_3' => 'Label for 123'},
           :contact => Osm::Member::MemberContact.new(postcode: 'A'),
           :primary_contact => Osm::Member::PrimaryContact.new(postcode: 'B'),
           :secondary_contact => Osm::Member::SecondaryContact.new(postcode: 'C'),
           :emergency_contact => Osm::Member::EmergencyContact.new(postcode: 'D'),
-          :doctor => Osm::Member::DoctorContact.new(postcode: 'E', custom: DirtyHashy['test_var', 'This is a test']),
+          :doctor => Osm::Member::DoctorContact.new(postcode: 'E', additional_information: DirtyHashy['test_var', 'This is a test']),
         }
         @member = Osm::Member.new(attributes)
       end
@@ -745,13 +745,13 @@ describe "Member" do
 
         @member.first_name = 'John'
         @member.gender = :unspecified
-        @member.custom['12_3'] = '321'
+        @member.additional_information['12_3'] = '321'
         @member.contact.address_1 = 'Address 1'
         @member.primary_contact.address_2 = 'Address 2'
         @member.secondary_contact.address_3 = 'Address 3'
         @member.emergency_contact.address_4 = 'Address 4'
         @member.doctor.surgery = 'Surgery'
-        @member.doctor.custom['test_var'] = 'This is still a test'
+        @member.doctor.additional_information['test_var'] = 'This is still a test'
         @member.update(@api).should == true
       end
 
@@ -907,8 +907,8 @@ describe "Member" do
         :grouping_leader => 0,
         :grouping_label => 'Grouping',
         :grouping_leader_label => '',
-        :custom => {},
-        :custom_labels => {},
+        :additional_information => {},
+        :additional_information_labels => {},
         :contact => Osm::Member::MemberContact.new(),
         :primary_contact => Osm::Member::PrimaryContact.new(),
         :secondary_contact => Osm::Member::PrimaryContact.new(),
@@ -936,8 +936,8 @@ describe "Member" do
           :grouping_leader => 0,
           :grouping_label => 'Grouping',
           :grouping_leader_label => '',
-          :custom => {},
-          :custom_labels => {},
+          :additional_information => {},
+          :additional_information_labels => {},
           :contact => Osm::Member::MemberContact.new(),
           :primary_contact => Osm::Member::PrimaryContact.new(),
           :secondary_contact => Osm::Member::PrimaryContact.new(),

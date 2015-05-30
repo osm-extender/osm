@@ -61,10 +61,10 @@ module Osm
     #   @return [Date] when the member finished the section they were retrieved for
     # @!attribute [rw] joined_movement
     #   @return [Date] when the member joined the movement
-    # @!attribute [rw] custom
-    #   @return [DirtyHashy] the custom data (key is OSM's variable name, value is the data)
-    # @!attribute [rw] custom_labels
-    #   @return [DirtyHashy] the labels for the custom data (key is OSM's variable name, value is the label)
+    # @!attribute [rw] additional_information
+    #   @return [DirtyHashy] the Additional Information (key is OSM's variable name, value is the data)
+    # @!attribute [rw] additional_information_labels
+    #   @return [DirtyHashy] the labels for the additional information (key is OSM's variable name, value is the label)
     # @!attribute [rw] contact
     #   @return [Osm::Member::MemberContact, nil] the member's contact details (nil if hidden in OSM)
     # @!attribute [rw] primary_contact
@@ -90,8 +90,8 @@ module Osm
     attribute :finished_section, :type => Date
     attribute :joined_movement, :type => Date
     attribute :gender, :type => Object
-    attribute :custom, :type => Object, :default => DirtyHashy.new
-    attribute :custom_labels, :type => Object, :default => DirtyHashy.new
+    attribute :additional_information, :type => Object, :default => DirtyHashy.new
+    attribute :additional_information_labels, :type => Object, :default => DirtyHashy.new
     attribute :contact, :type => Object
     attribute :primary_contact, :type => Object
     attribute :secondary_contact, :type => Object
@@ -101,7 +101,8 @@ module Osm
     if ActiveModel::VERSION::MAJOR < 4
       attr_accessible :id, :section_id, :first_name, :last_name, :grouping_id, :grouping_leader,
                       :date_of_birth, :started_section, :finished_section, :joined_movement, :age,
-                      :grouping_label, :grouping_leader_label, :gender, :custom, :custom_labels,
+                      :grouping_label, :grouping_leader_label, :gender,
+                      :additional_information, :additional_information_labels,
                       :contact, :primary_contact, :secondary_contact, :emergency_contact, :doctor
     end
 
@@ -113,8 +114,8 @@ module Osm
     validates_presence_of :last_name
     validates_presence_of :grouping_label, :allow_blank => true
     validates_presence_of :grouping_leader_label, :allow_blank => true
-    validates_presence_of :custom, :allow_blank => true
-    validates_presence_of :custom_labels, :allow_blank => true
+    validates_presence_of :additional_information, :allow_blank => true
+    validates_presence_of :additional_information_labels, :allow_blank => true
     validates_presence_of :date_of_birth
     validates_presence_of :started_section
     validates_presence_of :finished_section, :allow_nil=>true
@@ -212,8 +213,8 @@ module Osm
             receive_phone_2: member_contact[CID_RECIEVE_PHONE_2],
             receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
-            custom: member_custom,
-            custom_labels: custom_labels[GID_MEMBER_CONTACT],
+            additional_information: member_custom,
+            additional_information_labels: custom_labels[GID_MEMBER_CONTACT],
           ),
           :primary_contact => primary_contact.nil? ? nil : PrimaryContact.new(
             first_name: primary_contact[CID_FIRST_NAME],
@@ -231,8 +232,8 @@ module Osm
             receive_phone_2: primary_contact[CID_RECIEVE_PHONE_2],
             receive_email_1: primary_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: primary_contact[CID_RECIEVE_EMAIL_2],
-            custom: primary_custom,
-            custom_labels: custom_labels[GID_PRIMARY_CONTACT],
+            additional_information: primary_custom,
+            additional_information_labels: custom_labels[GID_PRIMARY_CONTACT],
           ),
           :secondary_contact => secondary_contact.nil? ? nil : SecondaryContact.new(
             first_name: secondary_contact[CID_FIRST_NAME],
@@ -250,8 +251,8 @@ module Osm
             receive_phone_2: secondary_contact[CID_RECIEVE_PHONE_2],
             receive_email_1: secondary_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: secondary_contact[CID_RECIEVE_EMAIL_2],
-            custom: secondary_custom,
-            custom_labels: custom_labels[GID_SECONDARY_CONTACT],
+            additional_information: secondary_custom,
+            additional_information_labels: custom_labels[GID_SECONDARY_CONTACT],
           ),
           :emergency_contact => emergency_contact.nil? ? nil : EmergencyContact.new(
             first_name: emergency_contact[CID_FIRST_NAME],
@@ -265,8 +266,8 @@ module Osm
             phone_2: emergency_contact[CID_PHONE_2],
             email_1: emergency_contact[CID_EMAIL_1],
             email_2: emergency_contact[CID_EMAIL_2],
-            custom: emergency_custom,
-            custom_labels: custom_labels[GID_EMERGENCY_CONTACT],
+            additional_information: emergency_custom,
+            additional_information_labels: custom_labels[GID_EMERGENCY_CONTACT],
           ),
           :doctor => doctor_contact.nil? ? nil : DoctorContact.new(
             first_name: doctor_contact[CID_FIRST_NAME],
@@ -279,11 +280,11 @@ module Osm
             postcode: doctor_contact[CID_POSTCODE],
             phone_1: doctor_contact[CID_PHONE_1],
             phone_2: doctor_contact[CID_PHONE_2],
-            custom:doctor_custom,
-            custom_labels: custom_labels[GID_DOCTOR_CONTACT],
+            additional_information:doctor_custom,
+            additional_information_labels: custom_labels[GID_DOCTOR_CONTACT],
           ),
-          custom: custom_data,
-          custom_labels: custom_labels[GID_CUSTOM],
+          additional_information: custom_data,
+          additional_information_labels: custom_labels[GID_CUSTOM],
         )
       end
 
@@ -376,8 +377,8 @@ module Osm
       end
 
       # Do custom attributes
-      custom.keys.select{ |a| force || custom.changes.keys.include?(a) }.each do |attr|
-        new_value = custom[attr]
+      additional_information.keys.select{ |a| force || additional_information.changes.keys.include?(a) }.each do |attr|
+        new_value = additional_information[attr]
         data = api.perform_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", {
           'associated_id' => self.id,
           'associated_type' => 'member',
@@ -399,7 +400,7 @@ module Osm
       # Finish off
       if updated
         reset_changed_attributes
-        custom.clean_up!
+        additional_information.clean_up!
         # The cached columns for the members will be out of date - remove them
         Osm::Term.get_for_section(api, section_id).each do |term|
           Osm::Model.cache_delete(api, ['members', section_id, term.id])
@@ -630,10 +631,10 @@ module Osm
       #   @return [String] the primary phone number
       # @!attribute [rw] phone_2
       #   @return [String] the secondary phone number
-      # @!attribute [rw] custom
-      #   @return [DirtyHashy] the custom data (key is OSM's variable name, value is the data)
-      # @!attribute [rw] custom_labels
-      #   @return [DirtyHashy] the labels for the custom data (key is OSM's variable name, value is the label)
+      # @!attribute [rw] additional_information
+      #   @return [DirtyHashy] the additional information (key is OSM's variable name, value is the data)
+      # @!attribute [rw] additional_information_labels
+      #   @return [DirtyHashy] the labels for the additional information (key is OSM's variable name, value is the label)
 
       attribute :first_name, :type => String
       attribute :last_name, :type => String
@@ -644,12 +645,13 @@ module Osm
       attribute :postcode, :type => String
       attribute :phone_1, :type => String
       attribute :phone_2, :type => String
-      attribute :custom, :type => Object, :default => DirtyHashy.new
-      attribute :custom_labels, :type => Object, :default => DirtyHashy.new
+      attribute :additional_information, :type => Object, :default => DirtyHashy.new
+      attribute :additional_information_labels, :type => Object, :default => DirtyHashy.new
 
       if ActiveModel::VERSION::MAJOR < 4
         attr_accessible :first_name, :last_name, :address_1, :address_2, :address_3, :address_4,
-                        :postcode, :phone_1, :phone_2, :custom, :custom_labels
+                        :postcode, :phone_1, :phone_2,
+                        :additional_information, :additional_information_labels
       end
 
       # @!method initialize
@@ -699,13 +701,13 @@ module Osm
         } # our name => OSM name
 
         data = {}
-        attributes.keys.select{ |a| !['custom', 'custom_labels'].include?(a) }.select{ |a| force || changed_attributes.include?(a) }.each do |attr|
+        attributes.keys.select{ |a| !['additional_information', 'additional_information_labels'].include?(a) }.select{ |a| force || changed_attributes.include?(a) }.each do |attr|
           value = send(attr)
           value = 'yes' if value.eql?(true)
           data[attribute_map[attr]] = value
         end
-        custom.keys.select{ |a| force || custom.changes.keys.include?(a) }.each do |attr|
-          data["data[#{attr}]"] = custom[attr]
+        additional_information.keys.select{ |a| force || additional_information.changes.keys.include?(a) }.each do |attr|
+          data["data[#{attr}]"] = additional_information[attr]
         end
 
         updated = false
@@ -722,7 +724,7 @@ module Osm
         # Finish off
         if updated
           reset_changed_attributes
-          custom.clean_up!
+          additional_information.clean_up!
         end
         return updated
       end
