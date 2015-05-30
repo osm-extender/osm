@@ -144,383 +144,386 @@ describe "Member" do
 
   describe "Using the API" do
 
-    it "Get from OSM" do
-      body = {
-        'status' => true,
-        'error' => nil,
-        'data' => {
-          '123' => {
-            'active' => true,
-            'age' => '12 / 00',
-            'date_of_birth' => '2000-03-08',
-            'end_date' => '2010-06-03',
-            'first_name' => 'John',
-            'joined' => '2008-07-12',
-            'last_name' => 'Smith',
-            'member_id' => 123,
-            'patrol' => 'Leaders',
-            'patrol_id' => -2,
-            'patrol_role_level' => 1,
-            'patrol_role_level_label' => 'Assistant leader',
-            'section_id' => 1,
-            'started' => '2006-07-17',
-            'custom_data' => {
-              '1' => {'2' => 'Primary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'primary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8441' => 'Data for 8441'},
-              '2' => {'2' => 'Secondary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'secondary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8442' => 'Data for 8442'},
-              '3' => {'2' => 'Emergency', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'emergency@example.com', '14' => '', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '8443' => 'Data for 8443'},
-              '4' => {'2' => 'Doctor', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '54' => 'Surgery', '8444' => 'Data for 8444'},
-              '5' => {'4848' => 'Data for 4848'},
-              '6' => {'7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'member@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8446' => 'Data for 8446'},
-              '7' => {'34' => 'Unspecified'},
-            },
-          }
-        },
-        'meta' => {
-          'leader_count' => 20,
-          'member_count' => 30,
+    describe "Get from OSM" do
+
+      it "Normal data returned from OSM" do
+        body = {
           'status' => true,
-          'structure' => [
-            {'group_id' => 1, 'description' => '', 'identifier' => 'contact_primary_1', 'name' => 'Primary Contact 1', 'columns' => [
-              {'column_id' => 2, 'group_column_id' => '1_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 3, 'group_column_id' => '1_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 7, 'group_column_id' => '1_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8, 'group_column_id' => '1_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 9, 'group_column_id' => '1_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 10, 'group_column_id' => '1_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 11, 'group_column_id' => '1_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 12, 'group_column_id' => '1_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-              {'column_id' => 14, 'group_column_id' => '1_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-              {'column_id' => 18, 'group_column_id' => '1_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 20, 'group_column_id' => '1_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8441, 'group_column_id' => '1_8441', 'label' => 'Label for 8441', 'varname' => 'label_for_8441', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-            {'group_id' => 2, 'description' => '', 'identifier' => 'contact_primary_2', 'name' => 'Primary Contact 2', 'columns' => [
-              {'column_id' => 2, 'group_column_id' => '2_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 3, 'group_column_id' => '2_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 7, 'group_column_id' => '2_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8, 'group_column_id' => '2_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 9, 'group_column_id' => '2_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 10, 'group_column_id' => '2_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 11, 'group_column_id' => '2_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 12, 'group_column_id' => '2_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-              {'column_id' => 14, 'group_column_id' => '2_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-              {'column_id' => 18, 'group_column_id' => '2_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 20, 'group_column_id' => '2_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8442, 'group_column_id' => '2_8442', 'label' => 'Label for 8442', 'varname' => 'label_for_8442', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-            {'group_id' => 3, 'description' => '', 'identifier' => 'emergency', 'name' => 'Emergency Contact', 'columns' => [
-              {'column_id' => 2, 'group_column_id' => '3_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 3, 'group_column_id' => '3_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 7, 'group_column_id' => '3_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8, 'group_column_id' => '3_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 9, 'group_column_id' => '3_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 10, 'group_column_id' => '3_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 11, 'group_column_id' => '3_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 12, 'group_column_id' => '3_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-              {'column_id' => 14, 'group_column_id' => '3_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-              {'column_id' => 18, 'group_column_id' => '3_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 20, 'group_column_id' => '3_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8443, 'group_column_id' => '3_8443', 'label' => 'Label for 8443', 'varname' => 'label_for_8443', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-            {'group_id' => 4, 'description' => '', 'identifier' => 'doctor', 'name' => "Doctor's Surgery", 'columns' => [
-              {'column_id' => 2, 'group_column_id' => '4_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 3, 'group_column_id' => '4_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 54, 'group_column_id' => '4_54', 'label' => 'Surgery', 'varname' => 'surgery', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 7, 'group_column_id' => '4_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8, 'group_column_id' => '4_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 9, 'group_column_id' => '4_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 10, 'group_column_id' => '4_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 11, 'group_column_id' => '4_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 18, 'group_column_id' => '4_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 20, 'group_column_id' => '4_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8444, 'group_column_id' => '4_8444', 'label' => 'Label for 8444', 'varname' => 'label_for_8444', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-            {'group_id' => 6, 'description' => '', 'identifier' => 'contact_member', 'name' => 'Member', 'columns' => [
-              {'column_id' => 2, 'group_column_id' => '6_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 3, 'group_column_id' => '6_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 7, 'group_column_id' => '6_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8, 'group_column_id' => '6_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 9, 'group_column_id' => '6_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 10, 'group_column_id' => '6_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 11, 'group_column_id' => '6_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 12, 'group_column_id' => '6_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-              {'column_id' => 14, 'group_column_id' => '6_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-              {'column_id' => 18, 'group_column_id' => '6_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 20, 'group_column_id' => '6_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              {'column_id' => 8446, 'group_column_id' => '6_8446', 'label' => 'Label for 8446', 'varname' => 'label_for_8446', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-            {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-              {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-            {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-              {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-          ],
-        },
-      }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+          'error' => nil,
+          'data' => {
+            '123' => {
+              'active' => true,
+              'age' => '12 / 00',
+              'date_of_birth' => '2000-03-08',
+              'end_date' => '2010-06-03',
+              'first_name' => 'John',
+              'joined' => '2008-07-12',
+              'last_name' => 'Smith',
+              'member_id' => 123,
+              'patrol' => 'Leaders',
+              'patrol_id' => -2,
+              'patrol_role_level' => 1,
+              'patrol_role_level_label' => 'Assistant leader',
+              'section_id' => 1,
+              'started' => '2006-07-17',
+              'custom_data' => {
+                '1' => {'2' => 'Primary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'primary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8441' => 'Data for 8441'},
+                '2' => {'2' => 'Secondary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'secondary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8442' => 'Data for 8442'},
+                '3' => {'2' => 'Emergency', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'emergency@example.com', '14' => '', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '8443' => 'Data for 8443'},
+                '4' => {'2' => 'Doctor', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '54' => 'Surgery', '8444' => 'Data for 8444'},
+                '5' => {'4848' => 'Data for 4848'},
+                '6' => {'7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'member@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8446' => 'Data for 8446'},
+                '7' => {'34' => 'Unspecified'},
+              },
+            }
+          },
+          'meta' => {
+            'leader_count' => 20,
+            'member_count' => 30,
+            'status' => true,
+            'structure' => [
+              {'group_id' => 1, 'description' => '', 'identifier' => 'contact_primary_1', 'name' => 'Primary Contact 1', 'columns' => [
+                {'column_id' => 2, 'group_column_id' => '1_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 3, 'group_column_id' => '1_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 7, 'group_column_id' => '1_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8, 'group_column_id' => '1_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 9, 'group_column_id' => '1_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 10, 'group_column_id' => '1_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 11, 'group_column_id' => '1_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 12, 'group_column_id' => '1_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
+                {'column_id' => 14, 'group_column_id' => '1_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
+                {'column_id' => 18, 'group_column_id' => '1_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 20, 'group_column_id' => '1_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8441, 'group_column_id' => '1_8441', 'label' => 'Label for 8441', 'varname' => 'label_for_8441', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+              {'group_id' => 2, 'description' => '', 'identifier' => 'contact_primary_2', 'name' => 'Primary Contact 2', 'columns' => [
+                {'column_id' => 2, 'group_column_id' => '2_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 3, 'group_column_id' => '2_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 7, 'group_column_id' => '2_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8, 'group_column_id' => '2_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 9, 'group_column_id' => '2_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 10, 'group_column_id' => '2_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 11, 'group_column_id' => '2_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 12, 'group_column_id' => '2_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
+                {'column_id' => 14, 'group_column_id' => '2_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
+                {'column_id' => 18, 'group_column_id' => '2_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 20, 'group_column_id' => '2_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8442, 'group_column_id' => '2_8442', 'label' => 'Label for 8442', 'varname' => 'label_for_8442', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+              {'group_id' => 3, 'description' => '', 'identifier' => 'emergency', 'name' => 'Emergency Contact', 'columns' => [
+                {'column_id' => 2, 'group_column_id' => '3_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 3, 'group_column_id' => '3_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 7, 'group_column_id' => '3_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8, 'group_column_id' => '3_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 9, 'group_column_id' => '3_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 10, 'group_column_id' => '3_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 11, 'group_column_id' => '3_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 12, 'group_column_id' => '3_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
+                {'column_id' => 14, 'group_column_id' => '3_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
+                {'column_id' => 18, 'group_column_id' => '3_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 20, 'group_column_id' => '3_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8443, 'group_column_id' => '3_8443', 'label' => 'Label for 8443', 'varname' => 'label_for_8443', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+              {'group_id' => 4, 'description' => '', 'identifier' => 'doctor', 'name' => "Doctor's Surgery", 'columns' => [
+                {'column_id' => 2, 'group_column_id' => '4_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 3, 'group_column_id' => '4_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 54, 'group_column_id' => '4_54', 'label' => 'Surgery', 'varname' => 'surgery', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 7, 'group_column_id' => '4_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8, 'group_column_id' => '4_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 9, 'group_column_id' => '4_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 10, 'group_column_id' => '4_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 11, 'group_column_id' => '4_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 18, 'group_column_id' => '4_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 20, 'group_column_id' => '4_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8444, 'group_column_id' => '4_8444', 'label' => 'Label for 8444', 'varname' => 'label_for_8444', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+              {'group_id' => 6, 'description' => '', 'identifier' => 'contact_member', 'name' => 'Member', 'columns' => [
+                {'column_id' => 2, 'group_column_id' => '6_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 3, 'group_column_id' => '6_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 7, 'group_column_id' => '6_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8, 'group_column_id' => '6_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 9, 'group_column_id' => '6_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 10, 'group_column_id' => '6_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 11, 'group_column_id' => '6_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 12, 'group_column_id' => '6_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
+                {'column_id' => 14, 'group_column_id' => '6_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
+                {'column_id' => 18, 'group_column_id' => '6_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 20, 'group_column_id' => '6_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+                {'column_id' => 8446, 'group_column_id' => '6_8446', 'label' => 'Label for 8446', 'varname' => 'label_for_8446', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+              {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+                {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+              {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+                {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+            ],
+          },
+        }
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
 
-      members = Osm::Member.get_for_section(@api, 1, 2)
-      members.size.should == 1
-      member = members[0]
-      member.id.should == 123
-      member.section_id.should == 1
-      member.first_name.should == 'John'
-      member.last_name.should == 'Smith'
-      member.date_of_birth.should == Date.new(2000, 3, 8)
-      member.grouping_id.should == -2
-      member.grouping_leader.should == 1
-      member.grouping_label.should == 'Leaders'
-      member.grouping_leader_label.should == 'Assistant leader'
-      member.age.should == '12 / 00'
-      member.gender.should == :unspecified
-      member.joined_movement.should == Date.new(2006, 7, 17)
-      member.started_section.should == Date.new(2008, 7, 12)
-      member.finished_section.should == Date.new(2010, 6, 3)
-      member.custom.should == {"label_for_4848" => "Data for 4848"}
-      member.custom_labels.should == {"label_for_4848" => 'Label for 4848'}
-      member.contact.first_name.should == 'John'
-      member.contact.last_name.should == 'Smith'
-      member.contact.address_1.should == 'Address 1'
-      member.contact.address_2.should == 'Address 2'
-      member.contact.address_3.should == 'Address 3'
-      member.contact.address_4.should == 'Address 4'
-      member.contact.postcode.should == 'Postcode'
-      member.contact.phone_1.should == '01234 567890'
-      member.contact.receive_phone_1.should == true
-      member.contact.phone_2.should == '0987 654321'
-      member.contact.receive_phone_2.should == false
-      member.contact.email_1.should == 'member@example.com'
-      member.contact.receive_email_1.should == true
-      member.contact.email_2.should == ''
-      member.contact.receive_email_2.should == false
-      member.contact.custom.should == {"label_for_8446"=>"Data for 8446"}
-      member.contact.custom_labels.should == {"label_for_8446"=>"Label for 8446"}
-      member.primary_contact.first_name.should == 'Primary'
-      member.primary_contact.last_name.should == 'Contact'
-      member.primary_contact.address_1.should == 'Address 1'
-      member.primary_contact.address_2.should == 'Address 2'
-      member.primary_contact.address_3.should == 'Address 3'
-      member.primary_contact.address_4.should == 'Address 4'
-      member.primary_contact.postcode.should == 'Postcode'
-      member.primary_contact.phone_1.should == '01234 567890'
-      member.primary_contact.receive_phone_1.should == true
-      member.primary_contact.phone_2.should == '0987 654321'
-      member.primary_contact.receive_phone_2.should == false
-      member.primary_contact.email_1.should == 'primary@example.com'
-      member.primary_contact.receive_email_1.should == true
-      member.primary_contact.email_2.should == ''
-      member.primary_contact.receive_email_2.should == false
-      member.primary_contact.custom.should == {"label_for_8441"=>"Data for 8441"}
-      member.primary_contact.custom_labels.should == {"label_for_8441"=>"Label for 8441"}
-      member.secondary_contact.first_name.should == 'Secondary'
-      member.secondary_contact.last_name.should == 'Contact'
-      member.secondary_contact.address_1.should == 'Address 1'
-      member.secondary_contact.address_2.should == 'Address 2'
-      member.secondary_contact.address_3.should == 'Address 3'
-      member.secondary_contact.address_4.should == 'Address 4'
-      member.secondary_contact.postcode.should == 'Postcode'
-      member.secondary_contact.phone_1.should == '01234 567890'
-      member.secondary_contact.receive_phone_1.should == true
-      member.secondary_contact.phone_2.should == '0987 654321'
-      member.secondary_contact.receive_phone_2.should == false
-      member.secondary_contact.email_1.should == 'secondary@example.com'
-      member.secondary_contact.receive_email_1.should == true
-      member.secondary_contact.email_2.should == ''
-      member.secondary_contact.receive_email_2.should == false
-      member.secondary_contact.custom.should == {"label_for_8442"=>"Data for 8442"}
-      member.secondary_contact.custom_labels.should == {"label_for_8442"=>"Label for 8442"}
-      member.emergency_contact.first_name.should == 'Emergency'
-      member.emergency_contact.last_name.should == 'Contact'
-      member.emergency_contact.address_1.should == 'Address 1'
-      member.emergency_contact.address_2.should == 'Address 2'
-      member.emergency_contact.address_3.should == 'Address 3'
-      member.emergency_contact.address_4.should == 'Address 4'
-      member.emergency_contact.postcode.should == 'Postcode'
-      member.emergency_contact.phone_1.should == '01234 567890'
-      member.emergency_contact.phone_2.should == '0987 654321'
-      member.emergency_contact.email_1.should == 'emergency@example.com'
-      member.emergency_contact.email_2.should == ''
-      member.emergency_contact.custom.should == {"label_for_8443"=>"Data for 8443"}
-      member.emergency_contact.custom_labels.should == {"label_for_8443"=>"Label for 8443"}
-      member.doctor.first_name.should == 'Doctor'
-      member.doctor.last_name.should == 'Contact'
-      member.doctor.surgery.should == 'Surgery'
-      member.doctor.address_1.should == 'Address 1'
-      member.doctor.address_2.should == 'Address 2'
-      member.doctor.address_3.should == 'Address 3'
-      member.doctor.address_4.should == 'Address 4'
-      member.doctor.postcode.should == 'Postcode'
-      member.doctor.phone_1.should == '01234 567890'
-      member.doctor.phone_2.should == '0987 654321'
-      member.doctor.custom.should == {"label_for_8444"=>"Data for 8444"}
-      member.doctor.custom_labels.should == {"label_for_8444"=>"Label for 8444"}
-      member.valid?.should == true
-    end
+        members = Osm::Member.get_for_section(@api, 1, 2)
+        members.size.should == 1
+        member = members[0]
+        member.id.should == 123
+        member.section_id.should == 1
+        member.first_name.should == 'John'
+        member.last_name.should == 'Smith'
+        member.date_of_birth.should == Date.new(2000, 3, 8)
+        member.grouping_id.should == -2
+        member.grouping_leader.should == 1
+        member.grouping_label.should == 'Leaders'
+        member.grouping_leader_label.should == 'Assistant leader'
+        member.age.should == '12 / 00'
+        member.gender.should == :unspecified
+        member.joined_movement.should == Date.new(2006, 7, 17)
+        member.started_section.should == Date.new(2008, 7, 12)
+        member.finished_section.should == Date.new(2010, 6, 3)
+        member.custom.should == {"label_for_4848" => "Data for 4848"}
+        member.custom_labels.should == {"label_for_4848" => 'Label for 4848'}
+        member.contact.first_name.should == 'John'
+        member.contact.last_name.should == 'Smith'
+        member.contact.address_1.should == 'Address 1'
+        member.contact.address_2.should == 'Address 2'
+        member.contact.address_3.should == 'Address 3'
+        member.contact.address_4.should == 'Address 4'
+        member.contact.postcode.should == 'Postcode'
+        member.contact.phone_1.should == '01234 567890'
+        member.contact.receive_phone_1.should == true
+        member.contact.phone_2.should == '0987 654321'
+        member.contact.receive_phone_2.should == false
+        member.contact.email_1.should == 'member@example.com'
+        member.contact.receive_email_1.should == true
+        member.contact.email_2.should == ''
+        member.contact.receive_email_2.should == false
+        member.contact.custom.should == {"label_for_8446"=>"Data for 8446"}
+        member.contact.custom_labels.should == {"label_for_8446"=>"Label for 8446"}
+        member.primary_contact.first_name.should == 'Primary'
+        member.primary_contact.last_name.should == 'Contact'
+        member.primary_contact.address_1.should == 'Address 1'
+        member.primary_contact.address_2.should == 'Address 2'
+        member.primary_contact.address_3.should == 'Address 3'
+        member.primary_contact.address_4.should == 'Address 4'
+        member.primary_contact.postcode.should == 'Postcode'
+        member.primary_contact.phone_1.should == '01234 567890'
+        member.primary_contact.receive_phone_1.should == true
+        member.primary_contact.phone_2.should == '0987 654321'
+        member.primary_contact.receive_phone_2.should == false
+        member.primary_contact.email_1.should == 'primary@example.com'
+        member.primary_contact.receive_email_1.should == true
+        member.primary_contact.email_2.should == ''
+        member.primary_contact.receive_email_2.should == false
+        member.primary_contact.custom.should == {"label_for_8441"=>"Data for 8441"}
+        member.primary_contact.custom_labels.should == {"label_for_8441"=>"Label for 8441"}
+        member.secondary_contact.first_name.should == 'Secondary'
+        member.secondary_contact.last_name.should == 'Contact'
+        member.secondary_contact.address_1.should == 'Address 1'
+        member.secondary_contact.address_2.should == 'Address 2'
+        member.secondary_contact.address_3.should == 'Address 3'
+        member.secondary_contact.address_4.should == 'Address 4'
+        member.secondary_contact.postcode.should == 'Postcode'
+        member.secondary_contact.phone_1.should == '01234 567890'
+        member.secondary_contact.receive_phone_1.should == true
+        member.secondary_contact.phone_2.should == '0987 654321'
+        member.secondary_contact.receive_phone_2.should == false
+        member.secondary_contact.email_1.should == 'secondary@example.com'
+        member.secondary_contact.receive_email_1.should == true
+        member.secondary_contact.email_2.should == ''
+        member.secondary_contact.receive_email_2.should == false
+        member.secondary_contact.custom.should == {"label_for_8442"=>"Data for 8442"}
+        member.secondary_contact.custom_labels.should == {"label_for_8442"=>"Label for 8442"}
+        member.emergency_contact.first_name.should == 'Emergency'
+        member.emergency_contact.last_name.should == 'Contact'
+        member.emergency_contact.address_1.should == 'Address 1'
+        member.emergency_contact.address_2.should == 'Address 2'
+        member.emergency_contact.address_3.should == 'Address 3'
+        member.emergency_contact.address_4.should == 'Address 4'
+        member.emergency_contact.postcode.should == 'Postcode'
+        member.emergency_contact.phone_1.should == '01234 567890'
+        member.emergency_contact.phone_2.should == '0987 654321'
+        member.emergency_contact.email_1.should == 'emergency@example.com'
+        member.emergency_contact.email_2.should == ''
+        member.emergency_contact.custom.should == {"label_for_8443"=>"Data for 8443"}
+        member.emergency_contact.custom_labels.should == {"label_for_8443"=>"Label for 8443"}
+        member.doctor.first_name.should == 'Doctor'
+        member.doctor.last_name.should == 'Contact'
+        member.doctor.surgery.should == 'Surgery'
+        member.doctor.address_1.should == 'Address 1'
+        member.doctor.address_2.should == 'Address 2'
+        member.doctor.address_3.should == 'Address 3'
+        member.doctor.address_4.should == 'Address 4'
+        member.doctor.postcode.should == 'Postcode'
+        member.doctor.phone_1.should == '01234 567890'
+        member.doctor.phone_2.should == '0987 654321'
+        member.doctor.custom.should == {"label_for_8444"=>"Data for 8444"}
+        member.doctor.custom_labels.should == {"label_for_8444"=>"Label for 8444"}
+        member.valid?.should == true
+      end
 
-    it "Get from OSM (handles disabled contacts)" do
-      body = {
-        'status' => true,
-        'error' => nil,
-        'data' => {
-          '123' => {
-            'active' => true,
-            'age' => '12 / 00',
-            'date_of_birth' => '2000-03-08',
-            'end_date' => '2010-06-03',
-            'first_name' => 'John',
-            'joined' => '2008-07-12',
-            'last_name' => 'Smith',
-            'member_id' => 123,
-            'patrol' => 'Leaders',
-            'patrol_id' => -2,
-            'patrol_role_level' => 1,
-            'patrol_role_level_label' => 'Assistant leader',
-            'section_id' => 1,
-            'started' => '2006-07-17',
-            'custom_data' => {
-              '5' => {'4848' => 'Data for 4848'},
-              '7' => {'34' => 'Unspecified'},
-            },
-          }
-        },
-        'meta' => {
-          'leader_count' => 20,
-          'member_count' => 30,
+      it "Handles disabled contacts" do
+        body = {
           'status' => true,
-          'structure' => [
-            {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-              {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-            {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-              {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-          ],
-        },
-      }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+          'error' => nil,
+          'data' => {
+            '123' => {
+              'active' => true,
+              'age' => '12 / 00',
+              'date_of_birth' => '2000-03-08',
+              'end_date' => '2010-06-03',
+              'first_name' => 'John',
+              'joined' => '2008-07-12',
+              'last_name' => 'Smith',
+              'member_id' => 123,
+              'patrol' => 'Leaders',
+              'patrol_id' => -2,
+              'patrol_role_level' => 1,
+              'patrol_role_level_label' => 'Assistant leader',
+              'section_id' => 1,
+              'started' => '2006-07-17',
+              'custom_data' => {
+                '5' => {'4848' => 'Data for 4848'},
+                '7' => {'34' => 'Unspecified'},
+              },
+            }
+          },
+          'meta' => {
+            'leader_count' => 20,
+            'member_count' => 30,
+            'status' => true,
+            'structure' => [
+              {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+                {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+              {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+                {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+            ],
+          },
+        }
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
 
-      members = Osm::Member.get_for_section(@api, 1, 2)
-      members.size.should == 1
-      member = members[0]
-      member.id.should == 123
-      member.contact.should == nil
-      member.primary_contact.should == nil
-      member.secondary_contact.should == nil
-      member.emergency_contact.should == nil
-      member.doctor.should == nil
-      member.valid?.should == true
-    end
+        members = Osm::Member.get_for_section(@api, 1, 2)
+        members.size.should == 1
+        member = members[0]
+        member.id.should == 123
+        member.contact.should == nil
+        member.primary_contact.should == nil
+        member.secondary_contact.should == nil
+        member.emergency_contact.should == nil
+        member.doctor.should == nil
+        member.valid?.should == true
+      end
 
-    it "Get from OSM (handles no custom data)" do
-      body = {
-        'status' => true,
-        'error' => nil,
-        'data' => {
-          '123' => {
-            'active' => true,
-            'age' => '12 / 00',
-            'date_of_birth' => '2000-03-08',
-            'end_date' => '2010-06-03',
-            'first_name' => 'John',
-            'joined' => '2008-07-12',
-            'last_name' => 'Smith',
-            'member_id' => 123,
-            'patrol' => 'Leaders',
-            'patrol_id' => -2,
-            'patrol_role_level' => 1,
-            'patrol_role_level_label' => 'Assistant leader',
-            'section_id' => 1,
-            'started' => '2006-07-17',
-            'custom_data' => {
-              '7' => {'34' => 'Unspecified'},
-            },
-          }
-        },
-        'meta' => {
-          'leader_count' => 20,
-          'member_count' => 30,
+      it "Handles no custom data" do
+        body = {
           'status' => true,
-          'structure' => [
-            {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-              {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-            {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-              {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-          ],
-        },
-      }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+          'error' => nil,
+          'data' => {
+            '123' => {
+              'active' => true,
+              'age' => '12 / 00',
+              'date_of_birth' => '2000-03-08',
+              'end_date' => '2010-06-03',
+              'first_name' => 'John',
+              'joined' => '2008-07-12',
+              'last_name' => 'Smith',
+              'member_id' => 123,
+              'patrol' => 'Leaders',
+              'patrol_id' => -2,
+              'patrol_role_level' => 1,
+              'patrol_role_level_label' => 'Assistant leader',
+              'section_id' => 1,
+              'started' => '2006-07-17',
+              'custom_data' => {
+                '7' => {'34' => 'Unspecified'},
+              },
+            }
+          },
+          'meta' => {
+            'leader_count' => 20,
+            'member_count' => 30,
+            'status' => true,
+            'structure' => [
+              {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+                {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+              {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+                {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+            ],
+          },
+        }
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
 
-      members = Osm::Member.get_for_section(@api, 1, 2)
-      members.size.should == 1
-      member = members[0]
-      member.id.should == 123
-      member.custom.should == {}
-      member.valid?.should == true
-    end
+        members = Osm::Member.get_for_section(@api, 1, 2)
+        members.size.should == 1
+        member = members[0]
+        member.id.should == 123
+        member.custom.should == {}
+        member.valid?.should == true
+      end
 
-    it "Get from OSM (handles missing floating data)" do
-      body = {
-        'status' => true,
-        'error' => nil,
-        'data' => {
-          '123' => {
-            'active' => true,
-            'age' => '12 / 00',
-            'date_of_birth' => '2000-03-08',
-            'end_date' => '2010-06-03',
-            'first_name' => 'John',
-            'joined' => '2008-07-12',
-            'last_name' => 'Smith',
-            'member_id' => 123,
-            'patrol' => 'Leaders',
-            'patrol_id' => -2,
-            'patrol_role_level' => 1,
-            'patrol_role_level_label' => 'Assistant leader',
-            'section_id' => 1,
-            'started' => '2006-07-17',
-            'custom_data' => {
-              '5' => {'4848' => 'Data for 4848'},
-            },
-          }
-        },
-        'meta' => {
-          'leader_count' => 20,
-          'member_count' => 30,
+      it "Handles missing floating data" do
+        body = {
           'status' => true,
-          'structure' => [
-            {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-              {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-            {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-              {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-            ]},
-          ],
-        },
-      }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+          'error' => nil,
+          'data' => {
+            '123' => {
+              'active' => true,
+              'age' => '12 / 00',
+              'date_of_birth' => '2000-03-08',
+              'end_date' => '2010-06-03',
+              'first_name' => 'John',
+              'joined' => '2008-07-12',
+              'last_name' => 'Smith',
+              'member_id' => 123,
+              'patrol' => 'Leaders',
+              'patrol_id' => -2,
+              'patrol_role_level' => 1,
+              'patrol_role_level_label' => 'Assistant leader',
+              'section_id' => 1,
+              'started' => '2006-07-17',
+              'custom_data' => {
+                '5' => {'4848' => 'Data for 4848'},
+              },
+            }
+          },
+          'meta' => {
+            'leader_count' => 20,
+            'member_count' => 30,
+            'status' => true,
+            'structure' => [
+              {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+                {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+              {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+                {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
+              ]},
+            ],
+          },
+        }
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
 
-      members = Osm::Member.get_for_section(@api, 1, 2)
-      members.size.should == 1
-      member = members[0]
-      member.id.should == 123
-      member.gender.should == nil
-      member.valid?.should == true
-    end
+        members = Osm::Member.get_for_section(@api, 1, 2)
+        members.size.should == 1
+        member = members[0]
+        member.id.should == 123
+        member.gender.should == nil
+        member.valid?.should == true
+      end
 
+      it "Handles an empty data array" do
+        body = {
+          'status' => true,
+          'error' => nil,
+          'data' => [],
+          'meta' => {},
+        }
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
 
-    it "Get from OSM (handles an empty data array)" do
-      body = {
-        'status' => true,
-        'error' => nil,
-        'data' => [],
-        'meta' => {},
-      }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+        Osm::Member.get_for_section(@api, 1, 2).should == []
+      end
 
-      Osm::Member.get_for_section(@api, 1, 2).should == []
     end
 
 
