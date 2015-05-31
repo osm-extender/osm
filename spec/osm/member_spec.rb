@@ -7,6 +7,7 @@ describe "Member" do
     attributes = {
       :id => 1,
       :section_id => 2,
+      :title => 'Title',
       :first_name => 'First',
       :last_name => 'Last',
       :date_of_birth => '2000-01-02',
@@ -31,6 +32,7 @@ describe "Member" do
 
     member.id.should == 1
     member.section_id.should == 2
+    member.title.should == 'Title'
     member.first_name.should == 'First'
     member.last_name.should == 'Last'
     member.date_of_birth.should == Date.new(2000, 1, 2)
@@ -54,16 +56,24 @@ describe "Member" do
   end
 
 
-  it "Provides member's full name" do
-    data = {
-      :first_name => 'First',
-      :last_name => 'Last',
-    }
-    member = Osm::Member.new(data)
+  describe "Provides full name" do
 
-    member.name.should == 'First Last'
-    member.name('_').should == 'First_Last'
+    it "Member" do
+      Osm::Member.new(first_name: 'First').name.should == 'First'
+      Osm::Member.new(first_name: 'First', last_name: 'Last').name.should == 'First Last'
+      Osm::Member.new(title: 'Mr', first_name: 'First', last_name: 'Last').name.should == 'Mr. First Last'
+      Osm::Member.new(title: 'Mr', first_name: 'First', last_name: 'Last').name('*').should == 'Mr.*First*Last'
+    end
+
+    it "Contact" do
+      Osm::Member::Contact.new(first_name: 'First').name.should == 'First'
+      Osm::Member::Contact.new(first_name: 'First', last_name: 'Last').name.should == 'First Last'
+      Osm::Member::Contact.new(title: 'Mr', first_name: 'First', last_name: 'Last').name.should == 'Mr. First Last'
+      Osm::Member::Contact.new(title: 'Mr', first_name: 'First', last_name: 'Last').name('*').should == 'Mr.*First*Last'
+    end
+
   end
+
 
   it "Tells if member is a leader" do
     Osm::Member.new(grouping_id: -2).leader?.should == true  # In the leader grouping
@@ -167,11 +177,11 @@ describe "Member" do
               'section_id' => 1,
               'started' => '2006-07-17',
               'custom_data' => {
-                '1' => {'2' => 'Primary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'primary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8441' => 'Data for 8441'},
+                '1' => {'1' => 'Mrs', '2' => 'Primary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'primary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8441' => 'Data for 8441'},
                 '2' => {'2' => 'Secondary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'secondary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8442' => 'Data for 8442'},
                 '3' => {'2' => 'Emergency', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'emergency@example.com', '14' => '', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '8443' => 'Data for 8443'},
-                '4' => {'2' => 'Doctor', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '54' => 'Surgery', '8444' => 'Data for 8444'},
-                '5' => {'4848' => 'Data for 4848'},
+                '4' => {'1' => 'Dr', '2' => 'Doctor', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '54' => 'Surgery', '8444' => 'Data for 8444'},
+                '5' => {'1' => 'Mr', '4848' => 'Data for 4848'},
                 '6' => {'7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'member@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8446' => 'Data for 8446'},
                 '7' => {'34' => 'Unspecified'},
               },
@@ -252,6 +262,7 @@ describe "Member" do
                 {'column_id' => 8446, 'group_column_id' => '6_8446', 'label' => 'Label for 8446', 'varname' => 'label_for_8446', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
               ]},
               {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+                {'column_id' => 1, 'group_column_id' => '5_1', 'label' => 'Title', 'varname' => 'title', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
                 {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
               ]},
               {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
@@ -267,6 +278,7 @@ describe "Member" do
         member = members[0]
         member.id.should == 123
         member.section_id.should == 1
+        member.title.should == 'Mr'
         member.first_name.should == 'John'
         member.last_name.should == 'Smith'
         member.date_of_birth.should == Date.new(2000, 3, 8)
@@ -298,6 +310,7 @@ describe "Member" do
         member.contact.receive_email_2.should == false
         member.contact.additional_information.should == {"label_for_8446"=>"Data for 8446"}
         member.contact.additional_information_labels.should == {"label_for_8446"=>"Label for 8446"}
+        member.primary_contact.title.should == 'Mrs'
         member.primary_contact.first_name.should == 'Primary'
         member.primary_contact.last_name.should == 'Contact'
         member.primary_contact.address_1.should == 'Address 1'
@@ -345,6 +358,7 @@ describe "Member" do
         member.emergency_contact.email_2.should == ''
         member.emergency_contact.additional_information.should == {"label_for_8443"=>"Data for 8443"}
         member.emergency_contact.additional_information_labels.should == {"label_for_8443"=>"Label for 8443"}
+        member.doctor.title.should == 'Dr'
         member.doctor.first_name.should == 'Doctor'
         member.doctor.last_name.should == 'Contact'
         member.doctor.surgery.should == 'Surgery'
@@ -532,6 +546,7 @@ describe "Member" do
       before :each do
         attributes = {
           :section_id => 2,
+          :title => 'Title',
           :first_name => 'First',
           :last_name => 'Last',
           :date_of_birth => '2000-01-02',
@@ -619,6 +634,7 @@ describe "Member" do
         attributes = {
           :id => 1,
           :section_id => 2,
+          :title => 'Title',
           :first_name => 'First',
           :last_name => 'Last',
           :date_of_birth => '2000-01-02',
@@ -805,6 +821,7 @@ describe "Member" do
             "associated_type" => "member",
             "associated_id" => 1,
             "group_id" => group_id,
+            "data[title]" => nil,
             "data[firstname]" => nil,
             "data[lastname]" => nil,
             "data[address1]" => nil,
@@ -832,6 +849,7 @@ describe "Member" do
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 3,
+          "data[title]" => nil,
           "data[firstname]" => nil,
           "data[lastname]" => nil,
           "data[address1]" => nil,
@@ -854,6 +872,7 @@ describe "Member" do
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 4,
+          "data[title]" => nil,
           "data[firstname]" => nil,
           "data[lastname]" => nil,
           "data[surgery]" => nil,
@@ -866,6 +885,19 @@ describe "Member" do
           "data[phone2]" => nil,
           "data[test_var]" => "This is a test",
         }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 5,
+          "column_id" => 1,
+          "value" => "Title",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":"Title"}}'}) }
 
         Osm::Term.stub(:get_for_section) { [] }
 
