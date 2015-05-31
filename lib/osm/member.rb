@@ -217,7 +217,7 @@ module Osm
             receive_phone_2: member_contact[CID_RECIEVE_PHONE_2],
             receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
-            additional_information: member_custom,
+            additional_information: member_custom.select{ |k,v| !['title'].include?(k) },
             additional_information_labels: custom_labels[GID_MEMBER_CONTACT],
           ),
           :primary_contact => primary_contact.nil? ? nil : PrimaryContact.new(
