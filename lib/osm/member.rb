@@ -217,7 +217,7 @@ module Osm
             receive_phone_2: member_contact[CID_RECIEVE_PHONE_2],
             receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
-            additional_information: member_custom.select{ |k,v| !['title'].include?(k) },
+            additional_information: DirtyHashy[ member_custom.select{ |k,v| !['title'].include?(k) } ],
             additional_information_labels: custom_labels[GID_MEMBER_CONTACT],
           ),
           :primary_contact => primary_contact.nil? ? nil : PrimaryContact.new(
@@ -291,8 +291,8 @@ module Osm
             additional_information: doctor_custom,
             additional_information_labels: custom_labels[GID_DOCTOR_CONTACT],
           ),
-          additional_information: custom_data.select{ |k,v| ! ['title'].include?(k) },
-          additional_information_labels: custom_labels[GID_CUSTOM].select{ |k,v| ! ['title'].include?(k) },
+          additional_information: DirtyHashy[ custom_data.select{ |k,v| !['title'].include?(k) } ],
+          additional_information_labels: custom_labels[GID_CUSTOM].select{ |k,v| !['title'].include?(k) },
         )
       end
 
@@ -372,7 +372,7 @@ module Osm
 
       # Do title attribute
       if force || changed_attributes.include?('title')
-        data = api.perform_query("ext/members/contact/?action=update", {
+        data = api.perform_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", {
           'associated_id' => self.id,
           'associated_type' => 'member',
           'value' => title,
@@ -383,11 +383,10 @@ module Osm
         updated = updated && data.is_a?(Hash) && data['data'].is_a?(Hash) && data['data']['value'].eql?(title)
       end
 
-
       # Do 'floating' attributes
       if force || changed_attributes.include?('gender')
         new_value = {male: 'Male', female: 'Female', other: 'Other'}[gender] || 'Unspecified'
-        data = api.perform_query("ext/members/contact/?action=update", {
+        data = api.perform_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", {
           'associated_id' => self.id,
           'associated_type' => 'member',
           'value' => new_value,
@@ -737,7 +736,7 @@ module Osm
           data["data[#{attr}]"] = additional_information[attr]
         end
 
-        updated = false
+        updated = true
         unless data.empty?
           result = api.perform_query("ext/customdata/?action=update&section_id=#{member.section_id}", {
             'associated_id' => member.id,

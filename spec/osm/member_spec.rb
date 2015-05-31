@@ -670,7 +670,7 @@ describe "Member" do
           "value" => "John",
         }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
           "apiid" => "1",
           "token" => "API TOKEN",
           "userid" => "user_id",
@@ -785,7 +785,7 @@ describe "Member" do
           }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
         end
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
           "apiid" => "1",
           "token" => "API TOKEN",
           "userid" => "user_id",
@@ -886,7 +886,7 @@ describe "Member" do
           "data[test_var]" => "This is a test",
         }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
           "apiid" => "1",
           "token" => "API TOKEN",
           "userid" => "user_id",
