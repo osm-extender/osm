@@ -14,7 +14,6 @@
       * grouping_leader
       * age
     * Addition of attibutes:
-      * title (String)
       * gender (Symbol - :male, :female, :other or :unspecified)
       * finished_section (Date, nil)
       * additional_information (DirtyHashy) - The customisable data part from OSM

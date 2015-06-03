@@ -11,7 +11,6 @@ module Osm
     GID_FLOATING = 7
 
     # Constants for column id
-    CID_TITLE = 1
     CID_FIRST_NAME = 2
     CID_LAST_NAME = 3
     CID_ADDRESS_1 = 7
@@ -36,8 +35,6 @@ module Osm
     #   @return [Fixnum] the id for the member
     # @!attribute [rw] section_id
     #   @return [Fixnum] the section the member belongs to
-    # @!attribute [rw] title
-    #   @return [String] the member's title (Mr, Mrs etc.)
     # @!attribute [rw] first_name
     #   @return [String] the member's first name
     # @!attribute [rw] last_name
@@ -79,7 +76,6 @@ module Osm
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
-    attribute :title, :type => String
     attribute :first_name, :type => String
     attribute :last_name, :type => String
     attribute :grouping_id, :type => Integer
@@ -101,7 +97,7 @@ module Osm
     attribute :doctor, :type => Object
 
     if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :id, :section_id, :title, :first_name, :last_name,
+      attr_accessible :id, :section_id, :first_name, :last_name,
                       :grouping_id, :grouping_leader,
                       :date_of_birth, :started_section, :finished_section, :joined_movement, :age,
                       :grouping_label, :grouping_leader_label, :gender,
@@ -162,32 +158,30 @@ module Osm
       structure = Hash[ structure.map{ |i| [i['group_id'].to_i, i ] } ] # Make a hash of identifier to group data hash
 
       custom_labels = {}
-      var_names = {}
+      key_key = 'column_id'   # the key in the data from OSM to use as the key in additional_information and labels hashes
       structure.each do |gid, group|
         columns = group['columns'] || []
-        custom_labels[gid.to_i] = Hash[ columns.map.select{ |a| gid.eql?(GID_CUSTOM) || !CORE_FIELD_IDS.include?(a['column_id'].to_i) }.map{ |c| [c['varname'], c['label']] } ]
-        var_names[gid.to_i] = DirtyHashy[ columns.map{ |c| [c['column_id'].to_i, c['varname']] } ]
+        custom_labels[gid.to_i] = Hash[ columns.map.select{ |a| gid.eql?(GID_CUSTOM) || !CORE_FIELD_IDS.include?(a['column_id'].to_i) }.map{ |c| [c[key_key], c['label']] } ]
       end
 
       data.each do |item|
         item_data = Hash[ item['custom_data'].map{ |k,v| [k.to_i, v] } ]
         member_contact = item_data[GID_MEMBER_CONTACT].nil? ? nil : Hash[ item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) } ]
-        member_custom = item_data[GID_MEMBER_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_MEMBER_CONTACT].select{ |k,v| !(CORE_FIELD_IDS - [CID_TITLE]).include?(k.to_i) }.map{ |k,v| [var_names[GID_MEMBER_CONTACT][k.to_i], v] } ]
+        member_custom = item_data[GID_MEMBER_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_MEMBER_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
         primary_contact = item_data[GID_PRIMARY_CONTACT].nil? ? nil : Hash[ item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) } ]
-        primary_custom = item_data[GID_PRIMARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_PRIMARY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [var_names[GID_PRIMARY_CONTACT][k.to_i], v] } ]
+        primary_custom = item_data[GID_PRIMARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_PRIMARY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
         secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : Hash[ item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) } ]
-        secondary_custom = item_data[GID_SECONDARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_SECONDARY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [var_names[GID_SECONDARY_CONTACT][k.to_i], v] } ]
+        secondary_custom = item_data[GID_SECONDARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_SECONDARY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
         emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : Hash[ item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) } ]
-        emergency_custom = item_data[GID_EMERGENCY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [var_names[GID_EMERGENCY_CONTACT][k.to_i], v] } ]
+        emergency_custom = item_data[GID_EMERGENCY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
         doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : Hash[ item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) } ]
-        doctor_custom = item_data[GID_DOCTOR_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_DOCTOR_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [var_names[GID_DOCTOR_CONTACT][k.to_i], v] } ]
+        doctor_custom = item_data[GID_DOCTOR_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_DOCTOR_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
         floating_data = item_data[GID_FLOATING].nil? ? {} : Hash[ item_data[GID_FLOATING].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) } ]
-        custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [var_names[GID_CUSTOM][k.to_i], v] } ]
+        custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ]
 
         result.push Osm::Member.new(
           :id => Osm::to_i_or_nil(item['member_id']),
           :section_id => Osm::to_i_or_nil(item['section_id']),
-          :title => custom_data['title'],
           :first_name => item['first_name'],
           :last_name => item['last_name'],
           :grouping_id => Osm::to_i_or_nil(item['patrol_id']),
@@ -201,7 +195,6 @@ module Osm
           :joined_movement => Osm::parse_date(item['started']),
           :gender => {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[(floating_data[CID_GENDER] || '').downcase],
           :contact => member_contact.nil? ? nil : MemberContact.new(
-            title: member_contact[CID_TITLE],
             first_name: item['first_name'],
             last_name: item['last_name'],
             address_1: member_contact[CID_ADDRESS_1],
@@ -217,11 +210,10 @@ module Osm
             receive_phone_2: member_contact[CID_RECIEVE_PHONE_2],
             receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
             receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
-            additional_information: DirtyHashy[ member_custom.select{ |k,v| !['title'].include?(k) } ],
+            additional_information: member_custom,
             additional_information_labels: custom_labels[GID_MEMBER_CONTACT],
           ),
           :primary_contact => primary_contact.nil? ? nil : PrimaryContact.new(
-            title: primary_contact[CID_TITLE],
             first_name: primary_contact[CID_FIRST_NAME],
             last_name: primary_contact[CID_LAST_NAME],
             address_1: primary_contact[CID_ADDRESS_1],
@@ -241,7 +233,6 @@ module Osm
             additional_information_labels: custom_labels[GID_PRIMARY_CONTACT],
           ),
           :secondary_contact => secondary_contact.nil? ? nil : SecondaryContact.new(
-            title: secondary_contact[CID_TITLE],
             first_name: secondary_contact[CID_FIRST_NAME],
             last_name: secondary_contact[CID_LAST_NAME],
             address_1: secondary_contact[CID_ADDRESS_1],
@@ -261,7 +252,6 @@ module Osm
             additional_information_labels: custom_labels[GID_SECONDARY_CONTACT],
           ),
           :emergency_contact => emergency_contact.nil? ? nil : EmergencyContact.new(
-            title: emergency_contact[CID_TITLE],
             first_name: emergency_contact[CID_FIRST_NAME],
             last_name: emergency_contact[CID_LAST_NAME],
             address_1: emergency_contact[CID_ADDRESS_1],
@@ -277,7 +267,6 @@ module Osm
             additional_information_labels: custom_labels[GID_EMERGENCY_CONTACT],
           ),
           :doctor => doctor_contact.nil? ? nil : DoctorContact.new(
-            title: doctor_contact[CID_TITLE],
             first_name: doctor_contact[CID_FIRST_NAME],
             last_name: doctor_contact[CID_LAST_NAME],
             surgery: doctor_contact[CID_SURGERY],
@@ -291,8 +280,8 @@ module Osm
             additional_information: doctor_custom,
             additional_information_labels: custom_labels[GID_DOCTOR_CONTACT],
           ),
-          additional_information: DirtyHashy[ custom_data.select{ |k,v| !['title'].include?(k) } ],
-          additional_information_labels: custom_labels[GID_CUSTOM].select{ |k,v| !['title'].include?(k) },
+          additional_information: custom_data,
+          additional_information_labels: custom_labels[GID_CUSTOM],
         )
       end
 
@@ -370,19 +359,6 @@ module Osm
         updated = updated && data.is_a?(Hash) && data['ok'].eql?(true)
       end # each attr to update
 
-      # Do title attribute
-      if force || changed_attributes.include?('title')
-        data = api.perform_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", {
-          'associated_id' => self.id,
-          'associated_type' => 'member',
-          'value' => title,
-          'column_id' => CID_TITLE,
-          'group_id' => GID_CUSTOM,
-          'context' => 'members',
-        })
-        updated = updated && data.is_a?(Hash) && data['data'].is_a?(Hash) && data['data']['value'].eql?(title)
-      end
-
       # Do 'floating' attributes
       if force || changed_attributes.include?('gender')
         new_value = {male: 'Male', female: 'Female', other: 'Other'}[gender] || 'Unspecified'
@@ -443,10 +419,10 @@ module Osm
     end
 
     # Get the full name
-    # @param [String] seperator What to split the member's title, first name and last name with
+    # @param [String] seperator What to split the member's first name and last name with
     # @return [String] this scout's full name seperated by the optional seperator
     def name(seperator=' ')
-      return [(title? ? "#{title}." : nil), first_name, last_name].select{ |i| !i.blank? }.join(seperator)
+      return [first_name, last_name].select{ |i| !i.blank? }.join(seperator)
     end
 
     # Check if the member is in the leaders grouping
@@ -634,8 +610,6 @@ module Osm
 
 
     class Contact < Osm::Model
-      # @!attribute [rw] title
-      #   @return [String] the contact's title (Mr, Ms, Dr etc.)
       # @!attribute [rw] first_name
       #   @return [String] the contact's first name
       # @!attribute [rw] last_name
@@ -659,7 +633,6 @@ module Osm
       # @!attribute [rw] additional_information_labels
       #   @return [DirtyHashy] the labels for the additional information (key is OSM's variable name, value is the label)
 
-      attribute :title, :type => String
       attribute :first_name, :type => String
       attribute :last_name, :type => String
       attribute :address_1, :type => String
@@ -673,7 +646,7 @@ module Osm
       attribute :additional_information_labels, :type => Object, :default => DirtyHashy.new
 
       if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :title, :first_name, :last_name,
+        attr_accessible :first_name, :last_name,
                         :address_1, :address_2, :address_3, :address_4,
                         :postcode, :phone_1, :phone_2,
                         :additional_information, :additional_information_labels
@@ -684,10 +657,10 @@ module Osm
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
       # Get the full name
-      # @param [String] seperator What to split the contact's title, first name and last name with
+      # @param [String] seperator What to split the contact's first name and last name with
       # @return [String] this scout's full name seperated by the optional seperator
       def name(seperator=' ')
-        return [(title? ? "#{title}." : nil), first_name, last_name].select{ |i| !i.blank? }.join(seperator)
+        return [first_name, last_name].select{ |i| !i.blank? }.join(seperator)
       end
 
       # Get an array of all phone numbers for the contact
@@ -707,7 +680,6 @@ module Osm
         require_ability_to(api, :write, :member, member.section_id)
 
         attribute_map = {
-          'title' => 'data[title]',
           'first_name' => 'data[firstname]',
           'last_name' => 'data[lastname]',
           'surgery' => 'data[surgery]',
