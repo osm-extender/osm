@@ -37,6 +37,7 @@
     * send_sms method now just returns a boolean to indicate success/failure
     * Addition of remaining_credits(api, section, options={}) method
     * Addition of number_selected(api, section, members, options={}) method to tell how many numbers a message would be sent to
+  * Add :migration as an API target
 
 ## Version 1.2.17
 

@@ -12,7 +12,8 @@ module Osm
     BASE_URLS = {
       :osm => 'https://www.onlinescoutmanager.co.uk',
       :ogm => 'http://www.onlineguidemanager.co.uk',
-      :osm_staging => 'http://staging.onlinescoutmanager.co.uk'
+      :osm_staging => 'http://staging.onlinescoutmanager.co.uk',
+      :migration => 'https://migration.onlinescoutmanager.com'
     }
 
 
@@ -47,7 +48,8 @@ module Osm
       @@api_details = {
         :osm => (options[:osm] || {}),
         :ogm => (options[:ogm] || {}),
-        :osm_staging => (options[:osm_staging] || {})
+        :osm_staging => (options[:osm_staging] || {}),
+        :migration => (options[:migration] || {})
       }
       nil
     end
