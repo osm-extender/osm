@@ -89,13 +89,13 @@ describe "Badges" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
 
       db = Osm::Badges.get_due_badges(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
-      db.empty?.should be_false
+      db.empty?.should == false
       db.badge_names.should == {'145_0_1'=>'Activity - Badge Name', '93_0_2'=>'Staged - Participation (Lvl 2)'}
       db.by_member.should == {1=>['93_0_2', '145_0_1'], 2=>['93_0_2']}
       db.member_names.should == {1 => 'John Doe', 2 => 'Jane Doe'}
       db.badge_stock.should == {'93_0_2'=>20, '145_0_1'=>10}
       db.totals.should == {'93_0_2'=>2, '145_0_1'=>1}
-      db.valid?.should be_true
+      db.valid?.should == true
     end
 
     it "handles an empty array representing no due badges" do
@@ -138,13 +138,13 @@ describe "Badges" do
         }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
 
         section = Osm::Section.new(:id => 2, :type => :beavers)
-        Osm::Badges.update_stock(@api, section, 3, 10).should be_true
+        Osm::Badges.update_stock(@api, section, 3, 10).should == true
       end
 
       it "Fails" do
         HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
         section = Osm::Section.new(:id => 1, :type => :beavers)
-        Osm::Badges.update_stock(@api, section, 3, 10).should be_false
+        Osm::Badges.update_stock(@api, section, 3, 10).should == false
       end
 
     end

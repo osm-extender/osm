@@ -1,3 +1,45 @@
+## Version 1.2.18
+
+  * Add gem version into the cache key
+  * Osm::Section - removal of column_names, fields, intouch_fields, mobile_fields and sms_* attributes
+  * Osm::Member - lots of changes to reflect OSM's new structure for member's details (main ones listed below):
+    * Removal of type attribute (I never could work out what it represented)
+    * Removal of data attributes except:
+      * id
+      * section_id
+      * first_name
+      * last_name
+      * date_of_birth
+      * grouping_id
+      * grouping_leader
+      * age
+    * Addition of attibutes:
+      * gender (Symbol - :male, :female, :other or :unspecified)
+      * finished_section (Date, nil)
+      * additional_information (DirtyHashy) - The customisable data part from OSM
+      * additional_information_labels (DirtyHashy) - The labels which belong to the data in custom
+      * primary_contact, secondary_contact, emergency_contact and doctor - the relevant parts from OSM
+      * grouping_label
+      * grouping_leader_label
+    * Renamed attributes:
+      * started becomes joined_movement
+      * joined becomes started_section
+    * New helper methods:
+      * male?
+      * female?
+      * current?(date=Date.today) - is the member a member of the section on the passed date
+      * all_emails, all_emails_with_name, enabled_emails, enabled_emails_with_name
+      * all_phones, enabled_phones
+    * Validation changes:
+      * age should now be in the format 'yy / mm' not 'yy/mm'
+  * Osm::Sms:
+    * send_sms method losses mobile_numbers argumant (OSM now sends to all enabled numbers for all contacts for the member)
+    * send_sms method now just returns a boolean to indicate success/failure
+    * Addition of remaining_credits(api, section, options={}) method
+    * Addition of number_selected(api, section, members, options={}) method to tell how many numbers a message would be sent to
+  * Add :migration as an API target
+>>>>>>> NewContactSystem
+
 ## Version 1.2.17
 
   * Update to match how OSM now lists activities within meetings.

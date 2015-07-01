@@ -14,7 +14,7 @@ describe "Flexi Record" do
     fr.id.should == 1
     fr.section_id.should == 2
     fr.name.should == 'name'
-    fr.valid?.should be_true
+    fr.valid?.should == true
   end
 
   describe "FlexiRecord::Column" do
@@ -29,8 +29,8 @@ describe "Flexi Record" do
 
       field.id.should == 'f_1'
       field.name.should == 'Field Name'
-      field.editable.should be_true
-      field.valid?.should be_true
+      field.editable.should == true
+      field.valid?.should == true
     end
 
     it "Sorts by flexirecord then id (system first then user)" do
@@ -78,7 +78,7 @@ describe "Flexi Record" do
         'f_1' => 'a',
         'f_2' => 'b',
       }
-      rd.valid?.should be_true
+      rd.valid?.should == true
     end
 
     it "Sorts by flexirecord, grouping_id then member_id" do
@@ -147,8 +147,8 @@ describe "Flexi Record" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/extras.php?action=getExtra&sectionid=1&extraid=2", :body => data.to_json, :content_type => 'application/json')
 
       fields = @flexi_record.get_columns(@api)
-      fields.is_a?(Array).should be_true
-      fields[0].valid?.should be_true
+      fields.is_a?(Array).should == true
+      fields[0].valid?.should == true
       fields[0].id.should == 'firstname'
       fields[1].id.should == 'lastname'
       fields[2].id.should == 'f_1'
@@ -188,7 +188,7 @@ describe "Flexi Record" do
       }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
 
-      @flexi_record.add_column(@api, 'name').should be_true
+      @flexi_record.add_column(@api, 'name').should == true
     end
 
     it "Add field (failure)" do
@@ -213,7 +213,7 @@ describe "Flexi Record" do
       }
       HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
 
-      @flexi_record.add_column(@api, 'name').should be_false
+      @flexi_record.add_column(@api, 'name').should == false
     end
 
     it "Update field (success)" do
@@ -256,7 +256,7 @@ describe "Flexi Record" do
         :name => 'name',
         :editable => true
       )
-      col.update(@api).should be_true
+      col.update(@api).should == true
     end
 
     it "Update field (failure)" do
@@ -287,7 +287,7 @@ describe "Flexi Record" do
         :name => 'name',
         :editable => true
       )
-      col.update(@api).should be_false
+      col.update(@api).should == false
     end
 
     it "Update field (uneditable)" do
@@ -338,7 +338,7 @@ describe "Flexi Record" do
         :name => 'name',
         :editable => true
       )
-      col.delete(@api).should be_true
+      col.delete(@api).should == true
     end
 
     it "Delete field (failure)" do
@@ -369,7 +369,7 @@ describe "Flexi Record" do
         :name => 'name',
         :editable => true
       )
-      col.delete(@api).should be_false
+      col.delete(@api).should == false
     end
 
     it "Delete field (uneditable)" do
@@ -404,7 +404,7 @@ describe "Flexi Record" do
       Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
 
       records = @flexi_record.get_data(@api, 3)
-      records.is_a?(Array).should be_true
+      records.is_a?(Array).should == true
       records.size.should == 1
       record = records[0]
       record.member_id.should == 1
@@ -419,7 +419,7 @@ describe "Flexi Record" do
         'f_1' => 'A',
         'f_2' => 'B',
       }
-      record.valid?.should be_true
+      record.valid?.should == true
     end
 
 
@@ -456,7 +456,7 @@ describe "Flexi Record" do
         :fields => {'f_1' => '', 'f_2' => 'value'}
       )
       fr_data.fields['f_1'] = 'value'
-      fr_data.update(@api).should be_true
+      fr_data.update(@api).should == true
     end
 
     it "Update data (failed)" do
@@ -479,7 +479,7 @@ describe "Flexi Record" do
         :fields => {'f_1' => 'old value'}
       )
       fr_data.fields['f_1'] = 'new value'
-      fr_data.update(@api).should be_false
+      fr_data.update(@api).should == false
     end
 
     it "Update data (uneditable field)" do
@@ -494,7 +494,7 @@ describe "Flexi Record" do
         :grouping_id => 5,
         :fields => {'f_1' => 'value'}
       )
-      fr_data.update(@api).should be_true
+      fr_data.update(@api).should == true
     end
 
 
@@ -532,7 +532,7 @@ describe "Flexi Record" do
       Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
 
       records = @flexi_record.get_data(@api, 3)
-      records.is_a?(Array).should be_true
+      records.is_a?(Array).should == true
       records.size.should == 1
       record = records[0]
       record.member_id.should == 1

@@ -11,7 +11,7 @@ describe "Gift Aid" do
     )
 
     d.donation_date.should == Date.new(2000, 1, 2)
-    d.valid?.should be_true
+    d.valid?.should == true
   end
 
   it "Sorts Donation by date" do
@@ -51,7 +51,7 @@ describe "Gift Aid" do
     d.donations.should == {
       Date.new(2012, 1, 2) => '1.23',
     }
-    d.valid?.should be_true
+    d.valid?.should == true
   end
 
   it "Sorts Data by section_id, grouping_id, last_name then first_name" do
@@ -99,7 +99,7 @@ describe "Gift Aid" do
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/giftaid.php?action=getGrid&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
 
       data = Osm::GiftAid.get_data(@api, 1, 2)
-      data.is_a?(Array).should be_true
+      data.is_a?(Array).should == true
       data.size.should == 1
       data = data[0]
       data.donations.should == {
@@ -112,7 +112,7 @@ describe "Gift Aid" do
       data.member_id.should == 2
       data.total.should == '2.34'
       data.section_id.should == 1
-      data.valid?.should be_true
+      data.valid?.should == true
     end
 
     it "Update donation" do
@@ -139,7 +139,7 @@ describe "Gift Aid" do
         :members => [3, 4],
         :amount => '1.23',
         :note => 'Note',
-      }).should be_true
+      }).should == true
     end
 
     describe "Update data" do
@@ -188,7 +188,7 @@ describe "Gift Aid" do
         @data.tax_payer_name = 'n'
         @data.tax_payer_address = 'a'
         @data.tax_payer_postcode = 'pc'
-        @data.update(@api).should be_true
+        @data.update(@api).should == true
       end
 
       it "A donation" do
@@ -214,7 +214,7 @@ describe "Gift Aid" do
         HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body_data.to_json}) }
 
         @data.donations[Date.new(2012, 1, 3)] = '3.45'
-        @data.update(@api).should be_true
+        @data.update(@api).should == true
       end
 
     end

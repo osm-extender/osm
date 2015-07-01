@@ -35,7 +35,7 @@ describe "Badge" do
       badge.id.should == 12
       badge.version.should == 3
       badge.group_name.should == ''
-      badge.latest.should be_true
+      badge.latest.should == true
       badge.sharing.should == :draft
       badge.user_id.should == 4
       badge.levels.should == [1, 2, 3]
@@ -48,25 +48,25 @@ describe "Badge" do
       badge.level_requirement.should == 8
       badge.requires_modules.should == [['A'], ['B', 'C']]
       badge.show_level_letters.should == true
-      badge.valid?.should be_true
+      badge.valid?.should == true
     end
 
     it "Valid with nil for levels" do
       badge = Osm::Badge.new(@badge_options.merge(levels: nil))
       badge.levels.should be_nil
-      badge.valid?.should be_true
+      badge.valid?.should == true
     end
 
     it "Valid with nil for level_requirement" do
       badge = Osm::Badge.new(@badge_options.merge(level_requirement: nil))
       badge.level_requirement.should be_nil
-      badge.valid?.should be_true
+      badge.valid?.should == true
     end
     
     it "Valid with nil for add_columns_to_module" do
       badge = Osm::Badge.new(@badge_options.merge(add_columns_to_module: nil))
       badge.add_columns_to_module.should be_nil
-      badge.valid?.should be_true
+      badge.valid?.should == true
     end
 
   end
@@ -86,9 +86,9 @@ describe "Badge" do
     requirement.description.should == 'description'
     requirement.mod.should == m
     requirement.id.should == 1
-    requirement.editable.should be_true
+    requirement.editable.should == true
     requirement.badge.identifier.should == 'key'
-    requirement.valid?.should be_true
+    requirement.valid?.should == true
   end
 
   it "Create RequirementModule" do
@@ -112,12 +112,12 @@ describe "Badge" do
     m.completed_into_column.should == 3
     m.numeric_into_column.should == 4
     m.add_column_id_to_numeric.should == 5
-    m.valid?.should be_true
+    m.valid?.should == true
   end
 
   it "Works out if we add columns to this badge" do
-    Osm::Badge.new(add_columns_to_module: 123).add_columns?.should be_true
-    Osm::Badge.new(add_columns_to_module: nil).add_columns?.should be_false
+    Osm::Badge.new(add_columns_to_module: 123).add_columns?.should == true
+    Osm::Badge.new(add_columns_to_module: nil).add_columns?.should == false
   end
 
   it "Produces a map of module letter <-> module id" do
@@ -174,7 +174,7 @@ describe "Badge" do
     data.requirements.should == {}
     data.section_id.should == 2
     data.badge.identifier.should == 'key'
-    data.valid?.should be_true
+    data.valid?.should == true
   end
 
 
@@ -215,14 +215,14 @@ describe "Badge" do
 
 
   it "Works out if a requirement has been met" do
-    data = Osm::Badge::Data.new(requirements: {1 => ''}).requirement_met?(1).should be_false
-    data = Osm::Badge::Data.new(requirements: {1 => 'xStuff'}).requirement_met?(1).should be_false
-    data = Osm::Badge::Data.new(requirements: {1 => '0'}).requirement_met?(1).should be_false
-    data = Osm::Badge::Data.new(requirements: {1 => 0}).requirement_met?(1).should be_false
-    data = Osm::Badge::Data.new(requirements: {}).requirement_met?(1).should be_false
-    data = Osm::Badge::Data.new(requirements: {1 => 'Stuff'}).requirement_met?(1).should be_true
-    data = Osm::Badge::Data.new(requirements: {1 => '1'}).requirement_met?(1).should be_true
-    data = Osm::Badge::Data.new(requirements: {1 => 1}).requirement_met?(1).should be_true
+    data = Osm::Badge::Data.new(requirements: {1 => ''}).requirement_met?(1).should == false
+    data = Osm::Badge::Data.new(requirements: {1 => 'xStuff'}).requirement_met?(1).should == false
+    data = Osm::Badge::Data.new(requirements: {1 => '0'}).requirement_met?(1).should == false
+    data = Osm::Badge::Data.new(requirements: {1 => 0}).requirement_met?(1).should == false
+    data = Osm::Badge::Data.new(requirements: {}).requirement_met?(1).should == false
+    data = Osm::Badge::Data.new(requirements: {1 => 'Stuff'}).requirement_met?(1).should == true
+    data = Osm::Badge::Data.new(requirements: {1 => '1'}).requirement_met?(1).should == true
+    data = Osm::Badge::Data.new(requirements: {1 => 1}).requirement_met?(1).should == true
   end
 
 
@@ -308,13 +308,13 @@ describe "Badge" do
       data = Osm::Badge::Data.new(:awarded => 2, :badge => badge)
 
       data.stub(:earnt) { 1 }
-      data.earnt?.should be_false
+      data.earnt?.should == false
 
       data.stub(:earnt) { 2 }
-      data.earnt?.should be_false
+      data.earnt?.should == false
 
       data.stub(:earnt) { 3 }
-      data.earnt?.should be_true
+      data.earnt?.should == true
     end
 
     it "Non staged" do
@@ -339,10 +339,10 @@ describe "Badge" do
       )
 
       data = Osm::Badge::Data.new(:due => 1, :awarded => 1, :badge => badge)
-      data.earnt?.should be_false
+      data.earnt?.should == false
 
       data = Osm::Badge::Data.new(:due => 1, :awarded => 0, :badge => badge)
-      data.earnt?.should be_true
+      data.earnt?.should == true
 
 
       # Number of modules required
@@ -350,10 +350,10 @@ describe "Badge" do
       this_badge.min_modules_required = 2
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'y', 20=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true
+      data.earnt?.should == true
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'y', 20=>'x'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_false
+      data.earnt?.should == false
 
 
       # Number of requirements needed
@@ -362,13 +362,13 @@ describe "Badge" do
       this_badge.min_requirements_required = 2
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'y', 20=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true
+      data.earnt?.should == true
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'x', 20=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true
+      data.earnt?.should == true
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'x', 20=>'x'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_false
+      data.earnt?.should == false
 
 
       # Module combinations
@@ -376,16 +376,16 @@ describe "Badge" do
       this_badge.requires_modules = [['a'], ['b', 'c']]
 
       data = Osm::Badge::Data.new(:requirements => {10=>'x', 11=>'x', 20=>'x', 30=>'x'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_false
+      data.earnt?.should == false
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'y', 20=>'x', 30=>'x'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_false
+      data.earnt?.should == false
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'y', 20=>'y', 30=>'x'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true
+      data.earnt?.should == true
 
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 11=>'y', 20=>'x', 30=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true
+      data.earnt?.should == true
 
       # Requirements from another badge
       this_badge = badge.clone
@@ -395,23 +395,23 @@ describe "Badge" do
       # Simply met
       this_badge.other_requirements_required = [{id: 100, min: 0}]
       data = Osm::Badge::Data.new(:requirements => {10=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true # Assume met if not in requirements Hash
+      data.earnt?.should == true # Assume met if not in requirements Hash
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'x'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_false
+      data.earnt?.should == false
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true
+      data.earnt?.should == true
       # Minimum value
       this_badge.other_requirements_required = [{id: 100, min: 2}]
       data = Osm::Badge::Data.new(:requirements => {10=>'y'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true # Assume met if not in requirements Hash
+      data.earnt?.should == true # Assume met if not in requirements Hash
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'x'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_false
+      data.earnt?.should == false
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'1'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_false
+      data.earnt?.should == false
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'2'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true
+      data.earnt?.should == true
       data = Osm::Badge::Data.new(:requirements => {10=>'y', 100=>'3'}, :due => 0, :awarded => 0, :badge => this_badge)
-      data.earnt?.should be_true
+      data.earnt?.should == true
     end
   end
 
@@ -485,10 +485,10 @@ describe "Badge" do
   end
 
   it "Works out if the badge has been started" do
-    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {1 => 'Yes', 2 => ''}).started?.should be_true
-    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {1 => 'Yes', 2 => ''}, :due => 1).started?.should be_false
-    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {1 => 'xNo', 2 => ''}).started?.should be_false
-    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {1 => '', 2 => ''}).started?.should be_false
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {1 => 'Yes', 2 => ''}).started?.should == true
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {1 => 'Yes', 2 => ''}, :due => 1).started?.should == false
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {1 => 'xNo', 2 => ''}).started?.should == false
+    Osm::Badge::Data.new(:badge => Osm::CoreBadge.new, :requirements => {1 => '', 2 => ''}).started?.should == false
 
     # Staged Activity Badge
     Osm::Badge::Data.new(
@@ -503,7 +503,7 @@ describe "Badge" do
       ),
       :requirements => {1000 => 'Yes', 2000 => 'Yes', 2001 => ''},
       :due => 1,
-    ).started?.should be_true
+    ).started?.should == true
 
     # Staged Count Badge
     Osm::Badge::Data.new(
@@ -511,13 +511,13 @@ describe "Badge" do
       :requirements => {1000 => 5, 2000 => '5', 3000 => ''},
       :due => 5,
       :awarded => 4,
-    ).started?.should be_false # Finished lvl 5 & not started lvl 10
+    ).started?.should == false # Finished lvl 5 & not started lvl 10
     Osm::Badge::Data.new(
       :badge => Osm::StagedBadge.new(:levels => [0,1,2,3,4,5,10,15,20], :show_level_letters => false, :level_requirement => 1000),
       :requirements => {1000 => 6, 2000 => '6', 3000 => ''},
       :due => 5,
       :awarded => 3,
-    ).started?.should be_true # Finished lvl 5 & started lvl 10
+    ).started?.should == true # Finished lvl 5 & started lvl 10
   end
 
   it "Works out what stage of the badge has been started" do
@@ -660,7 +660,7 @@ describe "Badge" do
           badge.identifier.should == '123_0'
           badge.id.should == 123
           badge.version.should == 0
-          badge.latest.should be_true
+          badge.latest.should == true
           badge.user_id.should == 0
           badge.sharing.should == :default_locked
           badge.requirements.size.should == 1
@@ -672,7 +672,7 @@ describe "Badge" do
           badge.other_requirements_required.should == []
           badge.badges_required.should == []
           badge.show_level_letters.should == true
-          badge.valid?.should be_true
+          badge.valid?.should == true
           badge.modules.size.should == 1
           m = badge.modules[0]
           m.badge.id.should == 123
@@ -684,15 +684,15 @@ describe "Badge" do
           m.completed_into_column.should == nil
           m.numeric_into_column.should == nil
           m.add_column_id_to_numeric.should == nil
-          m.valid?.should be_true
+          m.valid?.should == true
           requirement = badge.requirements[0]
           requirement.name.should == 'r_name'
           requirement.description.should == 'r_description'
           requirement.id.should == 2345
           requirement.mod.should == m
-          requirement.editable.should be_true
+          requirement.editable.should == true
           requirement.badge.should == badge
-          requirement.valid?.should be_true
+          requirement.valid?.should == true
         end
       end
 
@@ -774,7 +774,7 @@ describe "Badge" do
         @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should be_true
+        @data.update(@api).should == true
       end
 
       it "Success (just requirement)" do
@@ -785,7 +785,7 @@ describe "Badge" do
         @data.should_not_receive(:mark_due)
 
         @data.requirements[2345] = '2'
-        @data.update(@api).should be_true
+        @data.update(@api).should == true
       end
 
       it "Success (just due)" do
@@ -796,7 +796,7 @@ describe "Badge" do
         @data.should_receive(:mark_due).with(@api, 1) { true }
 
         @data.due = 1
-        @data.update(@api).should be_true
+        @data.update(@api).should == true
       end
 
       it "Success (just awarded)" do
@@ -808,7 +808,7 @@ describe "Badge" do
 
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should be_true
+        @data.update(@api).should == true
       end
 
       it "Failed (requirement)" do
@@ -823,7 +823,7 @@ describe "Badge" do
         @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should be_false
+        @data.update(@api).should == false
       end
 
       it "Failed (due)" do
@@ -837,7 +837,7 @@ describe "Badge" do
         @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should be_false
+        @data.update(@api).should == false
       end
 
       it "Failed (awarded)" do
@@ -851,7 +851,7 @@ describe "Badge" do
         @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should be_false
+        @data.update(@api).should == false
       end
 
     end
@@ -883,7 +883,7 @@ describe "Badge" do
       HTTParty.should_receive(:post).with(awarded_url, {:body => awarded_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>awarded_body_data.to_json}) }
       Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
 
-      data.mark_awarded(@api, Date.new(2000, 1, 2), 1).should be_true
+      data.mark_awarded(@api, Date.new(2000, 1, 2), 1).should == true
     end
 
     it "Mark badge due" do
@@ -914,7 +914,7 @@ describe "Badge" do
       HTTParty.should_receive(:post).with(awarded_url, {:body => awarded_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>awarded_body_data.to_json}) }
       Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
 
-      data.mark_due(@api, 1).should be_true
+      data.mark_due(@api, 1).should == true
     end
 
     it "Get summary data for a section" do

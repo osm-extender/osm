@@ -20,9 +20,9 @@ describe "Invoice" do
     i.name.should == 'Name'
     i.extra_details.should == 'Extra Details'
     i.date.should == Date.new(2001, 2, 3)
-    i.archived.should be_true
-    i.finalised.should be_true
-    i.valid?.should be_true
+    i.archived.should == true
+    i.finalised.should == true
+    i.valid?.should == true
   end
 
   it "Sorts Invoice by Section ID, Name then Date" do
@@ -58,7 +58,7 @@ describe "Invoice" do
       ii.payto.should == 'Name'
       ii.description.should == 'Comments'
       ii.budget_name.should == 'Budget'
-      ii.valid?.should be_true
+      ii.valid?.should == true
     end
   
     it "Sorts by Invoice then Date" do
@@ -168,9 +168,9 @@ describe "Invoice" do
           invoice.name.should == 'Invoice 1'
           invoice.extra_details.should == 'Some more details'
           invoice.date.should == Date.new(2010, 1, 1)
-          invoice.archived.should be_false
-          invoice.finalised.should be_false
-          invoice.valid?.should be_true
+          invoice.archived.should == false
+          invoice.finalised.should == false
+          invoice.valid?.should == true
         end
 
         it "Honours archived option" do
@@ -291,7 +291,7 @@ describe "Invoice" do
           'date' => '2002-03-04',
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"id":2}'}) }
 
-        invoice.create(@api).should be_true
+        invoice.create(@api).should == true
         invoice.id.should == 2
       end
 
@@ -314,7 +314,7 @@ describe "Invoice" do
           'date' => '2002-03-04',
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"message":"Something went wrong"}'}) }
 
-        invoice.create(@api).should be_false
+        invoice.create(@api).should == false
         invoice.id.should be_nil
       end
 
@@ -339,7 +339,7 @@ describe "Invoice" do
           'date' => '2002-03-04',
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
 
-        invoice.update(@api).should be_true
+        invoice.update(@api).should == true
       end
 
       it "Update (failure)" do
@@ -363,7 +363,7 @@ describe "Invoice" do
           'date' => '2002-03-04',
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
 
-        invoice.update(@api).should be_false
+        invoice.update(@api).should == false
       end
 
       it "Delete (success)" do
@@ -378,7 +378,7 @@ describe "Invoice" do
           'invoiceid' => 1,
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
 
-        invoice.delete(@api).should be_true
+        invoice.delete(@api).should == true
       end
 
       it "Delete (failure)" do
@@ -393,7 +393,7 @@ describe "Invoice" do
           'invoiceid' => 1,
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
 
-        invoice.delete(@api).should be_false
+        invoice.delete(@api).should == false
       end
 
       it "Finalise invoice (success)" do
@@ -407,8 +407,8 @@ describe "Invoice" do
           'secret' => 'secret',
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
 
-        invoice.finalise(@api).should be_true
-        invoice.finalised.should be_true
+        invoice.finalise(@api).should == true
+        invoice.finalised.should == true
       end
 
       it "Finalise invoice (failure)" do
@@ -422,8 +422,8 @@ describe "Invoice" do
           'secret' => 'secret',
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
 
-        invoice.finalise(@api).should be_false
-        invoice.finalised.should be_false
+        invoice.finalise(@api).should == false
+        invoice.finalised.should == false
       end
 
       it "Finalise invoice (already finalised)" do
@@ -431,8 +431,8 @@ describe "Invoice" do
 
         HTTParty.should_not_receive(:post)
 
-        invoice.finalise(@api).should be_false
-        invoice.finalised.should be_true
+        invoice.finalise(@api).should == false
+        invoice.finalised.should == true
       end
 
       it "Archive invoice (success)" do
@@ -448,8 +448,8 @@ describe "Invoice" do
           'archived' => 1,
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
 
-        invoice.archive(@api).should be_true
-        invoice.archived.should be_true
+        invoice.archive(@api).should == true
+        invoice.archived.should == true
       end
 
       it "Archive invoice (failure)" do
@@ -465,8 +465,8 @@ describe "Invoice" do
           'archived' => 1,
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
 
-        invoice.archive(@api).should be_false
-        invoice.archived.should be_false
+        invoice.archive(@api).should == false
+        invoice.archived.should == false
       end
 
       it "Archive invoice (already archived)" do
@@ -474,8 +474,8 @@ describe "Invoice" do
 
         HTTParty.should_not_receive(:post)
 
-        invoice.archive(@api).should be_false
-        invoice.archived.should be_true
+        invoice.archive(@api).should == false
+        invoice.archived.should == true
       end
 
     end
@@ -502,7 +502,7 @@ describe "Invoice" do
         item.payto.should == 'John Smith'
         item.budget_name.should == 'Default'
         item.description.should == 'Comment'
-        item.valid?.should be_true
+        item.valid?.should == true
       end
 
       it "Create (success)" do
@@ -558,7 +558,7 @@ describe "Invoice" do
           }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => {osm_name => new_value}.to_json}) }
         end
 
-        item.create(@api).should be_true
+        item.create(@api).should == true
         item.id.should == 2
         item.record_id.should == 4
       end
@@ -588,7 +588,7 @@ describe "Invoice" do
         ]
         invoice.should_receive(:get_items).with(@api, {:no_cache=>true}).and_return(data)
 
-        item.create(@api).should be_false
+        item.create(@api).should == false
       end
 
       it "Update (success)" do
@@ -628,7 +628,7 @@ describe "Invoice" do
           }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => {osm_name => new_value}.to_json}) }
         end
 
-        item.update(@api).should be_true
+        item.update(@api).should == true
       end
 
       it "Update (failure)" do
@@ -659,7 +659,7 @@ describe "Invoice" do
           'value' => 'A new description',
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"comments":"A description"}'}) }
 
-        item.update(@api).should be_false
+        item.update(@api).should == false
       end
 
       it "Delete (success)" do
@@ -674,7 +674,7 @@ describe "Invoice" do
           'id' => 1,
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
 
-        item.delete(@api).should be_true
+        item.delete(@api).should == true
       end
 
       it "Delete (failure)" do
@@ -689,7 +689,7 @@ describe "Invoice" do
           'id' => 1,
         }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
 
-        item.delete(@api).should be_false
+        item.delete(@api).should == false
       end
 
     end

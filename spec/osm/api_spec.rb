@@ -26,11 +26,11 @@ describe "API" do
   end
 
   it "Exposes the debug option seperatly too" do
-    Osm::Api.debug.should be_false
+    Osm::Api.debug.should == false
     Osm::Api.debug = true
-    Osm::Api.debug.should be_true
+    Osm::Api.debug.should == true
     Osm::Api.debug = false
-    Osm::Api.debug.should be_false
+    Osm::Api.debug.should == false
   end
 
 
@@ -60,7 +60,7 @@ describe "API" do
   end
 
   it "sets a new API user" do
-    @api.set_user('1', '2').is_a?(Osm::Api).should be_true
+    @api.set_user('1', '2').is_a?(Osm::Api).should == true
 
     HTTParty.should_receive(:post).with("https://www.onlinescoutmanager.co.uk/test", {:body => {
       'apiid' => @CONFIGURATION[:api][:osm][:id],
@@ -88,8 +88,8 @@ describe "API" do
 
     it "Get from cache" do
       permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
-      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
+      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id") { true }
+      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id") { permissions }
       @api.get_user_permissions.should == permissions
     end
 
@@ -105,17 +105,17 @@ describe "API" do
       }
       url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles'
 
-      OsmTest::Cache.should_not_receive('exist?').with('OSMAPI-osm-permissions-user_id')
-      OsmTest::Cache.should_not_receive('read').with('OSMAPI-osm-permissions-user_id')
+      OsmTest::Cache.should_not_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id")
+      OsmTest::Cache.should_not_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id")
       HTTParty.should_receive(:post).with(url, {:body=>body}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
       @api.get_user_permissions(:no_cache => true).should == {1 => {:badge => [:read]}}
     end
 
     it "Set" do
       permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-permissions-user_id') { true }
-      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-permissions-user_id') { permissions }
-      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-permissions-user_id', permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
+      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id") { true }
+      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id") { permissions }
+      OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id", permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
       @api.set_user_permissions(3, {:a => [:read]})
     end
 

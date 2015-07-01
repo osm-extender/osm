@@ -12,7 +12,8 @@ module Osm
     BASE_URLS = {
       :osm => 'https://www.onlinescoutmanager.co.uk',
       :ogm => 'http://www.onlineguidemanager.co.uk',
-      :osm_staging => 'http://staging.onlinescoutmanager.co.uk'
+      :osm_staging => 'http://staging.onlinescoutmanager.co.uk',
+      :migration => 'https://migration.onlinescoutmanager.com'
     }
 
 
@@ -30,9 +31,9 @@ module Osm
     # @option options [Boolean] :debug if true debugging info is output (optional, default = false)
     # @return nil
     def self.configure(options)
-      raise ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm' unless [:osm, :ogm, :osm_staging].include?(options[:default_site])
+      raise ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(options[:default_site])
       raise ArgumentError, ":#{options[:default_site]} does not exist in options hash" if options[options[:default_site]].nil?
-      [:osm, :ogm, :osm_staging].each do |api_key|
+      Osm::Api::BASE_URLS.keys.each do |api_key|
         if options[api_key]
           api_data = options[api_key]
           raise ArgumentError, ":#{api_key} must be a Hash" unless api_data.is_a?(Hash)
@@ -47,7 +48,8 @@ module Osm
       @@api_details = {
         :osm => (options[:osm] || {}),
         :ogm => (options[:ogm] || {}),
-        :osm_staging => (options[:osm_staging] || {})
+        :osm_staging => (options[:osm_staging] || {}),
+        :migration => (options[:migration] || {})
       }
       nil
     end
@@ -73,7 +75,7 @@ module Osm
     def initialize(user_id, secret, site=@@site)
       raise ArgumentError, 'You must pass a secret (get this by using the authorize method)' if secret.nil?
       raise ArgumentError, 'You must pass a user_id (get this by using the authorize method)' if user_id.nil?
-      raise ArgumentError, 'site is invalid, if passed it should be either :osm or :ogm, if not passed then you forgot to run Api.configure' unless [:osm, :ogm, :osm_staging].include?(site)
+      raise ArgumentError, 'site is invalid, if passed it should be either :osm or :ogm, if not passed then you forgot to run Api.configure' unless Osm::Api::BASE_URLS.keys.include?(site)
 
       @site = site
       set_user(user_id, secret)
@@ -145,7 +147,7 @@ module Osm
     # @param [Symbol] site For OSM or OGM (:osm or :ogm)
     # @return [String] The base URL for requests
     def self.base_url(site=@@site)
-      raise ArgumentError, "Invalid site" unless [:osm, :ogm].include?(site)
+      raise ArgumentError, "Invalid site" unless Osm::Api::BASE_URLS.keys.include?(site)
       BASE_URLS[site]
     end
 
@@ -153,7 +155,6 @@ module Osm
     # @param site For OSM or OGM (:osm or :ogm), defaults to the default for this api object
     # @return [String] The base URL for requests
     def base_url(site=@site)
-      raise ArgumentError, "Invalid site" unless [:osm, :ogm].include?(site)
       self.class.base_url(site)
     end
 
@@ -211,7 +212,7 @@ module Osm
     # @raise [Osm::Error] If an error was returned by OSM
     # @raise [Osm::ConnectionError] If an error occured connecting to OSM
     def self.perform_query(site, url, api_data={})
-      raise ArgumentError, 'site is invalid, this should be set to either :osm or :ogm' unless [:osm, :ogm, :osm_staging].include?(site)
+      raise ArgumentError, 'site is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(site)
  
       data = api_data.merge({
         'apiid' => @@api_details[site][:id],

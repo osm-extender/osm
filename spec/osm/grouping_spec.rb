@@ -29,9 +29,9 @@ describe "Grouping" do
       patrol.id.should == 1
       patrol.section_id.should == 2
       patrol.name.should == 'Patrol Name'
-      patrol.active.should be_true
+      patrol.active.should == true
       patrol.points.should == 3
-      patrol.valid?.should be_true
+      patrol.valid?.should == true
     end
 
     it "Handles no data" do
@@ -61,7 +61,7 @@ describe "Grouping" do
         'active' => grouping.active,
       }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>''}) }
 
-      grouping.update(@api).should be_true
+      grouping.update(@api).should == true
     end
 
     it "Update points in OSM (succeded)" do
@@ -83,7 +83,7 @@ describe "Grouping" do
         'points' => grouping.points,
       }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
 
-      grouping.update(@api).should be_true
+      grouping.update(@api).should == true
     end
 
     it "Update in OSM (failed)" do
@@ -96,7 +96,7 @@ describe "Grouping" do
       grouping.active = true
 
       HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"done":false}'}) }
-      grouping.update(@api).should be_false
+      grouping.update(@api).should == false
     end
 
   end

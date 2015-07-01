@@ -66,35 +66,35 @@ describe "Model" do
   describe "Caching" do
 
     it "Checks for existance" do
-      OsmTest::Cache.should_receive('exist?').with('OSMAPI-osm-key') { true }
-      ModelTester.cache('exist?', @api, 'key').should be_true
+      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
+      ModelTester.cache('exist?', @api, 'key').should == true
     end
 
     it "Writes" do
-      OsmTest::Cache.should_receive('write').with('OSMAPI-osm-key', 'data', {:expires_in=>600}) { true }
-      ModelTester.cache('write', @api, 'key', 'data').should be_true
+      OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', {:expires_in=>600}) { true }
+      ModelTester.cache('write', @api, 'key', 'data').should == true
     end
 
     it "Reads" do
-      OsmTest::Cache.should_receive('read').with('OSMAPI-osm-key') { 'data' }
+      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-key") { 'data' }
       ModelTester.cache('read', @api, 'key').should == 'data'
     end
 
     it "Deletes" do
-      OsmTest::Cache.should_receive('delete').with('OSMAPI-osm-key') { true }
-      ModelTester.cache('delete', @api, 'key').should be_true
+      OsmTest::Cache.should_receive('delete').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
+      ModelTester.cache('delete', @api, 'key').should == true
     end
 
     it "Behaves when cache is nil (no caching)" do
       Osm::Model.configure({:cache => nil})
-      ModelTester.cache('exist?', @api, 'key').should be_false
-      ModelTester.cache('write', @api, 'key', 'data').should be_false
+      ModelTester.cache('exist?', @api, 'key').should == false
+      ModelTester.cache('write', @api, 'key', 'data').should == false
       ModelTester.cache('read', @api, 'key').should be_nil
-      ModelTester.cache('delete', @api, 'key').should be_true
+      ModelTester.cache('delete', @api, 'key').should == true
     end
 
     it "Builds a key from an array" do
-      ModelTester.cache('key', @api, ['a', 'b']).should == 'OSMAPI-osm-a-b'
+      ModelTester.cache('key', @api, ['a', 'b']).should == "OSMAPI-#{Osm::VERSION}-osm-a-b"
     end
 
   end
@@ -103,15 +103,15 @@ describe "Model" do
   describe "Get items from ids" do
 
     it "All items in cache" do
-      OsmTest::Cache.write('OSMAPI-osm-items', [1, 2])
-      OsmTest::Cache.write('OSMAPI-osm-item-1', '1')
-      OsmTest::Cache.write('OSMAPI-osm-item-2', '2')
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-items", [1, 2])
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-1", '1')
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-2", '2')
       ModelTester.test_get_all(@api, 'items', 'item').should == ['1', '2']
     end
     
     it "An item not in cache" do
-      OsmTest::Cache.write('OSMAPI-osm-items', [1, 2])
-      OsmTest::Cache.write('OSMAPI-osm-item-1', '1')
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-items", [1, 2])
+      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-1", '1')
       ModelTester.stub(:get_all) { ['A', 'B'] }
       ModelTester.test_get_all(@api, 'items', 'item').should == ['A', 'B']
     end
@@ -148,33 +148,33 @@ describe "Model" do
     end
 
     it ">" do
-      (@mt1 > @mt2).should be_false
-      (@mt2 > @mt1).should be_true
-      (@mt2 > @mt2a).should be_false
+      (@mt1 > @mt2).should == false
+      (@mt2 > @mt1).should == true
+      (@mt2 > @mt2a).should == false
     end
 
     it ">=" do
-      (@mt1 >= @mt2).should be_false
-      (@mt2 >= @mt1).should be_true
-      (@mt2 >= @mt2a).should be_true
+      (@mt1 >= @mt2).should == false
+      (@mt2 >= @mt1).should == true
+      (@mt2 >= @mt2a).should == true
     end
 
     it "<" do
-      (@mt1 < @mt2).should be_true
-      (@mt2 < @mt1).should be_false
-      (@mt2 < @mt2a).should be_false
+      (@mt1 < @mt2).should == true
+      (@mt2 < @mt1).should == false
+      (@mt2 < @mt2a).should == false
     end
 
     it "<=" do
-      (@mt1 <= @mt2).should be_true
-      (@mt2 <= @mt1).should be_false
-      (@mt2 <= @mt2a).should be_true
+      (@mt1 <= @mt2).should == true
+      (@mt2 <= @mt1).should == false
+      (@mt2 <= @mt2a).should == true
     end
 
     it "between" do
-      @mt2.between?(@mt1, @mt3).should be_true
-      @mt1.between?(@mt1, @mt3).should be_false
-      @mt3.between?(@mt1, @mt3).should be_false
+      @mt2.between?(@mt1, @mt3).should == true
+      @mt1.between?(@mt1, @mt3).should == false
+      @mt3.between?(@mt1, @mt3).should == false
     end
 
   end
@@ -188,15 +188,15 @@ describe "Model" do
       end
 
       it "Has permission" do
-        Osm::Model.user_has_permission?(@api, :bar, :foo, 1).should be_true
+        Osm::Model.user_has_permission?(@api, :bar, :foo, 1).should == true
       end
 
       it "Doesn't have the level of permission" do
-        Osm::Model.user_has_permission?(@api, :barbar, :foo, 1).should be_false
+        Osm::Model.user_has_permission?(@api, :barbar, :foo, 1).should == false
       end
 
       it "Doesn't have access to section" do
-        Osm::Model.user_has_permission?(@api, :bar, :foo, 2).should be_false
+        Osm::Model.user_has_permission?(@api, :bar, :foo, 2).should == false
       end
 
     end
@@ -212,16 +212,16 @@ describe "Model" do
       end
 
       it "Has permission" do
-        Osm::Model.api_has_permission?(@api, :bar, :foo, 1).should be_true
+        Osm::Model.api_has_permission?(@api, :bar, :foo, 1).should == true
       end
 
       it "Doesn't have the level of permission" do
-        Osm::Model.api_has_permission?(@api, :barbar, :foo, 1).should be_false
+        Osm::Model.api_has_permission?(@api, :barbar, :foo, 1).should == false
       end
 
       it "Doesn't have access to the section" do
         Osm::ApiAccess.stub(:get_ours).and_return(nil)
-        Osm::Model.api_has_permission?(@api, :bar, :foo, 2).should be_false
+        Osm::Model.api_has_permission?(@api, :bar, :foo, 2).should == false
       end
 
     end
@@ -233,7 +233,7 @@ describe "Model" do
         options = {:foo => :bar}
         expect(Osm::Model).to receive('user_has_permission?').with(@api, :can_do, :can_to, section, options).and_return(true)
         expect(Osm::Model).to receive('api_has_permission?').with(@api, :can_do, :can_to, section, options).and_return(true)
-        Osm::Model.has_permission?(@api, :can_do, :can_to, section, options).should be_true
+        Osm::Model.has_permission?(@api, :can_do, :can_to, section, options).should == true
       end
 
       describe "Otherwise returns false" do
@@ -241,7 +241,7 @@ describe "Model" do
           it "User #{user ? 'can' : "can't"} and #{api ? 'has' : "hasn't"} given access" do
             Osm::Model.stub('user_has_permission?').and_return(user)
             Osm::Model.stub('api_has_permission?').and_return(api)
-            Osm::Model.has_permission?(@api, :can_do, :can_to, Osm::Section.new).should be_false
+            Osm::Model.has_permission?(@api, :can_do, :can_to, Osm::Section.new).should == false
           end
         end
       end
@@ -255,11 +255,11 @@ describe "Model" do
       end
 
       it "Has access" do
-        Osm::Model.has_access_to_section?(@api, 1).should be_true
+        Osm::Model.has_access_to_section?(@api, 1).should == true
       end
 
       it "Doesn't have access" do
-        Osm::Model.has_access_to_section?(@api, 2).should be_false
+        Osm::Model.has_access_to_section?(@api, 2).should == false
       end 
 
     end
