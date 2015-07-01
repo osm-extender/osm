@@ -1,3 +1,7 @@
+## Version 1.2.20
+
+  * 
+
 ## Version 1.2.19
 
   * Fix validity checks for member in rails 3
