@@ -1,3 +1,7 @@
+## Version 1.2.19
+
+  * Fix validity checks for member in rails 3
+
 ## Version 1.2.18
 
   * Add gem version into the cache key
