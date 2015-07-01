@@ -13,10 +13,6 @@ describe "Section" do
       :subscription_expires => (Date.today + 60).strftime('%Y-%m-%d'),
       :type => :cubs,
       :wizard => false,
-      :column_names => {:column_names => 'names'},
-      :fields => {:fields => true},
-      :intouch_fields => {:intouch_fields => true},
-      :mobile_fields => {:mobile_fields => true},
       :flexi_records => [],
       :group_id => 3,
       :group_name => '3rd Somewhere',
@@ -42,9 +38,6 @@ describe "Section" do
       :myscout_payment_reminder_frequency => 7,
       :myscout_details => true,
       :myscout_details_email_changes_to => 'notify-changes-to@example.com',
-      :sms_sent_test => true,
-      :sms_messages_sent => 8,
-      :sms_messages_remaining => 9,
     }
   end
 
@@ -57,10 +50,6 @@ describe "Section" do
     section.subscription_level.should == 2
     section.subscription_expires.should == Date.today + 60
     section.type.should == :cubs
-    section.column_names.should == {:column_names => 'names'}
-    section.fields.should == {:fields => true}
-    section.intouch_fields.should == {:intouch_fields => true}
-    section.mobile_fields.should == {:mobile_fields => true}
     section.group_id.should == 3
     section.group_name.should == '3rd Somewhere'
     section.flexi_records.should == []
@@ -86,9 +75,6 @@ describe "Section" do
     section.myscout_payment_reminder_frequency.should == 7
     section.myscout_details.should == true
     section.myscout_details_email_changes_to.should == 'notify-changes-to@example.com'
-    section.sms_sent_test.should == true
-    section.sms_messages_sent.should == 8
-    section.sms_messages_remaining.should == 9
     section.valid?.should == true
   end
 
@@ -99,18 +85,11 @@ describe "Section" do
     section.subscription_level.should == 1
     section.subscription_expires.should be_nil
     section.type.should == :unknown
-    section.column_names.should == {}
-    section.fields.should == {}
-    section.intouch_fields.should == {}
-    section.mobile_fields.should == {}
     section.flexi_records.should == []
     section.myscout_email_address_from.should == ''
     section.myscout_email_address_copy.should == ''
     section.myscout_details_email_changes_to.should == ''
     section.myscout_programme_show.should == 0
-    section.sms_sent_test.should == false
-    section.sms_messages_sent.should == 0
-    section.sms_messages_remaining.should == 0
   end
 
 
@@ -135,10 +114,6 @@ describe "Section" do
         section.subscription_level.should == 1
         section.subscription_expires.should == Date.new(2013, 1, 5)
         section.type.should == :beavers
-        section.column_names.should == {:column_names => 'names'}
-        section.fields.should == {:fields => true}
-        section.intouch_fields.should == {:intouch_fields => true}
-        section.mobile_fields.should == {:mobile_fields => true}
         section.group_id.should == 3
         section.group_name.should == '3rd Somewhere'
         section.flexi_records.size.should == 1
@@ -166,9 +141,6 @@ describe "Section" do
         section.myscout_payment_reminder_frequency.should == 7
         section.myscout_details.should == true
         section.myscout_details_email_changes_to.should == 'notify-changes-to@example.com'
-        section.sms_sent_test.should == true
-        section.sms_messages_remaining.should == 8
-        section.sms_messages_sent.should == 9
         section.valid?.should == true
       end
 
@@ -427,33 +399,6 @@ describe "Online Scout Manager API Strangeness" do
     sections = Osm::Section.get_all(@api)
     sections.size.should == 1
     sections[0].should_not be_nil
-  end
-
-  it "handles a section config where fields is an empty array" do
-    body = '[{"sectionConfig":"{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member\'s Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member\'s Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Subs\",\"extraid\":\"529\"}],\"wizard\":\"false\",\"fields\":[],\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}","groupname":"1st Somewhere","groupid":"1","groupNormalised":"1","sectionid":"1","sectionname":"Section 1","section":"cubs","isDefault":"1","permissions":{"badge":100,"member":100,"user":100,"register":100,"contact":100,"programme":100,"originator":1,"events":100,"finance":100,"flexi":100}}]'
-    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body, :content_type => 'application/json')
-
-    sections = Osm::Section.get_all(@api)
-    sections.size.should == 1
-    section = sections[0]
-    section.should_not be_nil
-    section.fields.should == {}
-  end
-
-  it "handles a section's flexi records being a hash" do
-    body = [
-      {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"beavers\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member's Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member's Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":{\"1\":{\"name\":\"Flexi Record 1\",\"extraid\":\"1\"},\"2\":{\"name\":\"Flexi Record 2\",\"extraid\":\"2\"}},\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"1", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>100, "member"=>100, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
-    ]
-    FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
-
-    sections = Osm::Section.get_all(@api)
-    sections.size.should == 1
-    section = sections[0]
-    section.should_not be_nil
-    section.flexi_records.size.should == 2
-    fr = section.flexi_records[0]
-    fr.id.should == 1
-    fr.name.should == 'Flexi Record 1'
   end
 
   it "handles an empty array representing no notepads" do
