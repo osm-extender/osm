@@ -105,19 +105,21 @@ module Osm
                       :contact, :primary_contact, :secondary_contact, :emergency_contact, :doctor
     end
 
+    unless ActiveModel::VERSION::MAJOR < 4
+      validates_presence_of :grouping_label, :allow_blank => true
+      validates_presence_of :grouping_leader_label, :allow_blank => true
+      validates_presence_of :additional_information, :allow_blank => true
+      validates_presence_of :additional_information_labels, :allow_blank => true
+      validates_presence_of :finished_section, :allow_nil=>true
+    end
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
     validates_numericality_of :grouping_leader, :only_integer=>true, :greater_than_or_equal_to=>0, :less_than_or_equal_to=>14, :allow_nil => true
     validates_presence_of :first_name
     validates_presence_of :last_name
-    validates_presence_of :grouping_label, :allow_blank => true
-    validates_presence_of :grouping_leader_label, :allow_blank => true
-    validates_presence_of :additional_information, :allow_blank => true
-    validates_presence_of :additional_information_labels, :allow_blank => true
     validates_presence_of :date_of_birth
     validates_presence_of :started_section
-    validates_presence_of :finished_section, :allow_nil=>true
     validates_presence_of :joined_movement
     validates_format_of :age, :with => /\A[0-9]{1,3} \/ (?:0?[0-9]|1[012])\Z/, :message => 'age is not in the correct format (yy / mm)', :allow_blank => true
     validates_inclusion_of :gender, :in => [:male, :female, :other, :unspecified], :allow_nil => true
