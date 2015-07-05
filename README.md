@@ -29,6 +29,8 @@ This gem supports the following versions of ruby, it may work on other versions 
 
   * 1.9.3
   * 2.0.0
+  * 2.2.1
+  * jruby-1.7.20.1
 
 
 ## OSM
