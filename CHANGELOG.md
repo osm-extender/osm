@@ -1,3 +1,7 @@
+## Version 1.2.21
+
+  * 
+
 ## Version 1.2.20
 
   * Fix to OSM changing the URL to get API permissions from
