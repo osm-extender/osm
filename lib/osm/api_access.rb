@@ -37,7 +37,7 @@ module Osm
         return get_from_ids(api, ids, cache_key, section, options, :get_all)
       end
 
-      data = api.perform_query("users.php?action=getAPIAccess&sectionid=#{section_id}")
+      data = api.perform_query("ext/settings/access/?action=getAPIAccess&sectionid=#{section_id}")
 
       permissions_map = {
         10  => [:read],
