@@ -379,13 +379,10 @@ module Osm
 
     # Compare Section based on group_name type (age order), then name
     def <=>(another)
+      type_order = [:beavers, :cubs, :scouts, :explorers, :network, :adults, :waiting]
       result = self.group_name <=> another.try(:group_name)
-      result = 0 if self.type == another.try(:type) && result == 0
-      [:beavers, :cubs, :scouts, :explorers, :network, :adults, :waiting].each do |type|
-        if result == 0
-          result = -1 if self.type == type
-          result =  1 if another.try(:type) == type
-        end
+      if result == 0
+        result = type_order.find_index(self.type) <=> type_order.find_index(another.try(:type))
       end
       result = self.name <=> another.try(:name) if result == 0
       return result
