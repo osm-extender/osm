@@ -17,12 +17,6 @@ This project uses continuous integration to help ensure that a quality product i
 Travis CI monitors two branches (versions) of the code - Master (which is what gets released)
 and Staging (which is what is currently being developed ready for moving to master).
 
-[![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?
-branch=master)](http://travis-ci.org/robertgauld/osm)
-
-[![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?
-branch=staging)](http://travis-ci.org/robertgauld/osm)
-
 
 ## Ruby Versions
 This gem supports the following versions of ruby, it may work on other versions but is not tested against them so don't rely on it.
