@@ -1,6 +1,6 @@
 ## Version 1.2.21
 
-  * 
+  * Fix updating badge data to a blank string incorrectly returns false when the update was made into OSM
 
 ## Version 1.2.20
 
