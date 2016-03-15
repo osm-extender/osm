@@ -386,7 +386,7 @@ module Osm
           'group_id' => GID_CUSTOM,
           'context' => 'members',
         })
-        updated = updated && data.is_a?(Hash) && data['data'].is_a?(Hash) && data['data']['value'].eql?(new_value)
+        updated = updated && data.is_a?(Hash) && data['data'].is_a?(Hash) && data['data']['value'].to_s.eql?(new_value.to_s)
       end # each attr to update
 
       # Do contacts

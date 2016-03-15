@@ -900,6 +900,39 @@ describe "Member" do
         @member.update(@api).should == true
       end
 
+      it "When setting data to a blank string" do
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "sectionid" => 2,
+          "scoutid" => 1,
+          "column" => "firstname",
+          "value" => "",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
+          "apiid" => "1",
+          "token" => "API TOKEN",
+          "userid" => "user_id",
+          "secret" => "secret",
+          "context" => "members",
+          "associated_type" => "member",
+          "associated_id" => 1,
+          "group_id" => 5,
+          "column_id" => 123,
+          "value" => "",
+        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":null}}'}) }
+
+        Osm::Term.stub(:get_for_section) { [] }
+
+        @member.stub('valid?'){ true }
+        @member.first_name = ''
+        @member.additional_information[123] = ''
+        @member.update(@api).should == true
+      end
+
     end
 
     it "Get Photo link" do
