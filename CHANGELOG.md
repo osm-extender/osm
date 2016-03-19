@@ -1,3 +1,7 @@
+## Version 1.2.22
+
+ * 
+
 ## Version 1.2.21
 
   * Fix updating requirement data of a Osm::Badge::Data to a blank string incorrectly returns false when the update was made into OSM
