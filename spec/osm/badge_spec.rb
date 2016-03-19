@@ -788,6 +788,17 @@ describe "Badge" do
         @data.update(@api).should == true
       end
 
+      it "Success (just requirement) (to blank)" do
+        date = Date.new(2000, 1, 2)
+        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data.merge('value' => '')}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.merge('2345' => nil).to_json}) }
+        Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+        @data.should_not_receive(:mark_awarded)
+        @data.should_not_receive(:mark_due)
+
+        @data.requirements[2345] = ''
+        @data.update(@api).should == true
+      end
+
       it "Success (just due)" do
         date = Date.new(2000, 1, 2)
         HTTParty.should_not_receive(:post)

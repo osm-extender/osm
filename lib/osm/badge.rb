@@ -815,7 +815,7 @@ module Osm
             })
             requirements_updated = false unless result.is_a?(Hash) &&
                                    (result['scoutid'].to_i == member_id) &&
-                                   (result[requirement.to_s] == now)
+                                   (result[requirement.to_s].to_s == now.to_s)
           end
         end
 

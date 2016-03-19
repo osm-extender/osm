@@ -1,3 +1,8 @@
+## Version 1.2.21
+
+  * Fix updating requirement data of a Osm::Badge::Data to a blank string incorrectly returns false when the update was made into OSM
+  * Fix updating additional details for a Osm::Member to a blank string incorrectly returns false when the update was made into OSM
+
 ## Version 1.2.20
 
   * Fix to OSM changing the URL to get API permissions from
@@ -46,7 +51,6 @@
     * Addition of remaining_credits(api, section, options={}) method
     * Addition of number_selected(api, section, members, options={}) method to tell how many numbers a message would be sent to
   * Add :migration as an API target
->>>>>>> NewContactSystem
 
 ## Version 1.2.17
 
