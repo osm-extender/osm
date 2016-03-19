@@ -516,7 +516,7 @@ module Osm
       # @!attribute [rw] first_name
       #   @return [Fixnum] the member's first name
       # @!attribute [rw] last_name
-      #   @return [Fixnum] Ithe member's last name
+      #   @return [Fixnum] the member's last name
       # @!attribute [rw] due
       #   @return [Fixnum] whether this badge is due according to OSM, number indicates stage if appropriate
       # @!attribute [rw] awarded
@@ -766,7 +766,7 @@ module Osm
       # @param [Osm::Api] api The api to use to make the request
       # @param [Fixnum] level The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return [Boolean] whether the data was updated in OSM
-      def mark_due(api, level=completed)
+      def mark_due(api, level=earnt)
         raise ArgumentError, 'level can not be negative' if level < 0
         section = Osm::Section.get(api, section_id)
         require_ability_to(api, :write, :badge, section)

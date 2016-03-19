@@ -922,10 +922,12 @@ describe "Badge" do
         )
       )
 
-      HTTParty.should_receive(:post).with(awarded_url, {:body => awarded_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>awarded_body_data.to_json}) }
+      HTTParty.should_receive(:post).twice.with(awarded_url, {:body => awarded_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>awarded_body_data.to_json}) }
       Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
+      data.stub(:earnt){ 1 }
 
       data.mark_due(@api, 1).should == true
+      data.mark_due(@api).should == true
     end
 
     it "Get summary data for a section" do
