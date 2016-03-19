@@ -1,3 +1,7 @@
+## Version 1.2.23
+
+  * 
+
 ## Version 1.2.22
 
  * Fix marking badge as due when not passing a level
