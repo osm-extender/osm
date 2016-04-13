@@ -187,7 +187,7 @@ module Osm
 
       rescue Osm::Error => e
         if e.message.eql?('false')
-          fail Osm::NoActiveRoles
+          fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
         else
           raise e
         end
