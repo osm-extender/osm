@@ -169,6 +169,32 @@ module Osm
       }))
     end
 
+    # Get API user's roles in OSM
+    # @!macro options_get
+    # @return [Array<Hash>] data returned by OSM
+    # @raises Osm::NoActiveRoles
+    def get_user_roles(options={})
+      cache_key = ['user_roles', @user_id]
+
+      if !options[:no_cache] && Osm::Model.cache_exist?(self, cache_key)
+        return Osm::Model.cache_read(self, cache_key)
+      end
+
+      begin
+        data = perform_query('api.php?action=getUserRoles')
+        Osm::Model.cache_write(self, cache_key, data)
+        return data
+
+      rescue Osm::Error => e
+        if e.message.eql?('false')
+          fail Osm::NoActiveRoles
+        else
+          raise e
+        end
+      end
+
+    end
+
     # Get API user's permissions
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that section
@@ -180,10 +206,8 @@ module Osm
         return Osm::Model.cache_read(self, cache_key)
       end
 
-      data = perform_query('api.php?action=getUserRoles')
-
       all_permissions = Hash.new
-      data.each do |item|
+      get_user_roles(options).each do |item|
         unless item['section'].eql?('discount')  # It's not an actual section
           all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
         end
