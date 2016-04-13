@@ -257,6 +257,7 @@ module Osm
     # Check if text looks like it's JSON
     # @param [String] text What to look at
     # @return [Boolean]
+    # TODO refactor to rescue JSON::ParserError instead of using this check
     def self.looks_like_json?(text)
       (['[', '{'].include?(text[0]))
     end
