@@ -266,24 +266,20 @@ module Osm
       return nil if result.response.body.empty?
       case result.response.content_type
         when 'application/json', 'text/html'
-          raise Osm::Error, result.response.body unless looks_like_json?(result.response.body)
-          decoded = ActiveSupport::JSON.decode(result.response.body)
-          osm_error = get_osm_error(decoded)
-          raise Osm::Error, osm_error if osm_error
-          return decoded
+          begin
+            decoded = ActiveSupport::JSON.decode(result.response.body)
+            if osm_error = get_osm_error(decoded)
+              fail Osm::Error, osm_error if osm_error
+            end
+            return decoded
+          rescue JSON::ParserError
+            fail Osm::Error, result.response.body
+          end
         when 'image/jpeg'
           return result.response.body
         else
-          raise Osm::Error, "Unhandled content-type: #{result.response.content_type}"
+          fail Osm::Error, "Unhandled content-type: #{result.response.content_type}"
       end
-    end
-
-    # Check if text looks like it's JSON
-    # @param [String] text What to look at
-    # @return [Boolean]
-    # TODO refactor to rescue JSON::ParserError instead of using this check
-    def self.looks_like_json?(text)
-      (['[', '{'].include?(text[0]))
     end
 
     # Get the error returned by OSM
