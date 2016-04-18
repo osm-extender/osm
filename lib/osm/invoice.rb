@@ -1,6 +1,8 @@
 module Osm
 
   class Invoice < Osm::Model
+    SORT_BY = [:section_id, :name, :date]
+
     # @!attribute [rw] id
     #   @return [Fixnum] The OSM ID for the invoice
     # @!attribute [rw] section_id
@@ -239,14 +241,6 @@ module Osm
       return items
     end
 
-    # Compare Invoice based on section_id, name then date
-    def <=>(another)
-      result = self.section_id <=> another.try(:section_id)
-      result = self.name <=> another.try(:name) if result == 0
-      result = self.date <=> another.try(:date) if result == 0
-      return result
-    end
-
 
     private
     def self.new_invoice_from_data(invoice_data)
@@ -266,6 +260,8 @@ module Osm
 
 
     class Item < Osm::Model
+      SORT_BY = [:invoice, :date]
+
       # @!attribute [rw] id
       #   @return [Fixnum] The OSM ID for the invoice item
       # @!attribute [rw] invoice
@@ -413,13 +409,6 @@ module Osm
         return amount.to_f if type.eql?(:income)
         return -amount.to_f if type.eql?(:expense)
         return 0.0
-      end
-
-      # Compare Invoice Item based on invoice then date
-      def <=>(another)
-        result = self.invoice <=> another.try(:invoice)
-        result = self.date <=> another.try(:date) if result == 0
-        return result
       end
 
     end # class Invoice::Item

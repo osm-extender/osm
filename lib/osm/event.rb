@@ -6,6 +6,7 @@ module Osm
 
     LIST_ATTRIBUTES = [:id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived, :public_notepad, :confirm_by_date, :allow_changes, :reminders, :attendance_limit, :attendance_limit_includes_leaders, :attendance_reminder, :allow_booking]
     EXTRA_ATTRIBUTES = [:notepad, :columns, :badges]
+    SORT_BY = [:start, :name, :id]
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the event
@@ -501,15 +502,6 @@ module Osm
       cost.eql?('0.00')
     end
 
-    # Compare Event based on start, name then id
-    def <=>(another)
-      return 0 if self.id == another.try(:id)
-      result = self.start <=> another.try(:start)
-      result = self.name <=> another.try(:name) if result == 0
-      result = self.id <=> another.try(:id) if result == 0
-      return result
-    end
-
 
     private
     def attendees(api)
@@ -581,6 +573,8 @@ module Osm
       include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
+      SORT_BY = [:badge_section, :badge_type, :badge_name, :requirement_label]
+
       # @!attribute [rw] badge_type
       #   @return [Symbol] the type of badge
       # @!attribute [rw] badge_section
@@ -622,19 +616,12 @@ module Osm
       #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-      # Compare BadgeLink based on section, type, badge_name, requirement_label, data
-      def <=>(another)
-        [:badge_section, :badge_type, :badge_name, :requirement_label].each do |attribute|
-          result = self.try(:data) <=> another.try(:data)
-          return result unless result == 0
-        end
-        return self.try(:data) <=> another.try(:data)
-      end
-
     end # Class Event::BadgeLink
 
 
     class Column < Osm::Model
+      SORT_BY = [:event, :id]
+
       # @!attribute [rw] id
       #   @return [String] OSM id for the column
       # @!attribute [rw] name
@@ -717,13 +704,6 @@ module Osm
         return true
       end
 
-      # Compare Column based on event then id
-      def <=>(another)
-        result = self.event <=> another.try(:event)
-        result = self.id <=> another.try(:id) if result == 0
-        return result
-      end
-
       def inspect
         Osm.inspect_instance(self, options={:replace_with => {'event' => :id}})
       end
@@ -732,6 +712,8 @@ module Osm
 
 
     class Attendance < Osm::Model
+      SORT_BY = [:event, :row]
+
       # @!attribute [rw] member_id
       #   @return [Fixnum] OSM id for the member
       # @!attribute [rw] grouping__id
@@ -941,13 +923,6 @@ module Osm
         define_method "is_#{attending_type}?" do
           attending == attending_type
         end
-      end
-
-      # Compare Attendance based on event then row
-      def <=>(another)
-        result = self.event <=> another.try(:event)
-        result = self.row <=> another.try(:row) if result == 0
-        return result
       end
 
       def inspect

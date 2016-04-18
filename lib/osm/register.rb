@@ -158,16 +158,12 @@ module Osm
       #   Initialize a new RegisterField
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-
-      # Compare Field based on id then version
-      def <=>(another)
-        return self.id <=> another.try(:id)
-      end
-
     end # Class Register::Field
 
 
     class Attendance < Osm::Model
+      SORT_BY = [:section_id, :grouping_id, :last_name, :first_name]
+
       # @!attribute [rw] member_id
       #   @return [Fixnum] The OSM ID for the member
       # @!attribute [rw] grouping_id
@@ -222,16 +218,6 @@ module Osm
       # @return [Boolean] whether the member was absent on the given date
       def absent_on?(date)
         attendance[date] != :yes
-      end
-
-
-      # Compare Attendance based on section_id, grouping_id, last_name then first_name
-      def <=>(another)
-        result = self.section_id <=> another.try(:section_id)
-        result = self.grouping_id <=> another.try(:grouping_id) if result == 0
-        result = self.last_name <=> another.try(:last_name) if result == 0
-        result = self.first_name <=> another.try(:last_name) if result == 0
-        return result
       end
 
     end # Class Register::Attendance

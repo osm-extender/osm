@@ -1,6 +1,7 @@
 module Osm
 
   class Grouping < Osm::Model
+    SORT_BY = [:section_id, :name]
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for grouping
@@ -103,13 +104,6 @@ module Osm
         Osm::Model.cache_delete(api, ['groupings', section_id])
       end
 
-      return result
-    end
-
-    # Compare Grouping based on section_id then name
-    def <=>(another)
-      result = self.section_id <=> another.try(:section_id)
-      result = self.name <=> another.try(:name) if result == 0
       return result
     end
 

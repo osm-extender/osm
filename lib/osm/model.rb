@@ -11,6 +11,8 @@ module Osm
     include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
     include ActiveAttr::Model
 
+    SORT_BY = [:id]
+
     @@cache = nil               # Class to use for caching
     @@cache_prepend = 'OSMAPI'  # Prepended to the key
     @@cache_ttl = 600           # 10 minutes
@@ -43,12 +45,13 @@ module Osm
       id.to_i
     end
 
-    # Default compare based on id
+    # Compare functions
     def <=>(another)
-      return self.id <=> another.try(:id)
+      us_values = self.class::SORT_BY.map{ |i| self.try(i) }
+      them_values = self.class::SORT_BY.map{ |i| another.try(i) }
+      us_values <=> them_values
     end
 
-    # Add other compare functions
     def <(another)
       send('<=>', another) < 0
     end

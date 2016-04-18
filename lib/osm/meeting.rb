@@ -360,6 +360,7 @@ module Osm
       #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
+
       # Compare Activity based on title then activity_id
       def <=>(another)
         result = self.title <=> another.try(:title)
@@ -373,6 +374,8 @@ module Osm
     class BadgeLink
       include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
+
+      SORT_BY = [:badge_section, :badge_type, :badge_name, :requirement_label]
 
       # @!attribute [rw] badge_type
       #   @return [Symbol] the type of badge
@@ -414,15 +417,6 @@ module Osm
       # @!method initialize
       #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-      # Compare BadgeLink based on section, type, badge_name, requirement_label, data
-      def <=>(another)
-        [:badge_section, :badge_type, :badge_name, :requirement_label].each do |attribute|
-          result = self.try(:data) <=> another.try(:data)
-          return result unless result == 0
-        end
-        return self.try(:data) <=> another.try(:data)
-      end
 
     end # Class Meeting::BadgeLink
 

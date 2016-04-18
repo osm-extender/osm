@@ -511,6 +511,8 @@ module Osm
 
 
     class Data < Osm::Model
+      SORT_BY = [:badge, :section_id, :member_id]
+
       # @!attribute [rw] member_id
       #   @return [Fixnum] ID of the member this data relates to
       # @!attribute [rw] first_name
@@ -841,14 +843,6 @@ module Osm
         end
 
         return requirements_updated && due_updated && awarded_updated
-      end
-
-      # Compare Badge::Data based on badge, section_id then member_id
-      def <=>(another)
-        result = self.badge <=> another.try(:badge)
-        result = self.section_id <=> another.try(:section_id) if result == 0
-        result = self.member_id <=> another.try(:member_id) if result == 0
-        return result
       end
 
       def inspect
