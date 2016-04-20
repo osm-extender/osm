@@ -1,3 +1,7 @@
+## Version 1.2.24
+
+  * 
+
 ## Version 1.2.23
 
   * Geting list of user roles for getting sections and permissions now done using the get_user_roles method of api instances
