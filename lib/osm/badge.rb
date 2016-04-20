@@ -324,14 +324,14 @@ module Osm
       @module_completion_data = get_module_completion_data(api, options) if fetched_this_time
 
       if @module_completion_data[badge.id].nil? && !fetched_this_time
-        @module_completion_data = fetch_from_osm
+        @module_completion_data = get_module_completion_data(api, options)
         fetched_this_time = true
       end
       data = @module_completion_data[badge.id]
       raise ArgumentError, "That badge does't exist (bad ID)." if data.nil?
 
       if data[badge.version].nil? && !fetched_this_time
-        @module_completion_data = fetch_from_osm
+        @module_completion_data = get_module_completion_data(api, options)
         data = @module_completion_data[badge.id]
         fetched_this_time = true
       end

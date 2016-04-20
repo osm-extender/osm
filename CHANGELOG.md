@@ -2,6 +2,7 @@
 
   * Geting list of user roles for getting sections and permissions now done using the get_user_roles method of api instances
   * get_user_roles will raise an Osm::NoActiveRoles exception if the user has no active roles
+  * Fix 'undefuned local method or variable fetch_from_osm' when retrieving badges
 
 ## Version 1.2.22
 
