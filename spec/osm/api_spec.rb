@@ -72,6 +72,31 @@ describe "API" do
   end
 
 
+  describe "Get user roles" do
+
+    before :each do
+      @api = Osm::Api.new(3, 4)
+    end
+
+    it "Returns what OSM gives on success" do
+      @api.stub(:perform_query).with('api.php?action=getUserRoles'){ ['a', 'b'] }
+      @api.get_user_roles.should == ['a', 'b']
+    end
+
+    it "User has no roles in OSM" do
+      @api.stub(:perform_query).with('api.php?action=getUserRoles'){ raise Osm::Error, 'false' }
+      expect{ @api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
+      @api.get_user_roles.should == []
+    end
+
+    it "Reraises any other Osm::Error" do
+      @api.stub(:perform_query).with('api.php?action=getUserRoles'){ raise Osm::Error, 'Test' }
+      expect{ @api.get_user_roles }.to raise_error(Osm::Error, 'Test')
+    end
+
+  end
+
+
   describe "User Permissions" do
 
     it "Get from API" do

@@ -1,6 +1,8 @@
 module Osm
 
   class Budget < Osm::Model
+    SORT_BY = [:section_id, :name]
+
     # @!attribute [rw] id
     #   @return [Fixnum] The OSM ID for the budget
     # @!attribute [rw] section_id
@@ -123,14 +125,6 @@ module Osm
         return true
       end
       return false
-    end
-
-
-    # Compare Budget based on section_id then name
-    def <=>(another)
-      result = self.section_id <=> another.try(:section_id)
-      result = self.name <=> another.try(:name) if result == 0
-      return result
     end
 
   end # Class Budget

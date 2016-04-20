@@ -134,6 +134,8 @@ module Osm
     end
 
     class Donation < Osm::Model
+      SORT_BY = [:donation_date]
+
       # @!attribute [rw] donation_date
       #   @return [Date] When the payment was made
 
@@ -151,15 +153,12 @@ module Osm
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
-      # Compare Payment based on donation_date then note
-      def <=>(another)
-        return self.donation_date <=> another.try(:donation_date)
-      end
-
     end # Class GiftAid::Donation
 
 
     class Data < Osm::Model
+      SORT_BY = [:section_id, :grouping_id, :last_name, :first_name]
+
       # @!attribute [rw] member_id
       #   @return [Fixnum] The OSM ID for the member
       # @!attribute [rw] grouping_id
@@ -277,16 +276,6 @@ module Osm
         Osm::Model.cache_delete(api, ['gift_aid_data', section_id, term_id]) if updated
 
         return updated
-      end
-
-
-      # Compare Data based on section_id, grouping_id, last_name then first_name
-      def <=>(another)
-        result = self.section_id <=> another.try(:section_id)
-        result = self.grouping_id <=> another.try(:grouping_id) if result == 0
-        result = self.last_name <=> another.try(:last_name) if result == 0
-        result = self.first_name <=> another.try(:last_name) if result == 0
-        return result
       end
 
     end # Class GiftAid::Data

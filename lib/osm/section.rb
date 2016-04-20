@@ -153,12 +153,10 @@ module Osm
         return get_from_ids(api, ids, 'section', options, :get_all)
       end
 
-      data = api.perform_query('api.php?action=getUserRoles')
-
       result = Array.new
       ids = Array.new
       permissions = Hash.new
-      data.each do |role_data|
+      api.get_user_roles(options).each do |role_data|
         next if role_data['section'].eql?('discount')  # It's not an actual section
         next if role_data['sectionConfig'].nil? # No config for the section = user hasn't got access
 

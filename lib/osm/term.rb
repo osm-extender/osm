@@ -1,6 +1,7 @@
 module Osm
 
   class Term < Osm::Model
+    SORT_BY = [:section_id, :start, :id]
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the term
@@ -230,14 +231,6 @@ module Osm
       return false if start.nil?
       return false if finish.nil?
       return (start <= date) && (finish >= date)
-    end
-
-    # Compare Term based on section_id, start then id
-    def <=>(another_term)
-      result = self.section_id <=> another_term.section_id
-      result = self.start <=> another_term.start if result == 0
-      result = self.id <=> another_term.id if result == 0
-      return result
     end
 
   end # Class Term

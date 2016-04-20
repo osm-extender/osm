@@ -169,6 +169,44 @@ module Osm
       }))
     end
 
+    # Get API user's roles in OSM
+    # @!macro options_get
+    # @return [Array<Hash>] data returned by OSM
+    def get_user_roles(*args)
+      begin
+        get_user_roles!(*args)
+      rescue Osm::NoActiveRoles
+        return []
+      end
+    end
+
+
+    # Get API user's roles in OSM
+    # @!macro options_get
+    # @return [Array<Hash>] data returned by OSM
+    # @raises Osm::NoActiveRoles
+    def get_user_roles!(options={})
+      cache_key = ['user_roles', @user_id]
+
+      if !options[:no_cache] && Osm::Model.cache_exist?(self, cache_key)
+        return Osm::Model.cache_read(self, cache_key)
+      end
+
+      begin
+        data = perform_query('api.php?action=getUserRoles')
+        Osm::Model.cache_write(self, cache_key, data)
+        return data
+
+      rescue Osm::Error => e
+        if e.message.eql?('false')
+          fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
+        else
+          raise e
+        end
+      end
+
+    end
+
     # Get API user's permissions
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that section
@@ -180,10 +218,8 @@ module Osm
         return Osm::Model.cache_read(self, cache_key)
       end
 
-      data = perform_query('api.php?action=getUserRoles')
-
       all_permissions = Hash.new
-      data.each do |item|
+      get_user_roles(options).each do |item|
         unless item['section'].eql?('discount')  # It's not an actual section
           all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
         end
@@ -242,23 +278,20 @@ module Osm
       return nil if result.response.body.empty?
       case result.response.content_type
         when 'application/json', 'text/html'
-          raise Osm::Error, result.response.body unless looks_like_json?(result.response.body)
-          decoded = ActiveSupport::JSON.decode(result.response.body)
-          osm_error = get_osm_error(decoded)
-          raise Osm::Error, osm_error if osm_error
-          return decoded
+          begin
+            decoded = ActiveSupport::JSON.decode(result.response.body)
+            if osm_error = get_osm_error(decoded)
+              fail Osm::Error, osm_error if osm_error
+            end
+            return decoded
+          rescue ActiveModel::VERSION::MAJOR.eql?(4) ? JSON::ParserError : MultiJson::ParseError
+            fail Osm::Error, result.response.body
+          end
         when 'image/jpeg'
           return result.response.body
         else
-          raise Osm::Error, "Unhandled content-type: #{result.response.content_type}"
+          fail Osm::Error, "Unhandled content-type: #{result.response.content_type}"
       end
-    end
-
-    # Check if text looks like it's JSON
-    # @param [String] text What to look at
-    # @return [Boolean]
-    def self.looks_like_json?(text)
-      (['[', '{'].include?(text[0]))
     end
 
     # Get the error returned by OSM

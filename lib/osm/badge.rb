@@ -324,14 +324,14 @@ module Osm
       @module_completion_data = get_module_completion_data(api, options) if fetched_this_time
 
       if @module_completion_data[badge.id].nil? && !fetched_this_time
-        @module_completion_data = fetch_from_osm
+        @module_completion_data = get_module_completion_data(api, options)
         fetched_this_time = true
       end
       data = @module_completion_data[badge.id]
       raise ArgumentError, "That badge does't exist (bad ID)." if data.nil?
 
       if data[badge.version].nil? && !fetched_this_time
-        @module_completion_data = fetch_from_osm
+        @module_completion_data = get_module_completion_data(api, options)
         data = @module_completion_data[badge.id]
         fetched_this_time = true
       end
@@ -511,6 +511,8 @@ module Osm
 
 
     class Data < Osm::Model
+      SORT_BY = [:badge, :section_id, :member_id]
+
       # @!attribute [rw] member_id
       #   @return [Fixnum] ID of the member this data relates to
       # @!attribute [rw] first_name
@@ -841,14 +843,6 @@ module Osm
         end
 
         return requirements_updated && due_updated && awarded_updated
-      end
-
-      # Compare Badge::Data based on badge, section_id then member_id
-      def <=>(another)
-        result = self.badge <=> another.try(:badge)
-        result = self.section_id <=> another.try(:section_id) if result == 0
-        result = self.member_id <=> another.try(:member_id) if result == 0
-        return result
       end
 
       def inspect

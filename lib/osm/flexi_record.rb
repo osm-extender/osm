@@ -238,6 +238,8 @@ module Osm
 
 
     class Data < Osm::Model
+      SORT_BY = [:flexi_record, :grouping_id, :member_id]
+
       # @!attribute [rw] flexi_record
       #   @return [Boolean] The FlexiRecord this column belongs to
       # @!attribute [rw] member_id

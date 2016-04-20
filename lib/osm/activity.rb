@@ -5,6 +5,8 @@ module Osm
     class File; end # Ensure the constant exists for the validators
     class Version; end # Ensure the constant exists for the validators
 
+    SORT_BY = [:id, :version]
+
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the activity
     # @!attribute [rw] version
@@ -272,13 +274,6 @@ module Osm
       else
         return false
       end
-    end
-
-    # Compare Activity based on id then version
-    def <=>(another)
-      result = self.id <=> another.try(:id)
-      result = self.version <=> another.try(:version) if result == 0
-      return result
     end
 
 
