@@ -172,8 +172,20 @@ module Osm
     # Get API user's roles in OSM
     # @!macro options_get
     # @return [Array<Hash>] data returned by OSM
+    def get_user_roles(*args)
+      begin
+        get_user_roles!(*args)
+      rescue Osm::NoActiveRoles
+        return []
+      end
+    end
+
+
+    # Get API user's roles in OSM
+    # @!macro options_get
+    # @return [Array<Hash>] data returned by OSM
     # @raises Osm::NoActiveRoles
-    def get_user_roles(options={})
+    def get_user_roles!(options={})
       cache_key = ['user_roles', @user_id]
 
       if !options[:no_cache] && Osm::Model.cache_exist?(self, cache_key)

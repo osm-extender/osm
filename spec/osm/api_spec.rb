@@ -83,9 +83,10 @@ describe "API" do
       @api.get_user_roles.should == ['a', 'b']
     end
 
-    it "Raises Osm::NoActiveRoles" do
+    it "User has no roles in OSM" do
       @api.stub(:perform_query).with('api.php?action=getUserRoles'){ raise Osm::Error, 'false' }
-      expect{ @api.get_user_roles }.to raise_error(Osm::NoActiveRoles)
+      expect{ @api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
+      @api.get_user_roles.should == []
     end
 
     it "Reraises any other Osm::Error" do
