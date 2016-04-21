@@ -1,3 +1,7 @@
+## Version 1.2.25
+
+  * 
+
 ## Version 1.2.24
 
   * Fix detection of no roles in api.get_user_roles!
