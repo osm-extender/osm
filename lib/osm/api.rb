@@ -194,8 +194,12 @@ module Osm
 
       begin
         data = perform_query('api.php?action=getUserRoles')
-        Osm::Model.cache_write(self, cache_key, data)
-        return data
+        unless data.eql?(false)
+          # false equates to no roles
+          Osm::Model.cache_write(self, cache_key, data)
+          return data
+        end
+        fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
 
       rescue Osm::Error => e
         if e.message.eql?('false')
