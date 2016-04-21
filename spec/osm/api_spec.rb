@@ -84,7 +84,7 @@ describe "API" do
     end
 
     it "User has no roles in OSM" do
-      @api.stub(:perform_query).with('api.php?action=getUserRoles'){ raise Osm::Error, 'false' }
+      @api.stub(:perform_query).with('api.php?action=getUserRoles'){ false }
       expect{ @api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
       @api.get_user_roles.should == []
     end
