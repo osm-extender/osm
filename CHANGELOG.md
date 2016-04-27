@@ -1,6 +1,6 @@
 ## Version 1.2.25
 
-  * 
+  * Add fetching of email delivery reports -> Osm::Email::Delivery class and subclasses
 
 ## Version 1.2.24
 

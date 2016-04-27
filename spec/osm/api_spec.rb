@@ -179,6 +179,11 @@ describe "API" do
       expect{ Osm::Api.authorize('email@example.com', 'password') }.to raise_error(Osm::Error, 'Error message')
     end
 
+    it "Raises an error if OSM returns an error (as a hash in a hash)" do
+      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"error":{"message":"Error message"}}'}) }
+      expect{ Osm::Api.authorize('email@example.com', 'password') }.to raise_error(Osm::Error, 'Error message')
+    end
+
     it "Raises an error if OSM returns an error (as a plain string)" do
       HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'Error message'}) }
       expect{ Osm::Api.authorize('email@example.com', 'password') }.to raise_error(Osm::Error, 'Error message')

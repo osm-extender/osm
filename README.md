@@ -89,7 +89,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API Supported:
 
-### Read
+### Retrieve
   * Activity
   * API Access
   * API Access for our app
@@ -100,6 +100,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Badge stock levels
   * Budgets (Gold required)
   * Due Badges
+  * Email delivery reports
   * Evening
   * Event (Silver required)
   * Events (Silver required)
