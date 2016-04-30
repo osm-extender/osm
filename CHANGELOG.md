@@ -2,6 +2,7 @@
 
   * Add fetching of email delivery reports -> Osm::Email::Delivery class and subclasses
   * Add fetching My.SCOUT parent login history - Osm::Myscout::ParentLoginHistory.get_for_section
+  * Add fetching and updating of My.SCOUT templates
 
 ## Version 1.2.24
 
