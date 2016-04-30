@@ -1,3 +1,10 @@
+## Version 1.2.25
+
+  * Add fetching My.SCOUT parent login history - Osm::Myscout::ParentLoginHistory.get_for_section
+  * Add fetching and updating of My.SCOUT templates
+  * Add fetching of email delivery reports -> Osm::Email::Delivery class and subclasses
+  * Send an email through OSM (use Osm::Email.get_emails_for_contacts method to get the value for Osm::Email.send_email method's send_to parameter).
+
 ## Version 1.2.24
 
   * Fix detection of no roles in api.get_user_roles!

@@ -162,11 +162,11 @@ module Osm
     # @param [String] url The script on the remote server to invoke
     # @param [Hash] api_data A hash containing the values to be sent to the server in the body of the request
     # @return [Hash, Array, String] the parsed JSON returned by OSM
-    def perform_query(url, api_data={})
+    def perform_query(url, api_data={}, raw=false)
       self.class.perform_query(@site, url, api_data.merge({
         'userid' => @user_id,
         'secret' => @user_secret,
-      }))
+      }), raw)
     end
 
     # Get API user's roles in OSM
@@ -251,7 +251,7 @@ module Osm
     # @return [Hash, Array, String] the parsed JSON returned by OSM
     # @raise [Osm::Error] If an error was returned by OSM
     # @raise [Osm::ConnectionError] If an error occured connecting to OSM
-    def self.perform_query(site, url, api_data={})
+    def self.perform_query(site, url, api_data={}, raw=false)
       raise ArgumentError, 'site is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(site)
  
       data = api_data.merge({
@@ -260,7 +260,7 @@ module Osm
       })
 
       if @@debug
-        puts "Making :#{site} API request to #{url}"
+        puts "Making #{'RAW' if raw} :#{site} API request to #{url}"
         hide_values_for = ['secret', 'token']
         api_data_as_string = api_data.sort.map{ |key, value| "#{key} => #{hide_values_for.include?(key) ? 'PRESENT' : value.inspect}" }.join(', ')
         puts "{#{api_data_as_string}}"
@@ -279,6 +279,7 @@ module Osm
         puts result.response.body
       end
 
+      return result.response.body if raw
       return nil if result.response.body.empty?
       case result.response.content_type
         when 'application/json', 'text/html'
@@ -306,6 +307,9 @@ module Osm
       return false unless data.is_a?(Hash)
       return false if data['ok']
       to_return = data['error'] || data['err'] || false
+      if to_return.is_a?(Hash)
+        to_return = to_return['message'] unless to_return['message'].blank?
+      end
       to_return = false if to_return.blank?
       return to_return
     end

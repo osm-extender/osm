@@ -4,14 +4,6 @@ require 'date'
 
 describe "Online Scout Manager" do
 
-  describe "Make array of symbols" do
-    it "turns array of strings to an array of symbols" do
-      start = %w{first second third}
-      Osm::make_array_of_symbols(start).should == [:first, :second, :third]
-    end
-  end
-
-
   describe "Make a DateTime" do
     it "is given a date and a time" do
       Osm::make_datetime('2001-02-03', '04:05:06').should == DateTime.new(2001, 02, 03, 04, 05, 06)

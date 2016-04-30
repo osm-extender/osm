@@ -89,7 +89,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API Supported:
 
-### Read
+### Retrieve
   * Activity
   * API Access
   * API Access for our app
@@ -100,6 +100,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
     * Badge stock levels
   * Budgets (Gold required)
   * Due Badges
+  * Email delivery reports
   * Evening
   * Event (Silver required)
   * Events (Silver required)
@@ -163,6 +164,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Authorise an app to use the API on a user's behalf
   * Add activity to programme
   * Send an SMS to member(s)
+  * Send an Email to member(s)
 
 ## Parts not/never supported
   * Campsite Directory

@@ -3,6 +3,7 @@ require 'active_attr'
 require 'active_support'
 require 'active_model'
 require 'date'
+require 'time'
 require 'httparty'
 require 'dirty_hashy'
 
@@ -88,13 +89,7 @@ module Osm
     end
 
 
-  private  
-  def self.make_array_of_symbols(array)
-    array.each_with_index do |item, index|
-      array[index] = item.to_sym
-    end
-  end
-
+  private
   def self.make_datetime(date, time, options={})
     date = nil if date.nil? || date.empty? || (!options[:ignore_epoch] && epoch_date?(date))
     time = nil if time.nil? || time.empty?

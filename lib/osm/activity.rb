@@ -141,7 +141,7 @@ module Osm
       attributes[:editable] = data['editable']
       attributes[:deletable] = data['deletable'] ? true : false
       attributes[:used] = data['used'].to_i
-      attributes[:sections] = data['sections'].is_a?(Array) ? Osm::make_array_of_symbols(data['sections']) : []
+      attributes[:sections] = data['sections'].is_a?(Array) ? data['sections'].map(&:to_sym) : []
       attributes[:tags] = data['tags'].is_a?(Array) ? data['tags'] : []
       attributes[:versions] = []
       attributes[:files] = []
