@@ -164,6 +164,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Authorise an app to use the API on a user's behalf
   * Add activity to programme
   * Send an SMS to member(s)
+  * Send an Email to member(s)
 
 ## Parts not/never supported
   * Campsite Directory

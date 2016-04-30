@@ -3,6 +3,152 @@ require 'spec_helper'
 
 describe "Email" do
 
+  describe "Get emails for contacts" do
+
+    it "Single member" do
+      @api.should_receive(:perform_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2", {"contactGroups" => '["contact_primary_member"]'}){
+        {
+          "emails"=>{
+            "2"=>{
+              "emails"=>["john@example.com"],
+              "firstname"=>"John",
+              "lastname"=>"Smith"
+            }
+          },
+          "count"=>1
+        }
+      }
+
+      result = Osm::Email.get_emails_for_contacts(@api, 1, :member, 2)
+      result.should == {
+        '2' => {
+          'emails' => ['john@example.com'],
+          'firstname' => 'John',
+          'lastname' => 'Smith'
+        }
+      }
+    end
+
+    it "Several members" do
+      @api.should_receive(:perform_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3", {"contactGroups" => '["contact_primary_member"]'}){
+        {
+          "emails"=>{
+            "2"=>{
+              "emails"=>["john@example.com"],
+              "firstname"=>"John",
+              "lastname"=>"Smith"
+            },
+            "3"=>{
+              "emails"=>["jane@example.com","jane2@example.com"],
+              "firstname"=>"Jane",
+              "lastname"=>"Smith"
+            }
+          },
+          "count"=>3
+        }
+      }
+
+      result = Osm::Email.get_emails_for_contacts(@api, 1, :member, [2,3])
+      result.should == {
+        '2' => {
+          'emails' => ['john@example.com'],
+          'firstname' => 'John',
+          'lastname' => 'Smith'
+        },
+        '3' => {
+          'emails' => ['jane@example.com', 'jane2@example.com'],
+          'firstname' => 'Jane',
+          'lastname' => 'Smith'
+        }
+      }
+    end
+
+    it "Requires at least one contact" do
+      @api.should_not_receive(:perform_query)
+      expect{ Osm::Email.get_emails_for_contacts(@api, 1, [], [2]) }.to raise_error ArgumentError, "You must pass at least one contact"
+    end
+
+    it "Checks for invalid contacts" do
+      @api.should_not_receive(:perform_query)
+      expect{ Osm::Email.get_emails_for_contacts(@api, 1, [:invalid_contact], [2]) }.to raise_error ArgumentError, "Invalid contact - :invalid_contact"
+    end
+
+    it "Requires at least one member" do
+      @api.should_not_receive(:perform_query)
+      expect{ Osm::Email.get_emails_for_contacts(@api, 1, [:primary], []) }.to raise_error ArgumentError, "You must pass at least one member"
+    end
+
+  end # describe Get emails for conatcts
+
+  describe "Send email" do
+
+    it "With cc" do
+      @api.should_receive(:perform_query).with("ext/members/email/?action=send", {
+        'sectionid' => 1,
+        'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]}}',
+        'scouts' => '2',
+        'cc' => 'cc@example.com',
+        'from' => 'Sender <from@example.com>',
+        'subject' => 'Subject of email',
+        'body' => 'Body of email',
+      }){ {'ok'=>true} }
+
+      Osm::Email.send_email(
+        @api,
+        1,
+        {'2'=>{'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com']}},
+        'cc@example.com',
+        'Sender <from@example.com>',
+        'Subject of email',
+        'Body of email',
+      ).should == true
+    end
+
+    it "Without cc" do
+      @api.should_receive(:perform_query).with("ext/members/email/?action=send", {
+        'sectionid' => 1,
+        'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]}}',
+        'scouts' => '2',
+        'cc' => '',
+        'from' => 'Sender <from@example.com>',
+        'subject' => 'Subject of email',
+        'body' => 'Body of email',
+      }){ {'ok'=>true} }
+
+      Osm::Email.send_email(
+        @api,
+        1,
+        {'2'=>{'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com']}},
+        'Sender <from@example.com>',
+        'Subject of email',
+        'Body of email',
+      ).should == true
+    end
+
+    it "To several members" do
+      @api.should_receive(:perform_query).with("ext/members/email/?action=send", {
+        'sectionid' => 1,
+        'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]},"3":{"firstname":"Jane","lastname":"Smith","emails":["jane@example.com"]}}',
+        'scouts' => '2,3',
+        'cc' => '',
+        'from' => 'Sender <from@example.com>',
+        'subject' => 'Subject of email',
+        'body' => 'Body of email',
+      }){ {'ok'=>true} }
+
+      Osm::Email.send_email(
+        @api,
+        1,
+        {'2'=>{'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com']},'3'=>{'firstname'=>'Jane', 'lastname'=>'Smith', 'emails'=>['jane@example.com']}},
+        'Sender <from@example.com>',
+        'Subject of email',
+        'Body of email',
+      ).should == true
+    end
+
+  end # describe Send email
+
+
   describe "DeliveryReport" do
 
     describe "Attribute validity -" do
