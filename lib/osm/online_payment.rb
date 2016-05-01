@@ -317,7 +317,7 @@ module Osm
         validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
         validates_presence_of :first_name
         validates_presence_of :last_name
-        validates_inclusion_of :direct_debit, in: [:active, :inactive]
+        validates_inclusion_of :direct_debit, in: [:active, :inactive, :cancelled]
         validates :payments, hash: {key_type: Fixnum, value_type: Array}
 
 
