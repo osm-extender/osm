@@ -1,3 +1,7 @@
+## Version 1.2.26
+
+  * 
+
 ## Version 1.2.25
 
   * Add fetching My.SCOUT parent login history - Osm::Myscout::ParentLoginHistory.get_for_section
