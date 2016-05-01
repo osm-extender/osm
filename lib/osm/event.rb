@@ -28,6 +28,8 @@ module Osm
     #   @return [Boolean] if the event has been archived
     # @!attribute [rw] badges
     #   @return [Array<Osm::Event::BadgeLink>] the badge links for the event
+    # @!attribute [rw] files
+    #   @return [Array<String>] the files attached to this event
     # @!attribute [rw] columns
     #   @return [Array<Osm::Event::Column>] the custom columns for the event
     # @!attribute [rw] notepad
@@ -59,6 +61,7 @@ module Osm
     attribute :notes, :type => String, :default => ''
     attribute :archived, :type => Boolean, :default => false
     attribute :badges, :default => []
+    attribute :files, :default => []
     attribute :columns, :default => []
     attribute :notepad, :type => String, :default => ''
     attribute :public_notepad, :type => String, :default => ''
@@ -72,8 +75,8 @@ module Osm
 
     if ActiveModel::VERSION::MAJOR < 4
       attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
-                      :fields, :badges, :columns, :notepad, :public_notepad, :confirm_by_date, :allow_changes,
-                      :reminders, :attendance_limit, :attendance_limit_includes_leaders,
+                      :fields, :badges, :files, :columns, :notepad, :public_notepad, :confirm_by_date,
+                      :allow_changes, :reminders, :attendance_limit, :attendance_limit_includes_leaders,
                       :attendance_reminder, :allow_booking
     end
 
@@ -83,6 +86,7 @@ module Osm
     validates_presence_of :name
     validates :badges, :array_of => {:item_type => Osm::Event::BadgeLink, :item_valid => true}
     validates :columns, :array_of => {:item_type => Osm::Event::Column, :item_valid => true}
+    validates :files, :array_of => {:item_type => String}
     validates_inclusion_of :allow_changes, :in => [true, false]
     validates_inclusion_of :reminders, :in => [true, false]
     validates_inclusion_of :attendance_limit_includes_leaders, :in => [true, false]
@@ -120,7 +124,12 @@ module Osm
         unless data['items'].nil?
           data['items'].map { |i| i['eventid'].to_i }.each do |event_id|
             event_data = api.perform_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
+            files_data = api.perform_query("ext/uploads/events/?action=listAttachments&sectionid=#{section_id}&eventid=#{event_id}")
+            files = files_data.is_a?(Hash) ? files_data['files'] : files_data
+            files = [] unless files.is_a?(Array)
+
             event = self.new_event_from_data(event_data)
+            event.files = files
             events.push event
             ids.push event.id
             cache_write(api, ['event', event.id], event)

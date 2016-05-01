@@ -1,6 +1,6 @@
 ## Version 1.2.26
 
-  * 
+  * Add fetching of file names for events (unable to download)
 
 ## Version 1.2.25
 
