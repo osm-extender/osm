@@ -174,7 +174,7 @@ module Osm
     replace_with = options[:replace_with] || {}
 
     values = instance.attributes.sort.map{ |(k,v)|
-      (replace_with.keys.include?(k) && !v.nil?) ? "#{k}.#{replace_with[k]}: #{v.try(replace_with[k])}" : "#{k}: #{v.inspect}"
+      (replace_with.keys.include?(k) && !v.nil?) ? "#{k}.#{replace_with[k]}: #{v.try(replace_with[k]).inspect}" : "#{k}: #{v.inspect}"
     }
 
     return "#<#{instance.class.name} #{values.join(', ')} >"
