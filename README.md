@@ -113,8 +113,13 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Groupings (e.g. Sixes, Patrols)
   * Invoices (Gold required)
   * Members
+  * My.SCOUT Templates
   * Notepad
   * Notepads
+  * Online Payments:
+    * Schedules
+    * Payment Statuses
+    * Payment Status History
   * Programme
   * Register Data
   * Register Structure
@@ -140,6 +145,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Grouping
   * Invoices (Gold required)
   * Member
+  * My.SCOUT Templates
   * Register Attendance
 
 ### Create
