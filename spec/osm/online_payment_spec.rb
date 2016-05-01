@@ -127,6 +127,67 @@ describe "Online payments" do
         Osm::OnlinePayment::Schedule.get_for_section(@api, 5).should == ['A', 'B']
       end
 
+      describe "Gets member's payments" do
+
+        before :each do
+          @payment = Osm::OnlinePayment::Schedule::Payment.new(id: 4)
+          @schedule = Osm::OnlinePayment::Schedule.new(
+            id:         1,
+            section_id: 2,
+            payments:   [@payment]
+          )
+          body = {'items'=>[ {
+            'directdebit'=>'Active', 'firstname'=>'John', 'lastname'=>'Snow', 'patrolid'=>'5', 'scoutid'=>'6',
+            'startdate'=>'2015-02-03',
+            '4'=>'{"status":[{"statusid":"7","scoutid":"6","schemeid":"1","paymentid":"8","statustimestamp":"03/02/2016 20:51","status":"Paid manually","details":"","editable":"1","latest":"1","who":"0","firstname":"System"}]}',
+          } ]}
+          @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=2&schemeid=1&termid=3').once{ body }
+        end
+
+        it 'For a "collect all" schedule' do
+          @schedule.require_all = true
+          p4m = @schedule.get_payments_for_members(@api, 3)
+          p4m.is_a?(Array).should == true
+          p4m.size.should == 1
+          p4m = p4m[0]
+          p4m.member_id.should == 6
+          p4m.section_id.should == 2
+          p4m.grouping_id.should == 5
+          p4m.first_name.should == 'John'
+          p4m.last_name.should == 'Snow'
+          p4m.start_date.should == Date.new(2015, 2, 3)
+          p4m.direct_debit.should == :active
+          p4m.payments.size.should == 1
+          payment = p4m.payments[4][0]
+          payment.id.should == 7
+          payment.payment.should == @payment
+          payment.timestamp.should == Time.new(2016, 2, 3, 20, 51)
+          payment.status.should == :paid_manually
+          payment.details.should == ''
+          payment.updated_by.should == 'System'
+          payment.updated_by_id.should == 0
+          payment.valid?.should == true
+          p4m.valid?.should == true
+        end
+
+        it 'For a "not collect all" schedule' do
+          @schedule.require_all = false
+          p4m = @schedule.get_payments_for_members(@api, 3)[0]
+          p4m.start_date.should == nil    # Only difference to a "collect all" type
+          p4m.valid?.should == true
+        end
+
+        it "When it needs to fetch a term" do
+          section = Osm::Section.new(id: 2)
+          Osm::Term.stub(:get_current_term_for_section).and_return(Osm::Term.new(id: 3))
+          Osm::Section.stub(:get).and_return(section)
+          p4m = @schedule.get_payments_for_members(@api)[0]
+          p4m.member_id.should == 6
+          p4m.valid?.should == true
+        end
+
+      end # describe Schedule : Uses OSM's API : Get member's payments
+
     end # describe Schedule : Uses OSM's API
 
 
@@ -160,6 +221,182 @@ describe "Online payments" do
       end
 
     end # describe Schedule -> Payment
+
+
+    describe "PaymentsForMember" do
+
+      it "Create" do
+        p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(
+          first_name:     'John',
+          last_name:      'Smith',
+          member_id:      1,
+          section_id:     2,
+          grouping_id:    3,
+          direct_debit:   :active,
+          start_date:     Date.new(2016, 6, 7),
+          payments:       {},
+        )
+        p4m.first_name.should == 'John'
+        p4m.last_name.should == 'Smith'
+        p4m.member_id.should == 1
+        p4m.section_id.should == 2
+        p4m.grouping_id.should == 3
+        p4m.direct_debit.should == :active
+        p4m.start_date.should == Date.new(2016, 6, 7)
+        p4m.payments.should == {}
+        p4m.valid?.should == true
+      end
+
+      it "Gets most recent status for a payment" do
+        payments = {
+          1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 1, timestamp: Time.new(2016, 1, 2, 3, 4))],
+          2 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 2, timestamp: Time.new(2016, 1, 2, 3, 4))],
+          3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 3, timestamp: Time.new(2016, 1, 2, 3, 4)), Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 4, timestamp: Time.new(2016, 1, 2, 3, 5))],
+        }
+        p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
+
+        p4m.latest_status_for(1).id.should == 1
+        p4m.latest_status_for(Osm::OnlinePayment::Schedule::Payment.new(id: 2)).id.should == 2
+        p4m.latest_status_for(3).id.should == 4
+      end
+
+      it "Works out if a payment is paid" do
+        payments = {
+          1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :required)],
+          2 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :not_required)],
+          3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :initiated)],
+          4 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid)],
+          5 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :received)],
+          6 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)],
+        }
+        p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
+
+        p4m.paid?(1).should == false
+        p4m.paid?(2).should == false
+        p4m.paid?(3).should == true
+        p4m.paid?(4).should == true
+        p4m.paid?(5).should == true
+        p4m.paid?(6).should == true
+        p4m.paid?(7).should == nil
+      end
+
+      it "Works out if a payment is unpaid" do
+        payments = {
+          1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :required)],
+          2 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :not_required)],
+          3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :initiated)],
+          4 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid)],
+          5 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :received)],
+          6 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)],
+        }
+        p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
+
+        p4m.unpaid?(1).should == true
+        p4m.unpaid?(2).should == false
+        p4m.unpaid?(3).should == false
+        p4m.unpaid?(4).should == false
+        p4m.unpaid?(5).should == false
+        p4m.unpaid?(6).should == false
+        p4m.unpaid?(7).should == nil
+      end
+
+      it "Tells if the user has an active direct debit" do
+        p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(direct_debit: :active)
+        p4m.active_direct_debit?.should == true
+
+        p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(direct_debit: :inactive)
+        p4m.active_direct_debit?.should == false
+      end
+
+      describe "Works out if a payment is over due" do
+
+        before :each do
+          @payment = Osm::OnlinePayment::Schedule::Payment.new(id: 1, due_date: Date.new(2016, 1, 2))
+          paid_payments = { 1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid, payment: @payment)] }
+          @paid = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: paid_payments)
+          unpaid_payments = { 1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :required, payment: @payment)] }
+          @unpaid = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: unpaid_payments)
+        end
+
+        it "Due date in over" do
+          date = Date.new(2016, 1, 3)
+          @paid.over_due?(@payment, date).should == false
+          @unpaid.over_due?(@payment, date).should == true
+        end
+
+        it "Due date in present" do
+          # Due today means that it is not over being due
+          date = Date.new(2016, 1, 2)
+          @paid.over_due?(@payment, date).should == false
+          @unpaid.over_due?(@payment, date).should == false
+        end
+
+        it "Due date in future" do
+          date = Date.new(2016, 1, 1)
+          @paid.over_due?(@payment, date).should == false
+          @unpaid.over_due?(@payment, date).should == false
+        end
+
+      end # describe Schedule -> PaymentsForMember : is payment past due?
+    end # describe Schedule -> PaymentsForMember
+
+
+    describe "Payment status" do
+
+      it "Create" do
+        payment = Osm::OnlinePayment::Schedule::Payment.new
+        payment.stub('valid?'){ true }
+        status = Osm::OnlinePayment::Schedule::PaymentStatus.new(
+          id:             1,
+          payment:        payment,
+          details:        'Details',
+          timestamp:      Time.new(2016, 4, 5, 6, 7),
+          status:         :paid,
+          updated_by:     'My.SCOUT',
+          updated_by_id:  -2,
+        )
+        status.id.should == 1
+        status.payment.should == payment
+        status.details.should == 'Details'
+        status.timestamp.should == Time.new(2016, 4, 5, 6, 7)
+        status.status.should == :paid
+        status.updated_by.should == 'My.SCOUT'
+        status.updated_by_id.should == -2
+        status.valid?.should == true
+      end
+
+      it "Sorts by timestamp (desc), payment then id" do
+        status1 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 6), payment: 1, id: 1)
+        status2 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 1, id: 1)
+        status3 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 2, id: 1)
+        status4 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 2, id: 2)
+        statuses = [status3, status1, status4, status2]
+        statuses.sort.should == [status1, status2, status3, status4]
+      end
+
+      describe "Has status checking method for" do
+        before :each do
+          @payments = []
+          Osm::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES.each do |status|
+            payment = Osm::OnlinePayment::Schedule::PaymentStatus.new(status: status)
+            @payments.push payment
+            instance_variable_set("@#{status}_payment", payment)
+          end
+        end
+
+        Osm::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES.each do |status|
+          it status.to_s do
+            payment = instance_variable_get("@#{status}_payment")
+            payment.send("#{status}?").should == true
+            (Osm::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES - [status]).each do |i|
+              payment.send("#{i}?").should == false
+            end
+          end
+        end
+      end
+
+    end # describe Schedule -> PaymentStatus
+
 
   end # describe Schedule
 

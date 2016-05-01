@@ -4,6 +4,7 @@ module Osm
 
     class Schedule < Osm::Model
       class Payment < Osm::Model; end # Ensure the constant exists for the validators
+      class PaymentStatus < Osm::Model; end # Ensure the constant exists for validators
 
       SORT_BY = [:section_id, :name, :id]
       PAY_NOW_OPTIONS = {
@@ -160,6 +161,64 @@ module Osm
         return schedule
       end
 
+
+      # Get payments made by members for the schedule
+      # @param [Osm::Api] api The api to use to make the request
+      # @param [Osm::Term, Fixnum, #to_i] term The term (or it's id) to get details for (defaults to current term)
+      # @!macro options_get
+      # @return [Array<Osm::OnlinePayment::Schedule::PaymentsForMember>]
+      def get_payments_for_members(api, term=nil, options={})
+        require_ability_to(api, :read, :finance, section_id, options)
+
+        payments_by_id = Hash[ payments.map{ |p| [p.id, p] } ]
+        if term.nil?
+          section = Osm::Section.get(api, section_id, options)
+          term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api, section)
+        end
+
+        cache_key = ['online_payments', 'for_members', id, term.to_i]
+        if !options[:no_cache] && cache_exist?(api, cache_key)
+          return cache_read(api, cache_key)
+        end
+
+        data = api.perform_query("ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=#{section_id}&schemeid=#{id}&termid=#{term.to_i}")
+        data = data['items'] || []
+        data.map! do |item|
+          payments_data = {}
+          payments.map(&:id).each do |payment_id|
+            payments_data[payment_id] = []
+            osm_data = ActiveSupport::JSON.decode(item[payment_id.to_s] || '{}')['status'] || []
+            osm_data.each do |osm_item|
+              payments_data[payment_id].push PaymentStatus.new(
+                id:             Osm::to_i_or_nil(osm_item['statusid']),
+                payment:        payments_by_id[payment_id],
+                timestamp:      Time.strptime(osm_item['statustimestamp'], '%d/%m/%Y %H:%M'),
+                status:         osm_item['status'].downcase.gsub(' ', '_').to_sym,
+                details:        osm_item['details'],
+                updated_by:     osm_item['firstname'],
+                updated_by_id:  osm_item['who'].to_i,
+              )
+            end
+          end
+
+          PaymentsForMember.new(
+            member_id:      Osm::to_i_or_nil(item['scoutid']),
+            section_id:     section_id,
+            grouping_id:    Osm::to_i_or_nil(item['patrolid']),
+            first_name:     item['firstname'],
+            last_name:      item['lastname'],
+            start_date:     require_all ? Osm::parse_date(item['startdate']) : nil,
+            direct_debit:   item['directdebit'].downcase.to_sym,
+            payments:       payments_data,
+          )
+        end
+
+        cache_write(api, cache_key, data)
+        return data
+      end
+
+
+
       # Get unarchived payments for the schedule
       # @return [Array<Osm::OnlinePayment::Schedule::Payment>]
       def current_payments
@@ -225,7 +284,7 @@ module Osm
         #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
-        # Check if the payment is past die (or will be past die on the passed date)
+        # Check if the payment is past due (or will be past due on the passed date)
         # @param [Date] date The date to check for (defaults to today)
         # @return [Boolean]
         def past_due?(date=Date.today)
@@ -238,6 +297,143 @@ module Osm
 
       end # Schedule::Payment class
 
+
+      class PaymentsForMember < Osm::Model
+        attribute :first_name, type: String
+        attribute :last_name, type: String
+        attribute :member_id, type: Integer
+        attribute :section_id, type: Integer
+        attribute :grouping_id, type: Integer
+        attribute :direct_debit, type: Object
+        attribute :start_date, type: Object
+        attribute :payments, type: Object, default: {}      # payment_id -> Array of statuses
+
+        if ActiveModel::VERSION::MAJOR < 4
+          attr_accessible :first_name, :last_name, :member_id, :section_id, :grouping_id, :direct_debit, :start_date, :payments
+        end
+
+        validates_numericality_of :member_id, only_integer: true, greater_than: 0
+        validates_numericality_of :section_id, only_integer: true, greater_than: 0
+        validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
+        validates_presence_of :first_name
+        validates_presence_of :last_name
+        validates_inclusion_of :direct_debit, in: [:active, :inactive]
+        validates :payments, hash: {key_type: Fixnum, value_type: Array}
+
+
+        # @!method initialize
+        #   Initialize a new Schedule
+        #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+
+        # Get the most recent status for a member's payment
+        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
+        # @return [Boolean]
+        def latest_status_for(payment)
+          @latest_status ||= Hash[ payments.map{ |k,v| [k, v.sort[0]] } ]
+          @latest_status[payment.to_i]
+        end
+
+        # Check if the status of a member's payment is considered paid
+        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
+        # @return [Boolean, nil]
+        def paid?(payment)
+          status = latest_status_for(payment.to_i)
+          return nil if status.nil?
+          [:paid, :paid_manually, :received, :initiated].include?(status.status)
+        end
+
+        # Check if the status of a member's payment is considered unpaid
+        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
+        # @return [Boolean, nil]
+        def unpaid?(payment)
+          status = latest_status_for(payment.to_i)
+          return nil if status.nil?
+          [:required].include?(status.status)
+        end
+
+        # Check if a payment is over due (or will be over due on the passed date)
+        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
+        # @param [Date] date The date to check for (defaults to today)
+        # @return [Boolean] whether the member's payment is unpaid and the payment's due date has passed
+        def over_due?(payment, date=nil)
+          unpaid?(payment) && payment.past_due?(date)
+        end
+
+        # Check if the member has an active direct debit for this schedule
+        # @return [Boolean]
+        def active_direct_debit?
+          direct_debit.eql?(:active)
+        end
+
+      end # Schedule::PaymentsForMember class
+
+
+      class PaymentStatus < Osm::Model
+        VALID_STATUSES = [:required, :not_required, :initiated, :paid, :received, :paid_manually]
+
+        attribute :id, type: Integer
+        attribute :payment, type: Object
+        attribute :timestamp, type: Object
+        attribute :status, type: Object
+        attribute :details, type: String
+        attribute :updated_by, type: String
+        attribute :updated_by_id, type: Integer
+
+        if ActiveModel::VERSION::MAJOR < 4
+          attr_accessible :id, :payment, :timestamp, :status, :details, :updated_by, :updated_by_id
+        end
+
+        validates_numericality_of :id, only_integer: true, greater_than: 0
+        validates_numericality_of :updated_by_id, only_integer: true, greater_than_or_equal_to: -2
+        validates_presence_of :payment
+        validates_presence_of :timestamp
+        validates_presence_of :updated_by
+        validates_inclusion_of :status, in: VALID_STATUSES
+
+
+        # @!method initialize
+        #   Initialize a new PaymentStatus
+        #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+
+
+        # @!method required?
+        #   Whether the status is :required
+        #   @return (Boolean)
+        # @!method not_required?
+        #   Whether the status is :not_required
+        #   @return (Boolean)
+        # @!method initiated?
+        #   Whether the status is :initiated
+        #   @return (Boolean)
+        # @!method paid?
+        #   Whether the status is :paid
+        #   @return (Boolean)
+        # @!method received?
+        #   Whether the status is :received
+        #   @return (Boolean)
+        # @!method paid_manually?
+        #   Whether the status is :paid_manually
+        #   @return (Boolean)
+        VALID_STATUSES.each do |attribute|
+          define_method "#{attribute}?" do
+            status.eql?(attribute)
+          end
+        end
+
+
+        def <=>(another)
+          result = -(self.timestamp <=> another.try(:timestamp))
+          result = self.payment <=> another.try(:payment) if result.eql?(0)
+          result = self.id <=> another.try(:id) if result.eql?(0)
+          return result
+        end
+
+        def inspect
+          Osm.inspect_instance(self, {:replace_with => {'payment' => :id}})
+        end
+
+      end # Schedule::PaymentStatus class
 
     end # Schedule class
 
