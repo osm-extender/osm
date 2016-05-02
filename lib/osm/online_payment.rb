@@ -305,7 +305,7 @@ module Osm
         # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
         # @return [Boolean]
         def latest_status_for(payment)
-          @latest_status ||= Hash[ payments.map{ |k,v| [k, v.sort.first] } ]
+          @latest_status ||= payments.map{ |k,v| [k, v.sort.first] }.to_h
           @latest_status[payment.to_i]
         end
 

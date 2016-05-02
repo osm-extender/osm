@@ -262,7 +262,7 @@ module Osm
           :due => d['completed'].to_i,
           :awarded => d['awarded'].to_i,
           :awarded_date => Osm.parse_date(d['awardeddate']),
-          :requirements => Hash[d.map{ |k,v| [k.to_i, v] }].except(0),
+          :requirements => d.map{ |k,v| [k.to_i, v] }.to_h.except(0),
           :section_id => section.id,
           :badge => self,
         )

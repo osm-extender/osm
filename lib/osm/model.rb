@@ -80,7 +80,7 @@ module Osm
       attributes_now = attributes.map do |k,v|
         [k, (classes_to_clone.include?(v.class) ? v.clone : v)]
       end # Deep(ish) clone
-      @original_attributes = Hash[attributes_now]
+      @original_attributes = attributes_now.to_h
     end
 
 

@@ -20,7 +20,7 @@ module Osm
       data = api.perform_query("ext/badges/stock/?action=getBadgeStock&section=#{section.type}&section_id=#{section.id}&term_id=#{term_id}")
       data = (data['items'] || [])
       data.map!{ |i| [i['badge_id_level'], i['stock']] }
-      data = Hash[data]
+      data = data.to_h
 
       Osm::Model.cache_write(api, cache_key, data)
       return data
