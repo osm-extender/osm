@@ -85,10 +85,6 @@ module Osm
       attribute :recipients, type: Object, default: []
       attribute :section_id, type: Integer
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :id, :sent_at, :subject, :recipients, :section_id
-      end
-
       validates_numericality_of :id, only_integer: true, greater_than: 0
       validates_numericality_of :section_id, only_integer: true, greater_than: 0
       validates_presence_of :sent_at
@@ -241,10 +237,6 @@ module Osm
         attribute :status, type: Object, default: :unknown
         attribute :member_id, type: Integer
 
-        if ActiveModel::VERSION::MAJOR < 4
-          attr_accessible :id, :delivery_report, :address, :status, :member_id
-        end
-
         validates_numericality_of :id, only_integer: true, greater_than: 0
         validates_numericality_of :member_id, only_integer: true, greater_than: 0
         validates_presence_of :address
@@ -336,10 +328,6 @@ module Osm
         attribute :from, type: String
         attribute :subject, type: String
         attribute :body, type: String
-
-        if ActiveModel::VERSION::MAJOR < 4
-          attr_accessible :to, :from, :subject, :body
-        end
 
         validates_presence_of :to
         validates_presence_of :from

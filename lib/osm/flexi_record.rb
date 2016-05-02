@@ -12,10 +12,6 @@ module Osm
     attribute :section_id, :type => Integer
     attribute :name, :type => String
 
-    if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :id, :section_id, :name
-    end
-
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_presence_of :name
@@ -142,10 +138,6 @@ module Osm
       attribute :name, :type => String
       attribute :editable, :type => Boolean, :default => false
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :flexi_record, :id, :name, :editable
-      end
-
       validates_presence_of :flexi_record
       validates_presence_of :id
       validates_presence_of :name
@@ -253,10 +245,6 @@ module Osm
       attribute :member_id, :type => Integer
       attribute :grouping_id, :type => Integer
       attribute :fields, :default => {}
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :flexi_record, :member_id, :grouping_id, :fields
-      end
 
       validates_presence_of :flexi_record
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0

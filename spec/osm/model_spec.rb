@@ -6,7 +6,6 @@ describe "Model" do
 
   class ModelTester < Osm::Model
     attribute :id
-    attr_accessible :id if ActiveModel::VERSION::MAJOR < 4
 
     def self.test_get_config
       {

@@ -94,19 +94,6 @@ module Osm
     attribute :myscout_payment_reminder_frequency, :type => Integer
     attribute :myscout_details_email_changes_to, :type => String, :default => ''
 
-    if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :id, :name, :group_id, :group_name, :subscription_level, :subscription_expires,
-                      :type, :flexi_records,
-                      :gocardless, :myscout_events_expires, :myscout_badges_expires,
-                      :myscout_programme_expires, :myscout_details_expires, :myscout_events,
-                      :myscout_badges, :myscout_programme, :myscout_payments, :myscout_details,
-                      :myscout_emails, :myscout_email_address_from, :myscout_email_address_copy,
-                      :myscout_badges_partial, :myscout_programme_summary, :myscout_programme_times,
-                      :myscout_programme_show, :myscout_event_reminder_count,
-                      :myscout_event_reminder_frequency, :myscout_payment_reminder_count,
-                      :myscout_payment_reminder_frequency, :myscout_details_email_changes_to
-    end
-
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :myscout_event_reminder_count, :only_integer=>true, :greater_than_or_equal_to=>-1

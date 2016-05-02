@@ -7,7 +7,6 @@ rvm:
   - jruby-9.0.0
 gemfile:
   - Gemfile
-  - gemfiles/rails3
 branches:
   only:
     - master

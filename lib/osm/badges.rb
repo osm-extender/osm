@@ -113,10 +113,6 @@ module Osm
       attribute :member_names, :default => {}
       attribute :badge_stock, :default => {}
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :badge_names, :by_member, :member_names, :badge_stock
-      end
-
       validates :badge_names, :hash => {:key_type => String, :value_type => String}
       validates :member_names, :hash => {:key_type => Fixnum, :value_type => String}
       validates :badge_stock, :hash => {:key_type => String, :value_type => Fixnum}

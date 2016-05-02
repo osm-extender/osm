@@ -96,22 +96,6 @@ module Osm
     attribute :emergency_contact, :type => Object
     attribute :doctor, :type => Object
 
-    if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :id, :section_id, :first_name, :last_name,
-                      :grouping_id, :grouping_leader,
-                      :date_of_birth, :started_section, :finished_section, :joined_movement, :age,
-                      :grouping_label, :grouping_leader_label, :gender,
-                      :additional_information, :additional_information_labels,
-                      :contact, :primary_contact, :secondary_contact, :emergency_contact, :doctor
-    end
-
-    unless ActiveModel::VERSION::MAJOR < 4
-      validates_presence_of :grouping_label, :allow_blank => true
-      validates_presence_of :grouping_leader_label, :allow_blank => true
-      validates_presence_of :additional_information, :allow_blank => true
-      validates_presence_of :additional_information_labels, :allow_blank => true
-      validates_presence_of :finished_section, :allow_nil=>true
-    end
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
@@ -647,13 +631,6 @@ module Osm
       attribute :additional_information, :type => Object, :default => DirtyHashy.new
       attribute :additional_information_labels, :type => Object, :default => DirtyHashy.new
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :first_name, :last_name,
-                        :address_1, :address_2, :address_3, :address_4,
-                        :postcode, :phone_1, :phone_2,
-                        :additional_information, :additional_information_labels
-      end
-
       # @!method initialize
       #   Initialize a new Contact
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
@@ -758,11 +735,6 @@ module Osm
       attribute :receive_phone_1, :type => Boolean, :default => false
       attribute :receive_phone_2, :type => Boolean, :default => false
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :email_1, :email_2, :receive_email_1, :receive_email_2,
-                        :receive_phone_1, :receive_phone_2
-      end
-
       validates_inclusion_of :receive_email_1, :in => [true, false]
       validates_inclusion_of :receive_email_2, :in => [true, false]
       validates_inclusion_of :receive_phone_1, :in => [true, false]
@@ -796,11 +768,6 @@ module Osm
       attribute :receive_phone_1, :type => Boolean, :default => false
       attribute :receive_phone_2, :type => Boolean, :default => false
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :email_1, :email_2,
-                        :receive_email_1, :receive_email_2, :receive_phone_1, :receive_phone_2
-      end
-
       validates_inclusion_of :receive_email_1, :in => [true, false]
       validates_inclusion_of :receive_email_2, :in => [true, false]
       validates_inclusion_of :receive_phone_1, :in => [true, false]
@@ -824,10 +791,6 @@ module Osm
       attribute :email_1, :type => String
       attribute :email_2, :type => String
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :email_1, :email_2
-      end
-
     end # class EmergencyContact
 
 
@@ -838,10 +801,6 @@ module Osm
       #   @return [String] the surgery name
 
       attribute :surgery, :type => String
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :surgery
-      end
 
     end # class DoctorContact
 

@@ -13,10 +13,6 @@ module Osm
     attribute :name, :type => String
     attribute :permissions, :default => {}
 
-    if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :id, :name, :permissions
-    end
-
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_presence_of :name
 

@@ -22,10 +22,6 @@ module Osm
       attribute :logins, type: Integer
       attribute :last_login, type: DateTime
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :member_id, :first_name, :last_name, :logins, :last_login
-      end
-
       validates_presence_of :first_name
       validates_presence_of :last_name
       validates_numericality_of :member_id, only_integer: true, greater_than: 0

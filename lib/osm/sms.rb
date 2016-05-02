@@ -112,10 +112,6 @@ module Osm
       attribute :credits, :type => Integer
       attribute :status, :type => Object
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :sms_id, :user_id, :member_id, :section_id, :from_name, :from_number, :to_name, :to_number, :message, :scheduled, :last_updated, :credits, :status
-      end
-
       validates_numericality_of :sms_id, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :user_id, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than_or_equal_to=>0

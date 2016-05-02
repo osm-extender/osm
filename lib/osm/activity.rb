@@ -69,13 +69,6 @@ module Osm
     attribute :files, :default => []
     attribute :badges, :default => []
 
-    if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :id, :version, :group_id, :user_id, :title, :description,
-                      :resources, :instructions, :running_time, :location,
-                      :shared, :rating, :editable, :deletable, :used, :versions,
-                      :sections, :tags, :files, :badges
-    end
-
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
     validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
@@ -279,7 +272,6 @@ module Osm
 
     private
     class File
-      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] id
@@ -295,10 +287,6 @@ module Osm
       attribute :activity_id, :type => Integer
       attribute :file_name, :type => String
       attribute :name, :type => String
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :id, :activity_id, :file_name, :name
-      end
 
       validates_numericality_of :id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
@@ -319,7 +307,6 @@ module Osm
     end # Class Activity::File
 
     class Badge
-      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] badge_type
@@ -348,10 +335,6 @@ module Osm
       attribute :badge_version, :type => Integer
       attribute :requirement_id, :type => Integer
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :badge_type, :badge_section, :requirement_label, :data, :badge_name, :badge_id, :badge_version, :requirement_id
-      end
-
       validates_presence_of :badge_name
       validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
       validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
@@ -375,7 +358,6 @@ module Osm
     end # Class Activity::Badge
 
     class Version
-      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] version
@@ -391,10 +373,6 @@ module Osm
       attribute :created_by, :type => Integer
       attribute :created_by_name, :type => String
       attribute :label, :type => String
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :version, :created_by, :created_by_name, :label
-      end
 
       validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :created_by, :only_integer=>true, :greater_than=>0

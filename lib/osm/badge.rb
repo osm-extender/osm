@@ -66,10 +66,6 @@ module Osm
     attribute :badges_required, :type => Object
     attribute :show_level_letters, :type => Boolean
 
-    if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :name, :requirement_notes, :requirements, :id, :version, :identifier, :group_name, :latest, :sharing, :user_id, :levels, :modules, :min_modules_required, :min_requirements_required, :add_columns_to_module, :level_requirement, :requires_modules, :other_requirements_required, :badges_required, :show_level_letters
-    end
-
     validates_presence_of :name
     validates_presence_of :requirement_notes
     validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>1
@@ -396,7 +392,6 @@ module Osm
 
 
     class Requirement
-      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] badge
@@ -418,10 +413,6 @@ module Osm
       attribute :mod, :type => Object
       attribute :id, :type => Integer
       attribute :editable, :type => Boolean
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :name, :description, :id, :editable, :badge, :mod
-      end
 
       validates_presence_of :name
       validates_presence_of :description
@@ -449,7 +440,6 @@ module Osm
 
 
     class RequirementModule
-      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       # @!attribute [rw] badge
@@ -477,10 +467,6 @@ module Osm
       attribute :completed_into_column, :type => Integer
       attribute :numeric_into_column, :type => Integer
       attribute :add_column_id_to_numeric, :type => Integer
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :badge, :letter, :id, :min_required, :custom_columns, :completed_into_column, :numeric_into_column, :add_column_id_to_numeric
-      end
 
       validates_presence_of :badge
       validates_presence_of :letter
@@ -541,10 +527,6 @@ module Osm
       attribute :requirements, :type => Object, :default => DirtyHashy.new
       attribute :section_id, :type => Integer
       attribute :badge, :type => Object
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :member_id, :first_name, :last_name, :due, :awarded, :awarded_date, :requirements, :section_id, :badge
-      end
 
       validates_presence_of :badge
       validates_presence_of :first_name

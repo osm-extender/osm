@@ -73,13 +73,6 @@ module Osm
     attribute :attendance_reminder, :type => Integer, :default => 0
     attribute :allow_booking, :type => Boolean, :default => true
 
-    if ActiveModel::VERSION::MAJOR < 4
-      attr_accessible :id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived,
-                      :fields, :badges, :files, :columns, :notepad, :public_notepad, :confirm_by_date,
-                      :allow_changes, :reminders, :attendance_limit, :attendance_limit_includes_leaders,
-                      :attendance_reminder, :allow_booking
-    end
-
     validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
     validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
     validates_numericality_of :attendance_limit, :only_integer=>true, :greater_than_or_equal_to=>0
@@ -579,7 +572,6 @@ module Osm
 
 
     class BadgeLink
-      include ActiveModel::MassAssignmentSecurity if ActiveModel::VERSION::MAJOR < 4
       include ActiveAttr::Model
 
       SORT_BY = [:badge_section, :badge_type, :badge_name, :requirement_label]
@@ -609,10 +601,6 @@ module Osm
       attribute :badge_id, :type => Integer
       attribute :badge_version, :type => Integer
       attribute :requirement_id, :type => Integer
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :badge_type, :badge_section, :requirement_label, :data, :badge_name, :badge_id, :badge_version, :requirement_id
-      end
 
       validates_presence_of :badge_name
       validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
@@ -647,10 +635,6 @@ module Osm
       attribute :label, :type => String, :default => ''
       attribute :parent_required, :type => Boolean, :default => false
       attribute :event
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :id, :name, :label, :parent_required, :event
-      end
 
       validates_presence_of :id
       validates_presence_of :name
@@ -757,10 +741,6 @@ module Osm
       attribute :attending
       attribute :payments, :default => {}
       attribute :payment_control
-
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :member_id, :grouping_id, :fields, :row, :event, :first_name, :last_name, :date_of_birth, :attending, :payments, :payment_control
-      end
 
       validates_numericality_of :row, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0

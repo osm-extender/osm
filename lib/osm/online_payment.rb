@@ -54,11 +54,6 @@ module Osm
       attribute :annual_limit, type: String
       attribute :payments, type: Object, default: []
 
-      if ActiveModel::VERSION::MAJOR < 4
-        attr_accessible :id, :section_id, :account_id, :name, :description, :archived, :gift_aid,
-                        :require_all, :pay_now, :annual_limit, :payments
-      end
-
       validates_numericality_of :id, only_integer: true, greater_than: 0
       validates_numericality_of :section_id, only_integer: true, greater_than: 0
       validates_numericality_of :account_id, only_integer: true, greater_than: 0
@@ -257,10 +252,6 @@ module Osm
         attribute :due_date, type: Object
         attribute :schedule, type: Object
 
-        if ActiveModel::VERSION::MAJOR < 4
-          attr_accessible :id, :amount, :name, :archived, :due_date, :schedule
-        end
-
         validates_numericality_of :id, only_integer: true, greater_than: 0
         validates_presence_of :amount
         validates_presence_of :name
@@ -296,10 +287,6 @@ module Osm
         attribute :start_date, type: Object
         attribute :payments, type: Object, default: {}      # payment_id -> Array of statuses
         attribute :schedule, type: Object
-
-        if ActiveModel::VERSION::MAJOR < 4
-          attr_accessible :first_name, :last_name, :member_id, :direct_debit, :start_date, :payments, :schedule
-        end
 
         validates_numericality_of :member_id, only_integer: true, greater_than: 0
         validates_presence_of :first_name
@@ -429,10 +416,6 @@ module Osm
         attribute :details, type: String
         attribute :updated_by, type: String
         attribute :updated_by_id, type: Integer
-
-        if ActiveModel::VERSION::MAJOR < 4
-          attr_accessible :id, :payment, :timestamp, :status, :details, :updated_by, :updated_by_id
-        end
 
         validates_numericality_of :id, only_integer: true, greater_than: 0
         validates_numericality_of :updated_by_id, only_integer: true, greater_than_or_equal_to: -2

@@ -19,10 +19,10 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
 
-  s.add_runtime_dependency 'activesupport', '>= 3.2', '< 5' # Used to parse JSON from OSM
+  s.add_runtime_dependency 'activesupport', '>= 4', '< 5'  # Used to parse JSON from OSM
   s.add_runtime_dependency 'httparty', '~> 0.9'             # Used to make web requests to the API
   s.add_runtime_dependency 'active_attr', '~> 0.8'
-  s.add_runtime_dependency 'activemodel', '>= 3.2', '< 5'
+  s.add_runtime_dependency 'activemodel', '>= 4', '< 5'
   s.add_runtime_dependency 'dirty_hashy', '~> 0.2.1'        # Used to track changed data in Badge::Data and FlexiRecord::Data
 
   s.add_development_dependency 'rake', '~> 10.0'
@@ -32,6 +32,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rb-inotify', '~> 0.9'
   s.add_development_dependency 'coveralls', '~> 0.7'
   s.add_development_dependency 'simplecov', '~> 0.7'
-  s.add_development_dependency 'listen', '< 3.1' # Actually required by another dependency but >= 3.1 causing issues
 
 end
