@@ -146,6 +146,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
   * Invoices (Gold required)
   * Member
   * My.SCOUT Templates
+  * Online payments - payment status
   * Register Attendance
 
 ### Create

@@ -170,7 +170,6 @@ module Osm
       def get_payments_for_members(api, term=nil, options={})
         require_ability_to(api, :read, :finance, section_id, options)
 
-        payments_by_id = Hash[ payments.map{ |p| [p.id, p] } ]
         if term.nil?
           section = Osm::Section.get(api, section_id, options)
           term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api, section)
@@ -185,19 +184,9 @@ module Osm
         data = data['items'] || []
         data.map! do |item|
           payments_data = {}
-          payments.map(&:id).each do |payment_id|
-            payments_data[payment_id] = []
-            osm_data = ActiveSupport::JSON.decode(item[payment_id.to_s] || '{}')['status'] || []
-            osm_data.each do |osm_item|
-              payments_data[payment_id].push PaymentStatus.new(
-                id:             Osm::to_i_or_nil(osm_item['statusid']),
-                payment:        payments_by_id[payment_id],
-                timestamp:      Time.strptime(osm_item['statustimestamp'], '%d/%m/%Y %H:%M'),
-                status:         osm_item['status'].downcase.gsub(' ', '_').to_sym,
-                details:        osm_item['details'],
-                updated_by:     osm_item['firstname'],
-                updated_by_id:  osm_item['who'].to_i,
-              )
+          payments.each do |payment|
+            unless item[payment.id.to_s].nil?
+              payments_data[payment.id] = PaymentStatus.build_from_json(item[payment.id.to_s], payment)
             end
           end
 
@@ -210,6 +199,7 @@ module Osm
             start_date:     require_all ? Osm::parse_date(item['startdate']) : nil,
             direct_debit:   item['directdebit'].downcase.to_sym,
             payments:       payments_data,
+            schedule:       self,
           )
         end
 
@@ -302,21 +292,19 @@ module Osm
         attribute :first_name, type: String
         attribute :last_name, type: String
         attribute :member_id, type: Integer
-        attribute :section_id, type: Integer
-        attribute :grouping_id, type: Integer
         attribute :direct_debit, type: Object
         attribute :start_date, type: Object
         attribute :payments, type: Object, default: {}      # payment_id -> Array of statuses
+        attribute :schedule, type: Object
 
         if ActiveModel::VERSION::MAJOR < 4
-          attr_accessible :first_name, :last_name, :member_id, :section_id, :grouping_id, :direct_debit, :start_date, :payments
+          attr_accessible :first_name, :last_name, :member_id, :direct_debit, :start_date, :payments, :schedule
         end
 
         validates_numericality_of :member_id, only_integer: true, greater_than: 0
-        validates_numericality_of :section_id, only_integer: true, greater_than: 0
-        validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
         validates_presence_of :first_name
         validates_presence_of :last_name
+        validates_presence_of :schedule
         validates_inclusion_of :direct_debit, in: [:active, :inactive, :cancelled]
         validates :payments, hash: {key_type: Fixnum, value_type: Array}
 
@@ -364,6 +352,68 @@ module Osm
         # @return [Boolean]
         def active_direct_debit?
           direct_debit.eql?(:active)
+        end
+
+        # Update the status of a payment for the member in OSM
+        # @param [Osm::Api] api The api to use to make the request
+        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to update
+        # @param [Symbol] status What to update the status to (:required, :not_required or :paid_manually)
+        # @param [Boolean] gift_aid Whether to update the gift aid record too (only relevant when setting to :paid_manually)
+        # @return [Boolean] whether the update was made in OSM
+        def update_payment_status(api, payment, status, gift_aid=false)
+          payment_id = payment.to_i
+          fail ArgumentError, "#{payment_id} is not a valid payment for the schedule." unless schedule.payments.map(&:id).include?(payment_id)
+          fail ArgumentError, "status must be either :required, :not_required or :paid_manually. You passed in #{status.inspect}" unless [:required, :not_required, :paid_manually].include?(status)
+
+          gift_aid = false unless payment.schedule.gift_aid?
+          api_status = {
+            required:       'Payment required',
+            not_required:   'Payment not required',
+            paid_manually:  'Paid manually',
+          }[status]
+
+          data = api.perform_query("ext/finances/onlinepayments/?action=updatePaymentStatus", {
+            'sectionid' => schedule.section_id,
+            'schemeid' => schedule.id,
+            'scoutid' => member_id,
+            'paymentid' => payment_id,
+            'giftaid' => gift_aid,
+            'value' => api_status,
+          })
+
+          data = data[payment_id.to_s]
+          return false if data.nil?                     # No data (at all) for this payment
+          data = PaymentStatus.build_from_json(data)
+          return false if data.nil?                     # No history for payment so it didn't get updated
+          data = data.sort[0]
+          return false if data.nil?                     # No history for payment so it didn't get updated
+          return false unless data.status.eql?(status)  # Latest status is not what we set
+          return true
+        end
+
+        # Mark a payment as required by the member
+        # @param [Osm::Api] api The api to use to make the request
+        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to update
+        # @return [Boolean] whether the update was made in OSM
+        def mark_payment_required(api, payment)
+          update_payment_status(api, payment, :required)
+        end
+
+        # Mark a payment as not required by the member
+        # @param [Osm::Api] api The api to use to make the request
+        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to update
+        # @return [Boolean] whether the update was made in OSM
+        def mark_payment_not_required(api, payment)
+          update_payment_status(api, payment, :not_required)
+        end
+
+        # Mark a payment as paid by the member
+        # @param [Osm::Api] api The api to use to make the request
+        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to update
+        # @param [Boolean] gift_aid Whether to update the gift aid record too
+        # @return [Boolean] whether the update was made in OSM
+        def mark_payment_paid_manually(api, payment, gift_aid=false)
+          update_payment_status(api, payment, :paid_manually, gift_aid)
         end
 
       end # Schedule::PaymentsForMember class
@@ -431,6 +481,35 @@ module Osm
 
         def inspect
           Osm.inspect_instance(self, {:replace_with => {'payment' => :id}})
+        end
+
+        protected
+        def self.build_from_json(json, payment=nil)
+          data = ActiveSupport::JSON.decode(json)
+          return [] unless data.is_a?(Hash)
+          data = data['status']
+          return [] unless data.is_a?(Array)
+
+          status_map = {
+            'Payment required' => :required,
+            'Payment not required' => :not_required,
+            'Initiated' => :initiated,
+            'Paid' => :paid,
+            'Received' => :received,
+            'Paid manually' => :paid_manually,
+          }
+
+          data.map! do |item|
+            new(
+              id:             Osm::to_i_or_nil(item['statusid']),
+              payment:        payment,
+              timestamp:      Time.strptime(item['statustimestamp'], '%d/%m/%Y %H:%M'),
+              status:         status_map[item['status']],
+              details:        item['details'],
+              updated_by:     item['firstname'],
+              updated_by_id:  item['who'].to_i,
+            )
+          end
         end
 
       end # Schedule::PaymentStatus class

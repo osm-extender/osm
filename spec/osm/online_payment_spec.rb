@@ -151,8 +151,6 @@ describe "Online payments" do
           p4m.size.should == 1
           p4m = p4m[0]
           p4m.member_id.should == 6
-          p4m.section_id.should == 2
-          p4m.grouping_id.should == 5
           p4m.first_name.should == 'John'
           p4m.last_name.should == 'Snow'
           p4m.start_date.should == Date.new(2015, 2, 3)
@@ -226,24 +224,23 @@ describe "Online payments" do
     describe "PaymentsForMember" do
 
       it "Create" do
+        schedule = Osm::OnlinePayment::Schedule.new
         p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(
           first_name:     'John',
           last_name:      'Smith',
           member_id:      1,
-          section_id:     2,
-          grouping_id:    3,
           direct_debit:   :active,
           start_date:     Date.new(2016, 6, 7),
           payments:       {},
+          schedule:       schedule,
         )
         p4m.first_name.should == 'John'
         p4m.last_name.should == 'Smith'
         p4m.member_id.should == 1
-        p4m.section_id.should == 2
-        p4m.grouping_id.should == 3
         p4m.direct_debit.should == :active
         p4m.start_date.should == Date.new(2016, 6, 7)
         p4m.payments.should == {}
+        p4m.schedule.should == schedule
         p4m.valid?.should == true
       end
 
@@ -338,6 +335,96 @@ describe "Online payments" do
         end
 
       end # describe Schedule -> PaymentsForMember : is payment past due?
+
+      describe "Update a payment in OSM" do
+
+        before :each do
+          @schedule = Osm::OnlinePayment::Schedule.new(id: 10, section_id: 4, gift_aid: true)
+          @payment = Osm::OnlinePayment::Schedule::Payment.new(id: 1, schedule: @schedule)
+          @schedule.payments = [@payment]
+          @status = Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 2, payment: @payment)
+          @p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(member_id: 3, payments: {1=>[@status]}, schedule: @schedule)
+        end
+
+        describe "Using update_payment_status method" do
+          it "Success" do
+            @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>false,'value'=>'Payment not required'})
+              .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Payment not required","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}'} }
+            @p4m.update_payment_status(@api, @payment, :not_required).should == true
+          end
+
+          describe "Failure" do
+            it "No history for payment" do
+              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
+                .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[]}'} }
+              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == false
+            end
+
+            it "No payment data" do
+              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
+                .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled'} }
+              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == false
+            end
+
+            it "Latest status is not what we set" do
+              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
+                .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Payment not required","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}'} }
+              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == false
+            end
+          end
+
+          it "Fails if payment is not in the schedule" do
+            expect{ @p4m.update_payment_status(@api, 2, :paid_manually) }.to raise_error ArgumentError, '2 is not a valid payment for the schedule.'
+          end
+
+          it "Fails if given a bad status" do
+            expect{ @p4m.update_payment_status(@api, 1, :invalid) }.to raise_error ArgumentError, 'status must be either :required, :not_required or :paid_manually. You passed in :invalid'
+          end
+
+          describe "Ignores gift aid parameter if appropriate" do # pass in true and check if calls out with false
+            it "Schedule is a gift aid one" do
+              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
+                .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Paid manually","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}'} }
+              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == true
+            end
+
+            it "Schedule is NOT a gift aid one" do
+              @schedule.gift_aid = false
+              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>false,'value'=>'Paid manually'})
+                .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Paid manually","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}'} }
+              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == true
+            end
+          end
+
+        end # Using update_payment_status method
+
+        describe "Using" do
+          it "mark_payment_required" do
+            @p4m.should_receive(:update_payment_status).with(@api, @payment, :required).once{ true }
+            @p4m.mark_payment_required(@api, @payment).should == true
+          end
+
+          it "mark_payment_not_required" do
+            @p4m.should_receive(:update_payment_status).with(@api, @payment, :not_required).once{ true }
+            @p4m.mark_payment_not_required(@api, @payment).should == true
+          end
+
+          describe "mark_payment_paid_manually" do
+            it "Updating gift aid" do
+              @p4m.should_receive(:update_payment_status).with(@api, @payment, :paid_manually, true).once{ true }
+              @p4m.mark_payment_paid_manually(@api, @payment, true).should == true
+            end
+
+            it "Not updating gift aid" do
+              @p4m.should_receive(:update_payment_status).with(@api, @payment, :paid_manually, false).once{ true }
+              @p4m.mark_payment_paid_manually(@api, @payment, false).should == true
+            end
+          end
+
+        end
+
+      end # describe Schedule -> PaymentsForMember : Update a payment in OSM
+
     end # describe Schedule -> PaymentsForMember
 
 
