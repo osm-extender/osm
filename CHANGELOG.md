@@ -1,4 +1,4 @@
-## Version 1.2.26
+## Version 1.3.0
 
   * Add fetching of file names for events (unable to download)
   * Add fetching of payment schedules - Osm::OnlinePayment::Schedule
