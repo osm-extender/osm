@@ -16,6 +16,7 @@ describe "Event" do
       :notes => 'None',
       :archived => '0',
       :badges => [],
+      :files => [],
       :columns => [],
       :notepad => 'notepad',
       :public_notepad => 'public notepad',
@@ -39,6 +40,7 @@ describe "Event" do
     event.notes.should == 'None'
     event.archived.should == false
     event.badges.should == []
+    event.files.should == []
     event.columns.should == []
     event.notepad.should == 'notepad'
     event.public_notepad.should == 'public notepad'
@@ -208,6 +210,7 @@ describe "Event" do
 
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => @events_body.to_json, :content_type => 'application/json')
       FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.to_json, :content_type => 'application/json')
+      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2", :body => '{"files":["file1.txt", "file2.txt"]}', :content_type => 'application/json')
 
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
     end
@@ -252,7 +255,14 @@ describe "Event" do
         event.badges[1].badge_type.should == :staged
         event.badges[1].requirement_id.should == 4
         event.badges[1].data.should == '1'
+        event.files.should == ['file1.txt', 'file2.txt']
         event.valid?.should == true
+      end
+
+      it "Handles no files being an empty array not a hash" do
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2", :body => '[]', :content_type => 'application/json')
+        expect{ @event = Osm::Event.get(@api, 1, 2) }.to_not raise_error
+        @event.files.should == []
       end
 
       it "Handles a blank config" do
@@ -313,6 +323,8 @@ describe "Event" do
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json, :content_type => 'application/json')
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json, :content_type => 'application/json')
         FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json, :content_type => 'application/json')
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/uploads/events/?action=listAttachments&sectionid=1&eventid=1", :body => '[]', :content_type => 'application/json')
+        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2", :body => '[]', :content_type => 'application/json')
 
         events = Osm::Event.get_for_section(@api, 1)
         OsmTest::Cache.clear
