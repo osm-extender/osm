@@ -305,7 +305,7 @@ module Osm
         # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
         # @return [Boolean]
         def latest_status_for(payment)
-          @latest_status ||= Hash[ payments.map{ |k,v| [k, v.sort[0]] } ]
+          @latest_status ||= Hash[ payments.map{ |k,v| [k, v.sort.first] } ]
           @latest_status[payment.to_i]
         end
 
@@ -372,7 +372,7 @@ module Osm
           return false if data.nil?                     # No data (at all) for this payment
           data = PaymentStatus.build_from_json(data)
           return false if data.nil?                     # No history for payment so it didn't get updated
-          data = data.sort[0]
+          data = data.sort.first
           return false if data.nil?                     # No history for payment so it didn't get updated
           return false unless data.status.eql?(status)  # Latest status is not what we set
           return true

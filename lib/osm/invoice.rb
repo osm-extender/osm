@@ -312,11 +312,11 @@ module Osm
         fail Osm::ObjectIsInvalid, 'invoice item is invalid' unless valid?
         Osm::Model.require_ability_to(api, :write, :finance, invoice.section_id)
 
-        last_item = invoice.get_items(api, {:no_cache=>true}).sort{ |a,b| a.record_id <=> b.record_id }[-1]
+        last_item = invoice.get_items(api, {:no_cache=>true}).sort{ |a,b| a.record_id <=> b.record_id }.last
 
         data = api.perform_query("finances.php?action=addRecord&invoiceid=#{invoice.id}&sectionid=#{invoice.section_id}")
         if data.is_a?(Hash) && data['ok'].eql?(true)
-          new_item = invoice.get_items(api, {:no_cache => true}).sort{ |a,b| a.record_id <=> b.record_id }[-1]
+          new_item = invoice.get_items(api, {:no_cache => true}).sort{ |a,b| a.record_id <=> b.record_id }.last
           if !new_item.nil? && (last_item.try(:id) != new_item.try(:id))
             # The cached invoice items for the section will be out of date - remove them
             cache_delete(api, ['invoice_items', invoice.id])

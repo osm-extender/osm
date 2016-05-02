@@ -679,7 +679,7 @@ module Osm
           done = requirements[badge.level_requirement].to_i
           levels = badge.levels                    # e.g. [0,1,2,3,4,5,10]
           return 0 if levels.include?(done)        # Has achieved a level (and not started next )
-          return 0 if done >= levels[-1]           # No more levels to do
+          return 0 if done >= levels.last          # No more levels to do
           (1..(levels.size-1)).to_a.reverse_each do |i|  # indexes from last to 2nd
             this_level = levels[i]
             previous_level = levels[i-1]
@@ -689,7 +689,7 @@ module Osm
         else
           # 'Normal' staged
           letters = ('a'..'z').to_a
-          top_level = badge.levels[-1]
+          top_level = badge.levels.last
           return 0 if due == top_level || awarded == top_level # No more levels to do
           ((due + 1)..top_level).reverse_each do |level|
             badge.requirements.each do |requirement|

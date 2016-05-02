@@ -319,10 +319,10 @@ module Osm
       result = self.section_id <=> another.try(:section_id)
       result = self.date <=> another.try(:date) if result == 0
       if result == 0
-        my_start_time = self.start_time.split(':').map{ |i| i.to_i }
+        my_start_time = self.start_time.split(':', 2).map{ |i| i.to_i }
         another_start_time = another.start_time.split(':').map{ |i| i.to_i }
-        result = my_start_time[0] <=> another_start_time[0] if result == 0
-        result = compare = my_start_time[1] <=> another_start_time[1] if result == 0
+        result = my_start_time.first <=> another_start_time.first if result == 0
+        result = compare = my_start_time.last <=> another_start_time.last if result == 0
       end  
       result = self.id <=> another.try(:id) if result == 0
       return result
