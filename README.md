@@ -23,7 +23,6 @@ This gem supports the following versions of ruby, it may work on other versions 
 
   * 2.2.1
   * 2.3.0
-  * jruby-1.7.4
 
 
 ## OSM

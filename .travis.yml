@@ -2,7 +2,6 @@ language: ruby
 rvm:
   - 2.2.1
   - 2.3.0
-  - jruby-1.7.4
 gemfile:
   - Gemfile
 branches:
