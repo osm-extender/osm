@@ -1,10 +1,10 @@
 language: ruby
 rvm:
-  - 1.9.3
   - 2.0.0
   - 2.2.1
   - 2.3.0
-  - jruby-1.7.20.1
+  - jruby-1.7.4
+  - jruby-9.0.0
 gemfile:
   - Gemfile
   - gemfiles/rails3

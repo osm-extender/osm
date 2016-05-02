@@ -21,11 +21,11 @@ and Staging (which is what is currently being developed ready for moving to mast
 ## Ruby Versions
 This gem supports the following versions of ruby, it may work on other versions but is not tested against them so don't rely on it.
 
-  * 1.9.3
   * 2.0.0
   * 2.2.1
   * 2.3.0
-  * jruby-1.7.20.1
+  * jruby-1.7.4
+  * jruby-9.0.0
 
 
 ## OSM
@@ -35,12 +35,12 @@ Use the [Online Scout Manager](https://www.onlinescoutmanager.co.uk) API.
 
 ## Installation
 
-**Requires Ruby 1.9.3 or later.**
+**Requires Ruby 2.0.0 or later.**
 
 Add to your Gemfile and run the `bundle` command to install it.
 
 ```ruby
-gem 'osm', '~> 1.2'
+gem 'osm', '~> 2.0'
 ```
 
 Configure the gem during the initalization of the app (e.g. if using rails then config/initializers/osm.rb would look like):
