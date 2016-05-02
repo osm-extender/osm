@@ -287,8 +287,8 @@ module Osm
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     # @raise [Osm::Error] If the member already exists in OSM
     def create(api)
-      raise Osm::Error, 'the member already exists in OSM' unless id.nil?
-      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail Osm::Error, 'the member already exists in OSM' unless id.nil?
+      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :write, :member, section_id)
 
       data = api.perform_query("users.php?action=newMember", {
@@ -320,7 +320,7 @@ module Osm
     # @return [Boolean] whether the member was successfully updated or not
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     def update(api, force=false)
-      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :write, :member, section_id)
 
       updated = true
@@ -480,13 +480,13 @@ module Osm
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
     def myscout_link_key(api)
-      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
-      raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
+      fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
 
       if @myscout_link_key.nil?
         data = api.perform_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{self.id}")
-        raise Osm::Error, 'Could not retrieve the key for the link from OSM' unless data['ok']
+        fail Osm::Error, 'Could not retrieve the key for the link from OSM' unless data['ok']
         @myscout_link_key = data['key']
       end
 
@@ -500,9 +500,9 @@ module Osm
     # @raise [Osm:Error] if the member doesn't exist in OSM
     # @return the photo of the member
     def get_photo(api, black_and_white=!current?, options={})
-      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
-      raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
+      fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
 
       cache_key = ['member_photo', self.id, black_and_white]
 
@@ -526,10 +526,10 @@ module Osm
     # @raise [Osm::ArgumentIsInvalid] If link_to is not an allowed Symbol
     # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
     def myscout_link(api, link_to=:badges, item_id=nil)
-      raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
-      raise Osm::Error, 'the member does not already exist in OSM' if id.nil?
-      raise Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice, :details, :census, :giftaid].include?(link_to)
+      fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
+      fail Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice, :details, :census, :giftaid].include?(link_to)
 
       link = "#{api.base_url}/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{myscout_link_key(api)}"
       link += "&e=#{item_id.to_i}" if item_id && link_to.eql?(:events)
@@ -655,7 +655,7 @@ module Osm
       # @return [Boolean] whether the member was successfully updated or not
       # @raise [Osm::ObjectIsInvalid] If the Contact is invalid
       def update(api, member, force=false)
-        raise Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+        fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
         require_ability_to(api, :write, :member, member.section_id)
 
         attribute_map = {

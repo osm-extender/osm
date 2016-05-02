@@ -104,8 +104,8 @@ module Osm
     # @raise [Osm::ObjectIsInvalid] If the Invoice is invalid
     # @raise [Osm::Error] If the invoice already exists in OSM
     def create(api)
-      raise Osm::Error, 'the invoice already exists in OSM' unless id.nil?
-      raise Osm::ObjectIsInvalid, 'invoice is invalid' unless valid?
+      fail Osm::Error, 'the invoice already exists in OSM' unless id.nil?
+      fail Osm::ObjectIsInvalid, 'invoice is invalid' unless valid?
       Osm::Model.require_ability_to(api, :write, :finance, section_id)
 
       data = api.perform_query("finances.php?action=addInvoice&sectionid=#{section_id}", {
@@ -127,7 +127,7 @@ module Osm
     # @return [Boolan] whether the invoice was successfully updated or not
     # @raise [Osm::ObjectIsInvalid] If the Invoice is invalid
     def update(api)
-      raise Osm::ObjectIsInvalid, 'invoice is invalid' unless valid?
+      fail Osm::ObjectIsInvalid, 'invoice is invalid' unless valid?
       require_ability_to(api, :write, :finance, section_id)
 
       data = api.perform_query("finances.php?action=addInvoice&sectionid=#{section_id}", {
@@ -170,7 +170,7 @@ module Osm
     # @raise [Osm::Error] If the invoice does not already exist in OSM
     def archive(api)
       Osm::Model.require_ability_to(api, :write, :finance, section_id)
-      raise Osm::Error, 'the invoice does not already exist in OSM' if id.nil?
+      fail Osm::Error, 'the invoice does not already exist in OSM' if id.nil?
       return false if archived?
 
       data = api.perform_query("finances.php?action=deleteInvoice&sectionid=#{section_id}", {
@@ -192,7 +192,7 @@ module Osm
     # @raise [Osm::Error] If the invoice does not already exist in OSM
     def finalise(api)
       Osm::Model.require_ability_to(api, :write, :finance, section_id)
-      raise Osm::Error, 'the invoice does not already exist in OSM' if id.nil?
+      fail Osm::Error, 'the invoice does not already exist in OSM' if id.nil?
       return false if finalised?
 
       data = api.perform_query("finances.php?action=finaliseInvoice&sectionid=#{section_id}&invoiceid=#{id}")
@@ -308,8 +308,8 @@ module Osm
       # @raise [Osm::ObjectIsInvalid] If the Item is invalid
       # @raise [Osm::Error] If the invoice item already exists in OSM
       def create(api)
-        raise Osm::Error, 'the invoice item already exists in OSM' unless id.nil?
-        raise Osm::ObjectIsInvalid, 'invoice item is invalid' unless valid?
+        fail Osm::Error, 'the invoice item already exists in OSM' unless id.nil?
+        fail Osm::ObjectIsInvalid, 'invoice item is invalid' unless valid?
         Osm::Model.require_ability_to(api, :write, :finance, invoice.section_id)
 
         last_item = invoice.get_items(api, {:no_cache=>true}).sort{ |a,b| a.record_id <=> b.record_id }[-1]
@@ -345,7 +345,7 @@ module Osm
       # @raise [Osm::ObjectIsInvalid] If the Invoice is invalid
       def update(api)
         require_ability_to(api, :write, :finance, invoice.section_id)
-        raise Osm::ObjectIsInvalid, 'invoice item is invalid' unless valid?
+        fail Osm::ObjectIsInvalid, 'invoice item is invalid' unless valid?
 
         updated = true
         to_update = Array.new

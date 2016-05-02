@@ -187,7 +187,7 @@ module Osm
     # @return [String] the link for this member's My.SCOUT
     # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
     def osm_link
-      raise Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
+      fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
       return "https://www.onlinescoutmanager.co.uk/?l=p#{self.id}"
     end
 
@@ -224,8 +224,8 @@ module Osm
     # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
     # @raise [Osm::Forbidden] If the Activity is not editable
     def update(api, section, secret_update=false)
-      raise Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
-      raise Osm::Forbidden, "You are not allowed to update this activity" unless self.editable
+      fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
+      fail Osm::Forbidden, "You are not allowed to update this activity" unless self.editable
 
       data = api.perform_query("programme.php?action=update", {
         'title' => title,

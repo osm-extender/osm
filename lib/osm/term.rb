@@ -113,7 +113,7 @@ module Osm
         return term if term.current?
       end
 
-      raise Osm::Error::NoCurrentTerm.new('There is no current term for the section.', section_id)
+      fail Osm::Error::NoCurrentTerm.new('There is no current term for the section.', section_id)
     end
 
     # Create a term in OSM
@@ -125,10 +125,10 @@ module Osm
     #   @option options [Date] :finish (required) the date for the finish of term
     # @return [Boolean] if the operation suceeded or not
     def self.create(api, options={})
-      raise ArgumentError, ":section can't be nil" if options[:section].nil?
-      raise ArgumentError, ":name can't be nil" if options[:name].nil?
-      raise ArgumentError, ":start can't be nil" if options[:start].nil?
-      raise ArgumentError, ":finish can't be nil" if options[:finish].nil?
+      fail ArgumentError, ":section can't be nil" if options[:section].nil?
+      fail ArgumentError, ":name can't be nil" if options[:name].nil?
+      fail ArgumentError, ":start can't be nil" if options[:start].nil?
+      fail ArgumentError, ":finish can't be nil" if options[:finish].nil?
       require_access_to_section(api, options[:section])
 
       api_data = {
@@ -155,7 +155,7 @@ module Osm
     # @return [Boolean] if the operation suceeded or not
     # @raise [Osm::ObjectIsInvalid] If the Term is invalid
     def update(api)
-      raise Osm::ObjectIsInvalid, 'term is invalid' unless valid?
+      fail Osm::ObjectIsInvalid, 'term is invalid' unless valid?
       require_access_to_section(api, section_id)
 
       data = api.perform_query("users.php?action=addTerm&sectionid=#{section_id}", {

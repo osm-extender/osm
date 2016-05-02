@@ -105,11 +105,11 @@ module Osm
     # @raise [Osm::ArgumentIsInvalid] If data[:members] is missing
     # @raise [Osm::ArgumentIsInvalid] If data[:api] is missing
     def self.update_attendance(data={})
-      raise Osm::ArgumentIsInvalid, ':attendance is invalid' unless [:yes, :unadvised_absent, :advised_absent].include?(data[:attendance])
-      raise Osm::ArgumentIsInvalid, ':section is missing' if data[:section].nil?
-      raise Osm::ArgumentIsInvalid, ':evening is missing' if data[:evening].nil?
-      raise Osm::ArgumentIsInvalid, ':members is missing' if data[:members].nil?
-      raise Osm::ArgumentIsInvalid, ':api is missing' if data[:api].nil?
+      fail Osm::ArgumentIsInvalid, ':attendance is invalid' unless [:yes, :unadvised_absent, :advised_absent].include?(data[:attendance])
+      fail Osm::ArgumentIsInvalid, ':section is missing' if data[:section].nil?
+      fail Osm::ArgumentIsInvalid, ':evening is missing' if data[:evening].nil?
+      fail Osm::ArgumentIsInvalid, ':members is missing' if data[:members].nil?
+      fail Osm::ArgumentIsInvalid, ':api is missing' if data[:api].nil?
       api = data[:api]
       Osm::Model.require_ability_to(api, :write, :register, data[:section])
 

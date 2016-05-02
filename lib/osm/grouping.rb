@@ -71,7 +71,7 @@ module Osm
     # @return [Boolan] whether the member was successfully updated or not
     # @raise [Osm::ObjectIsInvalid] If the Grouping is invalid
     def update(api)
-      raise Osm::ObjectIsInvalid, 'grouping is invalid' unless valid?
+      fail Osm::ObjectIsInvalid, 'grouping is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
 
       to_update = changed_attributes

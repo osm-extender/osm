@@ -31,14 +31,14 @@ module Osm
     # @option options [Boolean] :debug if true debugging info is output (optional, default = false)
     # @return nil
     def self.configure(options)
-      raise ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(options[:default_site])
-      raise ArgumentError, ":#{options[:default_site]} does not exist in options hash" if options[options[:default_site]].nil?
+      fail ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(options[:default_site])
+      fail ArgumentError, ":#{options[:default_site]} does not exist in options hash" if options[options[:default_site]].nil?
       Osm::Api::BASE_URLS.keys.each do |api_key|
         if options[api_key]
           api_data = options[api_key]
-          raise ArgumentError, ":#{api_key} must be a Hash" unless api_data.is_a?(Hash)
+          fail ArgumentError, ":#{api_key} must be a Hash" unless api_data.is_a?(Hash)
           [:id, :token, :name].each do |key|
-            raise ArgumentError, ":#{api_key} must contain a key :#{key}" if api_data[key].nil?
+            fail ArgumentError, ":#{api_key} must contain a key :#{key}" if api_data[key].nil?
           end
         end
       end
@@ -73,9 +73,9 @@ module Osm
     # @param [Symbol] site Whether to use OSM (:osm) or OGM (:ogm), defaults to the value set for the class
     # @return nil
     def initialize(user_id, secret, site=@@site)
-      raise ArgumentError, 'You must pass a secret (get this by using the authorize method)' if secret.nil?
-      raise ArgumentError, 'You must pass a user_id (get this by using the authorize method)' if user_id.nil?
-      raise ArgumentError, 'site is invalid, if passed it should be either :osm or :ogm, if not passed then you forgot to run Api.configure' unless Osm::Api::BASE_URLS.keys.include?(site)
+      fail ArgumentError, 'You must pass a secret (get this by using the authorize method)' if secret.nil?
+      fail ArgumentError, 'You must pass a user_id (get this by using the authorize method)' if user_id.nil?
+      fail ArgumentError, 'site is invalid, if passed it should be either :osm or :ogm, if not passed then you forgot to run Api.configure' unless Osm::Api::BASE_URLS.keys.include?(site)
 
       @site = site
       set_user(user_id, secret)
@@ -147,7 +147,7 @@ module Osm
     # @param [Symbol] site For OSM or OGM (:osm or :ogm)
     # @return [String] The base URL for requests
     def self.base_url(site=@@site)
-      raise ArgumentError, "Invalid site" unless Osm::Api::BASE_URLS.keys.include?(site)
+      fail ArgumentError, "Invalid site" unless Osm::Api::BASE_URLS.keys.include?(site)
       BASE_URLS[site]
     end
 
@@ -252,7 +252,7 @@ module Osm
     # @raise [Osm::Error] If an error was returned by OSM
     # @raise [Osm::ConnectionError] If an error occured connecting to OSM
     def self.perform_query(site, url, api_data={}, raw=false)
-      raise ArgumentError, 'site is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(site)
+      fail ArgumentError, 'site is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(site)
  
       data = api_data.merge({
         'apiid' => @@api_details[site][:id],
@@ -269,9 +269,9 @@ module Osm
       begin
         result = HTTParty.post("#{BASE_URLS[site]}/#{url}", {:body => data})
       rescue SocketError, TimeoutError, OpenSSL::SSL::SSLError
-        raise Osm::ConnectionError, 'A problem occured on the internet.'
+        fail Osm::ConnectionError, 'A problem occured on the internet.'
       end
-      raise Osm::ConnectionError, "HTTP Status code was #{result.response.code}" if !result.response.code.eql?('200')
+      fail Osm::ConnectionError, "HTTP Status code was #{result.response.code}" if !result.response.code.eql?('200')
 
       if @@debug
         puts "Result from :#{site} request to #{url}"

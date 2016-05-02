@@ -139,7 +139,7 @@ module Osm
   end
 
   def self.symbolize_hash(hash_in)
-    raise ArgumentError, 'You did not pass in a hash' unless hash_in.is_a?(Hash)
+    fail ArgumentError, 'You did not pass in a hash' unless hash_in.is_a?(Hash)
 
     hash_out = {}
     hash_in.each do |key, value|

@@ -63,8 +63,8 @@ module Osm
     # @raise [Osm::ObjectIsInvalid] If the Budget is invalid
     # @raise [Osm::Error] If the budget already exists in OSM
     def create(api)
-      raise Osm::Error, 'the budget already exists in OSM' unless id.nil?
-      raise Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
+      fail Osm::Error, 'the budget already exists in OSM' unless id.nil?
+      fail Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
       Osm::Model.require_ability_to(api, :write, :finance, section_id)
 
       data = api.perform_query("finances.php?action=addCategory&sectionid=#{section_id}")
@@ -88,7 +88,7 @@ module Osm
     # @return [Boolean] whether the budget was updated
     # @raise [Osm::ObjectIsInvalid] If the Budget is invalid
     def update(api)
-      raise Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
+      fail Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
       Osm::Model.require_ability_to(api, :write, :finance, section_id)
 
       data = api.perform_query("finances.php?action=updateCategory&sectionid=#{section_id}", {

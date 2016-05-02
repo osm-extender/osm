@@ -212,7 +212,7 @@ module Osm
     def self.create(api, parameters)
       require_ability_to(api, :write, :events, parameters[:section_id])
       event = new(parameters)
-      raise Osm::ObjectIsInvalid, 'event is invalid' unless event.valid?
+      fail Osm::ObjectIsInvalid, 'event is invalid' unless event.valid?
 
       data = api.perform_query("events.php?action=addEvent&sectionid=#{event.section_id}", {
         'name' => event.name,
@@ -427,7 +427,7 @@ module Osm
     # @param [Osm::Event::BadgeLink] link The badge link to add, if column_id is nil then a new column is created with requirement_label as the name
     # @return [Boolean] whether the update succedded
     def add_badge_link(api, link)
-      raise Osm::ObjectIsInvalid, 'link is invalid' unless link.valid?
+      fail Osm::ObjectIsInvalid, 'link is invalid' unless link.valid?
 
       data = api.perform_query("ext/badges/records/index.php?action=linkBadgeToItem&sectionid=#{section_id}", {
         'section' => link.badge_section,
@@ -452,7 +452,7 @@ module Osm
     # @raise [Osm::ArgumentIsInvalid] If the name is blank
     def add_column(api, name, label='', required=false)
       require_ability_to(api, :write, :events, section_id)
-      raise Osm::ArgumentIsInvalid, 'name is invalid' if name.blank?
+      fail Osm::ArgumentIsInvalid, 'name is invalid' if name.blank?
 
       data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
         'columnName' => name,

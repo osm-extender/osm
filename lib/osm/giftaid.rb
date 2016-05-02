@@ -104,12 +104,12 @@ module Osm
     # @raise [Osm::ArgumentIsInvalid] If data[:members] is missing
     # @raise [Osm::ArgumentIsInvalid] If data[:api] is missing
     def self.update_donation(data={})
-      raise Osm::ArgumentIsInvalid, ':section is missing' if data[:section].nil?
-      raise Osm::ArgumentIsInvalid, ':donation_date is missing' if data[:donation_date].nil?
-      raise Osm::ArgumentIsInvalid, ':amount is missing' if data[:amount].nil?
-      raise Osm::ArgumentIsInvalid, ':note is missing' if data[:note].nil?
-      raise Osm::ArgumentIsInvalid, ':members is missing' if data[:members].nil?
-      raise Osm::ArgumentIsInvalid, ':api is missing' if data[:api].nil?
+      fail Osm::ArgumentIsInvalid, ':section is missing' if data[:section].nil?
+      fail Osm::ArgumentIsInvalid, ':donation_date is missing' if data[:donation_date].nil?
+      fail Osm::ArgumentIsInvalid, ':amount is missing' if data[:amount].nil?
+      fail Osm::ArgumentIsInvalid, ':note is missing' if data[:note].nil?
+      fail Osm::ArgumentIsInvalid, ':members is missing' if data[:members].nil?
+      fail Osm::ArgumentIsInvalid, ':api is missing' if data[:api].nil?
       api = data[:api]
       Osm::Model.require_ability_to(api, :write, :finance, data[:section])
 
@@ -214,7 +214,7 @@ module Osm
       # @return [Boolean] whether the data was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
-        raise Osm::ObjectIsInvalid, 'data is invalid' unless valid?
+        fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
         require_ability_to(api, :write, :finance, section_id)
         term_id = Osm::Term.get_current_term_for_section(api, section_id).id
 

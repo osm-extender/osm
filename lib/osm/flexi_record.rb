@@ -53,7 +53,7 @@ module Osm
     # @return [Boolean] whether the column was created in OSM
     def add_column(api, name)
       require_ability_to(api, :write, :flexi, section_id)
-      raise ArgumentError, 'name is invalid' if name.blank?
+      fail ArgumentError, 'name is invalid' if name.blank?
 
       data = api.perform_query("extras.php?action=addColumn&sectionid=#{section_id}&extraid=#{id}", {
         'columnName' => name,
@@ -154,9 +154,9 @@ module Osm
       # @raise [Osm::ObjectIsInvalid] If the Column is invalid
       # @raise [Osm::Forbidden] If the COlumn is not editable
       def update(api)
-        raise Osm::ObjectIsInvalid, 'column is invalid' unless valid?
+        fail Osm::ObjectIsInvalid, 'column is invalid' unless valid?
         require_ability_to(api, :write, :flexi, flexi_record.section_id)
-        raise Osm::Forbidden, 'this column is not editable' unless self.editable
+        fail Osm::Forbidden, 'this column is not editable' unless self.editable
 
         data = api.perform_query("extras.php?action=renameColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", {
           'columnId' => self.id,
@@ -182,7 +182,7 @@ module Osm
       # @raise [Osm::Forbidden] If this Column is not editable
       def delete(api)
         require_ability_to(api, :write, :flexi, flexi_record.section_id)
-        raise Osm::Forbidden, 'this column is not editable' unless self.editable
+        fail Osm::Forbidden, 'this column is not editable' unless self.editable
 
         data = api.perform_query("extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", {
           'columnId' => self.id,
@@ -270,7 +270,7 @@ module Osm
       # @return [Boolean] whether the data was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
-        raise Osm::ObjectIsInvalid, 'data is invalid' unless valid?
+        fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
         require_ability_to(api, :write, :flexi, flexi_record.section_id)
 
         term_id = Osm::Term.get_current_term_for_section(api, flexi_record.section_id).id

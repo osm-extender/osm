@@ -24,11 +24,11 @@ module Osm
     # @option options [String] :prepend_to_key (optional, default = 'OSMAPI') Text to prepend to the key used to store data in the cache
     # @return nil
     def self.configure(options)
-      raise ArgumentError, ":ttl must be a FixNum greater than 0" if options[:ttl] && !(options[:ttl].is_a?(Fixnum) && options[:ttl] > 0)
-      raise ArgumentError, ":prepend_to_key must be a String" if options[:prepend_to_key] && !options[:prepend_to_key].is_a?(String)
+      fail ArgumentError, ":ttl must be a FixNum greater than 0" if options[:ttl] && !(options[:ttl].is_a?(Fixnum) && options[:ttl] > 0)
+      fail ArgumentError, ":prepend_to_key must be a String" if options[:prepend_to_key] && !options[:prepend_to_key].is_a?(String)
       if options[:cache]
         [:exist?, :delete, :write, :read].each do |method|
-          raise ArgumentError, ":cache must have a #{method} method" unless options[:cache].methods.include?(method)
+          fail ArgumentError, ":cache must have a #{method} method" unless options[:cache].methods.include?(method)
         end
       end
 
@@ -134,7 +134,7 @@ module Osm
     # @raise [Osm::Forbidden] If the Api user can not access the section
     def self.require_access_to_section(api, section, options={})
       unless has_access_to_section?(api, section, options)
-        raise Osm::Forbidden, "You do not have access to that section"
+        fail Osm::Forbidden, "You do not have access to that section"
       end
     end
 
@@ -196,10 +196,10 @@ module Osm
       section = Osm::Section.get(api, section.to_i, options) unless section.is_a?(Osm::Section)
       section_name = section.try(:name)
       unless user_has_permission?(api, to, on, section, options)
-        raise Osm::Forbidden, "Your OSM user does not have permission to #{to} on #{on} for #{section_name}."
+        fail Osm::Forbidden, "Your OSM user does not have permission to #{to} on #{on} for #{section_name}."
       end
       unless api_has_permission?(api, to, on, section, options)
-        raise Osm::Forbidden, "You have not granted the #{to} permissions on #{on} to the #{api.api_name} API for #{section_name}."
+        fail Osm::Forbidden, "You have not granted the #{to} permissions on #{on} to the #{api.api_name} API for #{section_name}."
       end
     end
 
@@ -212,7 +212,7 @@ module Osm
     def self.require_subscription(api, level, section, options={})
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       if section.nil? || !section.subscription_at_least?(level)
-        raise Osm::Forbidden, "Insufficent OSM subscription level (#{Osm::SUBSCRIPTION_LEVEL_NAMES[level]} required for #{section.name})."
+        fail Osm::Forbidden, "Insufficent OSM subscription level (#{Osm::SUBSCRIPTION_LEVEL_NAMES[level]} required for #{section.name})."
       end
     end
 
@@ -243,7 +243,7 @@ module Osm
     # @param [Symbol] get_all_method The method to get all items (either :get_all or :get_for_section)
     # @return [Array] An array of the items
     def self.get_from_ids(api, ids, key, arguments=[], options, get_all_method)
-      raise ArgumentError, "get_all_method is invalid" unless [:get_all, :get_for_section].include?(get_all_method)
+      fail ArgumentError, "get_all_method is invalid" unless [:get_all, :get_for_section].include?(get_all_method)
       items = Array.new
       ids.each do |id|
         if cache_exist?(api, [key, id])

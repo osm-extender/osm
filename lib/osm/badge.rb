@@ -95,7 +95,7 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Badge>]
     def self.get_badges_for_section(api, section, section_type=nil, options={})
-      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
+      fail Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
       require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       section_type ||= section.type
@@ -177,7 +177,7 @@ module Osm
     # @!macro options_get
     # @return [Array<Hash>]
     def self.get_summary_for_section(api, section, term=nil, options={})
-      raise Error, 'This method must NOT be called on one of the subclasses(CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' unless type.nil?
+      fail Error, 'This method must NOT be called on one of the subclasses(CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' unless type.nil?
       require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
@@ -241,7 +241,7 @@ module Osm
     # @!macro options_get
     # @return [Array<Osm::Badge::Data>]
     def get_data_for_section(api, section, term=nil, options={})
-      raise Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
+      fail Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
       Osm::Model.require_ability_to(api, :read, :badge, section, options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
@@ -324,7 +324,7 @@ module Osm
         fetched_this_time = true
       end
       data = @module_completion_data[badge.id]
-      raise ArgumentError, "That badge does't exist (bad ID)." if data.nil?
+      fail ArgumentError, "That badge does't exist (bad ID)." if data.nil?
 
       if data[badge.version].nil? && !fetched_this_time
         @module_completion_data = get_module_completion_data(api, options)
@@ -332,7 +332,7 @@ module Osm
         fetched_this_time = true
       end
       data = data[badge.version]
-      raise ArgumentError, "That badge does't exist (bad version)." if data.nil?
+      fail ArgumentError, "That badge does't exist (bad version)." if data.nil?
 
       data.each{ |i| i.badge = badge }
       return data
@@ -708,8 +708,8 @@ module Osm
       # @param [Fixnum] level The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return [Boolean] whether the data was updated in OSM
       def mark_awarded(api, date=Date.today, level=due)
-        raise ArgumentError, 'date is not a Date' unless date.is_a?(Date)
-        raise ArgumentError, 'level can not be negative' if level < 0
+        fail ArgumentError, 'date is not a Date' unless date.is_a?(Date)
+        fail ArgumentError, 'level can not be negative' if level < 0
         section = Osm::Section.get(api, section_id)
         require_ability_to(api, :write, :badge, section)
 
@@ -751,7 +751,7 @@ module Osm
       # @param [Fixnum] level The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return [Boolean] whether the data was updated in OSM
       def mark_due(api, level=earnt)
-        raise ArgumentError, 'level can not be negative' if level < 0
+        fail ArgumentError, 'level can not be negative' if level < 0
         section = Osm::Section.get(api, section_id)
         require_ability_to(api, :write, :badge, section)
 
@@ -780,7 +780,7 @@ module Osm
       # @return [Boolean] whether the data was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
-        raise Osm::ObjectIsInvalid, 'data is invalid' unless valid?
+        fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
         section = Osm::Section.get(api, section_id)
         require_ability_to(api, :write, :badge, section)
 
