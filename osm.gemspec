@@ -32,5 +32,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rb-inotify', '~> 0.9'
   s.add_development_dependency 'coveralls', '~> 0.7'
   s.add_development_dependency 'simplecov', '~> 0.7'
+  s.add_development_dependency 'listen', '< 3.1' # Actually required by guard but versions >= 3.1 require ruby >= 2.1.1
 
 end
