@@ -1,6 +1,6 @@
 ## Version 2.0.0
 
-  * Remove support for ruby <= 2.2.1
+  * Remove support for ruby <= 2.2.2
   * Remove support for jruby
   * Remove support for rails < 4
 
