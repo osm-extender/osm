@@ -25,13 +25,12 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'activemodel', '>= 4', '< 5'
   s.add_runtime_dependency 'dirty_hashy', '~> 0.2.1'        # Used to track changed data in Badge::Data and FlexiRecord::Data
 
-  s.add_development_dependency 'rake', '~> 10.0'
+  s.add_development_dependency 'rake', '~> 11.0'
   s.add_development_dependency 'rspec', '>= 2.14.1', '< 4'
   s.add_development_dependency 'fakeweb', '~> 1.3'
   s.add_development_dependency 'guard-rspec', '~> 4.2', '>= 4.2.5'
   s.add_development_dependency 'rb-inotify', '~> 0.9'
   s.add_development_dependency 'coveralls', '~> 0.7'
   s.add_development_dependency 'simplecov', '~> 0.7'
-  s.add_development_dependency 'listen', '< 3.1' # Actually required by guard but versions >= 3.1 require ruby >= 2.1.1
 
 end
