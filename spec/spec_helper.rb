@@ -40,31 +40,29 @@ RSpec.configure do |config|
     configuration.syntax = [:expect, :should]
   end
 
+  config.before(:suite) do
+    $api_configuration = Osm::Api::Configuration.new(
+      site:  :osm,
+      id:    '1',
+      token: 'API TOKEN',
+      name:  'API NAME',
+    )
+    Osm::Api.default_configuration = $api_configuration
+  end
+
   config.before(:each) do
     FakeWeb.clean_registry
     OsmTest::Cache.clear
 
+    $api = Osm::Api.new(configuration: $api_configuration, user_id: 'user_id', secret: 'secret')
+
     @CONFIGURATION = {
-      :api => {
-        :default_site => :osm,
-        :osm => {
-          :id => '1',
-          :token => 'API TOKEN',
-          :name => 'API NAME',
-        },
-        :ogm => {
-          :id => '2',
-          :token => 'API TOKEN 2',
-          :name => 'API NAME 2',
-        },
-      },
       :cache => {
         :cache => OsmTest::Cache,
       },
     }
     Osm::configure(@CONFIGURATION)
-    
-    @api = Osm::Api.new('user_id', 'secret')
+
     Osm::Model.stub(:require_ability_to).and_return(nil)
     Osm::Model.stub(:require_access_to_section).and_return(nil)
   end

@@ -43,15 +43,14 @@ Configure the gem during the initalization of the app (e.g. if using rails then 
 
 ```ruby
 ActionDispatch::Callbacks.to_prepare do
+  Osm::Api.default_configuration = Osm::Api::Configuration.new(
+    site:  :osm,  # or :osm_staging or :osm_migration
+    id:    'YOU WILL BE GIVEN THIS BY ED AT OSM',
+    token: 'YOU WILL BE GIVEN THIS BY ED AT OSM',
+    name:  'YOU WILL GIVE THIS TO ED AT OSM',
+  )
+
   Osm::configure(
-    :api => {
-      :default_site => :osm, # or :ogm
-      :osm => {              # or :ogm (both an :osm and :ogm config are allowed
-        :id    => 'YOU WILL BE GIVEN THIS BY ED AT OSM',
-        :token => 'YOU WILL BE GIVEN THIS BY ED AT OSM',
-        :name  => 'YOU WILL GIVE THIS TO ED AT OSM',
-      },
-    },
     :cache => {
       :cache => Rails.cache,
     },

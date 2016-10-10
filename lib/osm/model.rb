@@ -95,26 +95,26 @@ module Osm
 
     private
     # Wrap cache calls
-    def self.cache_read(api, key)
+    def self.cache_read(api_configuration, key)
       return nil if @@cache.nil?
-      @@cache.read(cache_key(api, key))
+      @@cache.read(cache_key(api_configuration, key))
     end
-    def self.cache_write(api, key, data, options={})
+    def self.cache_write(api_configuration, key, data, options={})
       return false if @@cache.nil?
       options.reverse_merge!(expires_in: @@cache_ttl)
-      @@cache.write(cache_key(api, key), data, options)
+      @@cache.write(cache_key(api_configuration, key), data, options)
     end
-    def self.cache_exist?(api, key)
+    def self.cache_exist?(api_configuration, key)
       return false if @@cache.nil?
-      @@cache.exist?(cache_key(api, key))
+      @@cache.exist?(cache_key(api_configuration, key))
     end
-    def self.cache_delete(api, key)
+    def self.cache_delete(api_configuration, key)
       return true if @@cache.nil?
-      @@cache.delete(cache_key(api, key))
+      @@cache.delete(cache_key(api_configuration, key))
     end
-    def self.cache_key(api, key)
+    def self.cache_key(api_configuration, key)
       key = key.join('-') if key.is_a?(Array)
-      "#{@@cache_prepend.empty? ? '' : "#{@@cache_prepend}-"}#{Osm::VERSION}-#{api.site}-#{key}"
+      "#{@@cache_prepend.empty? ? '' : "#{@@cache_prepend}-"}#{Osm::VERSION}-#{api_configuration.site}-#{key}"
     end
 
 

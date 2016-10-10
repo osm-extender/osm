@@ -66,17 +66,6 @@ module Osm
 
     # Configure the options used by classes in the module
     # @param [Hash] options
-    # @option options [Hash] :api Default options for accessing the API
-    # @option options[:api] [Symbol] :default_site whether to use OSM (if :osm) or OGM (if :ogm) by default
-    # @option options[:api] [Hash] :osm (optional but :osm_api or :ogm_api must be present) the api data for OSM
-    # @option options[:api][:osm] [String] :id the apiid given to you for using the OSM id
-    # @option options[:api][:osm] [String] :token the token which goes with the above api
-    # @option options[:api][:osm] [String] :name the name displayed in the External Access tab of OSM
-    # @option options[:api] [Hash] :ogm (optional but :osm_api or :ogm_api must be present) the api data for OGM
-    # @option options[:api][:ogm] [String] :id the apiid given to you for using the OGM id
-    # @option options[:api][:ogm] [String] :token the token which goes with the above api
-    # @option options[:api][:ogm] [String] :name the name displayed in the External Access tab of OGM
-    # @option options[:api] [Boolean] :debug if true debugging info is output (optional, default = false)
     # @option options [Hash] :cache_config (optional) How classes in the module will cache data. Whilst this is optional you should remember that caching is required to use the OSM API.
     # @option options[:cache] [Class] :cache An instance of a cache class, must provide the methods (exist?, delete, write, read), for details see Rails.cache.
     # @option options[:cache] [Fixnum] :ttl (optional, default = 30.minutes) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
@@ -84,7 +73,6 @@ module Osm
     # @return nil
     def self.configure(options)
       Osm::Model.configure(options[:cache])
-      Osm::Api.configure(options[:api])
       nil
     end
 

@@ -1,279 +1,153 @@
 module Osm
 
   class Api
-    
-    # Default options
-    @@site = nil      # Used as the defult value for api_site in new instances
-    @site = nil       # Used to make requests from an instance
-    @@debug = false   # Puts helpful information whilst connected to OSM/OGM
-    @@api_details = {:osm=>{}, :ogm=>{}} # API details - [:osm | :ogm] [:id | :token | :name]
+
+    class Configuration
+      # @!attribute [r] site
+      #   @return [Symbol] the 'flavour' of OSM to use - :osm, :osm_staging or :osm_migration
+      # @!attribute [r] name
+      #   @return [String] the name of the API as displayed in OSM
+      # @!attribute [r] id
+      #   @return [String] the apiid given to you by OSM
+      # @!attribute [r] token
+      #   @return [String] the token given to you by OSM
+      # @!attribute [rw] debug
+      #   @return [Boolean] whether debugging output should be displayed
+
+      attr_reader :id, :token, :name, :site, :debug
+
+      BASE_URLS = {
+        :osm => 'https://www.onlinescoutmanager.co.uk',
+        :osm_staging => 'http://staging.onlinescoutmanager.co.uk',
+        :osm_migration => 'https://migration.onlinescoutmanager.co.uk'
+      }
+
+      private_constant :BASE_URLS
 
 
-    BASE_URLS = {
-      :osm => 'https://www.onlinescoutmanager.co.uk',
-      :ogm => 'http://www.onlineguidemanager.co.uk',
-      :osm_staging => 'http://staging.onlinescoutmanager.co.uk',
-      :migration => 'https://migration.onlinescoutmanager.com'
-    }
+      # Initialize a new configuration for an API
+      # @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+      def initialize(id:, token:, name:, site: :osm, debug: false)
+        fail ArgumentError, "#{site.inspect} is not a valid site (must be one of #{BASE_URLS.keys.map{ |i| i.inspect }.join(', ')})." unless BASE_URLS.keys.include?(site)
 
-
-    # Configure the API options used by all instances of the class
-    # @param [Hash] options
-    # @option options [Symbol] :default_site whether to use OSM (if :osm) or OGM (if :ogm)
-    # @option options [Hash] :osm (optional but :osm_api or :ogm_api must be present) the api data for OSM
-    # @option options[:osm] [String] :id the apiid given to you for using the OSM id
-    # @option options[:osm] [String] :token the token which goes with the above api
-    # @option options[:osm] [String] :name the name displayed in the External Access tab of OSM
-    # @option options [Hash] :ogm (optional but :osm_api or :ogm_api must be present) the api data for OGM
-    # @option options[:ogm] [String] :id the apiid given to you for using the OGM id
-    # @option options[:ogm] [String] :token the token which goes with the above api
-    # @option options[:ogm] [String] :name the name displayed in the External Access tab of OGM
-    # @option options [Boolean] :debug if true debugging info is output (optional, default = false)
-    # @return nil
-    def self.configure(options)
-      fail ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(options[:default_site])
-      fail ArgumentError, ":#{options[:default_site]} does not exist in options hash" if options[options[:default_site]].nil?
-      Osm::Api::BASE_URLS.keys.each do |api_key|
-        if options[api_key]
-          api_data = options[api_key]
-          fail ArgumentError, ":#{api_key} must be a Hash" unless api_data.is_a?(Hash)
-          [:id, :token, :name].each do |key|
-            fail ArgumentError, ":#{api_key} must contain a key :#{key}" if api_data[key].nil?
-          end
+        local_variables.each do |k|
+          v = eval(k.to_s)
+          instance_variable_set("@#{k}", v) unless v.nil?
         end
+
+        @debug = !!debug
       end
 
-      @@site = options[:default_site]
-      @@debug = !!options[:debug]
-      @@api_details = {
-        :osm => (options[:osm] || {}),
-        :ogm => (options[:ogm] || {}),
-        :osm_staging => (options[:osm_staging] || {}),
-        :migration => (options[:migration] || {})
-      }
-      nil
+      # Get base URL for the site this configuration applies to
+      # @return [String] e.g. "https://www.onlinescoutmanager.co.uk"
+      def base_url
+        BASE_URLS[site]
+      end
+
+      # Get base URL for the site this configuration applies to
+      # @param [String] path The path to build the URL for e.g. "path/users.php"
+      # @return [String] e.g. "https://www.onlinescoutmanager.co.uk/path/users.php"
+      def build_url(path)
+        "#{BASE_URLS[site]}/#{path}"
+      end
+
+      # Items required in the post attributes for API authentication
+      # @return [Hash]
+      def post_attributes
+        {
+          'apiid' => self.id,
+          'token' => self.token,
+        }
+      end
+
+      # Check if debugging output should be displayed
+      def debug?
+        @debug
+      end
+
+      # Set whether debugging output should be displayed
+      # @param [Boolean] new_debug
+      def debug=(new_debug)
+        @debug = !!new_debug
+      end
+
+    end # class Osm::Api::Configuration
+
+
+    # @!attribute [rw] default_configuration
+    #   @return [Osm::Api::Configuration] the default configuration to use for new api instances. Can only be written once.
+
+
+    def self.default_configuration=(new_default_configuration)
+      fail "default_configuration has already been set:\n#{default_configuration.inspect}" unless default_configuration.nil?
+      @@default_configuration = new_default_configuration
     end
 
-    # Configure the debug option
-    # @param [Boolean] debug whether to display debugging information
-    # @return nil
-    def self.debug=(debug)
-      @@debug = !!debug
+    def self.default_configuration
+      defined?(@@default_configuration) ? @@default_configuration : nil
     end
 
-    # The debug option
-    # @return Boolean whether debugging output is enabled
-    def self.debug
-      @@debug
+    # Build a new configuration for an API based on the current default
+    # @param [Osm::Api::Configuration] base_configuration The configuration to build off of
+    # @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    # @return [Osm::Api::Configuration] the default configuration to use for new api instances. Can only be written once.
+    def self.build_configuration(base_configuration=default_configuration, attributes)
+      base_configuration = base_configuration.nil? ? {} : base_configuration.attributes
+      Osm::Api::Configuration.new(base_configuration.merge(options))
     end
+
 
     # Initialize a new API connection
+    # @param [Osm::Api::Configuration] configuration The configuration to use
     # @param [String] user_id OSM userid of the user to act as (get this by using the authorize method)
     # @param [String] secret OSM secret of the user to act as (get this by using the authorize method)
-    # @param [Symbol] site Whether to use OSM (:osm) or OGM (:ogm), defaults to the value set for the class
-    # @return nil
-    def initialize(user_id, secret, site=@@site)
+    def initialize(configuration: self.default_configuration, user_id: nil, secret: nil)
+      fail ArgumentError, 'You must pass a configuration' if configuration.nil?
       fail ArgumentError, 'You must pass a secret (get this by using the authorize method)' if secret.nil?
       fail ArgumentError, 'You must pass a user_id (get this by using the authorize method)' if user_id.nil?
-      fail ArgumentError, 'site is invalid, if passed it should be either :osm or :ogm, if not passed then you forgot to run Api.configure' unless Osm::Api::BASE_URLS.keys.include?(site)
 
-      @site = site
-      set_user(user_id, secret)
-      nil
-    end
-
-
-    # Get the API name
-    # @return [String]
-    def api_name
-      @@api_details[@site][:name]
-    end
-
-    # Get the API ID
-    # @return [String]
-    def api_id
-      @@api_details[@site][:id]
-    end
-    def to_i
-      api_id
-    end
-
-
-    # Get the site this Api currently uses
-    # @return [Symbol] :osm or :ogm
-    def site
-      @site
-    end
-
-
-    # Get the current user_id
-    # @return [String]
-    def user_id
-      @user_id
-    end
-
-
-    # Get the userid and secret to be able to act as a certain user on the OSM/OGM system
-    # @param [Symbol] site The site to use either :osm or :ogm (defaults to whatever was set in the configure method)
-    # @param [String] email The login email address of the user on OSM
-    # @param [String] password The login password of the user on OSM
-    # @return [Hash] a hash containing the following keys:
-    #   * :user_id - the userid to use in future requests
-    #   * :secret - the secret to use in future requests
-    def self.authorize(site=@@site, email, password)
-      api_data = {
-        'email' => email,
-        'password' => password,
-      }
-      data = perform_query(site, 'users.php?action=authorise', api_data)
-      return {
-        :user_id => data['userid'],
-        :secret => data['secret'],
-      }
-    end
-
-
-    # Set the OSM user to make future requests as
-    # @param [String] user_id The OSM userid to use (get this using the authorize method)
-    # @param [String] secret The OSM secret to use (get this using the authorize method)
-    # @return [Osm::Api] self
-    def set_user(user_id, secret)
+      @configuration = configuration
       @user_id = user_id
-      @user_secret = secret
-      return self
+      @secret = secret
     end
 
-    # Get the base URL for requests to OSM/OGM
-    # @param [Symbol] site For OSM or OGM (:osm or :ogm)
-    # @return [String] The base URL for requests
-    def self.base_url(site=@@site)
-      fail ArgumentError, "Invalid site" unless Osm::Api::BASE_URLS.keys.include?(site)
-      BASE_URLS[site]
-    end
 
-    # Get the base URL for requests to OSM.OGM
-    # @param site For OSM or OGM (:osm or :ogm), defaults to the default for this api object
-    # @return [String] The base URL for requests
-    def base_url(site=@site)
-      self.class.base_url(site)
+    # Make a query to the OSM/OGM API
+    # @param [String] path The path on the remote server to invoke
+    # @param [Hash] post_attributes A hash containing the values to be sent to the server in the body of the request
+    # @param [Boolean] raw When true the data returned by OSM is not parsed
+    # @return [Hash, Array, String] the parsed JSON returned by OSM
+    def perform_query(path:, post_attributes: {}, raw: false)
+      # Add required attrinbutes for user authentication and pass on responsabillity
+      self.class.perform_query(configuration: @configuration, path: path, post_attributes: post_attributes.merge('userid' => @user_id, 'secret' => @secret), raw: raw)
     end
 
     # Make a query to the OSM/OGM API
-    # @param [String] url The script on the remote server to invoke
-    # @param [Hash] api_data A hash containing the values to be sent to the server in the body of the request
+    # @param [Osm::Api::Configuration, nil] configuration The configuration to use
+    # @param [String] path The path on the remote server to invoke
+    # @param [Hash] post_attributes A hash containing the values to be sent to the server in the body of the request
+    # @param [Boolean] raw When true the data returned by OSM is not parsed
     # @return [Hash, Array, String] the parsed JSON returned by OSM
-    def perform_query(url, api_data={}, raw=false)
-      self.class.perform_query(@site, url, api_data.merge({
-        'userid' => @user_id,
-        'secret' => @user_secret,
-      }), raw)
-    end
+    def self.perform_query(configuration: self.default_configuration, path:, post_attributes: {}, raw: false)
+      post_attributes.merge!(configuration.post_attributes)  # Add required attributes for API authentication
 
-    # Get API user's roles in OSM
-    # @!macro options_get
-    # @return [Array<Hash>] data returned by OSM
-    def get_user_roles(*args)
-      begin
-        get_user_roles!(*args)
-      rescue Osm::NoActiveRoles
-        return []
-      end
-    end
+      url = configuration.build_url(path)
 
-
-    # Get API user's roles in OSM
-    # @!macro options_get
-    # @return [Array<Hash>] data returned by OSM
-    # @raises Osm::NoActiveRoles
-    def get_user_roles!(options={})
-      cache_key = ['user_roles', @user_id]
-
-      if !options[:no_cache] && Osm::Model.cache_exist?(self, cache_key)
-        return Osm::Model.cache_read(self, cache_key)
-      end
-
-      begin
-        data = perform_query('api.php?action=getUserRoles')
-        unless data.eql?(false)
-          # false equates to no roles
-          Osm::Model.cache_write(self, cache_key, data)
-          return data
-        end
-        fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
-
-      rescue Osm::Error => e
-        if e.message.eql?('false')
-          fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
-        else
-          raise e
-        end
-      end
-
-    end
-
-    # Get API user's permissions
-    # @!macro options_get
-    # @return nil if an error occured or the user does not have access to that section
-    # @return [Hash] {section_id => permissions_hash}
-    def get_user_permissions(options={})
-      cache_key = ['permissions', user_id]
-
-      if !options[:no_cache] && Osm::Model.cache_exist?(self, cache_key)
-        return Osm::Model.cache_read(self, cache_key)
-      end
-
-      all_permissions = Hash.new
-      get_user_roles(options).each do |item|
-        unless item['section'].eql?('discount')  # It's not an actual section
-          all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
-        end
-      end
-      Osm::Model.cache_write(self, cache_key, all_permissions)
-
-      return all_permissions
-    end
-
-    # Set access permission for an API user for a given Section
-    # @param [Section, Fixnum] section The Section to set permissions for
-    # @param [Hash] permissions The permissions Hash
-    def set_user_permissions(section, permissions)
-      key = ['permissions', user_id]
-      permissions = get_user_permissions.merge(section.to_i => permissions)
-      Osm::Model.cache_write(self, key, permissions)
-    end
-
-
-    private
-    # Make a query to the OSM/OGM API
-    # @param [Symbol] site The site to use either :osm or :ogm
-    # @param [String] url The script on the remote server to invoke
-    # @param [Hash] api_data A hash containing the values to be sent to the server in the body of the request
-    # @return [Hash, Array, String] the parsed JSON returned by OSM
-    # @raise [Osm::Error] If an error was returned by OSM
-    # @raise [Osm::ConnectionError] If an error occured connecting to OSM
-    def self.perform_query(site, url, api_data={}, raw=false)
-      fail ArgumentError, 'site is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(site)
- 
-      data = api_data.merge({
-        'apiid' => @@api_details[site][:id],
-        'token' => @@api_details[site][:token],
-      })
-
-      if @@debug
-        puts "Making #{'RAW' if raw} :#{site} API request to #{url}"
+      if configuration.debug?
+        puts "Making #{'RAW' if raw} :#{configuration.site} API request to #{url}"
         hide_values_for = ['secret', 'token']
         api_data_as_string = api_data.sort.map{ |key, value| "#{key} => #{hide_values_for.include?(key) ? 'PRESENT' : value.inspect}" }.join(', ')
         puts "{#{api_data_as_string}}"
       end
 
       begin
-        result = HTTParty.post("#{BASE_URLS[site]}/#{url}", {:body => data})
+        result = HTTParty.post(url, {:body => post_attributes})
       rescue SocketError, TimeoutError, OpenSSL::SSL::SSLError
         fail Osm::ConnectionError, 'A problem occured on the internet.'
       end
       fail Osm::ConnectionError, "HTTP Status code was #{result.response.code}" if !result.response.code.eql?('200')
 
-      if @@debug
+      if configuration.debug?
         puts "Result from :#{site} request to #{url}"
         puts "#{result.response.content_type}"
         puts result.response.body
@@ -298,6 +172,108 @@ module Osm
           fail Osm::Error, "Unhandled content-type: #{result.response.content_type}"
       end
     end
+
+
+    # Get the userid and secret to be able to act as a certain user on the OSM/OGM system
+    # @param [Osm::Api::Configuration] configuration The configuration detailing how to talk to OSM
+    # @param [String] email_address The login email address of the user on OSM
+    # @param [String] password The login password of the user on OSM
+    # @return [Hash] a hash containing the following keys:
+    #   * :user_id - the userid to use in future requests
+    #   * :secret - the secret to use in future requests
+    def self.authorize(configuration: default_configuration, email_address:, password:)
+      api_data = {
+        'email' => email_address,
+        'password' => password,
+      }
+      data = perform_query(configuration: configuration, path: 'users.php?action=authorise', post_attributes: api_data)
+      return {
+        user_id: data['userid'],
+        secret: data['secret'],
+      }
+    end
+
+
+
+    # Get API user's roles in OSM
+    # @param [Osm::Api::Configuration] configuration The configuration detailing how to talk to OSM
+    # @!macro options_get
+    # @return [Array<Hash>] data returned by OSM
+    def get_user_roles(**args)
+      begin
+        get_user_roles!(**args)
+      rescue Osm::NoActiveRoles
+        return []
+      end
+    end
+
+
+    # Get API user's roles in OSM
+    # @param [Osm::Api::Configuration] configuration The configuration detailing how to talk to OSM
+    # @!macro options_get
+    # @return [Array<Hash>] data returned by OSM
+    # @raises Osm::NoActiveRoles
+    def get_user_roles!(configuration: self.class.default_configuration, **options)
+      cache_key = ['user_roles', @user_id]
+
+      if !options[:no_cache] && Osm::Model.cache_exist?(configuration, cache_key)
+        return Osm::Model.cache_read(configuration, cache_key)
+      end
+
+      begin
+        data = perform_query(path: 'api.php?action=getUserRoles')
+        unless data.eql?(false)
+          # false equates to no roles
+          Osm::Model.cache_write(configuration, cache_key, data)
+          return data
+        end
+        fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
+
+      rescue Osm::Error => e
+        if e.message.eql?('false')
+          fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
+        else
+          raise e
+        end
+      end
+
+    end
+
+    # Get API user's permissions
+    # @param [Osm::Api::Configuration] configuration The configuration detailing how to talk to OSM
+    # @!macro options_get
+    # @return nil if an error occured or the user does not have access to that section
+    # @return [Hash] {section_id => permissions_hash}
+    def get_user_permissions(configuration: self.class.default_configuration, **options)
+      cache_key = ['permissions', @user_id]
+
+      if !options[:no_cache] && Osm::Model.cache_exist?(configuration, cache_key)
+        return Osm::Model.cache_read(configuration, cache_key)
+      end
+
+      all_permissions = Hash.new
+      get_user_roles(configuration: configuration, **options).each do |item|
+        unless item['section'].eql?('discount')  # It's not an actual section
+          all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
+        end
+      end
+      Osm::Model.cache_write(configuration, cache_key, all_permissions)
+
+      return all_permissions
+    end
+
+    # Set access permission for an API user for a given Section
+    # @param [Osm::Api::Configuration] configuration The configuration detailing how to talk to OSM
+    # @param [Section, Fixnum] section The Section to set permissions for
+    # @param [Hash] permissions The permissions Hash
+    def set_user_permissions(configuration: self.class.default_configuration, section:, permissions:)
+      key = ['permissions', @user_id]
+      permissions = get_user_permissions.merge(section.to_i => permissions)
+      Osm::Model.cache_write(configuration, key, permissions)
+    end
+
+
+    private
 
     # Get the error returned by OSM
     # @param data what OSM gave us
