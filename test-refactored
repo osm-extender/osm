@@ -1,3 +1,3 @@
 #!/bin/bash
 
-bundle exec rspec spec/osm/api_spec.rb
+bundle exec rspec spec/osm/api_spec.rb spec/osm/model_spec.rb

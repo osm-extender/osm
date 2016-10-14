@@ -71,6 +71,10 @@ module Osm
         @debug = !!new_debug
       end
 
+      def to_s
+        "#{self.site} - #{self.id} - #{self.name}"
+      end
+
     end # class Osm::Api::Configuration
 
 
@@ -101,7 +105,7 @@ module Osm
     # @param [Osm::Api::Configuration] configuration The configuration to use
     # @param [String] user_id OSM userid of the user to act as (get this by using the authorize method)
     # @param [String] secret OSM secret of the user to act as (get this by using the authorize method)
-    def initialize(configuration: self.default_configuration, user_id: nil, secret: nil)
+    def initialize(configuration: self.class.default_configuration, user_id: nil, secret: nil)
       fail ArgumentError, 'You must pass a configuration' if configuration.nil?
       fail ArgumentError, 'You must pass a secret (get this by using the authorize method)' if secret.nil?
       fail ArgumentError, 'You must pass a user_id (get this by using the authorize method)' if user_id.nil?
@@ -216,7 +220,7 @@ module Osm
     def get_user_roles!(configuration: self.class.default_configuration, **options)
       cache_key = ['user_roles', @user_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(configuration, cache_key)
+      if !options[:no_cache] && Osm::Model.cache_exist?(api_configuration: configuration, key: cache_key)
         return Osm::Model.cache_read(configuration, cache_key)
       end
 
@@ -224,7 +228,7 @@ module Osm
         data = perform_query(path: 'api.php?action=getUserRoles')
         unless data.eql?(false)
           # false equates to no roles
-          Osm::Model.cache_write(configuration, cache_key, data)
+          Osm::Model.cache_write(api_configuration: configuration, key: cache_key, data: data)
           return data
         end
         fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
@@ -247,8 +251,8 @@ module Osm
     def get_user_permissions(configuration: self.class.default_configuration, **options)
       cache_key = ['permissions', @user_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(configuration, cache_key)
-        return Osm::Model.cache_read(configuration, cache_key)
+      if !options[:no_cache] && Osm::Model.cache_exist?(api_configuration: configuration, key: cache_key)
+        return Osm::Model.cache_read(api_configuration: configuration, key: cache_key)
       end
 
       all_permissions = Hash.new
@@ -257,7 +261,7 @@ module Osm
           all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
         end
       end
-      Osm::Model.cache_write(configuration, cache_key, all_permissions)
+      Osm::Model.cache_write(api_configuration: configuration, key: cache_key, data: all_permissions)
 
       return all_permissions
     end
@@ -269,7 +273,7 @@ module Osm
     def set_user_permissions(configuration: self.class.default_configuration, section:, permissions:)
       key = ['permissions', @user_id]
       permissions = get_user_permissions.merge(section.to_i => permissions)
-      Osm::Model.cache_write(configuration, key, permissions)
+      Osm::Model.cache_write(api_configuration: configuration, key: key, data: permissions)
     end
 
 

@@ -4,6 +4,8 @@
   * Remove support for jruby
   * Remove support for rails < 4
   * Tidy up configuration of the API object - addition of Osm::Api::Configuration class
+  * Model is now configured through Osm::Model.configure
+  * Now supports chach fetching
   * Methods now use keyword arguments except where it makes sense (ie only 1 argument)
 
 ## Version 1.3.0

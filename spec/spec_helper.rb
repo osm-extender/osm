@@ -56,12 +56,9 @@ RSpec.configure do |config|
 
     $api = Osm::Api.new(configuration: $api_configuration, user_id: 'user_id', secret: 'secret')
 
-    @CONFIGURATION = {
-      :cache => {
-        :cache => OsmTest::Cache,
-      },
-    }
-    Osm::configure(@CONFIGURATION)
+    Osm::Model.configure(
+      cache: OsmTest::Cache
+    )
 
     Osm::Model.stub(:require_ability_to).and_return(nil)
     Osm::Model.stub(:require_access_to_section).and_return(nil)
@@ -77,6 +74,11 @@ module OsmTest
     end
     def self.read(key)
       @@cache[key]
+    end
+    def self.fetch(key)
+      value = read(key)
+      return value unless value.nil?
+      write(key, yield)
     end
     def self.exist?(key)
       @@cache.include?(key)

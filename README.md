@@ -50,10 +50,10 @@ ActionDispatch::Callbacks.to_prepare do
     name:  'YOU WILL GIVE THIS TO ED AT OSM',
   )
 
-  Osm::configure(
-    :cache => {
-      :cache => Rails.cache,
-    },
+  Osm::Model.configure(
+    cache:          Rails.cache,
+    cache_prepend:  OPTIONAL, DEFAULTS TO "OSMAPI",
+    ttl:            OPTIONAL, DEFAULTS TO 600
   )
 end
 ```
