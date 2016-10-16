@@ -1,13 +1,10 @@
 ## Version 2.0.0
 
-  * Remove support for ruby <= 2.2.2
-  * Remove support for jruby
-  * Remove support for rails < 4
-  * Tidy up configuration of the API object
-  * Model is now configured through Osm::Model.configure
-  * Now supports chach fetching
-  * Methods now use keyword arguments except where it makes sense (ie only 1 argument)
+  * Remove support for ruby <= 2.2.2, jruby, rails < 4
   * Remove dependancy on active_support
+  * Model is now configured through Osm::Model.configure
+  * Now supports cache fetching
+  * Methods now use keyword arguments except where it makes sense (ie only 1 argument)
 
 ## Version 1.3.0
 
