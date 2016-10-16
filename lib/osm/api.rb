@@ -166,7 +166,7 @@ module Osm
       case result.response.content_type
         when 'application/json', 'text/html'
           begin
-            decoded = ActiveSupport::JSON.decode(result.response.body)
+            decoded = JSON.parse(result.response.body)
             if osm_error = get_osm_error(decoded)
               fail Osm::Error, osm_error if osm_error
             end

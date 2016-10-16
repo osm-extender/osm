@@ -7,6 +7,7 @@
   * Model is now configured through Osm::Model.configure
   * Now supports chach fetching
   * Methods now use keyword arguments except where it makes sense (ie only 1 argument)
+  * Remove dependancy on active_support
 
 ## Version 1.3.0
 

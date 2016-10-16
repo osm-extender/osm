@@ -113,18 +113,18 @@ describe "API" do
 
     it "Without user credentials" do
       api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
-      api.perform_query(path: 'path/to/load').should == "1"
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      api.perform_query(path: 'path/to/load').should == {}
     end
 
     it "With user credentials" do
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
-      $api.perform_query(path: 'path/to/load').should == "1"
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      $api.perform_query(path: 'path/to/load').should == {}
     end
 
     it "Using passed post attributes" do
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", 'attribute' => 'value'}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
-      $api.perform_query(path: 'path/to/load', post_attributes: {'attribute' => 'value'}).should == "1"
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", 'attribute' => 'value'}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      $api.perform_query(path: 'path/to/load', post_attributes: {'attribute' => 'value'}).should == {}
     end
 
     it "Doesn't parse when raw option is true" do
