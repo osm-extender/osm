@@ -4,151 +4,144 @@ require 'spec_helper'
 
 describe "API" do
 
-  describe "Configuration" do
-
-    it "Create" do
-      $api_configuration.should_not be_nil
-      $api_configuration.site.should == :osm
-      $api_configuration.name.should == "API NAME"
-      $api_configuration.id.should == "1"
-      $api_configuration.token.should == "API TOKEN"
-    end
-
-    it "Reports debug option" do
-      $api_configuration.debug.should == false
-      $api_configuration.debug?.should == false
-
-      api_configuration_2 = Osm::Api::Configuration.new(
-        site:  :osm,
-        id:    '1',
-        token: 'API TOKEN',
-        name:  'API NAME',
-        debug: true,
-      )
-      api_configuration_2.debug.should == true
-      api_configuration_2.debug?.should == true
-
-      api_configuration_3 = Osm::Api::Configuration.new(
-        site:  :osm,
-        id:    '1',
-        token: 'API TOKEN',
-        name:  'API NAME',
-        debug: 'apples',
-      )
-      api_configuration_3.debug.should == true
-      api_configuration_3.debug?.should == true
-    end
-
-    describe "Create checks for required attributes" do
-
-      let(:attributes) { {id: 10, token: 'token', name: 'name', } }
-
-      [:id, :token, :name].each do |attribute|
-        it attribute do
-          attributes.delete(attribute)
-          expect{ Osm::Api::Configuration.new(attributes) }.to raise_error(ArgumentError, "missing keyword: #{attribute}")
-        end
-      end
-
-    end
-
-    describe "Create checks that site is valid" do
-
-      let(:attributes) { {id: 10, token: 'token', name: 'name', } }
-
-      it "Valid" do
-        attributes[:site] = :osm_staging
-        expect{ Osm::Api::Configuration.new(attributes) }.not_to raise_error
-      end
-
-      it "Invalid" do
-        attributes[:site] = :invalid
-        expect{ Osm::Api::Configuration.new(attributes) }.to raise_error(ArgumentError, ":invalid is not a valid site (must be one of :osm, :osm_staging, :osm_migration).")
-      end
-
-    end
-
-
-    it "Gets the base url for queries" do
-      Osm::Api::Configuration.new(site: :osm, id: 1, token: 't', name: 'n').base_url.should == 'https://www.onlinescoutmanager.co.uk'
-      Osm::Api::Configuration.new(site: :osm_staging, id: 1, token: 't', name: 'n').base_url.should == 'http://staging.onlinescoutmanager.co.uk'
-      Osm::Api::Configuration.new(site: :osm_migration, id: 1, token: 't', name: 'n').base_url.should == 'https://migration.onlinescoutmanager.co.uk'
-    end
-
-    it "Builds a url from a path" do
-      Osm::Api::Configuration.new(site: :osm, id: 1, token: 't', name: 'n').build_url('path').should == 'https://www.onlinescoutmanager.co.uk/path'
-      Osm::Api::Configuration.new(site: :osm_staging, id: 1, token: 't', name: 'n').build_url('path/path1').should == 'http://staging.onlinescoutmanager.co.uk/path/path1'
-      Osm::Api::Configuration.new(site: :osm_migration, id: 1, token: 't', name: 'n').build_url('another/path').should == 'https://migration.onlinescoutmanager.co.uk/another/path'
-    end
-
-    it "Creates the post attributes for queries" do
-      $api_configuration.post_attributes.should == {"apiid"=>"1", "token"=>"API TOKEN"}
-    end
-
-  end # describe Configuration
-
-
   it "Create" do
     $api.should_not be_nil
-    $api.class.default_configuration.should == $api_configuration
+    $api.site.should == :osm
+    $api.name.should == "API NAME"
+    $api.api_id.should == "1"
+    $api.api_secret.should == "API-SECRET"
+    $api.user_id.should == "2"
+    $api.user_secret.should == "USER-SECRET"
+    $api.debug.should == false
   end
 
-  describe "Create requires a" do
-    it "User ID" do
-      expect{ Osm::Api.new(configuration: $api_configuration, secret: 'secret') }.to raise_error(ArgumentError, "You must pass a user_id (get this by using the authorize method)")
+  describe "Initialize requires a" do
+
+    it "API ID" do
+      expect{ Osm::Api.new(api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, "missing keyword: api_id")
+      expect{ Osm::Api.new(api_id: '', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, "You must provide an api_id (get this by requesting one from OSM)")
     end
 
-    it "Secret" do
-      expect{ Osm::Api.new(configuration: $api_configuration, user_id: 'user_id') }.to raise_error(ArgumentError, "You must pass a secret (get this by using the authorize method)")
+    it "API secret" do
+      expect{ Osm::Api.new(api_id: '1', name: 'name') }.to raise_error(ArgumentError, "missing keyword: api_secret")
+      expect{ Osm::Api.new(api_id: '1', api_secret: '', name: 'name') }.to raise_error(ArgumentError, "You must provide an api_secret (get this by requesting one from OSM)")
     end
 
-    it "Configuration" do
-      expect{ Osm::Api.new(configuration: nil, user_id: 'user_id', secret: 'secret') }.to raise_error(ArgumentError, "You must pass a configuration")
+    it "Name" do
+      expect{ Osm::Api.new(api_id: '1', api_secret: 'secret') }.to raise_error(ArgumentError, "missing keyword: name")
+      expect{ Osm::Api.new(api_id: '1', api_secret: 'secret', name: '') }.to raise_error(ArgumentError, "You must provide a name for your API (this should be what appears in OSM)")
     end
 
+    it "Valid site" do
+      expect{ Osm::Api.new(site: :invalid, api_id: '1', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, ":invalid is not a valid site (must be one of :osm, :osm_staging, :osm_migration)")
+    end
+
+  end # initialize requires a
+
+
+  it "Checks the debug property" do
+    $api.debug?.should == false
+
+    $api.debug = true
+    $api.debug?.should == true
   end
 
-  describe "Performs queries" do
-    it "Instance adds authentication details" do
-      Osm::Api.should_receive(:perform_query).with(configuration: $api_configuration, path: 'path/to.php', post_attributes: {'post' => 'attributes', 'userid' => 'user_id', 'secret' => 'secret'}, raw: true) { :a }
-      $api.perform_query(path: 'path/to.php', post_attributes: {'post' => 'attributes'}, raw: true).should == :a
+
+  describe "Cloning" do
+    it "With changes" do
+      clone = $api.clone_with_changes
+
+      clone.debug.should == false
+      clone.site.should == :osm
+      clone.name.should == 'API NAME'
+      clone.api_id.should == '1'
+      clone.api_secret.should == 'API-SECRET'
+      clone.user_id.should == '2'
+      clone.user_secret.should == 'USER-SECRET'
+
+      clone.name.object_id.should_not == $api.name.object_id
+      clone.api_id.object_id.should_not == $api.api_id.object_id
+      clone.api_secret.object_id.should_not == $api.api_secret.object_id
+      clone.user_id.object_id.should_not == $api.user_id.object_id
+      clone.user_secret.object_id.should_not == $api.user_secret.object_id
     end
 
-    describe "Class performs the query" do
+    it "With a different user" do
+      clone = $api.clone_with_different_user(id: '3', secret: 'NEW USER SECRET')
+      clone.user_id.should == '3'
+      clone.user_secret.should == 'NEW USER SECRET'
+    end
+  end # describe CLoning
 
-      it "Using default configuration" do
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API TOKEN"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
-        Osm::Api.perform_query(path: 'path/to/load').should == "1"
+
+  describe "Checks for valid/invalid user" do
+    it "Has a valid user" do
+      $api.has_valid_user?.should == true
+      $api.has_invalid_user?.should == false
+    end
+
+    describe "Has an invalid user" do
+      it "Bad id" do
+        api = $api.clone_with_different_user(id: nil, secret: 'NEW USER SECRET')
+        api.has_valid_user?.should == false
+        api.has_invalid_user?.should == true
       end
 
-      it "Using passed configuration" do
-        configuration = Osm::Api::Configuration.new(id: '2', token: '345', name: 'name')
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "2", "token" => "345"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
-        Osm::Api.perform_query(configuration: configuration, path: 'path/to/load').should == "1"
+      it "Bad secret" do
+        api = $api.clone_with_different_user(id: '3', secret: nil)
+        api.has_valid_user?.should == false
+        api.has_invalid_user?.should == true
       end
+    end
+  end # describe Checks for valid/invalid user
 
-      it "Using passed post attributes" do
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API TOKEN", 'attribute' => 'value'}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
-        Osm::Api.perform_query(path: 'path/to/load', post_attributes: {'attribute' => 'value'}).should == "1"
-      end
 
-      it "Doesn't parse when raw option is true" do
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API TOKEN"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
-        Osm::Api.perform_query(path: 'path/to/load', raw: true).should == '"1"'
-      end
+  describe "Requires a valid user" do
+    it "User is valid" do
+      $api.stub(:has_valid_user?){ true }
+      $api.require_valid_user!.should == nil
+    end
 
-    end # Class performs the query
+    it "User is invalid" do
+      $api.stub(:has_valid_user?){ false }
+      expect{ $api.require_valid_user! }.to raise_error(Osm::Api::UserInvalid, 'id: "2", secret: "USER-SECRET"')
+    end
+  end # describe Requires a valid user
+
+
+  describe "Performs the query" do
+
+    it "Without user credentials" do
+      api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
+      api.perform_query(path: 'path/to/load').should == "1"
+    end
+
+    it "With user credentials" do
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
+      $api.perform_query(path: 'path/to/load').should == "1"
+    end
+
+    it "Using passed post attributes" do
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", 'attribute' => 'value'}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
+      $api.perform_query(path: 'path/to/load', post_attributes: {'attribute' => 'value'}).should == "1"
+    end
+
+    it "Doesn't parse when raw option is true" do
+      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
+      $api.perform_query(path: 'path/to/load', raw: true).should == '"1"'
+    end
 
     describe "Handles network errors" do
 
       it "Raises a connection error if the HTTP status code was not 'OK'" do
         HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'500'}) }
-        expect{ Osm::Api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
+        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
       end
 
       it "Raises a connection error if it can't connect to OSM" do
         HTTParty.stub(:post) { raise SocketError }
-        expect{ Osm::Api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'A problem occured on the internet.')
+        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'A problem occured on the internet.')
       end
 
     end # Handles network errors
@@ -157,38 +150,28 @@ describe "API" do
 
       it "Raises an error if OSM returns an error (as a hash)" do
         HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"error":"Error message"}'}) }
-        expect{ Osm::Api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
+        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a hash in a hash)" do
         HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"error":{"message":"Error message"}}'}) }
-        expect{ Osm::Api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
+        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a plain string)" do
         HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'Error message'}) }
-        expect{ Osm::Api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
+        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
       end
 
     end # Handles OSM errors
-
   end # Performs queries
 
 
-  describe "Authorizes a user to use the OSM API" do
-    it "Using the default configuration" do
-      user_email = 'alice@example.com'
-      user_password = 'alice'
-      Osm::Api.should_receive(:perform_query).with(configuration: $api_configuration, path: 'users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => 'id', 'secret' => 'secret'} }
-      Osm::Api.authorize(email_address: user_email, password: user_password).should == {:user_id => 'id', :secret => 'secret'}
-    end
-    it "Using a custom configuration" do
-      user_email = 'alice@example.com'
-      user_password = 'alice'
-      configuration = Osm::Api::Configuration.new(id: 1, token: 'token', name: 'name')
-      Osm::Api.should_receive(:perform_query).with(configuration: configuration, path: 'users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => 'id', 'secret' => 'secret'} }
-      Osm::Api.authorize(configuration: configuration, email_address: user_email, password: user_password).should == {:user_id => 'id', :secret => 'secret'}
-    end
+  it "Authorizes a user to use the OSM API" do
+    user_email = 'alice@example.com'
+    user_password = 'alice'
+    $api.should_receive(:perform_query).with(path: 'users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => '100', 'secret' => 'secret'} }
+    $api.authorize_user(email_address: user_email, password: user_password).should == {:user_id => '100', :user_secret => 'secret'}
   end
 
 
@@ -229,8 +212,8 @@ describe "API" do
 
     it "Get from cache" do
       permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id") { true }
-      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id") { permissions }
+      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2") { true }
+      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2") { permissions }
       $api.get_user_permissions.should == permissions
     end
 
@@ -240,27 +223,68 @@ describe "API" do
       ]
       body = {
         'apiid' => '1',
-        'token' => 'API TOKEN',
-        'userid' => 'user_id',
-        'secret' => 'secret',
+        'token' => 'API-SECRET',
+        'userid' => '2',
+        'secret' => 'USER-SECRET',
       }
       url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles'
 
-      OsmTest::Cache.should_not_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id")
-      OsmTest::Cache.should_not_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id")
+      OsmTest::Cache.should_not_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
+      OsmTest::Cache.should_not_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       HTTParty.should_receive(:post).with(url, {:body=>body}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
       $api.get_user_permissions(:no_cache => true).should == {1 => {:badge => [:read]}}
     end
 
     it "Set" do
       permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id") { true }
-      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id") { permissions }
-      OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-user_id", permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
+      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2") { true }
+      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2") { permissions }
+      OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
       $api.set_user_permissions(section: 3, permissions: {:a => [:read]})
     end
 
-  end
+  end # describe User Permissions
+
+
+  describe "Converters" do
+    describe "to_s" do
+      it "Has a user" do
+        $api.stub(:has_valid_user?){ true }
+        $api.to_s.should == "osm - 1 - API NAME - 2"
+      end
+
+      it "Doesn't have a user" do
+        $api.stub(:has_valid_user?){ false }
+        $api.to_s.should == "osm - 1 - API NAME"
+      end
+
+    end
+
+    it "to_i" do
+      $api.to_i.should == 1
+    end
+
+    it "to_h" do
+      hash = $api.to_h
+
+      hash.should == {
+        api_id:       '1',
+        api_secret:   'API-SECRET',
+        name:         'API NAME',
+        debug:        false,
+        site:         :osm,
+        user_id:      '2',
+        user_secret:  'USER-SECRET'
+      }
+
+      hash[:name].object_id.should_not == $api.name.object_id
+      hash[:api_id].object_id.should_not == $api.api_id.object_id
+      hash[:api_secret].object_id.should_not == $api.api_secret.object_id
+      hash[:user_id].object_id.should_not == $api.user_id.object_id
+      hash[:user_secret].object_id.should_not == $api.user_secret.object_id
+    end
+
+  end # describe Converters
 
 
 end

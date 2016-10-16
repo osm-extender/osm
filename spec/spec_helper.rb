@@ -40,21 +40,19 @@ RSpec.configure do |config|
     configuration.syntax = [:expect, :should]
   end
 
-  config.before(:suite) do
-    $api_configuration = Osm::Api::Configuration.new(
-      site:  :osm,
-      id:    '1',
-      token: 'API TOKEN',
-      name:  'API NAME',
-    )
-    Osm::Api.default_configuration = $api_configuration
-  end
-
   config.before(:each) do
     FakeWeb.clean_registry
     OsmTest::Cache.clear
 
-    $api = Osm::Api.new(configuration: $api_configuration, user_id: 'user_id', secret: 'secret')
+    $api = Osm::Api.new(
+      site:         :osm,
+      api_id:       '1',
+      api_secret:   'API-SECRET',
+      name:         'API NAME',
+      debug:        false,
+      user_id:      '2',
+      user_secret:  'USER-SECRET',
+    )
 
     Osm::Model.configure(
       cache: OsmTest::Cache

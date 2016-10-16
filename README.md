@@ -39,17 +39,10 @@ Add to your Gemfile and run the `bundle` command to install it.
 gem 'osm', '~> 2.0'
 ```
 
-Configure the gem during the initalization of the app (e.g. if using rails then config/initializers/osm.rb would look like):
+Configure the gem to use a cache during the initalization of the app (e.g. if using rails then config/initializers/osm.rb would look like):
 
 ```ruby
 ActionDispatch::Callbacks.to_prepare do
-  Osm::Api.default_configuration = Osm::Api::Configuration.new(
-    site:  :osm,  # or :osm_staging or :osm_migration
-    id:    'YOU WILL BE GIVEN THIS BY ED AT OSM',
-    token: 'YOU WILL BE GIVEN THIS BY ED AT OSM',
-    name:  'YOU WILL GIVE THIS TO ED AT OSM',
-  )
-
   Osm::Model.configure(
     cache:          Rails.cache,
     cache_prepend:  OPTIONAL, DEFAULTS TO "OSMAPI",
@@ -64,14 +57,18 @@ end
 In order to use the OSM API you first need to authorize the api to be used by the user, to do this use the {Osm::Api#authorize} method to get a userid and secret.
 
 ```ruby
-Osm::Api.authorize(users_email_address, users_osm_password)
+# Authorise your API to act as the user
+api = Osm::Api.new(api_id: id_you_got_from_osm, api_secret: token_you_got_from_osm, name: "A name for your API")
+user_credentials = api.authorize(users_email_address, users_osm_password)
+
+# Now login to OSM and give your API some permissions
+
+# Create an api instance with your user credentials
+api = api.clone_with_different_user(user_credentials)
 ```
 
 Once you have done this you should store the userid and secret somewhere, you can then create an {Osm::Api} object to start acting as the user.
 
-```ruby
-api_for_this_user = Osm::Api.new(userid, secret)
-```
 
 
 ## Documentation & Versioning
