@@ -43,11 +43,7 @@ Configure the gem to use a cache during the initalization of the app (e.g. if us
 
 ```ruby
 ActionDispatch::Callbacks.to_prepare do
-  Osm::Model.configure(
-    cache:          Rails.cache,
-    cache_prepend:  OPTIONAL, DEFAULTS TO "OSMAPI",
-    ttl:            OPTIONAL, DEFAULTS TO 600
-  )
+  Osm::Model.cache = OsmTest::Cache
 end
 ```
 

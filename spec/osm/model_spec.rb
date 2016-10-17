@@ -11,7 +11,7 @@ describe "Model" do
       {
         :cache => @@cache,
         :prepend_to_cache_key => @@prepend_to_cache_key,
-        :ttl => @@cache_ttl,
+        :cache_ttl => @@cache_ttl,
       }
     end
 
@@ -31,33 +31,25 @@ describe "Model" do
   it "Configure" do
     Osm::Model.configure(
       cache: OsmTest::Cache,
-      ttl: 100,
+      cache_ttl: 100,
       prepend_to_cache_key: 'Hi'
     )
 
     config = ModelTester.test_get_config
     config.should == {
       :cache => OsmTest::Cache,
-      :ttl => 100,
+      :cache_ttl => 100,
       :prepend_to_cache_key => 'Hi',
     }
   end
 
-  it "Configure (with no parameters)" do
-    Osm::Model.configure()
-    config = ModelTester.test_get_config
-    config[:cache].should be_nil
-    config[:ttl].should == 600
-    config[:prepend_to_cache_key].should == 'OSMAPI'
-  end
-
   it "Configure (bad arguments)" do
-    expect{ Osm::Model.configure(prepend_to_cache_key: :invalid) }.to raise_error(ArgumentError, ':prepend_to_cache_key must be a String')
+    expect{ Osm::Model.configure(prepend_to_cache_key: :invalid) }.to raise_error(ArgumentError, 'prepend_to_cache_key must be a String')
 
-    expect{ Osm::Model.configure(ttl: :invalid) }.to raise_error(ArgumentError, ':ttl must be a FixNum greater than 0')
-    expect{ Osm::Model.configure(ttl: 0) }.to raise_error(ArgumentError, ':ttl must be a FixNum greater than 0')
+    expect{ Osm::Model.configure(cache_ttl: :invalid) }.to raise_error(ArgumentError, 'cache_ttl must be a FixNum greater than 0')
+    expect{ Osm::Model.configure(cache_ttl: 0) }.to raise_error(ArgumentError, 'cache_ttl must be a FixNum greater than 0')
 
-    expect{ Osm::Model.configure(cache: String) }.to raise_error(ArgumentError, ':cache must have a exist? method')
+    expect{ Osm::Model.configure(cache: String) }.to raise_error(ArgumentError, 'cache must have a exist? method')
   end
 
 
@@ -108,7 +100,7 @@ describe "Model" do
     end
 
     it "Behaves when cache is nil (no caching)" do
-      Osm::Model.configure({:cache => nil})
+      Osm::Model.cache = nil
       ModelTester.cache_exist?(api: $api, key: 'key').should == false
       ModelTester.cache_write(api: $api, key: 'key', data: 'data').should == false
       ModelTester.cache_read(api: $api, key: 'key').should be_nil

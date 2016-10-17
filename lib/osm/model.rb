@@ -12,25 +12,50 @@ module Osm
 
     SORT_BY = [:id]
 
+    @@cache = nil
+    @@prepend_to_cache_key = 'OSMAPI'
+    @@cache_ttl = 600
+    
 
     # Configure the options used by all models
     # @param [Class, nil] :cache An instance of a cache class, must provide the methods (exist?, delete, write, read, fetch), for details see Rails.cache. Set to nil to disable caching.
     # @param [Fixnum] :ttl (optional, default = 1800 (30 minutes)) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
     # @param [String] :prepend_to_cache_key (optional, default = 'OSMAPI') Text to prepend to the key used to store data in the cache
     # @return nil
-    def self.configure(cache: nil, prepend_to_cache_key: 'OSMAPI', ttl: 600)
-      fail ArgumentError, ":ttl must be a FixNum greater than 0" if ttl && !(ttl.is_a?(Fixnum) && ttl > 0)
-      fail ArgumentError, ":prepend_to_cache_key must be a String" if prepend_to_cache_key && !prepend_to_cache_key.is_a?(String)
-      if cache
+    def self.configure(cache: @@cache, prepend_to_cache_key: @@prepend_to_cache_key, cache_ttl: @@cache_ttl)
+      self.cache = cache
+      self.prepend_to_cache_key = prepend_to_cache_key
+      self.cache_ttl = cache_ttl
+      nil
+    end
+
+
+    def self.cache=(new_cache)
+      unless new_cache.nil?
         [:exist?, :delete, :write, :read, :fetch].each do |method|
-          fail ArgumentError, ":cache must have a #{method} method" unless cache.methods.include?(method)
+          fail ArgumentError, "cache must have a #{method} method" unless new_cache.methods.include?(method)
         end
       end
+      @@cache = new_cache
+    end
+    def self.cache
+      @@cache
+    end
 
-      @@cache = cache
-      @@prepend_to_cache_key = prepend_to_cache_key
-      @@cache_ttl = ttl
-      nil
+    def self.cache_ttl=(new_cache_ttl)
+      fail ArgumentError, "cache_ttl must be a FixNum greater than 0" if new_cache_ttl && !(new_cache_ttl.is_a?(Fixnum) && new_cache_ttl > 0)
+      @@cache_ttl = new_cache_ttl
+    end
+    def self.cache_ttl
+      @@cache_ttl
+    end
+
+    def self.prepend_to_cache_key=(new_prepend_to_cache_key)
+      fail ArgumentError, "prepend_to_cache_key must be a String" if new_prepend_to_cache_key && !new_prepend_to_cache_key.is_a?(String)
+      @@prepend_to_cache_key = new_prepend_to_cache_key
+    end
+    def self.prepend_to_cache_key
+      @@prepend_to_cache_key
     end
 
 
@@ -99,35 +124,41 @@ module Osm
 # TODO - Add option for ignoring cache (e.g. run block regardless)
     def self.cache_fetch(api:, key:, options: {})
       fail ArgumentError, "A block is required" unless block_given?
-      return yield if @@cache.nil?
+      return yield if not_caching?
       key = cache_key(api: api, key: key)
       options = {expires_in: @@cache_ttl}.merge(options)
       @@cache.fetch(key, options){ yield }
     end
     def self.cache_read(api:, key:)
-      return nil if @@cache.nil?
+      return nil if not_caching?
       key = cache_key(api: api, key: key)
       @@cache.read(key)
     end
     def self.cache_write(api:, key:, data:, options: {})
-      return false if @@cache.nil?
+      return false if not_caching?
       key = cache_key(api: api, key: key)
       options = {expires_in: @@cache_ttl}.merge(options)
       @@cache.write(key, data, options)
     end
     def self.cache_exist?(api:, key:)
-      return false if @@cache.nil?
+      return false if not_caching?
       key = cache_key(api: api, key: key)
       @@cache.exist?(key)
     end
     def self.cache_delete(api:, key:)
-      return true if @@cache.nil?
+      return true if not_caching?
       key = cache_key(api: api, key: key)
       @@cache.delete(key)
     end
     def self.cache_key(api:, key:)
       key = key.join('-') if key.is_a?(Array)
       "#{!@@prepend_to_cache_key ? '' : "#{@@prepend_to_cache_key}-"}#{Osm::VERSION}-#{api.site}-#{key}"
+    end
+    def self.caching?
+      !@@cache.nil?
+    end
+    def self.not_caching?
+      !caching?
     end
 
 

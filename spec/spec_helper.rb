@@ -54,9 +54,9 @@ RSpec.configure do |config|
       user_secret:  'USER-SECRET',
     )
 
-    Osm::Model.configure(
-      cache: OsmTest::Cache
-    )
+    Osm::Model.cache = OsmTest::Cache
+    Osm::Model.prepend_to_cache_key = 'OSMAPI'
+    Osm::Model.cache_ttl = 600
 
     Osm::Model.stub(:require_ability_to).and_return(nil)
     Osm::Model.stub(:require_access_to_section).and_return(nil)

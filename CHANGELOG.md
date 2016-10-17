@@ -3,6 +3,7 @@
   * Remove support for ruby <= 2.2.2, jruby, rails < 4
   * Remove dependancy on active_support
   * Model is now configured through Osm::Model.configure
+  * Model now has class accessors for cache, cache_ttl and prepend_to_cache_key attributes
   * Now supports cache fetching
   * Methods now use keyword arguments except where it makes sense (ie only 1 argument)
 
