@@ -1,11 +1,13 @@
 # Require gems
 require 'active_attr'
 require 'active_model'
-require 'date'
-require 'time'
 require 'httparty'
 require 'dirty_hashy'
+
+# Require from standard ruby libraries
+require 'date'
 require 'json'
+require 'time'
 
 
 module Osm

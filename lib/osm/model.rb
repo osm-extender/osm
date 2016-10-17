@@ -19,7 +19,7 @@ module Osm
 
     # Configure the options used by all models
     # @param [Class, nil] :cache An instance of a cache class, must provide the methods (exist?, delete, write, read, fetch), for details see Rails.cache. Set to nil to disable caching.
-    # @param [Fixnum] :ttl (optional, default = 1800 (30 minutes)) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
+    # @param [Fixnum] :ttl (optional, default = 600 (10 minutes)) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
     # @param [String] :prepend_to_cache_key (optional, default = 'OSMAPI') Text to prepend to the key used to store data in the cache
     # @return nil
     def self.configure(cache: @@cache, prepend_to_cache_key: @@prepend_to_cache_key, cache_ttl: @@cache_ttl)
