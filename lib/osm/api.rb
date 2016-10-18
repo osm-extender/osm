@@ -124,60 +124,63 @@ module Osm
     # @param post_attributes [Hash] A hash containing the values to be sent to the server in the body of the request
     # @param raw [Boolean] When true the data returned by OSM is not parsed
     # @return [Hash, Array, String] the parsed JSON returned by OSM
-    def perform_query(path:, post_attributes: {}, raw: false)
+    def perform_query(path:, post_data: {}, raw: false)
       # Add required attributes for API authentication
-      post_attributes = post_attributes.merge(
+      post_data = post_data.merge(
         'apiid' => api_id,
         'token' => api_secret,
       )
 
       # Add required attributes for user authentication
       if has_valid_user?
-        post_attributes.merge!(
+        post_data.merge!(
           'userid' => user_id,
           'secret' => user_secret
         )
       end
 
-      url = build_url(path)
+      uri = URI("#{BASE_URLS[site]}/#{path}")
 
       if debug?
-        puts "Making #{'RAW' if raw} :#{site} API request to #{url}"
+        puts "Making #{'RAW' if raw} :#{site} API request to #{uri}"
         hide_values_for = ['secret', 'token']
-        api_data_as_string = api_data.sort.map{ |key, value| "#{key} => #{hide_values_for.include?(key) ? 'PRESENT' : value.inspect}" }.join(', ')
-        puts "{#{api_data_as_string}}"
+        post_data_as_string = post_data.sort.map{ |key, value| "#{key} => #{hide_values_for.include?(key) ? 'PRESENT' : value.inspect}" }.join(', ')
+        puts "{#{post_data_as_string}}"
       end
 
       begin
-        result = HTTParty.post(url, {:body => post_attributes})
-      rescue SocketError, TimeoutError, OpenSSL::SSL::SSLError
-        fail Osm::ConnectionError, 'A problem occured on the internet.'
+        response = Net::HTTP.post_form(uri, post_data)
+      rescue => e
+        raise Osm::ConnectionError, "#{e.class}: #{e.message}"
       end
-      fail Osm::ConnectionError, "HTTP Status code was #{result.response.code}" if !result.response.code.eql?('200')
+      unless response.is_a?(Net::HTTPOK)
+        # Connection error occured
+        fail Osm::ConnectionError, "HTTP Status code was #{response.code}"
+      end
 
       if debug?
         puts "Result from :#{site} request to #{url}"
-        puts "#{result.response.content_type}"
-        puts result.response.body
+        puts "#{response.code}\t#{response.class}\t#{response.content_type}"
+        puts response.body
       end
 
-      return result.response.body if raw
-      return nil if result.response.body.empty?
-      case result.response.content_type
+      return response.body if raw
+      return nil if response.body.empty?
+      case response.content_type
         when 'application/json', 'text/html'
           begin
-            decoded = JSON.parse(result.response.body)
+            decoded = JSON.parse(response.body)
             if osm_error = get_osm_error(decoded)
               fail Osm::Error, osm_error if osm_error
             end
             return decoded
           rescue JSON::ParserError
-            fail Osm::Error, result.response.body
+            fail Osm::Error, response.body
           end
         when 'image/jpeg'
-          return result.response.body
+          return response.body
         else
-          fail Osm::Error, "Unhandled content-type: #{result.response.content_type}"
+          fail Osm::Error, "Unhandled content-type: #{response.content_type}"
       end
     end
 
@@ -315,13 +318,6 @@ module Osm
       end
       to_return = false if to_return.blank?
       return to_return
-    end
-
-    # Build a URL out of a path and the base URL for the configured site
-    # @param path [String] The path to build the URL for e.g. "path/users.php"
-    # @return [String] e.g. "https://www.onlinescoutmanager.co.uk/path/users.php"
-    private def build_url(path)
-      "#{BASE_URLS[site]}/#{path}"
     end
 
   end # class Api

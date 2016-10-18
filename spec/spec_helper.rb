@@ -8,10 +8,7 @@ require 'coveralls' and Coveralls.wear! if ENV['TRAVIS']
 
 
 require 'fakeweb'
-require 'httparty'
-require 'active_support'
 require 'active_attr/rspec'
-require 'active_model'
 
 require 'osm'
 
@@ -90,28 +87,5 @@ module OsmTest
     def self.inspect
       @@cache.inspect
     end
-  end
-
-  class DummyHttpResult
-    def initialize(options={})
-      @response = OsmTest::DummyHttpResponse.new(options[:response])
-    end
-    def response
-      @response
-    end
-  end
-  class DummyHttpResponse
-    def initialize(options={})
-      @options = options
-    end
-    def code
-      @options[:code]
-    end
-    def body
-      @options[:body]
-    end
-    def content_type
-      @options[:content_type] || 'text/html'
-    end
-  end
-end
+  end # class Cache
+end # module OsmTest

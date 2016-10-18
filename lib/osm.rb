@@ -1,12 +1,12 @@
 # Require gems
 require 'active_attr'
 require 'active_model'
-require 'httparty'
 require 'dirty_hashy'
 
 # Require from standard ruby libraries
 require 'date'
 require 'json'
+require 'net/http'
 require 'time'
 
 

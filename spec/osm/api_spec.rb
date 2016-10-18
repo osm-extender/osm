@@ -111,37 +111,57 @@ describe "API" do
 
   describe "Performs the query" do
 
+    before :each do
+      $response = Net::HTTPOK.new(1, 200, '')
+      $response.stub(:content_type){ 'application/json' }
+      $response.stub(:body) { '{}' }
+    end
+
     it "Without user credentials" do
       api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
+      Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET"}).and_return($response)
       api.perform_query(path: 'path/to/load').should == {}
     end
 
     it "With user credentials" do
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
+      Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
       $api.perform_query(path: 'path/to/load').should == {}
     end
 
     it "Using passed post attributes" do
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", 'attribute' => 'value'}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-      $api.perform_query(path: 'path/to/load', post_attributes: {'attribute' => 'value'}).should == {}
+      uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
+      Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", 'attribute' => 'value'}).and_return($response)
+      $api.perform_query(path: 'path/to/load', post_data: {'attribute' => 'value'}).should == {}
     end
 
     it "Doesn't parse when raw option is true" do
-      HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/path/to/load', {:body => {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}}){ OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'"1"'}) }
+      uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
+      $response.stub(:body){ '"1"' }
+      Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
       $api.perform_query(path: 'path/to/load', raw: true).should == '"1"'
     end
 
     describe "Handles network errors" do
 
       it "Raises a connection error if the HTTP status code was not 'OK'" do
-        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'500'}) }
+        uri = URI('https://www.onlinescoutmanager.co.uk/path')
+        response = Net::HTTPInternalServerError.new(1, 500, '')
+        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(response)
         expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
       end
 
       it "Raises a connection error if it can't connect to OSM" do
-        HTTParty.stub(:post) { raise SocketError }
-        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'A problem occured on the internet.')
+        uri = URI('https://www.onlinescoutmanager.co.uk/path')
+        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}){ raise Errno::ENETUNREACH, 'Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)' }
+        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
+      end
+
+      it "Raises a connection error if an SSL error occurs" do
+        uri = URI('https://www.onlinescoutmanager.co.uk/path')
+        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}){ raise OpenSSL::SSL::SSLError, 'hostname "2.127.245.223" does not match the server certificate' }
+        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
       end
 
     end # Handles network errors
@@ -149,17 +169,23 @@ describe "API" do
     describe "Handles OSM errors" do
 
       it "Raises an error if OSM returns an error (as a hash)" do
-        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"error":"Error message"}'}) }
+        uri = URI('https://www.onlinescoutmanager.co.uk/path')
+        $response.stub(:body){ '{"error":"Error message"}' }
+        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
         expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a hash in a hash)" do
-        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"error":{"message":"Error message"}}'}) }
+        uri = URI('https://www.onlinescoutmanager.co.uk/path')
+        $response.stub(:body){ '{"error":{"message":"Error message"}}' }
+        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
         expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a plain string)" do
-        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'Error message'}) }
+        uri = URI('https://www.onlinescoutmanager.co.uk/path')
+        $response.stub(:body){ 'Error message' }
+        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
         expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
       end
 
@@ -221,17 +247,10 @@ describe "API" do
       data = [
         {"sectionid"=>"1", "permissions"=>{"badge"=>10}},
       ]
-      body = {
-        'apiid' => '1',
-        'token' => 'API-SECRET',
-        'userid' => '2',
-        'secret' => 'USER-SECRET',
-      }
-      url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles'
 
       OsmTest::Cache.should_not_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       OsmTest::Cache.should_not_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
-      HTTParty.should_receive(:post).with(url, {:body=>body}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      $api.should_receive(:perform_query).with(path: 'api.php?action=getUserRoles') { data }
       $api.get_user_permissions(:no_cache => true).should == {1 => {:badge => [:read]}}
     end
 

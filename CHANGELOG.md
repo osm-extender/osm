@@ -1,11 +1,12 @@
 ## Version 2.0.0
 
   * Remove support for ruby <= 2.2.2, jruby, rails < 4
-  * Remove dependancy on active_support
+  * Remove dependancy on active_support and httparty gems
   * Model is now configured through Osm::Model.configure
   * Model now has class accessors for cache, cache_ttl and prepend_to_cache_key attributes
   * Now supports cache fetching
   * Methods now use keyword arguments except where it makes sense (ie only 1 argument)
+  * Osm::ConnectionError - messages are now more descriptive
 
 ## Version 1.3.0
 
