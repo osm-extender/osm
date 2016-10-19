@@ -8,9 +8,10 @@ module Osm
   # This class is expected to be inherited from.
   # It provides the caching and permission handling for model objects.
   class Model
+    include Comparable
     include ActiveAttr::Model
 
-    SORT_BY = [:id]
+    SORT_BY = ['id'].map{ |i| i.freeze }.freeze
 
     @@cache = nil
     @@prepend_to_cache_key = 'OSMAPI'
@@ -72,25 +73,18 @@ module Osm
 
     # Compare functions
     def <=>(another)
-      us_values = self.class::SORT_BY.map{ |i| self.try(i) }
-      them_values = self.class::SORT_BY.map{ |i| another.try(i) }
-      us_values <=> them_values
-    end
-
-    def <(another)
-      send('<=>', another) < 0
-    end
-    def <=(another)
-      send('<=>', another) <= 0
-    end
-    def >(another)
-      send('<=>', another) > 0
-    end
-    def >=(another)
-      send('<=>', another) >= 0
-    end
-    def between?(min, max)
-      (send('<=>', min) > 0) && (send('<=>', max) < 0)
+      result = 0
+      self.class::SORT_BY.each do |attribute|
+        if attribute[0].eql?('-')
+          # Reverse order
+          result = another.try(attribute[1..-1]) <=> self.try(attribute[1..-1])
+        else
+          # Forward order
+          result = self.try(attribute) <=> another.try(attribute)
+        end
+        return result unless result.eql?(0)
+      end
+      result
     end
 
 

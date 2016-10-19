@@ -6,6 +6,9 @@ describe "Model" do
 
   class ModelTester < Osm::Model
     attribute :id
+    attribute :data
+
+    SORT_BY = ['id', '-data'].map{ |i| i.freeze }.freeze
 
     def self.test_get_config
       {
@@ -170,46 +173,52 @@ describe "Model" do
   describe "Comparisons" do
 
     before :each do
-      @mt1 = ModelTester.new(:id => 1)
-      @mt2 = ModelTester.new(:id => 2)
-      @mt3 = ModelTester.new(:id => 3)
-      @mt2a = ModelTester.new(:id => 2)
+      @mt1 = ModelTester.new(id: 1, data: 'a')
+      @mt2 = ModelTester.new(id: 2, data: 'a')
+      @mt3 = ModelTester.new(id: 3, data: 'a')
+      @mt2a = ModelTester.new(id: 2, data: 'a')
+      @mt2b = ModelTester.new(id: 2, data: 'b')
     end
 
     it "<=>" do
       (@mt1 <=> @mt2).should == -1
       (@mt2 <=> @mt1).should == 1
       (@mt2 <=> @mt2a).should == 0
+      (@mt2a <=> @mt2b).should == 1
     end
 
     it ">" do
       (@mt1 > @mt2).should == false
       (@mt2 > @mt1).should == true
       (@mt2 > @mt2a).should == false
+      (@mt2a > @mt2b).should == true
     end
 
     it ">=" do
       (@mt1 >= @mt2).should == false
       (@mt2 >= @mt1).should == true
       (@mt2 >= @mt2a).should == true
+      (@mt2a >= @mt2b).should == true
     end
 
     it "<" do
       (@mt1 < @mt2).should == true
       (@mt2 < @mt1).should == false
       (@mt2 < @mt2a).should == false
+      (@mt2a < @mt2b).should == false
     end
 
     it "<=" do
       (@mt1 <= @mt2).should == true
       (@mt2 <= @mt1).should == false
       (@mt2 <= @mt2a).should == true
+      (@mt2a <= @mt2b).should == false
     end
 
     it "between" do
       @mt2.between?(@mt1, @mt3).should == true
-      @mt1.between?(@mt1, @mt3).should == false
-      @mt3.between?(@mt1, @mt3).should == false
+      @mt1.between?(@mt2, @mt3).should == false
+      @mt3.between?(@mt1, @mt3).should == true
     end
 
   end
