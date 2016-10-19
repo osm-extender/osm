@@ -60,58 +60,92 @@ describe "Model" do
 
   describe "Caching" do
 
-    it "Checks for existance" do
-      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
-      ModelTester.cache_exist?(api: $api, key: 'key').should == true
-    end
+    describe "Checks for existance" do
+      it "With cache" do
+        OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
+        ModelTester.cache_exist?(api: $api, key: 'key').should == true
+      end
 
-    it "Writes" do
-      OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', {:expires_in=>600}) { true }
-      ModelTester.cache_write(api: $api, key: 'key', data: 'data').should == true
-    end
+      it "Without cache" do
+        OsmTest::Cache.should_not_receive('exist?')
+        Osm::Model.cache = nil
+        ModelTester.cache_exist?(api: $api, key: 'key').should == false
+      end
+
+      it "Ignoring cache" do
+        OsmTest::Cache.should_not_receive('exist?')
+        ModelTester.cache_exist?(api: $api, key: 'key', no_read_cache: true).should == false
+      end
+    end # describe Checks for existance
+
+    describe "Reads" do
+      it "With cache" do
+        OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-key") { 'data' }
+        ModelTester.cache_read(api: $api, key: 'key').should == 'data'
+      end
+
+      it "Without cache" do
+        OsmTest::Cache.should_not_receive('read')
+        Osm::Model.cache = nil
+        ModelTester.cache_read(api: $api, key: 'key').should == nil
+      end
+
+      it "Ignoring cache" do
+        OsmTest::Cache.should_not_receive('read')
+        ModelTester.cache_read(api: $api, key: 'key', no_read_cache: true).should == nil
+      end
+    end # describe Reads
+
+    describe "Writes" do
+      it "With cache" do
+        OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', {:expires_in=>600}) { true }
+        ModelTester.cache_write(api: $api, key: 'key', data: 'data').should == true
+      end
+
+      it "Without cache" do
+        OsmTest::Cache.should_not_receive('write')
+        Osm::Model.cache = nil
+        ModelTester.cache_write(api: $api, key: 'key', data: 'data').should == false
+      end
+    end # describe Writes
+
+    describe "Deletes" do
+      it "With cache" do
+        OsmTest::Cache.should_receive('delete').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
+        ModelTester.cache_delete(api: $api, key: 'key').should == true
+      end
+
+      it "Without cache" do
+        OsmTest::Cache.should_not_receive('delete')
+        Osm::Model.cache = nil
+        ModelTester.cache_delete(api: $api, key: 'key').should == true
+      end
+    end # describe Deletes
 
     describe "Fetches" do
-      it "With cache & with block" do
+      it "Without block" do
+        expect{ ModelTester.cache_fetch(api: $api, key: 'key') }.to raise_error(ArgumentError, "A block is required")
+      end
+
+      it "With cache" do
         block = Proc.new{ "ABC" }
         OsmTest::Cache.should_receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", {:expires_in=>600}).and_yield { "abc" }
         ModelTester.cache_fetch(api: $api, key: 'key', &block).should == "ABC"
       end
 
-      it "With cache & without block" do
-        expect{ ModelTester.cache_fetch(api: $api, key: 'key') }.to raise_error(ArgumentError, "A block is required")
-      end
-
-      it "Without cache & with block" do
-        ModelTester.configure(cache: nil)
+      it "Without cache" do
+        ModelTester.cache = nil
         block = Proc.new{ "GHI" }
         OsmTest::Cache.should_not_receive('fetch')
         ModelTester.cache_fetch(api: $api, key: 'key', &block).should == "GHI"
       end
 
-      it "Without cache & without block" do
-        ModelTester.configure(cache: nil)
-        expect{ ModelTester.cache_fetch(api: $api, key: 'key') }.to raise_error(ArgumentError, "A block is required")
+      it "Ignoring cache" do
+        OsmTest::Cache.should_not_receive('read')
+        block = Proc.new{ "GHI" }
+        ModelTester.cache_fetch(api: $api, key: 'key', no_read_cache: true, &block).should == "GHI"
       end
     end # describe fetches
-
-    it "Reads" do
-      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-key") { 'data' }
-      ModelTester.cache_read(api: $api, key: 'key').should == 'data'
-    end
-
-    it "Deletes" do
-      OsmTest::Cache.should_receive('delete').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
-      ModelTester.cache_delete(api: $api, key: 'key').should == true
-    end
-
-    it "Behaves when cache is nil (no caching)" do
-      Osm::Model.cache = nil
-      ModelTester.cache_exist?(api: $api, key: 'key').should == false
-      ModelTester.cache_write(api: $api, key: 'key', data: 'data').should == false
-      ModelTester.cache_read(api: $api, key: 'key').should be_nil
-      ModelTester.cache_delete(api: $api, key: 'key').should == true
-      ModelTester.cache_fetch(api: $api, key: 'key'){ 'abc' }.should == 'abc'
-    end
 
     it "Builds a key from an array" do
       ModelTester.cache_key(api: $api, key: ['a', 'b']).should == "OSMAPI-#{Osm::VERSION}-osm-a-b"

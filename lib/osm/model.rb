@@ -1,5 +1,5 @@
 # @!macro [new] options_get
-#   @param ignore_cache [Boolean] (optional) if true then the data will be retreived from OSM not the cache
+#   @param no_read_cache [Boolean] (optional) if true then the data will be retreived from OSM not the cache
 
 
 module Osm
@@ -38,6 +38,12 @@ module Osm
     end
     def self.cache
       @@cache
+    end
+    def self.cache?
+      !@@cache.nil?
+    end
+    def self.no_cache?
+      !cache?
     end
 
     def self.cache_ttl=(new_cache_ttl)
@@ -115,44 +121,35 @@ module Osm
 
     private
     # Wrap cache calls
-# TODO - Add option for ignoring cache (e.g. run block regardless)
-    def self.cache_fetch(api:, key:, options: {})
+    def self.cache_fetch(api:, key:, ttl: @@cache_ttl, no_read_cache: false)
       fail ArgumentError, "A block is required" unless block_given?
-      return yield if not_caching?
+      return yield if no_cache? || no_read_cache
       key = cache_key(api: api, key: key)
-      options = {expires_in: @@cache_ttl}.merge(options)
-      @@cache.fetch(key, options){ yield }
+      @@cache.fetch(key, {expires_in: ttl}){ yield }
     end
-    def self.cache_read(api:, key:)
-      return nil if not_caching?
+    def self.cache_read(api:, key:, no_read_cache: false)
+      return nil if no_cache? || no_read_cache
       key = cache_key(api: api, key: key)
       @@cache.read(key)
     end
-    def self.cache_write(api:, key:, data:, options: {})
-      return false if not_caching?
+    def self.cache_write(api:, key:, data:, ttl: @@cache_ttl)
+      return false if no_cache?
       key = cache_key(api: api, key: key)
-      options = {expires_in: @@cache_ttl}.merge(options)
-      @@cache.write(key, data, options)
+      @@cache.write(key, data, {expires_in: ttl})
     end
-    def self.cache_exist?(api:, key:)
-      return false if not_caching?
+    def self.cache_exist?(api:, key:, no_read_cache: false)
+      return false if no_cache? || no_read_cache
       key = cache_key(api: api, key: key)
       @@cache.exist?(key)
     end
     def self.cache_delete(api:, key:)
-      return true if not_caching?
+      return true if no_cache?
       key = cache_key(api: api, key: key)
       @@cache.delete(key)
     end
     def self.cache_key(api:, key:)
       key = key.join('-') if key.is_a?(Array)
       "#{!@@prepend_to_cache_key ? '' : "#{@@prepend_to_cache_key}-"}#{Osm::VERSION}-#{api.site}-#{key}"
-    end
-    def self.caching?
-      !@@cache.nil?
-    end
-    def self.not_caching?
-      !caching?
     end
 
 
