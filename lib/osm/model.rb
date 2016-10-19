@@ -11,8 +11,6 @@ module Osm
     include Comparable
     include ActiveAttr::Model
 
-    SORT_BY = ['id'].map{ |i| i.freeze }.freeze
-
     @@cache = nil
     @@prepend_to_cache_key = 'OSMAPI'
     @@cache_ttl = 600
@@ -74,7 +72,7 @@ module Osm
     # Compare functions
     def <=>(another)
       result = 0
-      self.class::SORT_BY.each do |attribute|
+      sort_by.each do |attribute|
         if attribute[0].eql?('-')
           # Reverse order
           result = another.try(attribute[1..-1]) <=> self.try(attribute[1..-1])
@@ -85,6 +83,9 @@ module Osm
         return result unless result.eql?(0)
       end
       result
+    end
+    protected def sort_by
+      ['id']
     end
 
 

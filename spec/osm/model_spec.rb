@@ -8,8 +8,6 @@ describe "Model" do
     attribute :id
     attribute :data
 
-    SORT_BY = ['id', '-data'].map{ |i| i.freeze }.freeze
-
     def self.test_get_config
       {
         :cache => @@cache,
@@ -21,6 +19,10 @@ describe "Model" do
     def self.test_get_all(api, keys, key)
       ids = cache_read(api: api, key: keys)
       return get_from_ids(api: api, ids: ids, key_base: key, get_all_method: :get_all)
+    end
+
+    protected def sort_by
+      ['id', '-data']
     end
   end
 
