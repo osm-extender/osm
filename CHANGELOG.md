@@ -7,6 +7,7 @@
   * Now supports cache fetching
   * Methods now use keyword arguments except where it makes sense (ie only 1 argument)
   * Osm::ConnectionError - messages are now more descriptive
+  * Osm::Api instances now have an http_user_agent attribute
 
 ## Version 1.3.0
 

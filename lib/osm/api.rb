@@ -6,20 +6,21 @@ module Osm
     # @!attribute [r] site
     #   @return [Symbol] the 'flavour' of OSM to use - :osm, :osm_staging or :osm_migration (default :osm)
     # @!attribute [r] name
-    #   @return [String] the name of the API as displayed in OSM
+    #   @return [String, #to_s] the name of the API as displayed in OSM
     # @!attribute [r] api_id
-    #   @return [String] the apiid given to you by OSM
+    #   @return [String, #to_s] the apiid given to you by OSM
     # @!attribute [r] api_secret
-    #   @return [String] the token given to you by OSM
+    #   @return [String, #to_s] the token given to you by OSM
     # @!attribute [r] user_id
-    #   @return [String] the id for the user given by OSM
+    #   @return [String, #to_s, nil] the id for the user given by OSM
     # @!attribute [r] user_secret
-    #   @return [String] the secret for the user given by OSM
+    #   @return [String, #to_s, nil] the secret for the user given by OSM
     # @!attribute [rw] debug
     #   @return [Boolean] whether debugging output should be displayed (default false)
+    # @!attribute [rw] http_user_agent
+    #   @return [String, #to_s, nil] what to send as the user-agent when making requests to OSM (default "#{name} (using osm gem version #{Osm::VERSION})")
 
     attr_reader :api_id, :api_secret, :name, :site, :debug, :user_id, :user_secret
-
 
     BASE_URLS = {
       :osm => 'https://www.onlinescoutmanager.co.uk',
@@ -31,7 +32,7 @@ module Osm
 
 
     # Initialize a new API connection
-    def initialize(api_id:, api_secret:, name:, site: :osm, debug: false, user_id: nil, user_secret: nil)
+    def initialize(api_id:, api_secret:, name:, site: :osm, debug: false, user_id: nil, user_secret: nil, http_user_agent: nil)
       fail ArgumentError, 'You must provide an api_id (get this by requesting one from OSM)' if api_id.to_s.empty?
       fail ArgumentError, 'You must provide an api_secret (get this by requesting one from OSM)' if api_secret.to_s.empty?
       fail ArgumentError, 'You must provide a name for your API (this should be what appears in OSM)' if name.to_s.empty?
@@ -41,7 +42,8 @@ module Osm
       @api_secret = api_secret.to_s.clone
       @name = name.to_s.clone
       @site = site
-      @debug = !!debug
+      self.debug = !!debug
+      self.http_user_agent = http_user_agent
       @user_id = user_id.to_s.clone unless user_id.nil?
       @user_secret = user_secret.to_s.clone unless user_secret.nil?
     end
@@ -104,7 +106,7 @@ module Osm
         'email' => email_address.to_s,
         'password' => password.to_s,
       }
-      data = perform_query(path: 'users.php?action=authorise', post_attributes: api_data)
+      data = post_query(path: 'users.php?action=authorise', post_attributes: api_data)
 
       return nil unless data.is_a?(Hash)
 
@@ -124,7 +126,7 @@ module Osm
     # @param post_attributes [Hash] A hash containing the values to be sent to the server in the body of the request
     # @param raw [Boolean] When true the data returned by OSM is not parsed
     # @return [Hash, Array, String] the parsed JSON returned by OSM
-    def perform_query(path:, post_data: {}, raw: false)
+    def post_query(path:, post_data: {}, raw: false)
       # Add required attributes for API authentication
       post_data = post_data.merge(
         'apiid' => api_id,
@@ -149,7 +151,12 @@ module Osm
       end
 
       begin
-        response = Net::HTTP.post_form(uri, post_data)
+        request = Net::HTTP::Post.new(uri)
+        request['User-Agent'] = http_user_agent
+        request.set_form_data post_data
+        http = Net::HTTP.new(uri.hostname, uri.port)
+        http.use_ssl = uri.scheme.eql?('https')
+        response = http.request(request)
       rescue => e
         raise Osm::ConnectionError, "#{e.class}: #{e.message}"
       end
@@ -208,7 +215,7 @@ module Osm
       end
 
       begin
-        data = perform_query(path: 'api.php?action=getUserRoles')
+        data = post_query(path: 'api.php?action=getUserRoles')
         unless data.eql?(false)
           # false equates to no roles
           Osm::Model.cache_write(api: self, key: cache_key, data: data)
@@ -291,9 +298,16 @@ module Osm
     def debug=(value)
       @debug = !!value
     end
-
     def debug?
       debug
+    end
+
+    def http_user_agent=(value)
+      value = value.to_s.clone
+      @http_user_agent = value.empty? ? nil : value
+    end
+    def http_user_agent
+      @http_user_agent || "#{name} (using osm gem version #{Osm::VERSION})"
     end
 
 

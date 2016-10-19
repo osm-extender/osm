@@ -42,13 +42,14 @@ RSpec.configure do |config|
     OsmTest::Cache.clear
 
     $api = Osm::Api.new(
-      site:         :osm,
-      api_id:       '1',
-      api_secret:   'API-SECRET',
-      name:         'API NAME',
-      debug:        false,
-      user_id:      '2',
-      user_secret:  'USER-SECRET',
+      site:             :osm,
+      api_id:           '1',
+      api_secret:       'API-SECRET',
+      name:             'API NAME',
+      debug:            false,
+      http_user_agent:  'HTTP-USER-AGENT',
+      user_id:          '2',
+      user_secret:      'USER-SECRET',
     )
 
     Osm::Model.cache = OsmTest::Cache

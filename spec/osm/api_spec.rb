@@ -115,53 +115,75 @@ describe "API" do
       $response = Net::HTTPOK.new(1, 200, '')
       $response.stub(:content_type){ 'application/json' }
       $response.stub(:body) { '{}' }
+      uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
+      $request = Net::HTTP::Post.new(uri)
+      $http = Net::HTTP.new(uri)
+      Net::HTTP::Post.should_receive(:new).with(uri).and_return($request)
+      Net::HTTP.should_receive(:new).with('www.onlinescoutmanager.co.uk', 443).and_return($http)
+      $http.should_receive(:use_ssl=).with(true).and_return(true)
     end
 
     it "Without user credentials" do
+      $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET"}).and_return(nil)
+      $http.should_receive(:request).with($request).and_return($response)
       api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
-      uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
-      Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET"}).and_return($response)
-      api.perform_query(path: 'path/to/load').should == {}
+      api.post_query(path: 'path/to/load').should == {}
     end
 
     it "With user credentials" do
-      uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
-      Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
-      $api.perform_query(path: 'path/to/load').should == {}
+      $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
+      $http.should_receive(:request).with($request).and_return($response)
+      $api.post_query(path: 'path/to/load').should == {}
     end
 
     it "Using passed post attributes" do
-      uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
-      Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", 'attribute' => 'value'}).and_return($response)
-      $api.perform_query(path: 'path/to/load', post_data: {'attribute' => 'value'}).should == {}
+      $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", "attribute" => "value"}).and_return(nil)
+      $http.should_receive(:request).with($request).and_return($response)
+      $api.post_query(path: 'path/to/load', post_data: {'attribute' => 'value'}).should == {}
     end
 
     it "Doesn't parse when raw option is true" do
-      uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
+      $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
       $response.stub(:body){ '"1"' }
-      Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
-      $api.perform_query(path: 'path/to/load', raw: true).should == '"1"'
+      $http.should_receive(:request).with($request).and_return($response)
+      $api.post_query(path: 'path/to/load', raw: true).should == '"1"'
     end
+
+
+    describe "User-Agent header" do
+
+      it "Default" do
+        api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
+        $request.should_receive('[]=').with('User-Agent', "name (using osm gem version #{Osm::VERSION})").and_return(nil)
+        $http.should_receive(:request).with($request).and_return($response)
+        api.post_query(path: 'path/to/load')
+      end
+
+      it "User set" do
+        $request.should_receive('[]=').with('User-Agent', "HTTP-USER-AGENT").and_return(nil)
+        $http.should_receive(:request).with($request).and_return($response)
+        $api.post_query(path: 'path/to/load')
+      end
+
+    end # describe User-Agent header
+
 
     describe "Handles network errors" do
 
       it "Raises a connection error if the HTTP status code was not 'OK'" do
-        uri = URI('https://www.onlinescoutmanager.co.uk/path')
         response = Net::HTTPInternalServerError.new(1, 500, '')
-        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(response)
-        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
+        $http.should_receive(:request).with($request).and_return(response)
+        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
       end
 
       it "Raises a connection error if it can't connect to OSM" do
-        uri = URI('https://www.onlinescoutmanager.co.uk/path')
-        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}){ raise Errno::ENETUNREACH, 'Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)' }
-        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
+        $http.should_receive(:request).with($request){ raise Errno::ENETUNREACH, 'Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)' }
+        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
       end
 
       it "Raises a connection error if an SSL error occurs" do
-        uri = URI('https://www.onlinescoutmanager.co.uk/path')
-        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}){ raise OpenSSL::SSL::SSLError, 'hostname "2.127.245.223" does not match the server certificate' }
-        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
+        $http.should_receive(:request).with($request){ raise OpenSSL::SSL::SSLError, 'hostname "2.127.245.223" does not match the server certificate' }
+        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
       end
 
     end # Handles network errors
@@ -169,24 +191,24 @@ describe "API" do
     describe "Handles OSM errors" do
 
       it "Raises an error if OSM returns an error (as a hash)" do
-        uri = URI('https://www.onlinescoutmanager.co.uk/path')
+        $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
         $response.stub(:body){ '{"error":"Error message"}' }
-        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
-        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
+        $http.should_receive(:request).with($request).and_return($response)
+        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a hash in a hash)" do
-        uri = URI('https://www.onlinescoutmanager.co.uk/path')
+        $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
         $response.stub(:body){ '{"error":{"message":"Error message"}}' }
-        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
-        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
+        $http.should_receive(:request).with($request).and_return($response)
+        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a plain string)" do
-        uri = URI('https://www.onlinescoutmanager.co.uk/path')
+        $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
         $response.stub(:body){ 'Error message' }
-        Net::HTTP.should_receive(:post_form).with(uri, {"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return($response)
-        expect{ $api.perform_query(path: 'path') }.to raise_error(Osm::Error, 'Error message')
+        $http.should_receive(:request).with($request).and_return($response)
+        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
     end # Handles OSM errors
@@ -196,7 +218,7 @@ describe "API" do
   it "Authorizes a user to use the OSM API" do
     user_email = 'alice@example.com'
     user_password = 'alice'
-    $api.should_receive(:perform_query).with(path: 'users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => '100', 'secret' => 'secret'} }
+    $api.should_receive(:post_query).with(path: 'users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => '100', 'secret' => 'secret'} }
     $api.authorize_user(email_address: user_email, password: user_password).should == {:user_id => '100', :user_secret => 'secret'}
   end
 
@@ -204,18 +226,18 @@ describe "API" do
   describe "Get user roles" do
 
     it "Returns what OSM gives on success" do
-      $api.should_receive(:perform_query).with(path: 'api.php?action=getUserRoles'){ ['a', 'b'] }
+      $api.should_receive(:post_query).with(path: 'api.php?action=getUserRoles'){ ['a', 'b'] }
       $api.get_user_roles.should == ['a', 'b']
     end
 
     it "User has no roles in OSM" do
-      $api.should_receive(:perform_query).with(path: 'api.php?action=getUserRoles').twice{ false }
+      $api.should_receive(:post_query).with(path: 'api.php?action=getUserRoles').twice{ false }
       expect{ $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
       $api.get_user_roles.should == []
     end
 
     it "Reraises any other Osm::Error" do
-      $api.should_receive(:perform_query).with(path: 'api.php?action=getUserRoles'){ raise Osm::Error, 'Test' }
+      $api.should_receive(:post_query).with(path: 'api.php?action=getUserRoles'){ raise Osm::Error, 'Test' }
       expect{ $api.get_user_roles }.to raise_error(Osm::Error, 'Test')
     end
 
@@ -250,7 +272,7 @@ describe "API" do
 
       OsmTest::Cache.should_not_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       OsmTest::Cache.should_not_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
-      $api.should_receive(:perform_query).with(path: 'api.php?action=getUserRoles') { data }
+      $api.should_receive(:post_query).with(path: 'api.php?action=getUserRoles') { data }
       $api.get_user_permissions(:no_cache => true).should == {1 => {:badge => [:read]}}
     end
 
