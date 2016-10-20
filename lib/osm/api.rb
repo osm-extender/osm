@@ -207,29 +207,27 @@ module Osm
     # @!macro options_get
     # @return [Array<Hash>] data returned by OSM
     # @raises Osm::NoActiveRoles
-    def get_user_roles!(**options)
+    def get_user_roles!(no_read_cache: false)
       cache_key = ['user_roles', user_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api: self, key: cache_key)
-        return Osm::Model.cache_read(api: self, key: cache_key)
-      end
+      Osm::Model.cache_fetch(api: self, key: cache_key, no_read_cache: no_read_cache) do
+        user_roles = {}
+        begin
+          user_roles = post_query(path: 'api.php?action=getUserRoles')
+          if user_roles.eql?(false)
+            # false equates to no roles
+            fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
+          end
 
-      begin
-        data = post_query(path: 'api.php?action=getUserRoles')
-        unless data.eql?(false)
-          # false equates to no roles
-          Osm::Model.cache_write(api: self, key: cache_key, data: data)
-          return data
+        rescue Osm::Error => e
+          if e.message.eql?('false')
+            fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
+          else
+            raise e
+          end
         end
-        fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
-
-      rescue Osm::Error => e
-        if e.message.eql?('false')
-          fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
-        else
-          raise e
-        end
-      end
+        user_roles
+      end # cache fetch
     end # def get_user_roles!
 
 
@@ -237,22 +235,18 @@ module Osm
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that section
     # @return [Hash] {section_id => permissions_hash}
-    def get_user_permissions(**options)
+    def get_user_permissions(no_read_cache: false)
       cache_key = ['permissions', user_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api: self, key: cache_key)
-        return Osm::Model.cache_read(api: self, key: cache_key)
-      end
-
-      all_permissions = Hash.new
-      get_user_roles(**options).each do |item|
-        unless item['section'].eql?('discount')  # It's not an actual section
-          all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
+      Osm::Model.cache_fetch(api: self, key: cache_key, no_read_cache: no_read_cache) do
+        all_permissions = Hash.new
+        get_user_roles(no_read_cache: no_read_cache).each do |item|
+          unless item['section'].eql?('discount')  # It's not an actual section
+            all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
+          end
         end
-      end
-      Osm::Model.cache_write(api: self, key: cache_key, data: all_permissions)
-
-      return all_permissions
+        all_permissions
+      end # cache fetch
     end
 
     # Set access permission for an API user for a given Section

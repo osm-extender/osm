@@ -246,22 +246,9 @@ describe "API" do
 
   describe "User Permissions" do
 
-    it "Get from API" do
-      body = [
-        {"sectionid"=>"1", "permissions"=>{"badge"=>20}},
-        {"sectionid"=>"2", "permissions"=>{"badge"=>10}}
-      ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
-
-      permissions = {1 => {:badge => [:read, :write]}, 2 => {:badge => [:read]}}
-      OsmTest::Cache.should_not_receive('read')
-      $api.get_user_permissions.should == permissions
-    end
-
     it "Get from cache" do
       permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2") { true }
-      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2") { permissions }
+      OsmTest::Cache.should_receive('fetch').and_return(permissions)
       $api.get_user_permissions.should == permissions
     end
 
@@ -273,13 +260,12 @@ describe "API" do
       OsmTest::Cache.should_not_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       OsmTest::Cache.should_not_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       $api.should_receive(:post_query).with(path: 'api.php?action=getUserRoles') { data }
-      $api.get_user_permissions(:no_cache => true).should == {1 => {:badge => [:read]}}
+      $api.get_user_permissions(no_read_cache: true).should == {1 => {:badge => [:read]}}
     end
 
     it "Set" do
       permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
-      OsmTest::Cache.should_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2") { true }
-      OsmTest::Cache.should_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2") { permissions }
+      $api.should_receive('get_user_permissions').and_return(permissions)
       OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
       $api.set_user_permissions(section: 3, permissions: {:a => [:read]})
     end

@@ -71,7 +71,7 @@ module OsmTest
     def self.read(key)
       @@cache[key]
     end
-    def self.fetch(key)
+    def self.fetch(key, options={})
       value = read(key)
       return value unless value.nil?
       write(key, yield)

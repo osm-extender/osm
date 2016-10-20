@@ -267,19 +267,19 @@ module Osm
     # @param api [Osm::Api] The api to use to make the query
     # @param ids [Array<Fixnum>] The ids of the items to get
     # @param key_base [String] The base of the key for getting an item from the cache (the key [key_base, id] is generated)
-    # @param arguments [Array] The arguments to pass to get_all
-    # @param get_all_method [Symbol] The method to get all items (either :get_all or :get_for_section)
+    # @param method [Symbol] The method to get all items (either :get_all or :get_for_section)
+    # @param arguments [Hash] The arguments to pass to get_all
     # @!macro options_get
     # @return [Array] An array of the items
-    def self.get_from_ids(api:, ids:, key_base:, arguments: [], get_all_method:, **options)
-      fail ArgumentError, "get_all_method is invalid" unless [:get_all, :get_for_section].include?(get_all_method)
+    def self.get_from_ids(api:, ids:, key_base:, method:, no_read_cache: false, arguments: {})
+      fail ArgumentError, "method is invalid" unless [:get_all, :get_for_section].include?(method)
       items = Array.new
       ids.each do |id|
-        if cache_exist?(api: api, key: [*key_base, id])
+        if cache_exist?(api: api, key: [*key_base, id], no_read_cache: no_read_cache)
           items.push cache_read(api: api, key: [*key_base, id])
         else
           # At least this one item is not in the cache - we might as well refresh the lot
-          return self.send(get_all_method, api, *arguments, **options.merge(:no_cache => true))
+          return self.send(method, api: api, no_read_cache: true, **arguments)
         end
       end
       return items
