@@ -144,7 +144,7 @@ module Osm
       uri = URI("#{BASE_URLS[site]}/#{path}")
 
       if debug?
-        puts "Making #{'RAW' if raw} :#{site} API request to #{uri}"
+        puts "Making #{'RAW' if raw} :#{site} API post request to #{uri}"
         hide_values_for = ['secret', 'token']
         post_data_as_string = post_data.sort.map{ |key, value| "#{key} => #{hide_values_for.include?(key) ? 'PRESENT' : value.inspect}" }.join(', ')
         puts "{#{post_data_as_string}}"
