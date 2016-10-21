@@ -20,20 +20,20 @@ module Osm
 
 
     # Get API access details for a given section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the details for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the details for
     # @!macro options_get
     # @return [Array<Osm::ApiAccess>]
-    def self.get_all(api, section, options={})
+    def self.get_all(api:, section:, no_read_cache: false)
       section_id = section.to_i
       cache_key = ['api_access', api.user_id, section_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        ids = cache_read(api, cache_key)
-        return get_from_ids(api, ids, cache_key, section, options, :get_all)
+      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
+        ids = cache_read(api: api, key: cache_key)
+        return get_from_ids(api: api, ids: ids, key_base: cache_key, method: :get_all)
       end
 
-      data = api.perform_query("ext/settings/access/?action=getAPIAccess&sectionid=#{section_id}")
+      data = api.post_query(path: "ext/settings/access/?action=getAPIAccess&sectionid=#{section_id}")
 
       permissions_map = {
         10  => [:read],
@@ -59,45 +59,43 @@ module Osm
         this_item = new(attributes)
         result.push this_item
         ids.push this_item.id
-        cache_write(api, [*cache_key, this_item.id], this_item)
+        cache_write(api: api, key: [*cache_key, this_item.id], data: this_item)
       end
-      cache_write(api, cache_key, ids)
+      cache_write(api: api, key: cache_key, data: ids)
 
       return result
     end
 
 
     # Get our API access details for a given section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the details for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the details for
     # @!macro options_get
     # @return [Osm::ApiAccess]
-    def self.get_ours(api, section, options={})
-      get(api, section, api.api_id, options)
+    def self.get_ours(api:, section:, no_read_cache: false)
+      get(api: api, section: section, for_api: api.api_id, no_read_cache: no_read_cache)
     end
 
 
     # Get API Access for a given API
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the details for
-    # @param [Osm::Api] for_api The api (or its ID) to get access for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the details for
+    # @param for_api [Osm::Api] The api (or its ID) to get access for
     # @!macro options_get
     # @return [Osm::ApiAccess]
-    def self.get(api, section, for_api, options={})
+    def self.get(api:, section:, for_api:, no_read_cache: false)
       section_id = section.to_i
       for_api_id = for_api.to_i
       cache_key = ['api_access', api.user_id, section_id, for_api]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
-
-      data = get_all(api, section_id, options)
-
-      data.each do |item|
-        return item if item.id == for_api_id
-      end
-      return nil
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = get_all(api: api, section: section_id, no_read_cache: no_read_cache)
+        found = nil
+        data.each do |item|
+          found = item if item.id == for_api_id
+        end
+        found
+      end # cache fetch
     end
 
 

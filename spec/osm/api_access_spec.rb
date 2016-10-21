@@ -43,12 +43,12 @@ describe "API Access" do
           }
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/settings/access/?action=getAPIAccess&sectionid=1", :body => body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with(path: 'ext/settings/access/?action=getAPIAccess&sectionid=1').and_return(body)
     end
 
     describe "Get All" do
       it "From OSM" do
-        api_accesses = Osm::ApiAccess.get_all(@api, 1)
+        api_accesses = Osm::ApiAccess.get_all(api: $api, section: 1)
   
         api_accesses.size.should == 2
         api_access = api_accesses[0]
@@ -58,19 +58,19 @@ describe "API Access" do
       end
 
       it "From cache" do
-        api_accesses = Osm::ApiAccess.get_all(@api, 1)
-        HTTParty.should_not_receive(:post)
-        Osm::ApiAccess.get_all(@api, 1).should == api_accesses
+        api_accesses = Osm::ApiAccess.get_all(api: $api, section: 1)
+        $api.should_not_receive(:post_query)
+        Osm::ApiAccess.get_all(api: $api, section: 1).should == api_accesses
       end
     end
 
     it "Get One" do
-      api_access = Osm::ApiAccess.get(@api, 1, 2)
+      api_access = Osm::ApiAccess.get(api: $api, section: 1, for_api: 2)
       api_access.id.should == 2
     end
 
     it "Get Ours" do
-      api_access = Osm::ApiAccess.get_ours(@api, 1)
+      api_access = Osm::ApiAccess.get_ours(api: $api, section: 1)
       api_access.id.should == 1
     end
 
