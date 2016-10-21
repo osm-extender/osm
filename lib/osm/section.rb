@@ -125,25 +125,25 @@ module Osm
 
     # @!method initialize
     #   Initialize a new Section
-    #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
+    #   @param attributes [Hash] The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
     # Get the user's sections
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @!macro options_get
     # @return [Array<Osm::Section>]
-    def self.get_all(api, options={})
+    def self.get_all(api:, no_read_cache: false)
       cache_key = ['sections', api.user_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        ids = cache_read(api, cache_key)
-        return get_from_ids(api, ids, 'section', options, :get_all)
+      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
+        ids = cache_read(api: api, key: cache_key)
+        return get_from_ids(api: api, ids: ids, key_base: 'section', no_read_cache: no_read_cache, method: :get_all)
       end
 
       result = Array.new
       ids = Array.new
       permissions = Hash.new
-      api.get_user_roles(options).each do |role_data|
+      api.get_user_roles(no_read_cache: no_read_cache).each do |role_data|
         next if role_data['section'].eql?('discount')  # It's not an actual section
         next if role_data['sectionConfig'].nil? # No config for the section = user hasn't got access
 
@@ -204,59 +204,59 @@ module Osm
 
         result.push section
         ids.push section.id
-        cache_write(api, ['section', section.id], section)
+        cache_write(api: api, key: ['section', section.id], data: section)
         permissions.merge!(section.id => Osm.make_permissions_hash(role_data['permissions']))
       end
 
       permissions.each do |s_id, perms|
-        api.set_user_permissions(s_id, perms)
+        api.set_user_permissions(section: s_id, permissions: perms)
       end
-      cache_write(api, cache_key, ids)
+      cache_write(api: api, key: cache_key, data: ids)
       return result
     end
 
 
     # Get a section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] section_id The section id of the required section
+    # @param api [Osm::Api] The api to use to make the request
+    # @param id [Fixnum] The section id of the required section
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that section
     # @return [Osm::Section]
-    def self.get(api, section_id, options={})
-      cache_key = ['section', section_id]
+    def self.get(api:, id:, **options)
+      cache_key = ['section', id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && can_access_section?(api, section_id)
-        return cache_read(api, cache_key)
+      if cache_exist?(api: api, key: cache_key, no_read_cache: options[:no_read_cache]) && can_access_section?(api, section_id)
+        return cache_read(api: api, key: cache_key)
       end
 
-      sections = get_all(api, options)
+      sections = get_all(api: api, **options)
       return nil unless sections.is_a? Array
 
       sections.each do |section|
-        return section if section.id == section_id
+        return section if section.id == id
       end
       return nil
     end
 
 
     # Get the section's notepad from OSM
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @!macro options_get
     # @return [String] the section's notepad
-    def get_notepad(api, options={})
+    def get_notepad(api, **options)
       require_access_to_section(api, self, options)
       cache_key = ['notepad', id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key) && can_access_section?(api, self.id)
-        return cache_read(api, cache_key)
+      if cache_exist?(api: api, key: cache_key, no_read_cache: options[:no_read_cache]) && can_access_section?(api, self.id)
+        return cache_read(api: api, key: cache_key)
       end
 
-      notepads = api.perform_query('api.php?action=getNotepads')
+      notepads = api.post_query(path: 'api.php?action=getNotepads')
       return '' unless notepads.is_a?(Hash)
 
       notepad = ''
       notepads.each do |key, value|
-        cache_write(api, ['notepad', key.to_i], value)
+        cache_write(api: api, key: ['notepad', key.to_i], data: value)
         notepad = value if key.to_i == id
       end
 
@@ -264,15 +264,15 @@ module Osm
     end
 
     # Set the section's notepad in OSM
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [String] content The content of the notepad
+    # @param api [Osm::Api] The api to use to make the request
+    # @param content [String] The content of the notepad
     # @return [Boolean] whether the notepad was sucessfully updated
-    def set_notepad(api, content)
+    def set_notepad(api:, content:)
       require_access_to_section(api, self)
-      data = api.perform_query("users.php?action=updateNotepad&sectionid=#{id}", {'value' => content})
+      data = api.post_query(path: "users.php?action=updateNotepad&sectionid=#{id}", post_data: {'value' => content})
 
       if data.is_a?(Hash) && data['ok'] # Success
-        cache_write(api, ['notepad', id], content)
+        cache_write(api: api, key: ['notepad', id], data: content)
         return true
       end
       return false

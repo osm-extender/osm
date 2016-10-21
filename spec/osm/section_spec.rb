@@ -105,7 +105,7 @@ describe "Section" do
 
     describe "Gets all sections" do
       it "From OSM" do
-        sections = Osm::Section.get_all(@api)
+        sections = Osm::Section.get_all(api: $api)
         sections.map{ |i| i.id }.should == [1, 2]
   
         section = sections[0]
@@ -145,14 +145,14 @@ describe "Section" do
       end
 
       it "From cache" do
-        sections = Osm::Section.get_all(@api)
-        HTTParty.should_not_receive(:post)
-        Osm::Section.get_all(@api).should == sections
+        sections = Osm::Section.get_all(api: $api)
+        $api.should_not_receive(:post_query)
+        Osm::Section.get_all(api: $api).should == sections
       end
     end
   
     it "Gets a section" do
-      section = Osm::Section.get(@api, 1)
+      section = Osm::Section.get(api: $api, id: 1)
       section.should_not be_nil
       section.id.should == 1
       section.valid?.should == true
@@ -160,36 +160,21 @@ describe "Section" do
 
 
     it "Gets the section's notepad" do
-      url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-      }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>{"1" => "Section 1", "2" => "Section 2"}.to_json}) }
+      $api.should_receive(:post_query).with(path: 'api.php?action=getNotepads').and_return({"1" => "Section 1", "2" => "Section 2"})
       section = Osm::Section.new(:id => 1)
-      section.get_notepad(@api).should == 'Section 1'
+      section.get_notepad($api).should == 'Section 1'
     end
 
     it "Sets the section's notepad (success)" do
-      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=updateNotepad&sectionid=1'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'value' => 'content'
-      }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+      $api.should_receive(:post_query).with(path: 'users.php?action=updateNotepad&sectionid=1', post_data: {"value"=>"content"}).and_return({"ok" => true})
       section = Osm::Section.new(:id => 1)
-      section.set_notepad(@api, 'content').should == true
+      section.set_notepad(api: $api, content: 'content').should == true
     end
 
     it "Sets the section's notepad (fail)" do
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
+      $api.should_receive(:post_query).with(path: 'users.php?action=updateNotepad&sectionid=1', post_data: {"value"=>"content"}).and_return({"ok" => false})
       section = Osm::Section.new(:id => 1)
-      section.set_notepad(@api, 'content').should == false
+      section.set_notepad(api: $api, content: 'content').should == false
     end
 
   end
@@ -385,7 +370,7 @@ describe "Online Scout Manager API Strangeness" do
     body = '[{"sectionConfig":"{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member\'s Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member\'s Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Subs\",\"extraid\":\"529\"}],\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}","groupname":"1st Somewhere","groupid":"1","groupNormalised":"1","sectionid":"1","sectionname":"Section 1","section":"cubs","isDefault":"1","permissions":{"badge":100,"member":100,"user":100,"register":100,"contact":100,"programme":100,"originator":1,"events":100,"finance":100,"flexi":100}}]'
     FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body, :content_type => 'application/json')
 
-    sections = Osm::Section.get_all(@api)
+    sections = Osm::Section.get_all(api: $api)
     sections.size.should == 1
     section = sections[0]
     section.should_not be_nil
@@ -396,7 +381,7 @@ describe "Online Scout Manager API Strangeness" do
     body = '[{"sectionConfig":"{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member\'s Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member\'s Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[[\"1\",{\"name\":\"Subs\",\"extraid\":\"529\"}],[\"2\",{\"name\":\"Subs 2\",\"extraid\":\"530\"}]],\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}","groupname":"1st Somewhere","groupid":"1","groupNormalised":"1","sectionid":"1","sectionname":"Section 1","section":"cubs","isDefault":"1","permissions":{"badge":100,"member":100,"user":100,"register":100,"contact":100,"programme":100,"originator":1,"events":100,"finance":100,"flexi":100}}]'
     FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body, :content_type => 'application/json')
 
-    sections = Osm::Section.get_all(@api)
+    sections = Osm::Section.get_all(api: $api)
     sections.size.should == 1
     sections[0].should_not be_nil
   end
@@ -406,9 +391,9 @@ describe "Online Scout Manager API Strangeness" do
     FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
     FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getNotepads", :body => '[]', :content_type => 'application/json')
 
-    section = Osm::Section.get(@api, 1)
+    section = Osm::Section.get(api: $api, id: 1)
     section.should_not be_nil
-    section.get_notepad(@api).should == ''
+    section.get_notepad($api).should == ''
   end
 
   it "skips a 'discount' section" do
@@ -418,7 +403,7 @@ describe "Online Scout Manager API Strangeness" do
     ]
     FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
 
-    sections = Osm::Section.get_all(@api)
+    sections = Osm::Section.get_all(api: $api)
     sections.size.should == 1
     section = sections[0]
     section.should_not be_nil
@@ -432,7 +417,7 @@ describe "Online Scout Manager API Strangeness" do
     ]
     FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
 
-    sections = Osm::Section.get_all(@api)
+    sections = Osm::Section.get_all(api: $api)
     sections.size.should == 2
     sections[0].should_not be_nil
     sections[1].should_not be_nil
@@ -441,7 +426,7 @@ describe "Online Scout Manager API Strangeness" do
   it "Handles user having access to no sections" do
     FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => '[{"isDefault":"1"}]', :content_type => 'application/json')
 
-    sections = Osm::Section.get_all(@api)
+    sections = Osm::Section.get_all(api: $api)
     sections.should == []
   end
 
