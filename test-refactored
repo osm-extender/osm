@@ -1,4 +1,4 @@
 #!/bin/bash
 
 bundle exec rspec spec/osm/api_spec.rb spec/osm/model_spec.rb \
-spec/osm/section_spec.rb
+spec/osm/section_spec.rb spec/osm/activity_spec.rb

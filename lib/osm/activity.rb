@@ -5,8 +5,6 @@ module Osm
     class File; end # Ensure the constant exists for the validators
     class Version; end # Ensure the constant exists for the validators
 
-    SORT_BY = [:id, :version]
-
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the activity
     # @!attribute [rw] version
@@ -93,15 +91,15 @@ module Osm
 
 
     # Get activity details
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] activity_id The activity ID
-    # @param [Fixnum] version The version of the activity to retreive, if nil the latest version will be assumed
+    # @param api [Osm::Api] The api to use to make the request
+    # @param id [Fixnum] The activity ID
+    # @param version [Fixnum] The version of the activity to retreive, if nil the latest version will be assumed
     # @!macro options_get
     # @return [Osm::Activity]
-    def self.get(api, activity_id, version=nil, options={})
-      cache_key = ['activity', activity_id]
+    def self.get(api:, id:, version: nil, no_read_cache: false)
+      cache_key = ['activity', id]
 
-      if !options[:no_cache] && cache_exist?(api, [*cache_key, version])
+      if cache_exist?(api: api, key: [*cache_key, version], no_read_cache: no_read_cache)
         activity = cache_read(api, [*cache_key, version])
         if (activity.shared == 2) || (activity.user_id == api.user_id) ||  # Shared or owned by this user
         Osm::Section.get_all(api).map{ |s| s.group_id }.uniq.include?(activity.group_id)  # user belomngs to the group owning the activity
@@ -113,9 +111,9 @@ module Osm
 
       data = nil
       if version.nil?
-        data = api.perform_query("programme.php?action=getActivity&id=#{activity_id}")
+        data = api.post_query(path: "programme.php?action=getActivity&id=#{id}")
       else
-        data = api.perform_query("programme.php?action=getActivity&id=#{activity_id}&version=#{version}")
+        data = api.post_query(path: "programme.php?action=getActivity&id=#{id}&version=#{version}")
       end
 
       attributes = {}
@@ -172,8 +170,8 @@ module Osm
 
       activity = Osm::Activity.new(attributes)
 
-      cache_write(api, [*cache_key, nil], activity) if version.nil?
-      cache_write(api, [*cache_key, version], activity)
+      cache_write(api: api, key: [*cache_key, nil], data: activity) if version.nil?
+      cache_write(api: api, key: [*cache_key, version], data: activity)
       return activity
     end
 
@@ -192,15 +190,15 @@ module Osm
     end
 
     # Add this activity to the programme in OSM
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The Section (or it's ID) to add the Activity to
-    # @param [Date, DateTime] date The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
-    # @param [String] notes The notes which should appear for this Activity on this Evening
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The Section (or it's ID) to add the Activity to
+    # @param date [Date, DateTime] The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
+    # @param notes [String] The notes which should appear for this Activity on this Evening
     # @return [Boolean] Whether the activity was successfully added
-    def add_to_programme(api, section, date, notes="")
-      require_ability_to(api, :write, :programme, section)
+    def add_to_programme(api:, section:, date:, notes: "")
+      require_ability_to(api: api, to: :write, on: :programme, section: section)
 
-      data = api.perform_query("programme.php?action=addActivityToProgramme", {
+      data = api.post_query(path: "programme.php?action=addActivityToProgramme", post_data: {
         'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
         'activityid' => id,
         'sectionid' => section.to_i,
@@ -209,7 +207,7 @@ module Osm
 
       if (data == {'result'=>0})
         # The cached activity will be out of date - remove it
-        cache_delete(api, ['activity', self.id])
+        cache_delete(api: api, key: ['activity', self.id])
         return true
       else
         return false
@@ -217,17 +215,17 @@ module Osm
     end
 
     # Update this activity in OSM
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The Section (or it's ID)
-    # @param [Boolean] secret_update Whether this is a secret update
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The Section (or it's ID)
+    # @param secret_update [Boolean] Whether this is a secret update
     # @return [Boolean] Whether the activity was successfully added
     # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
     # @raise [Osm::Forbidden] If the Activity is not editable
-    def update(api, section, secret_update=false)
+    def update(api:, section:, secret_update: false)
       fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
       fail Osm::Forbidden, "You are not allowed to update this activity" unless self.editable
 
-      data = api.perform_query("programme.php?action=update", {
+      data = api.post_query(path: "programme.php?action=update", post_data: {
         'title' => title,
         'description' => description,
         'resources' => resources,
@@ -262,7 +260,7 @@ module Osm
 
       if (data == {'result'=>true})
         # The cached activity will be out of date - remove it
-        cache_delete(api, ['activity', self.id])
+        cache_delete(api: api, key: ['activity', self.id])
         return true
       else
         return false
@@ -270,7 +268,11 @@ module Osm
     end
 
 
-    private
+    protected def sort_by
+      ['id', 'version']
+    end
+
+
     class File
       include ActiveAttr::Model
 
@@ -297,11 +299,8 @@ module Osm
       #   Initialize a new Term
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-      # Compare File based on activity_id then name
-      def <=>(another)
-        result = self.activity_id <=> another.try(:activity_id)
-        result = self.name <=> another.try(:name) if result == 0
-        return result
+      protected def sort_by
+        ['activity_id', 'name']
       end
 
     end # Class Activity::File
@@ -346,13 +345,8 @@ module Osm
       #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-      # Compare BadgeLink based on section, type, badge_name, requirement_label, data
-      def <=>(another)
-        [:badge_section, :badge_type, :badge_name, :requirement_label].each do |attribute|
-          result = self.try(:data) <=> another.try(:data)
-          return result unless result == 0
-        end
-        return self.try(:data) <=> another.try(:data)
+      protected def sort_by
+        ['section', 'type', 'badge_name', 'rerquirement_label', 'data']
       end
 
     end # Class Activity::Badge
@@ -383,11 +377,8 @@ module Osm
       #   Initialize a new Version
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
-      # Compare Version based on activity_id then version
-      def <=>(another)
-        result = self.activity_id <=> another.try(:activity_id)
-        result = self.version <=> another.try(:version) if result == 0
-        return result
+      protected def sort_by
+        ['activity_id', 'version']
       end
 
     end # Class Activity::Version

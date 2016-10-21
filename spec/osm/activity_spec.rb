@@ -17,35 +17,20 @@ describe "Activity" do
   end
 
   it "Sorts by id then version" do
-    a1 = Osm::Activity.new(:id => 1, :version => 1)
-    a2 = Osm::Activity.new(:id => 2, :version => 1)
-    a3 = Osm::Activity.new(:id => 2, :version => 2)
-
-    activities = [a2, a3, a1]
-    activities.sort.should == [a1, a2, a3]
+    Osm::Activity.new.send(:sort_by).should == ['id', 'version']
   end
 
 
   describe "Activity::File" do
     it "Sorts by activity_id then name" do
-      a1 = Osm::Activity::File.new(:activity_id => 1, :name => 'a')
-      a2 = Osm::Activity::File.new(:activity_id => 2, :name => 'a')
-      a3 = Osm::Activity::File.new(:activity_id => 2, :name => 'b')
-
-      activities = [a2, a3, a1]
-      activities.sort.should == [a1, a2, a3]
+      Osm::Activity::File.new.send(:sort_by).should == ['activity_id', 'name']
     end
   end
 
 
   describe "Activity::Version" do
     it "Sorts by activity_id then version" do
-      a1 = Osm::Activity::File.new(:activity_id => 1, :version => 1)
-      a2 = Osm::Activity::File.new(:activity_id => 2, :version => 1)
-      a3 = Osm::Activity::File.new(:activity_id => 2, :version => 2)
-
-      activities = [a2, a3, a1]
-      activities.sort.should == [a1, a2, a3]
+      Osm::Activity::Version.new.send(:sort_by).should == ['activity_id', 'version']
     end
   end
 
@@ -108,10 +93,9 @@ describe "Activity" do
           }
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getActivity&id=1", :body => body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with(path: 'programme.php?action=getActivity&id=1').and_return(body)
 
-
-      activity = Osm::Activity.get(@api, 1)
+      activity = Osm::Activity.get(api: $api, id: 1)
   
       activity.id.should == 1
       activity.version.should == 0
@@ -151,37 +135,34 @@ describe "Activity" do
   
   
     it "Add activity to programme (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=addActivityToProgramme'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => 2,
         'notes' => 'Notes',
       }
+      $api.should_receive(:post_query).with(path: 'programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 0})
   
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
       activity = Osm::Activity.new(:id => 2)
-      activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should == true
+      activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes').should == true
     end
   
     it "Add activity to programme (failed)" do
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
+      post_data = {
+        'meetingdate' => '2000-01-02',
+        'sectionid' => 1,
+        'activityid' => 2,
+        'notes' => 'Notes',
+      }
+      $api.should_receive(:post_query).with(path: 'programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 1})
+
       activity = Osm::Activity.new(:id => 2)
-      activity.add_to_programme(@api, 1, Date.new(2000, 1, 2), 'Notes').should == false
+      activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes').should == false
     end
   
   
     it "Update activity in OSM (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=update'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'title' => 'title',
         'description' => 'description',
         'resources' => 'resources',
@@ -198,7 +179,8 @@ describe "Activity" do
         'secretEdit' => true,
       }
   
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":true}'}) }
+      $api.should_receive(:post_query).with(path: 'programme.php?action=update', post_data: post_data).and_return({'result' => true})
+  
       activity = Osm::Activity.new(
         :id => 2,
         :title => 'title',
@@ -223,11 +205,10 @@ describe "Activity" do
         :shared => 0,
         :section_id => 1,
       )
-      activity.update(@api, 1, true).should == true
+      activity.update(api: $api, section: 1, secret_update: true).should == true
     end
   
     it "Update activity in OSM (failed)" do
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":false}'}) }
       activity = Osm::Activity.new(
         :id => 2,
         :title => 'title',
@@ -237,7 +218,8 @@ describe "Activity" do
         :location => :indoors,
         :running_time => 0,
       )
-      activity.update(@api, 1, true).should == false
+      $api.should_receive(:post_query).and_return({"result" => false})
+      activity.update(api: $api, section: 1, secret_update: true).should == false
     end
   
   end
