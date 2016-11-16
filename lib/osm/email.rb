@@ -4,12 +4,12 @@ module Osm
     TAGS = [{id: 'FIRSTNAME', description: "Member's first name"}, {id: 'LASTNAME', description: "Member's last name"}]
 
     # Get a list of selected email address for selected members ready to pass to send_email method
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to send the message to
-    # @param [Array<symbol>] contacts The contacts to get for members (:primary, :secondary and/or :member)
-    # @param [Array<Osm::Member, Fixnum, #to_i>] members The members (or their IDs) to get the email addresses for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to send the message to
+    # @param contacts [Array<Symbol>, Symbol] The contacts to get for members (:primary, :secondary and/or :member)
+    # @param members [Array<Osm::Member, Fixnum, #to_i>] The members (or their IDs) to get the email addresses for
     # @return [Hash] member_id -> {firstname [String], lastname [String], emails [Array<String>]}
-    def self.get_emails_for_contacts(api, section, contacts, members)
+    def self.get_emails_for_contacts(api:, section:, contacts:, members:)
       # Convert contacts into OSM's format
       contacts = [*contacts]
       fail ArgumentError, "You must pass at least one contact" if contacts.none?
@@ -29,7 +29,7 @@ module Osm
       fail ArgumentError, "You must pass at least one member" if members.none?
       members.map!{ |member| member.to_i }
 
-      data = api.perform_query("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=#{section.to_i}&scouts=#{members.join(',')}", {
+      data = api.post_query(path: "/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=#{section.to_i}&scouts=#{members.join(',')}", post_data: {
         'contactGroups' => "[#{contacts.join(',')}]"
       })
       if data.is_a?(Hash)
@@ -40,19 +40,19 @@ module Osm
     end
 
     # Get a list of selected email address for selected members ready to pass to send_email method
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to send the message to
-    # @param [Hash] send_to Email addresses to send the email to: member_id -> {firstname [String], lastname [String], emails [Array<String>]}
-    # @param [String, nil] cc Email address (if any) to cc
-    # @param [String] from Email address to send the email from
-    # @param [String] from Email subject The subject of the email
-    # @param [String] from Email body The bosy of the email
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to send the message to
+    # @param to [Hash] Email addresses to send the email to: member_id -> {firstname [String], lastname [String], emails [Array<String>]}
+    # @param cc [String, nil] Email address (if any) to cc
+    # @param from [String] Email address to send the email from
+    # @param subject [String] Email subject The subject of the email
+    # @param body [String] Email body The bosy of the email
     # @return [Boolean] Whether OSM reported the email as sent
-    def self.send_email(api, section, send_to, cc='', from, subject, body)
-      data = api.perform_query('ext/members/email/?action=send', {
+    def self.send_email(api:, section:, to:, cc:'', from:, subject:, body:)
+      data = api.post_query(path: 'ext/members/email/?action=send', post_data: {
         'sectionid' => section.to_i,
-        'emails' => send_to.to_json,
-        'scouts' => send_to.keys.join(','),
+        'emails' => to.to_json,
+        'scouts' => to.keys.join(','),
         'cc' => cc,
         'from' => from,
         'subject' => subject,
@@ -98,83 +98,73 @@ module Osm
 
 
       # Get delivery reports
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the reports for
+      # @param api [Osm::Api] The api to use to make the request
+      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the reports for
       # @!macro options_get
       # @return [Array<Osm::Email::DeliveryReport>]
-      def self.get_for_section(api, section, options={})
-        Osm::Model.require_access_to_section(api, section, options)
+      def self.get_for_section(api:, section:, no_read_cache: false)
+        Osm::Model.require_access_to_section(api: api, section: section, no_read_cache: no_read_cache)
         section_id = section.to_i
         cache_key = ['email_delivery_reports', section_id]
 
-        if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-          return cache_read(api, cache_key)
-        end
+        Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+          reports = []
+          recipients = {}
+          data = api.post_query(path: "ext/settings/emails/?action=getDeliveryReport&sectionid=#{section_id}")
+          data.each do |item|
+            case item['type']
 
-        reports = []
-        recipients = {}
-        data = api.perform_query("ext/settings/emails/?action=getDeliveryReport&sectionid=#{section_id}")
-        data.each do |item|
-          case item['type']
+            when 'email'
+              # Create an Osm::Email::DeliveryReport in reports array
+              id = Osm::to_i_or_nil(item['id'])
+              sent_at_str, subject = item['name'].to_s.split(' - ', 2).map{ |i| i.to_s.strip }
+              reports.push Osm::Email::DeliveryReport.new(
+                id:         id,
+                sent_at:    Time.strptime(sent_at_str, TIME_FORMAT),
+                subject:    subject,
+                section_id: section_id,
+              )
+              recipients[id] = []
 
-          when 'email'
-            # Create an Osm::Email::DeliveryReport in reports array
-            id = Osm::to_i_or_nil(item['id'])
-            sent_at_str, subject = item['name'].to_s.split(' - ', 2).map{ |i| i.to_s.strip }
-            reports.push Osm::Email::DeliveryReport.new(
-              id:         id,
-              sent_at:    Time.strptime(sent_at_str, TIME_FORMAT),
-              subject:    subject,
-              section_id: section_id,
-            )
-            recipients[id] = []
+            when 'oneEmail'
+              # Create an Osm::Email::DeliveryReport::Email::Recipient in recipients[email_id] array
+              report_id, id = item['id'].to_s.strip.split('-').map{ |i| Osm::to_i_or_nil(i) }
+              status = item['status_raw'].to_sym
+              status = :bounced if status.eql?(:bounce)
+              member_id = Osm::to_i_or_nil(item['member_id'])
+              recipients[report_id].push Osm::Email::DeliveryReport::Recipient.new(
+                id:         id,
+                address:    item['email'],
+                status:     status,
+                member_id:  member_id,
+              )
 
-          when 'oneEmail'
-            # Create an Osm::Email::DeliveryReport::Email::Recipient in recipients[email_id] array
-            report_id, id = item['id'].to_s.strip.split('-').map{ |i| Osm::to_i_or_nil(i) }
-            status = item['status_raw'].to_sym
-            status = :bounced if status.eql?(:bounce)
-            member_id = Osm::to_i_or_nil(item['member_id'])
-            recipients[report_id].push Osm::Email::DeliveryReport::Recipient.new(
-              id:         id,
-              address:    item['email'],
-              status:     status,
-              member_id:  member_id,
-            )
+            end
+          end # each item in data
 
+          # Add recipients to reports
+          reports.each do |report|
+            recs = recipients[report.id]
+            # Set report for each recipient
+            recs.each do |recipient|
+              recipient.delivery_report = report
+            end
+            report.recipients = recs
           end
-        end # each item in data
-
-        # Add recipients to reports
-        reports.each do |report|
-          recs = recipients[report.id]
-          # Set report for each recipient
-          recs.each do |recipient|
-            recipient.delivery_report = report
-          end
-          report.recipients = recs
-        end
-
-        cache_write(api, cache_key, reports)
-        return reports
+        end # cache fetch
       end
 
       # Get email contents for this report
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @!macro options_get
       # @return [Osm::Email::DeliveryReport::Email]
-      def get_email(api, options={})
-        Osm::Model.require_access_to_section(api, section_id, options)
+      def get_email(api, no_read_cache: false)
+        Osm::Model.require_access_to_section(api: api, section: section_id, no_read_cache: no_read_cache)
         cache_key = ['email_delivery_reports_email', section_id, id]
 
-        if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-          return cache_read(api, cache_key)
+        Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+          Osm::Email::DeliveryReport::Email.fetch_from_osm(api: api, section: section_id, email: id)
         end
-
-        email = Osm::Email::DeliveryReport::Email.fetch_from_osm(api, section_id, id)
-
-        cache_write(api, cache_key, email)
-        return email
       end
 
       # @!method processed_recipients
@@ -209,15 +199,12 @@ module Osm
         "#{sent_at.strftime(TIME_FORMAT)} - #{subject}"
       end
 
-      def <=>(another)
-        result = self.sent_at <=> another.try(:sent_at)
-        result = self.id <=> another.try(:id) if result.eql?(0)
-        return result
+      private def sort_by
+        ['sent_at', 'id']
       end
 
 
       class Recipient < Osm::Model
-        SORT_BY = [:delivery_report, :id]
         VALID_STATUSES = Osm::Email::DeliveryReport::VALID_STATUSES.clone
 
         # @!attribute [rw] id
@@ -250,30 +237,25 @@ module Osm
 
 
         # Get email contents for this recipient
-        # @param [Osm::Api] api The api to use to make the request
+        # @param api [Osm::Api] The api to use to make the request
         # @!macro options_get
         # @return [Osm::Email::DeliveryReport::Email]
-        def get_email(api, options={})
-          Osm::Model.require_access_to_section(api, delivery_report.section_id, options)
+        def get_email(api, no_read_cache: false)
+          Osm::Model.require_access_to_section(api: api, section: delivery_report.section_id, no_read_cache: no_read_cache)
           cache_key = ['email_delivery_reports_email', delivery_report.section_id, delivery_report.id, id]
 
-          if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-            return cache_read(api, cache_key)
+          Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+            Osm::Email::DeliveryReport::Email.fetch_from_osm(api: api, section: delivery_report.section_id, email: delivery_report.id, member: member_id, address: address)
           end
-
-          email = Osm::Email::DeliveryReport::Email.fetch_from_osm(api, delivery_report.section_id, delivery_report.id, member_id, address)
-
-          cache_write(api, cache_key, email)
-          return email
         end
 
         # Unblock email address from being sent emails
-        # @param [Osm::Api] api The api to use to make the request
+        # @param api [Osm::Api] The api to use to make the request
         # @param [Boolean] whether removal was successful
         def unblock_address(api)
           return true unless bounced?
 
-          data = api.perform_query('ext/settings/emails/?action=unBlockEmail', {
+          data = api.post_query(path: 'ext/settings/emails/?action=unBlockEmail', post_data: {
             'section_id' => delivery_report.section_id,
             'email'      => address,
             'email_id'   => delivery_report.id
@@ -309,12 +291,14 @@ module Osm
           Osm::inspect_instance(self, {replace_with: {'delivery_report' => :id}})
         end
 
+        private def sort_by
+          ['delivery_report', 'id']
+        end
+
       end # class Osm::Email::DeliveryReport::Recipient
 
 
       class Email < Osm::Model
-        SORT_BY = [:subject, :from, :to]
-
         # @!attribute [rw] to
         #   @return [String] who the email was sent to (possibly nil)
         # @!attribute [rw] from
@@ -346,20 +330,22 @@ module Osm
 
         protected
         # Get email contents
-        # @param [Osm::Api] api The api to use to make the request
-        # @param [Integer] section_id
-        # @param [Integer] email_id
-        # @param [String] email_address
+        # @param api [Osm::Api] The api to use to make the request
+        # @param section [Integer, #to_i]
+        # @param email [Integer, #to_i]
+        # @param member [Integer, #to_i, nil]
+        # @param address [String]
         # @return [Osm::Email::DeliveryReport::Email]
-        def self.fetch_from_osm(api, section_id, email_id, member_id=nil, email_address='')
-          Osm::Model.require_access_to_section(api, section_id)
+        def self.fetch_from_osm(api:, section:, email:, member: nil, address: '')
+          member = member.to_i unless member.nil?
+          Osm::Model.require_access_to_section(api: api, section: section)
 
-          data = api.perform_query("ext/settings/emails/?action=getSentEmail&section_id=#{section_id}&email_id=#{email_id}&email=#{email_address}&member_id=#{member_id}")
+          data = api.post_query(path: "ext/settings/emails/?action=getSentEmail&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
           fail Osm::Error, "Unexpected format for response - got a #{data.class}" unless data.is_a?(Hash)
           fail Osm::Error, data['error'].to_s unless data['status']
           fail Osm::Error, "Unexpected format for meta data - got a #{data.class}" unless data['data'].is_a?(Hash)
 
-          body = api.perform_query("ext/settings/emails/?action=getSentEmailContent&section_id=#{section_id}&email_id=#{email_id}&email=#{email_address}&member_id=#{member_id}", {}, true)
+          body = api.post_query(path: "ext/settings/emails/?action=getSentEmailContent&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
           fail Osm::Error, data if data.eql?('Email not found')
 
           email_data = data['data']
@@ -369,6 +355,10 @@ module Osm
             subject:  email_data['subject'],
             body:     body,
           )
+        end
+
+        private def sort_by
+          ['subject', 'from', 'to']
         end
 
       end # class Osm::Email::DeliveryReport::Email
