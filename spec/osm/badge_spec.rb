@@ -622,7 +622,6 @@ describe "Badge" do
             ],
           }
         }
-        @badge_data = @badge_data.to_json
 
         @module_data = {'items' => [
           {
@@ -637,22 +636,21 @@ describe "Badge" do
             'add_column_id_to_numeric' => '',
           },
         ]}
-        @module_data = @module_data.to_json
       end
 
       urls = {
-        Osm::CoreBadge => 'https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=4&term_id=2&section_id=1',
-        Osm::ChallengeBadge => 'https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=1&term_id=2&section_id=1',
-        Osm::StagedBadge => 'https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=3&term_id=2&section_id=1',
-        Osm::ActivityBadge => 'https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=2&term_id=2&section_id=1',
+        Osm::CoreBadge => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=4&term_id=2&section_id=1',
+        Osm::ChallengeBadge => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=1&term_id=2&section_id=1',
+        Osm::StagedBadge => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=3&term_id=2&section_id=1',
+        Osm::ActivityBadge => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=2&term_id=2&section_id=1',
       }
-      urls.each do |type, url|
+      urls.each do |type, path|
         it type.type.to_s.titleize do
-          FakeWeb.register_uri(:post, url, :body => @badge_data, :content_type => 'application/json')
-          FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=_getModuleDetails', :body => @module_data, :content_type => 'application/json')
+          $api.should_receive(:post_query).with(path: path).and_return(@badge_data)
+          $api.should_receive(:post_query).with(path: 'ext/badges/records/?action=_getModuleDetails').and_return(@module_data)
           Osm::Term.stub(:get_current_term_for_section){ Osm::Term.new(:id => 2) }
 
-          badges = type.get_badges_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers))
+          badges = type.get_badges_for_section(api: $api, section: Osm::Section.new(:id => 1, :type => :beavers))
           badges.size.should == 1
           badge = badges[0]
           badge.name.should == 'b_name'
@@ -712,10 +710,9 @@ describe "Badge" do
           '2345' => 'd',
         }]
       }
-      data = data.to_json
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=getBadgeRecords&term_id=2&section=beavers&badge_id=123&section_id=1&badge_version=0", :body => data, :content_type => 'application/json')
-      datas = Osm::CoreBadge.new(:id => 123, :version => 0).get_data_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
+      $api.should_receive(:post_query).with(path: "ext/badges/records/?action=getBadgeRecords&term_id=2&section=beavers&badge_id=123&section_id=1&badge_version=0").and_return(data)
+      datas = Osm::CoreBadge.new(id: 123, version: 0).get_data_for_section(api: $api, section: Osm::Section.new(:id => 1, :type => :beavers), term: 2)
       datas.size.should == 1
       data = datas[0]
       data.member_id.should == 3
@@ -733,10 +730,6 @@ describe "Badge" do
 
       before :each do
         @update_post_data = {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
           'scoutid' => 1,
           'section_id' => 2,
           'badge_id' => 123,
@@ -765,104 +758,104 @@ describe "Badge" do
 
      it "Success (requirmeent, due & awarded)" do
         date = Date.new(2000, 1, 2)
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
-        @data.should_receive(:mark_awarded).with(@api, date, 1) { true }
-        @data.should_receive(:mark_due).with(@api, 1) { true }
+        @data.should_receive(:mark_awarded).with($api, date, 1) { true }
+        @data.should_receive(:mark_due).with($api, 1) { true }
+        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body_data)
 
         @data.requirements[2345] = '2'
         @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should == true
+        @data.update($api).should == true
       end
 
       it "Success (just requirement)" do
         date = Date.new(2000, 1, 2)
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
         @data.should_not_receive(:mark_awarded)
         @data.should_not_receive(:mark_due)
+        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body_data)
 
         @data.requirements[2345] = '2'
-        @data.update(@api).should == true
+        @data.update($api).should == true
       end
 
       it "Success (just requirement) (to blank)" do
         date = Date.new(2000, 1, 2)
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data.merge('value' => '')}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.merge('2345' => nil).to_json}) }
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
         @data.should_not_receive(:mark_awarded)
         @data.should_not_receive(:mark_due)
+        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data.merge('value' => '')).and_return(@update_body_data.merge('2345' => ''))
 
         @data.requirements[2345] = ''
-        @data.update(@api).should == true
+        @data.update($api).should == true
       end
 
       it "Success (just due)" do
         date = Date.new(2000, 1, 2)
-        HTTParty.should_not_receive(:post)
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
         @data.should_not_receive(:mark_awarded)
-        @data.should_receive(:mark_due).with(@api, 1) { true }
+        @data.should_receive(:mark_due).with($api, 1) { true }
+        $api.should_not_receive(:post_query)
 
         @data.due = 1
-        @data.update(@api).should == true
+        @data.update($api).should == true
       end
 
       it "Success (just awarded)" do
         date = Date.new(2000, 1, 2)
-        HTTParty.should_not_receive(:post)
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
-        @data.should_receive(:mark_awarded).with(@api, date, 1) { true }
-        @data.should_not_receive(:mark_due).with(@api, 1) { true }
+        @data.should_receive(:mark_awarded).with($api, date, 1) { true }
+        @data.should_not_receive(:mark_due).with($api, 1) { true }
+        $api.should_not_receive(:post_query)
 
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should == true
+        @data.update($api).should == true
       end
 
       it "Failed (requirement)" do
         date = Date.new(2000, 1, 2)
         @update_body_data['2345'] = '1'
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
-        @data.should_receive(:mark_awarded).with(@api, date, 1) { true }
-        @data.should_receive(:mark_due).with(@api, 1) { true }
+        @data.should_receive(:mark_awarded).with($api, date, 1) { true }
+        @data.should_receive(:mark_due).with($api, 1) { true }
+        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
 
         @data.requirements[2345] = '2'
         @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should == false
+        @data.update($api).should == false
       end
 
       it "Failed (due)" do
         date = Date.new(2000, 1, 2)
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
-        @data.should_receive(:mark_awarded).with(@api, date, 1) { true }
-        @data.should_receive(:mark_due).with(@api, 1) { false }
+        @data.should_receive(:mark_awarded).with($api, date, 1) { true }
+        @data.should_receive(:mark_due).with($api, 1) { false }
+        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
 
         @data.requirements[2345] = '2'
         @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should == false
+        @data.update($api).should == false
       end
 
       it "Failed (awarded)" do
         date = Date.new(2000, 1, 2)
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=updateSingleRecord', {:body => @update_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>@update_body_data.to_json}) }
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
-        @data.should_receive(:mark_awarded).with(@api, date, 1) { false }
-        @data.should_receive(:mark_due).with(@api, 1) { true }
+        @data.should_receive(:mark_awarded).with($api, date, 1) { false }
+        @data.should_receive(:mark_due).with($api, 1) { true }
+        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
 
         @data.requirements[2345] = '2'
         @data.due = 1
         @data.awarded = 1
         @data.awarded_date = date
-        @data.update(@api).should == false
+        @data.update($api).should == false
       end
 
     end
@@ -871,16 +864,11 @@ describe "Badge" do
     it "Mark badge awarded" do
 
       awarded_post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'date' => '2000-01-02',
         'sectionid' => 2,
         'entries' => '[{"badge_id":"123","badge_version":"0","scout_id":"1","level":"1"}]',
       }
       awarded_body_data = {'scoutid'=>'1', 'completed'=>'1', 'awarded' => '1', 'awardeddate'=>'2000-01-02', 'firstname' => 'fn', 'lastname' => 'ln'}
-      awarded_url = "https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=awardBadge"
 
       data = Osm::Badge::Data.new(
         :member_id => 1,
@@ -891,19 +879,15 @@ describe "Badge" do
         )
       )
 
-      HTTParty.should_receive(:post).with(awarded_url, {:body => awarded_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>awarded_body_data.to_json}) }
+      $api.should_receive(:post_query).with(path: 'ext/badges/records/?action=awardBadge', post_data: awarded_post_data).and_return(awarded_body_data)
       Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
 
-      data.mark_awarded(@api, Date.new(2000, 1, 2), 1).should == true
+      data.mark_awarded(api: $api, date: Date.new(2000, 1, 2), level: 1).should == true
     end
 
     it "Mark badge due" do
 
       awarded_post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'section_id' => 2,
         'badge_id' => 123,
         'badge_version' => 0,
@@ -911,7 +895,6 @@ describe "Badge" do
         'level' => 1
       }
       awarded_body_data = {'scoutid'=>'1', 'completed'=>'1', 'awarded' => '1', 'awardeddate'=>'2000-01-02', 'firstname' => 'fn', 'lastname' => 'ln'}
-      awarded_url = "https://www.onlinescoutmanager.co.uk/ext/badges/records/?action=overrideCompletion"
 
       data = Osm::Badge::Data.new(
         :member_id => 1,
@@ -922,12 +905,12 @@ describe "Badge" do
         )
       )
 
-      HTTParty.should_receive(:post).twice.with(awarded_url, {:body => awarded_post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>awarded_body_data.to_json}) }
+      $api.should_receive(:post_query).twice.with(path: 'ext/badges/records/?action=overrideCompletion', post_data: awarded_post_data).and_return(awarded_body_data)
       Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
       data.stub(:earnt){ 1 }
 
-      data.mark_due(@api, 1).should == true
-      data.mark_due(@api).should == true
+      data.mark_due($api, 1).should == true
+      data.mark_due($api).should == true
     end
 
     it "Get summary data for a section" do
@@ -951,10 +934,10 @@ describe "Badge" do
           }
         ]
       }
-      data = data.to_json
+      data = data
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/records/summary/?action=get&mode=verbose&section=beavers&sectionid=1&termid=2", :body => data, :content_type => 'application/json')
-      summary = Osm::Badge.get_summary_for_section(@api, Osm::Section.new(:id => 1, :type => :beavers), 2)
+      $api.should_receive(:post_query).with(path: "ext/badges/records/summary/?action=get&mode=verbose&section=beavers&sectionid=1&termid=2").and_return(data)
+      summary = Osm::Badge.get_summary_for_section(api: $api, section: Osm::Section.new(:id => 1, :type => :beavers), term: 2)
       summary.size.should == 1
       summary[0].should == {
         :first_name => 'First',

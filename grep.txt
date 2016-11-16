@@ -1,0 +1,3 @@
+grep -d recurse FakeWeb spec/       --> Stub consistency & remove a dep
+grep -d recurse '\[Boolean\]' lib   --> Replace with [true, false]
+grep -d recurse 'perform_query.* true' lib   --> Get rid of raw option

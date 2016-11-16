@@ -89,187 +89,174 @@ module Osm
     #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
     # Get badges
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
-    # @param [Symbol] section_type The type of section to get badges for (if nil uses the type of the section param)
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
+    # @param section_type [Symbol] The type of section to get badges for (if nil uses the type of the section param)
     # @!macro options_get
     # @return [Array<Osm::Badge>]
-    def self.get_badges_for_section(api, section, section_type=nil, options={})
+    def self.get_badges_for_section(api:, section:, section_type: nil, no_read_cache: false)
       fail Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
-      require_ability_to(api, :read, :badge, section, options)
+      require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       section_type ||= section.type
       cache_key = ['badges', section_type, type]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        term_id = Osm::Term.get_current_term_for_section(api: api, section: section, no_read_cache: no_read_cache).to_i
+        badges = []
+        badge_sharing_map = {
+          'draft' => :draft,
+          'private' => :private,
+          'optin' => :optin,
+          'optin-locked' => :optin_locked,
+          'default-locked' => :default_locked
+        }
 
-      term_id = Osm::Term.get_current_term_for_section(api, section, options).to_i
-      badges = []
-      badge_sharing_map = {
-        'draft' => :draft,
-        'private' => :private,
-        'optin' => :optin,
-        'optin-locked' => :optin_locked,
-        'default-locked' => :default_locked
-      }
+        data = api.post_query(path: "ext/badges/records/?action=getBadgeStructureByType&section=#{section_type}&type_id=#{type_id}&term_id=#{term_id}&section_id=#{section.id}")
+        badge_order = data["badgeOrder"].to_s.split(',')
+        structures = data["structure"] || {}
+        details = data["details"] || {}
 
-      data = api.perform_query("ext/badges/records/?action=getBadgeStructureByType&section=#{section_type}&type_id=#{type_id}&term_id=#{term_id}&section_id=#{section.id}")
-      badge_order = data["badgeOrder"].to_s.split(',')
-      structures = data["structure"] || {}
-      details = data["details"] || {}
+        badge_order.each do |b|
+          structure = structures[b]
+          detail = details[b]
+          config = JSON.parse(detail['config'] || '{}')
 
-      badge_order.each do |b|
-        structure = structures[b]
-        detail = details[b]
-        config = ActiveSupport::JSON.decode(detail['config'] || '{}')
-
-        badge = new(
-          :id => detail['badge_id'],
-          :version => detail['badge_version'],
-          :identifier => detail['badge_identifier'],
-          :name => detail['name'],
-          :requirement_notes => detail['description'],
-          :group_name => detail['group_name'],
-          :latest => detail['latest'].to_i.eql?(1),
-          :sharing => badge_sharing_map[detail['sharing']],
-          :user_id => Osm.to_i_or_nil(detail['userid']),
-          :levels => config['levelslist'],
-          :min_modules_required => config['numModulesRequired'].to_i,
-          :min_requirements_required => config['minRequirementsCompleted'].to_i,
-          :add_columns_to_module => Osm.to_i_or_nil(config['addcolumns']),
-          :level_requirement => Osm.to_i_or_nil(config['levels_column_id']),
-          :requires_modules => config['requires'],
-          :other_requirements_required => (config['columnsRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i} },
-          :badges_required => (config['badgesRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i} },
-          :show_level_letters => !!config['shownumbers'],
-        )
-
-        modules = module_completion_data(api, badge, options)
-        badge.modules = modules
-        modules = Hash[*modules.map{|m| [m.letter, m]}.flatten]
-
-        requirements = []
-        ((structure[1] || {})['rows'] || []).each do |r|
-          requirements.push Osm::Badge::Requirement.new(
-            :badge => badge,
-            :name => r['name'],
-            :description => r['tooltip'],
-            :mod => modules[r['module']],
-            :id => Osm::to_i_or_nil(r['field']),
-            :editable => r['editable'].to_s.eql?('true'),
+          badge = new(
+            :id => detail['badge_id'],
+            :version => detail['badge_version'],
+            :identifier => detail['badge_identifier'],
+            :name => detail['name'],
+            :requirement_notes => detail['description'],
+            :group_name => detail['group_name'],
+            :latest => detail['latest'].to_i.eql?(1),
+            :sharing => badge_sharing_map[detail['sharing']],
+            :user_id => Osm.to_i_or_nil(detail['userid']),
+            :levels => config['levelslist'],
+            :min_modules_required => config['numModulesRequired'].to_i,
+            :min_requirements_required => config['minRequirementsCompleted'].to_i,
+            :add_columns_to_module => Osm.to_i_or_nil(config['addcolumns']),
+            :level_requirement => Osm.to_i_or_nil(config['levels_column_id']),
+            :requires_modules => config['requires'],
+            :other_requirements_required => (config['columnsRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i} },
+            :badges_required => (config['badgesRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i} },
+            :show_level_letters => !!config['shownumbers'],
           )
-        end
-        badge.requirements = requirements
 
-        badges.push badge
-      end
+          modules = module_completion_data(api: api, badge: badge, no_read_cache: no_read_cache)
+          badge.modules = modules
+          modules = Hash[*modules.map{|m| [m.letter, m]}.flatten]
 
-      cache_write(api, cache_key, badges)
-      return badges
+          requirements = []
+          ((structure[1] || {})['rows'] || []).each do |r|
+            requirements.push Osm::Badge::Requirement.new(
+              :badge => badge,
+              :name => r['name'],
+              :description => r['tooltip'],
+              :mod => modules[r['module']],
+              :id => Osm::to_i_or_nil(r['field']),
+              :editable => r['editable'].to_s.eql?('true'),
+            )
+          end
+          badge.requirements = requirements
+
+          badges.push badge
+        end # each badge_order
+
+        badges
+      end # cache fetch
     end
 
     # Get a summary of badges earnt by members
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Hash>]
-    def self.get_summary_for_section(api, section, term=nil, options={})
+    def self.get_summary_for_section(api:, section:, term: nil, no_read_cache: false)
       fail Error, 'This method must NOT be called on one of the subclasses(CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' unless type.nil?
-      require_ability_to(api, :read, :badge, section, options)
+      require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
-      term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
+      term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section, no_read_cache: no_read_cache) : term).to_i
       cache_key = ['badge-summary', section.id, term_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        summary = []
+        data = api.post_query(path: "ext/badges/records/summary/?action=get&mode=verbose&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
+        data['items'].each do |item|
+          new_item = {
+            :first_name => item['firstname'],
+            :last_name => item['lastname'],
+            :name => "#{item['firstname']} #{item['lastname']}",
+            :member_id => Osm.to_i_or_nil(item['scout_id']),
+          }
 
-      summary = []
-      data = api.perform_query("ext/badges/records/summary/?action=get&mode=verbose&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
-      data['items'].each do |item|
-        new_item = {
-          :first_name => item['firstname'],
-          :last_name => item['lastname'],
-          :name => "#{item['firstname']} #{item['lastname']}",
-          :member_id => Osm.to_i_or_nil(item['scout_id']),
-        }
+          badge_data = Hash[item.to_a.select{ |k,v| !!k.match(/\d+_\d+/) }]
+          badge_data.each do |badge_identifier, status|
+            if status.is_a?(String)
+              # Possible statuses: 
+              # 'Started',
+              # 'Due', 'Due Lvl 2'
+              # 'Awarded', 'Awarded Lvl 2', '01/02/2003', '02/03/2004 (Lvl 2)'
+              if status.eql?('Started')
+                new_item[badge_identifier] = :started
+              elsif status.eql?('Due')
+                new_item[badge_identifier] = :due
+              elsif match_data = status.match(/\ADue Lvl (\d+)\Z/)
+                new_item[badge_identifier] = :due
+                new_item["#{badge_identifier}_level"] = match_data[1].to_i
+              elsif status.eql?('Awarded')
+                new_item[badge_identifier] = :awarded
+              elsif match_data = status.match(/\AAwarded Lvl (\d+)\Z/)
+                new_item[badge_identifier] = :awarded
+                new_item["#{badge_identifier}_level"] = match_data[1].to_i
+              elsif match_data = status.match(Osm::OSM_DATE_REGEX)
+                new_item[badge_identifier] = :awarded
+                new_item["#{badge_identifier}_date"] = Osm.parse_date(match_data[0])
+              elsif match_data = status.match(/\A(#{Osm::OSM_DATE_REGEX_UNANCHORED.to_s}) \(Lvl (\d+)\)\Z/)
+                new_item[badge_identifier] = :awarded
+                new_item["#{badge_identifier}_date"] = Osm.parse_date(match_data[1])
+                new_item["#{badge_identifier}_level"] = match_data[2].to_i
+              end # ifs on status
+            end # if status is a string
+          end # each badge data
 
-        badge_data = Hash[item.to_a.select{ |k,v| !!k.match(/\d+_\d+/) }]
-        badge_data.each do |badge_identifier, status|
-          if status.is_a?(String)
-            # Possible statuses: 
-            # 'Started',
-            # 'Due', 'Due Lvl 2'
-            # 'Awarded', 'Awarded Lvl 2', '01/02/2003', '02/03/2004 (Lvl 2)'
-            if status.eql?('Started')
-              new_item[badge_identifier] = :started
-            elsif status.eql?('Due')
-              new_item[badge_identifier] = :due
-            elsif match_data = status.match(/\ADue Lvl (\d+)\Z/)
-              new_item[badge_identifier] = :due
-              new_item["#{badge_identifier}_level"] = match_data[1].to_i
-            elsif status.eql?('Awarded')
-              new_item[badge_identifier] = :awarded
-            elsif match_data = status.match(/\AAwarded Lvl (\d+)\Z/)
-              new_item[badge_identifier] = :awarded
-              new_item["#{badge_identifier}_level"] = match_data[1].to_i
-            elsif match_data = status.match(Osm::OSM_DATE_REGEX)
-              new_item[badge_identifier] = :awarded
-              new_item["#{badge_identifier}_date"] = Osm.parse_date(match_data[0])
-            elsif match_data = status.match(/\A(#{Osm::OSM_DATE_REGEX_UNANCHORED.to_s}) \(Lvl (\d+)\)\Z/)
-              new_item[badge_identifier] = :awarded
-              new_item["#{badge_identifier}_date"] = Osm.parse_date(match_data[1])
-              new_item["#{badge_identifier}_level"] = match_data[2].to_i
-            end
-          end
-        end
-
-        summary.push new_item
-      end
-
-      cache_write(api, cache_key, summary)
-      return summary
+          summary.push new_item
+        end # each item in data
+        summary
+      end  # cache fetch
     end
 
     # Get a list of badge requirements met by members
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Badge::Data>]
-    def get_data_for_section(api, section, term=nil, options={})
+    def get_data_for_section(api:, section:, term: nil, no_read_cache: false)
       fail Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
-      Osm::Model.require_ability_to(api, :read, :badge, section, options)
+      Osm::Model.require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
       cache_key = ['badge_data', section.id, term_id, id, version]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query(path: "ext/badges/records/?action=getBadgeRecords&term_id=#{term_id}&section=#{section.type}&badge_id=#{id}&section_id=#{section.id}&badge_version=#{version}")
 
-      datas = []
-      data = api.perform_query("ext/badges/records/?action=getBadgeRecords&term_id=#{term_id}&section=#{section.type}&badge_id=#{id}&section_id=#{section.id}&badge_version=#{version}")
-
-      data['items'].each do |d|
-        datas.push Osm::Badge::Data.new(
-          :member_id => d['scoutid'],
-          :first_name => d['firstname'],
-          :last_name => d['lastname'],
-          :due => d['completed'].to_i,
-          :awarded => d['awarded'].to_i,
-          :awarded_date => Osm.parse_date(d['awardeddate']),
-          :requirements => d.map{ |k,v| [k.to_i, v] }.to_h.except(0),
-          :section_id => section.id,
-          :badge => self,
-        )
-      end
-
-      cache_write(api, cache_key, datas)
-      return datas
+        data['items'].map do |d|
+          Osm::Badge::Data.new(
+            :member_id => d['scoutid'],
+            :first_name => d['firstname'],
+            :last_name => d['lastname'],
+            :due => d['completed'].to_i,
+            :awarded => d['awarded'].to_i,
+            :awarded_date => Osm.parse_date(d['awardeddate']),
+            :requirements => d.map{ |k,v| [k.to_i, v] }.to_h.except(0),
+            :section_id => section.id,
+            :badge => self,
+          )
+        end
+      end #cache fetch
     end
 
 
@@ -304,30 +291,27 @@ module Osm
     end
 
 
-    # Compare Badge based on name then id then version (desc)
-    def <=>(another)
-      result = self.name <=> another.try(:name)
-      result = self.id <=> another.try(:id) if result == 0
-      result = another.try(:version) <=> self.version if result == 0
-      return result
+    protected def sort_by
+      ['name', 'id', '-version']
     end
 
 
     private
     # return an array of hashes representing the modules of the badge
-    def self.module_completion_data(api, badge, options={})
+    def self.module_completion_data(api: api, badge: badge, no_read_cache: false)
       fetched_this_time = @module_completion_data.nil? # Flag to ensure we only get the data once (at most) per invocation
-      @module_completion_data = get_module_completion_data(api, options) if fetched_this_time
+      @module_completion_data = get_module_completion_data(api: api, no_read_cache: no_read_cache) if fetched_this_time
 
       if @module_completion_data[badge.id].nil? && !fetched_this_time
-        @module_completion_data = get_module_completion_data(api, options)
+        @module_completion_data = get_module_completion_data(api: api, no_read_cache: no_read_cache)
         fetched_this_time = true
       end
+
       data = @module_completion_data[badge.id]
       fail ArgumentError, "That badge does't exist (bad ID)." if data.nil?
 
       if data[badge.version].nil? && !fetched_this_time
-        @module_completion_data = get_module_completion_data(api, options)
+        @module_completion_data = get_module_completion_data(api, no_read_cache: no_read_cache)
         data = @module_completion_data[badge.id]
         fetched_this_time = true
       end
@@ -339,39 +323,35 @@ module Osm
     end
 
     # Return a 2 dimensional hash/array (badge ID, badge version) of hashes representing the modules
-    def self.get_module_completion_data(api, options={})
+    def self.get_module_completion_data(api:, no_read_cache: false)
       cache_key = ['badge_module_completion_data']
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache, ttl: 86400) do
+        osm_data = api.post_query(path: 'ext/badges/records/?action=_getModuleDetails')
+        osm_data = (osm_data || {})['items'] || []
+        osm_data.map! do |i|
+          [
+            Osm.to_i_or_nil(i['badge_id']),
+            Osm.to_i_or_nil(i['badge_version']),
+            Osm::Badge::RequirementModule.new({
+              id: Osm.to_i_or_nil(i['module_id']),
+              letter: i['module_letter'],
+              min_required: i['num_required'].to_i,
+              custom_columns: i['custom_columns'].to_i,
+              completed_into_column: i['completed_into_column_id'].to_i.eql?(0) ? nil : i['completed_into_column_id'].to_i,
+              numeric_into_column: i['numeric_into_column_id'].to_i.eql?(0) ? nil : i['numeric_into_column_id'].to_i,
+              add_column_id_to_numeric: i['add_column_id_to_numeric'].to_i.eql?(0) ? nil : i['add_column_id_to_numeric'].to_i,
+            })
+          ]
+        end # osm_data.map!
 
-      osm_data = api.perform_query('ext/badges/records/?action=_getModuleDetails')
-      osm_data = (osm_data || {})['items'] || []
-      osm_data.map! do |i|
-        [
-          Osm.to_i_or_nil(i['badge_id']),
-          Osm.to_i_or_nil(i['badge_version']),
-          Osm::Badge::RequirementModule.new({
-            id: Osm.to_i_or_nil(i['module_id']),
-            letter: i['module_letter'],
-            min_required: i['num_required'].to_i,
-            custom_columns: i['custom_columns'].to_i,
-            completed_into_column: i['completed_into_column_id'].to_i.eql?(0) ? nil : i['completed_into_column_id'].to_i,
-            numeric_into_column: i['numeric_into_column_id'].to_i.eql?(0) ? nil : i['numeric_into_column_id'].to_i,
-            add_column_id_to_numeric: i['add_column_id_to_numeric'].to_i.eql?(0) ? nil : i['add_column_id_to_numeric'].to_i,
-          })
-        ]
-      end
-
-      data = {}
-      osm_data.each do |id, version, m|
-        data[id] ||= []
-        data[id][version] ||= []
-        data[id][version].push m
-      end
-
-      cache_write(api, cache_key, data, {expires_in: 864000}) # Expire in 24 hours as this data changes really slowly
-      return data
+        data = {}
+        osm_data.each do |id, version, m|
+          data[id] ||= []
+          data[id][version] ||= []
+          data[id][version].push m
+        end
+        data
+      end # cache fetch
     end
 
     public
@@ -497,8 +477,6 @@ module Osm
 
 
     class Data < Osm::Model
-      SORT_BY = [:badge, :section_id, :member_id]
-
       # @!attribute [rw] member_id
       #   @return [Fixnum] ID of the member this data relates to
       # @!attribute [rw] first_name
@@ -703,11 +681,11 @@ module Osm
 
 
       # Mark the badge as awarded in OSM
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Date] date The date to mark the badge as awarded
-      # @param [Fixnum] level The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
+      # @param api [Osm::Api] The api to use to make the request
+      # @param date [Date] The date to mark the badge as awarded
+      # @param level [Fixnum] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return [Boolean] whether the data was updated in OSM
-      def mark_awarded(api, date=Date.today, level=due)
+      def mark_awarded(api:, date: Date.today, level: due)
         fail ArgumentError, 'date is not a Date' unless date.is_a?(Date)
         fail ArgumentError, 'level can not be negative' if level < 0
         section = Osm::Section.get(api, section_id)
@@ -721,7 +699,7 @@ module Osm
           'level' => level.to_s
         }]
 
-        result = api.perform_query("ext/badges/records/?action=awardBadge", {
+        result = api.post_query(path: "ext/badges/records/?action=awardBadge", post_data: {
           'date' => date_formatted,
           'sectionid' => section_id,
           'entries' => entries.to_json
@@ -739,7 +717,7 @@ module Osm
       end
 
       # Mark the badge as not awarded in OSM
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @return [Boolean] whether the data was updated in OSM
       def mark_not_awarded(api)
         mark_awarded(api, Date.today, 0)
@@ -747,15 +725,15 @@ module Osm
 
 
       # Mark the badge as due in OSM
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Fixnum] level The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
+      # @param api [Osm::Api] The api to use to make the request
+      # @param level [Fixnum] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return [Boolean] whether the data was updated in OSM
       def mark_due(api, level=earnt)
         fail ArgumentError, 'level can not be negative' if level < 0
         section = Osm::Section.get(api, section_id)
         require_ability_to(api, :write, :badge, section)
 
-        result = api.perform_query("ext/badges/records/?action=overrideCompletion", {
+        result = api.post_query(path: "ext/badges/records/?action=overrideCompletion", post_data: {
           'section_id' => section.id,
           'badge_id' => badge.id,
           'badge_version' => badge.version,
@@ -769,14 +747,14 @@ module Osm
       end
 
       # Mark the badge as not due in OSM
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @return [Boolean] whether the data was updated in OSM
       def mark_not_due(api)
         mark_due(api, 0)
       end
 
       # Update data in OSM
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @return [Boolean] whether the data was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
@@ -789,7 +767,7 @@ module Osm
         editable_requirements = badge.requirements.select{ |r| r.editable }.map{ |r| r.id }
         requirements.changes.each do |requirement, (was,now)|
           if editable_requirements.include?(requirement)
-            result = api.perform_query("ext/badges/records/?action=updateSingleRecord", {
+            result = api.post_query(path: "ext/badges/records/?action=updateSingleRecord", post_data: {
               'scoutid' => member_id,
               'section_id' => section_id,
               'badge_id' => badge.id,
@@ -832,12 +810,16 @@ module Osm
       end
 
       # Work out if the requirmeent has been met
-      # @param [Fixnum, #to_i] requirement_id The id of the requirement to evaluate (e.g. "12", "xSomething", "Yes" or "")
+      # @param requirement_id [Fixnum, #to_i] The id of the requirement to evaluate (e.g. "12", "xSomething", "Yes" or "")
       # @return [Boolean] whether the requirmeent has been met
       def requirement_met?(requirement_id)
         data = requirements[requirement_id.to_i].to_s
         return false if data == '0'
         !(data.blank? || data[0].downcase.eql?('x'))
+      end
+
+      protected def sort_by
+        ['badge', 'section_id', 'member_id']
       end
 
     end # Class Data
