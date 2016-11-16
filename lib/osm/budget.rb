@@ -1,8 +1,6 @@
 module Osm
 
   class Budget < Osm::Model
-    SORT_BY = [:section_id, :name]
-
     # @!attribute [rw] id
     #   @return [Fixnum] The OSM ID for the budget
     # @!attribute [rw] section_id
@@ -25,53 +23,45 @@ module Osm
 
 
     # Get budgets for a section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the structure for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the structure for
     # @!macro options_get
     # @return [Array<Osm::Budget>] representing the donations made
-    def self.get_for_section(api, section, options={})
-      Osm::Model.require_ability_to(api, :read, :finance, section, options)
+    def self.get_for_section(api:, section:, no_read_cache: false)
+      Osm::Model.require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
       cache_key = ['budgets', section_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
-      end
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query(path: "finances.php?action=getCategories&sectionid=#{section_id}")
 
-      data = api.perform_query("finances.php?action=getCategories&sectionid=#{section_id}")
-
-      budgets = []
-      data = data['items']
-      if data.is_a?(Array)
-        data.each do |budget|
-          budgets.push Budget.new(
+        data = data['items']
+        data.map do |budget|
+          Budget.new(
             :id => Osm::to_i_or_nil(budget['categoryid']),
             :section_id => Osm::to_i_or_nil(budget['sectionid']),
             :name => budget['name'],
           )
-        end
-      end
-
-      Osm::Model.cache_write(api, cache_key, budgets) unless budgets.nil?
-      return budgets
+        end # data.map
+      end # cache fetch
     end
 
 
     # Create the budget in OSM
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Boolean] whether the budget was created
     # @raise [Osm::ObjectIsInvalid] If the Budget is invalid
     # @raise [Osm::Error] If the budget already exists in OSM
     def create(api)
       fail Osm::Error, 'the budget already exists in OSM' unless id.nil?
       fail Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
-      Osm::Model.require_ability_to(api, :write, :finance, section_id)
+      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
-      data = api.perform_query("finances.php?action=addCategory&sectionid=#{section_id}")
+      data = api.post_query(path: "finances.php?action=addCategory&sectionid=#{section_id}")
       if data.is_a?(Hash) && data['ok'].eql?(true)
         # The cached budgets for the section will be out of date - remove them
-        cache_delete(api, ['budgets', section_id])
-        budgets = Budget.get_for_section(api, section_id, {:no_cache => true})
+        cache_delete(api: api, key: ['budgets', section_id])
+        budgets = Budget.get_for_section(api: api, section: section_id, no_read_cache: true)
         budget = budgets.sort.select{ |b| b.name.eql?('** Unnamed **') }.last
         return false if budget.nil? # a new blank budget was NOT created
         budget.name = name
@@ -84,14 +74,14 @@ module Osm
     end
 
     # Update budget in OSM
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Boolean] whether the budget was updated
     # @raise [Osm::ObjectIsInvalid] If the Budget is invalid
     def update(api)
       fail Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
-      Osm::Model.require_ability_to(api, :write, :finance, section_id)
+      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
-      data = api.perform_query("finances.php?action=updateCategory&sectionid=#{section_id}", {
+      data = api.post_query(path: "finances.php?action=updateCategory&sectionid=#{section_id}", post_data: {
         'categoryid' => id,
         'column' => 'name',
         'value' => name,
@@ -100,27 +90,31 @@ module Osm
       })
       if (data.is_a?(Hash) && data['ok'].eql?(true))
         # The cached budgets for the section will be out of date - remove them
-        cache_delete(api, ['budgets', section_id])
+        cache_delete(api: api, key: ['budgets', section_id])
         return true
       end
       return false
     end
 
     # Delete budget from OSM
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Boolean] whether the budget was deleted
     def delete(api)
-      Osm::Model.require_ability_to(api, :write, :finance, section_id)
+      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
-      data = api.perform_query("finances.php?action=deleteCategory&sectionid=#{section_id}", {
+      data = api.post_query(path: "finances.php?action=deleteCategory&sectionid=#{section_id}", post_data: {
         'categoryid' => id,
       })
       if (data.is_a?(Hash) && data['ok'].eql?(true))
         # The cached budgets for the section will be out of date - remove them
-        cache_delete(api, ['budgets', section_id])
+        cache_delete(api: api, key: ['budgets', section_id])
         return true
       end
       return false
+    end
+
+    private def sort_by
+      ['section_id', 'name']
     end
 
   end # Class Budget

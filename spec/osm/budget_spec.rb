@@ -41,9 +41,9 @@ describe "Budget" do
           }
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/finances.php?action=getCategories&sectionid=3", :body => data.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with(path: 'finances.php?action=getCategories&sectionid=3').and_return(data)
 
-      budgets = Osm::Budget.get_for_section(@api, 3)
+      budgets = Osm::Budget.get_for_section(api: $api, section: 3)
       budgets.should == [Osm::Budget.new(:id => 2, :section_id => 3, :name => 'Name')]
     end
 
@@ -53,28 +53,17 @@ describe "Budget" do
         :name => 'Budget Name',
       )
 
-      url = "https://www.onlinescoutmanager.co.uk/finances.php?action=addCategory&sectionid=2"
-      HTTParty.should_receive(:post).with(url, :body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-      }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
-      Osm::Budget.should_receive(:get_for_section).with(@api, 2, {:no_cache=>true}) { [Osm::Budget.new(:id => 3, :section_id => 2, :name => 'Existing budget'), Osm::Budget.new(:id => 4, :section_id => 2, :name => '** Unnamed **')] }
-      url = "https://www.onlinescoutmanager.co.uk/finances.php?action=updateCategory&sectionid=2"
-      HTTParty.should_receive(:post).with(url, :body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
+      Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(:id => 3, :section_id => 2, :name => 'Existing budget'), Osm::Budget.new(:id => 4, :section_id => 2, :name => '** Unnamed **')])
+      $api.should_receive(:post_query).with(path: 'finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
+      $api.should_receive(:post_query).with(path: 'finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 4,
         'column' => 'name',
         'value' => 'Budget Name',
         'section_id' => 2,
         'row' => 0,
-      }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
+      }).and_return({'ok'=>true})
 
-      budget.create(@api).should == true
+      budget.create($api).should == true
       budget.id.should == 4
     end
 
@@ -84,16 +73,10 @@ describe "Budget" do
         :name => 'Budget Name',
       )
     
-      url = "https://www.onlinescoutmanager.co.uk/finances.php?action=addCategory&sectionid=2"
-      HTTParty.should_receive(:post).with(url, :body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-      }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
-      Osm::Budget.should_receive(:get_for_section).with(@api, 2, {:no_cache=>true}) { [Osm::Budget.new(:id => 3, :section_id => 2, :name => 'Existing budget')] }
+      $api.should_receive(:post_query).with(path: 'finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
+      Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(:id => 3, :section_id => 2, :name => 'Existing budget')])
 
-      budget.create(@api).should == false
+      budget.create($api).should == false
     end
     
     it "Create budget (failure (not updated))" do
@@ -102,28 +85,17 @@ describe "Budget" do
         :name => 'Budget Name',
       )
     
-      url = "https://www.onlinescoutmanager.co.uk/finances.php?action=addCategory&sectionid=2"
-      HTTParty.should_receive(:post).with(url, :body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-      }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
-      Osm::Budget.should_receive(:get_for_section).with(@api, 2, {:no_cache=>true}) { [Osm::Budget.new(:id => 3, :section_id => 2, :name => '** Unnamed **')] }
-      url = "https://www.onlinescoutmanager.co.uk/finances.php?action=updateCategory&sectionid=2"
-      HTTParty.should_receive(:post).with(url, :body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
+      Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(:id => 3, :section_id => 2, :name => '** Unnamed **')])
+      $api.should_receive(:post_query).with(path: 'finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
+      $api.should_receive(:post_query).with(path: 'finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 3,
         'column' => 'name',
         'value' => 'Budget Name',
         'section_id' => 2,
         'row' => 0,
-      }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
+      }).and_return({'ok'=>false})
 
-      budget.create(@api).should == false
+      budget.create($api).should == false
     end
     
     it "Update budget (success)" do
@@ -132,21 +104,16 @@ describe "Budget" do
         :section_id => 2,
         :name => 'Budget Name',
       )
-    
-      url = "https://www.onlinescoutmanager.co.uk/finances.php?action=updateCategory&sectionid=2"
-      HTTParty.should_receive(:post).with(url, :body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
+
+      $api.should_receive(:post_query).with(path: 'finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 1,
         'column' => 'name',
         'value' => 'Budget Name',
         'section_id' => 2,
         'row' => 0,
-      }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
+      }).and_return({'ok'=>true})
     
-      budget.update(@api).should == true
+      budget.update($api).should == true
     end
     
     it "Update budget (failure)" do
@@ -156,9 +123,15 @@ describe "Budget" do
         :name => 'Budget Name',
       )
 
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
+      $api.should_receive(:post_query).with(path: 'finances.php?action=updateCategory&sectionid=2', post_data: {
+        'categoryid' => 1,
+        'column' => 'name',
+        'value' => 'Budget Name',
+        'section_id' => 2,
+        'row' => 0,
+      }).and_return({'ok'=>false})
     
-      budget.update(@api).should == false
+      budget.update($api).should == false
     end
     
     it "Delete budget (success)" do
@@ -167,17 +140,10 @@ describe "Budget" do
         :section_id => 2,
         :name => 'Budget Name',
       )
-    
-      url = "https://www.onlinescoutmanager.co.uk/finances.php?action=deleteCategory&sectionid=2"
-      HTTParty.should_receive(:post).with(url, :body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'categoryid' => 1,
-      }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
-    
-      budget.delete(@api).should == true
+
+      $api.should_receive(:post_query).with(path: 'finances.php?action=deleteCategory&sectionid=2', post_data: {'categoryid' => 1}).and_return({'ok'=>true})
+
+      budget.delete($api).should == true
     end
     
     it "Delete budget (failure)" do
@@ -186,17 +152,10 @@ describe "Budget" do
         :section_id => 2,
         :name => 'Budget Name',
       )
+
+      $api.should_receive(:post_query).with(path: 'finances.php?action=deleteCategory&sectionid=2', post_data: {'categoryid' => 1}).and_return({'ok'=>false})
     
-      url = "https://www.onlinescoutmanager.co.uk/finances.php?action=deleteCategory&sectionid=2"
-      HTTParty.should_receive(:post).with(url, :body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'categoryid' => 1,
-      }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
-    
-      budget.delete(@api).should == false
+      budget.delete($api).should == false
     end
     
   end
