@@ -121,29 +121,27 @@ describe "Term" do
 
   describe "Using the API" do
 
-    before :each do
-      body = [
-        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"beavers\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Flexi Record 1\",\"extraid\":\"111\"}],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"9", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
-        {"sectionConfig"=>"{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member's Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member's Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}", "groupname"=>"1st Somewhere", "groupid"=>"1", "groupNormalised"=>"1", "sectionid"=>"10", "sectionname"=>"Section 2", "section"=>"cubs", "isDefault"=>"0", "permissions"=>{"badge"=>100, "member"=>100, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}}
-      ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
-
-      body = {
-        "9" => [
-          {"termid" => "1", "name" => "Term 1", "sectionid" => "9", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')}
-        ],
-        "10" => [
-          {"termid" => "2", "name" => "Term 2", "sectionid" => "10", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')},
-          {"termid" => "3", "name" => "Term 3", "sectionid" => "10", "startdate" => (Date.today + 91).strftime('%Y-%m-%d'), "enddate" => (Date.today + 180).strftime('%Y-%m-%d')}
-        ]
-      }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getTerms", :body => body.to_json, :content_type => 'application/json')
-    end
-
-
     describe "Get all terms" do
+      before :each do
+        body = [
+          {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"beavers\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Flexi Record 1\",\"extraid\":\"111\"}],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"9", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
+          {"sectionConfig"=>"{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member's Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member's Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}", "groupname"=>"1st Somewhere", "groupid"=>"1", "groupNormalised"=>"1", "sectionid"=>"10", "sectionname"=>"Section 2", "section"=>"cubs", "isDefault"=>"0", "permissions"=>{"badge"=>100, "member"=>100, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}}
+        ]
+#        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
+
+        $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+          "9" => [
+            {"termid" => "1", "name" => "Term 1", "sectionid" => "9", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')}
+          ],
+          "10" => [
+            {"termid" => "2", "name" => "Term 2", "sectionid" => "10", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')},
+            {"termid" => "3", "name" => "Term 3", "sectionid" => "10", "startdate" => (Date.today + 91).strftime('%Y-%m-%d'), "enddate" => (Date.today + 180).strftime('%Y-%m-%d')}
+          ]
+        })
+      end
+
       it "From OSM" do
-        terms = Osm::Term.get_all(@api)
+        terms = Osm::Term.get_all($api)
         terms.size.should == 3
         terms.map{ |i| i.id }.should == [1, 2, 3]
         term = terms[0]
@@ -155,43 +153,58 @@ describe "Term" do
       end
 
       it "From cache" do
-        terms = Osm::Term.get_all(@api)
-        HTTParty.should_not_receive(:post)
-        Osm::Term.get_all(@api).should == terms
+        terms = Osm::Term.get_all($api)
+        $api.should_not_receive(:post_query)
+        Osm::Term.get_all($api).should == terms
       end
-    end
+    end # Get all terms
 
     it "Gets all terms for a section" do
-      terms = Osm::Term.get_for_section(@api, 10)
+      $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+        "9" => [
+          {"termid" => "1", "name" => "Term 1", "sectionid" => "9", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')}
+        ],
+        "10" => [
+          {"termid" => "2", "name" => "Term 2", "sectionid" => "10", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')},
+          {"termid" => "3", "name" => "Term 3", "sectionid" => "10", "startdate" => (Date.today + 91).strftime('%Y-%m-%d'), "enddate" => (Date.today + 180).strftime('%Y-%m-%d')}
+        ]
+      })
+      terms = Osm::Term.get_for_section(api: $api, section: 10)
       terms.size.should == 2
       terms.map{ |i| i.id }.should == [2, 3]
     end
 
     it "Gets a term" do
-      term = Osm::Term.get(@api, 2)
+      $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+        "10" => [
+          {"termid" => "2", "name" => "Term 2", "sectionid" => "10", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')},
+          {"termid" => "3", "name" => "Term 3", "sectionid" => "10", "startdate" => (Date.today + 91).strftime('%Y-%m-%d'), "enddate" => (Date.today + 180).strftime('%Y-%m-%d')}
+        ]
+      })
+      term = Osm::Term.get(api: $api, id: 2)
       term.is_a?(Osm::Term).should == true
       term.id.should == 2
     end
 
-    describe "find current term" do
+    describe "Find current term" do
       it "Returns the current term for the section from all terms returned by OSM" do
-        body = '{"9":['
-        body += '{"termid":"1","name":"Term 1","sectionid":"9","startdate":"' + (Date.today - 90).strftime('%Y-%m-%d') + '","enddate":"' + (Date.today - 31).strftime('%Y-%m-%d') + '"},'
-        body += '{"termid":"2","name":"Term 2","sectionid":"9","startdate":"' + (Date.today - 30).strftime('%Y-%m-%d') + '","enddate":"' + (Date.today + 30).strftime('%Y-%m-%d') + '"},'
-        body += '{"termid":"3","name":"Term 3","sectionid":"9","startdate":"' + (Date.today + 31).strftime('%Y-%m-%d') + '","enddate":"' + (Date.today + 90).strftime('%Y-%m-%d') + '"}'
-        body += ']}'
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getTerms", :body => body, :content_type => 'application/json')
-    
-        Osm::Term.get_current_term_for_section(@api, 9).id.should == 2
+        $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+          '9' => [
+            {'termid'=>'1', 'name'=>'Term 1', 'sectionid'=>'9', 'startdate'=>(Date.today - 90).strftime('%Y-%m-%d'), 'enddate'=>(Date.today - 31).strftime('%Y-%m-%d')},
+            {'termid'=>'2', 'name'=>'Term 2', 'sectionid'=>'9', 'startdate'=>(Date.today - 30).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 30).strftime('%Y-%m-%d')},
+            {'termid'=>'3', 'name'=>'Term 3', 'sectionid'=>'9', 'startdate'=>(Date.today + 31).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 90).strftime('%Y-%m-%d')},
+          ]
+        })
+        Osm::Term.get_current_term_for_section(api: $api, section: 9).id.should == 2
       end
     
       it "Raises an error if there is no current term" do
-        body = '{"9":['
-        body += '{"termid":"1","name":"Term 1","sectionid":"9","startdate":"' + (Date.today + 31).strftime('%Y-%m-%d') + '","enddate":"' + (Date.today + 90).strftime('%Y-%m-%d') + '"}'
-        body += ']}'
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getTerms", :body => body, :content_type => 'application/json')
-
-        expect{ Osm::Term.get_current_term_for_section(@api, 9) }.to raise_error do |error|
+        $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+          '9' => [
+            {'termid'=>'1', 'name'=>'Term 1', 'sectionid'=>'9', 'startdate'=>(Date.today + 31).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 31).strftime('%Y-%m-%d')}
+          ]
+        })
+        expect{ Osm::Term.get_current_term_for_section(api: $api, section: 9) }.to raise_error do |error|
           error.should be_a(Osm::Error::NoCurrentTerm)
           error.message.should == 'There is no current term for the section.'
           error.section_id.should == 9
@@ -200,12 +213,7 @@ describe "Term" do
     end
 
     it "Create a term" do
-      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'term' => 'A Term',
         'start' => '2010-01-01',
         'end' => '2010-12-31',
@@ -213,23 +221,19 @@ describe "Term" do
       }
 
       Osm::Term.stub(:get_all) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"terms":{}}'}) }
+      $api.should_receive(:post_query).with(path: 'users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({'terms'=>{}})
 
-      Osm::Term.create(@api, {
-        :section => 1,
-        :name => 'A Term',
-        :start => Date.new(2010, 01, 01),
-        :finish => Date.new(2010, 12, 31),
-      }).should == true
+      Osm::Term.create(
+        api: $api,
+        section: 1,
+        name: 'A Term',
+        start: Date.new(2010, 01, 01),
+        finish: Date.new(2010, 12, 31),
+      ).should == true
     end
 
     it "Create a term (failed)" do
-      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'term' => 'A Term',
         'start' => '2010-01-01',
         'end' => '2010-12-31',
@@ -237,57 +241,48 @@ describe "Term" do
       }
 
       Osm::Term.stub(:get_all) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      $api.should_receive(:post_query).with(path: 'users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
 
-      Osm::Term.create(@api, {
-        :section => 1,
-        :name => 'A Term',
-        :start => Date.new(2010, 01, 01),
-        :finish => Date.new(2010, 12, 31),
-      }).should == false
+      Osm::Term.create(
+        api: $api,
+        section: 1,
+        name: 'A Term',
+        start: Date.new(2010, 01, 01),
+        finish: Date.new(2010, 12, 31),
+      ).should == false
     end
 
     it "Update a term" do
-      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'term' => 'A Term',
         'start' => '2010-01-01',
         'end' => '2010-12-31',
         'termid' => 2
       }
       Osm::Term.stub(:get_all) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"terms":{}}'}) }
+      $api.should_receive(:post_query).with(path: 'users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({'terms'=>{}})
 
       term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
-      term.update(@api).should == true
+      term.update($api).should == true
     end
 
     it "Update a term (failed)" do
-      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=addTerm&sectionid=1'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'term' => 'A Term',
         'start' => '2010-01-01',
         'end' => '2010-12-31',
         'termid' => 2
       }
       Osm::Term.stub(:get_all) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      $api.should_receive(:post_query).with(path: 'users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
 
       term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
-      term.update(@api).should == false
+      term.update($api).should == false
     end
 
     it "Update a term (invalid term)" do
       term = Osm::Term.new
-      expect{ term.update(@api) }.to raise_error(Osm::ObjectIsInvalid)
+      expect{ term.update($api) }.to raise_error(Osm::ObjectIsInvalid)
     end
 
   end

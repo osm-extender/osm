@@ -1,8 +1,6 @@
 module Osm
 
   class Term < Osm::Model
-    SORT_BY = [:section_id, :start, :id]
-
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the term
     # @!attribute [rw] section_id
@@ -28,18 +26,18 @@ module Osm
 
 
     # Get the terms that the OSM user can access
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @!macro options_get
     # @return [Array<Osm::Term>]
-    def self.get_all(api, options={})
+    def self.get_all(api, no_read_cache: false)
       cache_key = ['terms', api.user_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        ids = cache_read(api, cache_key)
-        return get_from_ids(api, ids, 'term', options, :get_all)
+      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
+        ids = cache_read(api: api, key: cache_key)
+        return get_from_ids(api: api, ids: ids, key_base: 'term', method: :get_all, no_read_cache: no_read_cache)
       end
 
-      data = api.perform_query('api.php?action=getTerms')
+      data = api.post_query(path: 'api.php?action=getTerms')
 
       terms = Array.new
       ids = Array.new
@@ -54,111 +52,102 @@ module Osm
           )
           terms.push term
           ids.push term.id
-          cache_write(api, ['term', term.id], term)
+          cache_write(api: api, key: ['term', term.id], data: term)
         end
       end
 
-      cache_write(api, cache_key, ids)
+      cache_write(api: api, key: cache_key, data: ids)
       return terms
     end
 
     # Get the terms that the OSM user can access for a given section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] section The section (or its ID) of the section to get terms for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Fixnum] The section (or its ID) of the section to get terms for
     # @!macro options_get
     # @return [Array<Osm::Term>, nil] An array of terms or nil if the user can not access that section
-    def self.get_for_section(api, section, options={})
-      require_access_to_section(api, section, options)
+    def self.get_for_section(api:, section:, no_read_cache: false)
+      require_access_to_section(api: api, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
-      return get_all(api, options).select{ |term| term.section_id == section_id }
+      return get_all(api, no_read_cache: no_read_cache).select{ |term| term.section_id == section_id }
     end
 
     # Get a term
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Fixnum] term_id The id of the required term
+    # @param api [Osm::Api] The api to use to make the request
+    # @param id [Fixnum] The id of the required term
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that term
     # @return [Osm::Term]
-    def self.get(api, term_id, options={})
-      cache_key = ['term', term_id]
+    def self.get(api:, id:, no_read_cache: false)
+      cache_key = ['term', id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        term = cache_read(api, cache_key)
-        return term if can_access_section?(api, term.section_id, options)
+      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
+        term = cache_read(api: api, key: cache_key)
+        return term
       end
 
-      terms = get_all(api, options)
+      terms = get_all(api, no_read_cache: no_read_cache)
       return nil unless terms.is_a? Array
 
       terms.each do |term|
-        if term.id == term_id
-          return (can_access_section?(api, term.section_id, options) ? term : nil)
+        if term.id == id
+          return term
         end
       end
       return nil
     end
 
     # Get the current term for a given section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID)  to get terms for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID)  to get terms for
     # @!macro options_get 
     # @return [Osm::Term, nil] The current term or nil if the user can not access that section
     # @raise [Osm::Error::NoCurrentTerm] If the Section doesn't have a Term which is current
-    def self.get_current_term_for_section(api, section, options={})
-      section_id = section.to_i
-      terms = get_for_section(api, section_id, options)
-
+    def self.get_current_term_for_section(api:, section:, no_read_cache: false)
+      terms = get_for_section(api: api, section: section, no_read_cache: no_read_cache)
       return nil if terms.nil?
       terms.each do |term|
         return term if term.current?
       end
 
-      fail Osm::Error::NoCurrentTerm.new('There is no current term for the section.', section_id)
+      fail Osm::Error::NoCurrentTerm.new('There is no current term for the section.', section)
     end
 
     # Create a term in OSM
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Hash] options - the configuration of the new term
-    #   @option options [Osm::Section, Fixnum] :section (required) section or section_id to add the term to
-    #   @option options [String] :name (required) the name for the term
-    #   @option options [Date] :start (required) the date for the start of term
-    #   @option options [Date] :finish (required) the date for the finish of term
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum] (required) section or section_id to add the term to
+    # @param name [String] (required) the name for the term
+    # @param start [Date, #strftime] (required) the date for the start of term
+    # @param finish [Date, #strftime] (required) the date for the finish of term
     # @return [Boolean] if the operation suceeded or not
-    def self.create(api, options={})
-      fail ArgumentError, ":section can't be nil" if options[:section].nil?
-      fail ArgumentError, ":name can't be nil" if options[:name].nil?
-      fail ArgumentError, ":start can't be nil" if options[:start].nil?
-      fail ArgumentError, ":finish can't be nil" if options[:finish].nil?
-      require_access_to_section(api, options[:section])
+    def self.create(api:, section:, name:, start:, finish:)
+      require_access_to_section(api: api, section: section)
 
-      api_data = {
-        'term' => options[:name],
-        'start' => options[:start].strftime(Osm::OSM_DATE_FORMAT),
-        'end' => options[:finish].strftime(Osm::OSM_DATE_FORMAT),
+      data = api.post_query(path: "users.php?action=addTerm&sectionid=#{section.to_i}", post_data: {
+        'term' => name,
+        'start' => start.strftime(Osm::OSM_DATE_FORMAT),
+        'end' => finish.strftime(Osm::OSM_DATE_FORMAT),
         'termid' => '0'
-      }
-
-      data = api.perform_query("users.php?action=addTerm&sectionid=#{options[:section].to_i}", api_data)
+      })
 
       # The cached terms for the section will be out of date - remove them
-      get_all(api, options).each do |term|
-        cache_delete(api, ['term', term.id]) if term.section_id == section_id
+      get_all(api).each do |term|
+        cache_delete(api: api, key: ['term', term.id]) if term.section_id == section.to_i
       end
-      cache_delete(api, ['terms', api.user_id])
+      cache_delete(api: api, key: ['terms', api.user_id])
 
       return data.is_a?(Hash) && data['terms'].is_a?(Hash)
     end
 
 
     # Update a term in OSM
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Boolean] if the operation suceeded or not
     # @raise [Osm::ObjectIsInvalid] If the Term is invalid
     def update(api)
       fail Osm::ObjectIsInvalid, 'term is invalid' unless valid?
-      require_access_to_section(api, section_id)
+      require_access_to_section(api: api, section: section_id)
 
-      data = api.perform_query("users.php?action=addTerm&sectionid=#{section_id}", {
+      data = api.post_query(path: "users.php?action=addTerm&sectionid=#{section_id}", post_data: {
         'term' => name,
         'start' => start.strftime(Osm::OSM_DATE_FORMAT),
         'end' => finish.strftime(Osm::OSM_DATE_FORMAT),
@@ -168,7 +157,7 @@ module Osm
       if data.is_a?(Hash) && data['terms'].is_a?(Hash)
         reset_changed_attributes
         # The cached term will be out of date - remove it
-        cache_delete(api, ['term', id])
+        cache_delete(api: api, key: ['term', id])
         return true
       else
         return false
@@ -183,7 +172,7 @@ module Osm
 
 
     # Determine if the term is completly before the passed date
-    # @param [Date] date
+    # @param date [Date]
     # @return [Boolean] if the term is completly before the passed date
     def before?(date)
       return false if finish.nil?
@@ -191,7 +180,7 @@ module Osm
     end
 
     # Determine if the term is completly after the passed date
-    # @param [Date] date
+    # @param date [Date]
     # @return [Boolean] if the term is completly after the passed date
     def after?(date)
       return false if start.nil?
@@ -221,12 +210,16 @@ module Osm
     end
 
     # Determine if the provided date is within the term
-    # @param [Date] date The date to test
+    # @param date [Date] The date to test
     # @return [Boolean] if the term started before the date and finishes after the date
     def contains_date?(date)
       return false if start.nil?
       return false if finish.nil?
       return (start <= date) && (finish >= date)
+    end
+
+    private def sort_by
+      ['section_id', 'start', 'id']
     end
 
   end # Class Term

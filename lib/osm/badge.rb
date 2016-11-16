@@ -237,7 +237,7 @@ module Osm
       fail Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
       Osm::Model.require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
       section = Osm::Section.get(api: api, section: section, no_read_cache: no_read_cache) unless section.is_a?(Osm::Section)
-      term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
+      term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section, no_read_cache: no_read_cache) : term).to_i
       cache_key = ['badge_data', section.id, term_id, id, version]
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do

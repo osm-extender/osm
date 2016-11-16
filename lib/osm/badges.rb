@@ -10,7 +10,7 @@ module Osm
     def self.get_stock(api:, section:, no_read_cache: false)
       Osm::Model.require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
       section = Osm::Section.get(api: api, section: section, no_read_cache: no_read_cache) unless section.is_a?(Osm::Section)
-      term_id = Osm::Term.get_current_term_for_section(api, section).id
+      term_id = Osm::Term.get_current_term_for_section(api: api, section: section).id
       cache_key = ['badge_stock', section.id]
 
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
@@ -55,7 +55,7 @@ module Osm
     def self.get_due_badges(api:, section:, term: nil, no_read_cache: false)
       Osm::Model.require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
       section = Osm::Section.get(api: api, section: section, no_read_cache: no_read_cache) unless section.is_a?(Osm::Section)
-      term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
+      term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section, no_read_cache: no_read_cache) : term).to_i
       cache_key = ['due_badges', section.id, term_id]
 
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
