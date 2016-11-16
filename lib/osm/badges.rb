@@ -3,44 +3,39 @@ module Osm
   class Badges
 
     # Get badge stock levels for a section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the badge stock for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the badge stock for
     # @!macro options_get
     # @return Hash
-    def self.get_stock(api, section, options={})
-      Osm::Model.require_ability_to(api, :read, :badge, section, options)
+    def self.get_stock(api:, section:, no_read_cache: false)
+      Osm::Model.require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = Osm::Term.get_current_term_for_section(api, section).id
       cache_key = ['badge_stock', section.id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
-      end
-
-      data = api.perform_query("ext/badges/stock/?action=getBadgeStock&section=#{section.type}&section_id=#{section.id}&term_id=#{term_id}")
-      data = (data['items'] || [])
-      data.map!{ |i| [i['badge_id_level'], i['stock']] }
-      data = data.to_h
-
-      Osm::Model.cache_write(api, cache_key, data)
-      return data
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query(path: "ext/badges/stock/?action=getBadgeStock&section=#{section.type}&section_id=#{section.id}&term_id=#{term_id}")
+        data = (data['items'] || [])
+        data.map!{ |i| [i['badge_id_level'], i['stock']] }
+        data.to_h
+      end # cache fetch
     end
 
     # Update badge stock levels
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to update ther badge stock for
-    # @param [Fixnum, #to_i] badge_id The badge to set the stock level for
-    # @param [Fixnum, #to_i] badge_level The level of a staged badge to set the stock for (default 1)
-    # @param [Fixnum, #to_i] stock_level How many of the provided badge there are
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to update ther badge stock for
+    # @param badge_id [Fixnum, #to_i] The badge to set the stock level for
+    # @param badge_level [Fixnum, #to_i] The level of a staged badge to set the stock for (default 1)
+    # @param stock_level [Fixnum, #to_i] How many of the provided badge there are
     # @return [Boolan] whether the update was successfull or not
-    def self.update_stock(api, section, badge_id, badge_level=1, stock_level)
-      Osm::Model.require_ability_to(api, :write, :badge, section)
+    def self.update_stock(api:, section:, badge_id:, badge_level: 1, stock:)
+      Osm::Model.require_ability_to(api: api, to: :write, on: :badge, section: section)
       section = Osm::Section.get(api, section) unless section.is_a?(Osm::Section)
 
-      Osm::Model.cache_delete(api, ['badge_stock', section.id])
+      Osm::Model.cache_delete(api: api, key: ['badge_stock', section.id])
 
-      data = api.perform_query("ext/badges.php?action=updateStock", {
-        'stock' => stock_level,
+      data = api.post_query(path: "ext/badges.php?action=updateStock", post_data: {
+        'stock' => stock,
         'sectionid' => section.id,
         'section' => section.type,
         'type' => 'current',
@@ -52,51 +47,47 @@ module Osm
 
 
     # Get due badges
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Osm::Badges::DueBadges]
-    def self.get_due_badges(api, section, term=nil, options={})
-      Osm::Model.require_ability_to(api, :read, :badge, section, options)
+    def self.get_due_badges(api:, section:, term: nil, no_read_cache: false)
+      Osm::Model.require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
       cache_key = ['due_badges', section.id, term_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
-      end
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query(path: "ext/badges/due/?action=get&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
 
-      data = api.perform_query("ext/badges/due/?action=get&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
+        data = {} unless data.is_a?(Hash) # OSM/OGM returns an empty array to represent no badges
+        pending = data['pending'] || {}
 
-      data = {} unless data.is_a?(Hash) # OSM/OGM returns an empty array to represent no badges
-      pending = data['pending'] || {}
+        by_member = {}
+        member_names = {}
+        badge_names = {}
+        badge_stock = {}
 
-      by_member = {}
-      member_names = {}
-      badge_names = {}
-      badge_stock = {}
-
-      pending.each do |badge_identifier, members|
-        members.each do |member|
-          badge_level_identifier = badge_identifier + "_#{member['completed']}"
-          member_id = Osm.to_i_or_nil(member['scout_id'])
-          badge_names[badge_level_identifier] = "#{member['label']} - #{member['name']}" + (!member['extra'].nil? ? " (#{member['extra']})" : '')
-          badge_stock[badge_level_identifier] = member['current_stock'].to_i
-          by_member[member_id] ||= []
-          by_member[member_id].push(badge_level_identifier)
-          member_names[member_id] = "#{member['firstname']} #{member['lastname']}"
+        pending.each do |badge_identifier, members|
+          members.each do |member|
+            badge_level_identifier = badge_identifier + "_#{member['completed']}"
+            member_id = Osm.to_i_or_nil(member['scout_id'])
+            badge_names[badge_level_identifier] = "#{member['label']} - #{member['name']}" + (!member['extra'].nil? ? " (#{member['extra']})" : '')
+            badge_stock[badge_level_identifier] = member['current_stock'].to_i
+            by_member[member_id] ||= []
+            by_member[member_id].push(badge_level_identifier)
+            member_names[member_id] = "#{member['firstname']} #{member['lastname']}"
+          end
         end
-      end
 
-      due_badges = Osm::Badges::DueBadges.new(
-        :by_member => by_member,
-        :member_names => member_names,
-        :badge_names => badge_names,
-        :badge_stock => badge_stock,
-      )
-      Osm::Model.cache_write(api, cache_key, due_badges)
-      return due_badges
+        Osm::Badges::DueBadges.new(
+          :by_member => by_member,
+          :member_names => member_names,
+          :badge_names => badge_names,
+          :badge_stock => badge_stock,
+        )
+      end # cache fetch
     end
 
 

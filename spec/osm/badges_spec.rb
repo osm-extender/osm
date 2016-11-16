@@ -86,9 +86,9 @@ describe "Badges" do
           }],
         },
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with(path: 'ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return(data)
 
-      db = Osm::Badges.get_due_badges(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
+      db = Osm::Badges.get_due_badges(api: $api, section: Osm::Section.new(:id => 1, :type => :cubs), term: 2)
       db.empty?.should == false
       db.badge_names.should == {'145_0_1'=>'Activity - Badge Name', '93_0_2'=>'Staged - Participation (Lvl 2)'}
       db.by_member.should == {1=>['93_0_2', '145_0_1'], 2=>['93_0_2']}
@@ -99,8 +99,8 @@ describe "Badges" do
     end
 
     it "handles an empty array representing no due badges" do
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2", :body => '[]', :content_type => 'application/json')
-      db = Osm::Badges.get_due_badges(@api, Osm::Section.new(:id => 1, :type => :cubs), 2)
+      $api.should_receive(:post_query).with(path: 'ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return([])
+      db = Osm::Badges.get_due_badges(api: $api, section: Osm::Section.new(:id => 1, :type => :cubs), term: 2)
       db.should_not be_nil
     end
 
@@ -113,42 +113,40 @@ describe "Badges" do
           { 'shortname' => 'badge_2', 'stock' => 2, 'desired' => 0, 'due' => 0, 'badge_id_level' => '200_2' },
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/badges/stock/?action=getBadgeStock&section=beavers&section_id=1&term_id=2", :body => badges_body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with(path: 'ext/badges/stock/?action=getBadgeStock&section=beavers&section_id=1&term_id=2').and_return(badges_body)
       Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 2) }
 
       section = Osm::Section.new(:id => 1, :type => :beavers)
-      Osm::Badges.get_stock(@api, section).should == {'100_1' => 1, '200_2' => 2}
+      Osm::Badges.get_stock(api: $api, section: section).should == {'100_1' => 1, '200_2' => 2}
     end
 
     describe "Update badge stock levels" do
 
-      it "Succeds" do
-        url = "https://www.onlinescoutmanager.co.uk/ext/badges.php?action=updateStock"
-        HTTParty.should_receive(:post).with(url, {:body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+      before :each do
+        @path = "ext/badges.php?action=updateStock"
+        @post_body = {
           'stock' => 10,
           'sectionid' => 2,
           'section' => :beavers,
           'type' => 'current',
           'level' => 1,
           'badge_id' => 3
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+        }
+        @section = Osm::Section.new(:id => 2, :type => :beavers)
+      end
 
-        section = Osm::Section.new(:id => 2, :type => :beavers)
-        Osm::Badges.update_stock(@api, section, 3, 10).should == true
+      it "Succeds" do
+        $api.should_receive(:post_query).with(path: @path, post_data: @post_body).and_return({'ok' => true})
+        Osm::Badges.update_stock(api: $api, section: @section, badge_id: 3, stock: 10).should == true
       end
 
       it "Fails" do
-        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
-        section = Osm::Section.new(:id => 1, :type => :beavers)
-        Osm::Badges.update_stock(@api, section, 3, 10).should == false
+        $api.should_receive(:post_query).with(path: @path, post_data: @post_body).and_return({'ok' => false})
+        Osm::Badges.update_stock(api: $api, section: @section, badge_id: 3, stock: 10).should == false
       end
 
-    end
+    end # describe - Update badge stock levels
 
-  end
+  end # describe - Using OSM API
 
 end
