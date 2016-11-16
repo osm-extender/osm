@@ -97,7 +97,7 @@ module Osm
     def self.get_badges_for_section(api:, section:, section_type: nil, no_read_cache: false)
       fail Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
       require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
-      section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
+      section = Osm::Section.get(api: api, section: section, no_read_cache: no_read_cache) unless section.is_a?(Osm::Section)
       section_type ||= section.type
       cache_key = ['badges', section_type, type]
 
@@ -176,7 +176,7 @@ module Osm
     def self.get_summary_for_section(api:, section:, term: nil, no_read_cache: false)
       fail Error, 'This method must NOT be called on one of the subclasses(CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' unless type.nil?
       require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
-      section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
+      section = Osm::Section.get(api: api, section: section, no_read_cache: no_read_cache) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section, no_read_cache: no_read_cache) : term).to_i
       cache_key = ['badge-summary', section.id, term_id]
 
@@ -236,7 +236,7 @@ module Osm
     def get_data_for_section(api:, section:, term: nil, no_read_cache: false)
       fail Error, 'This method must be called on one of the subclasses (CoreBadge, ChallengeBadge, StagedBadge or ActivityBadge)' if type.nil?
       Osm::Model.require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
-      section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
+      section = Osm::Section.get(api: api, section: section, no_read_cache: no_read_cache) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
       cache_key = ['badge_data', section.id, term_id, id, version]
 
@@ -688,7 +688,7 @@ module Osm
       def mark_awarded(api:, date: Date.today, level: due)
         fail ArgumentError, 'date is not a Date' unless date.is_a?(Date)
         fail ArgumentError, 'level can not be negative' if level < 0
-        section = Osm::Section.get(api, section_id)
+        section = Osm::Section.get(api: api, section: section_id)
         require_ability_to(api, :write, :badge, section)
 
         date_formatted = date.strftime(Osm::OSM_DATE_FORMAT)
@@ -730,7 +730,7 @@ module Osm
       # @return [Boolean] whether the data was updated in OSM
       def mark_due(api, level=earnt)
         fail ArgumentError, 'level can not be negative' if level < 0
-        section = Osm::Section.get(api, section_id)
+        section = Osm::Section.get(api: api, section: section_id)
         require_ability_to(api, :write, :badge, section)
 
         result = api.post_query(path: "ext/badges/records/?action=overrideCompletion", post_data: {
@@ -759,7 +759,7 @@ module Osm
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
         fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
-        section = Osm::Section.get(api, section_id)
+        section = Osm::Section.get(api: api, section: section_id)
         require_ability_to(api, :write, :badge, section)
 
         # Update requirements that changed

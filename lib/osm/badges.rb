@@ -9,7 +9,7 @@ module Osm
     # @return Hash
     def self.get_stock(api:, section:, no_read_cache: false)
       Osm::Model.require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
-      section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
+      section = Osm::Section.get(api: api, section: section, no_read_cache: no_read_cache) unless section.is_a?(Osm::Section)
       term_id = Osm::Term.get_current_term_for_section(api, section).id
       cache_key = ['badge_stock', section.id]
 
@@ -30,7 +30,7 @@ module Osm
     # @return [Boolan] whether the update was successfull or not
     def self.update_stock(api:, section:, badge_id:, badge_level: 1, stock:)
       Osm::Model.require_ability_to(api: api, to: :write, on: :badge, section: section)
-      section = Osm::Section.get(api, section) unless section.is_a?(Osm::Section)
+      section = Osm::Section.get(api: api, section: section) unless section.is_a?(Osm::Section)
 
       Osm::Model.cache_delete(api: api, key: ['badge_stock', section.id])
 
@@ -54,7 +54,7 @@ module Osm
     # @return [Osm::Badges::DueBadges]
     def self.get_due_badges(api:, section:, term: nil, no_read_cache: false)
       Osm::Model.require_ability_to(api: api, to: :read, on: :badge, section: section, no_read_cache: no_read_cache)
-      section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
+      section = Osm::Section.get(api: api, section: section, no_read_cache: no_read_cache) unless section.is_a?(Osm::Section)
       term_id = (term.nil? ? Osm::Term.get_current_term_for_section(api, section, options) : term).to_i
       cache_key = ['due_badges', section.id, term_id]
 

@@ -102,7 +102,7 @@ module Osm
       if cache_exist?(api: api, key: [*cache_key, version], no_read_cache: no_read_cache)
         activity = cache_read(api, [*cache_key, version])
         if (activity.shared == 2) || (activity.user_id == api.user_id) ||  # Shared or owned by this user
-        Osm::Section.get_all(api).map{ |s| s.group_id }.uniq.include?(activity.group_id)  # user belomngs to the group owning the activity
+        Osm::Section.get_all(api: api).map{ |s| s.group_id }.uniq.include?(activity.group_id)  # user belomngs to the group owning the activity
           return activity
         else
           return nil
