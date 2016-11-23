@@ -257,6 +257,15 @@ describe "Model" do
       @mt3.between?(@mt1, @mt3).should == true
     end
 
+    it "handles nil" do
+      # Sorts by id then -data
+      (ModelTester.new(id: 1) <=> ModelTester.new).should == 1
+      (ModelTester.new(id: 1, data: 'a') <=> ModelTester.new(id: 1)).should == -1
+      (ModelTester.new <=> ModelTester.new(id: 1)).should == -1
+      (ModelTester.new(id: 1) <=> ModelTester.new(id: 1, data: 'a')).should == 1
+      (ModelTester.new <=> ModelTester.new).should == 0
+     end
+
   end
 
   describe "Access control" do

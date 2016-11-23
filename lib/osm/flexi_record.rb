@@ -18,52 +18,47 @@ module Osm
 
 
     # Get structure for the flexi record
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @!macro options_get
     # @return [Array<Osm::FlexiRecordColumn>] representing the columns of the flexi record
-    def get_columns(api, options={})
-      require_ability_to(api, :read, :flexi, section_id, options)
+    def get_columns(api, no_read_cache: false)
+      require_ability_to(api: api, to: :read, on: :flexi, section: section_id, no_read_cache: no_read_cache)
       cache_key = ['flexi_record_columns', self.id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
-
-      data = api.perform_query("extras.php?action=getExtra&sectionid=#{self.section_id}&extraid=#{self.id}")
-
-      structure = []
-      data['structure'].each do |item|
-        item['rows'].each do |row|
-          structure.push Osm::FlexiRecord::Column.new(
-            :id => row['field'],
-            :name => row['name'],
-            :editable => row['editable'] || false,
-            :flexi_record => self,
-          )
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query(path: "extras.php?action=getExtra&sectionid=#{self.section_id}&extraid=#{self.id}")
+        structure = []
+        data['structure'].each do |item|
+          item['rows'].each do |row|
+            structure.push Osm::FlexiRecord::Column.new(
+              :id => row['field'],
+              :name => row['name'],
+              :editable => row['editable'] || false,
+              :flexi_record => self,
+            )
+          end
         end
-      end
-      cache_write(api, cache_key, structure)
-
-      return structure
+        structure
+      end # cache fetch
     end
 
     # Add a column in OSM
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [String] name The name for the created column
+    # @param api [Osm::Api] The api to use to make the request
+    # @param name [String] The name for the created column
     # @return [Boolean] whether the column was created in OSM
-    def add_column(api, name)
-      require_ability_to(api, :write, :flexi, section_id)
+    def add_column(api:, name:)
+      require_ability_to(api: api, to: :write, on: :flexi, section: section_id)
       fail ArgumentError, 'name is invalid' if name.blank?
 
-      data = api.perform_query("extras.php?action=addColumn&sectionid=#{section_id}&extraid=#{id}", {
+      data = api.post_query(path: "extras.php?action=addColumn&sectionid=#{section_id}&extraid=#{id}", post_data: {
         'columnName' => name,
       })
 
       if (data.is_a?(Hash) && data.has_key?('config'))
-        ActiveSupport::JSON.decode(data['config']).each do |field|
+        JSON.parse(data['config']).each do |field|
           if field['name'] == name
             # The cached fields for the flexi record will be out of date - remove them
-            cache_delete(api, ['flexi_record_columns', id])
+            cache_delete(api: api, key: ['flexi_record_columns', id])
             return true
           end
         end
@@ -72,53 +67,47 @@ module Osm
     end
 
     # Get data for flexi record
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param api [Osm::Api] The api to use to make the request
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<FlexiRecordData>]
-    def get_data(api, term=nil, options={})
-      require_ability_to(api, :read, :flexi, section_id, options)
-      section = Osm::Section.get(api, self.section_id)
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
+    def get_data(api:, term: nil, no_read_cache: false)
+      require_ability_to(api: api, to: :read, on: :flexi, section: section_id, no_read_cache: no_read_cache)
+      section = Osm::Section.get(api: api, id: self.section_id)
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
       cache_key = ['flexi_record_data', id, term_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query(path: "extras.php?action=getExtraRecords&sectionid=#{section.id}&extraid=#{id}&termid=#{term_id}&section=#{section.type}")
 
-      data = api.perform_query("extras.php?action=getExtraRecords&sectionid=#{section.id}&extraid=#{id}&termid=#{term_id}&section=#{section.type}")
-
-      to_return = []
-      data['items'].each do |item|
-        unless item['scoutid'].to_i < 0  # It's a total row
-          fields = item.select { |key, value|
-            ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
-          }
-          fields.merge!(
-            'dob' => item['dob'].empty? ? nil : item['dob'],
-            'total' => item['total'].to_s.empty? ? nil : item['total'],
-            'completed' => item['completed'].to_s.empty? ? nil : item['completed'],
-            'age' => item['age'].empty? ? nil : item['age'],
-          )
+        datas = []
+        data['items'].each do |item|
+          unless item['scoutid'].to_i < 0  # It's a total row
+            fields = item.select { |key, value|
+              ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
+            }
+            fields.merge!(
+              'dob' => item['dob'].empty? ? nil : item['dob'],
+              'total' => item['total'].to_s.empty? ? nil : item['total'],
+              'completed' => item['completed'].to_s.empty? ? nil : item['completed'],
+              'age' => item['age'].empty? ? nil : item['age'],
+            )
   
-          to_return.push Osm::FlexiRecord::Data.new(
-            :member_id => Osm::to_i_or_nil(item['scoutid']),
-            :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
-            :fields => fields,
-            :flexi_record => self,
-          )
-        end
-      end
-
-      cache_write(api, cache_key, to_return)
-      return to_return
+            datas.push Osm::FlexiRecord::Data.new(
+              :member_id => Osm::to_i_or_nil(item['scoutid']),
+              :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+              :fields => fields,
+              :flexi_record => self,
+            )
+          end # unless a total row
+        end # each item in data
+        datas
+      end # cache fetch
     end
 
-    # Compare FlexiRecord based on section_id then name
-    def <=>(another)
-      result = self.section_id.to_i <=> another.try(:section_id).to_i
-      result = self.name.to_s <=> another.try(:name).to_s if result == 0
-      return result
+
+    private def sort_by
+      ['section_id', 'name']
     end
 
 
@@ -149,26 +138,26 @@ module Osm
 
 
       # Update a column in OSM
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @return [Boolean] whether the column was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Column is invalid
       # @raise [Osm::Forbidden] If the COlumn is not editable
       def update(api)
         fail Osm::ObjectIsInvalid, 'column is invalid' unless valid?
-        require_ability_to(api, :write, :flexi, flexi_record.section_id)
+        require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
         fail Osm::Forbidden, 'this column is not editable' unless self.editable
 
-        data = api.perform_query("extras.php?action=renameColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", {
+        data = api.post_query(path: "extras.php?action=renameColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
           'columnId' => self.id,
           'columnName' => self.name,
         })
 
         if (data.is_a?(Hash) && data.has_key?('config'))
-          ActiveSupport::JSON.decode(data['config']).each do |f|
+          JSON.parse(data['config']).each do |f|
             if (f['id'] == self.id) && (f['name'] == self.name)
               reset_changed_attributes
               # The cached columns for the flexi record will be out of date - remove them
-              cache_delete(api, ['flexi_record_columns', flexi_record.id])
+              cache_delete(api: api, key: ['flexi_record_columns', flexi_record.id])
               return true
             end
           end
@@ -177,19 +166,19 @@ module Osm
       end
 
       # Delete a column in OSM
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @return [Boolean] whether the column was deleted from OSM
       # @raise [Osm::Forbidden] If this Column is not editable
       def delete(api)
-        require_ability_to(api, :write, :flexi, flexi_record.section_id)
+        require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
         fail Osm::Forbidden, 'this column is not editable' unless self.editable
 
-        data = api.perform_query("extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", {
+        data = api.post_query(path: "extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
           'columnId' => self.id,
         })
 
         if (data.is_a?(Hash) && data.has_key?('config'))
-          ActiveSupport::JSON.decode(data['config']).each do |f|
+          JSON.parse(data['config']).each do |f|
             if f['id'] == self.id
               # It wasn't deleted
               return false
@@ -198,7 +187,7 @@ module Osm
         end
 
         # The cached columns for the flexi record will be out of date - remove them
-        cache_delete(api, ['flexi_record_columns', flexi_record.id])
+        cache_delete(api: api, key: ['flexi_record_columns', flexi_record.id])
         return true
       end
 
@@ -230,8 +219,6 @@ module Osm
 
 
     class Data < Osm::Model
-      SORT_BY = [:flexi_record, :grouping_id, :member_id]
-
       # @!attribute [rw] flexi_record
       #   @return [Boolean] The FlexiRecord this column belongs to
       # @!attribute [rw] member_id
@@ -266,20 +253,20 @@ module Osm
 
 
       # Update data in OSM
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @return [Boolean] whether the data was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
         fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
-        require_ability_to(api, :write, :flexi, flexi_record.section_id)
+        require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
 
-        term_id = Osm::Term.get_current_term_for_section(api, flexi_record.section_id).id
+        term_id = Osm::Term.get_current_term_for_section(api: api, section: flexi_record.section_id).id
 
         updated = true
         editable_fields = flexi_record.get_columns(api).select{ |c| c.editable }.map{ |i| i.id }
         fields.changes.each do |field, (was,now)|
           if editable_fields.include?(field)
-            data = api.perform_query("extras.php?action=updateScout", {
+            data = api.post_query(path: "extras.php?action=updateScout", post_data: {
               'termid' => term_id,
               'scoutid' => self.member_id,
               'column' => field,
@@ -302,22 +289,18 @@ module Osm
         if updated
           fields.clean_up!
           # The cached datas for the flexi record will be out of date - remove them
-          cache_delete(api, ['flexi_record_data', flexi_record.id])
+          cache_delete(api: api, key: ['flexi_record_data', flexi_record.id])
         end
 
         return updated
       end
 
-      # Compare Data based on flexi_record, grouping_id then member_id
-      def <=>(another)
-        result = self.flexi_record <=> another.try(:flexi_record)
-        result = self.grouping_id <=> another.try(:grouping_id) if result == 0
-        result = self.member_id <=> another.try(:member_id) if result == 0
-        return result
-      end
-
       def inspect
         Osm.inspect_instance(self, options={:replace_with => {'flexi_record' => :id}})
+      end
+
+      private def sort_by
+        ['flexi_record', 'grouping_id', 'member_id']
       end
 
     end # Class FlexiRecord::Data
