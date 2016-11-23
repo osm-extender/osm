@@ -142,13 +142,6 @@ describe "API" do
       $api.post_query('path/to/load', post_data: {'attribute' => 'value'}).should == {}
     end
 
-    it "Doesn't parse when raw option is true" do
-      $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
-      $response.stub(:body){ '"1"' }
-      $http.should_receive(:request).with($request).and_return($response)
-      $api.post_query('path/to/load', raw: true).should == '"1"'
-    end
-
 
     describe "User-Agent header" do
 

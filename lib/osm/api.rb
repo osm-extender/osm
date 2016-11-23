@@ -125,7 +125,7 @@ module Osm
     # @param path [String] The path on the remote server to invoke
     # @param post_attributes [Hash] A hash containing the values to be sent to the server in the body of the request
     # @return [Hash, Array, String] the parsed JSON returned by OSM
-    def post_query(path, post_data: {}, raw: false)
+    def post_query(path, post_data: {})
       # Add required attributes for API authentication
       post_data = post_data.merge(
         'apiid' => api_id,
@@ -170,7 +170,6 @@ module Osm
         puts response.body
       end
 
-      return response.body if raw
       return nil if response.body.empty?
       case response.content_type
         when 'application/json', 'text/html'
