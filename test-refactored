@@ -3,8 +3,8 @@
 bundle exec rspec spec/osm/api_spec.rb spec/osm/model_spec.rb \
 spec/osm/section_spec.rb spec/osm/activity_spec.rb \
 spec/osm/api_access_spec.rb spec/osm/badge_spec.rb spec/osm/badges_spec.rb \
-spec/osm/term_spec.rb spec/osm/budget_spec.rb spec/osm/email_spec.rb
-# spec/osm/event_spec.rb
+spec/osm/term_spec.rb spec/osm/budget_spec.rb spec/osm/email_spec.rb \
+spec/osm/event_spec.rb
 # spec/osm/flexi_record_spec.rb
 # spec/osm/giftaid_spec.rb
 # spec/osm/grouping_spec.rb

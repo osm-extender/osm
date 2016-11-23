@@ -208,16 +208,15 @@ describe "Event" do
         'allowbooking' => '1',
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => @events_body.to_json, :content_type => 'application/json')
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.to_json, :content_type => 'application/json')
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2", :body => '{"files":["file1.txt", "file2.txt"]}', :content_type => 'application/json')
-
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
     end
 
     describe "Get events for section" do
       it "From OSM" do
-        events = Osm::Event.get_for_section(@api, 1)
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        events = Osm::Event.get_for_section(api: $api, section: 1)
         events.size.should == 1
         event = events[0]
         event.id.should == 2
@@ -260,31 +259,37 @@ describe "Event" do
       end
 
       it "Handles no files being an empty array not a hash" do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2", :body => '[]', :content_type => 'application/json')
-        expect{ @event = Osm::Event.get(@api, 1, 2) }.to_not raise_error
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        expect{ @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
         @event.files.should == []
       end
 
       it "Handles a blank config" do
         @event_body['config'] = ''
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.to_json,:content_type => 'application/json')
-        expect { @event = Osm::Event.get(@api, 1, 2) }.to_not raise_error
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        expect { @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
         @event.columns.should == []
       end
 
       it 'Handles cost of "-1" for TBC' do
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => @event_body.merge({'cost' => '-1'}).to_json, :content_type => 'application/json')
+        @event_body['cost'] = '-1'
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
 
-        events = Osm::Event.get_for_section(@api, 1)
+        events = Osm::Event.get_for_section(api: $api, section: 1)
         event = events[0]
         event.cost.should == 'TBC'
         event.valid?.should == true
       end
 
       it "From cache" do
-        events = Osm::Event.get_for_section(@api, 1)
-        HTTParty.should_not_receive(:post)
-        Osm::Event.get_for_section(@api, 1).should == events
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        events = Osm::Event.get_for_section(api: $api, section: 1)
+        $api.should_not_receive(:post_query)
+        Osm::Event.get_for_section(api: $api, section: 1).should == events
       end
 
       it "Honours archived option" do
@@ -320,15 +325,15 @@ describe "Event" do
           }]
         }
 
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => body.to_json, :content_type => 'application/json')
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=1", :body => {'config' => '[]', 'archived' => '0', 'eventid' => '1'}.to_json, :content_type => 'application/json')
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => {'config' => '[]', 'archived' => '1', 'eventid' => '2'}.to_json, :content_type => 'application/json')
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/uploads/events/?action=listAttachments&sectionid=1&eventid=1", :body => '[]', :content_type => 'application/json')
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2", :body => '[]', :content_type => 'application/json')
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').twice.and_return(body)
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=1').twice.and_return({'config' => '[]', 'archived' => '0', 'eventid' => '1'})
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').twice.and_return({'config' => '[]', 'archived' => '1', 'eventid' => '2'})
+        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=1').twice.and_return({"files" => []})
+        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').twice.and_return({"files" => []})
 
-        events = Osm::Event.get_for_section(@api, 1)
+        events = Osm::Event.get_for_section(api: $api, section: 1, include_archived: false)
         OsmTest::Cache.clear
-        all_events = Osm::Event.get_for_section(@api, 1, {:include_archived => true})
+        all_events = Osm::Event.get_for_section(api: $api, section: 1, include_archived: true)
 
         events.size.should == 1
         events[0].id == 1
@@ -338,28 +343,34 @@ describe "Event" do
 
     describe "Get events list for section" do
       it "From OSM" do
-        events = Osm::Event.get_list(@api, 1)
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        events = Osm::Event.get_list(api: $api, section: 1)
         events.map{ |e| e[:id]}.should == [2]
       end
 
       it "From cache" do
-        events = Osm::Event.get_list(@api, 1)
-        HTTParty.should_not_receive(:post)
-        Osm::Event.get_list(@api, 1).should == events
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        events = Osm::Event.get_list(api: $api, section: 1)
+        $api.should_not_receive(:post_query)
+        Osm::Event.get_list(api: $api, section: 1).should == events
       end
 
       it "From cached events" do
-        Osm::Event.get_for_section(@api, 1)
-        HTTParty.should_not_receive(:post)
-        events = Osm::Event.get_list(@api, 1)
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        Osm::Event.get_for_section(api: $api, section: 1)
+        $api.should_not_receive(:post_query)
+        events = Osm::Event.get_list(api: $api, section: 1)
         events.map{ |e| e[:id]}.should == [2]
       end
 
-    end
+    end # describe get events list for section
 
 
     it "Get event" do
-      event = Osm::Event.get(@api, 1, 2)
+      $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+      event = Osm::Event.get(api: $api, section: 1, id: 2)
       event.should_not be_nil
       event.id.should == 2
     end
@@ -367,13 +378,14 @@ describe "Event" do
     describe "Tells if there are spaces" do
 
       it "No limit" do
+        $api.should_not_receive(:post_query)
         event = Osm::Event.new(:attendance_limit => 0, :id => 1, :section_id => 2)
-        event.spaces?(@api).should == true
-        event.spaces(@api).should be_nil
+        event.spaces?($api).should == true
+        event.spaces($api).should be_nil
       end
 
       it "Under limit" do
-        FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3', :body => {
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
           'identifier' => 'scoutid',
           'eventid' => '1',
           'items' => [
@@ -387,16 +399,16 @@ describe "Event" do
               'f_1' => 'a',
             },
           ]
-        }.to_json, :content_type => 'application/json')
+        })
         Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
         event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
-        event.spaces?(@api).should == true
-        event.spaces(@api).should == 1
+        event.spaces?($api).should == true
+        event.spaces($api).should == 1
       end
 
       it "Over limit" do
-        FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3', :body => {
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
           'identifier' => 'scoutid',
           'eventid' => '1',
           'items' => [
@@ -426,16 +438,16 @@ describe "Event" do
               'f_1' => 'a',
             }
           ]
-        }.to_json, :content_type => 'application/json')
+        })
         Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
         event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
-        event.spaces?(@api).should == false
-        event.spaces(@api).should == -1
+        event.spaces?($api).should == false
+        event.spaces($api).should == -1
       end
 
       it "At limit" do
-        FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3', :body => {
+        $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
           'identifier' => 'scoutid',
           'eventid' => '1',
           'items' => [
@@ -457,12 +469,12 @@ describe "Event" do
               'f_1' => 'a',
             }
           ]
-        }.to_json, :content_type => 'application/json')
+        })
         Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
         event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
-        event.spaces?(@api).should == false
-        event.spaces(@api).should == 0
+        event.spaces?($api).should == false
+        event.spaces($api).should == 0
       end
 
     end
@@ -470,12 +482,7 @@ describe "Event" do
     describe "Create (succeded)" do
 
       it "Normal" do
-        url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
         post_data = {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
           'name' => 'Test event',
           'startdate' => '2000-01-02',
           'enddate' => '2001-02-03',
@@ -494,39 +501,35 @@ describe "Event" do
         }
 
         Osm::Event.stub(:get_for_section) { [] }
-        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+        $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
 
-        event = Osm::Event.create(@api, {
-          :section_id => 1,
-          :name => 'Test event',
-          :start => DateTime.new(2000, 1, 2, 3, 4, 5),
-          :finish => DateTime.new(2001, 2, 3, 4, 5, 6),
-          :cost => '1.23',
-          :location => 'Somewhere',
-          :notes => 'none',
-          :badges => [],
-          :columns => [],
-          :notepad => '',
-          :public_notepad => '',
-          :confirm_by_date => Date.new(2000, 1, 1),
-          :allow_changes => true,
-          :reminders => true,
-          :attendance_limit => 3,
-          :attendance_limit_includes_leaders => true,
-          :attendance_reminder => 1,
-          :allow_booking => true,
-        })
+        event = Osm::Event.create(
+          api: $api,
+          section_id: 1,
+          name: 'Test event',
+          start: DateTime.new(2000, 1, 2, 3, 4, 5),
+          finish: DateTime.new(2001, 2, 3, 4, 5, 6),
+          cost: '1.23',
+          location: 'Somewhere',
+          notes: 'none',
+          badges: [],
+          columns: [],
+          notepad: '',
+          public_notepad: '',
+          confirm_by_date: Date.new(2000, 1, 1),
+          allow_changes: true,
+          reminders: true,
+          attendance_limit: 3,
+          attendance_limit_includes_leaders: true,
+          attendance_reminder: 1,
+          allow_booking: true,
+        )
         event.should_not be_nil
         event.id.should == 2
       end
 
       it "TBC cost" do
-        url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
         post_data = {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
           'name' => 'Test event',
           'startdate' => '2000-01-02',
           'enddate' => '2001-02-03',
@@ -545,27 +548,28 @@ describe "Event" do
         }
 
         Osm::Event.stub(:get_for_section) { [] }
-        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+        $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
 
-        event = Osm::Event.create(@api, {
-          :section_id => 1,
-          :name => 'Test event',
-          :start => DateTime.new(2000, 1, 2, 3, 4, 5),
-          :finish => DateTime.new(2001, 2, 3, 4, 5, 6),
-          :cost => 'TBC',
-          :location => 'Somewhere',
-          :notes => 'none',
-          :badges => [],
-          :columns => [],
-          :notepad => '',
-          :public_notepad => '',
-          :confirm_by_date => Date.new(2000, 1, 1),
-          :allow_changes => true,
-          :reminders => true,
-          :attendance_limit => 3,
-          :attendance_limit_includes_leaders => true,
-          :allow_booking => true,
-        })
+        event = Osm::Event.create(
+          api: $api,
+          section_id: 1,
+          name: 'Test event',
+          start: DateTime.new(2000, 1, 2, 3, 4, 5),
+          finish: DateTime.new(2001, 2, 3, 4, 5, 6),
+          cost: 'TBC',
+          location: 'Somewhere',
+          notes: 'none',
+          badges: [],
+          columns: [],
+          notepad: '',
+          public_notepad: '',
+          confirm_by_date: Date.new(2000, 1, 1),
+          allow_changes: true,
+          reminders: true,
+          attendance_limit: 3,
+          attendance_limit_includes_leaders: true,
+          allow_booking: true,
+        )
         event.should_not be_nil
         event.id.should == 2
       end
@@ -573,12 +577,7 @@ describe "Event" do
       describe "With badges" do
 
         before :each do
-          url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
           post_data = {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
             'name' => 'Test event',
             'startdate' => '2000-01-02',
             'enddate' => '2001-02-03',
@@ -597,37 +596,33 @@ describe "Event" do
           }
 
           Osm::Event.stub(:get_for_section) { [] }
-          HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+          $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
 
           @attributes = {
-            :section_id => 1,
-            :name => 'Test event',
-            :start => DateTime.new(2000, 1, 2, 3, 4, 5),
-            :finish => DateTime.new(2001, 2, 3, 4, 5, 6),
-            :cost => '1.23',
-            :location => 'Somewhere',
-            :notes => 'none',
-            :badges => [],
-            :columns => [],
-            :notepad => '',
-            :public_notepad => '',
-            :confirm_by_date => Date.new(2000, 1, 1),
-            :allow_changes => true,
-            :reminders => true,
-            :attendance_limit => 3,
-            :attendance_limit_includes_leaders => true,
-            :attendance_reminder => 1,
-            :allow_booking => true,
+            section_id: 1,
+            name: 'Test event',
+            start: DateTime.new(2000, 1, 2, 3, 4, 5),
+            finish: DateTime.new(2001, 2, 3, 4, 5, 6),
+            cost: '1.23',
+            location: 'Somewhere',
+            notes: 'none',
+            badges: [],
+            columns: [],
+            notepad: '',
+            public_notepad: '',
+            confirm_by_date: Date.new(2000, 1, 1),
+            allow_changes: true,
+            reminders: true,
+            attendance_limit: 3,
+            attendance_limit_includes_leaders: true,
+            attendance_reminder: 1,
+            allow_booking: true,
           }
-          @badge_url = 'https://www.onlinescoutmanager.co.uk/ext/badges/records/index.php?action=linkBadgeToItem&sectionid=1'
+          @badge_path = 'ext/badges/records/index.php?action=linkBadgeToItem&sectionid=1'
         end
 
         it "'Normal badge'" do
           post_data = {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
             'type' => 'event',
             'id' => 2,
             'section' => :beavers,
@@ -638,7 +633,7 @@ describe "Event" do
             'column_data' => '',
             'new_column_name' => '',
           }
-          HTTParty.should_receive(:post).with(@badge_url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+          $api.should_receive(:post_query).with(path: @badge_path, post_data: post_data).and_return({"status" => true})
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
             badge_type: :activity,
@@ -650,17 +645,13 @@ describe "Event" do
             badge_version: 2,
             requirement_id: 1,
           )]
-          event = Osm::Event.create(@api, @attributes)
+          event = Osm::Event.create(api: $api, **@attributes)
           event.should_not be_nil
           event.id.should == 2
         end
 
         it "Add a hikes column" do
           post_data = {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
             'type' => 'event',
             'id' => 2,
             'section' => :beavers,
@@ -671,7 +662,7 @@ describe "Event" do
             'column_data' => '1',
             'new_column_name' => 'Label for added column',
           }
-          HTTParty.should_receive(:post).with(@badge_url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+          $api.should_receive(:post_query).with(path: @badge_path, post_data: post_data).and_return({"status" => true})
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
             badge_type: :staged,
@@ -682,17 +673,13 @@ describe "Event" do
             badge_id: 3,
             badge_version: 2,
           )]
-          event = Osm::Event.create(@api, @attributes)
+          event = Osm::Event.create(api: $api, **@attributes)
           event.should_not be_nil
           event.id.should == 2
         end
 
         it "Existing nights away column" do
           post_data = {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
             'type' => 'event',
             'id' => 2,
             'section' => :beavers,
@@ -703,7 +690,7 @@ describe "Event" do
             'column_data' => '2',
             'new_column_name' => '',
           }
-          HTTParty.should_receive(:post).with(@badge_url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+          $api.should_receive(:post_query).with(path: @badge_path, post_data: post_data).and_return({"status" => true})
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
             badge_type: :staged,
@@ -715,7 +702,7 @@ describe "Event" do
             badge_version: 2,
             requirement_id: 4,
           )]
-          event = Osm::Event.create(@api, @attributes)
+          event = Osm::Event.create(api: $api, **@attributes)
           event.should_not be_nil
           event.id.should == 2
         end
@@ -726,23 +713,24 @@ describe "Event" do
 
     it "Create (failed)" do
       Osm::Event.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      $api.should_receive(:post_query).and_return({})
 
-      event = Osm::Event.create(@api, {
-        :section_id => 1,
-        :name => 'Test event',
-        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
-        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
-        :cost => '1.23',
-        :location => 'Somewhere',
-        :notes => 'none',
-        :columns => [],
-        :notepad => '',
-        :public_notepad => '',
-        :confirm_by_date => nil,
-        :allow_changes => true,
-        :reminders => true,
-      })
+      event = Osm::Event.create(
+        api: $api,
+        section_id: 1,
+        name: 'Test event',
+        start: DateTime.new(2000, 01, 02, 03, 04, 05),
+        finish: DateTime.new(2001, 02, 03, 04, 05, 06),
+        cost: '1.23',
+        location: 'Somewhere',
+        notes: 'none',
+        columns: [],
+        notepad: '',
+        public_notepad: '',
+        confirm_by_date: nil,
+        allow_changes: true,
+        reminders: true,
+      )
       event.should be_nil
     end
 
@@ -750,12 +738,7 @@ describe "Event" do
     describe "Update (succeded)" do
 
       it "Normal" do
-        url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
         post_data = {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
           'name' => 'Test event',
           'startdate' => '2000-01-02',
           'enddate' => '2001-02-03',
@@ -774,42 +757,37 @@ describe "Event" do
           'allowbooking' => 'true',
         }
 
-        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "notepad"=>"notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/events.php?action=saveNotepad&sectionid=1', {:body=>{"eventid"=>2, "pnnotepad"=>"public notepad", "userid"=>"user_id", "secret"=>"secret", "apiid"=>"1", "token"=>"API TOKEN"}}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+        $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+        $api.should_receive(:post_query).with(path: 'events.php?action=saveNotepad&sectionid=1', post_data: {"eventid"=>2, "notepad"=>"notepad"}).and_return({})
+        $api.should_receive(:post_query).with(path: 'events.php?action=saveNotepad&sectionid=1', post_data: {"eventid"=>2, "pnnotepad"=>"public notepad"}).and_return({})
 
         event = Osm::Event.new(
-          :section_id => 1,
-          :name => '',
-          :start => DateTime.new(2000, 01, 02, 03, 04, 05),
-          :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
-          :cost => '1.23',
-          :location => 'Somewhere',
-          :notes => 'none',
-          :id => 2,
-          :confirm_by_date => nil,
-          :allow_changes => true,
-          :reminders => true,
-          :notepad => '',
-          :public_notepad => '',
-          :attendance_limit => 3,
-          :attendance_limit_includes_leaders => true,
-          :attendance_reminder => 2,
-          :allow_booking => true,
+          section_id: 1,
+          name: '',
+          start: DateTime.new(2000, 01, 02, 03, 04, 05),
+          finish: DateTime.new(2001, 02, 03, 04, 05, 06),
+          cost: '1.23',
+          location: 'Somewhere',
+          notes: 'none',
+          id: 2,
+          confirm_by_date: nil,
+          allow_changes: true,
+          reminders: true,
+          notepad: '',
+          public_notepad: '',
+          attendance_limit: 3,
+          attendance_limit_includes_leaders: true,
+          attendance_reminder: 2,
+          allow_booking: true,
         )
         event.name = 'Test event'
         event.notepad = 'notepad'
         event.public_notepad = 'public notepad'
-        event.update(@api).should == true
+        event.update($api).should == true
       end
 
       it "TBC cost" do
-        url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addEvent&sectionid=1'
         post_data = {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
           'name' => 'Test event',
           'startdate' => '2000-01-02',
           'enddate' => '2001-02-03',
@@ -828,29 +806,29 @@ describe "Event" do
           'allowbooking' => 'true',
         }
 
-        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"id":2}'}) }
+        $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
 
         event = Osm::Event.new(
-          :section_id => 1,
-          :name => 'Test event',
-          :start => DateTime.new(2000, 01, 02, 03, 04, 05),
-          :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
-          :cost => '1.23',
-          :location => 'Somewhere',
-          :notes => 'none',
-          :id => 2,
-          :confirm_by_date => nil,
-          :allow_changes => true,
-          :reminders => true,
-          :notepad => '',
-          :public_notepad => '',
-          :attendance_limit => 3,
-          :attendance_limit_includes_leaders => true,
-          :attendance_reminder => 1,
-          :allow_booking => true,
+          section_id: 1,
+          name: 'Test event',
+          start: DateTime.new(2000, 01, 02, 03, 04, 05),
+          finish: DateTime.new(2001, 02, 03, 04, 05, 06),
+          cost: '1.23',
+          location: 'Somewhere',
+          notes: 'none',
+          id: 2,
+          confirm_by_date: nil,
+          allow_changes: true,
+          reminders: true,
+          notepad: '',
+          public_notepad: '',
+          attendance_limit: 3,
+          attendance_limit_includes_leaders: true,
+          attendance_reminder: 1,
+          allow_booking: true,
         )
         event.cost = 'TBC'
-        event.update(@api).should == true
+        event.update($api).should == true
       end
 
       describe "Badge links" do
@@ -899,19 +877,14 @@ describe "Event" do
             badge_version: 2,
             requirement_id: 6,
           )
-          @event.should_receive(:add_badge_link).with(@api, badge) { true }
+          @event.should_receive(:add_badge_link).with(api: $api, link: badge) { true }
 
           @event.badges.push(badge)
-          @event.update(@api).should == true
+          @event.update($api).should == true
         end
 
         it "Removed" do
-          url = 'https://www.onlinescoutmanager.co.uk/ext/badges/records/index.php?action=deleteBadgeLink&sectionid=1'
           post_data = {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
             'section' => :scouts,
             'sectionid' => 1,
             'type' => 'event',
@@ -920,10 +893,10 @@ describe "Event" do
             'badge_version' => 2,
             'column_id' => 4,
           }
-          HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+          $api.should_receive(:post_query).with(path: 'ext/badges/records/index.php?action=deleteBadgeLink&sectionid=1', post_data: post_data).and_return({"status" => true})
 
           @event.badges = []
-          @event.update(@api).should == true
+          @event.update($api).should == true
         end
 
       end
@@ -931,7 +904,7 @@ describe "Event" do
     end
 
     it "Update (failed)" do
-      HTTParty.should_receive(:post).exactly(1).times { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      $api.should_receive(:post_query).exactly(1).times.and_return({})
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -944,20 +917,12 @@ describe "Event" do
         :id => 2
       )
       event.id = 22
-      event.update(@api).should == false
+      event.update($api).should == false
     end
 
 
     it "Delete (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=deleteEvent&sectionid=1&eventid=2'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-      }
-
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+      $api.should_receive(:post_query).with(path: 'events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({"ok" => true})
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -969,34 +934,34 @@ describe "Event" do
         :notes => 'none',
         :id => 2
       )
-      event.delete(@api).should == true
+      event.delete($api).should == true
     end
 
     it "Delete (failed)" do
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":false}'}) }
+      $api.should_receive(:post_query).with(path: 'events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({"ok" => false})
 
       event = Osm::Event.new(
-        :section_id => 1,
-        :name => 'Test event',
-        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
-        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
-        :cost => '1.23',
-        :location => 'Somewhere',
-        :notes => 'none',
-        :id => 2
+        section_id: 1,
+        name: 'Test event',
+        start: DateTime.new(2000, 01, 02, 03, 04, 05),
+        finish: DateTime.new(2001, 02, 03, 04, 05, 06),
+        cost: '1.23',
+        location: 'Somewhere',
+        notes: 'none',
+        id: 2
       )
-      event.delete(@api).should == false
+      event.delete($api).should == false
     end
 
 
     it "Get attendance" do
       attendance_body = {
-	'identifier' => 'scoutid',
-	'eventid' => '2',
-	'items' => [
+      	'identifier' => 'scoutid',
+	      'eventid' => '2',
+	      'items' => [
           {
-	    'scoutid' => '1',
-	    'attending' => 'Yes',
+	          'scoutid' => '1',
+	          'attending' => 'Yes',
             'firstname' => 'First',
             'lastname' => 'Last',
             'dob' => '1980-01-02',
@@ -1008,10 +973,10 @@ describe "Event" do
         ]
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3').and_return(attendance_body)
 
-      event = Osm::Event.new(:id => 2, :section_id => 1)
-      attendance = event.get_attendance(@api, 3)
+      event = Osm::Event.new(id: 2, section_id: 1)
+      attendance = event.get_attendance(api: $api, term: 3)
       attendance.is_a?(Array).should == true
       ea = attendance[0]
       ea.member_id.should == 1
@@ -1031,14 +996,14 @@ describe "Event" do
 
     it "Get attendance (no items)" do
       attendance_body = {
-	'identifier' => 'scoutid',
-	'eventid' => '2',
+      	'identifier' => 'scoutid',
+	      'eventid' => '2',
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3", :body => attendance_body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3').and_return(attendance_body)
 
-      event = Osm::Event.new(:id => 2, :section_id => 1)
-      attendance = event.get_attendance(@api, 3)
+      event = Osm::Event.new(id: 2, section_id: 1)
+      attendance = event.get_attendance(api: $api, term: 3)
       attendance.should == []
     end
 
@@ -1046,67 +1011,47 @@ describe "Event" do
       ea = Osm::Event::Attendance.new(:row => 0, :member_id => 4, :fields => {1 => 'old value', 2 => 'another old value'}, :event => Osm::Event.new(:id => 2, :section_id => 1))
 
       ea.fields[1] = 'value'
-      HTTParty.should_receive(:post).with(
-        "https://www.onlinescoutmanager.co.uk/events.php?action=updateScout",
-        {:body => {
+      $api.should_receive(:post_query).with(
+        path: 'events.php?action=updateScout',
+        post_data: {
           'scoutid' => 4,
           'column' => 'f_1',
           'value' => 'value',
           'sectionid' => 1,
           'row' => 0,
           'eventid' => 2,
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-        }}
-      ) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+        }).and_return({})
 
       ea.attending = :yes
-      HTTParty.should_receive(:post).with(
-        "https://www.onlinescoutmanager.co.uk/events.php?action=updateScout",
-        {:body => {
+      $api.should_receive(:post_query).with(
+        path: 'events.php?action=updateScout',
+        post_data: {
           'scoutid' => 4,
           'column' => 'attending',
           'value' => 'Yes',
           'sectionid' => 1,
           'row' => 0,
           'eventid' => 2,
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-        }}
-      ) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+        }).and_return({})
 
       ea.payment_control = :automatic
-      HTTParty.should_receive(:post).with(
-        "https://www.onlinescoutmanager.co.uk/events.php?action=updateScout",
-        {:body => {
+      $api.should_receive(:post_query).with(
+        path: 'events.php?action=updateScout',
+        post_data: {
           'scoutid' => 4,
           'column' => 'payment',
           'value' => 'Automatic',
           'sectionid' => 1,
           'row' => 0,
           'eventid' => 2,
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-        }}
-      ) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+        }).and_return({})
 
-      ea.update(@api).should == true
+      ea.update($api).should == true
     end
 
 
     it "Add column (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=addColumn&sectionid=1&eventid=2'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'columnName' => 'Test name',
         'parentLabel' => 'Test label',
         'parentRequire' => 1
@@ -1115,11 +1060,11 @@ describe "Event" do
         'eventid' => '2',
         'config' => '[{"id":"f_1","name":"Test name","pL":"Test label"}]'
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
+      $api.should_receive(:post_query).with(path: 'events.php?action=addColumn&sectionid=1&eventid=2', post_data: post_data).and_return(body)
 
-      event = Osm::Event.new(:id => 2, :section_id => 1)
+      event = Osm::Event.new(id: 2, section_id: 1)
       event.should_not be_nil
-      event.add_column(@api, 'Test name', 'Test label', true).should == true
+      event.add_column(api: $api, name: 'Test name', label: 'Test label', required: true).should == true
       column = event.columns[0]
       column.id.should == 'f_1'
       column.name.should == 'Test name'
@@ -1127,21 +1072,16 @@ describe "Event" do
     end
 
     it "Add column (failed)" do
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
+      $api.should_receive(:post_query).and_return({"config" => "[]"})
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.should_not be_nil
-      event.add_column(@api, 'Test name', 'Test label').should == false
+      event.add_column(api: $api, name: 'Test name', label: 'Test label').should == false
     end
 
 
     it "Update column (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=renameColumn&sectionid=1&eventid=2'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'columnId' => 'f_1',
         'columnName' => 'New name',
         'pL' => 'New label',
@@ -1151,7 +1091,7 @@ describe "Event" do
         'eventid' => '2',
         'config' => '[{"id":"f_1","name":"New name","pL":"New label","pR":"1"}]'
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body.to_json}) }
+      $api.should_receive(:post_query).with(path: 'events.php?action=renameColumn&sectionid=1&eventid=2', post_data: post_data).and_return(body)
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.columns = [Osm::Event::Column.new(:id => 'f_1', :event => event)]
@@ -1160,7 +1100,7 @@ describe "Event" do
       column.label = 'New label'
       column.parent_required = true
 
-      column.update(@api).should == true
+      column.update($api).should == true
 
       column.name.should == 'New name'
       column.label.should == 'New label'
@@ -1169,69 +1109,57 @@ describe "Event" do
     end
 
     it "Update column (failed)" do
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[]"}'}) }
+      $api.should_receive(:post_query).and_return({"config" => "[]"})
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
       event.columns = [column]
-      column.update(@api).should == false
+      column.update($api).should == false
     end
 
 
     it "Delete column (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=deleteColumn&sectionid=1&eventid=2'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'columnId' => 'f_1'
       }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"eventid":"2","config":"[]"}'}) }
+      $api.should_receive(:post_query).with(path: 'events.php?action=deleteColumn&sectionid=1&eventid=2', post_data: post_data).and_return({"eventid" => "2", "config" => "[]"})
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
       event.columns = [column]
 
-      column.delete(@api).should == true
+      column.delete($api).should == true
       event.columns.should == []
     end
 
     it "Delete column (failed)" do
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"config":"[{\"id\":\"f_1\"}]"}'}) }
+      $api.should_receive(:post_query).and_return({"config" => '[{"id":"f_1"}]'})
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
       event.columns = [column]
-      column.delete(@api).should == false
+      column.delete($api).should == false
     end
 
     it "Get audit trail" do
-      url = 'https://www.onlinescoutmanager.co.uk/events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-      }
       data = [
-	{"date" => "10/06/2013 19:17","updatedby" => "My.SCOUT","type" => "detail","desc" => "Set 'Test' to 'Test data'"},
-	{"date" => "10/06/2013 19:16","updatedby" => "My.SCOUT","type" => "attendance","desc" => "Attendance: Yes"},
-	{"date" => "10/06/2013 19:15","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Reserved"},
-	{"date" => "10/06/2013 19:14","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: No"},
-	{"date" => "10/06/2013 19:13","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Yes"},
-	{"date" => "10/06/2013 19:12","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Invited"},
-	{"date" => "10/06/2013 19:11","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Show in My.SCOUT"},
+      	{"date" => "10/06/2013 19:17","updatedby" => "My.SCOUT","type" => "detail","desc" => "Set 'Test' to 'Test data'"},
+      	{"date" => "10/06/2013 19:16","updatedby" => "My.SCOUT","type" => "attendance","desc" => "Attendance: Yes"},
+	      {"date" => "10/06/2013 19:15","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Reserved"},
+	      {"date" => "10/06/2013 19:14","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: No"},
+	      {"date" => "10/06/2013 19:13","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Yes"},
+	      {"date" => "10/06/2013 19:12","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Invited"},
+	      {"date" => "10/06/2013 19:11","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Show in My.SCOUT"},
       ]
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>data.to_json}) }
+      $api.should_receive(:post_query).with(path: 'events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3').and_return(data)
 
       ea = Osm::Event::Attendance.new(
         :event => Osm::Event.new(:id => 3, :section_id => 1),
         :member_id => 2,
       )
-      ea.get_audit_trail(@api).should == [
+      ea.get_audit_trail($api).should == [
         {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 17), :by => 'My.SCOUT', :type => :detail, :description => "Set 'Test' to 'Test data'", :label => 'Test', :value => 'Test data'},
         {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 16), :by => 'My.SCOUT', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
         {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 15), :by => 'A Leader', :type => :attendance, :description => "Attendance: Reserved", :attendance => :reserved},
@@ -1248,14 +1176,13 @@ describe "Event" do
   describe "API Strangeness" do
 
     it "Handles a non existant array when no events" do
-      data = '{"identifier":"eventid","label":"name"}'
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => data, :content_type => 'application/json')
-      events = Osm::Event.get_for_section(@api, 1).should == []
+      data = {"identifier" => "eventid", "label" => "name"}
+      $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(data)
+      events = Osm::Event.get_for_section(api: $api, section: 1).should == []
     end
 
     it "Handles missing config from OSM" do
-      events_body = '{"identifier":"eventid","label":"name","items":[{"eventid":"2","name":"An Event","startdate":"2001-02-03","enddate":"2001-02-05","starttime":"00:00:00","endtime":"12:00:00","cost":"0.00","location":"Somewhere","notes":"Notes","sectionid":1,"googlecalendar":null,"archived":"0","confdate":null,"allowchanges":"1","disablereminders":"1","attendancelimit":"3","limitincludesleaders":"1"}]}'
-
+      events_body = {"identifier" => "eventid", "label" => "name", "items" => [{"eventid"=>"2","name"=>"An Event","startdate"=>"2001-02-03","enddate"=>"2001-02-05","starttime"=>"00:00:00","endtime"=>"12:00:00","cost"=>"0.00","location"=>"Somewhere","notes"=>"Notes","sectionid"=>1,"googlecalendar"=>nil,"archived"=>"0","confdate"=>nil,"allowchanges"=>"1","disablereminders"=>"1","attendancelimit"=>"3","limitincludesleaders"=>"1"}]}
       event_body = {
         'eventid' => '2',
         'name' => 'An Event',
@@ -1280,12 +1207,11 @@ describe "Event" do
         'limitincludesleaders' => '1',
       }
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvents&sectionid=1&showArchived=true", :body => events_body, :content_type => 'application/json')
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/events.php?action=getEvent&sectionid=1&eventid=2", :body => event_body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(event_body)
 
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
 
-      event = Osm::Event.get(@api, 1, 2)
+      event = Osm::Event.get(api: $api, section: 1, id: 2)
       event.should_not be_nil
       event.id.should == 2
       event.columns.should == []

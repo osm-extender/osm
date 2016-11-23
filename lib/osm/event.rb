@@ -6,7 +6,7 @@ module Osm
 
     LIST_ATTRIBUTES = [:id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived, :public_notepad, :confirm_by_date, :allow_changes, :reminders, :attendance_limit, :attendance_limit_includes_leaders, :attendance_reminder, :allow_booking]
     EXTRA_ATTRIBUTES = [:notepad, :columns, :badges]
-    SORT_BY = [:start, :name, :id]
+    private_constant :LIST_ATTRIBUTES, :EXTRA_ATTRIBUTES
 
     # @!attribute [rw] id
     #   @return [Fixnum] the id for the event
@@ -94,30 +94,30 @@ module Osm
 
 
     # Get events for a section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the events for
+    # @param include_archived [Boolean] whether to include archived events
     # @!macro options_get
-    # @option options [Boolean] :include_archived (optional) if true then archived events will also be returned
     # @return [Array<Osm::Event>]
-    def self.get_for_section(api, section, options={})
-      require_ability_to(api, :read, :events, section, options)
+    def self.get_for_section(api:, section:, include_archived: false, no_read_cache: false)
+      require_ability_to(api: api, to: :read, on: :events, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
       cache_key = ['events', section_id]
       events = nil
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        ids = cache_read(api, cache_key)
-        events = get_from_ids(api, ids, 'event', section, options, :get_for_section)
+      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
+        ids = cache_read(api: api, key: cache_key)
+        events = get_from_ids(api: api, ids: ids, key_base: 'event', method: :get_for_section)
       end
 
       if events.nil?
-        data = api.perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
+        data = api.post_query(path: "events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
         events = Array.new
         ids = Array.new
         unless data['items'].nil?
           data['items'].map { |i| i['eventid'].to_i }.each do |event_id|
-            event_data = api.perform_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
-            files_data = api.perform_query("ext/uploads/events/?action=listAttachments&sectionid=#{section_id}&eventid=#{event_id}")
+            event_data = api.post_query(path: "events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
+            files_data = api.post_query(path: "ext/uploads/events/?action=listAttachments&sectionid=#{section_id}&eventid=#{event_id}")
             files = files_data.is_a?(Hash) ? files_data['files'] : files_data
             files = [] unless files.is_a?(Array)
 
@@ -125,52 +125,51 @@ module Osm
             event.files = files
             events.push event
             ids.push event.id
-            cache_write(api, ['event', event.id], event)
+            cache_write(api: api, key: ['event', event.id], data: event)
           end
         end
-        cache_write(api, cache_key, ids)
+        cache_write(api: api, key: cache_key, data: ids)
       end
 
-      return events if options[:include_archived]
+      return events if include_archived
       return events.reject do |event|
         event.archived?
       end
     end
 
     # Get event list for a section (not all details for each event)
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the events for
     # @!macro options_get
     # @return [Array<Hash>]
-    def self.get_list(api, section, options={})
-      require_ability_to(api, :read, :events, section, options)
+    def self.get_list(api:, section:, no_read_cache: false)
+      require_ability_to(api: api, to: :read, on: :events, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
       cache_key = ['events_list', section_id]
       events_cache_key = ['events', section_id]
       events = nil
 
-      unless options[:no_cache]
-
+      unless no_read_cache
         # Try getting from cache
-        if cache_exist?(api, cache_key)
-          return cache_read(api, cache_key)
+        if cache_exist?(api: api, key: cache_key)
+          return cache_read(api: api, key: cache_key)
         end
   
         # Try generating from cached events
-        if cache_exist?(api, events_cache_key)
-          ids = cache_read(api, events_cache_key)
-          events = get_from_ids(api, ids, 'event', section, options, :get_for_section).map do |e|
+        if cache_exist?(api: api, key: events_cache_key)
+          ids = cache_read(api: api, key: events_cache_key)
+          events = get_from_ids(api: api, ids: ids, key_base: 'event', method: :get_for_section).map do |e|
             e.attributes.symbolize_keys.select do |k,v|
               LIST_ATTRIBUTES.include?(k)
             end
           end
+          return events
         end
-
-      end
+      end # unless no_read_cache
 
       # Fetch from OSM
       if events.nil?
-        data = api.perform_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
+        data = api.post_query(path: "events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
         events = Array.new
         unless data['items'].nil?
           data['items'].map do |event_data|
@@ -179,42 +178,39 @@ module Osm
         end
       end
 
-      cache_write(api, cache_key, events)
+      cache_write(api: api, key: cache_key, data: events)
       return events
     end
 
     # Get an event
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the events for
-    # @param [Fixnum, #to_i] event_id The id of the event to get
+    # @param api [Osm::Api] api The to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the events for
+    # @param id [Fixnum, #to_i] The id of the event to get
     # @!macro options_get
     # @return [Osm::Event, nil] the event (or nil if it couldn't be found
-    def self.get(api, section, event_id, options={})
-      require_ability_to(api, :read, :events, section, options)
+    def self.get(api:, section:, id:, no_read_cache: false)
+      require_ability_to(api: api, to: :read, on: :events, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
-      event_id = event_id.to_i
+      event_id = id.to_i
       cache_key = ['event', event_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        self.new_event_from_data(api.post_query(path: "events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}"))
       end
-
-      event_data = api.perform_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
-      return self.new_event_from_data(event_data)
     end
 
 
     # Create an event in OSM
     # If something goes wrong adding badges to OSM then the event returned will have been read from OSM
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Osm::Event, nil] the created event, nil if failed
     # @raise [Osm::ObjectIsInvalid] If the Event is invalid
-    def self.create(api, parameters)
-      require_ability_to(api, :write, :events, parameters[:section_id])
+    def self.create(api:, **parameters)
+      require_ability_to(api: api, to: :write, on: :events, section: parameters[:section_id])
       event = new(parameters)
       fail Osm::ObjectIsInvalid, 'event is invalid' unless event.valid?
 
-      data = api.perform_query("events.php?action=addEvent&sectionid=#{event.section_id}", {
+      data = api.post_query(path: "events.php?action=addEvent&sectionid=#{event.section_id}", post_data: {
         'name' => event.name,
         'location' => event.location,
         'startdate' => event.start? ? event.start.strftime(Osm::OSM_DATE_FORMAT) : '',
@@ -236,20 +232,20 @@ module Osm
         event.id = data['id'].to_i
 
         # The cached events for the section will be out of date - remove them
-        cache_delete(api, ['events', event.section_id])
+        cache_delete(api: api, key: ['events', event.section_id])
 
         # Add badge links to OSM
         badges_created = true
         event.badges.each do |badge|
-          badges_created &= event.add_badge_link(api, badge)
+          badges_created &= event.add_badge_link(api: api, link: badge)
         end
 
         if badges_created
-          cache_write(api, ['event', event.id], event)
+          cache_write(api: api, key: ['event', event.id], data: event)
           return event
         else
           # Someting went wrong adding badges so return what OSM has
-          return get(api, event.section_id, event.id)
+          return get(api: api, section: event.section_id, id: event.id)
         end
       else
         return nil
@@ -257,10 +253,10 @@ module Osm
     end
 
     # Update event in OSM
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Boolean] whether the update succedded (will return true if no updates needed to be made)
     def update(api)
-      require_ability_to(api, :write, :events, section_id)
+      require_ability_to(api: api, to: :write, on: :events, section: section_id)
        updated = true
 
       # Update main attributes
@@ -272,7 +268,7 @@ module Osm
         end
       end
       if update_main_attributes
-        data = api.perform_query("events.php?action=addEvent&sectionid=#{section_id}", {
+        data = api.post_query(path: "events.php?action=addEvent&sectionid=#{section_id}", post_data: {
           'eventid' => id,
           'name' => name,
           'location' => location,
@@ -295,7 +291,7 @@ module Osm
 
       # Private notepad
       if changed_attributes.include?('notepad')
-        data = api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
+        data = api.post_query(path: "events.php?action=saveNotepad&sectionid=#{section_id}", post_data: {
           'eventid' => id,
           'notepad' => notepad,
         })
@@ -304,7 +300,7 @@ module Osm
 
       # MySCOUT notepad
       if changed_attributes.include?('public_notepad')
-        data = api.perform_query("events.php?action=saveNotepad&sectionid=#{section_id}", {
+        data = api.post_query(path: "events.php?action=saveNotepad&sectionid=#{section_id}", post_data: {
           'eventid' => id,
           'pnnotepad' => public_notepad,
         })
@@ -323,7 +319,7 @@ module Osm
           end
         end
         badges_to_delete.each do |badge|
-          data = api.perform_query("ext/badges/records/index.php?action=deleteBadgeLink&sectionid=#{section_id}", {
+          data = api.post_query(path: "ext/badges/records/index.php?action=deleteBadgeLink&sectionid=#{section_id}", post_data: {
             'section' => badge.badge_section,
             'sectionid' => section_id,
             'type' => 'event',
@@ -338,7 +334,7 @@ module Osm
         # Added badges
         badges.each do |badge|
           unless original_badges.include?(badge)
-            updated &= add_badge_link(api, badge)
+            updated &= add_badge_link(api: api, link: badge)
           end
         end
       end # includes badges
@@ -346,7 +342,7 @@ module Osm
       if updated
         reset_changed_attributes
         # The cached event will be out of date - remove it
-        cache_delete(api, ['event', id])
+        cache_delete(api: api, key: ['event', id])
         return true
       else
         return false
@@ -354,15 +350,15 @@ module Osm
     end
 
     # Delete event from OSM
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Boolean] whether the delete succedded
     def delete(api)
-      require_ability_to(api, :write, :events, section_id)
+      require_ability_to(api: api, to: :write, on: :events, section: section_id)
 
-      data = api.perform_query("events.php?action=deleteEvent&sectionid=#{section_id}&eventid=#{id}")
+      data = api.post_query(path: "events.php?action=deleteEvent&sectionid=#{section_id}&eventid=#{id}")
 
       if data.is_a?(Hash) && data['ok']
-        cache_delete(api, ['event', id])
+        cache_delete(api: api, key: ['event', id])
         return true
       end
       return false
@@ -370,66 +366,61 @@ module Osm
 
 
     # Get event attendance
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param api [Osm::Api] The api to use to make the request
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @return [Array<Osm::Event::Attendance>]
-    def get_attendance(api, term=nil, options={})
-      require_ability_to(api, :read, :events, section_id, options)
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section_id).id : term.to_i
+    def get_attendance(api:, term: nil, no_read_cache: false)
+      require_ability_to(api: api, to: :read, on: :events, section: section_id, no_read_cache: no_read_cache)
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section_id, no_read_cache: no_read_cache).id : term.to_i
       cache_key = ['event_attendance', id, term_id]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query(path: "events.php?action=getEventAttendance&eventid=#{id}&sectionid=#{section_id}&termid=#{term_id}")
+        data = data['items'] || []
 
-      data = api.perform_query("events.php?action=getEventAttendance&eventid=#{id}&sectionid=#{section_id}&termid=#{term_id}")
-      data = data['items'] || []
+        payment_values = {
+          'Manual' => :manual,
+          'Automatic' => :automatic,
+        }
+        attending_values = {
+          'Yes' => :yes,
+          'No' => :no,
+          'Invited' => :invited,
+          'Show in My.SCOUT' => :shown,
+          'Reserved' => :reserved,
+        }
 
-      payment_values = {
-        'Manual' => :manual,
-        'Automatic' => :automatic,
-      }
-      attending_values = {
-        'Yes' => :yes,
-        'No' => :no,
-        'Invited' => :invited,
-        'Show in My.SCOUT' => :shown,
-        'Reserved' => :reserved,
-      }
-
-      attendance = []
-      data.each_with_index do |item, index|
-        attendance.push Osm::Event::Attendance.new(
-          :event => self,
-          :member_id => Osm::to_i_or_nil(item['scoutid']),
-          :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
-          :first_name => item['firstname'],
-          :last_name => item['lastname'],
-          :date_of_birth => item['dob'].nil? ? nil : Osm::parse_date(item['dob'], :ignore_epoch => true),
-          :attending => attending_values[item['attending']],
-          :payment_control => payment_values[item['payment']],
-          :fields => item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
-                         .inject({}){ |h,(k,v)| h[k[2..-1].to_i] = v; h },
-          :payments => item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
-                           .inject({}){ |h,(k,v)| h[k[1..-1].to_i] = v; h },
-          :row => index,
-        )
-      end
-
-      cache_write(api, cache_key, attendance)
-      return attendance
+        data.each_with_index.map do |item, index|
+          Osm::Event::Attendance.new(
+            :event => self,
+            :member_id => Osm::to_i_or_nil(item['scoutid']),
+            :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+            :first_name => item['firstname'],
+            :last_name => item['lastname'],
+            :date_of_birth => item['dob'].nil? ? nil : Osm::parse_date(item['dob'], :ignore_epoch => true),
+            :attending => attending_values[item['attending']],
+            :payment_control => payment_values[item['payment']],
+            :fields => item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
+                           .inject({}){ |h,(k,v)| h[k[2..-1].to_i] = v; h },
+            :payments => item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
+                             .inject({}){ |h,(k,v)| h[k[1..-1].to_i] = v; h },
+            :row => index,
+          )
+        end # each data
+      end # cache fetch
     end
 
     # Add a badge link to the event in OSM
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Event::BadgeLink] link The badge link to add, if column_id is nil then a new column is created with requirement_label as the name
+    # @param api [Osm::Api] The api to use to make the request
+    # @param link [Osm::Event::BadgeLink] The badge link to add, if column_id is nil then a new column is created with requirement_label as the name
     # @return [Boolean] whether the update succedded
-    def add_badge_link(api, link)
+    def add_badge_link(api:, link:)
       fail Osm::ObjectIsInvalid, 'link is invalid' unless link.valid?
+      require_ability_to(api: api, to: :write, on: :events, section: section_id)
 
-      data = api.perform_query("ext/badges/records/index.php?action=linkBadgeToItem&sectionid=#{section_id}", {
+      data = api.post_query(path: "ext/badges/records/index.php?action=linkBadgeToItem&sectionid=#{section_id}", post_data: {
         'section' => link.badge_section,
         'sectionid' => section_id,
         'type' => 'event',
@@ -444,26 +435,26 @@ module Osm
     end
 
     # Add a column to the event in OSM
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [String] label The label for the field in OSM
-    # @param [String] name The label for the field in My.SCOUT (if this is blank then parents can't edit it)
-    # @param [Boolean] required Whether the parent is required to enter something
+    # @param api [Osm::Api] The api to use to make the request
+    # @param label [String] The label for the field in OSM
+    # @param name [String] The label for the field in My.SCOUT (if this is blank then parents can't edit it)
+    # @param required [Boolean] Whether the parent is required to enter something
     # @return [Boolean] whether the update succedded
     # @raise [Osm::ArgumentIsInvalid] If the name is blank
-    def add_column(api, name, label='', required=false)
-      require_ability_to(api, :write, :events, section_id)
+    def add_column(api:, name:, label: '', required: false)
+      require_ability_to(api: api, to: :write, on: :events, section: section_id)
       fail Osm::ArgumentIsInvalid, 'name is invalid' if name.blank?
 
-      data = api.perform_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", {
+      data = api.post_query(path: "events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", post_data: {
         'columnName' => name,
         'parentLabel' => label,
         'parentRequire' => (required ? 1 : 0),
       })
 
       # The cached events for the section will be out of date - remove them
-      cache_delete(api, ['events', section_id])
-      cache_delete(api, ['event', id])
-      cache_delete(api, ['event_attendance', id])
+      cache_delete(api: api, key: ['events', section_id])
+      cache_delete(api: api, key: ['event', id])
+      cache_delete(api: api, key: ['event_attendance', id])
 
       self.columns = self.class.new_event_from_data(data).columns
 
@@ -477,7 +468,7 @@ module Osm
     end
 
     # Whether there are spaces left for the event
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Boolean] whether there are spaces left for the event
     def spaces?(api)
       return true unless limited_attendance?
@@ -485,7 +476,7 @@ module Osm
     end
 
     # Get the number of spaces left for the event
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Fixnum, nil] the number of spaces left (nil if there is no attendance limit)
     def spaces(api)
       return nil unless limited_attendance?
@@ -508,7 +499,7 @@ module Osm
     private
     def attendees(api)
       attendees = 0
-      get_attendance(api).each do |a|
+      get_attendance(api: api).each do |a|
         attendees += 1 unless attendance_limit_includes_leaders && (a.grouping_id == -2)
       end
       return attendees
@@ -543,7 +534,7 @@ module Osm
       columns = []
       config_raw = event_data['config']
       config_raw = '[]' if config_raw.blank?
-      column_data = ActiveSupport::JSON.decode(config_raw)
+      column_data = JSON.parse(config_raw)
       column_data = [] unless column_data.is_a?(Array)
       column_data.each do |field|
         columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :parent_required => field['pR'].to_s.eql?('1'), :event => event)
@@ -570,11 +561,12 @@ module Osm
       return event
     end
 
+    def sort_by
+      ['start', 'name', 'id']
+    end
 
     class BadgeLink
       include ActiveAttr::Model
-
-      SORT_BY = [:badge_section, :badge_type, :badge_name, :requirement_label]
 
       # @!attribute [rw] badge_type
       #   @return [Symbol] the type of badge
@@ -613,12 +605,13 @@ module Osm
       #   Initialize a new Meeting::Activity
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
+      private def sort_by
+        ['badge_section', 'badge_type', 'badge_name', 'requirement_label']
+      end
     end # Class Event::BadgeLink
 
 
     class Column < Osm::Model
-      SORT_BY = [:event, :id]
-
       # @!attribute [rw] id
       #   @return [String] OSM id for the column
       # @!attribute [rw] name
@@ -646,26 +639,26 @@ module Osm
 
 
       # Update event column in OSM
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @return [Boolean] if the operation suceeded or not
       def update(api)
-        require_ability_to(api, :write, :events, event.section_id)
+        require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
 
-        data = api.perform_query("events.php?action=renameColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
+        data = api.post_query(path: "events.php?action=renameColumn&sectionid=#{event.section_id}&eventid=#{event.id}", post_data: {
           'columnId' => id,
           'columnName' => name,
           'pL' => label,
           'pR' => (parent_required ? 1 : 0),
         })
 
-        (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
+        (JSON.parse(data['config']) || []).each do |i|
           if i['id'] == id
             if i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label)) && (i['pR'].eql?('1') == parent_required)
               reset_changed_attributes
                 # The cached event will be out of date - remove it
-                cache_delete(api, ['event', event.id])
+                cache_delete(api: api, key: ['event', event.id])
                 # The cached event attedance will be out of date
-                cache_delete(api, ['event_attendance', event.id])
+                cache_delete(api: api, key: ['event_attendance', event.id])
               return true
             end
           end
@@ -674,16 +667,16 @@ module Osm
       end
 
       # Delete event column from OSM
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @return [Boolean] whether the delete succedded
       def delete(api)
-        require_ability_to(api, :write, :events, event.section_id)
+        require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
 
-        data = api.perform_query("events.php?action=deleteColumn&sectionid=#{event.section_id}&eventid=#{event.id}", {
+        data = api.post_query(path: "events.php?action=deleteColumn&sectionid=#{event.section_id}&eventid=#{event.id}", post_data: {
           'columnId' => id
         })
 
-        (ActiveSupport::JSON.decode(data['config']) || []).each do |i|
+        (JSON.parse(data['config']) || []).each do |i|
           return false if i['id'] == id
         end
 
@@ -693,7 +686,7 @@ module Osm
         end
         event.columns = new_columns
 
-        cache_write(api, ['event', event.id], event)
+        cache_write(api: api, key: ['event', event.id], data: event)
         return true
       end
 
@@ -701,12 +694,14 @@ module Osm
         Osm.inspect_instance(self, options={:replace_with => {'event' => :id}})
       end
 
+      private def sort_by
+        ['event', 'id']
+      end
+
     end # class Column
 
 
     class Attendance < Osm::Model
-      SORT_BY = [:event, :row]
-
       # @!attribute [rw] member_id
       #   @return [Fixnum] OSM id for the member
       # @!attribute [rw] grouping__id
@@ -770,10 +765,10 @@ module Osm
 
 
       # Update event attendance
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @return [Boolean] if the operation suceeded or not
       def update(api)
-        require_ability_to(api, :write, :events, event.section_id)
+        require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
 
         payment_values = {
           :manual => 'Manual',
@@ -789,7 +784,7 @@ module Osm
 
         updated = true
         fields.changes.each do |field, (was,now)|
-          data = api.perform_query("events.php?action=updateScout", {
+          data = api.post_query(path: "events.php?action=updateScout", post_data: {
             'scoutid' => member_id,
             'column' => "f_#{field}",
             'value' => now,
@@ -801,7 +796,7 @@ module Osm
         end
 
         if changed_attributes.include?('payment_control')
-          data = api.perform_query("events.php?action=updateScout", {
+          data = api.post_query(path: "events.php?action=updateScout", post_data: {
             'scoutid' => member_id,
             'column' => 'payment',
             'value' => payment_values[payment_control],
@@ -812,7 +807,7 @@ module Osm
           updated = false unless data.is_a?(Hash)
         end
         if changed_attributes.include?('attending')
-          data = api.perform_query("events.php?action=updateScout", {
+          data = api.post_query(path: "events.php?action=updateScout", post_data: {
             'scoutid' => member_id,
             'column' => 'attending',
             'value' => attending_values[attending],
@@ -827,59 +822,55 @@ module Osm
           reset_changed_attributes
           fields.clean_up!
           # The cached event attedance will be out of date
-          cache_delete(api, ['event_attendance', event.id])
+          cache_delete(api: api, key: ['event_attendance', event.id])
         end
         return updated
       end
 
       # Get audit trail
-      # @param [Osm::Api] api The api to use to make the request
+      # @param api [Osm::Api] The api to use to make the request
       # @!macro options_get
       # @return [Array<Hash>]
-      def get_audit_trail(api, options={})
-        require_ability_to(api, :read, :events, event.section_id, options)
+      def get_audit_trail(api, no_read_cache: false)
+        require_ability_to(api: api, to: :read, on: :events, section: event.section_id, no_read_cache: no_read_cache)
         cache_key = ['event\_attendance\_audit', event.id, member_id]
 
-        if !options[:no_cache] && cache_exist?(api, cache_key)
-          return cache_read(api, cache_key)
-        end
+        cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+          data = api.post_query(path: "events.php?action=getEventAudit&sectionid=#{event.section_id}&scoutid=#{member_id}&eventid=#{event.id}")
+          data ||= []
 
-        data = api.perform_query("events.php?action=getEventAudit&sectionid=#{event.section_id}&scoutid=#{member_id}&eventid=#{event.id}")
-        data ||= []
-
-        attending_values = {
-          'Yes' => :yes,
-          'No' => :no,
-          'Invited' => :invited,
-          'Show in My.SCOUT' => :shown,
-          'Reserved' => :reserved,
-        }
-
-        trail = []
-        data.each do |item|
-          this_item = {
-            :at => DateTime.strptime(item['date'], '%d/%m/%Y %H:%M'),
-            :by => item['updatedby'].strip,
-            :type => item['type'].to_sym,
-            :description => item['desc'],
-            :event_id => event.id,
-            :member_id => member_id,
-            :event_attendance => self,
+          attending_values = {
+            'Yes' => :yes,
+            'No' => :no,
+            'Invited' => :invited,
+            'Show in My.SCOUT' => :shown,
+            'Reserved' => :reserved,
           }
-          if this_item[:type].eql?(:detail)
-            results = this_item[:description].match(/\ASet '(?<label>.+)' to '(?<value>.+)'\Z/)
-            this_item[:label] = results[:label]
-            this_item[:value] = results[:value]
-          end
-          if this_item[:type].eql?(:attendance)
-            results = this_item[:description].match(/\AAttendance: (?<attending>.+)\Z/)
-            this_item[:attendance] = attending_values[results[:attending]]
-          end
-          trail.push this_item
-        end
 
-        cache_write(api, cache_key, trail)
-        return trail
+          trail = []
+          data.each do |item|
+            this_item = {
+              :at => DateTime.strptime(item['date'], '%d/%m/%Y %H:%M'),
+              :by => item['updatedby'].strip,
+              :type => item['type'].to_sym,
+              :description => item['desc'],
+              :event_id => event.id,
+              :member_id => member_id,
+              :event_attendance => self,
+            }
+            if this_item[:type].eql?(:detail)
+              results = this_item[:description].match(/\ASet '(?<label>.+)' to '(?<value>.+)'\Z/)
+              this_item[:label] = results[:label]
+              this_item[:value] = results[:value]
+            end
+            if this_item[:type].eql?(:attendance)
+              results = this_item[:description].match(/\AAttendance: (?<attending>.+)\Z/)
+              this_item[:attendance] = attending_values[results[:attending]]
+            end
+            trail.push this_item
+          end # each data
+          trail
+        end # cache fetch
       end
 
       # @! method automatic_payments?
@@ -916,6 +907,10 @@ module Osm
 
       def inspect
         Osm.inspect_instance(self, options={:replace_with => {'event' => :id}})
+      end
+
+      private def sort_by
+        ['event', 'row']
       end
 
     end # Class Attendance
