@@ -86,7 +86,7 @@ describe "Badges" do
           }],
         },
       }
-      $api.should_receive(:post_query).with(path: 'ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return(data)
+      $api.should_receive(:post_query).with('ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return(data)
 
       db = Osm::Badges.get_due_badges(api: $api, section: Osm::Section.new(:id => 1, :type => :cubs), term: 2)
       db.empty?.should == false
@@ -99,7 +99,7 @@ describe "Badges" do
     end
 
     it "handles an empty array representing no due badges" do
-      $api.should_receive(:post_query).with(path: 'ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return([])
+      $api.should_receive(:post_query).with('ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return([])
       db = Osm::Badges.get_due_badges(api: $api, section: Osm::Section.new(:id => 1, :type => :cubs), term: 2)
       db.should_not be_nil
     end
@@ -113,7 +113,7 @@ describe "Badges" do
           { 'shortname' => 'badge_2', 'stock' => 2, 'desired' => 0, 'due' => 0, 'badge_id_level' => '200_2' },
         ]
       }
-      $api.should_receive(:post_query).with(path: 'ext/badges/stock/?action=getBadgeStock&section=beavers&section_id=1&term_id=2').and_return(badges_body)
+      $api.should_receive(:post_query).with('ext/badges/stock/?action=getBadgeStock&section=beavers&section_id=1&term_id=2').and_return(badges_body)
       Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 2) }
 
       section = Osm::Section.new(:id => 1, :type => :beavers)
@@ -136,12 +136,12 @@ describe "Badges" do
       end
 
       it "Succeds" do
-        $api.should_receive(:post_query).with(path: @path, post_data: @post_body).and_return({'ok' => true})
+        $api.should_receive(:post_query).with(@path, post_data: @post_body).and_return({'ok' => true})
         Osm::Badges.update_stock(api: $api, section: @section, badge_id: 3, stock: 10).should == true
       end
 
       it "Fails" do
-        $api.should_receive(:post_query).with(path: @path, post_data: @post_body).and_return({'ok' => false})
+        $api.should_receive(:post_query).with(@path, post_data: @post_body).and_return({'ok' => false})
         Osm::Badges.update_stock(api: $api, section: @section, badge_id: 3, stock: 10).should == false
       end
 

@@ -14,7 +14,7 @@ module Osm
       cache_key = ['badge_stock', section.id]
 
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        data = api.post_query(path: "ext/badges/stock/?action=getBadgeStock&section=#{section.type}&section_id=#{section.id}&term_id=#{term_id}")
+        data = api.post_query("ext/badges/stock/?action=getBadgeStock&section=#{section.type}&section_id=#{section.id}&term_id=#{term_id}")
         data = (data['items'] || [])
         data.map!{ |i| [i['badge_id_level'], i['stock']] }
         data.to_h
@@ -34,7 +34,7 @@ module Osm
 
       Osm::Model.cache_delete(api: api, key: ['badge_stock', section.id])
 
-      data = api.post_query(path: "ext/badges.php?action=updateStock", post_data: {
+      data = api.post_query("ext/badges.php?action=updateStock", post_data: {
         'stock' => stock,
         'sectionid' => section.id,
         'section' => section.type,
@@ -59,7 +59,7 @@ module Osm
       cache_key = ['due_badges', section.id, term_id]
 
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        data = api.post_query(path: "ext/badges/due/?action=get&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
+        data = api.post_query("ext/badges/due/?action=get&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
 
         data = {} unless data.is_a?(Hash) # OSM/OGM returns an empty array to represent no badges
         pending = data['pending'] || {}

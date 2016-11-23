@@ -106,7 +106,7 @@ module Osm
         'email' => email_address.to_s,
         'password' => password.to_s,
       }
-      data = post_query(path: 'users.php?action=authorise', post_attributes: api_data)
+      data = post_query('users.php?action=authorise', post_attributes: api_data)
 
       return nil unless data.is_a?(Hash)
 
@@ -124,9 +124,8 @@ module Osm
     # Make a query to the OSM API
     # @param path [String] The path on the remote server to invoke
     # @param post_attributes [Hash] A hash containing the values to be sent to the server in the body of the request
-    # @param raw [Boolean] When true the data returned by OSM is not parsed
     # @return [Hash, Array, String] the parsed JSON returned by OSM
-    def post_query(path:, post_data: {}, raw: false)
+    def post_query(path, post_data: {}, raw: false)
       # Add required attributes for API authentication
       post_data = post_data.merge(
         'apiid' => api_id,
@@ -213,7 +212,7 @@ module Osm
       Osm::Model.cache_fetch(api: self, key: cache_key, no_read_cache: no_read_cache) do
         user_roles = {}
         begin
-          user_roles = post_query(path: 'api.php?action=getUserRoles')
+          user_roles = post_query('api.php?action=getUserRoles')
           if user_roles.eql?(false)
             # false equates to no roles
             fail Osm::NoActiveRoles, "You do not have any active roles in OSM."

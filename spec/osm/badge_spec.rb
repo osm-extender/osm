@@ -646,8 +646,8 @@ describe "Badge" do
       }
       urls.each do |type, path|
         it type.type.to_s.titleize do
-          $api.should_receive(:post_query).with(path: path).and_return(@badge_data)
-          $api.should_receive(:post_query).with(path: 'ext/badges/records/?action=_getModuleDetails').and_return(@module_data)
+          $api.should_receive(:post_query).with(path).and_return(@badge_data)
+          $api.should_receive(:post_query).with('ext/badges/records/?action=_getModuleDetails').and_return(@module_data)
           Osm::Term.stub(:get_current_term_for_section){ Osm::Term.new(:id => 2) }
 
           badges = type.get_badges_for_section(api: $api, section: Osm::Section.new(:id => 1, :type => :beavers))
@@ -711,7 +711,7 @@ describe "Badge" do
         }]
       }
 
-      $api.should_receive(:post_query).with(path: "ext/badges/records/?action=getBadgeRecords&term_id=2&section=beavers&badge_id=123&section_id=1&badge_version=0").and_return(data)
+      $api.should_receive(:post_query).with("ext/badges/records/?action=getBadgeRecords&term_id=2&section=beavers&badge_id=123&section_id=1&badge_version=0").and_return(data)
       datas = Osm::CoreBadge.new(id: 123, version: 0).get_data_for_section(api: $api, section: Osm::Section.new(:id => 1, :type => :beavers), term: 2)
       datas.size.should == 1
       data = datas[0]
@@ -761,7 +761,7 @@ describe "Badge" do
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
         @data.should_receive(:mark_awarded).with($api, date, 1) { true }
         @data.should_receive(:mark_due).with($api, 1) { true }
-        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body_data)
+        $api.should_receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body_data)
 
         @data.requirements[2345] = '2'
         @data.due = 1
@@ -775,7 +775,7 @@ describe "Badge" do
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
         @data.should_not_receive(:mark_awarded)
         @data.should_not_receive(:mark_due)
-        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body_data)
+        $api.should_receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body_data)
 
         @data.requirements[2345] = '2'
         @data.update($api).should == true
@@ -786,7 +786,7 @@ describe "Badge" do
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
         @data.should_not_receive(:mark_awarded)
         @data.should_not_receive(:mark_due)
-        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data.merge('value' => '')).and_return(@update_body_data.merge('2345' => ''))
+        $api.should_receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data.merge('value' => '')).and_return(@update_body_data.merge('2345' => ''))
 
         @data.requirements[2345] = ''
         @data.update($api).should == true
@@ -821,7 +821,7 @@ describe "Badge" do
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
         @data.should_receive(:mark_awarded).with($api, date, 1) { true }
         @data.should_receive(:mark_due).with($api, 1) { true }
-        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
+        $api.should_receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
 
         @data.requirements[2345] = '2'
         @data.due = 1
@@ -835,7 +835,7 @@ describe "Badge" do
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
         @data.should_receive(:mark_awarded).with($api, date, 1) { true }
         @data.should_receive(:mark_due).with($api, 1) { false }
-        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
+        $api.should_receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
 
         @data.requirements[2345] = '2'
         @data.due = 1
@@ -849,7 +849,7 @@ describe "Badge" do
         Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
         @data.should_receive(:mark_awarded).with($api, date, 1) { false }
         @data.should_receive(:mark_due).with($api, 1) { true }
-        $api.should_receive(:post_query).with(path: "ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
+        $api.should_receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
 
         @data.requirements[2345] = '2'
         @data.due = 1
@@ -879,7 +879,7 @@ describe "Badge" do
         )
       )
 
-      $api.should_receive(:post_query).with(path: 'ext/badges/records/?action=awardBadge', post_data: awarded_post_data).and_return(awarded_body_data)
+      $api.should_receive(:post_query).with('ext/badges/records/?action=awardBadge', post_data: awarded_post_data).and_return(awarded_body_data)
       Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
 
       data.mark_awarded(api: $api, date: Date.new(2000, 1, 2), level: 1).should == true
@@ -905,7 +905,7 @@ describe "Badge" do
         )
       )
 
-      $api.should_receive(:post_query).twice.with(path: 'ext/badges/records/?action=overrideCompletion', post_data: awarded_post_data).and_return(awarded_body_data)
+      $api.should_receive(:post_query).twice.with('ext/badges/records/?action=overrideCompletion', post_data: awarded_post_data).and_return(awarded_body_data)
       Osm::Section.stub(:get) { Osm::Section.new(:id => 2, :type => :beavers) }
       data.stub(:earnt){ 1 }
 
@@ -936,7 +936,7 @@ describe "Badge" do
       }
       data = data
 
-      $api.should_receive(:post_query).with(path: "ext/badges/records/summary/?action=get&mode=verbose&section=beavers&sectionid=1&termid=2").and_return(data)
+      $api.should_receive(:post_query).with("ext/badges/records/summary/?action=get&mode=verbose&section=beavers&sectionid=1&termid=2").and_return(data)
       summary = Osm::Badge.get_summary_for_section(api: $api, section: Osm::Section.new(:id => 1, :type => :beavers), term: 2)
       summary.size.should == 1
       summary[0].should == {

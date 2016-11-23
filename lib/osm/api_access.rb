@@ -33,7 +33,7 @@ module Osm
         return get_from_ids(api: api, ids: ids, key_base: cache_key, method: :get_all)
       end
 
-      data = api.post_query(path: "ext/settings/access/?action=getAPIAccess&sectionid=#{section_id}")
+      data = api.post_query("ext/settings/access/?action=getAPIAccess&sectionid=#{section_id}")
 
       permissions_map = {
         10  => [:read],

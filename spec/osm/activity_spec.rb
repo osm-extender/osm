@@ -93,7 +93,7 @@ describe "Activity" do
           }
         ]
       }
-      $api.should_receive(:post_query).with(path: 'programme.php?action=getActivity&id=1').and_return(body)
+      $api.should_receive(:post_query).with('programme.php?action=getActivity&id=1').and_return(body)
 
       activity = Osm::Activity.get(api: $api, id: 1)
   
@@ -141,7 +141,7 @@ describe "Activity" do
         'activityid' => 2,
         'notes' => 'Notes',
       }
-      $api.should_receive(:post_query).with(path: 'programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 0})
+      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 0})
   
       activity = Osm::Activity.new(:id => 2)
       activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes').should == true
@@ -154,7 +154,7 @@ describe "Activity" do
         'activityid' => 2,
         'notes' => 'Notes',
       }
-      $api.should_receive(:post_query).with(path: 'programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 1})
+      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 1})
 
       activity = Osm::Activity.new(:id => 2)
       activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes').should == false
@@ -179,7 +179,7 @@ describe "Activity" do
         'secretEdit' => true,
       }
   
-      $api.should_receive(:post_query).with(path: 'programme.php?action=update', post_data: post_data).and_return({'result' => true})
+      $api.should_receive(:post_query).with('programme.php?action=update', post_data: post_data).and_return({'result' => true})
   
       activity = Osm::Activity.new(
         :id => 2,

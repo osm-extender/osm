@@ -160,19 +160,19 @@ describe "Section" do
 
 
     it "Gets the section's notepad" do
-      $api.should_receive(:post_query).with(path: 'api.php?action=getNotepads').and_return({"1" => "Section 1", "2" => "Section 2"})
+      $api.should_receive(:post_query).with('api.php?action=getNotepads').and_return({"1" => "Section 1", "2" => "Section 2"})
       section = Osm::Section.new(:id => 1)
       section.get_notepad($api).should == 'Section 1'
     end
 
     it "Sets the section's notepad (success)" do
-      $api.should_receive(:post_query).with(path: 'users.php?action=updateNotepad&sectionid=1', post_data: {"value"=>"content"}).and_return({"ok" => true})
+      $api.should_receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: {"value"=>"content"}).and_return({"ok" => true})
       section = Osm::Section.new(:id => 1)
       section.set_notepad(api: $api, content: 'content').should == true
     end
 
     it "Sets the section's notepad (fail)" do
-      $api.should_receive(:post_query).with(path: 'users.php?action=updateNotepad&sectionid=1', post_data: {"value"=>"content"}).and_return({"ok" => false})
+      $api.should_receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: {"value"=>"content"}).and_return({"ok" => false})
       section = Osm::Section.new(:id => 1)
       section.set_notepad(api: $api, content: 'content').should == false
     end

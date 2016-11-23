@@ -251,7 +251,7 @@ module Osm
         return cache_read(api: api, key: cache_key)
       end
 
-      notepads = api.post_query(path: 'api.php?action=getNotepads')
+      notepads = api.post_query('api.php?action=getNotepads')
       return '' unless notepads.is_a?(Hash)
 
       notepad = ''
@@ -269,7 +269,7 @@ module Osm
     # @return [Boolean] whether the notepad was sucessfully updated
     def set_notepad(api:, content:)
       require_access_to_section(api, self)
-      data = api.post_query(path: "users.php?action=updateNotepad&sectionid=#{id}", post_data: {'value' => content})
+      data = api.post_query("users.php?action=updateNotepad&sectionid=#{id}", post_data: {'value' => content})
 
       if data.is_a?(Hash) && data['ok'] # Success
         cache_write(api: api, key: ['notepad', id], data: content)

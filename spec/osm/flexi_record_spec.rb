@@ -132,7 +132,7 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      $api.should_receive(:post_query).with(path: 'extras.php?action=getExtra&sectionid=1&extraid=2').and_return(data)
+      $api.should_receive(:post_query).with('extras.php?action=getExtra&sectionid=1&extraid=2').and_return(data)
 
       fields = @flexi_record.get_columns($api)
       fields.is_a?(Array).should == true
@@ -168,7 +168,7 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      $api.should_receive(:post_query).with(path: 'extras.php?action=addColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
+      $api.should_receive(:post_query).with('extras.php?action=addColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
 
       @flexi_record.add_column(api: $api, name: 'name').should == true
     end
@@ -224,7 +224,7 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      $api.should_receive(:post_query).with(path: 'extras.php?action=renameColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
+      $api.should_receive(:post_query).with('extras.php?action=renameColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
 
       col = Osm::FlexiRecord::Column.new(
         :flexi_record => @flexi_record,
@@ -299,7 +299,7 @@ describe "Flexi Record" do
           {"rows" => []}
         ]
       }
-      $api.should_receive(:post_query).with(path: 'extras.php?action=deleteColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
+      $api.should_receive(:post_query).with('extras.php?action=deleteColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
 
       col = Osm::FlexiRecord::Column.new(
         :flexi_record => @flexi_record,
@@ -370,7 +370,7 @@ describe "Flexi Record" do
           "patrol" => "Green"
         }]
       }
-      $api.should_receive(:post_query).with(path: 'extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
+      $api.should_receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
       Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
 
       records = @flexi_record.get_data(api: $api, term: 3)
@@ -408,7 +408,7 @@ describe "Flexi Record" do
           {'f_1' => 'value', 'scoutid' => '4'},
         ]
       }
-      $api.should_receive(:post_query).with(path: 'extras.php?action=updateScout', post_data: post_data).and_return(data)
+      $api.should_receive(:post_query).with('extras.php?action=updateScout', post_data: post_data).and_return(data)
       Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
 
       fr = Osm::FlexiRecord.new(:section_id => 1, :id => 2)
@@ -492,7 +492,7 @@ describe "Flexi Record" do
           "patrol" => "Green"
         }]
       }
-      $api.should_receive(:post_query).with(path: 'extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
+      $api.should_receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
       Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
 
       records = @flexi_record.get_data(api: $api, term: 3)
@@ -527,7 +527,7 @@ describe "Flexi Record" do
           "patrol" => "Green"
         }]
       }
-      $api.should_receive(:post_query).with(path: 'extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
+      $api.should_receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
       Osm::Section.stub(:get) { Osm::Section.new(:id => 1, :type => :cubs) }
 
       flexi_record = Osm::FlexiRecord.new(:section_id => 1, :id => 2, :name => 'A Flexi Record')

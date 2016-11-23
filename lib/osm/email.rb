@@ -29,7 +29,7 @@ module Osm
       fail ArgumentError, "You must pass at least one member" if members.none?
       members.map!{ |member| member.to_i }
 
-      data = api.post_query(path: "/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=#{section.to_i}&scouts=#{members.join(',')}", post_data: {
+      data = api.post_query("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=#{section.to_i}&scouts=#{members.join(',')}", post_data: {
         'contactGroups' => "[#{contacts.join(',')}]"
       })
       if data.is_a?(Hash)
@@ -49,7 +49,7 @@ module Osm
     # @param body [String] Email body The bosy of the email
     # @return [Boolean] Whether OSM reported the email as sent
     def self.send_email(api:, section:, to:, cc:'', from:, subject:, body:)
-      data = api.post_query(path: 'ext/members/email/?action=send', post_data: {
+      data = api.post_query('ext/members/email/?action=send', post_data: {
         'sectionid' => section.to_i,
         'emails' => to.to_json,
         'scouts' => to.keys.join(','),
@@ -110,7 +110,7 @@ module Osm
         Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
           reports = []
           recipients = {}
-          data = api.post_query(path: "ext/settings/emails/?action=getDeliveryReport&sectionid=#{section_id}")
+          data = api.post_query("ext/settings/emails/?action=getDeliveryReport&sectionid=#{section_id}")
           data.each do |item|
             case item['type']
 
@@ -255,7 +255,7 @@ module Osm
         def unblock_address(api)
           return true unless bounced?
 
-          data = api.post_query(path: 'ext/settings/emails/?action=unBlockEmail', post_data: {
+          data = api.post_query('ext/settings/emails/?action=unBlockEmail', post_data: {
             'section_id' => delivery_report.section_id,
             'email'      => address,
             'email_id'   => delivery_report.id
@@ -340,12 +340,12 @@ module Osm
           member = member.to_i unless member.nil?
           Osm::Model.require_access_to_section(api: api, section: section)
 
-          data = api.post_query(path: "ext/settings/emails/?action=getSentEmail&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
+          data = api.post_query("ext/settings/emails/?action=getSentEmail&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
           fail Osm::Error, "Unexpected format for response - got a #{data.class}" unless data.is_a?(Hash)
           fail Osm::Error, data['error'].to_s unless data['status']
           fail Osm::Error, "Unexpected format for meta data - got a #{data.class}" unless data['data'].is_a?(Hash)
 
-          body = api.post_query(path: "ext/settings/emails/?action=getSentEmailContent&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
+          body = api.post_query("ext/settings/emails/?action=getSentEmailContent&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
           fail Osm::Error, data if data.eql?('Email not found')
 
           email_data = data['data']

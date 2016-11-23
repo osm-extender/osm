@@ -43,7 +43,7 @@ describe "API Access" do
           }
         ]
       }
-      $api.should_receive(:post_query).with(path: 'ext/settings/access/?action=getAPIAccess&sectionid=1').and_return(body)
+      $api.should_receive(:post_query).with('ext/settings/access/?action=getAPIAccess&sectionid=1').and_return(body)
     end
 
     describe "Get All" do

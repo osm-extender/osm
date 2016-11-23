@@ -37,7 +37,7 @@ module Osm
         return get_from_ids(api: api, ids: ids, key_base: 'term', method: :get_all, no_read_cache: no_read_cache)
       end
 
-      data = api.post_query(path: 'api.php?action=getTerms')
+      data = api.post_query('api.php?action=getTerms')
 
       terms = Array.new
       ids = Array.new
@@ -122,7 +122,7 @@ module Osm
     def self.create(api:, section:, name:, start:, finish:)
       require_access_to_section(api: api, section: section)
 
-      data = api.post_query(path: "users.php?action=addTerm&sectionid=#{section.to_i}", post_data: {
+      data = api.post_query("users.php?action=addTerm&sectionid=#{section.to_i}", post_data: {
         'term' => name,
         'start' => start.strftime(Osm::OSM_DATE_FORMAT),
         'end' => finish.strftime(Osm::OSM_DATE_FORMAT),
@@ -147,7 +147,7 @@ module Osm
       fail Osm::ObjectIsInvalid, 'term is invalid' unless valid?
       require_access_to_section(api: api, section: section_id)
 
-      data = api.post_query(path: "users.php?action=addTerm&sectionid=#{section_id}", post_data: {
+      data = api.post_query("users.php?action=addTerm&sectionid=#{section_id}", post_data: {
         'term' => name,
         'start' => start.strftime(Osm::OSM_DATE_FORMAT),
         'end' => finish.strftime(Osm::OSM_DATE_FORMAT),

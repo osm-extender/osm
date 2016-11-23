@@ -213,9 +213,9 @@ describe "Event" do
 
     describe "Get events for section" do
       it "From OSM" do
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        $api.should_receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
         events = Osm::Event.get_for_section(api: $api, section: 1)
         events.size.should == 1
         event = events[0]
@@ -259,23 +259,23 @@ describe "Event" do
       end
 
       it "Handles no files being an empty array not a hash" do
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
         expect{ @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
         @event.files.should == []
       end
 
       it "Handles a blank config" do
         @event_body['config'] = ''
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
         expect { @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
         @event.columns.should == []
       end
 
       it 'Handles cost of "-1" for TBC' do
         @event_body['cost'] = '-1'
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        $api.should_receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
 
         events = Osm::Event.get_for_section(api: $api, section: 1)
         event = events[0]
@@ -284,9 +284,9 @@ describe "Event" do
       end
 
       it "From cache" do
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        $api.should_receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
         events = Osm::Event.get_for_section(api: $api, section: 1)
         $api.should_not_receive(:post_query)
         Osm::Event.get_for_section(api: $api, section: 1).should == events
@@ -325,11 +325,11 @@ describe "Event" do
           }]
         }
 
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').twice.and_return(body)
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=1').twice.and_return({'config' => '[]', 'archived' => '0', 'eventid' => '1'})
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').twice.and_return({'config' => '[]', 'archived' => '1', 'eventid' => '2'})
-        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=1').twice.and_return({"files" => []})
-        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').twice.and_return({"files" => []})
+        $api.should_receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').twice.and_return(body)
+        $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=1').twice.and_return({'config' => '[]', 'archived' => '0', 'eventid' => '1'})
+        $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').twice.and_return({'config' => '[]', 'archived' => '1', 'eventid' => '2'})
+        $api.should_receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=1').twice.and_return({"files" => []})
+        $api.should_receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').twice.and_return({"files" => []})
 
         events = Osm::Event.get_for_section(api: $api, section: 1, include_archived: false)
         OsmTest::Cache.clear
@@ -343,22 +343,22 @@ describe "Event" do
 
     describe "Get events list for section" do
       it "From OSM" do
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         events = Osm::Event.get_list(api: $api, section: 1)
         events.map{ |e| e[:id]}.should == [2]
       end
 
       it "From cache" do
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         events = Osm::Event.get_list(api: $api, section: 1)
         $api.should_not_receive(:post_query)
         Osm::Event.get_list(api: $api, section: 1).should == events
       end
 
       it "From cached events" do
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        $api.should_receive(:post_query).with(path: 'ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        $api.should_receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
+        $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+        $api.should_receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
         Osm::Event.get_for_section(api: $api, section: 1)
         $api.should_not_receive(:post_query)
         events = Osm::Event.get_list(api: $api, section: 1)
@@ -369,7 +369,7 @@ describe "Event" do
 
 
     it "Get event" do
-      $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+      $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
       event = Osm::Event.get(api: $api, section: 1, id: 2)
       event.should_not be_nil
       event.id.should == 2
@@ -385,7 +385,7 @@ describe "Event" do
       end
 
       it "Under limit" do
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
+        $api.should_receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
           'identifier' => 'scoutid',
           'eventid' => '1',
           'items' => [
@@ -408,7 +408,7 @@ describe "Event" do
       end
 
       it "Over limit" do
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
+        $api.should_receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
           'identifier' => 'scoutid',
           'eventid' => '1',
           'items' => [
@@ -447,7 +447,7 @@ describe "Event" do
       end
 
       it "At limit" do
-        $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
+        $api.should_receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
           'identifier' => 'scoutid',
           'eventid' => '1',
           'items' => [
@@ -501,7 +501,7 @@ describe "Event" do
         }
 
         Osm::Event.stub(:get_for_section) { [] }
-        $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+        $api.should_receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
 
         event = Osm::Event.create(
           api: $api,
@@ -548,7 +548,7 @@ describe "Event" do
         }
 
         Osm::Event.stub(:get_for_section) { [] }
-        $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+        $api.should_receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
 
         event = Osm::Event.create(
           api: $api,
@@ -596,7 +596,7 @@ describe "Event" do
           }
 
           Osm::Event.stub(:get_for_section) { [] }
-          $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+          $api.should_receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
 
           @attributes = {
             section_id: 1,
@@ -633,7 +633,7 @@ describe "Event" do
             'column_data' => '',
             'new_column_name' => '',
           }
-          $api.should_receive(:post_query).with(path: @badge_path, post_data: post_data).and_return({"status" => true})
+          $api.should_receive(:post_query).with(@badge_path, post_data: post_data).and_return({"status" => true})
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
             badge_type: :activity,
@@ -662,7 +662,7 @@ describe "Event" do
             'column_data' => '1',
             'new_column_name' => 'Label for added column',
           }
-          $api.should_receive(:post_query).with(path: @badge_path, post_data: post_data).and_return({"status" => true})
+          $api.should_receive(:post_query).with(@badge_path, post_data: post_data).and_return({"status" => true})
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
             badge_type: :staged,
@@ -690,7 +690,7 @@ describe "Event" do
             'column_data' => '2',
             'new_column_name' => '',
           }
-          $api.should_receive(:post_query).with(path: @badge_path, post_data: post_data).and_return({"status" => true})
+          $api.should_receive(:post_query).with(@badge_path, post_data: post_data).and_return({"status" => true})
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
             badge_type: :staged,
@@ -757,9 +757,9 @@ describe "Event" do
           'allowbooking' => 'true',
         }
 
-        $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
-        $api.should_receive(:post_query).with(path: 'events.php?action=saveNotepad&sectionid=1', post_data: {"eventid"=>2, "notepad"=>"notepad"}).and_return({})
-        $api.should_receive(:post_query).with(path: 'events.php?action=saveNotepad&sectionid=1', post_data: {"eventid"=>2, "pnnotepad"=>"public notepad"}).and_return({})
+        $api.should_receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+        $api.should_receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: {"eventid"=>2, "notepad"=>"notepad"}).and_return({})
+        $api.should_receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: {"eventid"=>2, "pnnotepad"=>"public notepad"}).and_return({})
 
         event = Osm::Event.new(
           section_id: 1,
@@ -806,7 +806,7 @@ describe "Event" do
           'allowbooking' => 'true',
         }
 
-        $api.should_receive(:post_query).with(path: 'events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+        $api.should_receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
 
         event = Osm::Event.new(
           section_id: 1,
@@ -893,7 +893,7 @@ describe "Event" do
             'badge_version' => 2,
             'column_id' => 4,
           }
-          $api.should_receive(:post_query).with(path: 'ext/badges/records/index.php?action=deleteBadgeLink&sectionid=1', post_data: post_data).and_return({"status" => true})
+          $api.should_receive(:post_query).with('ext/badges/records/index.php?action=deleteBadgeLink&sectionid=1', post_data: post_data).and_return({"status" => true})
 
           @event.badges = []
           @event.update($api).should == true
@@ -922,7 +922,7 @@ describe "Event" do
 
 
     it "Delete (succeded)" do
-      $api.should_receive(:post_query).with(path: 'events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({"ok" => true})
+      $api.should_receive(:post_query).with('events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({"ok" => true})
 
       event = Osm::Event.new(
         :section_id => 1,
@@ -938,7 +938,7 @@ describe "Event" do
     end
 
     it "Delete (failed)" do
-      $api.should_receive(:post_query).with(path: 'events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({"ok" => false})
+      $api.should_receive(:post_query).with('events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({"ok" => false})
 
       event = Osm::Event.new(
         section_id: 1,
@@ -973,7 +973,7 @@ describe "Event" do
         ]
       }
 
-      $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3').and_return(attendance_body)
+      $api.should_receive(:post_query).with('events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3').and_return(attendance_body)
 
       event = Osm::Event.new(id: 2, section_id: 1)
       attendance = event.get_attendance(api: $api, term: 3)
@@ -1000,7 +1000,7 @@ describe "Event" do
 	      'eventid' => '2',
       }
 
-      $api.should_receive(:post_query).with(path: 'events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3').and_return(attendance_body)
+      $api.should_receive(:post_query).with('events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3').and_return(attendance_body)
 
       event = Osm::Event.new(id: 2, section_id: 1)
       attendance = event.get_attendance(api: $api, term: 3)
@@ -1012,7 +1012,7 @@ describe "Event" do
 
       ea.fields[1] = 'value'
       $api.should_receive(:post_query).with(
-        path: 'events.php?action=updateScout',
+        'events.php?action=updateScout',
         post_data: {
           'scoutid' => 4,
           'column' => 'f_1',
@@ -1024,7 +1024,7 @@ describe "Event" do
 
       ea.attending = :yes
       $api.should_receive(:post_query).with(
-        path: 'events.php?action=updateScout',
+        'events.php?action=updateScout',
         post_data: {
           'scoutid' => 4,
           'column' => 'attending',
@@ -1036,7 +1036,7 @@ describe "Event" do
 
       ea.payment_control = :automatic
       $api.should_receive(:post_query).with(
-        path: 'events.php?action=updateScout',
+        'events.php?action=updateScout',
         post_data: {
           'scoutid' => 4,
           'column' => 'payment',
@@ -1060,7 +1060,7 @@ describe "Event" do
         'eventid' => '2',
         'config' => '[{"id":"f_1","name":"Test name","pL":"Test label"}]'
       }
-      $api.should_receive(:post_query).with(path: 'events.php?action=addColumn&sectionid=1&eventid=2', post_data: post_data).and_return(body)
+      $api.should_receive(:post_query).with('events.php?action=addColumn&sectionid=1&eventid=2', post_data: post_data).and_return(body)
 
       event = Osm::Event.new(id: 2, section_id: 1)
       event.should_not be_nil
@@ -1091,7 +1091,7 @@ describe "Event" do
         'eventid' => '2',
         'config' => '[{"id":"f_1","name":"New name","pL":"New label","pR":"1"}]'
       }
-      $api.should_receive(:post_query).with(path: 'events.php?action=renameColumn&sectionid=1&eventid=2', post_data: post_data).and_return(body)
+      $api.should_receive(:post_query).with('events.php?action=renameColumn&sectionid=1&eventid=2', post_data: post_data).and_return(body)
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       event.columns = [Osm::Event::Column.new(:id => 'f_1', :event => event)]
@@ -1123,7 +1123,7 @@ describe "Event" do
         'columnId' => 'f_1'
       }
 
-      $api.should_receive(:post_query).with(path: 'events.php?action=deleteColumn&sectionid=1&eventid=2', post_data: post_data).and_return({"eventid" => "2", "config" => "[]"})
+      $api.should_receive(:post_query).with('events.php?action=deleteColumn&sectionid=1&eventid=2', post_data: post_data).and_return({"eventid" => "2", "config" => "[]"})
 
       event = Osm::Event.new(:id => 2, :section_id => 1)
       column = Osm::Event::Column.new(:id => 'f_1', :event => event)
@@ -1153,7 +1153,7 @@ describe "Event" do
 	      {"date" => "10/06/2013 19:11","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Show in My.SCOUT"},
       ]
 
-      $api.should_receive(:post_query).with(path: 'events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3').and_return(data)
+      $api.should_receive(:post_query).with('events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3').and_return(data)
 
       ea = Osm::Event::Attendance.new(
         :event => Osm::Event.new(:id => 3, :section_id => 1),
@@ -1177,7 +1177,7 @@ describe "Event" do
 
     it "Handles a non existant array when no events" do
       data = {"identifier" => "eventid", "label" => "name"}
-      $api.should_receive(:post_query).with(path: 'events.php?action=getEvents&sectionid=1&showArchived=true').and_return(data)
+      $api.should_receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(data)
       events = Osm::Event.get_for_section(api: $api, section: 1).should == []
     end
 
@@ -1207,7 +1207,7 @@ describe "Event" do
         'limitincludesleaders' => '1',
       }
 
-      $api.should_receive(:post_query).with(path: 'events.php?action=getEvent&sectionid=1&eventid=2').and_return(event_body)
+      $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(event_body)
 
       Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
 

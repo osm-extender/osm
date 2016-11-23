@@ -41,7 +41,7 @@ describe "Budget" do
           }
         ]
       }
-      $api.should_receive(:post_query).with(path: 'finances.php?action=getCategories&sectionid=3').and_return(data)
+      $api.should_receive(:post_query).with('finances.php?action=getCategories&sectionid=3').and_return(data)
 
       budgets = Osm::Budget.get_for_section(api: $api, section: 3)
       budgets.should == [Osm::Budget.new(:id => 2, :section_id => 3, :name => 'Name')]
@@ -54,8 +54,8 @@ describe "Budget" do
       )
 
       Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(:id => 3, :section_id => 2, :name => 'Existing budget'), Osm::Budget.new(:id => 4, :section_id => 2, :name => '** Unnamed **')])
-      $api.should_receive(:post_query).with(path: 'finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
-      $api.should_receive(:post_query).with(path: 'finances.php?action=updateCategory&sectionid=2', post_data: {
+      $api.should_receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
+      $api.should_receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 4,
         'column' => 'name',
         'value' => 'Budget Name',
@@ -73,7 +73,7 @@ describe "Budget" do
         :name => 'Budget Name',
       )
     
-      $api.should_receive(:post_query).with(path: 'finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
+      $api.should_receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
       Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(:id => 3, :section_id => 2, :name => 'Existing budget')])
 
       budget.create($api).should == false
@@ -86,8 +86,8 @@ describe "Budget" do
       )
     
       Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(:id => 3, :section_id => 2, :name => '** Unnamed **')])
-      $api.should_receive(:post_query).with(path: 'finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
-      $api.should_receive(:post_query).with(path: 'finances.php?action=updateCategory&sectionid=2', post_data: {
+      $api.should_receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
+      $api.should_receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 3,
         'column' => 'name',
         'value' => 'Budget Name',
@@ -105,7 +105,7 @@ describe "Budget" do
         :name => 'Budget Name',
       )
 
-      $api.should_receive(:post_query).with(path: 'finances.php?action=updateCategory&sectionid=2', post_data: {
+      $api.should_receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 1,
         'column' => 'name',
         'value' => 'Budget Name',
@@ -123,7 +123,7 @@ describe "Budget" do
         :name => 'Budget Name',
       )
 
-      $api.should_receive(:post_query).with(path: 'finances.php?action=updateCategory&sectionid=2', post_data: {
+      $api.should_receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 1,
         'column' => 'name',
         'value' => 'Budget Name',
@@ -141,7 +141,7 @@ describe "Budget" do
         :name => 'Budget Name',
       )
 
-      $api.should_receive(:post_query).with(path: 'finances.php?action=deleteCategory&sectionid=2', post_data: {'categoryid' => 1}).and_return({'ok'=>true})
+      $api.should_receive(:post_query).with('finances.php?action=deleteCategory&sectionid=2', post_data: {'categoryid' => 1}).and_return({'ok'=>true})
 
       budget.delete($api).should == true
     end
@@ -153,7 +153,7 @@ describe "Budget" do
         :name => 'Budget Name',
       )
 
-      $api.should_receive(:post_query).with(path: 'finances.php?action=deleteCategory&sectionid=2', post_data: {'categoryid' => 1}).and_return({'ok'=>false})
+      $api.should_receive(:post_query).with('finances.php?action=deleteCategory&sectionid=2', post_data: {'categoryid' => 1}).and_return({'ok'=>false})
     
       budget.delete($api).should == false
     end

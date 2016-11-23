@@ -112,7 +112,7 @@ module Osm
           'default-locked' => :default_locked
         }
 
-        data = api.post_query(path: "ext/badges/records/?action=getBadgeStructureByType&section=#{section_type}&type_id=#{type_id}&term_id=#{term_id}&section_id=#{section.id}")
+        data = api.post_query("ext/badges/records/?action=getBadgeStructureByType&section=#{section_type}&type_id=#{type_id}&term_id=#{term_id}&section_id=#{section.id}")
         badge_order = data["badgeOrder"].to_s.split(',')
         structures = data["structure"] || {}
         details = data["details"] || {}
@@ -182,7 +182,7 @@ module Osm
 
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         summary = []
-        data = api.post_query(path: "ext/badges/records/summary/?action=get&mode=verbose&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
+        data = api.post_query("ext/badges/records/summary/?action=get&mode=verbose&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
         data['items'].each do |item|
           new_item = {
             :first_name => item['firstname'],
@@ -241,7 +241,7 @@ module Osm
       cache_key = ['badge_data', section.id, term_id, id, version]
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        data = api.post_query(path: "ext/badges/records/?action=getBadgeRecords&term_id=#{term_id}&section=#{section.type}&badge_id=#{id}&section_id=#{section.id}&badge_version=#{version}")
+        data = api.post_query("ext/badges/records/?action=getBadgeRecords&term_id=#{term_id}&section=#{section.type}&badge_id=#{id}&section_id=#{section.id}&badge_version=#{version}")
 
         data['items'].map do |d|
           Osm::Badge::Data.new(
@@ -326,7 +326,7 @@ module Osm
     def self.get_module_completion_data(api:, no_read_cache: false)
       cache_key = ['badge_module_completion_data']
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache, ttl: 86400) do
-        osm_data = api.post_query(path: 'ext/badges/records/?action=_getModuleDetails')
+        osm_data = api.post_query('ext/badges/records/?action=_getModuleDetails')
         osm_data = (osm_data || {})['items'] || []
         osm_data.map! do |i|
           [
@@ -699,7 +699,7 @@ module Osm
           'level' => level.to_s
         }]
 
-        result = api.post_query(path: "ext/badges/records/?action=awardBadge", post_data: {
+        result = api.post_query("ext/badges/records/?action=awardBadge", post_data: {
           'date' => date_formatted,
           'sectionid' => section_id,
           'entries' => entries.to_json
@@ -733,7 +733,7 @@ module Osm
         section = Osm::Section.get(api: api, section: section_id)
         require_ability_to(api, :write, :badge, section)
 
-        result = api.post_query(path: "ext/badges/records/?action=overrideCompletion", post_data: {
+        result = api.post_query("ext/badges/records/?action=overrideCompletion", post_data: {
           'section_id' => section.id,
           'badge_id' => badge.id,
           'badge_version' => badge.version,
@@ -767,7 +767,7 @@ module Osm
         editable_requirements = badge.requirements.select{ |r| r.editable }.map{ |r| r.id }
         requirements.changes.each do |requirement, (was,now)|
           if editable_requirements.include?(requirement)
-            result = api.post_query(path: "ext/badges/records/?action=updateSingleRecord", post_data: {
+            result = api.post_query("ext/badges/records/?action=updateSingleRecord", post_data: {
               'scoutid' => member_id,
               'section_id' => section_id,
               'badge_id' => badge.id,

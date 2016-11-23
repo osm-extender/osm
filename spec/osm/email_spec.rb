@@ -6,7 +6,7 @@ describe "Email" do
   describe "Get emails for contacts" do
 
     it "Single member" do
-      $api.should_receive(:post_query).with(path: "/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
+      $api.should_receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
         "emails"=>{
           "2"=>{
             "emails"=>["john@example.com"],
@@ -28,7 +28,7 @@ describe "Email" do
     end
 
     it "Several members" do
-      $api.should_receive(:post_query).with(path: "/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
+      $api.should_receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
         "emails"=>{
           "2"=>{
             "emails"=>["john@example.com"],
@@ -79,7 +79,7 @@ describe "Email" do
   describe "Send email" do
 
     it "With cc" do
-      $api.should_receive(:post_query).with(path: "ext/members/email/?action=send", post_data: {
+      $api.should_receive(:post_query).with("ext/members/email/?action=send", post_data: {
         'sectionid' => 1,
         'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]}}',
         'scouts' => '2',
@@ -101,7 +101,7 @@ describe "Email" do
     end
 
     it "Without cc" do
-      $api.should_receive(:post_query).with(path: "ext/members/email/?action=send", post_data: {
+      $api.should_receive(:post_query).with("ext/members/email/?action=send", post_data: {
         'sectionid' => 1,
         'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]}}',
         'scouts' => '2',
@@ -122,7 +122,7 @@ describe "Email" do
     end
 
     it "To several members" do
-      $api.should_receive(:post_query).with(path: "ext/members/email/?action=send", post_data: {
+      $api.should_receive(:post_query).with("ext/members/email/?action=send", post_data: {
         'sectionid' => 1,
         'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]},"3":{"firstname":"Jane","lastname":"Smith","emails":["jane@example.com"]}}',
         'scouts' => '2,3',
@@ -201,7 +201,7 @@ describe "Email" do
 
 
     it "Fetch delivery reports from OSM" do
-      $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=getDeliveryReport&sectionid=1234').and_return([
+      $api.should_receive(:post_query).with('ext/settings/emails/?action=getDeliveryReport&sectionid=1234').and_return([
         {'id'=>"0", 'name'=>"ALL", 'type'=>"all", 'count'=>47},
         {'id'=>123, 'name'=>'01/02/2003 04:05 - Subject of email - 1', 'type'=>'email', 'parent'=>'0', 'hascontent'=>true, 'errors'=>0, 'opens'=>0, 'warnings'=>0},
         {'id'=>'123-1', 'name'=>'a@example.com - delivered', 'type'=>'oneEmail', 'status'=>'delivered', 'email'=>'a@example.com', 'email_key'=>'aexamplecom', 'hascontent'=>true, 'member_id'=>'12', 'parent'=>123, 'status_raw'=>'delivered'},
@@ -350,25 +350,25 @@ describe "Email" do
       describe "Unblock address in OSM" do
         it "Success" do
           recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>true})
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>true})
           recipient.unblock_address($api).should == true
         end
 
         it "Fails with error message" do
           recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>false, 'error'=>'Error message'})
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>false, 'error'=>'Error message'})
           expect{ recipient.unblock_address($api) }.to raise_error(Osm::Error, 'Error message')
         end
 
         it "Fails without error message" do
           recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>false})
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>false})
           recipient.unblock_address($api).should == false
         end
 
         it "Gets something other than a hash" do
           recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return([])
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return([])
           recipient.unblock_address($api).should == false
         end
 
@@ -478,8 +478,8 @@ describe "Email" do
       describe "Fetch email from OSM" do
 
         it "For a delivery report" do
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'data'=>{'to'=>'1 Recipient', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').and_return('This is the body of the email.')
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'data'=>{'to'=>'1 Recipient', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').and_return('This is the body of the email.')
 
           email = Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2)
           email.to.should == '1 Recipient'
@@ -489,8 +489,8 @@ describe "Email" do
         end
 
         it "For a recipient" do
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=to@example.com&member_id=3').and_return({'data'=>{'to'=>'to@example.com', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=to@example.com&member_id=3').and_return('This is the body of the email.')
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=to@example.com&member_id=3').and_return({'data'=>{'to'=>'to@example.com', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=to@example.com&member_id=3').and_return('This is the body of the email.')
 
           email = Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2, member: 3, address: 'to@example.com')
           email.to.should == 'to@example.com'
@@ -502,20 +502,20 @@ describe "Email" do
         describe "Error getting meta data" do
 
           it "Didn't get a Hash" do
-            $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return(nil)
+            $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return(nil)
             expect{ Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Unexpected format for response - got a NilClass'
           end
 
           it "Got an error from OSM" do
-            $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'success'=>false, 'error'=>'Error message'})
+            $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'success'=>false, 'error'=>'Error message'})
             expect{ Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Error message'
           end
 
         end
 
         it "Error getting body" do
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'data'=>{'to'=>'1 Recipient', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
-          $api.should_receive(:post_query).with(path: 'ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').once{ raise Osm::Forbidden, 'Email not found' }
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'data'=>{'to'=>'1 Recipient', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
+          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').once{ raise Osm::Forbidden, 'Email not found' }
           expect{ Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Email not found'
         end
 

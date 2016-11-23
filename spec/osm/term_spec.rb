@@ -129,7 +129,7 @@ describe "Term" do
         ]
 #        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => body.to_json, :content_type => 'application/json')
 
-        $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+        $api.should_receive(:post_query).with('api.php?action=getTerms').and_return({
           "9" => [
             {"termid" => "1", "name" => "Term 1", "sectionid" => "9", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')}
           ],
@@ -160,7 +160,7 @@ describe "Term" do
     end # Get all terms
 
     it "Gets all terms for a section" do
-      $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+      $api.should_receive(:post_query).with('api.php?action=getTerms').and_return({
         "9" => [
           {"termid" => "1", "name" => "Term 1", "sectionid" => "9", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')}
         ],
@@ -175,7 +175,7 @@ describe "Term" do
     end
 
     it "Gets a term" do
-      $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+      $api.should_receive(:post_query).with('api.php?action=getTerms').and_return({
         "10" => [
           {"termid" => "2", "name" => "Term 2", "sectionid" => "10", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')},
           {"termid" => "3", "name" => "Term 3", "sectionid" => "10", "startdate" => (Date.today + 91).strftime('%Y-%m-%d'), "enddate" => (Date.today + 180).strftime('%Y-%m-%d')}
@@ -188,7 +188,7 @@ describe "Term" do
 
     describe "Find current term" do
       it "Returns the current term for the section from all terms returned by OSM" do
-        $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+        $api.should_receive(:post_query).with('api.php?action=getTerms').and_return({
           '9' => [
             {'termid'=>'1', 'name'=>'Term 1', 'sectionid'=>'9', 'startdate'=>(Date.today - 90).strftime('%Y-%m-%d'), 'enddate'=>(Date.today - 31).strftime('%Y-%m-%d')},
             {'termid'=>'2', 'name'=>'Term 2', 'sectionid'=>'9', 'startdate'=>(Date.today - 30).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 30).strftime('%Y-%m-%d')},
@@ -199,7 +199,7 @@ describe "Term" do
       end
     
       it "Raises an error if there is no current term" do
-        $api.should_receive(:post_query).with(path: 'api.php?action=getTerms').and_return({
+        $api.should_receive(:post_query).with('api.php?action=getTerms').and_return({
           '9' => [
             {'termid'=>'1', 'name'=>'Term 1', 'sectionid'=>'9', 'startdate'=>(Date.today + 31).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 31).strftime('%Y-%m-%d')}
           ]
@@ -221,7 +221,7 @@ describe "Term" do
       }
 
       Osm::Term.stub(:get_all) { [] }
-      $api.should_receive(:post_query).with(path: 'users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({'terms'=>{}})
+      $api.should_receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({'terms'=>{}})
 
       Osm::Term.create(
         api: $api,
@@ -241,7 +241,7 @@ describe "Term" do
       }
 
       Osm::Term.stub(:get_all) { [] }
-      $api.should_receive(:post_query).with(path: 'users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
+      $api.should_receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
 
       Osm::Term.create(
         api: $api,
@@ -260,7 +260,7 @@ describe "Term" do
         'termid' => 2
       }
       Osm::Term.stub(:get_all) { [] }
-      $api.should_receive(:post_query).with(path: 'users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({'terms'=>{}})
+      $api.should_receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({'terms'=>{}})
 
       term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
       term.update($api).should == true
@@ -274,7 +274,7 @@ describe "Term" do
         'termid' => 2
       }
       Osm::Term.stub(:get_all) { [] }
-      $api.should_receive(:post_query).with(path: 'users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
+      $api.should_receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
 
       term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
       term.update($api).should == false

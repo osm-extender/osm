@@ -111,9 +111,9 @@ module Osm
 
       data = nil
       if version.nil?
-        data = api.post_query(path: "programme.php?action=getActivity&id=#{id}")
+        data = api.post_query("programme.php?action=getActivity&id=#{id}")
       else
-        data = api.post_query(path: "programme.php?action=getActivity&id=#{id}&version=#{version}")
+        data = api.post_query("programme.php?action=getActivity&id=#{id}&version=#{version}")
       end
 
       attributes = {}
@@ -198,7 +198,7 @@ module Osm
     def add_to_programme(api:, section:, date:, notes: "")
       require_ability_to(api: api, to: :write, on: :programme, section: section)
 
-      data = api.post_query(path: "programme.php?action=addActivityToProgramme", post_data: {
+      data = api.post_query("programme.php?action=addActivityToProgramme", post_data: {
         'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
         'activityid' => id,
         'sectionid' => section.to_i,
@@ -225,7 +225,7 @@ module Osm
       fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
       fail Osm::Forbidden, "You are not allowed to update this activity" unless self.editable
 
-      data = api.post_query(path: "programme.php?action=update", post_data: {
+      data = api.post_query("programme.php?action=update", post_data: {
         'title' => title,
         'description' => description,
         'resources' => resources,

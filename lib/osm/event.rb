@@ -111,13 +111,13 @@ module Osm
       end
 
       if events.nil?
-        data = api.post_query(path: "events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
+        data = api.post_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
         events = Array.new
         ids = Array.new
         unless data['items'].nil?
           data['items'].map { |i| i['eventid'].to_i }.each do |event_id|
-            event_data = api.post_query(path: "events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
-            files_data = api.post_query(path: "ext/uploads/events/?action=listAttachments&sectionid=#{section_id}&eventid=#{event_id}")
+            event_data = api.post_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
+            files_data = api.post_query("ext/uploads/events/?action=listAttachments&sectionid=#{section_id}&eventid=#{event_id}")
             files = files_data.is_a?(Hash) ? files_data['files'] : files_data
             files = [] unless files.is_a?(Array)
 
@@ -169,7 +169,7 @@ module Osm
 
       # Fetch from OSM
       if events.nil?
-        data = api.post_query(path: "events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
+        data = api.post_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
         events = Array.new
         unless data['items'].nil?
           data['items'].map do |event_data|
@@ -195,7 +195,7 @@ module Osm
       cache_key = ['event', event_id]
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        self.new_event_from_data(api.post_query(path: "events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}"))
+        self.new_event_from_data(api.post_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}"))
       end
     end
 
@@ -210,7 +210,7 @@ module Osm
       event = new(parameters)
       fail Osm::ObjectIsInvalid, 'event is invalid' unless event.valid?
 
-      data = api.post_query(path: "events.php?action=addEvent&sectionid=#{event.section_id}", post_data: {
+      data = api.post_query("events.php?action=addEvent&sectionid=#{event.section_id}", post_data: {
         'name' => event.name,
         'location' => event.location,
         'startdate' => event.start? ? event.start.strftime(Osm::OSM_DATE_FORMAT) : '',
@@ -268,7 +268,7 @@ module Osm
         end
       end
       if update_main_attributes
-        data = api.post_query(path: "events.php?action=addEvent&sectionid=#{section_id}", post_data: {
+        data = api.post_query("events.php?action=addEvent&sectionid=#{section_id}", post_data: {
           'eventid' => id,
           'name' => name,
           'location' => location,
@@ -291,7 +291,7 @@ module Osm
 
       # Private notepad
       if changed_attributes.include?('notepad')
-        data = api.post_query(path: "events.php?action=saveNotepad&sectionid=#{section_id}", post_data: {
+        data = api.post_query("events.php?action=saveNotepad&sectionid=#{section_id}", post_data: {
           'eventid' => id,
           'notepad' => notepad,
         })
@@ -300,7 +300,7 @@ module Osm
 
       # MySCOUT notepad
       if changed_attributes.include?('public_notepad')
-        data = api.post_query(path: "events.php?action=saveNotepad&sectionid=#{section_id}", post_data: {
+        data = api.post_query("events.php?action=saveNotepad&sectionid=#{section_id}", post_data: {
           'eventid' => id,
           'pnnotepad' => public_notepad,
         })
@@ -319,7 +319,7 @@ module Osm
           end
         end
         badges_to_delete.each do |badge|
-          data = api.post_query(path: "ext/badges/records/index.php?action=deleteBadgeLink&sectionid=#{section_id}", post_data: {
+          data = api.post_query("ext/badges/records/index.php?action=deleteBadgeLink&sectionid=#{section_id}", post_data: {
             'section' => badge.badge_section,
             'sectionid' => section_id,
             'type' => 'event',
@@ -355,7 +355,7 @@ module Osm
     def delete(api)
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
 
-      data = api.post_query(path: "events.php?action=deleteEvent&sectionid=#{section_id}&eventid=#{id}")
+      data = api.post_query("events.php?action=deleteEvent&sectionid=#{section_id}&eventid=#{id}")
 
       if data.is_a?(Hash) && data['ok']
         cache_delete(api: api, key: ['event', id])
@@ -377,7 +377,7 @@ module Osm
       cache_key = ['event_attendance', id, term_id]
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        data = api.post_query(path: "events.php?action=getEventAttendance&eventid=#{id}&sectionid=#{section_id}&termid=#{term_id}")
+        data = api.post_query("events.php?action=getEventAttendance&eventid=#{id}&sectionid=#{section_id}&termid=#{term_id}")
         data = data['items'] || []
 
         payment_values = {
@@ -420,7 +420,7 @@ module Osm
       fail Osm::ObjectIsInvalid, 'link is invalid' unless link.valid?
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
 
-      data = api.post_query(path: "ext/badges/records/index.php?action=linkBadgeToItem&sectionid=#{section_id}", post_data: {
+      data = api.post_query("ext/badges/records/index.php?action=linkBadgeToItem&sectionid=#{section_id}", post_data: {
         'section' => link.badge_section,
         'sectionid' => section_id,
         'type' => 'event',
@@ -445,7 +445,7 @@ module Osm
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
       fail Osm::ArgumentIsInvalid, 'name is invalid' if name.blank?
 
-      data = api.post_query(path: "events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", post_data: {
+      data = api.post_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", post_data: {
         'columnName' => name,
         'parentLabel' => label,
         'parentRequire' => (required ? 1 : 0),
@@ -644,7 +644,7 @@ module Osm
       def update(api)
         require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
 
-        data = api.post_query(path: "events.php?action=renameColumn&sectionid=#{event.section_id}&eventid=#{event.id}", post_data: {
+        data = api.post_query("events.php?action=renameColumn&sectionid=#{event.section_id}&eventid=#{event.id}", post_data: {
           'columnId' => id,
           'columnName' => name,
           'pL' => label,
@@ -672,7 +672,7 @@ module Osm
       def delete(api)
         require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
 
-        data = api.post_query(path: "events.php?action=deleteColumn&sectionid=#{event.section_id}&eventid=#{event.id}", post_data: {
+        data = api.post_query("events.php?action=deleteColumn&sectionid=#{event.section_id}&eventid=#{event.id}", post_data: {
           'columnId' => id
         })
 
@@ -784,7 +784,7 @@ module Osm
 
         updated = true
         fields.changes.each do |field, (was,now)|
-          data = api.post_query(path: "events.php?action=updateScout", post_data: {
+          data = api.post_query("events.php?action=updateScout", post_data: {
             'scoutid' => member_id,
             'column' => "f_#{field}",
             'value' => now,
@@ -796,7 +796,7 @@ module Osm
         end
 
         if changed_attributes.include?('payment_control')
-          data = api.post_query(path: "events.php?action=updateScout", post_data: {
+          data = api.post_query("events.php?action=updateScout", post_data: {
             'scoutid' => member_id,
             'column' => 'payment',
             'value' => payment_values[payment_control],
@@ -807,7 +807,7 @@ module Osm
           updated = false unless data.is_a?(Hash)
         end
         if changed_attributes.include?('attending')
-          data = api.post_query(path: "events.php?action=updateScout", post_data: {
+          data = api.post_query("events.php?action=updateScout", post_data: {
             'scoutid' => member_id,
             'column' => 'attending',
             'value' => attending_values[attending],
@@ -836,7 +836,7 @@ module Osm
         cache_key = ['event\_attendance\_audit', event.id, member_id]
 
         cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-          data = api.post_query(path: "events.php?action=getEventAudit&sectionid=#{event.section_id}&scoutid=#{member_id}&eventid=#{event.id}")
+          data = api.post_query("events.php?action=getEventAudit&sectionid=#{event.section_id}&scoutid=#{member_id}&eventid=#{event.id}")
           data ||= []
 
           attending_values = {

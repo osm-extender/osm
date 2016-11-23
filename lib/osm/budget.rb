@@ -33,7 +33,7 @@ module Osm
       cache_key = ['budgets', section_id]
 
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        data = api.post_query(path: "finances.php?action=getCategories&sectionid=#{section_id}")
+        data = api.post_query("finances.php?action=getCategories&sectionid=#{section_id}")
 
         data = data['items']
         data.map do |budget|
@@ -57,7 +57,7 @@ module Osm
       fail Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
       Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
-      data = api.post_query(path: "finances.php?action=addCategory&sectionid=#{section_id}")
+      data = api.post_query("finances.php?action=addCategory&sectionid=#{section_id}")
       if data.is_a?(Hash) && data['ok'].eql?(true)
         # The cached budgets for the section will be out of date - remove them
         cache_delete(api: api, key: ['budgets', section_id])
@@ -81,7 +81,7 @@ module Osm
       fail Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
       Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
-      data = api.post_query(path: "finances.php?action=updateCategory&sectionid=#{section_id}", post_data: {
+      data = api.post_query("finances.php?action=updateCategory&sectionid=#{section_id}", post_data: {
         'categoryid' => id,
         'column' => 'name',
         'value' => name,
@@ -102,7 +102,7 @@ module Osm
     def delete(api)
       Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
-      data = api.post_query(path: "finances.php?action=deleteCategory&sectionid=#{section_id}", post_data: {
+      data = api.post_query("finances.php?action=deleteCategory&sectionid=#{section_id}", post_data: {
         'categoryid' => id,
       })
       if (data.is_a?(Hash) && data['ok'].eql?(true))

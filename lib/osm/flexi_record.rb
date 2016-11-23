@@ -26,7 +26,7 @@ module Osm
       cache_key = ['flexi_record_columns', self.id]
 
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        data = api.post_query(path: "extras.php?action=getExtra&sectionid=#{self.section_id}&extraid=#{self.id}")
+        data = api.post_query("extras.php?action=getExtra&sectionid=#{self.section_id}&extraid=#{self.id}")
         structure = []
         data['structure'].each do |item|
           item['rows'].each do |row|
@@ -50,7 +50,7 @@ module Osm
       require_ability_to(api: api, to: :write, on: :flexi, section: section_id)
       fail ArgumentError, 'name is invalid' if name.blank?
 
-      data = api.post_query(path: "extras.php?action=addColumn&sectionid=#{section_id}&extraid=#{id}", post_data: {
+      data = api.post_query("extras.php?action=addColumn&sectionid=#{section_id}&extraid=#{id}", post_data: {
         'columnName' => name,
       })
 
@@ -78,7 +78,7 @@ module Osm
       cache_key = ['flexi_record_data', id, term_id]
 
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        data = api.post_query(path: "extras.php?action=getExtraRecords&sectionid=#{section.id}&extraid=#{id}&termid=#{term_id}&section=#{section.type}")
+        data = api.post_query("extras.php?action=getExtraRecords&sectionid=#{section.id}&extraid=#{id}&termid=#{term_id}&section=#{section.type}")
 
         datas = []
         data['items'].each do |item|
@@ -147,7 +147,7 @@ module Osm
         require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
         fail Osm::Forbidden, 'this column is not editable' unless self.editable
 
-        data = api.post_query(path: "extras.php?action=renameColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
+        data = api.post_query("extras.php?action=renameColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
           'columnId' => self.id,
           'columnName' => self.name,
         })
@@ -173,7 +173,7 @@ module Osm
         require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
         fail Osm::Forbidden, 'this column is not editable' unless self.editable
 
-        data = api.post_query(path: "extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
+        data = api.post_query("extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
           'columnId' => self.id,
         })
 
@@ -266,7 +266,7 @@ module Osm
         editable_fields = flexi_record.get_columns(api).select{ |c| c.editable }.map{ |i| i.id }
         fields.changes.each do |field, (was,now)|
           if editable_fields.include?(field)
-            data = api.post_query(path: "extras.php?action=updateScout", post_data: {
+            data = api.post_query("extras.php?action=updateScout", post_data: {
               'termid' => term_id,
               'scoutid' => self.member_id,
               'column' => field,

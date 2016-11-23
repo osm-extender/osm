@@ -127,26 +127,26 @@ describe "API" do
       $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET"}).and_return(nil)
       $http.should_receive(:request).with($request).and_return($response)
       api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
-      api.post_query(path: 'path/to/load').should == {}
+      api.post_query('path/to/load').should == {}
     end
 
     it "With user credentials" do
       $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
       $http.should_receive(:request).with($request).and_return($response)
-      $api.post_query(path: 'path/to/load').should == {}
+      $api.post_query('path/to/load').should == {}
     end
 
     it "Using passed post attributes" do
       $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", "attribute" => "value"}).and_return(nil)
       $http.should_receive(:request).with($request).and_return($response)
-      $api.post_query(path: 'path/to/load', post_data: {'attribute' => 'value'}).should == {}
+      $api.post_query('path/to/load', post_data: {'attribute' => 'value'}).should == {}
     end
 
     it "Doesn't parse when raw option is true" do
       $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
       $response.stub(:body){ '"1"' }
       $http.should_receive(:request).with($request).and_return($response)
-      $api.post_query(path: 'path/to/load', raw: true).should == '"1"'
+      $api.post_query('path/to/load', raw: true).should == '"1"'
     end
 
 
@@ -156,13 +156,13 @@ describe "API" do
         api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
         $request.should_receive('[]=').with('User-Agent', "name (using osm gem version #{Osm::VERSION})").and_return(nil)
         $http.should_receive(:request).with($request).and_return($response)
-        api.post_query(path: 'path/to/load')
+        api.post_query('path/to/load')
       end
 
       it "User set" do
         $request.should_receive('[]=').with('User-Agent', "HTTP-USER-AGENT").and_return(nil)
         $http.should_receive(:request).with($request).and_return($response)
-        $api.post_query(path: 'path/to/load')
+        $api.post_query('path/to/load')
       end
 
     end # describe User-Agent header
@@ -173,17 +173,17 @@ describe "API" do
       it "Raises a connection error if the HTTP status code was not 'OK'" do
         response = Net::HTTPInternalServerError.new(1, 500, '')
         $http.should_receive(:request).with($request).and_return(response)
-        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
+        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
       end
 
       it "Raises a connection error if it can't connect to OSM" do
         $http.should_receive(:request).with($request){ raise Errno::ENETUNREACH, 'Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)' }
-        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
+        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
       end
 
       it "Raises a connection error if an SSL error occurs" do
         $http.should_receive(:request).with($request){ raise OpenSSL::SSL::SSLError, 'hostname "2.127.245.223" does not match the server certificate' }
-        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
+        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
       end
 
     end # Handles network errors
@@ -194,21 +194,21 @@ describe "API" do
         $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
         $response.stub(:body){ '{"error":"Error message"}' }
         $http.should_receive(:request).with($request).and_return($response)
-        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::Error, 'Error message')
+        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a hash in a hash)" do
         $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
         $response.stub(:body){ '{"error":{"message":"Error message"}}' }
         $http.should_receive(:request).with($request).and_return($response)
-        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::Error, 'Error message')
+        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a plain string)" do
         $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
         $response.stub(:body){ 'Error message' }
         $http.should_receive(:request).with($request).and_return($response)
-        expect{ $api.post_query(path: 'path/to/load') }.to raise_error(Osm::Error, 'Error message')
+        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
     end # Handles OSM errors
@@ -218,7 +218,7 @@ describe "API" do
   it "Authorizes a user to use the OSM API" do
     user_email = 'alice@example.com'
     user_password = 'alice'
-    $api.should_receive(:post_query).with(path: 'users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => '100', 'secret' => 'secret'} }
+    $api.should_receive(:post_query).with('users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => '100', 'secret' => 'secret'} }
     $api.authorize_user(email_address: user_email, password: user_password).should == {:user_id => '100', :user_secret => 'secret'}
   end
 
@@ -226,18 +226,18 @@ describe "API" do
   describe "Get user roles" do
 
     it "Returns what OSM gives on success" do
-      $api.should_receive(:post_query).with(path: 'api.php?action=getUserRoles'){ ['a', 'b'] }
+      $api.should_receive(:post_query).with('api.php?action=getUserRoles'){ ['a', 'b'] }
       $api.get_user_roles.should == ['a', 'b']
     end
 
     it "User has no roles in OSM" do
-      $api.should_receive(:post_query).with(path: 'api.php?action=getUserRoles').twice{ false }
+      $api.should_receive(:post_query).with('api.php?action=getUserRoles').twice{ false }
       expect{ $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
       $api.get_user_roles.should == []
     end
 
     it "Reraises any other Osm::Error" do
-      $api.should_receive(:post_query).with(path: 'api.php?action=getUserRoles'){ raise Osm::Error, 'Test' }
+      $api.should_receive(:post_query).with('api.php?action=getUserRoles'){ raise Osm::Error, 'Test' }
       expect{ $api.get_user_roles }.to raise_error(Osm::Error, 'Test')
     end
 
@@ -259,7 +259,7 @@ describe "API" do
 
       OsmTest::Cache.should_not_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       OsmTest::Cache.should_not_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
-      $api.should_receive(:post_query).with(path: 'api.php?action=getUserRoles') { data }
+      $api.should_receive(:post_query).with('api.php?action=getUserRoles') { data }
       $api.get_user_permissions(no_read_cache: true).should == {1 => {:badge => [:read]}}
     end
 
