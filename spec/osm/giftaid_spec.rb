@@ -70,35 +70,34 @@ describe "Gift Aid" do
 
     it "Fetch the donations for a section" do
       data = [
-	{"rows" => [
+    	  {"rows" => [
           {"name" => "First name","field" => "firstname","width" => "100px","formatter" => "boldFormatter"},
           {"name" => "Last name","field" => "lastname","width" => "100px","formatter" => "boldFormatter"},
           {"name" => "Tax payer's name","field" => "parentname","width" => "150px","editable" => true,"formatter" => "boldFormatter"},
           {"name" => "Total","field" => "total","width" => "60px","formatter" => "boldFormatter"}
-	],"noscroll" => true},
-	{"rows" => [
+	      ],"noscroll" => true},
+	      {"rows" => [
           {"name" => "2000-01-02", "field" => "2000-01-02", "width" => "110px", "editable" => true, "formatter" => "boldFormatter"}
-	]}
+      	]}
       ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/giftaid.php?action=getStructure&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with('giftaid.php?action=getStructure&sectionid=1&termid=2').and_return(data)
 
-      donations = Osm::GiftAid.get_donations(@api, 1, 2)
+      donations = Osm::GiftAid.get_donations(api: $api, section: 1, term: 2)
       donations.should == [Osm::GiftAid::Donation.new(:donation_date => Date.new(2000, 1, 2))]
     end
 
     it "Fetch the data for a section" do
       data = {
-	"identifier" => "scoutid",
-	"label" => "name",
-	"items" => [
-	  {"2000-01-02" => "1.23", "total" => 2.34, "scoutid" => "2", "firstname" => "First", "lastname" => "Last", "patrolid" => "3", "parentname" => "Tax"},
-	  {"2000-01-02" => 1.23,"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 1.23}
-	]
+      	"identifier" => "scoutid",
+	      "label" => "name",
+	      "items" => [
+	        {"2000-01-02" => "1.23", "total" => 2.34, "scoutid" => "2", "firstname" => "First", "lastname" => "Last", "patrolid" => "3", "parentname" => "Tax"},
+	        {"2000-01-02" => 1.23,"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 1.23}
+	      ]
       }
+      $api.should_receive(:post_query).with('giftaid.php?action=getGrid&sectionid=1&termid=2').and_return(data)
 
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/giftaid.php?action=getGrid&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
-
-      data = Osm::GiftAid.get_data(@api, 1, 2)
+      data = Osm::GiftAid.get_data(api: $api, section: 1, term: 2)
       data.is_a?(Array).should == true
       data.size.should == 1
       data = data[0]
@@ -116,30 +115,24 @@ describe "Gift Aid" do
     end
 
     it "Update donation" do
-      url = 'https://www.onlinescoutmanager.co.uk/giftaid.php?action=update&sectionid=1&termid=2'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'scouts' => '["3", "4"]',
         'donatedate'=> '2000-01-02',
         'amount' => '1.23',
         'notes' => 'Note',
         'sectionid' => 1,
       }
+      $api.should_receive(:post_query).with('giftaid.php?action=update&sectionid=1&termid=2', post_data: post_data).and_return([])
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
-      Osm::GiftAid.update_donation({
-        :api => @api,
-        :section => 1,
-        :term => 2,
-        :donation_date => Date.new(2000, 1, 2),
-        :attendance => :yes,
-        :members => [3, 4],
-        :amount => '1.23',
-        :note => 'Note',
-      }).should == true
+      Osm::GiftAid.update_donation(
+        api: $api,
+        section: 1,
+        term: 2,
+        date: Date.new(2000, 1, 2),
+        members: [3, 4],
+        amount: '1.23',
+        note: 'Note',
+      ).should == true
     end
 
     describe "Update data" do
@@ -165,10 +158,6 @@ describe "Gift Aid" do
 
       it "Tax payer" do
         post_data = {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
           'scoutid' => 1,
           'termid' => 4,
           'sectionid' => 2,
@@ -180,23 +169,18 @@ describe "Gift Aid" do
             {"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 0}
           ]
         }
-        url = "https://www.onlinescoutmanager.co.uk/giftaid.php?action=updateScout"
-        HTTParty.should_receive(:post).with(url, {:body => post_data.merge({'column' => 'parentname', 'value' => 'n'})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body_data.to_json}) }
-        HTTParty.should_receive(:post).with(url, {:body => post_data.merge({'column' => 'address', 'value' => 'a'})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body_data.to_json}) }
-        HTTParty.should_receive(:post).with(url, {:body => post_data.merge({'column' => 'postcode', 'value' => 'pc'})}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body_data.to_json}) }
+        $api.should_receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'parentname', 'value' => 'n'})).and_return(body_data)
+        $api.should_receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'address', 'value' => 'a'})).and_return(body_data)
+        $api.should_receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'postcode', 'value' => 'pc'})).and_return(body_data)
 
         @data.tax_payer_name = 'n'
         @data.tax_payer_address = 'a'
         @data.tax_payer_postcode = 'pc'
-        @data.update(@api).should == true
+        @data.update($api).should == true
       end
 
       it "A donation" do
         post_data = {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
           'scoutid' => 1,
           'termid' => 4,
           'column' => '2012-01-03',
@@ -210,15 +194,15 @@ describe "Gift Aid" do
             {"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 0}
           ]
         }
-        url = "https://www.onlinescoutmanager.co.uk/giftaid.php?action=updateScout"
-        HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>body_data.to_json}) }
+        url = "https://www.onlinescoutmanager.co.uk/"
+        $api.should_receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data).and_return(body_data)
 
         @data.donations[Date.new(2012, 1, 3)] = '3.45'
-        @data.update(@api).should == true
+        @data.update($api).should == true
       end
 
-    end
+    end # Describe update data
 
-  end
+  end # Describe using the API
 
 end

@@ -3,139 +3,114 @@ module Osm
   class GiftAid
 
     # Get donations
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the structure for
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the structure for, passing nil causes the current term to be used
+    # @param api [Osm::Api] api The to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the structure for
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::GiftAid::Donation>] representing the donations made
-    def self.get_donations(api, section, term=nil, options={})
-      Osm::Model.require_ability_to(api, :read, :finance, section, options)
+    def self.get_donations(api:, section:, term: nil, no_read_cache: false)
+      Osm::Model.require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       cache_key = ['gift_aid_donations', section_id, term_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
-      end
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query("giftaid.php?action=getStructure&sectionid=#{section_id}&termid=#{term_id}")
 
-      data = api.perform_query("giftaid.php?action=getStructure&sectionid=#{section_id}&termid=#{term_id}")
-
-      structure = []
-      if data.is_a?(Array)
-        data = (data.size == 2) ? data[1] : []
-        if data.is_a?(Hash) && data['rows'].is_a?(Array)
-          data['rows'].each do |row|
-            structure.push Donation.new(
-              :donation_date => Osm::parse_date(row['field']),
-            )
-          end
-        end
-      end
-
-      Osm::Model.cache_write(api, cache_key, structure) unless structure.nil?
-      return structure
-    end
-
-    # Get donation data
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the register for
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the register for, passing nil causes the current term to be used
-    # @!macro options_get
-    # @return [Array<Osm::GiftAid::Data>] representing the donations of each member
-    def self.get_data(api, section, term=nil, options={})
-      Osm::Model.require_ability_to(api, :read, :finance, section, options)
-      section_id = section.to_i
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
-      cache_key = ['gift_aid_data', section_id, term_id]
-
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
-      end
-
-      data = api.perform_query("giftaid.php?action=getGrid&sectionid=#{section_id}&termid=#{term_id}")
-
-      to_return = []
-      if data.is_a?(Hash) && data['items'].is_a?(Array)
-        data = data['items']
-        data.each do |item|
-          if item.is_a?(Hash)
-            unless item['scoutid'].to_i < 0  # It's a total row
-              donations = {}
-              item.each do |key, value|
-                if key.match(Osm::OSM_DATE_REGEX)
-                  donations[Osm::parse_date(key)] = value
-                end
-              end
-              to_return.push Osm::GiftAid::Data.new(
-                :member_id => Osm::to_i_or_nil(item['scoutid']),
-                :grouping_id => Osm::to_i_or_nil(item ['patrolid']),
-                :section_id => section_id,
-                :first_name => item['firstname'],
-                :last_name => item['lastname'],
-                :tax_payer_name => item['parentname'],
-                :tax_payer_address => item['address'],
-                :tax_payer_postcode => item['postcode'],
-                :total => item['total'],
-                :donations => donations,
+        structure = []
+        if data.is_a?(Array)
+          data = (data.size == 2) ? data[1] : []
+          if data.is_a?(Hash) && data['rows'].is_a?(Array)
+            data['rows'].each do |row|
+              structure.push Donation.new(
+                :donation_date => Osm::parse_date(row['field']),
               )
             end
           end
         end
-        Osm::Model.cache_write(api, cache_key, to_return)
-      end
-      return to_return
+        structure
+      end # cache fetch
+    end
+
+    # Get donation data
+    # @param api [Osm::Api] api The to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the data for
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the data for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @return [Array<Osm::GiftAid::Data>] representing the donations of each member
+    def self.get_data(api:, section:, term: nil, no_read_cache: false)
+      Osm::Model.require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
+      section_id = section.to_i
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
+      cache_key = ['gift_aid_data', section_id, term_id]
+
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query("giftaid.php?action=getGrid&sectionid=#{section_id}&termid=#{term_id}")
+
+        to_return = []
+        if data.is_a?(Hash) && data['items'].is_a?(Array)
+          data = data['items']
+          data.each do |item|
+            if item.is_a?(Hash)
+              unless item['scoutid'].to_i < 0  # It's a total row
+                donations = {}
+                item.each do |key, value|
+                  if key.match(Osm::OSM_DATE_REGEX)
+                    donations[Osm::parse_date(key)] = value
+                  end
+                end
+                to_return.push Osm::GiftAid::Data.new(
+                  :member_id => Osm::to_i_or_nil(item['scoutid']),
+                  :grouping_id => Osm::to_i_or_nil(item ['patrolid']),
+                  :section_id => section_id,
+                  :first_name => item['firstname'],
+                  :last_name => item['lastname'],
+                  :tax_payer_name => item['parentname'],
+                  :tax_payer_address => item['address'],
+                  :tax_payer_postcode => item['postcode'],
+                  :total => item['total'],
+                  :donations => donations,
+                )
+              end
+            end
+          end # each item in data
+        end # if
+        to_return
+      end # cache fetch
     end
 
     # Update information for a donation
-    # @param [Hash] data
-    # @option data [Osm::Api] :api The api to use to make the request
-    # @option data [Osm::Section] :section the section to update the register for
-    # @option data [Osm::Term, #to_i, nil] :term The term (or its ID) to get the register for, passing nil causes the current term to be used
-    # @option data [Osm::Evening, DateTime, Date] :evening the evening to update the register on
-    # @option data [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>, #to_i, Array<#to_i>] :members the members (or their ids) to update
-    # @option data [Date, #strftime] :donation_date the date the donation was made
-    # @option data [String, #to_s] :amount the donation amount
-    # @option data [String, #to_s] :note the description for the donation
+    # @param api [Osm::Api] :api The api to use to make the request
+    # @param section [Osm::Section] the section to update the donation for
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to update the donation for
+    # @param members [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>, #to_i, Array<#to_i>] the members (or their ids) to update
+    # @param date [Date, #strftime] date the date the donation was made
+    # @param amount[String, #to_s] the donation amount
+    # @param note [String, #to_s] the description for the donation
     # @return [Boolean] whether the update succedded
-    # @raise [Osm::ArgumentIsInvalid] If data[:section] is missing
-    # @raise [Osm::ArgumentIsInvalid] If data[:donation_date] is missing
-    # @raise [Osm::ArgumentIsInvalid] If data[:amount] is missing
-    # @raise [Osm::ArgumentIsInvalid] If data[:note] is missing
-    # @raise [Osm::ArgumentIsInvalid] If data[:members] is missing
-    # @raise [Osm::ArgumentIsInvalid] If data[:api] is missing
-    def self.update_donation(data={})
-      fail Osm::ArgumentIsInvalid, ':section is missing' if data[:section].nil?
-      fail Osm::ArgumentIsInvalid, ':donation_date is missing' if data[:donation_date].nil?
-      fail Osm::ArgumentIsInvalid, ':amount is missing' if data[:amount].nil?
-      fail Osm::ArgumentIsInvalid, ':note is missing' if data[:note].nil?
-      fail Osm::ArgumentIsInvalid, ':members is missing' if data[:members].nil?
-      fail Osm::ArgumentIsInvalid, ':api is missing' if data[:api].nil?
-      api = data[:api]
-      Osm::Model.require_ability_to(api, :write, :finance, data[:section])
+    def self.update_donation(api:, section:, term: nil, members:, date: Date.today, amount:, note:)
+      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section)
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
+      section_id = section.to_i
 
-      term_id = data[:term].nil? ? Osm::Term.get_current_term_for_section(api, data[:section]).id : data[:term].to_i
-      section_id = data[:section].to_i
+      members = [*members].map{ |member| member.to_i.to_s } # Make sure it's an Array of Strings
 
-      data[:members] = [*data[:members]].map{ |member| member.to_i.to_s } # Make sure it's an Array of Strings
-
-      response = api.perform_query("giftaid.php?action=update&sectionid=#{section_id}&termid=#{term_id}", {
-        'scouts' => data[:members].inspect,
+      response = api.post_query("giftaid.php?action=update&sectionid=#{section_id}&termid=#{term_id}", post_data: {
+        'scouts' => members.inspect,
         'sectionid' => section_id,
-        'donatedate'=> data[:donation_date].strftime(Osm::OSM_DATE_FORMAT),
-        'amount' => data[:amount],
-        'notes' => data[:note],
+        'donatedate'=> date.strftime(Osm::OSM_DATE_FORMAT),
+        'amount' => amount,
+        'notes' => note,
       })
 
       # The cached donations and data will be out of date - remove them
-      Osm::Model.cache_delete(api, ['gift_aid_donations', section_id, term_id])
-      Osm::Model.cache_delete(api, ['gift_aid_data', section_id, term_id])
+      Osm::Model.cache_delete(api: api, key: ['gift_aid_donations', section_id, term_id])
+      Osm::Model.cache_delete(api: api, key: ['gift_aid_data', section_id, term_id])
 
       return response.is_a?(Array)
     end
 
     class Donation < Osm::Model
-      SORT_BY = [:donation_date]
-
       # @!attribute [rw] donation_date
       #   @return [Date] When the payment was made
 
@@ -148,13 +123,14 @@ module Osm
       #   Initialize a new RegisterField
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
+      private def sort_by
+        ['donation_date']
+      end
 
     end # Class GiftAid::Donation
 
 
     class Data < Osm::Model
-      SORT_BY = [:section_id, :grouping_id, :last_name, :first_name]
-
       # @!attribute [rw] member_id
       #   @return [Fixnum] The OSM ID for the member
       # @!attribute [rw] grouping_id
@@ -215,7 +191,7 @@ module Osm
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
         fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
-        require_ability_to(api, :write, :finance, section_id)
+        require_ability_to(api: api, to: :write, on: :finance, section: section_id)
         term_id = Osm::Term.get_current_term_for_section(api, section_id).id
 
         updated = true
@@ -226,7 +202,7 @@ module Osm
         ]
         fields.each do |field|
           if changed_attributes.include?(field[0])
-            result = api.perform_query("giftaid.php?action=updateScout", {
+            result = api.post_query("giftaid.php?action=updateScout", post_data: {
               'scoutid' => member_id,
               'termid' => term_id,
               'column' => field[1],
@@ -247,7 +223,7 @@ module Osm
 
         donations.changes.each do |date, (was,now)|
           date = date.strftime(Osm::OSM_DATE_FORMAT)
-          result = api.perform_query("giftaid.php?action=updateScout", {
+          result = api.post_query("giftaid.php?action=updateScout", post_data: {
             'scoutid' => member_id,
             'termid' => term_id,
             'column' => date,
@@ -265,9 +241,13 @@ module Osm
         end
         donations.clean_up! if updated
 
-        Osm::Model.cache_delete(api, ['gift_aid_data', section_id, term_id]) if updated
+        Osm::Model.cache_delete(api: api, key: ['gift_aid_data', section_id, term_id]) if updated
 
         return updated
+      end
+
+      private def sort_by
+        ['section_id', 'grouping_id', 'last_name', 'first_name']
       end
 
     end # Class GiftAid::Data
