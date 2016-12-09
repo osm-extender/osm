@@ -15,15 +15,15 @@ describe "Grouping" do
   describe "Using the API" do
 
     it "Get for section" do
-      body = {'patrols' => [{
+      data = {'patrols' => [{
         'patrolid' => 1,
         'name' => 'Patrol Name',
         'active' => 1,
         'points' => '3',
       }]}
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getPatrols&sectionid=2", :body => body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(data)
 
-      patrols = Osm::Grouping.get_for_section(@api, 2)
+      patrols = Osm::Grouping.get_for_section(api: $api, section: 2)
       patrols.size.should == 1
       patrol = patrols[0]
       patrol.id.should == 1
@@ -35,68 +35,75 @@ describe "Grouping" do
     end
 
     it "Handles no data" do
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=getPatrols&sectionid=2", :body => '', :content_type => 'application/json')
-      patrols = Osm::Grouping.get_for_section(@api, 2)
+      $api.should_receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(nil)
+      patrols = Osm::Grouping.get_for_section(api: $api, section: 2)
       patrols.size.should == 0
     end
 
 
     it "Update in OSM (succeded)" do
       grouping = Osm::Grouping.new(
-        :id => 1,
-        :section_id => 2,
-        :active => true,
-        :points => 3
+        id: 1,
+        section_id: 2,
+        active: true,
+        points: 3
       )
       grouping.name = 'Grouping'
 
-      url = "https://www.onlinescoutmanager.co.uk/users.php?action=editPatrol&sectionid=#{grouping.section_id}"
-      HTTParty.should_receive(:post).with(url, {:body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
+      post_data = {
         'patrolid' => grouping.id,
         'name' => grouping.name,
         'active' => grouping.active,
-      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>''}) }
+      }
+      $api.should_receive(:post_query).with('users.php?action=editPatrol&sectionid=2', post_data: post_data).and_return(nil)
 
-      grouping.update(@api).should == true
+      grouping.update($api).should == true
     end
 
     it "Update points in OSM (succeded)" do
       grouping = Osm::Grouping.new(
-        :id => 1,
-        :section_id => 2,
-        :active => true,
-        :name => 'Grouping'
+        id: 1,
+        section_id: 2,
+        active: true,
+        name: 'Grouping',
       )
       grouping.points = 3
 
-      url = "https://www.onlinescoutmanager.co.uk/users.php?action=updatePatrolPoints&sectionid=#{grouping.section_id}"
-      HTTParty.should_receive(:post).with(url, {:body => {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
+      post_data = {
         'patrolid' => grouping.id,
         'points' => grouping.points,
-      }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
+      }
+      $api.should_receive(:post_query).with('users.php?action=updatePatrolPoints&sectionid=2', post_data: post_data).and_return({})
 
-      grouping.update(@api).should == true
+      grouping.update($api).should == true
     end
 
     it "Update in OSM (failed)" do
       grouping = Osm::Grouping.new(
-        :id => 1,
-        :section_id => 2,
+        id: 1,
+        section_id: 2,
+        points: 3,
       )
       grouping.name = 'Grouping'
-      grouping.points = 3
       grouping.active = true
 
-      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"done":false}'}) }
-      grouping.update(@api).should == false
+      $api.should_receive(:post_query).and_return({"done" => false})
+
+      grouping.update($api).should == false
+    end
+
+    it "Update points in OSM (failed)" do
+      grouping = Osm::Grouping.new(
+        id: 1,
+        section_id: 2,
+        name: 'Name',
+        active: true,
+      )
+      grouping.points = 3
+
+      $api.should_receive(:post_query).and_return({"done" => false})
+
+      grouping.update($api).should == false
     end
 
   end
