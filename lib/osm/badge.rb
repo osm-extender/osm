@@ -298,7 +298,7 @@ module Osm
 
     private
     # return an array of hashes representing the modules of the badge
-    def self.module_completion_data(api: api, badge: badge, no_read_cache: false)
+    def self.module_completion_data(api:, badge:, no_read_cache: false)
       fetched_this_time = @module_completion_data.nil? # Flag to ensure we only get the data once (at most) per invocation
       @module_completion_data = get_module_completion_data(api: api, no_read_cache: no_read_cache) if fetched_this_time
 
