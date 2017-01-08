@@ -101,9 +101,9 @@ describe "Meeting" do
           'sectionLongName' => 'Cubs',
          }]},
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getProgramme&sectionid=3&termid=4", :body => body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with('programme.php?action=getProgramme&sectionid=3&termid=4').and_return(body)
 
-      programme = Osm::Meeting.get_for_section(@api, 3, 4)
+      programme = Osm::Meeting.get_for_section(api: $api, section: 3, term: 4)
       programme.size.should == 1
       meeting = programme[0]
       meeting.is_a?(Osm::Meeting).should == true
@@ -137,63 +137,49 @@ describe "Meeting" do
 
     it "Fetch badge requirements for a meeting (from API)" do
       Osm::Model.stub('has_permission?').and_return(true)
+      Osm::Section.stub(:get){ Osm::Section.new(id: 3, type: :cubs) }
       badges_body = [{'a'=>'a'},{'a'=>'A'}]
-      FakeWeb.register_uri(:post, 'https://www.onlinescoutmanager.co.uk/users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs', :body => badges_body.to_json, :content_type => 'application/json')
-      roles_body = [
-        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"3", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>100, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>100, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
-      ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => roles_body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with('users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs').and_return(badges_body)
 
-      meeting = Osm::Meeting.new(:date => Date.new(2000, 1, 2), :section_id => 3)
-      meeting.get_badge_requirements(@api).should == badges_body
+      meeting = Osm::Meeting.new(date: Date.new(2000, 1, 2), section_id: 3)
+      meeting.get_badge_requirements($api).should == badges_body
     end
 
     it "Fetch badge requirements for a meeting (iterating through activities)" do
-      Osm::Model.stub('has_permission?').with(@api, :write, :badge, 3, {}).and_return(false)
-      roles_body = [
-        {"sectionConfig"=>"{\"subscription_level\":1,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"column_names\":\"names\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"fields\":true},\"intouch\":{\"intouch_fields\":true},\"mobFields\":{\"mobile_fields\":true}}", "groupname"=>"3rd Somewhere", "groupid"=>"3", "groupNormalised"=>"1", "sectionid"=>"3", "sectionname"=>"Section 1", "section"=>"beavers", "isDefault"=>"1", "permissions"=>{"badge"=>10, "member"=>20, "user"=>100, "register"=>100, "contact"=>100, "programme"=>10, "originator"=>1, "events"=>100, "finance"=>100, "flexi"=>100}},
-      ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/api.php?action=getUserRoles", :body => roles_body.to_json, :content_type => 'application/json')
-
+      Osm::Model.stub('has_permission?').with(api: $api, to: :write, on: :badge, section: 3, no_read_cache: false).and_return(false)
+      Osm::Section.stub(:get){ Osm::Section.new(id: 3, type: :cubs) }
       Osm::Activity.stub(:get) { Osm::Activity.new(:badges => [
         Osm::Activity::Badge.new(badge_type: :activity, badge_section: :beavers, requirement_label: 'label', data: 'data', badge_name: 'badge', badge_id: 2, badge_version: 0, requirement_id: 200)
       ]) }
   
       meeting = Osm::Meeting.new(
-        :id => 2,
-        :date => Date.new(2000, 1, 2),
-        :section_id => 3,
-        :activities => [Osm::Meeting::Activity.new(:activity_id => 4)],
-        :badge_links => [
+        id: 2,
+        date: Date.new(2000, 1, 2),
+        section_id: 3,
+        activities: [Osm::Meeting::Activity.new(activity_id: 4)],
+        badge_links: [
           Osm::Activity::Badge.new(badge_type: :activity, badge_section: :beavers, requirement_label: 'label 2', data: 'data 2', badge_name: 'badge 2', badge_id: 4, badge_version: 1, requirement_id: 400)
         ],
       )
 
-      meeting.get_badge_requirements(@api).should == [
+      meeting.get_badge_requirements($api).should == [
         {"badge"=>nil, "badge_id"=>4, "badge_version"=>1, "column_id"=>400, "badgeName"=>"badge 2", "badgetype"=>:activity, "columngroup"=>nil, "columnname"=>nil, "data"=>"data 2", "eveningid"=>2, "meetingdate"=>Date.new(2000, 1, 2), "name"=>"label 2", "section"=>:beavers, "sectionid"=>3},
         {"badge"=>nil, "badge_id"=>2, "badge_version"=>0, "column_id"=>200, "badgeName"=>"badge", "badgetype"=>:activity, "columngroup"=>nil, "columnname"=>nil, "data"=>"data", "eveningid"=>2, "meetingdate"=>Date.new(2000, 1, 2), "name"=>"label", "section"=>:beavers, "sectionid"=>3}
       ]
     end
 
     it "Create a meeting (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=addActivityToProgramme'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'meetingdate' => '2000-01-02',
+      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => -1,
         'start' => '2000-01-02',
         'starttime' => '11:11',
         'endtime' => '22:22',
         'title' => 'Title',
-      }
+      }).and_return({"result"=>0})
 
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
-      Osm::Meeting.create(@api, {
+      Osm::Meeting.create($api, **{
         :section_id => 1,
         :date => Date.new(2000, 1, 2),
         :start_time => '11:11',
@@ -204,8 +190,8 @@ describe "Meeting" do
 
     it "Create a meeting (failed)" do
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
-      Osm::Meeting.create(@api, {
+      $api.should_receive(:post_query).and_return([])
+      Osm::Meeting.create($api, **{
         :section_id => 1,
         :date => Date.new(2000, 1, 2),
         :start_time => '11:11',
@@ -216,49 +202,40 @@ describe "Meeting" do
 
 
     it "Add activity to meeting (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=addActivityToProgramme'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-        'meetingdate' => '2000-01-02',
+      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => 2,
         'notes' => 'Notes',
-      }
-
+      }).and_return({"result"=>0})
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
-      activity = Osm::Activity.new(:id => 2, :title => 'Title')
-      meeting = Osm::Meeting.new(:section_id => 1, :date => Date.new(2000, 1, 2))
-      meeting.add_activity(@api, activity, 'Notes').should == true
+
+      activity = Osm::Activity.new(id: 2, title: 'Title')
+      meeting = Osm::Meeting.new(section_id: 1, date: Date.new(2000, 1, 2))
+      meeting.add_activity(api: $api, activity: activity, notes: 'Notes').should == true
       meeting.activities[0].activity_id.should == 2
     end
 
     it "Add activity to meeting (failed)" do
-      HTTParty.should_receive(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
-      activity = Osm::Activity.new(:id => 2, :title => 'Title')
-      meeting = Osm::Meeting.new(:section_id => 1, :date => Date.new(2000, 1, 2))
-      meeting.add_activity(@api, activity, 'Notes').should == false
+      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
+        'sectionid' => 1,
+        'activityid' => 2,
+        'notes' => 'Notes',
+      }).and_return({"result"=>1})
+      activity = Osm::Activity.new(id: 2, title: 'Title')
+      meeting = Osm::Meeting.new(section_id: 1, date: Date.new(2000, 1, 2))
+      meeting.add_activity(api: $api, activity: activity, notes: 'Notes').should == false
     end
 
 
     it "Update a meeting (succeded)" do
-      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=editEvening'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
+      $api.should_receive(:post_query).with('programme.php?action=editEvening', post_data: {
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '',
         'activity' => '[{"activityid":3,"notes":"Some notes"}]',
         'badgelinks' => '[{"badge_id":"181","badge_version":"0","column_id":"93384","badge":null,"badgeLongName":"Badge name","columnname":null,"columnnameLongName":"l","data":"","section":"beavers","sectionLongName":null,"badgetype":"activity","badgetypeLongName":null}]',
-      }
+      }).and_return({"result"=>0})
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":0}'}) }
 
       meeting = Osm::Meeting.new(
         :id=>1,
@@ -276,46 +253,33 @@ describe "Meeting" do
           :requirement_id => 93384,
         )]
       )
-      meeting.update(@api).should == true
+      meeting.update($api).should == true
     end
 
     it "Update a meeting (failed)" do
-      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=editEvening'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
+      $api.should_receive(:post_query).with('programme.php?action=editEvening', post_data: {
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'badgelinks' => '[]',
-      }
+      }).and_return({"result"=>1})
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":1}'}) }
 
       meeting = Osm::Meeting.new(:id=>1, :section_id=>2, :date=>Date.new(2000, 01, 02))
-      meeting.update(@api).should == false
+      meeting.update($api).should == false
     end
 
     it "Update a meeting (invalid meeting)" do
       meeting = Osm::Meeting.new
-      expect{ meeting.update(@api) }.to raise_error(Osm::ObjectIsInvalid)
+      expect{ meeting.update($api) }.to raise_error(Osm::ObjectIsInvalid)
     end
 
 
     it "Delete a meeting" do
-      url = 'https://www.onlinescoutmanager.co.uk/programme.php?action=deleteEvening&eveningid=1&sectionid=2'
-      post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
-      }
+      $api.should_receive(:post_query).with('programme.php?action=deleteEvening&eveningid=1&sectionid=2').and_return(nil)
       Osm::Term.stub(:get_for_section) { [] }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>''}) }
 
       meeting = Osm::Meeting.new(:id=>1, :section_id=>2)
-      meeting.delete(@api).should == true
+      meeting.delete($api).should == true
     end
 
   end # Describe using API
@@ -329,9 +293,9 @@ describe "Meeting" do
         ]},
         "badgelinks" => {"5" => []},
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/programme.php?action=getProgramme&sectionid=3&termid=4", :body => body.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with('programme.php?action=getProgramme&sectionid=3&termid=4').and_return(body)
 
-      programme = Osm::Meeting.get_for_section(@api, 3, 4)
+      programme = Osm::Meeting.get_for_section(api: $api, section: 3, term: 4)
       programme.size.should == 1
       meeting = programme[0]
       meeting.activities.size.should == 1
