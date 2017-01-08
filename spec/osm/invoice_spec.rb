@@ -138,29 +138,11 @@ describe "Invoice" do
         end
 
         it "From API" do
-          url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoices&sectionid=3&showArchived=true'
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => @invoices_body.to_json}) }
-          url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoice&sectionid=3&invoiceid=1'
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => @invoice1_body.to_json}) }
-          url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoice&sectionid=3&invoiceid=2'
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => @invoice2_body.to_json}) }
+          $api.should_receive(:post_query).with('finances.php?action=getInvoices&sectionid=3&showArchived=true').and_return(@invoices_body)
+          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
+          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
 
-          invoices = Osm::Invoice.get_for_section(@api, 3)
+          invoices = Osm::Invoice.get_for_section(api: $api, section: 3)
           invoices.size.should == 1
           invoice = invoices[0]
           invoice.id.should == 1
@@ -174,58 +156,22 @@ describe "Invoice" do
         end
 
         it "Honours archived option" do
-          url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoices&sectionid=3&showArchived=true'
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => @invoices_body.to_json}) }
-          url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoice&sectionid=3&invoiceid=1'
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => @invoice1_body.to_json}) }
-          url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoice&sectionid=3&invoiceid=2'
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => @invoice2_body.to_json}) }
+          $api.should_receive(:post_query).with('finances.php?action=getInvoices&sectionid=3&showArchived=true').and_return(@invoices_body)
+          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
+          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
 
-          invoices = Osm::Invoice.get_for_section(@api, 3, {:include_archived => true})
+          invoices = Osm::Invoice.get_for_section(api: $api, section: 3, include_archived: true)
           invoices.size.should == 2
         end
 
         it "From Cache" do
-          url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoices&sectionid=3&showArchived=true'
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => @invoices_body.to_json}) }
-          url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoice&sectionid=3&invoiceid=1'
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => @invoice1_body.to_json}) }
-          url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoice&sectionid=3&invoiceid=2'
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => @invoice2_body.to_json}) }
+          $api.should_receive(:post_query).with('finances.php?action=getInvoices&sectionid=3&showArchived=true').and_return(@invoices_body)
+          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
+          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
 
-          invoices = Osm::Invoice.get_for_section(@api, 3)
-          HTTParty.should_not_receive(:post)
-          Osm::Invoice.get_for_section(@api, 3).should == invoices
+          invoices = Osm::Invoice.get_for_section(api: $api, section: 3)
+          $api.should_not_receive(:post_query)
+          Osm::Invoice.get_for_section(api: $api, section: 3).should == invoices
         end
 
       end
@@ -259,15 +205,9 @@ describe "Invoice" do
             "A Budget"
           ]
         }
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoice&sectionid=3&invoiceid=1'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => invoice1_body.to_json}) }
+        $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(invoice1_body)
 
-        invoice = Osm::Invoice.get(@api, 3, 1)
+        invoice = Osm::Invoice.get(api: $api, section: 3, id: 1)
         invoice.should_not be_nil
         invoice.id.should == 1
       end
@@ -280,18 +220,13 @@ describe "Invoice" do
           :date => Date.new(2002, 3, 4),
         )
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=addInvoice&sectionid=1'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"id":2}'}) }
+        }).and_return({"id"=>2})
 
-        invoice.create(@api).should == true
+        invoice.create($api).should == true
         invoice.id.should == 2
       end
 
@@ -303,18 +238,13 @@ describe "Invoice" do
           :date => Date.new(2002, 3, 4),
         )
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=addInvoice&sectionid=1'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"message":"Something went wrong"}'}) }
+        }).and_return({"message"=>"Something went wrong"})
 
-        invoice.create(@api).should == false
+        invoice.create($api).should == false
         invoice.id.should be_nil
       end
 
@@ -327,19 +257,14 @@ describe "Invoice" do
           :date => Date.new(2002, 3, 4),
         )
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=addInvoice&sectionid=2'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
+        }).and_return({"ok"=>true})
 
-        invoice.update(@api).should == true
+        invoice.update($api).should == true
       end
 
       it "Update (failure)" do
@@ -351,130 +276,93 @@ describe "Invoice" do
           :date => Date.new(2002, 3, 4),
         )
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=addInvoice&sectionid=2'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
+        }).and_return({"ok"=>false})
 
-        invoice.update(@api).should == false
+        invoice.update($api).should == false
       end
 
       it "Delete (success)" do
         invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=deleteInvoice&sectionid=2'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
+        }).and_return({"ok"=>true})
 
-        invoice.delete(@api).should == true
+        invoice.delete($api).should == true
       end
 
       it "Delete (failure)" do
         invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=deleteInvoice&sectionid=2'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
+        }).and_return({"ok"=>false})
 
-        invoice.delete(@api).should == false
+        invoice.delete($api).should == false
       end
 
       it "Finalise invoice (success)" do
         invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
+        $api.should_receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({"ok"=>true})
 
-        invoice.finalise(@api).should == true
+        invoice.finalise($api).should == true
         invoice.finalised.should == true
       end
 
       it "Finalise invoice (failure)" do
         invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
+        $api.should_receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({"ok"=>false})
 
-        invoice.finalise(@api).should == false
+        invoice.finalise($api).should == false
         invoice.finalised.should == false
       end
 
       it "Finalise invoice (already finalised)" do
         invoice = Osm::Invoice.new(:id => 1, :section_id => 2, :finalised => true)
 
-        HTTParty.should_not_receive(:post)
+        $api.should_not_receive(:post_query)
 
-        invoice.finalise(@api).should == false
+        invoice.finalise($api).should == false
         invoice.finalised.should == true
       end
 
       it "Archive invoice (success)" do
         invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=deleteInvoice&sectionid=2'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'archived' => 1,
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
+        }).and_return({"ok"=>true})
 
-        invoice.archive(@api).should == true
+        invoice.archive($api).should == true
         invoice.archived.should == true
       end
 
       it "Archive invoice (failure)" do
         invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=deleteInvoice&sectionid=2'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'archived' => 1,
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
+        }).and_return({"ok"=>false})
 
-        invoice.archive(@api).should == false
+        invoice.archive($api).should == false
         invoice.archived.should == false
       end
 
       it "Archive invoice (already archived)" do
         invoice = Osm::Invoice.new(:id => 1, :section_id => 2, :archived => true)
 
-        HTTParty.should_not_receive(:post)
+        $api.should_not_receive(:post_query)
 
-        invoice.archive(@api).should == false
+        invoice.archive($api).should == false
         invoice.archived.should == true
       end
 
@@ -487,10 +375,10 @@ describe "Invoice" do
         data = {"identifier" => "id","items" => [
           {"id" => "1","invoiceid" => "2","recordid" => "3","sectionid" => "4","entrydate" => "2012-01-02","amount" => "1.23","type" => "Expense","payto_userid" => "John Smith","comments" => "Comment","categoryid" => "Default","firstname" => "John Smith"}
         ]}
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/finances.php?action=getInvoiceRecords&invoiceid=2&sectionid=4&dateFormat=generic", :body => data.to_json, :content_type => 'application/json')
+        $api.should_receive(:post_query).with('finances.php?action=getInvoiceRecords&invoiceid=2&sectionid=4&dateFormat=generic').and_return(data)
 
-        invoice = Osm::Invoice.new(:id => 2, :section_id => 4)
-        items = invoice.get_items(@api)
+        invoice = Osm::Invoice.new(id: 2, section_id: 4)
+        items = invoice.get_items($api)
         items.size.should == 1
         item = items[0]
         item.id.should == 1
@@ -506,7 +394,7 @@ describe "Invoice" do
       end
 
       it "Create (success)" do
-        invoice = Osm::Invoice.new(:id => 3, :section_id => 2)
+        invoice = Osm::Invoice.new(id: 3, section_id: 2)
         item = Osm::Invoice::Item.new(
           :invoice => invoice,
           :amount => '1.23',
@@ -517,13 +405,7 @@ describe "Invoice" do
           :payto => 'Person to Pay',
         )
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=addRecord&invoiceid=3&sectionid=2'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
+        $api.should_receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({"ok"=>true})
 
         data1 = [
           Osm::Invoice::Item.new(:id => 1, :invoice => invoice, :record_id => 3, :date => Date.new(2012, 1, 2), :amount => '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
@@ -532,9 +414,8 @@ describe "Invoice" do
           Osm::Invoice::Item.new(:id => 1, :invoice => invoice, :record_id => 3, :date => Date.new(2012, 1, 2), :amount => '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
           Osm::Invoice::Item.new(:id => 2, :invoice => invoice, :record_id => 4, :date => Date.new(2012, 1, 2), :amount => '1.23', :type => :expense, :payto => 'John Smith', :description => '', :budget_name => 'Default'),
         ]
-        invoice.should_receive(:get_items).with(@api, {:no_cache=>true}).and_return(data1, data2)
+        invoice.should_receive(:get_items).with($api, no_read_cache: true).and_return(data1, data2)
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=updateRecord&sectionid=2&dateFormat=generic'
         [
           # osm_name, new_value
           ['amount', '1.23'],
@@ -544,21 +425,17 @@ describe "Invoice" do
           ['categoryid', 'A budget'],
           ['entrydate', '2003-05-06'],
         ].each do |osm_name, new_value|
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
+          $api.should_receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
             'section_id' => 2,
             'invoiceid' => 3,
             'recordid' => 4,
             'row' => 0,
             'column' => osm_name,
             'value' => new_value,
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => {osm_name => new_value}.to_json}) }
+          }).and_return({osm_name => new_value})
         end
 
-        item.create(@api).should == true
+        item.create($api).should == true
         item.id.should == 2
         item.record_id.should == 4
       end
@@ -575,20 +452,14 @@ describe "Invoice" do
           :payto => 'Person to Pay',
         )
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=addRecord&invoiceid=3&sectionid=2'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
+        $api.should_receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({"ok"=>false})
 
         data = [
           Osm::Invoice::Item.new(:id => 1, :invoice => invoice, :record_id => 3, :date => Date.new(2012, 1, 2), :amount => '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
         ]
-        invoice.should_receive(:get_items).with(@api, {:no_cache=>true}).and_return(data)
+        invoice.should_receive(:get_items).with($api, no_read_cache: true).and_return(data)
 
-        item.create(@api).should == false
+        item.create($api).should == false
       end
 
       it "Update (success)" do
@@ -604,7 +475,6 @@ describe "Invoice" do
         item.description = 'A new description'
         item.payto = 'Another person to Pay'
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=updateRecord&sectionid=2&dateFormat=generic'
         [
           # osm_name, new_value
           ['amount', '1.23'],
@@ -614,21 +484,17 @@ describe "Invoice" do
           ['categoryid', 'A different budget'],
           ['entrydate', '2003-05-06'],
         ].each do |osm_name, new_value|
-          HTTParty.should_receive(:post).with(url, :body => {
-            'apiid' => @CONFIGURATION[:api][:osm][:id],
-            'token' => @CONFIGURATION[:api][:osm][:token],
-            'userid' => 'user_id',
-            'secret' => 'secret',
+          $api.should_receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
             'section_id' => 2,
             'invoiceid' => 3,
             'recordid' => 4,
             'row' => 0,
             'column' => osm_name,
             'value' => new_value,
-          }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => {osm_name => new_value}.to_json}) }
+          }).and_return({osm_name => new_value})
         end
 
-        item.update(@api).should == true
+        item.update($api).should == true
       end
 
       it "Update (failure)" do
@@ -645,51 +511,36 @@ describe "Invoice" do
         )
         item.description = 'A new description'
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=updateRecord&sectionid=2&dateFormat=generic'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
           'section_id' => 2,
           'invoiceid' => 3,
           'recordid' => 4,
           'row' => 0,
           'column' => 'comments',
           'value' => 'A new description',
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"comments":"A description"}'}) }
+        }).and_return({"comments"=>"A description"})
 
-        item.update(@api).should == false
+        item.update($api).should == false
       end
 
       it "Delete (success)" do
         item = Osm::Invoice::Item.new(:id => 1, :invoice => Osm::Invoice.new(:id => 3, :section_id => 2))
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=deleteEntry&sectionid=2'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=deleteEntry&sectionid=2', post_data: {
           'id' => 1,
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":true}'}) }
+        }).and_return({"ok"=>true})
 
-        item.delete(@api).should == true
+        item.delete($api).should == true
       end
 
       it "Delete (failure)" do
         item = Osm::Invoice::Item.new(:id => 1, :invoice => Osm::Invoice.new(:id => 2, :section_id => 4),)
 
-        url = 'https://www.onlinescoutmanager.co.uk/finances.php?action=deleteEntry&sectionid=4'
-        HTTParty.should_receive(:post).with(url, :body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
+        $api.should_receive(:post_query).with('finances.php?action=deleteEntry&sectionid=4', post_data: {
           'id' => 1,
-        }) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body => '{"ok":false}'}) }
+        }).and_return({"ok"=>false})
 
-        item.delete(@api).should == false
+        item.delete($api).should == false
       end
 
     end
