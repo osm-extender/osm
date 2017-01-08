@@ -26,9 +26,7 @@ module Osm
       :osm => 'https://www.onlinescoutmanager.co.uk',
       :osm_staging => 'http://staging.onlinescoutmanager.co.uk',
       :osm_migration => 'https://migration.onlinescoutmanager.co.uk'
-    }
-
-    private_constant :BASE_URLS
+    }.freeze
 
 
     # Initialize a new API connection

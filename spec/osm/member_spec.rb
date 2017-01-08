@@ -268,9 +268,9 @@ describe "Member" do
             ],
           },
         }
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
-        members = Osm::Member.get_for_section(@api, 1, 2)
+        members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         members.size.should == 1
         member = members[0]
         member.id.should == 123
@@ -408,9 +408,9 @@ describe "Member" do
             ],
           },
         }
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
-        members = Osm::Member.get_for_section(@api, 1, 2)
+        members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         members.size.should == 1
         member = members[0]
         member.id.should == 123
@@ -461,9 +461,9 @@ describe "Member" do
             ],
           },
         }
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
-        members = Osm::Member.get_for_section(@api, 1, 2)
+        members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         members.size.should == 1
         member = members[0]
         member.id.should == 123
@@ -510,9 +510,9 @@ describe "Member" do
             ],
           },
         }
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
-        members = Osm::Member.get_for_section(@api, 1, 2)
+        members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         members.size.should == 1
         member = members[0]
         member.id.should == 123
@@ -527,9 +527,9 @@ describe "Member" do
           'data' => [],
           'meta' => {},
         }
-        FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/ext/members/contact/grid/?action=getMembers", :body => body.to_json, :content_type => 'application/json')
+        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
-        Osm::Member.get_for_section(@api, 1, 2).should == []
+        Osm::Member.get_for_section(api: $api, section: 1, term: 2).should == []
       end
 
     end
@@ -564,58 +564,50 @@ describe "Member" do
       end
 
       it "Success" do
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/users.php?action=newMember', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('users.php?action=newMember', post_data: {
           "sectionid" => 2,
           "firstname" => "First",
           "lastname" => "Last",
           "dob" => "2000-01-02",
           "started" => "2006-01-02",
           "startedsection" => "2006-01-07",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":577743}'}) }
+        }).and_return({"result"=>"ok","scoutid"=>577743})
 
         @member.stub(:update) { true }
         Osm::Term.stub(:get_for_section) { [] }
 
-        @member.create(@api).should == true
+        @member.create($api).should == true
         @member.id.should == 577743
       end
 
       it "Failed the create stage in OSM" do
-        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-        @member.create(@api).should == false
+        $api.should_receive(:post_query).with('users.php?action=newMember', post_data: {"firstname"=>"First", "lastname"=>"Last", "dob"=>"2000-01-02", "started"=>"2006-01-02", "startedsection"=>"2006-01-07", "sectionid"=>2}).and_return({})
+        @member.create($api).should == false
       end
 
       it "Failed the update stage in OSM" do
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/users.php?action=newMember', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('users.php?action=newMember', post_data: {
           "sectionid" => 2,
           "firstname" => "First",
           "lastname" => "Last",
           "dob" => "2000-01-02",
           "started" => "2006-01-02",
           "startedsection" => "2006-01-07",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"result":"ok","scoutid":577743}'}) }
+        }).and_return({"result"=>"ok","scoutid"=>577743})
 
         @member.stub(:update) { false }
         Osm::Term.stub(:get_for_section) { [] }
 
-        @member.create(@api).should == nil
+        @member.create($api).should == nil
         @member.id.should == 577743
       end
 
       it "Raises error if member is invalid" do
-        expect{ Osm::Member.new.create(@api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
+        expect{ Osm::Member.new.create($api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
       end
 
       it "Raises error if member exists in OSM (has an ID)" do
-        expect{ Osm::Member.new(id: 12345).create(@api) }.to raise_error(Osm::Error, 'the member already exists in OSM')
+        expect{ Osm::Member.new(id: 12345).create($api) }.to raise_error(Osm::Error, 'the member already exists in OSM')
       end
 
     end
@@ -651,103 +643,71 @@ describe "Member" do
       end
 
       it "Only updated fields" do
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/members/contact/?action=update', post_data: {
           "sectionid" => 2,
           "scoutid" => 1,
           "column" => "firstname",
           "value" => "John",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+        }).and_return({"ok"=>true})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 7,
           "column_id" => 34,
           "value" => "Unspecified",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":"Unspecified"}}'}) }
+        }).and_return({"data"=>{"value"=>"Unspecified"}})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 6,
           "data[address1]" => "Address 1",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+        }).and_return({"status"=>true})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 1,
           "data[address2]" => "Address 2",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+        }).and_return({"status"=>true})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 2,
           "data[address3]" => "Address 3",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+        }).and_return({"status"=>true})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 3,
           "data[address4]" => "Address 4",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+        }).and_return({"status"=>true})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 4,
           "data[surgery]" => "Surgery",
           "data[test_var]" => "This is still a test",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+        }).and_return({"status"=>true})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 5,
           "column_id" => 123,
           "value" => "321",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":"321"}}'}) }
+        }).and_return({"data"=>{"value"=>"321"}})
 
         Osm::Term.stub(:get_for_section) { [] }
 
@@ -760,55 +720,39 @@ describe "Member" do
         @member.emergency_contact.address_4 = 'Address 4'
         @member.doctor.surgery = 'Surgery'
         @member.doctor.additional_information['test_var'] = 'This is still a test'
-        @member.update(@api).should == true
+        @member.update($api).should == true
       end
 
       it "All fields" do
         {'firstname'=>'First', 'lastname'=>'Last', 'patrolid'=>3, 'patrolleader'=>0, 'dob'=>'2000-01-02', 'startedsection'=>'2006-01-07', 'started'=>'2006-01-02'}.each do |key, value|
-          HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
-            "apiid" => "1",
-            "token" => "API TOKEN",
-            "userid" => "user_id",
-            "secret" => "secret",
+          $api.should_receive(:post_query).with('ext/members/contact/?action=update', post_data: {
             "sectionid" => 2,
             "scoutid" => 1,
             "column" => key,
             "value" => value,
-          }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+          }).and_return({"ok"=>true})
         end
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 7,
           "column_id" => 34,
           "value" => "Other",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":"Other"}}'}) }
+        }).and_return({"data"=>{"value"=>"Other"}})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 5,
           "column_id" => 123,
           "value" => "123",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":"123"}}'}) }
+        }).and_return({"data"=>{"value"=>"123"}})
 
         {6=>'A', 1=>'B', 2=>'C'}.each do |group_id, postcode|
-          HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
-            "apiid" => "1",
-            "token" => "API TOKEN",
-            "userid" => "user_id",
-            "secret" => "secret",
+          $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
             "context" => "members",
             "associated_type" => "member",
             "associated_id" => 1,
@@ -828,14 +772,10 @@ describe "Member" do
             "data[email2_leaders]" => false,
             "data[phone1_sms]" => false,
             "data[phone2_sms]" => false,
-          }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+          }).and_return({"status"=>true})
         end
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -851,13 +791,9 @@ describe "Member" do
           "data[phone2]" => nil,
           "data[email1]" => nil,
           "data[email2]" => nil,
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+        }).and_return({"status"=>true})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=update&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -873,21 +809,21 @@ describe "Member" do
           "data[phone1]" => nil,
           "data[phone2]" => nil,
           "data[test_var]" => "This is a test",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"status":true}'}) }
+        }).and_return({"status"=>true})
 
         Osm::Term.stub(:get_for_section) { [] }
 
-        @member.update(@api, true).should == true
+        @member.update($api, force: true).should == true
       end
 
       it "Failed to update in OSM" do
         @member.first_name = 'John'
-        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-        @member.update(@api).should == false
+        $api.stub(:post_query) { {} }
+        @member.update($api).should == false
       end
 
       it "Raises error if member is invalid" do
-        expect{ Osm::Member.new.create(@api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
+        expect{ Osm::Member.new.create($api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
       end
 
       it "Handles disabled contacts" do
@@ -896,41 +832,33 @@ describe "Member" do
         @member.secondary_contact = nil
         @member.emergency_contact = nil
         @member.doctor = nil
-        HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{}'}) }
-        @member.update(@api).should == true
+        $api.stub(:post_query) { {} }
+        @member.update($api).should == true
       end
 
       it "When setting data to a blank string" do
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/members/contact/?action=update', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/members/contact/?action=update', post_data: {
           "sectionid" => 2,
           "scoutid" => 1,
           "column" => "firstname",
           "value" => "",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
+        }).and_return({"ok"=>true})
 
-        HTTParty.should_receive(:post).with('https://www.onlinescoutmanager.co.uk/ext/customdata/?action=updateColumn&section_id=2', {:body => {
-          "apiid" => "1",
-          "token" => "API TOKEN",
-          "userid" => "user_id",
-          "secret" => "secret",
+        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
           "group_id" => 5,
           "column_id" => 123,
           "value" => "",
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"data":{"value":null}}'}) }
+        }).and_return({"data"=>{"value"=>nil}})
 
         Osm::Term.stub(:get_for_section) { [] }
 
         @member.stub('valid?'){ true }
         @member.first_name = ''
         @member.additional_information[123] = ''
-        @member.update(@api).should == true
+        @member.update($api).should == true
       end
 
     end
@@ -956,9 +884,9 @@ describe "Member" do
         :emergency_contact => Osm::Member::EmergencyContact.new(),
         :doctor => Osm::Member::DoctorContact.new(),
       )
-      HTTParty.stub(:post) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :content_type=>'image/jpeg', :body=>'abcdef'}) }
+      $api.stub(:post_query).with('ext/members/contact/images/member.php?sectionid=2&scoutid=1&bw=false').and_return('abcdef')
 
-      member.get_photo(@api).should == "abcdef"
+      member.get_photo($api).should == "abcdef"
     end
 
 
@@ -988,65 +916,58 @@ describe "Member" do
       end
 
       it "Get the key" do
-        url = 'https://www.onlinescoutmanager.co.uk/api.php?action=getMyScoutKey&sectionid=2&scoutid=1'
-        HTTParty.should_receive(:post).with(url, {:body => {
-          'apiid' => @CONFIGURATION[:api][:osm][:id],
-          'token' => @CONFIGURATION[:api][:osm][:token],
-          'userid' => 'user_id',
-          'secret' => 'secret',
-        }}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true,"key":"KEY-HERE"}'}) }
-
-        @member.myscout_link_key(@api).should == 'KEY-HERE'
+        $api.should_receive(:post_query).with('api.php?action=getMyScoutKey&sectionid=2&scoutid=1').and_return({"ok"=>true,"key"=>"KEY-HERE"})
+        @member.myscout_link_key($api).should == 'KEY-HERE'
       end
 
       it "Default" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
+        @member.myscout_link($api).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Payments" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api, :payments).should == 'https://www.onlinescoutmanager.co.uk/parents/payments.php?sc=1&se=2&c=KEY-HERE'
+        @member.myscout_link($api, link_to: :payments).should == 'https://www.onlinescoutmanager.co.uk/parents/payments.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Events" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api, :events).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE'
+        @member.myscout_link($api, link_to: :events).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Specific Event" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api, :events, 2).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE&e=2'
+        @member.myscout_link($api, link_to: :events, item_id: 2).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE&e=2'
       end
 
       it "Programme" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api, :programme).should == 'https://www.onlinescoutmanager.co.uk/parents/programme.php?sc=1&se=2&c=KEY-HERE'
+        @member.myscout_link($api, link_to: :programme).should == 'https://www.onlinescoutmanager.co.uk/parents/programme.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Badges" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api, :badges).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
+        @member.myscout_link($api, link_to: :badges).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Notice board" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api, :notice).should == 'https://www.onlinescoutmanager.co.uk/parents/notice.php?sc=1&se=2&c=KEY-HERE'
+        @member.myscout_link($api, link_to: :notice).should == 'https://www.onlinescoutmanager.co.uk/parents/notice.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Personal details" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api, :details).should == 'https://www.onlinescoutmanager.co.uk/parents/details.php?sc=1&se=2&c=KEY-HERE'
+        @member.myscout_link($api, link_to: :details).should == 'https://www.onlinescoutmanager.co.uk/parents/details.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Census detail entry" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api, :census).should == 'https://www.onlinescoutmanager.co.uk/parents/census.php?sc=1&se=2&c=KEY-HERE'
+        @member.myscout_link($api, link_to: :census).should == 'https://www.onlinescoutmanager.co.uk/parents/census.php?sc=1&se=2&c=KEY-HERE'
       end
 
       it "Gift Aid consent" do
         @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link(@api, :giftaid).should == 'https://www.onlinescoutmanager.co.uk/parents/giftaid.php?sc=1&se=2&c=KEY-HERE'
+        @member.myscout_link($api, link_to: :giftaid).should == 'https://www.onlinescoutmanager.co.uk/parents/giftaid.php?sc=1&se=2&c=KEY-HERE'
       end
 
     end

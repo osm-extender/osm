@@ -115,164 +115,157 @@ module Osm
 
 
     # Get members for a section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the members for
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the members for
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Member>]
-    def self.get_for_section(api, section, term=nil, options={})
-      require_ability_to(api, :read, :member, section, options)
+    def self.get_for_section(api:, section:, term: nil, no_read_cache: false)
+      require_ability_to(api: api, to: :read, on: :member, section: section, no_read_cache: no_read_cache)
       if term.nil?
-        section = Osm::Section.get(api, section) if section.is_a?(Fixnum)
-        term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api, section)
+        section = Osm::Section.get(api: api, id: section) if section.is_a?(Fixnum)
+        term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api: api, section: section)
       end
       cache_key = ['members', section.to_i, term.to_i]
 
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
-      end
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        api_response = api.post_query('ext/members/contact/grid/?action=getMembers', post_data: {
+          'section_id' => section.to_i,
+          'term_id' => term.to_i,
+        })
 
-      result = Array.new
+        data = api_response['data'].is_a?(Hash) ? api_response['data'].values : []
+        structure = (api_response['meta'] || {})['structure'] || []
+        structure = structure.map{ |i| [i['group_id'].to_i, i ] }.to_h # Make a hash of identifier to group data hash
 
-      api_response = api.perform_query('ext/members/contact/grid/?action=getMembers', {
-        'section_id' => section.to_i,
-        'term_id' => term.to_i,
-      })
+        custom_labels = {}
+        key_key = 'column_id'   # the key in the data from OSM to use as the key in additional_information and labels hashes
+        structure.each do |gid, group|
+          columns = group['columns'] || []
+          custom_labels[gid.to_i] = columns.map.select{ |a| gid.eql?(GID_CUSTOM) || !CORE_FIELD_IDS.include?(a['column_id'].to_i) }.map{ |c| [c[key_key], c['label']] }.to_h
+        end
 
-      data = api_response['data'].is_a?(Hash) ? api_response['data'].values : []
-      structure = (api_response['meta'] || {})['structure'] || []
-      structure = structure.map{ |i| [i['group_id'].to_i, i ] }.to_h # Make a hash of identifier to group data hash
+        data.map do |item|
+          item_data = item['custom_data'].map{ |k,v| [k.to_i, v] }.to_h
+          member_contact = item_data[GID_MEMBER_CONTACT].nil? ? nil : item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
+          member_custom = item_data[GID_MEMBER_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_MEMBER_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
+          primary_contact = item_data[GID_PRIMARY_CONTACT].nil? ? nil : item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
+          primary_custom = item_data[GID_PRIMARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_PRIMARY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
+          secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
+          secondary_custom = item_data[GID_SECONDARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_SECONDARY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
+          emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
+          emergency_custom = item_data[GID_EMERGENCY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
+          doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
+          doctor_custom = item_data[GID_DOCTOR_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_DOCTOR_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
+          floating_data = item_data[GID_FLOATING].nil? ? {} : item_data[GID_FLOATING].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
+          custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ]
 
-      custom_labels = {}
-      key_key = 'column_id'   # the key in the data from OSM to use as the key in additional_information and labels hashes
-      structure.each do |gid, group|
-        columns = group['columns'] || []
-        custom_labels[gid.to_i] = columns.map.select{ |a| gid.eql?(GID_CUSTOM) || !CORE_FIELD_IDS.include?(a['column_id'].to_i) }.map{ |c| [c[key_key], c['label']] }.to_h
-      end
-
-      data.each do |item|
-        item_data = item['custom_data'].map{ |k,v| [k.to_i, v] }.to_h
-        member_contact = item_data[GID_MEMBER_CONTACT].nil? ? nil : item_data[GID_MEMBER_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
-        member_custom = item_data[GID_MEMBER_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_MEMBER_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
-        primary_contact = item_data[GID_PRIMARY_CONTACT].nil? ? nil : item_data[GID_PRIMARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
-        primary_custom = item_data[GID_PRIMARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_PRIMARY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
-        secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : item_data[GID_SECONDARY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
-        secondary_custom = item_data[GID_SECONDARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_SECONDARY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
-        emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : item_data[GID_EMERGENCY_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
-        emergency_custom = item_data[GID_EMERGENCY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
-        doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : item_data[GID_DOCTOR_CONTACT].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
-        doctor_custom = item_data[GID_DOCTOR_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_DOCTOR_CONTACT].select{ |k,v| !CORE_FIELD_IDS.include?(k.to_i) }.map{ |k,v| [k.to_i, v] } ]
-        floating_data = item_data[GID_FLOATING].nil? ? {} : item_data[GID_FLOATING].map{ |k,v| [k.to_i, v] }.select{ |k,v| CORE_FIELD_IDS.include?(k) }.to_h
-        custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ]
-
-        result.push Osm::Member.new(
-          :id => Osm::to_i_or_nil(item['member_id']),
-          :section_id => Osm::to_i_or_nil(item['section_id']),
-          :first_name => item['first_name'],
-          :last_name => item['last_name'],
-          :grouping_id => Osm::to_i_or_nil(item['patrol_id']),
-          :grouping_label => item['patrol'],
-          :grouping_leader => item['patrol_role_level'],
-          :grouping_leader_label => item['patrol_role_level_label'],
-          :age => item['age'],
-          :date_of_birth => Osm::parse_date(item['date_of_birth'], :ignore_epoch => true),
-          :started_section => Osm::parse_date(item['joined']),
-          :finished_section => Osm::parse_date(item['end_date']),
-          :joined_movement => Osm::parse_date(item['started']),
-          :gender => {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[(floating_data[CID_GENDER] || '').downcase],
-          :contact => member_contact.nil? ? nil : MemberContact.new(
-            first_name: item['first_name'],
-            last_name: item['last_name'],
-            address_1: member_contact[CID_ADDRESS_1],
-            address_2: member_contact[CID_ADDRESS_2],
-            address_3: member_contact[CID_ADDRESS_3],
-            address_4: member_contact[CID_ADDRESS_4],
-            postcode: member_contact[CID_POSTCODE],
-            phone_1: member_contact[CID_PHONE_1],
-            phone_2: member_contact[CID_PHONE_2],
-            email_1: member_contact[CID_EMAIL_1],
-            email_2: member_contact[CID_EMAIL_2],
-            receive_phone_1: member_contact[CID_RECIEVE_PHONE_1],
-            receive_phone_2: member_contact[CID_RECIEVE_PHONE_2],
-            receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
-            receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
-            additional_information: member_custom,
-            additional_information_labels: custom_labels[GID_MEMBER_CONTACT],
-          ),
-          :primary_contact => primary_contact.nil? ? nil : PrimaryContact.new(
-            first_name: primary_contact[CID_FIRST_NAME],
-            last_name: primary_contact[CID_LAST_NAME],
-            address_1: primary_contact[CID_ADDRESS_1],
-            address_2: primary_contact[CID_ADDRESS_2],
-            address_3: primary_contact[CID_ADDRESS_3],
-            address_4: primary_contact[CID_ADDRESS_4],
-            postcode: primary_contact[CID_POSTCODE],
-            phone_1: primary_contact[CID_PHONE_1],
-            phone_2: primary_contact[CID_PHONE_2],
-            email_1: primary_contact[CID_EMAIL_1],
-            email_2: primary_contact[CID_EMAIL_2],
-            receive_phone_1: primary_contact[CID_RECIEVE_PHONE_1],
-            receive_phone_2: primary_contact[CID_RECIEVE_PHONE_2],
-            receive_email_1: primary_contact[CID_RECIEVE_EMAIL_1],
-            receive_email_2: primary_contact[CID_RECIEVE_EMAIL_2],
-            additional_information: primary_custom,
-            additional_information_labels: custom_labels[GID_PRIMARY_CONTACT],
-          ),
-          :secondary_contact => secondary_contact.nil? ? nil : SecondaryContact.new(
-            first_name: secondary_contact[CID_FIRST_NAME],
-            last_name: secondary_contact[CID_LAST_NAME],
-            address_1: secondary_contact[CID_ADDRESS_1],
-            address_2: secondary_contact[CID_ADDRESS_2],
-            address_3: secondary_contact[CID_ADDRESS_3],
-            address_4: secondary_contact[CID_ADDRESS_4],
-            postcode: secondary_contact[CID_POSTCODE],
-            phone_1: secondary_contact[CID_PHONE_1],
-            phone_2: secondary_contact[CID_PHONE_2],
-            email_1: secondary_contact[CID_EMAIL_1],
-            email_2: secondary_contact[CID_EMAIL_2],
-            receive_phone_1: secondary_contact[CID_RECIEVE_PHONE_1],
-            receive_phone_2: secondary_contact[CID_RECIEVE_PHONE_2],
-            receive_email_1: secondary_contact[CID_RECIEVE_EMAIL_1],
-            receive_email_2: secondary_contact[CID_RECIEVE_EMAIL_2],
-            additional_information: secondary_custom,
-            additional_information_labels: custom_labels[GID_SECONDARY_CONTACT],
-          ),
-          :emergency_contact => emergency_contact.nil? ? nil : EmergencyContact.new(
-            first_name: emergency_contact[CID_FIRST_NAME],
-            last_name: emergency_contact[CID_LAST_NAME],
-            address_1: emergency_contact[CID_ADDRESS_1],
-            address_2: emergency_contact[CID_ADDRESS_2],
-            address_3: emergency_contact[CID_ADDRESS_3],
-            address_4: emergency_contact[CID_ADDRESS_4],
-            postcode: emergency_contact[CID_POSTCODE],
-            phone_1: emergency_contact[CID_PHONE_1],
-            phone_2: emergency_contact[CID_PHONE_2],
-            email_1: emergency_contact[CID_EMAIL_1],
-            email_2: emergency_contact[CID_EMAIL_2],
-            additional_information: emergency_custom,
-            additional_information_labels: custom_labels[GID_EMERGENCY_CONTACT],
-          ),
-          :doctor => doctor_contact.nil? ? nil : DoctorContact.new(
-            first_name: doctor_contact[CID_FIRST_NAME],
-            last_name: doctor_contact[CID_LAST_NAME],
-            surgery: doctor_contact[CID_SURGERY],
-            address_1: doctor_contact[CID_ADDRESS_1],
-            address_2: doctor_contact[CID_ADDRESS_2],
-            address_3: doctor_contact[CID_ADDRESS_3],
-            address_4: doctor_contact[CID_ADDRESS_4],
-            postcode: doctor_contact[CID_POSTCODE],
-            phone_1: doctor_contact[CID_PHONE_1],
-            phone_2: doctor_contact[CID_PHONE_2],
-            additional_information: doctor_custom,
-            additional_information_labels: custom_labels[GID_DOCTOR_CONTACT],
-          ),
-          additional_information: custom_data,
-          additional_information_labels: custom_labels[GID_CUSTOM],
-        )
-      end
-
-      cache_write(api, cache_key, result)
-      return result
+          new(
+            :id => Osm::to_i_or_nil(item['member_id']),
+            :section_id => Osm::to_i_or_nil(item['section_id']),
+            :first_name => item['first_name'],
+            :last_name => item['last_name'],
+            :grouping_id => Osm::to_i_or_nil(item['patrol_id']),
+            :grouping_label => item['patrol'],
+            :grouping_leader => item['patrol_role_level'],
+            :grouping_leader_label => item['patrol_role_level_label'],
+            :age => item['age'],
+            :date_of_birth => Osm::parse_date(item['date_of_birth'], :ignore_epoch => true),
+            :started_section => Osm::parse_date(item['joined']),
+            :finished_section => Osm::parse_date(item['end_date']),
+            :joined_movement => Osm::parse_date(item['started']),
+            :gender => {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[(floating_data[CID_GENDER] || '').downcase],
+            :contact => member_contact.nil? ? nil : MemberContact.new(
+              first_name: item['first_name'],
+              last_name: item['last_name'],
+              address_1: member_contact[CID_ADDRESS_1],
+              address_2: member_contact[CID_ADDRESS_2],
+              address_3: member_contact[CID_ADDRESS_3],
+              address_4: member_contact[CID_ADDRESS_4],
+              postcode: member_contact[CID_POSTCODE],
+              phone_1: member_contact[CID_PHONE_1],
+              phone_2: member_contact[CID_PHONE_2],
+              email_1: member_contact[CID_EMAIL_1],
+              email_2: member_contact[CID_EMAIL_2],
+              receive_phone_1: member_contact[CID_RECIEVE_PHONE_1],
+              receive_phone_2: member_contact[CID_RECIEVE_PHONE_2],
+              receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
+              receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
+              additional_information: member_custom,
+              additional_information_labels: custom_labels[GID_MEMBER_CONTACT],
+            ),
+            :primary_contact => primary_contact.nil? ? nil : PrimaryContact.new(
+              first_name: primary_contact[CID_FIRST_NAME],
+              last_name: primary_contact[CID_LAST_NAME],
+              address_1: primary_contact[CID_ADDRESS_1],
+              address_2: primary_contact[CID_ADDRESS_2],
+              address_3: primary_contact[CID_ADDRESS_3],
+              address_4: primary_contact[CID_ADDRESS_4],
+              postcode: primary_contact[CID_POSTCODE],
+              phone_1: primary_contact[CID_PHONE_1],
+              phone_2: primary_contact[CID_PHONE_2],
+              email_1: primary_contact[CID_EMAIL_1],
+              email_2: primary_contact[CID_EMAIL_2],
+              receive_phone_1: primary_contact[CID_RECIEVE_PHONE_1],
+              receive_phone_2: primary_contact[CID_RECIEVE_PHONE_2],
+              receive_email_1: primary_contact[CID_RECIEVE_EMAIL_1],
+              receive_email_2: primary_contact[CID_RECIEVE_EMAIL_2],
+              additional_information: primary_custom,
+              additional_information_labels: custom_labels[GID_PRIMARY_CONTACT],
+            ),
+            :secondary_contact => secondary_contact.nil? ? nil : SecondaryContact.new(
+              first_name: secondary_contact[CID_FIRST_NAME],
+              last_name: secondary_contact[CID_LAST_NAME],
+              address_1: secondary_contact[CID_ADDRESS_1],
+              address_2: secondary_contact[CID_ADDRESS_2],
+              address_3: secondary_contact[CID_ADDRESS_3],
+              address_4: secondary_contact[CID_ADDRESS_4],
+              postcode: secondary_contact[CID_POSTCODE],
+              phone_1: secondary_contact[CID_PHONE_1],
+              phone_2: secondary_contact[CID_PHONE_2],
+              email_1: secondary_contact[CID_EMAIL_1],
+              email_2: secondary_contact[CID_EMAIL_2],
+              receive_phone_1: secondary_contact[CID_RECIEVE_PHONE_1],
+              receive_phone_2: secondary_contact[CID_RECIEVE_PHONE_2],
+              receive_email_1: secondary_contact[CID_RECIEVE_EMAIL_1],
+              receive_email_2: secondary_contact[CID_RECIEVE_EMAIL_2],
+              additional_information: secondary_custom,
+              additional_information_labels: custom_labels[GID_SECONDARY_CONTACT],
+            ),
+            :emergency_contact => emergency_contact.nil? ? nil : EmergencyContact.new(
+              first_name: emergency_contact[CID_FIRST_NAME],
+              last_name: emergency_contact[CID_LAST_NAME],
+              address_1: emergency_contact[CID_ADDRESS_1],
+              address_2: emergency_contact[CID_ADDRESS_2],
+              address_3: emergency_contact[CID_ADDRESS_3],
+              address_4: emergency_contact[CID_ADDRESS_4],
+              postcode: emergency_contact[CID_POSTCODE],
+              phone_1: emergency_contact[CID_PHONE_1],
+              phone_2: emergency_contact[CID_PHONE_2],
+              email_1: emergency_contact[CID_EMAIL_1],
+              email_2: emergency_contact[CID_EMAIL_2],
+              additional_information: emergency_custom,
+              additional_information_labels: custom_labels[GID_EMERGENCY_CONTACT],
+            ),
+            :doctor => doctor_contact.nil? ? nil : DoctorContact.new(
+              first_name: doctor_contact[CID_FIRST_NAME],
+              last_name: doctor_contact[CID_LAST_NAME],
+              surgery: doctor_contact[CID_SURGERY],
+              address_1: doctor_contact[CID_ADDRESS_1],
+              address_2: doctor_contact[CID_ADDRESS_2],
+              address_3: doctor_contact[CID_ADDRESS_3],
+              address_4: doctor_contact[CID_ADDRESS_4],
+              postcode: doctor_contact[CID_POSTCODE],
+              phone_1: doctor_contact[CID_PHONE_1],
+              phone_2: doctor_contact[CID_PHONE_2],
+              additional_information: doctor_custom,
+              additional_information_labels: custom_labels[GID_DOCTOR_CONTACT],
+            ),
+            additional_information: custom_data,
+            additional_information_labels: custom_labels[GID_CUSTOM],
+          )
+        end # data.map
+      end # cache fetch
     end
 
 
@@ -282,7 +275,7 @@ module Osm
 
 
     # Create the user in OSM
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [Boolan, nil] whether the member was successfully added or not (nil is returned if the user was created but not with all the data)
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     # @raise [Osm::Error] If the member already exists in OSM
@@ -291,7 +284,7 @@ module Osm
       fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :write, :member, section_id)
 
-      data = api.perform_query("users.php?action=newMember", {
+      data = api.post_query("users.php?action=newMember", post_data: {
         'firstname' => first_name,
         'lastname' => last_name,
         'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
@@ -303,8 +296,8 @@ module Osm
       if (data.is_a?(Hash) && (data['result'] == 'ok') && (data['scoutid'].to_i > 0))
         self.id = data['scoutid'].to_i
         # The cached members for the section will be out of date - remove them
-        Osm::Term.get_for_section(api, section_id).each do |term|
-          cache_delete(api, ['members', section_id, term.id])
+        Osm::Term.get_for_section(api: api, section: section_id).each do |term|
+          cache_delete(api: api, key: ['members', section_id, term.id])
         end
         # Now it's created we need to give OSM the rest of the data
         updated = update(api, true)
@@ -315,13 +308,13 @@ module Osm
     end
 
     # Update the member in OSM
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Boolean] force Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
+    # @param api [Osm::Api] The api to use to make the request
+    # @param force [Boolean] Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
     # @return [Boolean] whether the member was successfully updated or not
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
-    def update(api, force=false)
+    def update(api, force: false)
       fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
-      require_ability_to(api, :write, :member, section_id)
+      require_ability_to(api: api, to: :write, on: :member, section: section_id)
 
       updated = true
 
@@ -336,7 +329,7 @@ module Osm
         ['joined_movement', 'started', joined_movement.strftime(Osm::OSM_DATE_FORMAT)],
       ] # our name => OSM name
       attribute_map.select{ |attr,col,val| force || changed_attributes.include?(attr) }.each do |attr,col,val|
-        data = api.perform_query("ext/members/contact/?action=update", {
+        data = api.post_query("ext/members/contact/?action=update", post_data: {
           'scoutid' => self.id,
           'column' => col,
           'value' => val,
@@ -348,7 +341,7 @@ module Osm
       # Do 'floating' attributes
       if force || changed_attributes.include?('gender')
         new_value = {male: 'Male', female: 'Female', other: 'Other'}[gender] || 'Unspecified'
-        data = api.perform_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", {
+        data = api.post_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", post_data: {
           'associated_id' => self.id,
           'associated_type' => 'member',
           'value' => new_value,
@@ -362,7 +355,7 @@ module Osm
       # Do custom attributes
       additional_information.keys.select{ |a| force || additional_information.changes.keys.include?(a) }.each do |attr|
         new_value = additional_information[attr]
-        data = api.perform_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", {
+        data = api.post_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", post_data: {
           'associated_id' => self.id,
           'associated_type' => 'member',
           'value' => new_value,
@@ -374,19 +367,19 @@ module Osm
       end # each attr to update
 
       # Do contacts
-      updated = (contact.nil? || contact.update(api, self, force)) && updated
-      updated = (primary_contact.nil? || primary_contact.update(api, self, force)) && updated
-      updated = (secondary_contact.nil? || secondary_contact.update(api, self, force)) && updated
-      updated = (emergency_contact.nil? ||emergency_contact.update(api, self, force)) && updated
-      updated = (doctor.nil? || doctor.update(api, self, force)) && updated
+      updated = (contact.nil? || contact.update(api: api, member: self, force: force)) && updated
+      updated = (primary_contact.nil? || primary_contact.update(api: api, member: self, force: force)) && updated
+      updated = (secondary_contact.nil? || secondary_contact.update(api: api, member: self, force: force)) && updated
+      updated = (emergency_contact.nil? ||emergency_contact.update(api: api, member: self, force: force)) && updated
+      updated = (doctor.nil? || doctor.update(api: api, member: self, force: force)) && updated
 
       # Finish off
       if updated
         reset_changed_attributes
         additional_information.clean_up!
         # The cached columns for the members will be out of date - remove them
-        Osm::Term.get_for_section(api, section_id).each do |term|
-          Osm::Model.cache_delete(api, ['members', section_id, term.id])
+        Osm::Term.get_for_section(api: api, section: section_id).each do |term|
+          Osm::Model.cache_delete(api: api, key: ['members', section_id, term.id])
         end
       end
       return updated
@@ -405,7 +398,7 @@ module Osm
     end
 
     # Get the full name
-    # @param [String] seperator What to split the member's first name and last name with
+    # @param seperatpr [String] What to split the member's first name and last name with
     # @return [String] this scout's full name seperated by the optional seperator
     def name(seperator=' ')
       return [first_name, last_name].select{ |i| !i.blank? }.join(seperator)
@@ -426,17 +419,17 @@ module Osm
     # Check if the member is male
     # @return [Boolean]
     def male?
-      gender == :male
+      gender.eql?(:male)
     end
 
     # Check if the member is male
     # @return [Boolean]
     def female?
-      gender == :female
+      gender.eql?(:female)
     end
 
     # Check if this is a current member of the section they were retrieved for
-    # @param [Date] date The date to check membership status for
+    # @param date [Date] The date to check membership status for
     # @return [Boolean]
     def current?(date=Date.today)
       if finished_section.nil?
@@ -475,17 +468,17 @@ module Osm
     end
 
     # Get the Key to use in My.SCOUT links for this member
-    # @param [Osm::Api] api The api to use to make the request
+    # @param api [Osm::Api] The api to use to make the request
     # @return [String] the key
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
     def myscout_link_key(api)
       fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
-      require_ability_to(api, :read, :member, section_id)
+      require_ability_to(api: api, to: :read, on: :member, section: section_id)
       fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
 
       if @myscout_link_key.nil?
-        data = api.perform_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{self.id}")
+        data = api.post_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{self.id}")
         fail Osm::Error, 'Could not retrieve the key for the link from OSM' unless data['ok']
         @myscout_link_key = data['key']
       end
@@ -494,56 +487,43 @@ module Osm
     end
 
     # Get the member's photo
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Boolean] black_and_white Whether you want the photo in blank and white (defaults to false unless the member is not active)
+    # @param api [Osm::Api] The api to use to make the request
+    # @param black_and_white [Boolean] Whether you want the photo in blank and white (defaults to false unless the member is not active)
     # @!macro options_get
     # @raise [Osm:Error] if the member doesn't exist in OSM
     # @return the photo of the member
-    def get_photo(api, black_and_white=!current?, options={})
+    def get_photo(api, black_and_white: !current?, no_read_cache: false)
       fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
       fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
 
       cache_key = ['member_photo', self.id, black_and_white]
-
-      if !options[:no_cache] && cache_exist?(api, cache_key)
-        return cache_read(api, cache_key)
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        api.post_query("ext/members/contact/images/member.php?sectionid=#{section_id}&scoutid=#{self.id}&bw=#{black_and_white}")
       end
-
-      url = "ext/members/contact/images/member.php?sectionid=#{section_id}&scoutid=#{self.id}&bw=#{black_and_white}"
-      image = api.perform_query(url)
-
-      cache_write(api, cache_key, image) unless image.nil?
-      return image
     end
 
     # Get the My.SCOUT link for this member
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Symbol] link_to The page in My.SCOUT to link to (:payments, :events, :programme, :badges, :notice, :details, :census or :giftaid)
-    # @param [#to_i] item_id Allows you to link to a specfic item (only for :events)
+    # @param api [Osm::Api] The api to use to make the request
+    # @param link_to [Symbol] The page in My.SCOUT to link to (:payments, :events, :programme, :badges, :notice, :details, :census or :giftaid)
+    # @param item_id [#to_i] Allows you to link to a specfic item (only for :events)
     # @return [String] the URL for this member's My.SCOUT
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     # @raise [Osm::ArgumentIsInvalid] If link_to is not an allowed Symbol
     # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
-    def myscout_link(api, link_to=:badges, item_id=nil)
+    def myscout_link(api, link_to: :badges, item_id: nil)
       fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
-      require_ability_to(api, :read, :member, section_id)
+      require_ability_to(api: api, to: :read, on: :member, section: section_id)
       fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
       fail Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice, :details, :census, :giftaid].include?(link_to)
 
-      link = "#{api.base_url}/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{myscout_link_key(api)}"
+      link = "#{Osm::Api::BASE_URLS[api.site]}/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{myscout_link_key(api)}"
       link += "&e=#{item_id.to_i}" if item_id && link_to.eql?(:events)
       return link
     end
 
-    # Compare member based on section_id, grouping_id, grouping_leader (descending), last_name then first_name
-    def <=>(another)
-      result = self.section_id <=> another.try(:section_id)
-      result = self.grouping_id <=> another.try(:grouping_id) if result == 0
-      result = -(self.grouping_leader <=> another.try(:grouping_leader)) if result == 0
-      result = self.last_name <=> another.try(:last_name) if result == 0
-      result = self.first_name <=> another.try(:first_name) if result == 0
-      return result
+    private def sort_by
+      ['section_id', 'grouping_id', '-grouping_leader', 'last_name', 'first_name']
     end
 
 
@@ -636,7 +616,7 @@ module Osm
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
       # Get the full name
-      # @param [String] seperator What to split the contact's first name and last name with
+      # @param seperator [String] What to split the contact's first name and last name with
       # @return [String] this scout's full name seperated by the optional seperator
       def name(seperator=' ')
         return [first_name, last_name].select{ |i| !i.blank? }.join(seperator)
@@ -649,12 +629,12 @@ module Osm
       end
 
       # Update the contact in OSM
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Member] section The member to update the contact for
-      # @param [Boolean] force Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
+      # @param api [Osm::Api] The api to use to make the request
+      # @param section [Osm::Member] The member to update the contact for
+      # @param force [Boolean] Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
       # @return [Boolean] whether the member was successfully updated or not
       # @raise [Osm::ObjectIsInvalid] If the Contact is invalid
-      def update(api, member, force=false)
+      def update(api:, member:, force: false)
         fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
         require_ability_to(api, :write, :member, member.section_id)
 
@@ -689,7 +669,7 @@ module Osm
 
         updated = true
         unless data.empty?
-          result = api.perform_query("ext/customdata/?action=update&section_id=#{member.section_id}", {
+          result = api.post_query("ext/customdata/?action=update&section_id=#{member.section_id}", post_data: {
             'associated_id' => member.id,
             'associated_type' => 'member',
             'context' => 'members',
