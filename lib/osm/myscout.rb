@@ -3,8 +3,6 @@ module Osm
   class Myscout
 
     class ParentLoginHistory < Osm::Model
-      SORT_BY= [:last_name, :first_name, :member_id]
-
       # @!attribute [rw] member_id
       #   @return [Fixnum] the id for the member
       # @!attribute [rw] first_name
@@ -34,36 +32,31 @@ module Osm
 
 
       # Get parent login history
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get login history for
+      # @param api [Osm::Api] The api to use to make the request
+      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get login history for
       # @!macro options_get
       # @return [Array<Osm::Myscout::ParentLoginHistory>]
-      def self.get_for_section(api, section, options={})
+      def self.get_for_section(api:, section:, no_read_cache: false)
         section_id = section.to_i
-        require_ability_to(api, :read, :member, section, options)
+        require_ability_to(api: api, to: :read, on: :member, section: section, no_read_cache: no_read_cache)
         cache_key = ['myscout', 'parent_login_history', section_id]
 
-        if !options[:no_cache] && cache_exist?(api, cache_key)
-          return cache_read(api, cache_key)
-        end
+        cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+          data = api.post_query("ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=#{section_id}")
+          data = {} unless data.is_a?(Hash)
+          data = data['items']
+          data = [] unless data.is_a?(Array)
 
-        data = api.perform_query("ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=#{section_id}")
-        return [] unless data.is_a?(Hash)
-        data = data['items']
-        return [] unless data.is_a?(Array)
-
-        data.map! do |item|
-          new(
-            member_id:    Osm::to_i_or_nil(item['scoutid']),
-            first_name:   item['firstname'],
-            last_name:    item['lastname'],
-            logins:       Osm::to_i_or_nil(item['numlogins']),
-            last_login:   get_last_login_date(item['lastlogin'],)
-          )
-        end
-
-        cache_write(api, cache_key, data)
-        return data
+          data.map do |item|
+            new(
+              member_id:    Osm::to_i_or_nil(item['scoutid']),
+              first_name:   item['firstname'],
+              last_name:    item['lastname'],
+              logins:       Osm::to_i_or_nil(item['numlogins']),
+              last_login:   get_last_login_date(item['lastlogin'],)
+            )
+          end
+        end # cache fetch
       end
 
       private
@@ -73,12 +66,14 @@ module Osm
         Time.strptime(date_str, '%d/%m/%Y %H:%M')
       end
 
+      def sort_by
+        ['last_name', 'first_name', 'member_id']
+      end
+
     end # class Myscout::ParentLoginHistory
 
 
     class Template < Osm::Model
-      SORT_BY = [:key]
-
       TEMPLATES = [
         {title: "First payment email", id: "email-first", description: "This email is sent to the parents the first time that you request a payment from them. The message should introduce the system to them, explain the benefits that the parents and you get, and provide account details (by using the tags).", tags:[
           {id: "DIRECT_LINK", required: true, description: "A direct link to the payments page that avoids the need for the parents to login."},
@@ -225,50 +220,45 @@ module Osm
           {id: "MEMBER_FIRSTNAME", required: false, description: "The member's first name."},
           {id: "MEMBER_LASTNAME", required: false, description: "The member's last name."},
         ]},
-      ]
+      ].freeze
 
-      VALID_TEMPLATE_IDS = TEMPLATES.map{ |t| t[:id] }
+      VALID_TEMPLATE_KEYS = TEMPLATES.map{ |t| t[:id] }.freeze
 
 
       # Get a template
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get login history for
-      # @param [String] id The ID of the template to get
+      # @param api [Osm::Api] The api to use to make the request
+      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get login history for
+      # @param key [String] The key of the template to get
       # @!macro options_get
       # @return [String, nil]
-      def self.get_template(api, section, id, options={})
-        fail ArgumentError, "Invalid template ID: #{id.inspect}" unless VALID_TEMPLATE_IDS.include?(id)
+      def self.get_template(api:, section:, key:, no_read_cache: false)
+        fail ArgumentError, "Invalid template key: #{key.inspect}" unless VALID_TEMPLATE_KEYS.include?(key)
 
         section_id = section.to_i
-        require_ability_to(api, :read, :user, section, options)
-        cache_key = ['myscout', 'template', section_id, id]
+        require_ability_to(api: api, to: :read, on: :user, section: section, no_read_cache: no_read_cache)
+        cache_key = ['myscout', 'template', section_id, key]
 
-        if !options[:no_cache] && cache_exist?(api, cache_key)
-          return cache_read(api, cache_key)
+        cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+          data = api.post_query("ext/settings/parents/?action=getTemplate&key=#{key}&section_id=#{section_id}")
+          content = data.is_a?(Hash) ? data['data'] : nil
+          content.empty? ? nil : content
         end
-
-        data = api.perform_query("ext/settings/parents/?action=getTemplate&key=#{id}&section_id=#{section_id}")
-        content = data.is_a?(Hash) ? data['data'] : ''
-        return nil if content.empty?
-
-        cache_write(api, cache_key, content)
-        return content
       end
 
       # Update a template in OSM
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get login history for
-      # @param [String] id The ID of the template to get
-      # @param [String] content The new content of the template
+      # @param api [Osm::Api] The api to use to make the request
+      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get login history for
+      # @param key [String] The key of the template to get
+      # @param content [String] The new content of the template
       # @return [Boolean] Wheter OSM reported the template as updated 
-      def self.update_template(api, section, id, content)
-        fail ArgumentError, "Invalid template ID: #{id.inspect}" unless VALID_TEMPLATE_IDS.include?(id)
+      def self.update_template(api:, section:, key:, content:)
+        fail ArgumentError, "Invalid template key: #{key.inspect}" unless VALID_TEMPLATE_KEYS.include?(key)
 
         section_id = section.to_i
-        require_ability_to(api, :write, :user, section)
+        require_ability_to(api: api, to: :write, on: :user, section: section)
 
         # Make sure required tags are present
-        tags = Osm::Myscout::Template::TEMPLATES.find{ |t| t[:id].eql?(id) }[:tags]
+        tags = Osm::Myscout::Template::TEMPLATES.find{ |t| t[:id].eql?(key) }[:tags]
         fail Osm::Error, "Couldn't find tags for template" if tags.nil?
         tags.select{ |tag| tag[:required] }.each do |tag|
           unless content.include?("[#{tag[:id]}]")
@@ -277,15 +267,15 @@ module Osm
           end
         end
 
-        data = api.perform_query('ext/settings/parents/?action=updateTemplate', {
+        data = api.post_query('ext/settings/parents/?action=updateTemplate', post_data: {
           'section_id' => section_id,
-          'key' =>        id,
+          'key' =>        key,
           'value' =>      content
         })
 
         if data.is_a?(Hash) && data['status'] && data['data']
-          cache_key = ['myscout', 'template', section_id, id]
-          cache_write(api, cache_key, content)
+          cache_key = ['myscout', 'template', section_id, key]
+          cache_write(api: api, key: cache_key, data: content)
           return true
         end
 
@@ -293,30 +283,34 @@ module Osm
       end
 
       # Restore a template to OSM's default for it
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get login history for
-      # @param [String] id The ID of the template to get
-      # @param [String] content The new content of the template
+      # @param api [Osm::Api] The api to use to make the request
+      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get login history for
+      # @param key [String] The key of the template to get
+      # @param content [String] The new content of the template
       # @return [String, nil] The content of the template (nil if not restored)
-      def self.restore_template(api, section, id)
-        fail ArgumentError, "Invalid template ID: #{id.inspect}" unless VALID_TEMPLATE_IDS.include?(id)
+      def self.restore_template(api:, section:, key:)
+        fail ArgumentError, "Invalid template key: #{key.inspect}" unless VALID_TEMPLATE_KEYS.include?(key)
 
         section_id = section.to_i
-        require_ability_to(api, :write, :user, section)
+        require_ability_to(api: api, to: :write, on: :user, section: section)
 
-        data = api.perform_query('ext/settings/parents/?action=restoreTemplate', {
+        data = api.post_query('ext/settings/parents/?action=restoreTemplate', post_data: {
           'section_id' => section_id,
-          'key' =>        id,
+          'key' =>        key,
         })
 
         if data.is_a?(Hash) && data['status']
           content = data['data']
-          cache_key = ['myscout', 'template', section_id, id]
-          cache_write(api, cache_key, content)
+          cache_key = ['myscout', 'template', section_id, key]
+          cache_write(api: api, key: cache_key, data: content)
           return content
         end
 
         return nil
+      end
+
+      private def sort_by
+        ['key']
       end
 
     end # class Myscout::Template
