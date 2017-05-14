@@ -6,7 +6,6 @@ module Osm
       class Payment < Osm::Model; end # Ensure the constant exists for the validators
       class PaymentStatus < Osm::Model; end # Ensure the constant exists for validators
 
-      SORT_BY = [:section_id, :name, :id]
       PAY_NOW_OPTIONS = {
         -1 => 'Allowed at all times',
         0  => 'Permanently disabled',
@@ -72,134 +71,120 @@ module Osm
 
 
       # Get a simple list of schedules for a section
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
+      # @param api [Osm::Api] The api to use to make the request
+      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
       # @!macro options_get
       # @return [Array<Hash>]
-      def self.get_list_for_section(api, section, options={})
-        require_ability_to(api, :read, :finance, section, options)
+      def self.get_list_for_section(api:, section:, no_read_cache: false)
+        require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
         section_id = section.to_i
         cache_key = ['online_payments', 'schedule_list', section_id]
 
-        if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-          return cache_read(api, cache_key)
+        cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+          data = api.post_query("ext/finances/onlinepayments/?action=getSchemes&sectionid=#{section_id}")
+          data = data.is_a?(Hash) ? data['items'] : nil
+          data ||= []
+          data.map!{ |i| {id: Osm::to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
         end
-
-        data = api.perform_query("ext/finances/onlinepayments/?action=getSchemes&sectionid=#{section_id}")
-        data = data.is_a?(Hash) ? data['items'] : nil
-        data ||= []
-        data.map!{ |i| {id: Osm::to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
-
-        cache_write(api, cache_key, data)
-        return data
       end
 
 
       # Get all payment schedules for a section
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
+      # @param api [Osm::Api] The api to use to make the request
+      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
       # @!macro options_get
       # @return [Array<Osm::OnlinePayment::Schedule>]
-      def self.get_for_section(api, section, options={})
-        require_ability_to(api, :read, :finance, section, options)
+      def self.get_for_section(api:, section:, no_read_cache: false)
+        require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
 
-        get_list_for_section(api, section, options).map do |schedule|
-          get(api, section, schedule[:id], options)
+        get_list_for_section(api: api, section: section, no_read_cache: no_read_cache).map do |schedule|
+          get(api: api, section: section, schedule: schedule[:id], no_read_cache: no_read_cache)
         end
       end
 
 
       # Get a payment schedules for a section
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the due badges for
-      # @param [Fixnum, #to_i] schedule The ID of the payment schedule to get
+      # @param api [Osm::Api] The api to use to make the request
+      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
+      # @param schedule [Osm::OnlinePayment::Schedule, Fixnum, #to_i] The ID of the payment schedule to get
       # @!macro options_get
       # @return [Array<Osm::OnlinePayment::Schedule>]
-      def self.get(api, section, schedule, options={})
-        require_ability_to(api, :read, :finance, section, options)
+      def self.get(api:, section:, schedule:, no_read_cache: false)
+        require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
         section_id = section.to_i
         schedule_id = schedule.to_i
         cache_key = ['online_payments', 'schedule', schedule_id]
 
-        if !options[:no_cache] && cache_exist?(api, cache_key)
-          data = cache_read(api, cache_key)
-          return data if data.section_id.eql?(section_id)
-        end
-
-        data = api.perform_query("ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=#{section_id}&schemeid=#{schedule_id}&allpayments=true")
-        schedule = new(
-          id:            Osm::to_i_or_nil(data['schemeid']),
-          section_id:    section_id,
-          account_id:    Osm::to_i_or_nil(data['accountid']),
-          name:          data['name'],
-          description:   data['description'],
-          archived:      data['archived'].eql?('1'),
-          gift_aid:      data['giftaid'].eql?('1'),
-          require_all:   data['defaulton'].eql?('1'),
-          pay_now:       data['paynow'],
-          annual_limit:  data['preauth_amount'],
-        )
-
-        (data['payments'] || []).each do |payment_data|
-          payment = Payment.new(
-            amount:   payment_data['amount'],
-            archived: payment_data['archived'].eql?('1'),
-            due_date: Osm::parse_date(payment_data['date']),
-            name:     payment_data['name'].to_s,
-            id:       Osm::to_i_or_nil(payment_data['paymentid']),
-            schedule: schedule,
+        cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+          data = api.post_query("ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=#{section_id}&schemeid=#{schedule_id}&allpayments=true")
+          schedule = new(
+            id:            Osm::to_i_or_nil(data['schemeid']),
+            section_id:    section_id,
+            account_id:    Osm::to_i_or_nil(data['accountid']),
+            name:          data['name'],
+            description:   data['description'],
+            archived:      data['archived'].eql?('1'),
+            gift_aid:      data['giftaid'].eql?('1'),
+            require_all:   data['defaulton'].eql?('1'),
+            pay_now:       data['paynow'],
+            annual_limit:  data['preauth_amount'],
           )
-          schedule.payments.push payment
-        end 
 
-        cache_write(api, cache_key, schedule)
-        return schedule
+          (data['payments'] || []).each do |payment_data|
+            payment = Payment.new(
+              amount:   payment_data['amount'],
+              archived: payment_data['archived'].eql?('1'),
+              due_date: Osm::parse_date(payment_data['date']),
+              name:     payment_data['name'].to_s,
+              id:       Osm::to_i_or_nil(payment_data['paymentid']),
+              schedule: schedule,
+            )
+            schedule.payments.push payment
+          end
+          schedule
+        end
       end
 
 
       # Get payments made by members for the schedule
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Term, Fixnum, #to_i] term The term (or it's id) to get details for (defaults to current term)
+      # @param api [Osm::Api] The api to use to make the request
+      # @param term [Osm::Term, Fixnum, #to_i] The term (or it's id) to get details for (defaults to current term)
       # @!macro options_get
       # @return [Array<Osm::OnlinePayment::Schedule::PaymentsForMember>]
-      def get_payments_for_members(api, term=nil, options={})
-        require_ability_to(api, :read, :finance, section_id, options)
+      def get_payments_for_members(api:, term: nil, no_read_cache: false)
+        require_ability_to(api: api, to: :read, on: :finance, section: section_id, no_read_cache: no_read_cache)
 
         if term.nil?
-          section = Osm::Section.get(api, section_id, options)
-          term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api, section)
+          section = Osm::Section.get(api: api, section: section_id, no_read_cache: no_read_cache)
+          term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api: api, section: section)
         end
 
         cache_key = ['online_payments', 'for_members', id, term.to_i]
-        if !options[:no_cache] && cache_exist?(api, cache_key)
-          return cache_read(api, cache_key)
-        end
-
-        data = api.perform_query("ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=#{section_id}&schemeid=#{id}&termid=#{term.to_i}")
-        data = data['items'] || []
-        data.map! do |item|
-          payments_data = {}
-          payments.each do |payment|
-            unless item[payment.id.to_s].nil?
-              payments_data[payment.id] = PaymentStatus.build_from_json(item[payment.id.to_s], payment)
+        cache_fetch(api: api, key: cache_key, no_read_cache:no_read_cache) do
+          data = api.post_query("ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=#{section_id}&schemeid=#{id}&termid=#{term.to_i}")
+          data = data['items'] || []
+          data.map! do |item|
+            payments_data = {}
+            payments.each do |payment|
+              unless item[payment.id.to_s].nil?
+                payments_data[payment.id] = PaymentStatus.build_from_json(item[payment.id.to_s], payment)
+              end
             end
+
+            PaymentsForMember.new(
+              member_id:      Osm::to_i_or_nil(item['scoutid']),
+              section_id:     section_id,
+              grouping_id:    Osm::to_i_or_nil(item['patrolid']),
+              first_name:     item['firstname'],
+              last_name:      item['lastname'],
+              start_date:     require_all ? Osm::parse_date(item['startdate']) : nil,
+              direct_debit:   item['directdebit'].downcase.to_sym,
+              payments:       payments_data,
+              schedule:       self,
+            )
           end
-
-          PaymentsForMember.new(
-            member_id:      Osm::to_i_or_nil(item['scoutid']),
-            section_id:     section_id,
-            grouping_id:    Osm::to_i_or_nil(item['patrolid']),
-            first_name:     item['firstname'],
-            last_name:      item['lastname'],
-            start_date:     require_all ? Osm::parse_date(item['startdate']) : nil,
-            direct_debit:   item['directdebit'].downcase.to_sym,
-            payments:       payments_data,
-            schedule:       self,
-          )
+          data
         end
-
-        cache_write(api, cache_key, data)
-        return data
       end
 
 
@@ -229,7 +214,10 @@ module Osm
       def to_s
         "#{id} -> #{name}"
       end
-
+      
+      def sort_by
+        [:section_id, :name, :id]
+      end
 
       class Payment < Osm::Model
         # @!attribute [rw] id
@@ -266,7 +254,7 @@ module Osm
 
 
         # Check if the payment is past due (or will be past due on the passed date)
-        # @param [Date] date The date to check for (defaults to today)
+        # @param date [Date] The date to check for (defaults to today)
         # @return [Boolean]
         def past_due?(date=Date.today)
           date > due_date
@@ -302,7 +290,7 @@ module Osm
 
 
         # Get the most recent status for a member's payment
-        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to check
         # @return [Boolean]
         def latest_status_for(payment)
           @latest_status ||= payments.map{ |k,v| [k, v.sort.first] }.to_h
@@ -310,7 +298,7 @@ module Osm
         end
 
         # Check if the status of a member's payment is considered paid
-        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to check
         # @return [Boolean, nil]
         def paid?(payment)
           status = latest_status_for(payment.to_i)
@@ -319,7 +307,7 @@ module Osm
         end
 
         # Check if the status of a member's payment is considered unpaid
-        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to check
         # @return [Boolean, nil]
         def unpaid?(payment)
           status = latest_status_for(payment.to_i)
@@ -328,8 +316,8 @@ module Osm
         end
 
         # Check if a payment is over due (or will be over due on the passed date)
-        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to check
-        # @param [Date] date The date to check for (defaults to today)
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to check
+        # @param date [Date] The date to check for (defaults to today)
         # @return [Boolean] whether the member's payment is unpaid and the payment's due date has passed
         def over_due?(payment, date=nil)
           unpaid?(payment) && payment.past_due?(date)
@@ -342,12 +330,12 @@ module Osm
         end
 
         # Update the status of a payment for the member in OSM
-        # @param [Osm::Api] api The api to use to make the request
-        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to update
-        # @param [Symbol] status What to update the status to (:required, :not_required or :paid_manually)
-        # @param [Boolean] gift_aid Whether to update the gift aid record too (only relevant when setting to :paid_manually)
+        # @param api [Osm::Api] The api to use to make the request
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to update
+        # @param status [Symbol] What to update the status to (:required, :not_required or :paid_manually)
+        # @param gift_aid [Boolean] Whether to update the gift aid record too (only relevant when setting to :paid_manually)
         # @return [Boolean] whether the update was made in OSM
-        def update_payment_status(api, payment, status, gift_aid=false)
+        def update_payment_status(api:, payment:, status:, gift_aid: false)
           payment_id = payment.to_i
           fail ArgumentError, "#{payment_id} is not a valid payment for the schedule." unless schedule.payments.map(&:id).include?(payment_id)
           fail ArgumentError, "status must be either :required, :not_required or :paid_manually. You passed in #{status.inspect}" unless [:required, :not_required, :paid_manually].include?(status)
@@ -359,7 +347,7 @@ module Osm
             paid_manually:  'Paid manually',
           }[status]
 
-          data = api.perform_query("ext/finances/onlinepayments/?action=updatePaymentStatus", {
+          data = api.post_query("ext/finances/onlinepayments/?action=updatePaymentStatus", post_data: {
             'sectionid' => schedule.section_id,
             'schemeid' => schedule.id,
             'scoutid' => member_id,
@@ -379,28 +367,28 @@ module Osm
         end
 
         # Mark a payment as required by the member
-        # @param [Osm::Api] api The api to use to make the request
-        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to update
+        # @param api [Osm::Api] The api to use to make the request
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to update
         # @return [Boolean] whether the update was made in OSM
-        def mark_payment_required(api, payment)
-          update_payment_status(api, payment, :required)
+        def mark_payment_required(api:, payment:)
+          update_payment_status(api: api, payment: payment, status: :required)
         end
 
         # Mark a payment as not required by the member
-        # @param [Osm::Api] api The api to use to make the request
-        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to update
+        # @param api [Osm::Api] The api to use to make the request
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to update
         # @return [Boolean] whether the update was made in OSM
-        def mark_payment_not_required(api, payment)
-          update_payment_status(api, payment, :not_required)
+        def mark_payment_not_required(api:, payment:)
+          update_payment_status(api: api, payment: payment, status: :not_required)
         end
 
         # Mark a payment as paid by the member
-        # @param [Osm::Api] api The api to use to make the request
-        # @param [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] payment The payment (or it's ID) to update
-        # @param [Boolean] gift_aid Whether to update the gift aid record too
+        # @param api [Osm::Api] The api to use to make the request
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to update
+        # @param gift_aid [Boolean] Whether to update the gift aid record too
         # @return [Boolean] whether the update was made in OSM
-        def mark_payment_paid_manually(api, payment, gift_aid=false)
-          update_payment_status(api, payment, :paid_manually, gift_aid)
+        def mark_payment_paid_manually(api:, payment:, gift_aid: false)
+          update_payment_status(api: api, payment: payment, status: :paid_manually, gift_aid: gift_aid)
         end
 
       end # Schedule::PaymentsForMember class
@@ -454,12 +442,8 @@ module Osm
           end
         end
 
-
-        def <=>(another)
-          result = -(self.timestamp <=> another.try(:timestamp))
-          result = self.payment <=> another.try(:payment) if result.eql?(0)
-          result = self.id <=> another.try(:id) if result.eql?(0)
-          return result
+        def sort_by
+          ['-timestamp', :payment, :id]
         end
 
         def inspect

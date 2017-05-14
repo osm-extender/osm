@@ -89,15 +89,15 @@ describe "Online payments" do
     describe "Uses OSM's API" do
 
       it "Gets summary list" do
-        @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=getSchemes&sectionid=1'){ {'items'=>[{"schemeid"=>"539","name"=>"Events"}]} }
-        result = Osm::OnlinePayment::Schedule.get_list_for_section(@api, 1)
+        $api.should_receive(:post_query).with('ext/finances/onlinepayments/?action=getSchemes&sectionid=1'){ {'items'=>[{"schemeid"=>"539","name"=>"Events"}]} }
+        result = Osm::OnlinePayment::Schedule.get_list_for_section(api: $api, section: 1)
         result.should == [{id: 539, name: 'Events'}]
       end
 
       it "Gets an individual schedule" do
         data = {"schemeid"=>"2","sectionid"=>"1","accountid"=>"3","name"=>"Schedule name","preauth_amount"=>"12.34","description"=>"Schedule description","giftaid"=>"1","defaulton"=>"1","paynow"=>"-1","archived"=>"1","payments"=>[{"paymentid"=>"4","schemeid"=>"2","date"=>"2013-03-21","amount"=>"1.23","name"=>"Payment name","archived"=>"1"}]}
-        @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=1&schemeid=2&allpayments=true'){ data }
-        schedule = Osm::OnlinePayment::Schedule.get(@api, 1, 2)
+        $api.should_receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=1&schemeid=2&allpayments=true'){ data }
+        schedule = Osm::OnlinePayment::Schedule.get(api: $api, section: 1, schedule: 2)
         schedule.id.should == 2
         schedule.section_id.should == 1
         schedule.account_id.should == 3
@@ -121,10 +121,10 @@ describe "Online payments" do
       end
 
       it "Gets all schedules for a section" do
-        Osm::OnlinePayment::Schedule.should_receive(:get_list_for_section).with(@api, 5, {}){ [{id: 6, name: 'A'}, {id: 7, name: 'B'}] }
-        Osm::OnlinePayment::Schedule.should_receive(:get).with(@api, 5, 6, {}){ 'A' }
-        Osm::OnlinePayment::Schedule.should_receive(:get).with(@api, 5, 7, {}){ 'B' }
-        Osm::OnlinePayment::Schedule.get_for_section(@api, 5).should == ['A', 'B']
+        Osm::OnlinePayment::Schedule.should_receive(:get_list_for_section).with(api: $api, section: 5, no_read_cache: false){ [{id: 6, name: 'A'}, {id: 7, name: 'B'}] }
+        Osm::OnlinePayment::Schedule.should_receive(:get).with(api: $api, section: 5, schedule: 6, no_read_cache: false){ 'A' }
+        Osm::OnlinePayment::Schedule.should_receive(:get).with(api: $api, section: 5, schedule: 7, no_read_cache: false){ 'B' }
+        Osm::OnlinePayment::Schedule.get_for_section(api: $api, section: 5).should == ['A', 'B']
       end
 
       describe "Gets member's payments" do
@@ -141,12 +141,12 @@ describe "Online payments" do
             'startdate'=>'2015-02-03',
             '4'=>'{"status":[{"statusid":"7","scoutid":"6","schemeid":"1","paymentid":"8","statustimestamp":"03/02/2016 20:51","status":"Paid manually","details":"","editable":"1","latest":"1","who":"0","firstname":"System"}]}',
           } ]}
-          @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=2&schemeid=1&termid=3').once{ body }
+          $api.should_receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=2&schemeid=1&termid=3').once{ body }
         end
 
         it 'For a "collect all" schedule' do
           @schedule.require_all = true
-          p4m = @schedule.get_payments_for_members(@api, 3)
+          p4m = @schedule.get_payments_for_members(api: $api, term: 3)
           p4m.is_a?(Array).should == true
           p4m.size.should == 1
           p4m = p4m[0]
@@ -170,7 +170,7 @@ describe "Online payments" do
 
         it 'For a "not collect all" schedule' do
           @schedule.require_all = false
-          p4m = @schedule.get_payments_for_members(@api, 3)[0]
+          p4m = @schedule.get_payments_for_members(api: $api, term: 3)[0]
           p4m.start_date.should == nil    # Only difference to a "collect all" type
           p4m.valid?.should == true
         end
@@ -179,7 +179,7 @@ describe "Online payments" do
           section = Osm::Section.new(id: 2)
           Osm::Term.stub(:get_current_term_for_section).and_return(Osm::Term.new(id: 3))
           Osm::Section.stub(:get).and_return(section)
-          p4m = @schedule.get_payments_for_members(@api)[0]
+          p4m = @schedule.get_payments_for_members(api: $api)[0]
           p4m.member_id.should == 6
           p4m.valid?.should == true
         end
@@ -348,51 +348,51 @@ describe "Online payments" do
 
         describe "Using update_payment_status method" do
           it "Success" do
-            @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>false,'value'=>'Payment not required'})
+            $api.should_receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>false,'value'=>'Payment not required'})
               .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Payment not required","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}'} }
-            @p4m.update_payment_status(@api, @payment, :not_required).should == true
+            @p4m.update_payment_status(api: $api, payment: @payment, status: :not_required).should == true
           end
 
           describe "Failure" do
             it "No history for payment" do
-              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
+              $api.should_receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
                 .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[]}'} }
-              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == false
+              @p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true).should == false
             end
 
             it "No payment data" do
-              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
+              $api.should_receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
                 .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled'} }
-              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == false
+              @p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true).should == false
             end
 
             it "Latest status is not what we set" do
-              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
+              $api.should_receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
                 .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Payment not required","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}'} }
-              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == false
+              @p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true).should == false
             end
           end
 
           it "Fails if payment is not in the schedule" do
-            expect{ @p4m.update_payment_status(@api, 2, :paid_manually) }.to raise_error ArgumentError, '2 is not a valid payment for the schedule.'
+            expect{ @p4m.update_payment_status(api: $api, payment: 2, status: :paid_manually) }.to raise_error ArgumentError, '2 is not a valid payment for the schedule.'
           end
 
           it "Fails if given a bad status" do
-            expect{ @p4m.update_payment_status(@api, 1, :invalid) }.to raise_error ArgumentError, 'status must be either :required, :not_required or :paid_manually. You passed in :invalid'
+            expect{ @p4m.update_payment_status(api: $api, payment: 1, status: :invalid) }.to raise_error ArgumentError, 'status must be either :required, :not_required or :paid_manually. You passed in :invalid'
           end
 
           describe "Ignores gift aid parameter if appropriate" do # pass in true and check if calls out with false
             it "Schedule is a gift aid one" do
-              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
+              $api.should_receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>true,'value'=>'Paid manually'})
                 .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Paid manually","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}'} }
-              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == true
+              @p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true).should == true
             end
 
             it "Schedule is NOT a gift aid one" do
               @schedule.gift_aid = false
-              @api.should_receive(:perform_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>false,'value'=>'Paid manually'})
+              $api.should_receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: {'sectionid'=>4,'schemeid'=>10,'scoutid'=>3,'paymentid'=>1,'giftaid'=>false,'value'=>'Paid manually'})
                 .once{ {'scoutid'=>'3', 'firstname'=>'John', 'lastname'=>'Smith', 'patrolid'=>'5', 'startdate'=>'1970-01-01', 'directdebit'=>'cancelled', '1'=>'{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Paid manually","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}'} }
-              @p4m.update_payment_status(@api, @payment, :paid_manually, true).should == true
+              @p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true).should == true
             end
           end
 
@@ -400,24 +400,24 @@ describe "Online payments" do
 
         describe "Using" do
           it "mark_payment_required" do
-            @p4m.should_receive(:update_payment_status).with(@api, @payment, :required).once{ true }
-            @p4m.mark_payment_required(@api, @payment).should == true
+            @p4m.should_receive(:update_payment_status).with(api: $api, payment: @payment, status: :required).once{ true }
+            @p4m.mark_payment_required(api: $api, payment: @payment).should == true
           end
 
           it "mark_payment_not_required" do
-            @p4m.should_receive(:update_payment_status).with(@api, @payment, :not_required).once{ true }
-            @p4m.mark_payment_not_required(@api, @payment).should == true
+            @p4m.should_receive(:update_payment_status).with(api: $api, payment: @payment, status: :not_required).once{ true }
+            @p4m.mark_payment_not_required(api: $api, payment: @payment).should == true
           end
 
           describe "mark_payment_paid_manually" do
             it "Updating gift aid" do
-              @p4m.should_receive(:update_payment_status).with(@api, @payment, :paid_manually, true).once{ true }
-              @p4m.mark_payment_paid_manually(@api, @payment, true).should == true
+              @p4m.should_receive(:update_payment_status).with(api: $api, payment: @payment, status: :paid_manually, gift_aid: true).once{ true }
+              @p4m.mark_payment_paid_manually(api: $api, payment: @payment, gift_aid: true).should == true
             end
 
             it "Not updating gift aid" do
-              @p4m.should_receive(:update_payment_status).with(@api, @payment, :paid_manually, false).once{ true }
-              @p4m.mark_payment_paid_manually(@api, @payment, false).should == true
+              @p4m.should_receive(:update_payment_status).with(api: $api, payment: @payment, status: :paid_manually, gift_aid: false).once{ true }
+              @p4m.mark_payment_paid_manually(api: $api, payment: @payment, gift_aid: false).should == true
             end
           end
 
