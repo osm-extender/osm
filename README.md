@@ -12,7 +12,7 @@ Staging branch:
 [![Code Climate](https://codeclimate.com/github/robertgauld/osm.png?branch=staging)](https://codeclimate.com/github/robertgauld/osm)
 
 
-##Build State
+## Build State
 This project uses continuous integration to help ensure that a quality product is delivered.
 Travis CI monitors two branches (versions) of the code - Master (which is what gets released)
 and Staging (which is what is currently being developed ready for moving to master).
