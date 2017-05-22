@@ -299,7 +299,7 @@ module Osm
     # Make selected class methods instance methods too
     %w{
       cache_read cache_write cache_exist? cache_delete require_access_to_section
-      can_access_section? has_permission? user_has_permission? api_has_permission?
+      has_access_to_section? has_permission? user_has_permission? api_has_permission?
       require_permission require_subscription require_ability_to
     }.each do |method_name|
       define_method method_name do |*options|

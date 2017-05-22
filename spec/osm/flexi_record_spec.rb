@@ -40,6 +40,17 @@ describe "Flexi Record" do
       frc4 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), id: 'f_1')
       frc5 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), id: 'f_2')
 
+      # Compare section 1 > section 2
+      expect(frc1 <=> frc2).to eq(-1)
+      # Compare system field > system field
+      expect(frc2 <=> frc3).to eq(-1)
+      # Compare user field > user field
+      expect(frc4 <=> frc5).to eq(-1)
+      # Compare system field > user field
+      expect(frc3 <=> frc4).to eq(-1)
+      # Compare user field < system field
+      expect(frc4 <=> frc3).to eq(1)
+
       columns = [frc3, frc2, frc1, frc5, frc4]
       expect(columns.sort).to eq([frc1, frc2, frc3, frc4, frc5])
     end

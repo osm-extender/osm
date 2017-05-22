@@ -178,7 +178,10 @@ describe "Meeting" do
         'title' => 'Title',
       }).and_return({"result"=>0})
 
-      allow(Osm::Term).to receive(:get_for_section) { [] }
+      term = Osm::Term.new(id: 2)
+      allow(Osm::Term).to receive(:get_for_section) { [term] }
+      expect(Osm::Meeting).to receive(:cache_delete).with(api: $api, cache_key: ['programme', 1, 2]).and_return(true)
+
       expect(Osm::Meeting.create($api, **{
         section_id: 1,
         date: Date.new(2000, 1, 2),

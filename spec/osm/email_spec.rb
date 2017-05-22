@@ -74,6 +74,16 @@ describe "Email" do
       expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:primary], members: []) }.to raise_error ArgumentError, "You must pass at least one member"
     end
 
+    it "Handles no emails returned" do
+      expect($api).to receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1", post_data: {"contactGroups" => '["contact_primary_1"]'}).and_return({})
+      expect(Osm::Email.get_emails_for_contacts(api: $api, section: 1, members: 1, contacts: [:primary])).to be false
+    end
+
+    it "Handles no data hash returned" do
+      expect($api).to receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1", post_data: {"contactGroups" => '["contact_primary_1"]'}).and_return([])
+      expect(Osm::Email.get_emails_for_contacts(api: $api, section: 1, members: 1, contacts: [:primary])).to be false
+    end
+
   end # describe Get emails for conatcts
 
   describe "Send email" do

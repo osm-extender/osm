@@ -151,18 +151,36 @@ describe "Section" do
       end
     end
   
-    it "Gets a section" do
-      section = Osm::Section.get(api: $api, id: 1)
-      expect(section).not_to be_nil
-      expect(section.id).to eq(1)
-      expect(section.valid?).to eq(true)
+    describe "Gets a section" do
+      it "From OSM" do
+        section = Osm::Section.get(api: $api, id: 1)
+        expect(section).not_to be_nil
+        expect(section.id).to eq(1)
+        expect(section.valid?).to eq(true)
+      end
+
+      it "From cache" do
+        section = Osm::Section.get(api: $api, id: 1)
+        expect($api).not_to receive(:post_query)
+        expect(Osm::Section.get(api: $api, id: 1)).to eq(section)
+      end
     end
 
 
-    it "Gets the section's notepad" do
-      expect($api).to receive(:post_query).with('api.php?action=getNotepads').and_return({"1" => "Section 1", "2" => "Section 2"})
-      section = Osm::Section.new(id: 1)
-      expect(section.get_notepad($api)).to eq('Section 1')
+    describe "Gets the section's notepad" do
+      it "From OSM" do
+        expect($api).to receive(:post_query).with('api.php?action=getNotepads').and_return({"1" => "Section 1", "2" => "Section 2"})
+        section = Osm::Section.new(id: 1)
+        expect(section.get_notepad($api)).to eq('Section 1')
+      end
+
+      it "From cache" do
+        expect($api).to receive(:post_query).with('api.php?action=getNotepads').and_return({"1" => "Section 1", "2" => "Section 2"})
+        section = Osm::Section.new(id: 1)
+        expect(section.get_notepad($api)).to eq('Section 1')
+        expect($api).not_to receive(:post_query).with('api.php?action=getNotepads')
+        expect(section.get_notepad($api)).to eq('Section 1')
+      end
     end
 
     it "Sets the section's notepad (success)" do

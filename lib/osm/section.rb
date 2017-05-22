@@ -225,7 +225,7 @@ module Osm
     def self.get(api:, id:, **options)
       cache_key = ['section', id]
 
-      if cache_exist?(api: api, key: cache_key, no_read_cache: options[:no_read_cache]) && can_access_section?(api, section_id)
+      if cache_exist?(api: api, key: cache_key, no_read_cache: options[:no_read_cache]) && has_access_to_section?(api: api, section: id)
         return cache_read(api: api, key: cache_key)
       end
 
@@ -247,7 +247,7 @@ module Osm
       require_access_to_section(api, self, options)
       cache_key = ['notepad', id]
 
-      if cache_exist?(api: api, key: cache_key, no_read_cache: options[:no_read_cache]) && can_access_section?(api, self.id)
+      if cache_exist?(api: api, key: cache_key, no_read_cache: options[:no_read_cache]) && has_access_to_section?(api: api, section: id)
         return cache_read(api: api, key: cache_key)
       end
 
@@ -311,14 +311,6 @@ module Osm
       define_method "#{attribute}?" do
         type == attribute
       end
-    end
-
-    # Get the name for the section's subscription level
-    # @return [String, nil] the name of the subscription level (nil if no name exists)
-    # @deprecated Please use Osm::SUBSCRIPTION_LEVEL_NAMES[section.subscription_level instead
-    def subscription_level_name
-      warn "[DEPRECATION] `subscription_level_name` is deprecated.  Please use `Osm::SUBSCRIPTION_LEVEL_NAMES[section.subscription_level` instead."
-      Osm::SUBSCRIPTION_LEVEL_NAMES[subscription_level]
     end
 
     # Check if the section has a subscription of a given level (or higher)

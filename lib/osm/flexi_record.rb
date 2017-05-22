@@ -191,22 +191,25 @@ module Osm
         return true
       end
 
+      # Is this column a user column
+      # @return [true, false]
+      def user_column?
+        id.match(/\Af_\d+\Z/)
+      end
+
+      # Is this column a system column
+      # @return [true, false]
+      def system_column?
+        !user_column?
+      end
+
       # Compare Column based on flexi_record then id
       def <=>(another)
         result = self.flexi_record <=> another.try(:flexi_record)
         if result == 0
-          if id.match(/\Af_\d+\Z/)
-            # This is a user column
-            unless another.try(:id).to_s.match(/\Af_\d+\Z/)
-              return 1
-            end
-          else
-            # This is a system column
-            if another.try(:id).to_s.match(/\Af_\d+\Z/)
-              return -1
-            end
-          end
-          result = self.id <=> another.try(:id)
+          return 1 if user_column? && another.try(:system_column?)
+          return -1 if system_column? && another.try(:user_column?)
+          return self.id <=> another.try(:id)
         end
         return result
       end

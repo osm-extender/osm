@@ -379,7 +379,7 @@ module Osm
         additional_information.clean_up!
         # The cached columns for the members will be out of date - remove them
         Osm::Term.get_for_section(api: api, section: section_id).each do |term|
-          Osm::Model.cache_delete(api: api, key: ['members', section_id, term.id])
+          cache_delete(api: api, key: ['members', section_id, term.id])
         end
       end
       return updated
@@ -460,8 +460,9 @@ module Osm
     [:all_emails, :all_emails_with_name, :enabled_emails, :enabled_emails_with_name, :all_phones, :enabled_phones].each do |meth|
       define_method meth do
         items = []
-        [:contact, :primary_contact, :secondary_contact].each do |cont|
-          items.push *send(cont).send(meth)
+        [:contact, :primary_contact, :secondary_contact].each do |contact|
+          contact = send(contact)
+          items.push *contact.send(meth) unless contact.nil?
         end
         return items
       end

@@ -149,6 +149,121 @@ describe "Member" do
     expect(data.sort).to eq([m1, m2, m3, m4, m5, m6, m7])
   end
 
+  describe "Get contact details" do
+    before :each do
+      @member = Osm::Member.new(
+        first_name: 'A',
+        last_name:  'Member',
+        contact:    Osm::Member::MemberContact.new(
+          first_name: 'A',
+          last_name: 'Member',
+          email_1:  'enabled.member@example.com',
+          email_2:  'disabled.member@example.com',
+          receive_email_1: true,
+          receive_email_2: false,
+          phone_1:  '1111111',
+          phone_2:  '2222222',
+          receive_phone_1: true,
+          receive_phone_2: false
+        ),
+        primary_contact: Osm::Member::PrimaryContact.new(
+          first_name: 'Primary',
+          last_name:  'Contact',
+          email_1:    'enabled.primary@example.com',
+          email_2:    'disabled.primary@example.com',
+          receive_email_1: true,
+          receive_email_2: false,
+          phone_1:    '3333333',
+          phone_2:    '4444444',
+          receive_phone_1: true,
+          receive_phone_2: false
+        ),
+        secondary_contact: Osm::Member::SecondaryContact.new(
+          first_name: 'Secondary',
+          last_name:  'Contact',
+          email_1:    'enabled.secondary@example.com',
+          email_2:    'disabled.secondary@example.com',
+          receive_email_1: true,
+          receive_email_2: false,
+          phone_1:    '5555555',
+          phone_2:    '6666666',
+          receive_phone_1: true,
+          receive_phone_2: false
+        ),
+        emergency_contact: Osm::Member::EmergencyContact.new(
+          first_name: 'Emergency',
+          last_name:  'Contact',
+          email_1:    'emergency@example.com',
+          phone_1:    '7777777'
+        ),
+        doctor_contact: Osm::Member::DoctorContact.new(
+          first_name: 'Doctor',
+          last_name:  'Contact',
+          email_1:    'doctor@example.com',
+          phone_1:    '8888888'
+        )
+      )
+      @member_nil_contacts = Osm::Member.new(
+        first_name: 'A',
+        last_name:  'Member',
+        contact:    nil,
+        primary_contact: nil,
+        secondary_contact: nil,
+        emergency_contact: nil,
+        doctor_contact: nil
+      )
+    end
+
+    it "#all_emails" do
+      expect(@member.all_emails).to eq [
+        'enabled.member@example.com',
+        'disabled.member@example.com',
+        'enabled.primary@example.com',
+        'disabled.primary@example.com',
+        'enabled.secondary@example.com',
+        'disabled.secondary@example.com'
+      ]
+      expect(@member_nil_contacts.all_emails).to eq []
+    end
+    it "#all_emails_with_name" do
+      expect(@member.all_emails_with_name).to eq [
+        '"A Member" <enabled.member@example.com>',
+        '"A Member" <disabled.member@example.com>',
+        '"Primary Contact" <enabled.primary@example.com>',
+        '"Primary Contact" <disabled.primary@example.com>',
+        '"Secondary Contact" <enabled.secondary@example.com>',
+        '"Secondary Contact" <disabled.secondary@example.com>'
+      ]
+      expect(@member_nil_contacts.all_emails_with_name).to eq []
+    end
+
+    it "#enabled_emails" do
+      expect(@member.enabled_emails).to eq [
+        'enabled.member@example.com',
+        'enabled.primary@example.com',
+        'enabled.secondary@example.com',
+      ]
+      expect(@member_nil_contacts.enabled_emails).to eq []
+    end
+    it "#enabled_emails_with_name" do
+      expect(@member.enabled_emails_with_name).to eq [
+        '"A Member" <enabled.member@example.com>',
+        '"Primary Contact" <enabled.primary@example.com>',
+        '"Secondary Contact" <enabled.secondary@example.com>',
+      ]
+      expect(@member_nil_contacts.enabled_emails_with_name).to eq []
+    end
+
+    it "#all_phones" do
+      expect(@member.all_phones).to eq ['1111111', '2222222', '3333333', '4444444', '5555555', '6666666']
+      expect(@member_nil_contacts.all_phones).to eq []
+    end
+    it "#enabled_phones" do
+      expect(@member.enabled_phones).to eq ['1111111', '3333333', '5555555']
+      expect(@member_nil_contacts.enabled_phones).to eq []
+    end
+  end
+
 
   describe "Using the API" do
 
@@ -574,7 +689,8 @@ describe "Member" do
         }).and_return({"result"=>"ok","scoutid"=>577743})
 
         allow(@member).to receive(:update) { true }
-        allow(Osm::Term).to receive(:get_for_section) { [] }
+        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
 
         expect(@member.create($api)).to eq(true)
         expect(@member.id).to eq(577743)
@@ -582,6 +698,8 @@ describe "Member" do
 
       it "Failed the create stage in OSM" do
         expect($api).to receive(:post_query).with('users.php?action=newMember', post_data: {"firstname"=>"First", "lastname"=>"Last", "dob"=>"2000-01-02", "started"=>"2006-01-02", "startedsection"=>"2006-01-07", "sectionid"=>2}).and_return({})
+        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        expect(@member).to_not receive(:cache_delete)
         expect(@member.create($api)).to eq(false)
       end
 
@@ -596,7 +714,8 @@ describe "Member" do
         }).and_return({"result"=>"ok","scoutid"=>577743})
 
         allow(@member).to receive(:update) { false }
-        allow(Osm::Term).to receive(:get_for_section) { [] }
+        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
 
         expect(@member.create($api)).to eq(nil)
         expect(@member.id).to eq(577743)
@@ -709,7 +828,8 @@ describe "Member" do
           "value" => "321",
         }).and_return({"data"=>{"value"=>"321"}})
 
-        allow(Osm::Term).to receive(:get_for_section) { [] }
+        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
 
         @member.first_name = 'John'
         @member.gender = :unspecified
@@ -811,7 +931,8 @@ describe "Member" do
           "data[test_var]" => "This is a test",
         }).and_return({"status"=>true})
 
-        allow(Osm::Term).to receive(:get_for_section) { [] }
+        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
 
         expect(@member.update($api, force: true)).to eq(true)
       end
@@ -819,6 +940,7 @@ describe "Member" do
       it "Failed to update in OSM" do
         @member.first_name = 'John'
         allow($api).to receive(:post_query) { {} }
+        expect(@member).to_not receive(:cache_delete)
         expect(@member.update($api)).to eq(false)
       end
 

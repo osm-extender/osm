@@ -173,16 +173,27 @@ describe "Term" do
       expect(terms.map{ |i| i.id }).to eq([2, 3])
     end
 
-    it "Gets a term" do
-      expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return({
-        "10" => [
-          {"termid" => "2", "name" => "Term 2", "sectionid" => "10", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')},
-          {"termid" => "3", "name" => "Term 3", "sectionid" => "10", "startdate" => (Date.today + 91).strftime('%Y-%m-%d'), "enddate" => (Date.today + 180).strftime('%Y-%m-%d')}
-        ]
-      })
-      term = Osm::Term.get(api: $api, id: 2)
-      expect(term.is_a?(Osm::Term)).to eq(true)
-      expect(term.id).to eq(2)
+    describe "Gets a term" do
+      before :each do
+        expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return({
+          "10" => [
+            {"termid" => "2", "name" => "Term 2", "sectionid" => "10", "startdate" => (Date.today + 31).strftime('%Y-%m-%d'), "enddate" => (Date.today + 90).strftime('%Y-%m-%d')},
+            {"termid" => "3", "name" => "Term 3", "sectionid" => "10", "startdate" => (Date.today + 91).strftime('%Y-%m-%d'), "enddate" => (Date.today + 180).strftime('%Y-%m-%d')}
+          ]
+        })
+      end
+
+      it "From OSM" do
+        term = Osm::Term.get(api: $api, id: 2)
+        expect(term.is_a?(Osm::Term)).to eq(true)
+        expect(term.id).to eq(2)
+      end
+
+      it "From cache" do
+        Osm::Term.get(api: $api, id: 2)
+        expect($api).to_not receive(:post_query).with('api.php?action=getTerms')
+        expect(Osm::Term.get(api: $api, id: 3).id).to eq(3)
+      end
     end
 
     describe "Find current term" do
@@ -219,8 +230,11 @@ describe "Term" do
         'termid' => '0'
       }
 
-      allow(Osm::Term).to receive(:get_all) { [] }
+      allow(Osm::Term).to receive(:get_all) { [Osm::Term.new(id: 1, section_id: 1), Osm::Term.new(id: 9, section_id: 9)] }
       expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({'terms'=>{}})
+      expect(Osm::Term).to receive(:cache_delete).with(api: $api, key: ['term', 1])
+      expect(Osm::Term).to_not receive(:cache_delete).with(api: $api, key: ['term', 9])
+      expect(Osm::Term).to receive(:cache_delete).with(api: $api, key: ['terms', $api.user_id])
 
       expect(Osm::Term.create(
         api: $api,

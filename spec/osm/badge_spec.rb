@@ -551,9 +551,14 @@ describe "Badge" do
     ).started).to eq(2)
     expect(Osm::Badge::Data.new(
       badge: staged_activity,
-      requirements: {},
+      requirements: {100 => 'Yes', 200 => 'Yes', 201 => 'Yes'},
       due: 2,
     ).started).to eq(0) # No more stages to do
+    expect(Osm::Badge::Data.new(
+      badge: staged_activity,
+      requirements: {},
+      due: 0,
+    ).started).to eq(0) # No stages started
 
 
     # Staged count

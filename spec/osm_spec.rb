@@ -130,6 +130,10 @@ describe "Online Scout Manager" do
     it "given text in a string" do
       expect(Osm::to_i_or_nil('a')).to eq(0)
     end
+
+    it "given something without a to_i method" do
+      expect(Osm::to_i_or_nil(:a)).to be_nil
+    end
   end
 
 

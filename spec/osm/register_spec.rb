@@ -85,12 +85,16 @@ describe "Register" do
     it "Fetch the register structure for a section" do
       data = [
         {"rows" => [{"name"=>"First name","field"=>"firstname","width"=>"100px"},{"name"=>"Last name","field"=>"lastname","width"=>"100px"},{"name"=>"Total","field"=>"total","width"=>"60px"}],"noscroll"=>true},
-        {"rows" => []}
+        {"rows" => [{"field"=>"field1","name"=>"name1","tooltip"=>"tooltip1"}]}
       ]
       expect($api).to receive(:post_query).with("users.php?action=registerStructure&sectionid=1&termid=2"){ data }
 
       register_structure = Osm::Register.get_structure(api: $api, section: 1, term: 2)
       expect(register_structure.is_a?(Array)).to eq(true)
+      expect(register_structure.size).to eq(1)
+      expect(register_structure[0].id).to eq('field1')
+      expect(register_structure[0].name).to eq('name1')
+      expect(register_structure[0].tooltip).to eq('tooltip1')
     end
 
     it "Fetch the register data for a section" do

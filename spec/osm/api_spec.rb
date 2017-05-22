@@ -142,6 +142,47 @@ describe "API" do
       expect($api.post_query('path/to/load', post_data: {'attribute' => 'value'})).to eq({})
     end
 
+    it "Returns nil if body is empty" do
+        response = Net::HTTPOK.new('1.1', '200', 'OK')
+        response.content_type = 'text/html'
+        allow(response).to receive(:body).and_return('')
+        expect($http).to receive(:request).with($request).and_return(response)
+        expect($api.post_query('path/to/load')).to eq(nil)
+      end
+
+    describe "Handles different content types" do
+      it "application/json" do
+        response = Net::HTTPOK.new('1.1', '200', 'OK')
+        response.content_type = 'application/json'
+        allow(response).to receive(:body).and_return('[{}]')
+        expect($http).to receive(:request).with($request).and_return(response)
+        expect($api.post_query('path/to/load')).to eq([{}])
+      end
+
+      it "text/html" do
+        response = Net::HTTPOK.new('1.1', '200', 'OK')
+        response.content_type = 'text/html'
+        allow(response).to receive(:body).and_return('[{}]')
+        expect($http).to receive(:request).with($request).and_return(response)
+        expect($api.post_query('path/to/load')).to eq([{}])
+      end
+
+      it "image/jpeg" do
+        response = Net::HTTPOK.new('1.1', '200', 'OK')
+        response.content_type = 'image/jpeg'
+        allow(response).to receive(:body).and_return('image data')
+        expect($http).to receive(:request).with($request).and_return(response)
+        expect($api.post_query('path/to/load')).to eq('image data')
+      end
+
+      it "Other types" do
+        response = Net::HTTPOK.new('1.1', '200', 'OK')
+        response.content_type = 'giberish/nothing-meaningful'
+        allow(response).to receive(:body).and_return('body')
+        expect($http).to receive(:request).with($request).and_return(response)
+        expect{$api.post_query('path/to/load')}.to raise_error(Osm::Error, 'Unhandled content-type: giberish/nothing-meaningful')
+      end
+    end
 
     describe "User-Agent header" do
 
@@ -223,10 +264,17 @@ describe "API" do
       expect($api.get_user_roles).to eq(['a', 'b'])
     end
 
-    it "User has no roles in OSM" do
-      expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice{ false }
-      expect{ $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
-      expect($api.get_user_roles).to eq([])
+    describe "User has no roles in OSM" do
+      it "OSM returns false" do
+        expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice{ false }
+        expect{ $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
+        expect($api.get_user_roles).to eq([])
+      end
+      it "OSM causes an exception to be raised" do
+        expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice{ fail Osm::Error, 'false' }
+        expect{ $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
+        expect($api.get_user_roles).to eq([])
+      end
     end
 
     it "Reraises any other Osm::Error" do
