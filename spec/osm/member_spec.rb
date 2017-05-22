@@ -29,60 +29,60 @@ describe "Member" do
     }
     member = Osm::Member.new(attributes)
 
-    member.id.should == 1
-    member.section_id.should == 2
-    member.first_name.should == 'First'
-    member.last_name.should == 'Last'
-    member.date_of_birth.should == Date.new(2000, 1, 2)
-    member.grouping_id.should == 3
-    member.grouping_leader.should == 0
-    member.grouping_label.should == 'Grouping'
-    member.grouping_leader_label.should == '6er'
-    member.age.should == '06 / 07'
-    member.gender.should == :other
-    member.joined_movement.should == Date.new(2006, 1, 2)
-    member.started_section.should == Date.new(2006, 1, 7)
-    member.finished_section.should == Date.new(2007, 12, 31)
-    member.additional_information.should == {'12_3' => '123'}
-    member.additional_information_labels.should == {'12_3' => 'Label for 123'}
-    member.contact.postcode.should == 'A'
-    member.primary_contact.postcode.should == 'B'
-    member.secondary_contact.postcode.should == 'C'
-    member.emergency_contact.postcode.should == 'D'
-    member.doctor.postcode.should == 'E'
-    member.valid?.should == true
+    expect(member.id).to eq(1)
+    expect(member.section_id).to eq(2)
+    expect(member.first_name).to eq('First')
+    expect(member.last_name).to eq('Last')
+    expect(member.date_of_birth).to eq(Date.new(2000, 1, 2))
+    expect(member.grouping_id).to eq(3)
+    expect(member.grouping_leader).to eq(0)
+    expect(member.grouping_label).to eq('Grouping')
+    expect(member.grouping_leader_label).to eq('6er')
+    expect(member.age).to eq('06 / 07')
+    expect(member.gender).to eq(:other)
+    expect(member.joined_movement).to eq(Date.new(2006, 1, 2))
+    expect(member.started_section).to eq(Date.new(2006, 1, 7))
+    expect(member.finished_section).to eq(Date.new(2007, 12, 31))
+    expect(member.additional_information).to eq({'12_3' => '123'})
+    expect(member.additional_information_labels).to eq({'12_3' => 'Label for 123'})
+    expect(member.contact.postcode).to eq('A')
+    expect(member.primary_contact.postcode).to eq('B')
+    expect(member.secondary_contact.postcode).to eq('C')
+    expect(member.emergency_contact.postcode).to eq('D')
+    expect(member.doctor.postcode).to eq('E')
+    expect(member.valid?).to eq(true)
   end
 
 
   describe "Provides full name" do
 
     it "Member" do
-      Osm::Member.new(first_name: 'First').name.should == 'First'
-      Osm::Member.new(last_name: 'Last').name.should == 'Last'
-      Osm::Member.new(first_name: 'First', last_name: 'Last').name.should == 'First Last'
-      Osm::Member.new(first_name: 'First', last_name: 'Last').name('*').should == 'First*Last'
+      expect(Osm::Member.new(first_name: 'First').name).to eq('First')
+      expect(Osm::Member.new(last_name: 'Last').name).to eq('Last')
+      expect(Osm::Member.new(first_name: 'First', last_name: 'Last').name).to eq('First Last')
+      expect(Osm::Member.new(first_name: 'First', last_name: 'Last').name('*')).to eq('First*Last')
     end
 
     it "Contact" do
-      Osm::Member::Contact.new(first_name: 'First').name.should == 'First'
-      Osm::Member::Contact.new(last_name: 'Last').name.should == 'Last'
-      Osm::Member::Contact.new(first_name: 'First', last_name: 'Last').name.should == 'First Last'
-      Osm::Member::Contact.new(first_name: 'First', last_name: 'Last').name('*').should == 'First*Last'
+      expect(Osm::Member::Contact.new(first_name: 'First').name).to eq('First')
+      expect(Osm::Member::Contact.new(last_name: 'Last').name).to eq('Last')
+      expect(Osm::Member::Contact.new(first_name: 'First', last_name: 'Last').name).to eq('First Last')
+      expect(Osm::Member::Contact.new(first_name: 'First', last_name: 'Last').name('*')).to eq('First*Last')
     end
 
   end
 
 
   it "Tells if member is a leader" do
-    Osm::Member.new(grouping_id: -2).leader?.should == true  # In the leader grouping
-    Osm::Member.new(grouping_id: 2).leader?.should == false  # In a youth grouping
-    Osm::Member.new(grouping_id: 0).leader?.should == false  # Not in a grouping
+    expect(Osm::Member.new(grouping_id: -2).leader?).to eq(true)  # In the leader grouping
+    expect(Osm::Member.new(grouping_id: 2).leader?).to eq(false)  # In a youth grouping
+    expect(Osm::Member.new(grouping_id: 0).leader?).to eq(false)  # Not in a grouping
   end
 
   it "Tells if member is a youth member" do
-    Osm::Member.new(grouping_id: -2).youth?.should == false  # In the leader grouping
-    Osm::Member.new(grouping_id: 2).youth?.should == true  # In a youth grouping
-    Osm::Member.new(grouping_id: 0).youth?.should == false  # Not in a grouping
+    expect(Osm::Member.new(grouping_id: -2).youth?).to eq(false)  # In the leader grouping
+    expect(Osm::Member.new(grouping_id: 2).youth?).to eq(true)  # In a youth grouping
+    expect(Osm::Member.new(grouping_id: 0).youth?).to eq(false)  # Not in a grouping
   end
 
   it "Provides each part of age" do
@@ -91,47 +91,47 @@ describe "Member" do
     }
     member = Osm::Member.new(data)
 
-    member.age_years.should == 6
-    member.age_months.should == 7
+    expect(member.age_years).to eq(6)
+    expect(member.age_months).to eq(7)
   end
 
   it "Tells if the member is male" do
-    Osm::Member.new(gender: :male).male?.should == true
-    Osm::Member.new(gender: :female).male?.should == false
-    Osm::Member.new(gender: :other).male?.should == false
-    Osm::Member.new(gender: :unspecified).male?.should == false
-    Osm::Member.new(gender: nil).male?.should == false
+    expect(Osm::Member.new(gender: :male).male?).to eq(true)
+    expect(Osm::Member.new(gender: :female).male?).to eq(false)
+    expect(Osm::Member.new(gender: :other).male?).to eq(false)
+    expect(Osm::Member.new(gender: :unspecified).male?).to eq(false)
+    expect(Osm::Member.new(gender: nil).male?).to eq(false)
   end
 
   it "Tells if the member is female" do
-    Osm::Member.new(gender: :female).female?.should == true
-    Osm::Member.new(gender: :male).female?.should == false
-    Osm::Member.new(gender: :other).female?.should == false
-    Osm::Member.new(gender: :unspecified).female?.should == false
-    Osm::Member.new(gender: nil).female?.should == false
+    expect(Osm::Member.new(gender: :female).female?).to eq(true)
+    expect(Osm::Member.new(gender: :male).female?).to eq(false)
+    expect(Osm::Member.new(gender: :other).female?).to eq(false)
+    expect(Osm::Member.new(gender: :unspecified).female?).to eq(false)
+    expect(Osm::Member.new(gender: nil).female?).to eq(false)
   end
 
 
   describe "Tells if the member is currently in the section" do
     it "Today" do
-      Osm::Member.new(started_section: Date.yesterday).current?.should == true
-      Osm::Member.new(started_section: Date.today).current?.should == true
-      Osm::Member.new(started_section: Date.tomorrow).current?.should == false
-      Osm::Member.new(started_section: Date.yesterday, finished_section: Date.yesterday).current?.should == false
-      Osm::Member.new(started_section: Date.yesterday, finished_section: Date.today).current?.should == true
-      Osm::Member.new(started_section: Date.yesterday, finished_section: Date.tomorrow).current?.should == true
+      expect(Osm::Member.new(started_section: Date.yesterday).current?).to eq(true)
+      expect(Osm::Member.new(started_section: Date.today).current?).to eq(true)
+      expect(Osm::Member.new(started_section: Date.tomorrow).current?).to eq(false)
+      expect(Osm::Member.new(started_section: Date.yesterday, finished_section: Date.yesterday).current?).to eq(false)
+      expect(Osm::Member.new(started_section: Date.yesterday, finished_section: Date.today).current?).to eq(true)
+      expect(Osm::Member.new(started_section: Date.yesterday, finished_section: Date.tomorrow).current?).to eq(true)
     end
 
     it "Another date" do
       yesterday = Date.new(2014, 10, 15)
       today = Date.new(2014, 10, 16)
       tomorrow = Date.new(2014, 10, 17)
-      Osm::Member.new(started_section: yesterday).current?(today).should == true
-      Osm::Member.new(started_section: today).current?(today).should == true
-      Osm::Member.new(started_section: tomorrow).current?(today).should == false
-      Osm::Member.new(started_section: yesterday, finished_section: yesterday).current?(today).should == false
-      Osm::Member.new(started_section: yesterday, finished_section: today).current?(today).should == true
-      Osm::Member.new(started_section: yesterday, finished_section: tomorrow).current?(today).should == true
+      expect(Osm::Member.new(started_section: yesterday).current?(today)).to eq(true)
+      expect(Osm::Member.new(started_section: today).current?(today)).to eq(true)
+      expect(Osm::Member.new(started_section: tomorrow).current?(today)).to eq(false)
+      expect(Osm::Member.new(started_section: yesterday, finished_section: yesterday).current?(today)).to eq(false)
+      expect(Osm::Member.new(started_section: yesterday, finished_section: today).current?(today)).to eq(true)
+      expect(Osm::Member.new(started_section: yesterday, finished_section: tomorrow).current?(today)).to eq(true)
     end
   end
 
@@ -146,7 +146,7 @@ describe "Member" do
     m7 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'b', first_name: 'b')
 
     data = [m4, m2, m3, m1, m7, m6, m5]
-    data.sort.should == [m1, m2, m3, m4, m5, m6, m7]
+    expect(data.sort).to eq([m1, m2, m3, m4, m5, m6, m7])
   end
 
 
@@ -268,104 +268,104 @@ describe "Member" do
             ],
           },
         }
-        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
-        members.size.should == 1
+        expect(members.size).to eq(1)
         member = members[0]
-        member.id.should == 123
-        member.section_id.should == 1
-        member.first_name.should == 'John'
-        member.last_name.should == 'Smith'
-        member.date_of_birth.should == Date.new(2000, 3, 8)
-        member.grouping_id.should == -2
-        member.grouping_leader.should == 1
-        member.grouping_label.should == 'Leaders'
-        member.grouping_leader_label.should == 'Assistant leader'
-        member.age.should == '12 / 00'
-        member.gender.should == :unspecified
-        member.joined_movement.should == Date.new(2006, 7, 17)
-        member.started_section.should == Date.new(2008, 7, 12)
-        member.finished_section.should == Date.new(2010, 6, 3)
-        member.additional_information.should == {4848 => "Data for 4848"}
-        member.additional_information_labels.should == {4848 => 'Label for 4848'}
-        member.contact.first_name.should == 'John'
-        member.contact.last_name.should == 'Smith'
-        member.contact.address_1.should == 'Address 1'
-        member.contact.address_2.should == 'Address 2'
-        member.contact.address_3.should == 'Address 3'
-        member.contact.address_4.should == 'Address 4'
-        member.contact.postcode.should == 'Postcode'
-        member.contact.phone_1.should == '01234 567890'
-        member.contact.receive_phone_1.should == true
-        member.contact.phone_2.should == '0987 654321'
-        member.contact.receive_phone_2.should == false
-        member.contact.email_1.should == 'member@example.com'
-        member.contact.receive_email_1.should == true
-        member.contact.email_2.should == ''
-        member.contact.receive_email_2.should == false
-        member.contact.additional_information.should == {8446=>"Data for 8446"}
-        member.contact.additional_information_labels.should == {8446=>"Label for 8446"}
-        member.primary_contact.first_name.should == 'Primary'
-        member.primary_contact.last_name.should == 'Contact'
-        member.primary_contact.address_1.should == 'Address 1'
-        member.primary_contact.address_2.should == 'Address 2'
-        member.primary_contact.address_3.should == 'Address 3'
-        member.primary_contact.address_4.should == 'Address 4'
-        member.primary_contact.postcode.should == 'Postcode'
-        member.primary_contact.phone_1.should == '01234 567890'
-        member.primary_contact.receive_phone_1.should == true
-        member.primary_contact.phone_2.should == '0987 654321'
-        member.primary_contact.receive_phone_2.should == false
-        member.primary_contact.email_1.should == 'primary@example.com'
-        member.primary_contact.receive_email_1.should == true
-        member.primary_contact.email_2.should == ''
-        member.primary_contact.receive_email_2.should == false
-        member.primary_contact.additional_information.should == {8441=>"Data for 8441"}
-        member.primary_contact.additional_information_labels.should == {8441=>"Label for 8441"}
-        member.secondary_contact.first_name.should == 'Secondary'
-        member.secondary_contact.last_name.should == 'Contact'
-        member.secondary_contact.address_1.should == 'Address 1'
-        member.secondary_contact.address_2.should == 'Address 2'
-        member.secondary_contact.address_3.should == 'Address 3'
-        member.secondary_contact.address_4.should == 'Address 4'
-        member.secondary_contact.postcode.should == 'Postcode'
-        member.secondary_contact.phone_1.should == '01234 567890'
-        member.secondary_contact.receive_phone_1.should == true
-        member.secondary_contact.phone_2.should == '0987 654321'
-        member.secondary_contact.receive_phone_2.should == false
-        member.secondary_contact.email_1.should == 'secondary@example.com'
-        member.secondary_contact.receive_email_1.should == true
-        member.secondary_contact.email_2.should == ''
-        member.secondary_contact.receive_email_2.should == false
-        member.secondary_contact.additional_information.should == {8442=>"Data for 8442"}
-        member.secondary_contact.additional_information_labels.should == {8442=>"Label for 8442"}
-        member.emergency_contact.first_name.should == 'Emergency'
-        member.emergency_contact.last_name.should == 'Contact'
-        member.emergency_contact.address_1.should == 'Address 1'
-        member.emergency_contact.address_2.should == 'Address 2'
-        member.emergency_contact.address_3.should == 'Address 3'
-        member.emergency_contact.address_4.should == 'Address 4'
-        member.emergency_contact.postcode.should == 'Postcode'
-        member.emergency_contact.phone_1.should == '01234 567890'
-        member.emergency_contact.phone_2.should == '0987 654321'
-        member.emergency_contact.email_1.should == 'emergency@example.com'
-        member.emergency_contact.email_2.should == ''
-        member.emergency_contact.additional_information.should == {8443=>"Data for 8443"}
-        member.emergency_contact.additional_information_labels.should == {8443=>"Label for 8443"}
-        member.doctor.first_name.should == 'Doctor'
-        member.doctor.last_name.should == 'Contact'
-        member.doctor.surgery.should == 'Surgery'
-        member.doctor.address_1.should == 'Address 1'
-        member.doctor.address_2.should == 'Address 2'
-        member.doctor.address_3.should == 'Address 3'
-        member.doctor.address_4.should == 'Address 4'
-        member.doctor.postcode.should == 'Postcode'
-        member.doctor.phone_1.should == '01234 567890'
-        member.doctor.phone_2.should == '0987 654321'
-        member.doctor.additional_information.should == {8444=>"Data for 8444"}
-        member.doctor.additional_information_labels.should == {8444=>"Label for 8444"}
-        member.valid?.should == true
+        expect(member.id).to eq(123)
+        expect(member.section_id).to eq(1)
+        expect(member.first_name).to eq('John')
+        expect(member.last_name).to eq('Smith')
+        expect(member.date_of_birth).to eq(Date.new(2000, 3, 8))
+        expect(member.grouping_id).to eq(-2)
+        expect(member.grouping_leader).to eq(1)
+        expect(member.grouping_label).to eq('Leaders')
+        expect(member.grouping_leader_label).to eq('Assistant leader')
+        expect(member.age).to eq('12 / 00')
+        expect(member.gender).to eq(:unspecified)
+        expect(member.joined_movement).to eq(Date.new(2006, 7, 17))
+        expect(member.started_section).to eq(Date.new(2008, 7, 12))
+        expect(member.finished_section).to eq(Date.new(2010, 6, 3))
+        expect(member.additional_information).to eq({4848 => "Data for 4848"})
+        expect(member.additional_information_labels).to eq({4848 => 'Label for 4848'})
+        expect(member.contact.first_name).to eq('John')
+        expect(member.contact.last_name).to eq('Smith')
+        expect(member.contact.address_1).to eq('Address 1')
+        expect(member.contact.address_2).to eq('Address 2')
+        expect(member.contact.address_3).to eq('Address 3')
+        expect(member.contact.address_4).to eq('Address 4')
+        expect(member.contact.postcode).to eq('Postcode')
+        expect(member.contact.phone_1).to eq('01234 567890')
+        expect(member.contact.receive_phone_1).to eq(true)
+        expect(member.contact.phone_2).to eq('0987 654321')
+        expect(member.contact.receive_phone_2).to eq(false)
+        expect(member.contact.email_1).to eq('member@example.com')
+        expect(member.contact.receive_email_1).to eq(true)
+        expect(member.contact.email_2).to eq('')
+        expect(member.contact.receive_email_2).to eq(false)
+        expect(member.contact.additional_information).to eq({8446=>"Data for 8446"})
+        expect(member.contact.additional_information_labels).to eq({8446=>"Label for 8446"})
+        expect(member.primary_contact.first_name).to eq('Primary')
+        expect(member.primary_contact.last_name).to eq('Contact')
+        expect(member.primary_contact.address_1).to eq('Address 1')
+        expect(member.primary_contact.address_2).to eq('Address 2')
+        expect(member.primary_contact.address_3).to eq('Address 3')
+        expect(member.primary_contact.address_4).to eq('Address 4')
+        expect(member.primary_contact.postcode).to eq('Postcode')
+        expect(member.primary_contact.phone_1).to eq('01234 567890')
+        expect(member.primary_contact.receive_phone_1).to eq(true)
+        expect(member.primary_contact.phone_2).to eq('0987 654321')
+        expect(member.primary_contact.receive_phone_2).to eq(false)
+        expect(member.primary_contact.email_1).to eq('primary@example.com')
+        expect(member.primary_contact.receive_email_1).to eq(true)
+        expect(member.primary_contact.email_2).to eq('')
+        expect(member.primary_contact.receive_email_2).to eq(false)
+        expect(member.primary_contact.additional_information).to eq({8441=>"Data for 8441"})
+        expect(member.primary_contact.additional_information_labels).to eq({8441=>"Label for 8441"})
+        expect(member.secondary_contact.first_name).to eq('Secondary')
+        expect(member.secondary_contact.last_name).to eq('Contact')
+        expect(member.secondary_contact.address_1).to eq('Address 1')
+        expect(member.secondary_contact.address_2).to eq('Address 2')
+        expect(member.secondary_contact.address_3).to eq('Address 3')
+        expect(member.secondary_contact.address_4).to eq('Address 4')
+        expect(member.secondary_contact.postcode).to eq('Postcode')
+        expect(member.secondary_contact.phone_1).to eq('01234 567890')
+        expect(member.secondary_contact.receive_phone_1).to eq(true)
+        expect(member.secondary_contact.phone_2).to eq('0987 654321')
+        expect(member.secondary_contact.receive_phone_2).to eq(false)
+        expect(member.secondary_contact.email_1).to eq('secondary@example.com')
+        expect(member.secondary_contact.receive_email_1).to eq(true)
+        expect(member.secondary_contact.email_2).to eq('')
+        expect(member.secondary_contact.receive_email_2).to eq(false)
+        expect(member.secondary_contact.additional_information).to eq({8442=>"Data for 8442"})
+        expect(member.secondary_contact.additional_information_labels).to eq({8442=>"Label for 8442"})
+        expect(member.emergency_contact.first_name).to eq('Emergency')
+        expect(member.emergency_contact.last_name).to eq('Contact')
+        expect(member.emergency_contact.address_1).to eq('Address 1')
+        expect(member.emergency_contact.address_2).to eq('Address 2')
+        expect(member.emergency_contact.address_3).to eq('Address 3')
+        expect(member.emergency_contact.address_4).to eq('Address 4')
+        expect(member.emergency_contact.postcode).to eq('Postcode')
+        expect(member.emergency_contact.phone_1).to eq('01234 567890')
+        expect(member.emergency_contact.phone_2).to eq('0987 654321')
+        expect(member.emergency_contact.email_1).to eq('emergency@example.com')
+        expect(member.emergency_contact.email_2).to eq('')
+        expect(member.emergency_contact.additional_information).to eq({8443=>"Data for 8443"})
+        expect(member.emergency_contact.additional_information_labels).to eq({8443=>"Label for 8443"})
+        expect(member.doctor.first_name).to eq('Doctor')
+        expect(member.doctor.last_name).to eq('Contact')
+        expect(member.doctor.surgery).to eq('Surgery')
+        expect(member.doctor.address_1).to eq('Address 1')
+        expect(member.doctor.address_2).to eq('Address 2')
+        expect(member.doctor.address_3).to eq('Address 3')
+        expect(member.doctor.address_4).to eq('Address 4')
+        expect(member.doctor.postcode).to eq('Postcode')
+        expect(member.doctor.phone_1).to eq('01234 567890')
+        expect(member.doctor.phone_2).to eq('0987 654321')
+        expect(member.doctor.additional_information).to eq({8444=>"Data for 8444"})
+        expect(member.doctor.additional_information_labels).to eq({8444=>"Label for 8444"})
+        expect(member.valid?).to eq(true)
       end
 
       it "Handles disabled contacts" do
@@ -408,18 +408,18 @@ describe "Member" do
             ],
           },
         }
-        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
-        members.size.should == 1
+        expect(members.size).to eq(1)
         member = members[0]
-        member.id.should == 123
-        member.contact.should == nil
-        member.primary_contact.should == nil
-        member.secondary_contact.should == nil
-        member.emergency_contact.should == nil
-        member.doctor.should == nil
-        member.valid?.should == true
+        expect(member.id).to eq(123)
+        expect(member.contact).to eq(nil)
+        expect(member.primary_contact).to eq(nil)
+        expect(member.secondary_contact).to eq(nil)
+        expect(member.emergency_contact).to eq(nil)
+        expect(member.doctor).to eq(nil)
+        expect(member.valid?).to eq(true)
       end
 
       it "Handles no custom data" do
@@ -461,14 +461,14 @@ describe "Member" do
             ],
           },
         }
-        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
-        members.size.should == 1
+        expect(members.size).to eq(1)
         member = members[0]
-        member.id.should == 123
-        member.additional_information.should == {}
-        member.valid?.should == true
+        expect(member.id).to eq(123)
+        expect(member.additional_information).to eq({})
+        expect(member.valid?).to eq(true)
       end
 
       it "Handles missing floating data" do
@@ -510,14 +510,14 @@ describe "Member" do
             ],
           },
         }
-        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
-        members.size.should == 1
+        expect(members.size).to eq(1)
         member = members[0]
-        member.id.should == 123
-        member.gender.should == nil
-        member.valid?.should == true
+        expect(member.id).to eq(123)
+        expect(member.gender).to eq(nil)
+        expect(member.valid?).to eq(true)
       end
 
       it "Handles an empty data array" do
@@ -527,9 +527,9 @@ describe "Member" do
           'data' => [],
           'meta' => {},
         }
-        $api.should_receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {"section_id"=>1, "term_id"=>2}).and_return(body)
 
-        Osm::Member.get_for_section(api: $api, section: 1, term: 2).should == []
+        expect(Osm::Member.get_for_section(api: $api, section: 1, term: 2)).to eq([])
       end
 
     end
@@ -564,7 +564,7 @@ describe "Member" do
       end
 
       it "Success" do
-        $api.should_receive(:post_query).with('users.php?action=newMember', post_data: {
+        expect($api).to receive(:post_query).with('users.php?action=newMember', post_data: {
           "sectionid" => 2,
           "firstname" => "First",
           "lastname" => "Last",
@@ -573,20 +573,20 @@ describe "Member" do
           "startedsection" => "2006-01-07",
         }).and_return({"result"=>"ok","scoutid"=>577743})
 
-        @member.stub(:update) { true }
-        Osm::Term.stub(:get_for_section) { [] }
+        allow(@member).to receive(:update) { true }
+        allow(Osm::Term).to receive(:get_for_section) { [] }
 
-        @member.create($api).should == true
-        @member.id.should == 577743
+        expect(@member.create($api)).to eq(true)
+        expect(@member.id).to eq(577743)
       end
 
       it "Failed the create stage in OSM" do
-        $api.should_receive(:post_query).with('users.php?action=newMember', post_data: {"firstname"=>"First", "lastname"=>"Last", "dob"=>"2000-01-02", "started"=>"2006-01-02", "startedsection"=>"2006-01-07", "sectionid"=>2}).and_return({})
-        @member.create($api).should == false
+        expect($api).to receive(:post_query).with('users.php?action=newMember', post_data: {"firstname"=>"First", "lastname"=>"Last", "dob"=>"2000-01-02", "started"=>"2006-01-02", "startedsection"=>"2006-01-07", "sectionid"=>2}).and_return({})
+        expect(@member.create($api)).to eq(false)
       end
 
       it "Failed the update stage in OSM" do
-        $api.should_receive(:post_query).with('users.php?action=newMember', post_data: {
+        expect($api).to receive(:post_query).with('users.php?action=newMember', post_data: {
           "sectionid" => 2,
           "firstname" => "First",
           "lastname" => "Last",
@@ -595,11 +595,11 @@ describe "Member" do
           "startedsection" => "2006-01-07",
         }).and_return({"result"=>"ok","scoutid"=>577743})
 
-        @member.stub(:update) { false }
-        Osm::Term.stub(:get_for_section) { [] }
+        allow(@member).to receive(:update) { false }
+        allow(Osm::Term).to receive(:get_for_section) { [] }
 
-        @member.create($api).should == nil
-        @member.id.should == 577743
+        expect(@member.create($api)).to eq(nil)
+        expect(@member.id).to eq(577743)
       end
 
       it "Raises error if member is invalid" do
@@ -643,14 +643,14 @@ describe "Member" do
       end
 
       it "Only updated fields" do
-        $api.should_receive(:post_query).with('ext/members/contact/?action=update', post_data: {
+        expect($api).to receive(:post_query).with('ext/members/contact/?action=update', post_data: {
           "sectionid" => 2,
           "scoutid" => 1,
           "column" => "firstname",
           "value" => "John",
         }).and_return({"ok"=>true})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -659,7 +659,7 @@ describe "Member" do
           "value" => "Unspecified",
         }).and_return({"data"=>{"value"=>"Unspecified"}})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -667,7 +667,7 @@ describe "Member" do
           "data[address1]" => "Address 1",
         }).and_return({"status"=>true})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -675,7 +675,7 @@ describe "Member" do
           "data[address2]" => "Address 2",
         }).and_return({"status"=>true})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -683,7 +683,7 @@ describe "Member" do
           "data[address3]" => "Address 3",
         }).and_return({"status"=>true})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -691,7 +691,7 @@ describe "Member" do
           "data[address4]" => "Address 4",
         }).and_return({"status"=>true})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -700,7 +700,7 @@ describe "Member" do
           "data[test_var]" => "This is still a test",
         }).and_return({"status"=>true})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -709,7 +709,7 @@ describe "Member" do
           "value" => "321",
         }).and_return({"data"=>{"value"=>"321"}})
 
-        Osm::Term.stub(:get_for_section) { [] }
+        allow(Osm::Term).to receive(:get_for_section) { [] }
 
         @member.first_name = 'John'
         @member.gender = :unspecified
@@ -720,12 +720,12 @@ describe "Member" do
         @member.emergency_contact.address_4 = 'Address 4'
         @member.doctor.surgery = 'Surgery'
         @member.doctor.additional_information['test_var'] = 'This is still a test'
-        @member.update($api).should == true
+        expect(@member.update($api)).to eq(true)
       end
 
       it "All fields" do
         {'firstname'=>'First', 'lastname'=>'Last', 'patrolid'=>3, 'patrolleader'=>0, 'dob'=>'2000-01-02', 'startedsection'=>'2006-01-07', 'started'=>'2006-01-02'}.each do |key, value|
-          $api.should_receive(:post_query).with('ext/members/contact/?action=update', post_data: {
+          expect($api).to receive(:post_query).with('ext/members/contact/?action=update', post_data: {
             "sectionid" => 2,
             "scoutid" => 1,
             "column" => key,
@@ -733,7 +733,7 @@ describe "Member" do
           }).and_return({"ok"=>true})
         end
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -742,7 +742,7 @@ describe "Member" do
           "value" => "Other",
         }).and_return({"data"=>{"value"=>"Other"}})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -752,7 +752,7 @@ describe "Member" do
         }).and_return({"data"=>{"value"=>"123"}})
 
         {6=>'A', 1=>'B', 2=>'C'}.each do |group_id, postcode|
-          $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
+          expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
             "context" => "members",
             "associated_type" => "member",
             "associated_id" => 1,
@@ -775,7 +775,7 @@ describe "Member" do
           }).and_return({"status"=>true})
         end
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -793,7 +793,7 @@ describe "Member" do
           "data[email2]" => nil,
         }).and_return({"status"=>true})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -811,15 +811,15 @@ describe "Member" do
           "data[test_var]" => "This is a test",
         }).and_return({"status"=>true})
 
-        Osm::Term.stub(:get_for_section) { [] }
+        allow(Osm::Term).to receive(:get_for_section) { [] }
 
-        @member.update($api, force: true).should == true
+        expect(@member.update($api, force: true)).to eq(true)
       end
 
       it "Failed to update in OSM" do
         @member.first_name = 'John'
-        $api.stub(:post_query) { {} }
-        @member.update($api).should == false
+        allow($api).to receive(:post_query) { {} }
+        expect(@member.update($api)).to eq(false)
       end
 
       it "Raises error if member is invalid" do
@@ -832,19 +832,19 @@ describe "Member" do
         @member.secondary_contact = nil
         @member.emergency_contact = nil
         @member.doctor = nil
-        $api.stub(:post_query) { {} }
-        @member.update($api).should == true
+        allow($api).to receive(:post_query) { {} }
+        expect(@member.update($api)).to eq(true)
       end
 
       it "When setting data to a blank string" do
-        $api.should_receive(:post_query).with('ext/members/contact/?action=update', post_data: {
+        expect($api).to receive(:post_query).with('ext/members/contact/?action=update', post_data: {
           "sectionid" => 2,
           "scoutid" => 1,
           "column" => "firstname",
           "value" => "",
         }).and_return({"ok"=>true})
 
-        $api.should_receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
+        expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           "context" => "members",
           "associated_type" => "member",
           "associated_id" => 1,
@@ -853,12 +853,12 @@ describe "Member" do
           "value" => "",
         }).and_return({"data"=>{"value"=>nil}})
 
-        Osm::Term.stub(:get_for_section) { [] }
+        allow(Osm::Term).to receive(:get_for_section) { [] }
 
-        @member.stub('valid?'){ true }
+        allow(@member).to receive('valid?'){ true }
         @member.first_name = ''
         @member.additional_information[123] = ''
-        @member.update($api).should == true
+        expect(@member.update($api)).to eq(true)
       end
 
     end
@@ -884,9 +884,9 @@ describe "Member" do
         emergency_contact: Osm::Member::EmergencyContact.new(),
         doctor: Osm::Member::DoctorContact.new(),
       )
-      $api.stub(:post_query).with('ext/members/contact/images/member.php?sectionid=2&scoutid=1&bw=false').and_return('abcdef')
+      allow($api).to receive(:post_query).with('ext/members/contact/images/member.php?sectionid=2&scoutid=1&bw=false').and_return('abcdef')
 
-      member.get_photo($api).should == "abcdef"
+      expect(member.get_photo($api)).to eq("abcdef")
     end
 
 
@@ -916,58 +916,58 @@ describe "Member" do
       end
 
       it "Get the key" do
-        $api.should_receive(:post_query).with('api.php?action=getMyScoutKey&sectionid=2&scoutid=1').and_return({"ok"=>true,"key"=>"KEY-HERE"})
-        @member.myscout_link_key($api).should == 'KEY-HERE'
+        expect($api).to receive(:post_query).with('api.php?action=getMyScoutKey&sectionid=2&scoutid=1').and_return({"ok"=>true,"key"=>"KEY-HERE"})
+        expect(@member.myscout_link_key($api)).to eq('KEY-HERE')
       end
 
       it "Default" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api)).to eq('https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE')
       end
 
       it "Payments" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api, link_to: :payments).should == 'https://www.onlinescoutmanager.co.uk/parents/payments.php?sc=1&se=2&c=KEY-HERE'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api, link_to: :payments)).to eq('https://www.onlinescoutmanager.co.uk/parents/payments.php?sc=1&se=2&c=KEY-HERE')
       end
 
       it "Events" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api, link_to: :events).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api, link_to: :events)).to eq('https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE')
       end
 
       it "Specific Event" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api, link_to: :events, item_id: 2).should == 'https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE&e=2'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api, link_to: :events, item_id: 2)).to eq('https://www.onlinescoutmanager.co.uk/parents/events.php?sc=1&se=2&c=KEY-HERE&e=2')
       end
 
       it "Programme" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api, link_to: :programme).should == 'https://www.onlinescoutmanager.co.uk/parents/programme.php?sc=1&se=2&c=KEY-HERE'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api, link_to: :programme)).to eq('https://www.onlinescoutmanager.co.uk/parents/programme.php?sc=1&se=2&c=KEY-HERE')
       end
 
       it "Badges" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api, link_to: :badges).should == 'https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api, link_to: :badges)).to eq('https://www.onlinescoutmanager.co.uk/parents/badges.php?sc=1&se=2&c=KEY-HERE')
       end
 
       it "Notice board" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api, link_to: :notice).should == 'https://www.onlinescoutmanager.co.uk/parents/notice.php?sc=1&se=2&c=KEY-HERE'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api, link_to: :notice)).to eq('https://www.onlinescoutmanager.co.uk/parents/notice.php?sc=1&se=2&c=KEY-HERE')
       end
 
       it "Personal details" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api, link_to: :details).should == 'https://www.onlinescoutmanager.co.uk/parents/details.php?sc=1&se=2&c=KEY-HERE'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api, link_to: :details)).to eq('https://www.onlinescoutmanager.co.uk/parents/details.php?sc=1&se=2&c=KEY-HERE')
       end
 
       it "Census detail entry" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api, link_to: :census).should == 'https://www.onlinescoutmanager.co.uk/parents/census.php?sc=1&se=2&c=KEY-HERE'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api, link_to: :census)).to eq('https://www.onlinescoutmanager.co.uk/parents/census.php?sc=1&se=2&c=KEY-HERE')
       end
 
       it "Gift Aid consent" do
-        @member.stub(:myscout_link_key) { 'KEY-HERE' }
-        @member.myscout_link($api, link_to: :giftaid).should == 'https://www.onlinescoutmanager.co.uk/parents/giftaid.php?sc=1&se=2&c=KEY-HERE'
+        allow(@member).to receive(:myscout_link_key) { 'KEY-HERE' }
+        expect(@member.myscout_link($api, link_to: :giftaid)).to eq('https://www.onlinescoutmanager.co.uk/parents/giftaid.php?sc=1&se=2&c=KEY-HERE')
       end
 
     end

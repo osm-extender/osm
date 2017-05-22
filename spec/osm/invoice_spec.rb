@@ -15,14 +15,14 @@ describe "Invoice" do
       finalised: true,
     )
 
-    i.id.should == 1
-    i.section_id.should == 2
-    i.name.should == 'Name'
-    i.extra_details.should == 'Extra Details'
-    i.date.should == Date.new(2001, 2, 3)
-    i.archived.should == true
-    i.finalised.should == true
-    i.valid?.should == true
+    expect(i.id).to eq(1)
+    expect(i.section_id).to eq(2)
+    expect(i.name).to eq('Name')
+    expect(i.extra_details).to eq('Extra Details')
+    expect(i.date).to eq(Date.new(2001, 2, 3))
+    expect(i.archived).to eq(true)
+    expect(i.finalised).to eq(true)
+    expect(i.valid?).to eq(true)
   end
 
   it "Sorts Invoice by Section ID, Name then Date" do
@@ -32,7 +32,7 @@ describe "Invoice" do
     i4 = Osm::Invoice.new(section_id: 2, name: 'b', date: Date.new(2000, 1, 3))
 
     data = [i2, i4, i1, i3]
-    data.sort.should == [i1, i2, i3, i4]
+    expect(data.sort).to eq([i1, i2, i3, i4])
   end
 
   describe "Invoice Item" do
@@ -49,16 +49,16 @@ describe "Invoice" do
         budget_name: 'Budget',
       )
   
-      ii.id.should == 1
-      ii.invoice.should == Osm::Invoice.new
-      ii.record_id.should == 3
-      ii.date.should == Date.new(2002, 3, 4)
-      ii.amount.should == '5.00'
-      ii.type.should == :expense
-      ii.payto.should == 'Name'
-      ii.description.should == 'Comments'
-      ii.budget_name.should == 'Budget'
-      ii.valid?.should == true
+      expect(ii.id).to eq(1)
+      expect(ii.invoice).to eq(Osm::Invoice.new)
+      expect(ii.record_id).to eq(3)
+      expect(ii.date).to eq(Date.new(2002, 3, 4))
+      expect(ii.amount).to eq('5.00')
+      expect(ii.type).to eq(:expense)
+      expect(ii.payto).to eq('Name')
+      expect(ii.description).to eq('Comments')
+      expect(ii.budget_name).to eq('Budget')
+      expect(ii.valid?).to eq(true)
     end
   
     it "Sorts by Invoice then Date" do
@@ -69,12 +69,12 @@ describe "Invoice" do
       ii3 = Osm::Invoice::Item.new(invoice: i2, date: Date.new(2000, 1, 2))
   
       data = [ii2, ii3, ii1]
-      data.sort.should == [ii1, ii2, ii3]
+      expect(data.sort).to eq([ii1, ii2, ii3])
     end
 
     it "Calculates value for easy summing" do
-      Osm::Invoice::Item.new(type: :income, amount: '1.00').value.should == 1.00
-      Osm::Invoice::Item.new(type: :expense, amount: '2.00').value.should == -2.00
+      expect(Osm::Invoice::Item.new(type: :income, amount: '1.00').value).to eq(1.00)
+      expect(Osm::Invoice::Item.new(type: :expense, amount: '2.00').value).to eq(-2.00)
     end
 
   end
@@ -138,40 +138,40 @@ describe "Invoice" do
         end
 
         it "From API" do
-          $api.should_receive(:post_query).with('finances.php?action=getInvoices&sectionid=3&showArchived=true').and_return(@invoices_body)
-          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
-          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
+          expect($api).to receive(:post_query).with('finances.php?action=getInvoices&sectionid=3&showArchived=true').and_return(@invoices_body)
+          expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
+          expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
 
           invoices = Osm::Invoice.get_for_section(api: $api, section: 3)
-          invoices.size.should == 1
+          expect(invoices.size).to eq(1)
           invoice = invoices[0]
-          invoice.id.should == 1
-          invoice.section_id.should == 3
-          invoice.name.should == 'Invoice 1'
-          invoice.extra_details.should == 'Some more details'
-          invoice.date.should == Date.new(2010, 1, 1)
-          invoice.archived.should == false
-          invoice.finalised.should == false
-          invoice.valid?.should == true
+          expect(invoice.id).to eq(1)
+          expect(invoice.section_id).to eq(3)
+          expect(invoice.name).to eq('Invoice 1')
+          expect(invoice.extra_details).to eq('Some more details')
+          expect(invoice.date).to eq(Date.new(2010, 1, 1))
+          expect(invoice.archived).to eq(false)
+          expect(invoice.finalised).to eq(false)
+          expect(invoice.valid?).to eq(true)
         end
 
         it "Honours archived option" do
-          $api.should_receive(:post_query).with('finances.php?action=getInvoices&sectionid=3&showArchived=true').and_return(@invoices_body)
-          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
-          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
+          expect($api).to receive(:post_query).with('finances.php?action=getInvoices&sectionid=3&showArchived=true').and_return(@invoices_body)
+          expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
+          expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
 
           invoices = Osm::Invoice.get_for_section(api: $api, section: 3, include_archived: true)
-          invoices.size.should == 2
+          expect(invoices.size).to eq(2)
         end
 
         it "From Cache" do
-          $api.should_receive(:post_query).with('finances.php?action=getInvoices&sectionid=3&showArchived=true').and_return(@invoices_body)
-          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
-          $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
+          expect($api).to receive(:post_query).with('finances.php?action=getInvoices&sectionid=3&showArchived=true').and_return(@invoices_body)
+          expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
+          expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
 
           invoices = Osm::Invoice.get_for_section(api: $api, section: 3)
-          $api.should_not_receive(:post_query)
-          Osm::Invoice.get_for_section(api: $api, section: 3).should == invoices
+          expect($api).not_to receive(:post_query)
+          expect(Osm::Invoice.get_for_section(api: $api, section: 3)).to eq(invoices)
         end
 
       end
@@ -205,11 +205,11 @@ describe "Invoice" do
             "A Budget"
           ]
         }
-        $api.should_receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(invoice1_body)
+        expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(invoice1_body)
 
         invoice = Osm::Invoice.get(api: $api, section: 3, id: 1)
-        invoice.should_not be_nil
-        invoice.id.should == 1
+        expect(invoice).not_to be_nil
+        expect(invoice.id).to eq(1)
       end
 
       it "Create (success)" do
@@ -220,14 +220,14 @@ describe "Invoice" do
           date: Date.new(2002, 3, 4),
         )
 
-        $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
         }).and_return({"id"=>2})
 
-        invoice.create($api).should == true
-        invoice.id.should == 2
+        expect(invoice.create($api)).to eq(true)
+        expect(invoice.id).to eq(2)
       end
 
       it "Create (failure)" do
@@ -238,14 +238,14 @@ describe "Invoice" do
           date: Date.new(2002, 3, 4),
         )
 
-        $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
         }).and_return({"message"=>"Something went wrong"})
 
-        invoice.create($api).should == false
-        invoice.id.should be_nil
+        expect(invoice.create($api)).to eq(false)
+        expect(invoice.id).to be_nil
       end
 
       it "Update (success)" do
@@ -257,14 +257,14 @@ describe "Invoice" do
           date: Date.new(2002, 3, 4),
         )
 
-        $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
         }).and_return({"ok"=>true})
 
-        invoice.update($api).should == true
+        expect(invoice.update($api)).to eq(true)
       end
 
       it "Update (failure)" do
@@ -276,94 +276,94 @@ describe "Invoice" do
           date: Date.new(2002, 3, 4),
         )
 
-        $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
         }).and_return({"ok"=>false})
 
-        invoice.update($api).should == false
+        expect(invoice.update($api)).to eq(false)
       end
 
       it "Delete (success)" do
         invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
-        $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
         }).and_return({"ok"=>true})
 
-        invoice.delete($api).should == true
+        expect(invoice.delete($api)).to eq(true)
       end
 
       it "Delete (failure)" do
         invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
-        $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
         }).and_return({"ok"=>false})
 
-        invoice.delete($api).should == false
+        expect(invoice.delete($api)).to eq(false)
       end
 
       it "Finalise invoice (success)" do
         invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
-        $api.should_receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({"ok"=>true})
+        expect($api).to receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({"ok"=>true})
 
-        invoice.finalise($api).should == true
-        invoice.finalised.should == true
+        expect(invoice.finalise($api)).to eq(true)
+        expect(invoice.finalised).to eq(true)
       end
 
       it "Finalise invoice (failure)" do
         invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
-        $api.should_receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({"ok"=>false})
+        expect($api).to receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({"ok"=>false})
 
-        invoice.finalise($api).should == false
-        invoice.finalised.should == false
+        expect(invoice.finalise($api)).to eq(false)
+        expect(invoice.finalised).to eq(false)
       end
 
       it "Finalise invoice (already finalised)" do
         invoice = Osm::Invoice.new(id: 1, section_id: 2, finalised: true)
 
-        $api.should_not_receive(:post_query)
+        expect($api).not_to receive(:post_query)
 
-        invoice.finalise($api).should == false
-        invoice.finalised.should == true
+        expect(invoice.finalise($api)).to eq(false)
+        expect(invoice.finalised).to eq(true)
       end
 
       it "Archive invoice (success)" do
         invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
-        $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'archived' => 1,
         }).and_return({"ok"=>true})
 
-        invoice.archive($api).should == true
-        invoice.archived.should == true
+        expect(invoice.archive($api)).to eq(true)
+        expect(invoice.archived).to eq(true)
       end
 
       it "Archive invoice (failure)" do
         invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
-        $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'archived' => 1,
         }).and_return({"ok"=>false})
 
-        invoice.archive($api).should == false
-        invoice.archived.should == false
+        expect(invoice.archive($api)).to eq(false)
+        expect(invoice.archived).to eq(false)
       end
 
       it "Archive invoice (already archived)" do
         invoice = Osm::Invoice.new(id: 1, section_id: 2, archived: true)
 
-        $api.should_not_receive(:post_query)
+        expect($api).not_to receive(:post_query)
 
-        invoice.archive($api).should == false
-        invoice.archived.should == true
+        expect(invoice.archive($api)).to eq(false)
+        expect(invoice.archived).to eq(true)
       end
 
     end
@@ -375,22 +375,22 @@ describe "Invoice" do
         data = {"identifier" => "id","items" => [
           {"id" => "1","invoiceid" => "2","recordid" => "3","sectionid" => "4","entrydate" => "2012-01-02","amount" => "1.23","type" => "Expense","payto_userid" => "John Smith","comments" => "Comment","categoryid" => "Default","firstname" => "John Smith"}
         ]}
-        $api.should_receive(:post_query).with('finances.php?action=getInvoiceRecords&invoiceid=2&sectionid=4&dateFormat=generic').and_return(data)
+        expect($api).to receive(:post_query).with('finances.php?action=getInvoiceRecords&invoiceid=2&sectionid=4&dateFormat=generic').and_return(data)
 
         invoice = Osm::Invoice.new(id: 2, section_id: 4)
         items = invoice.get_items($api)
-        items.size.should == 1
+        expect(items.size).to eq(1)
         item = items[0]
-        item.id.should == 1
-        item.invoice.should == invoice
-        item.record_id.should == 3
-        item.date.should == Date.new(2012, 1, 2)
-        item.amount.should == '1.23'
-        item.type.should == :expense
-        item.payto.should == 'John Smith'
-        item.budget_name.should == 'Default'
-        item.description.should == 'Comment'
-        item.valid?.should == true
+        expect(item.id).to eq(1)
+        expect(item.invoice).to eq(invoice)
+        expect(item.record_id).to eq(3)
+        expect(item.date).to eq(Date.new(2012, 1, 2))
+        expect(item.amount).to eq('1.23')
+        expect(item.type).to eq(:expense)
+        expect(item.payto).to eq('John Smith')
+        expect(item.budget_name).to eq('Default')
+        expect(item.description).to eq('Comment')
+        expect(item.valid?).to eq(true)
       end
 
       it "Create (success)" do
@@ -405,7 +405,7 @@ describe "Invoice" do
           payto: 'Person to Pay',
         )
 
-        $api.should_receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({"ok"=>true})
+        expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({"ok"=>true})
 
         data1 = [
           Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
@@ -414,7 +414,7 @@ describe "Invoice" do
           Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
           Osm::Invoice::Item.new(id: 2, invoice: invoice, record_id: 4, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => '', :budget_name => 'Default'),
         ]
-        invoice.should_receive(:get_items).with($api, no_read_cache: true).and_return(data1, data2)
+        expect(invoice).to receive(:get_items).with($api, no_read_cache: true).and_return(data1, data2)
 
         [
           # osm_name, new_value
@@ -425,7 +425,7 @@ describe "Invoice" do
           ['categoryid', 'A budget'],
           ['entrydate', '2003-05-06'],
         ].each do |osm_name, new_value|
-          $api.should_receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
+          expect($api).to receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
             'section_id' => 2,
             'invoiceid' => 3,
             'recordid' => 4,
@@ -435,9 +435,9 @@ describe "Invoice" do
           }).and_return({osm_name => new_value})
         end
 
-        item.create($api).should == true
-        item.id.should == 2
-        item.record_id.should == 4
+        expect(item.create($api)).to eq(true)
+        expect(item.id).to eq(2)
+        expect(item.record_id).to eq(4)
       end
 
       it "Create (failure to create)" do
@@ -452,14 +452,14 @@ describe "Invoice" do
           payto: 'Person to Pay',
         )
 
-        $api.should_receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({"ok"=>false})
+        expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({"ok"=>false})
 
         data = [
           Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
         ]
-        invoice.should_receive(:get_items).with($api, no_read_cache: true).and_return(data)
+        expect(invoice).to receive(:get_items).with($api, no_read_cache: true).and_return(data)
 
-        item.create($api).should == false
+        expect(item.create($api)).to eq(false)
       end
 
       it "Update (success)" do
@@ -484,7 +484,7 @@ describe "Invoice" do
           ['categoryid', 'A different budget'],
           ['entrydate', '2003-05-06'],
         ].each do |osm_name, new_value|
-          $api.should_receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
+          expect($api).to receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
             'section_id' => 2,
             'invoiceid' => 3,
             'recordid' => 4,
@@ -494,7 +494,7 @@ describe "Invoice" do
           }).and_return({osm_name => new_value})
         end
 
-        item.update($api).should == true
+        expect(item.update($api)).to eq(true)
       end
 
       it "Update (failure)" do
@@ -511,7 +511,7 @@ describe "Invoice" do
         )
         item.description = 'A new description'
 
-        $api.should_receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
           'section_id' => 2,
           'invoiceid' => 3,
           'recordid' => 4,
@@ -520,27 +520,27 @@ describe "Invoice" do
           'value' => 'A new description',
         }).and_return({"comments"=>"A description"})
 
-        item.update($api).should == false
+        expect(item.update($api)).to eq(false)
       end
 
       it "Delete (success)" do
         item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 3, section_id: 2))
 
-        $api.should_receive(:post_query).with('finances.php?action=deleteEntry&sectionid=2', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=deleteEntry&sectionid=2', post_data: {
           'id' => 1,
         }).and_return({"ok"=>true})
 
-        item.delete($api).should == true
+        expect(item.delete($api)).to eq(true)
       end
 
       it "Delete (failure)" do
         item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 2, section_id: 4),)
 
-        $api.should_receive(:post_query).with('finances.php?action=deleteEntry&sectionid=4', post_data: {
+        expect($api).to receive(:post_query).with('finances.php?action=deleteEntry&sectionid=4', post_data: {
           'id' => 1,
         }).and_return({"ok"=>false})
 
-        item.delete($api).should == false
+        expect(item.delete($api)).to eq(false)
       end
 
     end

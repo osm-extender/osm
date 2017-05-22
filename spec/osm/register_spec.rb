@@ -12,10 +12,10 @@ describe "Register" do
       tooltip: 'Tooltip'
     )
 
-    field.id.should == 'machine_name'
-    field.name.should == 'Human name'
-    field.tooltip.should == 'Tooltip'
-    field.valid?.should == true
+    expect(field.id).to eq('machine_name')
+    expect(field.name).to eq('Human name')
+    expect(field.tooltip).to eq('Tooltip')
+    expect(field.valid?).to eq(true)
   end
 
   it "Sorts Field by id" do
@@ -23,7 +23,7 @@ describe "Register" do
     a2 = Osm::Register::Field.new(id: 'a')
 
     data = [a2, a1]
-    data.sort.should == [a1, a2]
+    expect(data.sort).to eq([a1, a2])
   end
 
 
@@ -41,17 +41,17 @@ describe "Register" do
       }
     )
 
-    rd.member_id.should == 1
-    rd.section_id.should == 2
-    rd.grouping_id.should == 3
-    rd.first_name.should == 'A'
-    rd.last_name.should == 'B'
-    rd.total.should == 4
-    rd.attendance.should == {
+    expect(rd.member_id).to eq(1)
+    expect(rd.section_id).to eq(2)
+    expect(rd.grouping_id).to eq(3)
+    expect(rd.first_name).to eq('A')
+    expect(rd.last_name).to eq('B')
+    expect(rd.total).to eq(4)
+    expect(rd.attendance).to eq({
       Date.new(2012, 01, 10) => :yes,
       Date.new(2012, 01, 24) => :unadvised_absent
-    }
-    rd.valid?.should == true
+    })
+    expect(rd.valid?).to eq(true)
   end
 
   it "Sorts Attendance by section_id, grouping_id, last_name then first_name" do
@@ -62,21 +62,21 @@ describe "Register" do
     d5 = Osm::Register::Attendance.new(section_id: 2, grouping_id: 2, last_name: 'b', first_name: 'b')
 
     data = [d4, d3, d5, d2, d1]
-    data.sort.should == [d1, d2, d3, d4, d5]
+    expect(data.sort).to eq([d1, d2, d3, d4, d5])
   end
 
   it "Reports if a member was present on a date" do
     date = Date.new(2000, 1, 1)
-    Osm::Register::Attendance.new(attendance: {date => :yes}).present_on?(date).should == true
-    Osm::Register::Attendance.new(attendance: {date => :known_absent}).present_on?(date).should == false
-    Osm::Register::Attendance.new(attendance: {date => :unknown_absent}).present_on?(date).should == false
+    expect(Osm::Register::Attendance.new(attendance: {date => :yes}).present_on?(date)).to eq(true)
+    expect(Osm::Register::Attendance.new(attendance: {date => :known_absent}).present_on?(date)).to eq(false)
+    expect(Osm::Register::Attendance.new(attendance: {date => :unknown_absent}).present_on?(date)).to eq(false)
   end
 
   it "Reports if a member was absent on a date" do
     date = Date.new(2000, 1, 1)
-    Osm::Register::Attendance.new(attendance: {date => :yes}).absent_on?(date).should == false
-    Osm::Register::Attendance.new(attendance: {date => :known_absent}).absent_on?(date).should == true
-    Osm::Register::Attendance.new(attendance: {date => :unknown_absent}).absent_on?(date).should == true
+    expect(Osm::Register::Attendance.new(attendance: {date => :yes}).absent_on?(date)).to eq(false)
+    expect(Osm::Register::Attendance.new(attendance: {date => :known_absent}).absent_on?(date)).to eq(true)
+    expect(Osm::Register::Attendance.new(attendance: {date => :unknown_absent}).absent_on?(date)).to eq(true)
   end
 
 
@@ -87,10 +87,10 @@ describe "Register" do
         {"rows" => [{"name"=>"First name","field"=>"firstname","width"=>"100px"},{"name"=>"Last name","field"=>"lastname","width"=>"100px"},{"name"=>"Total","field"=>"total","width"=>"60px"}],"noscroll"=>true},
         {"rows" => []}
       ]
-      $api.should_receive(:post_query).with("users.php?action=registerStructure&sectionid=1&termid=2"){ data }
+      expect($api).to receive(:post_query).with("users.php?action=registerStructure&sectionid=1&termid=2"){ data }
 
       register_structure = Osm::Register.get_structure(api: $api, section: 1, term: 2)
-      register_structure.is_a?(Array).should == true
+      expect(register_structure.is_a?(Array)).to eq(true)
     end
 
     it "Fetch the register data for a section" do
@@ -109,29 +109,29 @@ describe "Register" do
           }
         ]
       }
-      $api.should_receive(:post_query).with("users.php?action=register&sectionid=1&termid=2") { data }
-      Osm::Register.stub(:get_structure) { [
+      expect($api).to receive(:post_query).with("users.php?action=register&sectionid=1&termid=2") { data }
+      allow(Osm::Register).to receive(:get_structure) { [
         Osm::Register::Field.new(id: '2000-01-01', name: 'Name', tooltip: 'Tooltip'),
         Osm::Register::Field.new(id: '2000-01-02', name: 'Name', tooltip: 'Tooltip'),
         Osm::Register::Field.new(id: '2000-01-03', name: 'Name', tooltip: 'Tooltip'),
       ] }
 
       register = Osm::Register.get_attendance(api: $api, section: 1, term: 2)
-      register.is_a?(Array).should == true
-      register.size.should == 1
+      expect(register.is_a?(Array)).to eq(true)
+      expect(register.size).to eq(1)
       reg = register[0]
-      reg.attendance.should == {
+      expect(reg.attendance).to eq({
         Date.new(2000, 1, 1) => :yes,
         Date.new(2000, 1, 2) => :advised_absent,
         Date.new(2000, 1, 3) => :unadvised_absent,
-      }
-      reg.first_name.should == 'First'
-      reg.last_name.should == 'Last'
-      reg.grouping_id.should == 3
-      reg.member_id.should == 2
-      reg.total.should == 4
-      reg.section_id.should == 1
-      reg.valid?.should == true
+      })
+      expect(reg.first_name).to eq('First')
+      expect(reg.last_name).to eq('Last')
+      expect(reg.grouping_id).to eq(3)
+      expect(reg.member_id).to eq(2)
+      expect(reg.total).to eq(4)
+      expect(reg.section_id).to eq(1)
+      expect(reg.valid?).to eq(true)
     end
 
     it "Update register attendance" do
@@ -143,9 +143,9 @@ describe "Register" do
         'sectionid' => 1,
         'completedBadges' => '[{"a":"A"},{"b":"B"}]'
       }
-      $api.should_receive(:post_query).with("users.php?action=registerUpdate&sectionid=1&termid=2", post_data: post_data){ [] }
+      expect($api).to receive(:post_query).with("users.php?action=registerUpdate&sectionid=1&termid=2", post_data: post_data){ [] }
 
-      Osm::Register.update_attendance(
+      expect(Osm::Register.update_attendance(
         api: $api,
         section: Osm::Section.new(id: 1, type: :cubs),
         term: 2,
@@ -153,7 +153,7 @@ describe "Register" do
         attendance: :yes,
         members: 3,
         completed_badge_requirements: [{'a'=>'A'}, {'b'=>'B'}]
-      ).should == true
+      )).to eq(true)
     end
 
     it "Handles the total row" do
@@ -177,22 +177,22 @@ describe "Register" do
           }
         ]
       }
-      $api.should_receive(:post_query).with("users.php?action=register&sectionid=1&termid=2"){ data }
-      Osm::Register.stub(:get_structure) { [] }
+      expect($api).to receive(:post_query).with("users.php?action=register&sectionid=1&termid=2"){ data }
+      allow(Osm::Register).to receive(:get_structure) { [] }
 
       register = Osm::Register.get_attendance(api: $api, section: 1, term: 2)
-      register.is_a?(Array).should == true
-      register.size.should == 1
+      expect(register.is_a?(Array)).to eq(true)
+      expect(register.size).to eq(1)
       reg = register[0]
-      reg.first_name.should == 'First'
-      reg.last_name.should == 'Last'
+      expect(reg.first_name).to eq('First')
+      expect(reg.last_name).to eq('Last')
     end
 
     it "Handles no data getting structure" do
-      $api.should_receive(:post_query).with("users.php?action=registerStructure&sectionid=1&termid=2") { nil }
+      expect($api).to receive(:post_query).with("users.php?action=registerStructure&sectionid=1&termid=2") { nil }
       register_structure = Osm::Register.get_structure(api: $api, section: 1, term: 2)
-      register_structure.is_a?(Array).should == true
-      register_structure.size.should == 0
+      expect(register_structure.is_a?(Array)).to eq(true)
+      expect(register_structure.size).to eq(0)
     end
 
   end

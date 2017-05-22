@@ -11,10 +11,10 @@ describe "Flexi Record" do
       section_id: 2,
       name: 'name'
     )
-    fr.id.should == 1
-    fr.section_id.should == 2
-    fr.name.should == 'name'
-    fr.valid?.should == true
+    expect(fr.id).to eq(1)
+    expect(fr.section_id).to eq(2)
+    expect(fr.name).to eq('name')
+    expect(fr.valid?).to eq(true)
   end
 
   describe "FlexiRecord::Column" do
@@ -27,10 +27,10 @@ describe "Flexi Record" do
         flexi_record: Osm::FlexiRecord.new(),
       )
 
-      field.id.should == 'f_1'
-      field.name.should == 'Field Name'
-      field.editable.should == true
-      field.valid?.should == true
+      expect(field.id).to eq('f_1')
+      expect(field.name).to eq('Field Name')
+      expect(field.editable).to eq(true)
+      expect(field.valid?).to eq(true)
     end
 
     it "Sorts by flexirecord then id (system first then user)" do
@@ -41,7 +41,7 @@ describe "Flexi Record" do
       frc5 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), id: 'f_2')
 
       columns = [frc3, frc2, frc1, frc5, frc4]
-      columns.sort.should == [frc1, frc2, frc3, frc4, frc5]
+      expect(columns.sort).to eq([frc1, frc2, frc3, frc4, frc5])
     end
 
   end
@@ -66,9 +66,9 @@ describe "Flexi Record" do
         flexi_record: Osm::FlexiRecord.new()
       )
 
-      rd.member_id.should == 1
-      rd.grouping_id.should == 2
-      rd.fields.should == {
+      expect(rd.member_id).to eq(1)
+      expect(rd.grouping_id).to eq(2)
+      expect(rd.fields).to eq({
         'firstname' => 'First',
         'lastname' => 'Last',
         'dob' => Date.new(1899, 11, 30),
@@ -77,8 +77,8 @@ describe "Flexi Record" do
         'age' => nil,
         'f_1' => 'a',
         'f_2' => 'b',
-      }
-      rd.valid?.should == true
+      })
+      expect(rd.valid?).to eq(true)
     end
 
     it "Sorts by flexirecord, grouping_id then member_id" do
@@ -88,7 +88,7 @@ describe "Flexi Record" do
       frd4 = Osm::FlexiRecord::Data.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), grouping_id: 2, member_id: 2)
 
       datas = [frd3, frd2, frd1, frd4]
-      datas.sort.should == [frd1, frd2, frd3, frd4]
+      expect(datas.sort).to eq([frd1, frd2, frd3, frd4])
     end
 
   end
@@ -100,7 +100,7 @@ describe "Flexi Record" do
     fr3 = Osm::FlexiRecord.new(section_id: 2, name: 'C')
     records = [fr2, fr1, fr3]
 
-    records.sort.should == [fr1, fr2, fr3]
+    expect(records.sort).to eq([fr1, fr2, fr3])
   end
 
 
@@ -132,15 +132,15 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      $api.should_receive(:post_query).with('extras.php?action=getExtra&sectionid=1&extraid=2').and_return(data)
+      expect($api).to receive(:post_query).with('extras.php?action=getExtra&sectionid=1&extraid=2').and_return(data)
 
       fields = @flexi_record.get_columns($api)
-      fields.is_a?(Array).should == true
-      fields[0].valid?.should == true
-      fields[0].id.should == 'firstname'
-      fields[1].id.should == 'lastname'
-      fields[2].id.should == 'f_1'
-      fields[3].id.should == 'f_2'
+      expect(fields.is_a?(Array)).to eq(true)
+      expect(fields[0].valid?).to eq(true)
+      expect(fields[0].id).to eq('firstname')
+      expect(fields[1].id).to eq('lastname')
+      expect(fields[2].id).to eq('f_1')
+      expect(fields[3].id).to eq('f_2')
     end
 
     it "Add field (success)" do
@@ -168,9 +168,9 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      $api.should_receive(:post_query).with('extras.php?action=addColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
+      expect($api).to receive(:post_query).with('extras.php?action=addColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
 
-      @flexi_record.add_column(api: $api, name: 'name').should == true
+      expect(@flexi_record.add_column(api: $api, name: 'name')).to eq(true)
     end
 
     it "Add field (failure)" do
@@ -193,9 +193,9 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      $api.should_receive(:post_query).and_return(data)
+      expect($api).to receive(:post_query).and_return(data)
 
-      @flexi_record.add_column(api: $api, name: 'name').should == false
+      expect(@flexi_record.add_column(api: $api, name: 'name')).to eq(false)
     end
 
     it "Update field (success)" do
@@ -224,7 +224,7 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      $api.should_receive(:post_query).with('extras.php?action=renameColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
+      expect($api).to receive(:post_query).with('extras.php?action=renameColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
 
       col = Osm::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
@@ -232,7 +232,7 @@ describe "Flexi Record" do
         name: 'name',
         editable: true
       )
-      col.update($api).should == true
+      expect(col.update($api)).to eq(true)
     end
 
     it "Update field (failure)" do
@@ -255,7 +255,7 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      $api.should_receive(:post_query).and_return(data)
+      expect($api).to receive(:post_query).and_return(data)
 
       col = Osm::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
@@ -263,7 +263,7 @@ describe "Flexi Record" do
         name: 'name',
         editable: true
       )
-      col.update($api).should == false
+      expect(col.update($api)).to eq(false)
     end
 
     it "Update field (uneditable)" do
@@ -273,7 +273,7 @@ describe "Flexi Record" do
         name: 'name',
         editable: false
       )
-      $api.should_not_receive(:post_query)
+      expect($api).not_to receive(:post_query)
       expect{ col.update($api) }.to raise_error(Osm::Forbidden)
     end
 
@@ -299,7 +299,7 @@ describe "Flexi Record" do
           {"rows" => []}
         ]
       }
-      $api.should_receive(:post_query).with('extras.php?action=deleteColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
+      expect($api).to receive(:post_query).with('extras.php?action=deleteColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
 
       col = Osm::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
@@ -307,7 +307,7 @@ describe "Flexi Record" do
         name: 'name',
         editable: true
       )
-      col.delete($api).should == true
+      expect(col.delete($api)).to eq(true)
     end
 
     it "Delete field (failure)" do
@@ -330,7 +330,7 @@ describe "Flexi Record" do
           ]}
         ]
       }
-      $api.should_receive(:post_query).and_return(data)
+      expect($api).to receive(:post_query).and_return(data)
 
       col = Osm::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
@@ -338,7 +338,7 @@ describe "Flexi Record" do
         name: 'name',
         editable: true
       )
-      col.delete($api).should == false
+      expect(col.delete($api)).to eq(false)
     end
 
     it "Delete field (uneditable)" do
@@ -348,7 +348,7 @@ describe "Flexi Record" do
         name: 'name',
         editable: false
       )
-      $api.should_not_receive(:post_query)
+      expect($api).not_to receive(:post_query)
       expect{ col.delete($api) }.to raise_error(Osm::Forbidden)
     end
 
@@ -370,16 +370,16 @@ describe "Flexi Record" do
           "patrol" => "Green"
         }]
       }
-      $api.should_receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
-      Osm::Section.stub(:get) { Osm::Section.new(id: 1, type: :cubs) }
+      expect($api).to receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
+      allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 1, type: :cubs) }
 
       records = @flexi_record.get_data(api: $api, term: 3)
-      records.is_a?(Array).should == true
-      records.size.should == 1
+      expect(records.is_a?(Array)).to eq(true)
+      expect(records.size).to eq(1)
       record = records[0]
-      record.member_id.should == 1
-      record.grouping_id.should == 2
-      record.fields.should == {
+      expect(record.member_id).to eq(1)
+      expect(record.grouping_id).to eq(2)
+      expect(record.fields).to eq({
         'firstname' => 'First',
         'lastname' => 'Last',
         'dob' => nil,
@@ -388,8 +388,8 @@ describe "Flexi Record" do
         'age' => nil,
         'f_1' => 'A',
         'f_2' => 'B',
-      }
-      record.valid?.should == true
+      })
+      expect(record.valid?).to eq(true)
     end
 
 
@@ -408,11 +408,11 @@ describe "Flexi Record" do
           {'f_1' => 'value', 'scoutid' => '4'},
         ]
       }
-      $api.should_receive(:post_query).with('extras.php?action=updateScout', post_data: post_data).and_return(data)
-      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(id: 3) }
+      expect($api).to receive(:post_query).with('extras.php?action=updateScout', post_data: post_data).and_return(data)
+      allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 3) }
 
       fr = Osm::FlexiRecord.new(section_id: 1, id: 2)
-      fr.stub(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: true)] }
+      allow(fr).to receive(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: true)] }
       fr_data = Osm::FlexiRecord::Data.new(
         flexi_record: fr,
         member_id: 4,
@@ -420,7 +420,7 @@ describe "Flexi Record" do
         fields: {'f_1' => '', 'f_2' => 'value'}
       )
       fr_data.fields['f_1'] = 'value'
-      fr_data.update($api).should == true
+      expect(fr_data.update($api)).to eq(true)
     end
 
     it "Update data (failed)" do
@@ -430,11 +430,11 @@ describe "Flexi Record" do
         ]
       }
 
-      $api.should_receive(:post_query).and_return(data)
-      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(id: 1) }
+      expect($api).to receive(:post_query).and_return(data)
+      allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 1) }
 
       fr = Osm::FlexiRecord.new(section_id: 1, id: 2)
-      fr.stub(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: true)] }
+      allow(fr).to receive(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: true)] }
 
       fr_data = Osm::FlexiRecord::Data.new(
         flexi_record: fr,
@@ -443,14 +443,14 @@ describe "Flexi Record" do
         fields: {'f_1' => 'old value'}
       )
       fr_data.fields['f_1'] = 'new value'
-      fr_data.update($api).should == false
+      expect(fr_data.update($api)).to eq(false)
     end
 
     it "Update data (uneditable field)" do
-      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(id: 1) }
+      allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 1) }
       fr = Osm::FlexiRecord.new(section_id: 1, id: 2)
-      fr.stub(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: false)] }
-      $api.should_not_receive(:post_query)
+      allow(fr).to receive(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: false)] }
+      expect($api).not_to receive(:post_query)
 
       fr_data = Osm::FlexiRecord::Data.new(
         flexi_record: fr,
@@ -458,7 +458,7 @@ describe "Flexi Record" do
         grouping_id: 5,
         fields: {'f_1' => 'value'}
       )
-      fr_data.update($api).should == true
+      expect(fr_data.update($api)).to eq(true)
     end
 
 
@@ -492,17 +492,17 @@ describe "Flexi Record" do
           "patrol" => "Green"
         }]
       }
-      $api.should_receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
-      Osm::Section.stub(:get) { Osm::Section.new(id: 1, type: :cubs) }
+      expect($api).to receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
+      allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 1, type: :cubs) }
 
       records = @flexi_record.get_data(api: $api, term: 3)
-      records.is_a?(Array).should == true
-      records.size.should == 1
+      expect(records.is_a?(Array)).to eq(true)
+      expect(records.size).to eq(1)
       record = records[0]
-      record.member_id.should == 1
-      record.grouping_id.should == 2
-      record.fields['firstname'].should == 'First'
-      record.fields['lastname'].should == 'Last'
+      expect(record.member_id).to eq(1)
+      expect(record.grouping_id).to eq(2)
+      expect(record.fields['firstname']).to eq('First')
+      expect(record.fields['lastname']).to eq('Last')
     end
 
   end
@@ -527,14 +527,14 @@ describe "Flexi Record" do
           "patrol" => "Green"
         }]
       }
-      $api.should_receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
-      Osm::Section.stub(:get) { Osm::Section.new(id: 1, type: :cubs) }
+      expect($api).to receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
+      allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 1, type: :cubs) }
 
       flexi_record = Osm::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
       records = flexi_record.get_data(api: $api, term: 3)
       record = records[0]
-      record.fields['total'].should == 3
-      record.fields['completed'].should == 4
+      expect(record.fields['total']).to eq(3)
+      expect(record.fields['completed']).to eq(4)
     end
 
   end

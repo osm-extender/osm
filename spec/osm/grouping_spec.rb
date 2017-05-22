@@ -9,7 +9,7 @@ describe "Grouping" do
     g3 = Osm::Grouping.new(section_id: 2, name: 'b')
 
     data = [g3, g1, g2]
-    data.sort.should == [g1, g2, g3]
+    expect(data.sort).to eq([g1, g2, g3])
   end
 
   describe "Using the API" do
@@ -21,23 +21,23 @@ describe "Grouping" do
         'active' => 1,
         'points' => '3',
       }]}
-      $api.should_receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(data)
+      expect($api).to receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(data)
 
       patrols = Osm::Grouping.get_for_section(api: $api, section: 2)
-      patrols.size.should == 1
+      expect(patrols.size).to eq(1)
       patrol = patrols[0]
-      patrol.id.should == 1
-      patrol.section_id.should == 2
-      patrol.name.should == 'Patrol Name'
-      patrol.active.should == true
-      patrol.points.should == 3
-      patrol.valid?.should == true
+      expect(patrol.id).to eq(1)
+      expect(patrol.section_id).to eq(2)
+      expect(patrol.name).to eq('Patrol Name')
+      expect(patrol.active).to eq(true)
+      expect(patrol.points).to eq(3)
+      expect(patrol.valid?).to eq(true)
     end
 
     it "Handles no data" do
-      $api.should_receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(nil)
+      expect($api).to receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(nil)
       patrols = Osm::Grouping.get_for_section(api: $api, section: 2)
-      patrols.size.should == 0
+      expect(patrols.size).to eq(0)
     end
 
 
@@ -55,9 +55,9 @@ describe "Grouping" do
         'name' => grouping.name,
         'active' => grouping.active,
       }
-      $api.should_receive(:post_query).with('users.php?action=editPatrol&sectionid=2', post_data: post_data).and_return(nil)
+      expect($api).to receive(:post_query).with('users.php?action=editPatrol&sectionid=2', post_data: post_data).and_return(nil)
 
-      grouping.update($api).should == true
+      expect(grouping.update($api)).to eq(true)
     end
 
     it "Update points in OSM (succeded)" do
@@ -73,9 +73,9 @@ describe "Grouping" do
         'patrolid' => grouping.id,
         'points' => grouping.points,
       }
-      $api.should_receive(:post_query).with('users.php?action=updatePatrolPoints&sectionid=2', post_data: post_data).and_return({})
+      expect($api).to receive(:post_query).with('users.php?action=updatePatrolPoints&sectionid=2', post_data: post_data).and_return({})
 
-      grouping.update($api).should == true
+      expect(grouping.update($api)).to eq(true)
     end
 
     it "Update in OSM (failed)" do
@@ -87,9 +87,9 @@ describe "Grouping" do
       grouping.name = 'Grouping'
       grouping.active = true
 
-      $api.should_receive(:post_query).and_return({"done" => false})
+      expect($api).to receive(:post_query).and_return({"done" => false})
 
-      grouping.update($api).should == false
+      expect(grouping.update($api)).to eq(false)
     end
 
     it "Update points in OSM (failed)" do
@@ -101,9 +101,9 @@ describe "Grouping" do
       )
       grouping.points = 3
 
-      $api.should_receive(:post_query).and_return({"done" => false})
+      expect($api).to receive(:post_query).and_return({"done" => false})
 
-      grouping.update($api).should == false
+      expect(grouping.update($api)).to eq(false)
     end
 
   end

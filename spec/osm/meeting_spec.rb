@@ -21,20 +21,20 @@ describe "Meeting" do
       badge_links: []
     )
 
-    e.id.should == 1
-    e.section_id.should == 2
-    e.title.should == 'Meeting Name'
-    e.notes_for_parents.should == 'Notes for parents'
-    e.games.should == 'Games'
-    e.pre_notes.should == 'Before'
-    e.post_notes.should == 'After'
-    e.leaders.should == 'Leaders'
-    e.start_time.should == '19:00'
-    e.finish_time.should == '21:00'
-    e.date.should == Date.new(2000, 1, 2)
-    e.activities.should == []
-    e.badge_links.should == []
-    e.valid?.should == true
+    expect(e.id).to eq(1)
+    expect(e.section_id).to eq(2)
+    expect(e.title).to eq('Meeting Name')
+    expect(e.notes_for_parents).to eq('Notes for parents')
+    expect(e.games).to eq('Games')
+    expect(e.pre_notes).to eq('Before')
+    expect(e.post_notes).to eq('After')
+    expect(e.leaders).to eq('Leaders')
+    expect(e.start_time).to eq('19:00')
+    expect(e.finish_time).to eq('21:00')
+    expect(e.date).to eq(Date.new(2000, 1, 2))
+    expect(e.activities).to eq([])
+    expect(e.badge_links).to eq([])
+    expect(e.valid?).to eq(true)
   end
 
   it "Sorts by Section ID, Meeting date, Start time and then Meeting ID" do
@@ -45,7 +45,7 @@ describe "Meeting" do
     meeting5 = Osm::Meeting.new(section_id: 2, id: 2, date: (Date.today + 1), start_time: '19:00')
 
     data = [meeting5, meeting3, meeting2, meeting4, meeting1]
-    data.sort.should == [meeting1, meeting2, meeting3, meeting4, meeting5]
+    expect(data.sort).to eq([meeting1, meeting2, meeting3, meeting4, meeting5])
   end
 
 
@@ -58,10 +58,10 @@ describe "Meeting" do
         notes: 'Notes',
       )
 
-      ea.activity_id.should == 2
-      ea.title.should == 'Activity Name'
-      ea.notes.should == 'Notes'
-      ea.valid?.should == true
+      expect(ea.activity_id).to eq(2)
+      expect(ea.title).to eq('Activity Name')
+      expect(ea.notes).to eq('Notes')
+      expect(ea.valid?).to eq(true)
     end
 
     it "Sorts by title then activity_id" do
@@ -70,7 +70,7 @@ describe "Meeting" do
       a3 = Osm::Meeting::Activity.new(title: 'b', activity_id: 2)
 
       data = [a2, a3, a1]
-      data.sort.should == [a1, a2, a3]
+      expect(data.sort).to eq([a1, a2, a3])
     end
 
   end
@@ -101,54 +101,54 @@ describe "Meeting" do
           'sectionLongName' => 'Cubs',
          }]},
       }
-      $api.should_receive(:post_query).with('programme.php?action=getProgramme&sectionid=3&termid=4').and_return(body)
+      expect($api).to receive(:post_query).with('programme.php?action=getProgramme&sectionid=3&termid=4').and_return(body)
 
       programme = Osm::Meeting.get_for_section(api: $api, section: 3, term: 4)
-      programme.size.should == 1
+      expect(programme.size).to eq(1)
       meeting = programme[0]
-      meeting.is_a?(Osm::Meeting).should == true
-      meeting.id.should == 5
-      meeting.section_id.should == 3
-      meeting.title.should == 'Weekly Meeting 1'
-      meeting.notes_for_parents.should == 'parents'
-      meeting.games.should == 'games'
-      meeting.pre_notes.should == 'before'
-      meeting.post_notes.should == 'after'
-      meeting.leaders.should == 'leaders'
-      meeting.date.should == Date.new(2001, 2, 3)
-      meeting.start_time.should == '19:15'
-      meeting.finish_time.should == '20:30'
-      meeting.activities.size.should == 2
+      expect(meeting.is_a?(Osm::Meeting)).to eq(true)
+      expect(meeting.id).to eq(5)
+      expect(meeting.section_id).to eq(3)
+      expect(meeting.title).to eq('Weekly Meeting 1')
+      expect(meeting.notes_for_parents).to eq('parents')
+      expect(meeting.games).to eq('games')
+      expect(meeting.pre_notes).to eq('before')
+      expect(meeting.post_notes).to eq('after')
+      expect(meeting.leaders).to eq('leaders')
+      expect(meeting.date).to eq(Date.new(2001, 2, 3))
+      expect(meeting.start_time).to eq('19:15')
+      expect(meeting.finish_time).to eq('20:30')
+      expect(meeting.activities.size).to eq(2)
       activity = meeting.activities[0]
-      activity.activity_id.should == 6
-      activity.title.should == 'Activity 6'
-      activity.notes.should == 'Some notes'
-      meeting.badge_links.size.should == 1
+      expect(activity.activity_id).to eq(6)
+      expect(activity.title).to eq('Activity 6')
+      expect(activity.notes).to eq('Some notes')
+      expect(meeting.badge_links.size).to eq(1)
       badge_link = meeting.badge_links[0]
-      badge_link.badge_type.should == :activity
-      badge_link.badge_section.should == :cubs
-      badge_link.badge_name.should == 'Artist'
-      badge_link.badge_id.should == 180
-      badge_link.badge_version.should == 0
-      badge_link.requirement_id.should == 1234
-      badge_link.requirement_label.should == 'Guide Dogs'
-      badge_link.data.should == ''
+      expect(badge_link.badge_type).to eq(:activity)
+      expect(badge_link.badge_section).to eq(:cubs)
+      expect(badge_link.badge_name).to eq('Artist')
+      expect(badge_link.badge_id).to eq(180)
+      expect(badge_link.badge_version).to eq(0)
+      expect(badge_link.requirement_id).to eq(1234)
+      expect(badge_link.requirement_label).to eq('Guide Dogs')
+      expect(badge_link.data).to eq('')
     end
 
     it "Fetch badge requirements for a meeting (from API)" do
-      Osm::Model.stub('has_permission?').and_return(true)
-      Osm::Section.stub(:get){ Osm::Section.new(id: 3, type: :cubs) }
+      allow(Osm::Model).to receive('has_permission?').and_return(true)
+      allow(Osm::Section).to receive(:get){ Osm::Section.new(id: 3, type: :cubs) }
       badges_body = [{'a'=>'a'},{'a'=>'A'}]
-      $api.should_receive(:post_query).with('users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs').and_return(badges_body)
+      expect($api).to receive(:post_query).with('users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs').and_return(badges_body)
 
       meeting = Osm::Meeting.new(date: Date.new(2000, 1, 2), section_id: 3)
-      meeting.get_badge_requirements($api).should == badges_body
+      expect(meeting.get_badge_requirements($api)).to eq(badges_body)
     end
 
     it "Fetch badge requirements for a meeting (iterating through activities)" do
-      Osm::Model.stub('has_permission?').with(api: $api, to: :write, on: :badge, section: 3, no_read_cache: false).and_return(false)
-      Osm::Section.stub(:get){ Osm::Section.new(id: 3, type: :cubs) }
-      Osm::Activity.stub(:get) { Osm::Activity.new(badges: [
+      allow(Osm::Model).to receive('has_permission?').with(api: $api, to: :write, on: :badge, section: 3, no_read_cache: false).and_return(false)
+      allow(Osm::Section).to receive(:get){ Osm::Section.new(id: 3, type: :cubs) }
+      allow(Osm::Activity).to receive(:get) { Osm::Activity.new(badges: [
         Osm::Activity::Badge.new(badge_type: :activity, badge_section: :beavers, requirement_label: 'label', data: 'data', badge_name: 'badge', badge_id: 2, badge_version: 0, requirement_id: 200)
       ]) }
   
@@ -162,14 +162,14 @@ describe "Meeting" do
         ],
       )
 
-      meeting.get_badge_requirements($api).should == [
+      expect(meeting.get_badge_requirements($api)).to eq([
         {"badge"=>nil, "badge_id"=>4, "badge_version"=>1, "column_id"=>400, "badgeName"=>"badge 2", "badgetype"=>:activity, "columngroup"=>nil, "columnname"=>nil, "data"=>"data 2", "eveningid"=>2, "meetingdate"=>Date.new(2000, 1, 2), "name"=>"label 2", "section"=>:beavers, "sectionid"=>3},
         {"badge"=>nil, "badge_id"=>2, "badge_version"=>0, "column_id"=>200, "badgeName"=>"badge", "badgetype"=>:activity, "columngroup"=>nil, "columnname"=>nil, "data"=>"data", "eveningid"=>2, "meetingdate"=>Date.new(2000, 1, 2), "name"=>"label", "section"=>:beavers, "sectionid"=>3}
-      ]
+      ])
     end
 
     it "Create a meeting (succeded)" do
-      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
+      expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => -1,
         'start' => '2000-01-02',
@@ -178,64 +178,64 @@ describe "Meeting" do
         'title' => 'Title',
       }).and_return({"result"=>0})
 
-      Osm::Term.stub(:get_for_section) { [] }
-      Osm::Meeting.create($api, **{
+      allow(Osm::Term).to receive(:get_for_section) { [] }
+      expect(Osm::Meeting.create($api, **{
         section_id: 1,
         date: Date.new(2000, 1, 2),
         start_time: '11:11',
         finish_time: '22:22',
         title: 'Title',
-      }).is_a?(Osm::Meeting).should == true
+      }).is_a?(Osm::Meeting)).to eq(true)
     end
 
     it "Create a meeting (failed)" do
-      Osm::Term.stub(:get_for_section) { [] }
-      $api.should_receive(:post_query).and_return([])
-      Osm::Meeting.create($api, **{
+      allow(Osm::Term).to receive(:get_for_section) { [] }
+      expect($api).to receive(:post_query).and_return([])
+      expect(Osm::Meeting.create($api, **{
         section_id: 1,
         date: Date.new(2000, 1, 2),
         start_time: '11:11',
         finish_time: '22:22',
         title: 'Title',
-      }).should be_nil
+      })).to be_nil
     end
 
 
     it "Add activity to meeting (succeded)" do
-      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
+      expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => 2,
         'notes' => 'Notes',
       }).and_return({"result"=>0})
-      Osm::Term.stub(:get_for_section) { [] }
+      allow(Osm::Term).to receive(:get_for_section) { [] }
 
       activity = Osm::Activity.new(id: 2, title: 'Title')
       meeting = Osm::Meeting.new(section_id: 1, date: Date.new(2000, 1, 2))
-      meeting.add_activity(api: $api, activity: activity, notes: 'Notes').should == true
-      meeting.activities[0].activity_id.should == 2
+      expect(meeting.add_activity(api: $api, activity: activity, notes: 'Notes')).to eq(true)
+      expect(meeting.activities[0].activity_id).to eq(2)
     end
 
     it "Add activity to meeting (failed)" do
-      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
+      expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => 2,
         'notes' => 'Notes',
       }).and_return({"result"=>1})
       activity = Osm::Activity.new(id: 2, title: 'Title')
       meeting = Osm::Meeting.new(section_id: 1, date: Date.new(2000, 1, 2))
-      meeting.add_activity(api: $api, activity: activity, notes: 'Notes').should == false
+      expect(meeting.add_activity(api: $api, activity: activity, notes: 'Notes')).to eq(false)
     end
 
 
     it "Update a meeting (succeded)" do
-      $api.should_receive(:post_query).with('programme.php?action=editEvening', post_data: {
+      expect($api).to receive(:post_query).with('programme.php?action=editEvening', post_data: {
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '',
         'activity' => '[{"activityid":3,"notes":"Some notes"}]',
         'badgelinks' => '[{"badge_id":"181","badge_version":"0","column_id":"93384","badge":null,"badgeLongName":"Badge name","columnname":null,"columnnameLongName":"l","data":"","section":"beavers","sectionLongName":null,"badgetype":"activity","badgetypeLongName":null}]',
       }).and_return({"result"=>0})
-      Osm::Term.stub(:get_for_section) { [] }
+      allow(Osm::Term).to receive(:get_for_section) { [] }
 
       meeting = Osm::Meeting.new(
         id:1,
@@ -253,19 +253,19 @@ describe "Meeting" do
           requirement_id: 93384,
         )]
       )
-      meeting.update($api).should == true
+      expect(meeting.update($api)).to eq(true)
     end
 
     it "Update a meeting (failed)" do
-      $api.should_receive(:post_query).with('programme.php?action=editEvening', post_data: {
+      expect($api).to receive(:post_query).with('programme.php?action=editEvening', post_data: {
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'badgelinks' => '[]',
       }).and_return({"result"=>1})
-      Osm::Term.stub(:get_for_section) { [] }
+      allow(Osm::Term).to receive(:get_for_section) { [] }
 
       meeting = Osm::Meeting.new(id:1, section_id:2, date:Date.new(2000, 01, 02))
-      meeting.update($api).should == false
+      expect(meeting.update($api)).to eq(false)
     end
 
     it "Update a meeting (invalid meeting)" do
@@ -275,11 +275,11 @@ describe "Meeting" do
 
 
     it "Delete a meeting" do
-      $api.should_receive(:post_query).with('programme.php?action=deleteEvening&eveningid=1&sectionid=2').and_return(nil)
-      Osm::Term.stub(:get_for_section) { [] }
+      expect($api).to receive(:post_query).with('programme.php?action=deleteEvening&eveningid=1&sectionid=2').and_return(nil)
+      allow(Osm::Term).to receive(:get_for_section) { [] }
 
       meeting = Osm::Meeting.new(id:1, section_id:2)
-      meeting.delete($api).should == true
+      expect(meeting.delete($api)).to eq(true)
     end
 
   end # Describe using API
@@ -293,17 +293,17 @@ describe "Meeting" do
         ]},
         "badgelinks" => {"5" => []},
       }
-      $api.should_receive(:post_query).with('programme.php?action=getProgramme&sectionid=3&termid=4').and_return(body)
+      expect($api).to receive(:post_query).with('programme.php?action=getProgramme&sectionid=3&termid=4').and_return(body)
 
       programme = Osm::Meeting.get_for_section(api: $api, section: 3, term: 4)
-      programme.size.should == 1
+      expect(programme.size).to eq(1)
       meeting = programme[0]
-      meeting.activities.size.should == 1
+      expect(meeting.activities.size).to eq(1)
       activity = meeting.activities[0]
-      activity.activity_id.should == 6
-      activity.title.should == 'Activity 6'
-      activity.notes.should == 'Some notes'
-      meeting.valid?.should == true
+      expect(activity.activity_id).to eq(6)
+      expect(activity.title).to eq('Activity 6')
+      expect(activity.notes).to eq('Some notes')
+      expect(meeting.valid?).to eq(true)
     end
   end
 

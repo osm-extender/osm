@@ -6,7 +6,7 @@ describe "Email" do
   describe "Get emails for contacts" do
 
     it "Single member" do
-      $api.should_receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
+      expect($api).to receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
         "emails"=>{
           "2"=>{
             "emails"=>["john@example.com"],
@@ -18,17 +18,17 @@ describe "Email" do
       })
 
       result = Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: :member, members: 2)
-      result.should == {
+      expect(result).to eq({
         '2' => {
           'emails' => ['john@example.com'],
           'firstname' => 'John',
           'lastname' => 'Smith'
         }
-      }
+      })
     end
 
     it "Several members" do
-      $api.should_receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
+      expect($api).to receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
         "emails"=>{
           "2"=>{
             "emails"=>["john@example.com"],
@@ -45,7 +45,7 @@ describe "Email" do
       })
 
       result = Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: :member, members: [2,3])
-      result.should == {
+      expect(result).to eq({
         '2' => {
           'emails' => ['john@example.com'],
           'firstname' => 'John',
@@ -56,21 +56,21 @@ describe "Email" do
           'firstname' => 'Jane',
           'lastname' => 'Smith'
         }
-      }
+      })
     end
 
     it "Requires at least one contact" do
-      $api.should_not_receive(:post_query)
+      expect($api).not_to receive(:post_query)
       expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [], members: [2]) }.to raise_error ArgumentError, "You must pass at least one contact"
     end
 
     it "Checks for invalid contacts" do
-      $api.should_not_receive(:post_query)
+      expect($api).not_to receive(:post_query)
       expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:invalid_contact], members: [2]) }.to raise_error ArgumentError, "Invalid contact - :invalid_contact"
     end
 
     it "Requires at least one member" do
-      $api.should_not_receive(:post_query)
+      expect($api).not_to receive(:post_query)
       expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:primary], members: []) }.to raise_error ArgumentError, "You must pass at least one member"
     end
 
@@ -79,7 +79,7 @@ describe "Email" do
   describe "Send email" do
 
     it "With cc" do
-      $api.should_receive(:post_query).with("ext/members/email/?action=send", post_data: {
+      expect($api).to receive(:post_query).with("ext/members/email/?action=send", post_data: {
         'sectionid' => 1,
         'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]}}',
         'scouts' => '2',
@@ -89,7 +89,7 @@ describe "Email" do
         'body' => 'Body of email',
       }){ {'ok'=>true} }
 
-      Osm::Email.send_email(
+      expect(Osm::Email.send_email(
         api: $api,
         section: 1,
         to: {'2'=>{'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com']}},
@@ -97,11 +97,11 @@ describe "Email" do
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
         body: 'Body of email',
-      ).should == true
+      )).to eq(true)
     end
 
     it "Without cc" do
-      $api.should_receive(:post_query).with("ext/members/email/?action=send", post_data: {
+      expect($api).to receive(:post_query).with("ext/members/email/?action=send", post_data: {
         'sectionid' => 1,
         'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]}}',
         'scouts' => '2',
@@ -111,18 +111,18 @@ describe "Email" do
         'body' => 'Body of email',
       }){ {'ok'=>true} }
 
-      Osm::Email.send_email(
+      expect(Osm::Email.send_email(
         api: $api,
         section: 1,
         to: {'2'=>{'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com']}},
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
         body: 'Body of email',
-      ).should == true
+      )).to eq(true)
     end
 
     it "To several members" do
-      $api.should_receive(:post_query).with("ext/members/email/?action=send", post_data: {
+      expect($api).to receive(:post_query).with("ext/members/email/?action=send", post_data: {
         'sectionid' => 1,
         'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]},"3":{"firstname":"Jane","lastname":"Smith","emails":["jane@example.com"]}}',
         'scouts' => '2,3',
@@ -132,14 +132,14 @@ describe "Email" do
         'body' => 'Body of email',
       }){ {'ok'=>true} }
 
-      Osm::Email.send_email(
+      expect(Osm::Email.send_email(
         api: $api,
         section: 1,
         to: {'2'=>{'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com']},'3'=>{'firstname'=>'Jane', 'lastname'=>'Smith', 'emails'=>['jane@example.com']}},
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
         body: 'Body of email',
-      ).should == true
+      )).to eq(true)
     end
 
   end # describe Send email
@@ -162,16 +162,16 @@ describe "Email" do
       %w{id section_id}.each do |attribute|
         it attribute do
           @report.send("#{attribute}=", 0)
-          @report.valid?.should == false
-          @report.errors.messages[attribute.to_sym].should == ["must be greater than 0"]
+          expect(@report.valid?).to eq(false)
+          expect(@report.errors.messages[attribute.to_sym]).to eq(["must be greater than 0"])
         end
       end
 
       %w{sent_at subject}.each do |attribute|
         it attribute do
           @report.send("#{attribute}=", nil)
-          @report.valid?.should == false
-          @report.errors.messages[attribute.to_sym].should == ["can't be blank"]
+          expect(@report.valid?).to eq(false)
+          expect(@report.errors.messages[attribute.to_sym]).to eq(["can't be blank"])
         end
       end
 
@@ -179,20 +179,20 @@ describe "Email" do
 
         it "Empty array allowed" do
           @report.recipients = []
-          @report.valid?.should == true
-          @report.errors.messages[:recipients].should == nil
+          expect(@report.valid?).to eq(true)
+          expect(@report.errors.messages[:recipients]).to eq(nil)
         end
 
         it "Invalid item in array not allowed" do
           @report.recipients = [Osm::Email::DeliveryReport::Recipient.new()]
-          @report.valid?.should == false
-          @report.errors.messages[:recipients].should == ["contains an invalid item"]
+          expect(@report.valid?).to eq(false)
+          expect(@report.errors.messages[:recipients]).to eq(["contains an invalid item"])
         end
 
         it "Something other than a recipient not allowed" do
           @report.recipients = [Time.now]
-          @report.valid?.should == false
-          @report.errors.messages[:recipients].should == ["items in the Array must be a Osm::Email::DeliveryReport::Recipient"]
+          expect(@report.valid?).to eq(false)
+          expect(@report.errors.messages[:recipients]).to eq(["items in the Array must be a Osm::Email::DeliveryReport::Recipient"])
         end
 
       end # describe Email -> DeliveryReport : Invalid without : Recipients
@@ -201,7 +201,7 @@ describe "Email" do
 
 
     it "Fetch delivery reports from OSM" do
-      $api.should_receive(:post_query).with('ext/settings/emails/?action=getDeliveryReport&sectionid=1234').and_return([
+      expect($api).to receive(:post_query).with('ext/settings/emails/?action=getDeliveryReport&sectionid=1234').and_return([
         {'id'=>"0", 'name'=>"ALL", 'type'=>"all", 'count'=>47},
         {'id'=>123, 'name'=>'01/02/2003 04:05 - Subject of email - 1', 'type'=>'email', 'parent'=>'0', 'hascontent'=>true, 'errors'=>0, 'opens'=>0, 'warnings'=>0},
         {'id'=>'123-1', 'name'=>'a@example.com - delivered', 'type'=>'oneEmail', 'status'=>'delivered', 'email'=>'a@example.com', 'email_key'=>'aexamplecom', 'hascontent'=>true, 'member_id'=>'12', 'parent'=>123, 'status_raw'=>'delivered'},
@@ -210,38 +210,38 @@ describe "Email" do
       ])
 
       reports = Osm::Email::DeliveryReport.get_for_section(api: $api, section: 1234)
-      reports.count.should == 1
+      expect(reports.count).to eq(1)
       report = reports[0]
-      report.id.should == 123
-      report.sent_at.should == Time.new(2003, 2, 1, 4, 5)
-      report.subject.should == 'Subject of email - 1'
-      report.section_id.should == 1234
+      expect(report.id).to eq(123)
+      expect(report.sent_at).to eq(Time.new(2003, 2, 1, 4, 5))
+      expect(report.subject).to eq('Subject of email - 1')
+      expect(report.section_id).to eq(1234)
 
-      report.recipients.count.should == 3
+      expect(report.recipients.count).to eq(3)
       recipients = report.recipients.sort{ |a,b| a.id <=> b.id }
-      recipients[0].delivery_report.should == report
-      recipients[0].id.should == 1
-      recipients[0].member_id.should == 12
-      recipients[0].address.should == 'a@example.com'
-      recipients[0].status.should == :delivered
-      recipients[1].delivery_report.should == report
-      recipients[1].id.should == 2
-      recipients[1].member_id.should == 23
-      recipients[1].address.should == 'b@example.com'
-      recipients[1].status.should == :processed
-      recipients[2].delivery_report.should == report
-      recipients[2].id.should == 3
-      recipients[2].member_id.should == 34
-      recipients[2].address.should == 'c@example.com'
-      recipients[2].status.should == :bounced
+      expect(recipients[0].delivery_report).to eq(report)
+      expect(recipients[0].id).to eq(1)
+      expect(recipients[0].member_id).to eq(12)
+      expect(recipients[0].address).to eq('a@example.com')
+      expect(recipients[0].status).to eq(:delivered)
+      expect(recipients[1].delivery_report).to eq(report)
+      expect(recipients[1].id).to eq(2)
+      expect(recipients[1].member_id).to eq(23)
+      expect(recipients[1].address).to eq('b@example.com')
+      expect(recipients[1].status).to eq(:processed)
+      expect(recipients[2].delivery_report).to eq(report)
+      expect(recipients[2].id).to eq(3)
+      expect(recipients[2].member_id).to eq(34)
+      expect(recipients[2].address).to eq('c@example.com')
+      expect(recipients[2].status).to eq(:bounced)
     end
 
     it "Fetch email from OSM" do
       email = Osm::Email::DeliveryReport::Email.new
       report = Osm::Email::DeliveryReport.new(id: 3, section_id: 4)
 
-      Osm::Email::DeliveryReport::Email.should_receive(:fetch_from_osm).with(api: $api, section: 4, email: 3).and_return(email)
-      report.get_email($api).should == email
+      expect(Osm::Email::DeliveryReport::Email).to receive(:fetch_from_osm).with(api: $api, section: 4, email: 3).and_return(email)
+      expect(report.get_email($api)).to eq(email)
     end
 
     describe "Get recipients of a certain status -" do
@@ -257,7 +257,7 @@ describe "Email" do
       %w{processed delivered bounced}.each do |status|
         it status do
           returned = @reports.send("#{status}_recipients")
-          returned.should == [instance_variable_get("@#{status}_recipient")]
+          expect(returned).to eq([instance_variable_get("@#{status}_recipient")])
         end
       end
 
@@ -274,10 +274,10 @@ describe "Email" do
       %w{processed delivered bounced}.each do |status|
         it status do
           reports = Osm::Email::DeliveryReport.new(recipients: [instance_variable_get("@#{status}_recipient")])
-          reports.send("#{status}_recipients?").should == true
+          expect(reports.send("#{status}_recipients?")).to eq(true)
 
           reports.recipients = []
-          reports.send("#{status}_recipients?").should == false
+          expect(reports.send("#{status}_recipients?")).to eq(false)
         end
       end
 
@@ -285,7 +285,7 @@ describe "Email" do
 
     it "Converts to a string" do
       report = Osm::Email::DeliveryReport.new(sent_at: Time.new(2016, 4, 17, 11, 50, 45), subject: 'Subject line of email')
-      report.to_s.should == '17/04/2016 11:50 - Subject line of email'
+      expect(report.to_s).to eq('17/04/2016 11:50 - Subject line of email')
     end
 
     it "Sorts by sent_at then id" do
@@ -293,7 +293,7 @@ describe "Email" do
       report2 = Osm::Email::DeliveryReport.new(sent_at: Time.new(2017), id: 1)
       report3 = Osm::Email::DeliveryReport.new(sent_at: Time.new(2017), id: 2)
       reports = [report2, report3, report1]
-      reports.sort.should == [report1, report2, report3]
+      expect(reports.sort).to eq([report1, report2, report3])
     end
 
 
@@ -314,23 +314,23 @@ describe "Email" do
         %w{id member_id}.each do |attribute|
           it attribute do
             @recipient.send("#{attribute}=", 0)
-            @recipient.valid?.should == false
-            @recipient.errors.messages[attribute.to_sym].should == ["must be greater than 0"]
+            expect(@recipient.valid?).to eq(false)
+            expect(@recipient.errors.messages[attribute.to_sym]).to eq(["must be greater than 0"])
           end
         end
 
         it "address" do
           @recipient.address = nil
-          @recipient.valid?.should == false
-          @recipient.errors.messages[:address].should == ["can't be blank"]
+          expect(@recipient.valid?).to eq(false)
+          expect(@recipient.errors.messages[:address]).to eq(["can't be blank"])
         end
 
         describe "status" do
           [nil, :invalid].each do |status|
             it "is #{status.inspect}" do
               @recipient.status = status
-              @recipient.valid?.should == false
-              @recipient.errors.messages[:status].should == ["is not included in the list"]
+              expect(@recipient.valid?).to eq(false)
+              expect(@recipient.errors.messages[:status]).to eq(["is not included in the list"])
             end
           end
         end
@@ -342,47 +342,47 @@ describe "Email" do
         report = Osm::Email::DeliveryReport.new(id: 3, section_id: 4)
         recipient = Osm::Email::DeliveryReport::Recipient.new(member_id: 456, address: 'd@example.com', delivery_report: report)
 
-        Osm::Email::DeliveryReport::Email.should_receive(:fetch_from_osm).with(api: $api, section: 4, email: 3, member: 456, address: 'd@example.com').and_return(email)
-        recipient.get_email($api).should == email
+        expect(Osm::Email::DeliveryReport::Email).to receive(:fetch_from_osm).with(api: $api, section: 4, email: 3, member: 456, address: 'd@example.com').and_return(email)
+        expect(recipient.get_email($api)).to eq(email)
       end
 
 
       describe "Unblock address in OSM" do
         it "Success" do
           recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>true})
-          recipient.unblock_address($api).should == true
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>true})
+          expect(recipient.unblock_address($api)).to eq(true)
         end
 
         it "Fails with error message" do
           recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>false, 'error'=>'Error message'})
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>false, 'error'=>'Error message'})
           expect{ recipient.unblock_address($api) }.to raise_error(Osm::Error, 'Error message')
         end
 
         it "Fails without error message" do
           recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>false})
-          recipient.unblock_address($api).should == false
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return({'status'=>false})
+          expect(recipient.unblock_address($api)).to eq(false)
         end
 
         it "Gets something other than a hash" do
           recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return([])
-          recipient.unblock_address($api).should == false
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: {"section_id"=>1, "email"=>"a@example.com", "email_id"=>2}).and_return([])
+          expect(recipient.unblock_address($api)).to eq(false)
         end
 
         describe "Doesn't try to unblock when status is" do
 
           before :each do
             @recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
-            $api.should_not_receive(:post_query)
+            expect($api).not_to receive(:post_query)
           end
 
           (Osm::Email::DeliveryReport::VALID_STATUSES - [:bounced]).each do |status|
             it status do
               @recipient.status = status
-              @recipient.unblock_address($api).should == true
+              expect(@recipient.unblock_address($api)).to eq(true)
             end
           end # each status
         end
@@ -397,28 +397,28 @@ describe "Email" do
         end
 
         it "processed?" do
-          @processed_recipient.processed?.should == true
-          @delivered_recipient.processed?.should == false
-          @bounced_recipient.processed?.should == false
+          expect(@processed_recipient.processed?).to eq(true)
+          expect(@delivered_recipient.processed?).to eq(false)
+          expect(@bounced_recipient.processed?).to eq(false)
         end
 
         it "delivered?" do
-          @processed_recipient.delivered?.should == false
-          @delivered_recipient.delivered?.should == true
-          @bounced_recipient.delivered?.should == false
+          expect(@processed_recipient.delivered?).to eq(false)
+          expect(@delivered_recipient.delivered?).to eq(true)
+          expect(@bounced_recipient.delivered?).to eq(false)
         end
 
         it "bounced?" do
-          @processed_recipient.bounced?.should == false
-          @delivered_recipient.bounced?.should == false
-          @bounced_recipient.bounced?.should == true
+          expect(@processed_recipient.bounced?).to eq(false)
+          expect(@delivered_recipient.bounced?).to eq(false)
+          expect(@bounced_recipient.bounced?).to eq(true)
         end
 
       end
 
       it "Converts to a string" do
         recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'recipient@example.com', status: :delivered)
-        recipient.to_s.should == 'recipient@example.com - delivered'
+        expect(recipient.to_s).to eq('recipient@example.com - delivered')
       end
 
       it "Sorts by delivery_report then id" do
@@ -430,7 +430,7 @@ describe "Email" do
         recipient3 = Osm::Email::DeliveryReport::Recipient.new(delivery_report: report2, id: 2)
 
         recipients = [recipient3, recipient1, recipient2]
-        recipients.sort.should == [recipient1, recipient2, recipient3]
+        expect(recipients.sort).to eq([recipient1, recipient2, recipient3])
       end
  
     end # describe Email -> DeliveryReport -> Recipient
@@ -449,8 +449,8 @@ describe "Email" do
         %w{to from subject body}.each do |attribute|
           it attribute do
             @email.send("#{attribute}=", nil)
-            @email.valid?.should == false
-            @email.errors.messages[attribute.to_sym].should == ["can't be blank"]
+            expect(@email.valid?).to eq(false)
+            expect(@email.errors.messages[attribute.to_sym]).to eq(["can't be blank"])
           end
         end
       end # describe Email -> DeliveryReport -> Email : invalid without
@@ -462,7 +462,7 @@ describe "Email" do
           subject:  'What the email is about',
           body:     '<p>Hello person.</p>'
         )
-        email.to_s.should == "To: to@example.com\nFrom: \"Sender\" <from@example.com>\n\nWhat the email is about\n\nHello person."
+        expect(email.to_s).to eq("To: to@example.com\nFrom: \"Sender\" <from@example.com>\n\nWhat the email is about\n\nHello person.")
       end
 
       it "Sorts by subject then from then to" do
@@ -472,50 +472,50 @@ describe "Email" do
         email4 = Osm::Email::DeliveryReport::Email.new(subject: 'b', from: 'b', to: 'b')
 
         emails = [email2, email3, email4, email1]
-        emails.sort.should == [email1, email2, email3, email4]
+        expect(emails.sort).to eq([email1, email2, email3, email4])
       end
 
       describe "Fetch email from OSM" do
 
         it "For a delivery report" do
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'data'=>{'to'=>'1 Recipient', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').and_return('This is the body of the email.')
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'data'=>{'to'=>'1 Recipient', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').and_return('This is the body of the email.')
 
           email = Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2)
-          email.to.should == '1 Recipient'
-          email.from.should == '"From" <from@example.com>'
-          email.subject.should == 'Subject of email'
-          email.body.should == 'This is the body of the email.'
+          expect(email.to).to eq('1 Recipient')
+          expect(email.from).to eq('"From" <from@example.com>')
+          expect(email.subject).to eq('Subject of email')
+          expect(email.body).to eq('This is the body of the email.')
         end
 
         it "For a recipient" do
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=to@example.com&member_id=3').and_return({'data'=>{'to'=>'to@example.com', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=to@example.com&member_id=3').and_return('This is the body of the email.')
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=to@example.com&member_id=3').and_return({'data'=>{'to'=>'to@example.com', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=to@example.com&member_id=3').and_return('This is the body of the email.')
 
           email = Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2, member: 3, address: 'to@example.com')
-          email.to.should == 'to@example.com'
-          email.from.should == '"From" <from@example.com>'
-          email.subject.should == 'Subject of email'
-          email.body.should == 'This is the body of the email.'
+          expect(email.to).to eq('to@example.com')
+          expect(email.from).to eq('"From" <from@example.com>')
+          expect(email.subject).to eq('Subject of email')
+          expect(email.body).to eq('This is the body of the email.')
         end
 
         describe "Error getting meta data" do
 
           it "Didn't get a Hash" do
-            $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return(nil)
+            expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return(nil)
             expect{ Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Unexpected format for response - got a NilClass'
           end
 
           it "Got an error from OSM" do
-            $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'success'=>false, 'error'=>'Error message'})
+            expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'success'=>false, 'error'=>'Error message'})
             expect{ Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Error message'
           end
 
         end
 
         it "Error getting body" do
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'data'=>{'to'=>'1 Recipient', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
-          $api.should_receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').once{ raise Osm::Forbidden, 'Email not found' }
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return({'data'=>{'to'=>'1 Recipient', 'from'=>'"From" <from@example.com>', 'subject'=>'Subject of email', 'sent'=>'16/04/2016 13:45'}, 'status'=>true, 'error'=>nil, 'meta'=>[]})
+          expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').once{ raise Osm::Forbidden, 'Email not found' }
           expect{ Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Email not found'
         end
 

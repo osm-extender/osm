@@ -5,14 +5,14 @@ require 'spec_helper'
 describe "API" do
 
   it "Create" do
-    $api.should_not be_nil
-    $api.site.should == :osm
-    $api.name.should == "API NAME"
-    $api.api_id.should == "1"
-    $api.api_secret.should == "API-SECRET"
-    $api.user_id.should == "2"
-    $api.user_secret.should == "USER-SECRET"
-    $api.debug.should == false
+    expect($api).not_to be_nil
+    expect($api.site).to eq(:osm)
+    expect($api.name).to eq("API NAME")
+    expect($api.api_id).to eq("1")
+    expect($api.api_secret).to eq("API-SECRET")
+    expect($api.user_id).to eq("2")
+    expect($api.user_secret).to eq("USER-SECRET")
+    expect($api.debug).to eq(false)
   end
 
   describe "Initialize requires a" do
@@ -40,10 +40,10 @@ describe "API" do
 
 
   it "Checks the debug property" do
-    $api.debug?.should == false
+    expect($api.debug?).to eq(false)
 
     $api.debug = true
-    $api.debug?.should == true
+    expect($api.debug?).to eq(true)
   end
 
 
@@ -51,46 +51,46 @@ describe "API" do
     it "With changes" do
       clone = $api.clone_with_changes
 
-      clone.debug.should == false
-      clone.site.should == :osm
-      clone.name.should == 'API NAME'
-      clone.api_id.should == '1'
-      clone.api_secret.should == 'API-SECRET'
-      clone.user_id.should == '2'
-      clone.user_secret.should == 'USER-SECRET'
+      expect(clone.debug).to eq(false)
+      expect(clone.site).to eq(:osm)
+      expect(clone.name).to eq('API NAME')
+      expect(clone.api_id).to eq('1')
+      expect(clone.api_secret).to eq('API-SECRET')
+      expect(clone.user_id).to eq('2')
+      expect(clone.user_secret).to eq('USER-SECRET')
 
-      clone.name.object_id.should_not == $api.name.object_id
-      clone.api_id.object_id.should_not == $api.api_id.object_id
-      clone.api_secret.object_id.should_not == $api.api_secret.object_id
-      clone.user_id.object_id.should_not == $api.user_id.object_id
-      clone.user_secret.object_id.should_not == $api.user_secret.object_id
+      expect(clone.name.object_id).not_to eq($api.name.object_id)
+      expect(clone.api_id.object_id).not_to eq($api.api_id.object_id)
+      expect(clone.api_secret.object_id).not_to eq($api.api_secret.object_id)
+      expect(clone.user_id.object_id).not_to eq($api.user_id.object_id)
+      expect(clone.user_secret.object_id).not_to eq($api.user_secret.object_id)
     end
 
     it "With a different user" do
       clone = $api.clone_with_different_user(id: '3', secret: 'NEW USER SECRET')
-      clone.user_id.should == '3'
-      clone.user_secret.should == 'NEW USER SECRET'
+      expect(clone.user_id).to eq('3')
+      expect(clone.user_secret).to eq('NEW USER SECRET')
     end
   end # describe CLoning
 
 
   describe "Checks for valid/invalid user" do
     it "Has a valid user" do
-      $api.has_valid_user?.should == true
-      $api.has_invalid_user?.should == false
+      expect($api.has_valid_user?).to eq(true)
+      expect($api.has_invalid_user?).to eq(false)
     end
 
     describe "Has an invalid user" do
       it "Bad id" do
         api = $api.clone_with_different_user(id: nil, secret: 'NEW USER SECRET')
-        api.has_valid_user?.should == false
-        api.has_invalid_user?.should == true
+        expect(api.has_valid_user?).to eq(false)
+        expect(api.has_invalid_user?).to eq(true)
       end
 
       it "Bad secret" do
         api = $api.clone_with_different_user(id: '3', secret: nil)
-        api.has_valid_user?.should == false
-        api.has_invalid_user?.should == true
+        expect(api.has_valid_user?).to eq(false)
+        expect(api.has_invalid_user?).to eq(true)
       end
     end
   end # describe Checks for valid/invalid user
@@ -98,12 +98,12 @@ describe "API" do
 
   describe "Requires a valid user" do
     it "User is valid" do
-      $api.stub(:has_valid_user?){ true }
-      $api.require_valid_user!.should == nil
+      allow($api).to receive(:has_valid_user?){ true }
+      expect($api.require_valid_user!).to eq(nil)
     end
 
     it "User is invalid" do
-      $api.stub(:has_valid_user?){ false }
+      allow($api).to receive(:has_valid_user?){ false }
       expect{ $api.require_valid_user! }.to raise_error(Osm::Api::UserInvalid, 'id: "2", secret: "USER-SECRET"')
     end
   end # describe Requires a valid user
@@ -113,33 +113,33 @@ describe "API" do
 
     before :each do
       $response = Net::HTTPOK.new(1, 200, '')
-      $response.stub(:content_type){ 'application/json' }
-      $response.stub(:body) { '{}' }
+      allow($response).to receive(:content_type){ 'application/json' }
+      allow($response).to receive(:body) { '{}' }
       uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
       $request = Net::HTTP::Post.new(uri)
       $http = Net::HTTP.new(uri)
-      Net::HTTP::Post.should_receive(:new).with(uri).and_return($request)
-      Net::HTTP.should_receive(:new).with('www.onlinescoutmanager.co.uk', 443).and_return($http)
-      $http.should_receive(:use_ssl=).with(true).and_return(true)
+      expect(Net::HTTP::Post).to receive(:new).with(uri).and_return($request)
+      expect(Net::HTTP).to receive(:new).with('www.onlinescoutmanager.co.uk', 443).and_return($http)
+      expect($http).to receive(:use_ssl=).with(true).and_return(true)
     end
 
     it "Without user credentials" do
-      $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET"}).and_return(nil)
-      $http.should_receive(:request).with($request).and_return($response)
+      expect($request).to receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET"}).and_return(nil)
+      expect($http).to receive(:request).with($request).and_return($response)
       api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
-      api.post_query('path/to/load').should == {}
+      expect(api.post_query('path/to/load')).to eq({})
     end
 
     it "With user credentials" do
-      $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
-      $http.should_receive(:request).with($request).and_return($response)
-      $api.post_query('path/to/load').should == {}
+      expect($request).to receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
+      expect($http).to receive(:request).with($request).and_return($response)
+      expect($api.post_query('path/to/load')).to eq({})
     end
 
     it "Using passed post attributes" do
-      $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", "attribute" => "value"}).and_return(nil)
-      $http.should_receive(:request).with($request).and_return($response)
-      $api.post_query('path/to/load', post_data: {'attribute' => 'value'}).should == {}
+      expect($request).to receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET", "attribute" => "value"}).and_return(nil)
+      expect($http).to receive(:request).with($request).and_return($response)
+      expect($api.post_query('path/to/load', post_data: {'attribute' => 'value'})).to eq({})
     end
 
 
@@ -147,14 +147,14 @@ describe "API" do
 
       it "Default" do
         api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
-        $request.should_receive('[]=').with('User-Agent', "name (using osm gem version #{Osm::VERSION})").and_return(nil)
-        $http.should_receive(:request).with($request).and_return($response)
+        expect($request).to receive('[]=').with('User-Agent', "name (using osm gem version #{Osm::VERSION})").and_return(nil)
+        expect($http).to receive(:request).with($request).and_return($response)
         api.post_query('path/to/load')
       end
 
       it "User set" do
-        $request.should_receive('[]=').with('User-Agent', "HTTP-USER-AGENT").and_return(nil)
-        $http.should_receive(:request).with($request).and_return($response)
+        expect($request).to receive('[]=').with('User-Agent', "HTTP-USER-AGENT").and_return(nil)
+        expect($http).to receive(:request).with($request).and_return($response)
         $api.post_query('path/to/load')
       end
 
@@ -165,17 +165,17 @@ describe "API" do
 
       it "Raises a connection error if the HTTP status code was not 'OK'" do
         response = Net::HTTPInternalServerError.new(1, 500, '')
-        $http.should_receive(:request).with($request).and_return(response)
+        expect($http).to receive(:request).with($request).and_return(response)
         expect{ $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
       end
 
       it "Raises a connection error if it can't connect to OSM" do
-        $http.should_receive(:request).with($request){ raise Errno::ENETUNREACH, 'Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)' }
+        expect($http).to receive(:request).with($request){ raise Errno::ENETUNREACH, 'Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)' }
         expect{ $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
       end
 
       it "Raises a connection error if an SSL error occurs" do
-        $http.should_receive(:request).with($request){ raise OpenSSL::SSL::SSLError, 'hostname "2.127.245.223" does not match the server certificate' }
+        expect($http).to receive(:request).with($request){ raise OpenSSL::SSL::SSLError, 'hostname "2.127.245.223" does not match the server certificate' }
         expect{ $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
       end
 
@@ -184,23 +184,23 @@ describe "API" do
     describe "Handles OSM errors" do
 
       it "Raises an error if OSM returns an error (as a hash)" do
-        $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
-        $response.stub(:body){ '{"error":"Error message"}' }
-        $http.should_receive(:request).with($request).and_return($response)
+        expect($request).to receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
+        allow($response).to receive(:body){ '{"error":"Error message"}' }
+        expect($http).to receive(:request).with($request).and_return($response)
         expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a hash in a hash)" do
-        $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
-        $response.stub(:body){ '{"error":{"message":"Error message"}}' }
-        $http.should_receive(:request).with($request).and_return($response)
+        expect($request).to receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
+        allow($response).to receive(:body){ '{"error":{"message":"Error message"}}' }
+        expect($http).to receive(:request).with($request).and_return($response)
         expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it "Raises an error if OSM returns an error (as a plain string)" do
-        $request.should_receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
-        $response.stub(:body){ 'Error message' }
-        $http.should_receive(:request).with($request).and_return($response)
+        expect($request).to receive(:set_form_data).with({"apiid" => "1", "token" => "API-SECRET", "userid" => "2", "secret" => "USER-SECRET"}).and_return(nil)
+        allow($response).to receive(:body){ 'Error message' }
+        expect($http).to receive(:request).with($request).and_return($response)
         expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
@@ -211,26 +211,26 @@ describe "API" do
   it "Authorizes a user to use the OSM API" do
     user_email = 'alice@example.com'
     user_password = 'alice'
-    $api.should_receive(:post_query).with('users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => '100', 'secret' => 'secret'} }
-    $api.authorize_user(email_address: user_email, password: user_password).should == {user_id: '100', user_secret: 'secret'}
+    expect($api).to receive(:post_query).with('users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => '100', 'secret' => 'secret'} }
+    expect($api.authorize_user(email_address: user_email, password: user_password)).to eq({user_id: '100', user_secret: 'secret'})
   end
 
 
   describe "Get user roles" do
 
     it "Returns what OSM gives on success" do
-      $api.should_receive(:post_query).with('api.php?action=getUserRoles'){ ['a', 'b'] }
-      $api.get_user_roles.should == ['a', 'b']
+      expect($api).to receive(:post_query).with('api.php?action=getUserRoles'){ ['a', 'b'] }
+      expect($api.get_user_roles).to eq(['a', 'b'])
     end
 
     it "User has no roles in OSM" do
-      $api.should_receive(:post_query).with('api.php?action=getUserRoles').twice{ false }
+      expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice{ false }
       expect{ $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
-      $api.get_user_roles.should == []
+      expect($api.get_user_roles).to eq([])
     end
 
     it "Reraises any other Osm::Error" do
-      $api.should_receive(:post_query).with('api.php?action=getUserRoles'){ raise Osm::Error, 'Test' }
+      expect($api).to receive(:post_query).with('api.php?action=getUserRoles'){ raise Osm::Error, 'Test' }
       expect{ $api.get_user_roles }.to raise_error(Osm::Error, 'Test')
     end
 
@@ -241,8 +241,8 @@ describe "API" do
 
     it "Get from cache" do
       permissions = {1 => {a: [:read, :write]}, 2 => {a: [:read]}}
-      OsmTest::Cache.should_receive('fetch').and_return(permissions)
-      $api.get_user_permissions.should == permissions
+      expect(OsmTest::Cache).to receive('fetch').and_return(permissions)
+      expect($api.get_user_permissions).to eq(permissions)
     end
 
     it "Get ignoring cache" do
@@ -250,16 +250,16 @@ describe "API" do
         {"sectionid"=>"1", "permissions"=>{"badge"=>10}},
       ]
 
-      OsmTest::Cache.should_not_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
-      OsmTest::Cache.should_not_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
-      $api.should_receive(:post_query).with('api.php?action=getUserRoles') { data }
-      $api.get_user_permissions(no_read_cache: true).should == {1 => {badge: [:read]}}
+      expect(OsmTest::Cache).not_to receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
+      expect(OsmTest::Cache).not_to receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
+      expect($api).to receive(:post_query).with('api.php?action=getUserRoles') { data }
+      expect($api.get_user_permissions(no_read_cache: true)).to eq({1 => {badge: [:read]}})
     end
 
     it "Set" do
       permissions = {1 => {a: [:read, :write]}, 2 => {a: [:read]}}
-      $api.should_receive('get_user_permissions').and_return(permissions)
-      OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => {a: [:read]}), {expires_in:600}) { true }
+      expect($api).to receive('get_user_permissions').and_return(permissions)
+      expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => {a: [:read]}), {expires_in:600}) { true }
       $api.set_user_permissions(section: 3, permissions: {a: [:read]})
     end
 
@@ -269,25 +269,25 @@ describe "API" do
   describe "Converters" do
     describe "to_s" do
       it "Has a user" do
-        $api.stub(:has_valid_user?){ true }
-        $api.to_s.should == "osm - 1 - API NAME - 2"
+        allow($api).to receive(:has_valid_user?){ true }
+        expect($api.to_s).to eq("osm - 1 - API NAME - 2")
       end
 
       it "Doesn't have a user" do
-        $api.stub(:has_valid_user?){ false }
-        $api.to_s.should == "osm - 1 - API NAME"
+        allow($api).to receive(:has_valid_user?){ false }
+        expect($api.to_s).to eq("osm - 1 - API NAME")
       end
 
     end
 
     it "to_i" do
-      $api.to_i.should == 1
+      expect($api.to_i).to eq(1)
     end
 
     it "to_h" do
       hash = $api.to_h
 
-      hash.should == {
+      expect(hash).to eq({
         api_id:       '1',
         api_secret:   'API-SECRET',
         name:         'API NAME',
@@ -295,13 +295,13 @@ describe "API" do
         site:         :osm,
         user_id:      '2',
         user_secret:  'USER-SECRET'
-      }
+      })
 
-      hash[:name].object_id.should_not == $api.name.object_id
-      hash[:api_id].object_id.should_not == $api.api_id.object_id
-      hash[:api_secret].object_id.should_not == $api.api_secret.object_id
-      hash[:user_id].object_id.should_not == $api.user_id.object_id
-      hash[:user_secret].object_id.should_not == $api.user_secret.object_id
+      expect(hash[:name].object_id).not_to eq($api.name.object_id)
+      expect(hash[:api_id].object_id).not_to eq($api.api_id.object_id)
+      expect(hash[:api_secret].object_id).not_to eq($api.api_secret.object_id)
+      expect(hash[:user_id].object_id).not_to eq($api.user_id.object_id)
+      expect(hash[:user_secret].object_id).not_to eq($api.user_secret.object_id)
     end
 
   end # describe Converters

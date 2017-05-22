@@ -29,29 +29,29 @@ module ValidityValidatorSpec
 
     it "Item is valid" do
       model = TestModel.new(item: TestItem.new(validity: true))
-      model.valid?.should == true
-      model.errors.count.should == 0
+      expect(model.valid?).to eq(true)
+      expect(model.errors.count).to eq(0)
     end
 
     it "Item is invalid" do
       model = TestModel.new(item: TestItem.new(validity: false))
-      model.valid?.should == false
-      model.errors.count.should == 2
-      model.errors.messages.should == {item: ['must be valid', 'validity attribute is invalid: is not included in the list']}
+      expect(model.valid?).to eq(false)
+      expect(model.errors.count).to eq(2)
+      expect(model.errors.messages).to eq({item: ['must be valid', 'validity attribute is invalid: is not included in the list']})
     end
 
     describe "Allow nil" do
 
       it "Is true" do
-        TestModelAllowNil.new(item: TestItem.new(validity: true)).valid?.should == true
-        TestModelAllowNil.new(item: TestItem.new(validity: false)).valid?.should == false
-        TestModelAllowNil.new(item: nil).valid?.should == true
+        expect(TestModelAllowNil.new(item: TestItem.new(validity: true)).valid?).to eq(true)
+        expect(TestModelAllowNil.new(item: TestItem.new(validity: false)).valid?).to eq(false)
+        expect(TestModelAllowNil.new(item: nil).valid?).to eq(true)
       end
 
       it "Is false" do
-        TestModelDisallowNil.new(item: TestItem.new(validity: true)).valid?.should == true
-        TestModelDisallowNil.new(item: TestItem.new(validity: false)).valid?.should == false
-        TestModelDisallowNil.new(item: nil).valid?.should == false
+        expect(TestModelDisallowNil.new(item: TestItem.new(validity: true)).valid?).to eq(true)
+        expect(TestModelDisallowNil.new(item: TestItem.new(validity: false)).valid?).to eq(false)
+        expect(TestModelDisallowNil.new(item: nil).valid?).to eq(false)
       end
 
     end

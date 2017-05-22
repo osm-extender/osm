@@ -10,8 +10,8 @@ describe "Gift Aid" do
       donation_date: Date.new(2000, 1, 2),
     )
 
-    d.donation_date.should == Date.new(2000, 1, 2)
-    d.valid?.should == true
+    expect(d.donation_date).to eq(Date.new(2000, 1, 2))
+    expect(d.valid?).to eq(true)
   end
 
   it "Sorts Donation by date" do
@@ -19,7 +19,7 @@ describe "Gift Aid" do
     d2 = Osm::GiftAid::Donation.new(donation_date: Date.new(2001, 1, 2))
 
     data = [d2, d1]
-    data.sort.should == [d1, d2]
+    expect(data.sort).to eq([d1, d2])
   end
 
 
@@ -39,19 +39,19 @@ describe "Gift Aid" do
       }
     )
 
-    d.member_id.should == 1
-    d.section_id.should == 2
-    d.grouping_id.should == 3
-    d.first_name.should == 'A'
-    d.last_name.should == 'B'
-    d.tax_payer_name.should == 'C'
-    d.tax_payer_address.should == 'D'
-    d.tax_payer_postcode.should == 'E'
-    d.total.should == '2.34'
-    d.donations.should == {
+    expect(d.member_id).to eq(1)
+    expect(d.section_id).to eq(2)
+    expect(d.grouping_id).to eq(3)
+    expect(d.first_name).to eq('A')
+    expect(d.last_name).to eq('B')
+    expect(d.tax_payer_name).to eq('C')
+    expect(d.tax_payer_address).to eq('D')
+    expect(d.tax_payer_postcode).to eq('E')
+    expect(d.total).to eq('2.34')
+    expect(d.donations).to eq({
       Date.new(2012, 1, 2) => '1.23',
-    }
-    d.valid?.should == true
+    })
+    expect(d.valid?).to eq(true)
   end
 
   it "Sorts Data by section_id, grouping_id, last_name then first_name" do
@@ -62,7 +62,7 @@ describe "Gift Aid" do
     d5 = Osm::GiftAid::Data.new(section_id: 2, grouping_id: 2, last_name: 'b', first_name: 'b')
 
     data = [d4, d3, d5, d2, d1]
-    data.sort.should == [d1, d2, d3, d4, d5]
+    expect(data.sort).to eq([d1, d2, d3, d4, d5])
   end
 
 
@@ -80,10 +80,10 @@ describe "Gift Aid" do
           {"name" => "2000-01-02", "field" => "2000-01-02", "width" => "110px", "editable" => true, "formatter" => "boldFormatter"}
       	]}
       ]
-      $api.should_receive(:post_query).with('giftaid.php?action=getStructure&sectionid=1&termid=2').and_return(data)
+      expect($api).to receive(:post_query).with('giftaid.php?action=getStructure&sectionid=1&termid=2').and_return(data)
 
       donations = Osm::GiftAid.get_donations(api: $api, section: 1, term: 2)
-      donations.should == [Osm::GiftAid::Donation.new(donation_date: Date.new(2000, 1, 2))]
+      expect(donations).to eq([Osm::GiftAid::Donation.new(donation_date: Date.new(2000, 1, 2))])
     end
 
     it "Fetch the data for a section" do
@@ -95,23 +95,23 @@ describe "Gift Aid" do
 	        {"2000-01-02" => 1.23,"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 1.23}
 	      ]
       }
-      $api.should_receive(:post_query).with('giftaid.php?action=getGrid&sectionid=1&termid=2').and_return(data)
+      expect($api).to receive(:post_query).with('giftaid.php?action=getGrid&sectionid=1&termid=2').and_return(data)
 
       data = Osm::GiftAid.get_data(api: $api, section: 1, term: 2)
-      data.is_a?(Array).should == true
-      data.size.should == 1
+      expect(data.is_a?(Array)).to eq(true)
+      expect(data.size).to eq(1)
       data = data[0]
-      data.donations.should == {
+      expect(data.donations).to eq({
         Date.new(2000, 1, 2) => '1.23',
-      }
-      data.first_name.should == 'First'
-      data.last_name.should == 'Last'
-      data.tax_payer_name.should == 'Tax'
-      data.grouping_id.should == 3
-      data.member_id.should == 2
-      data.total.should == '2.34'
-      data.section_id.should == 1
-      data.valid?.should == true
+      })
+      expect(data.first_name).to eq('First')
+      expect(data.last_name).to eq('Last')
+      expect(data.tax_payer_name).to eq('Tax')
+      expect(data.grouping_id).to eq(3)
+      expect(data.member_id).to eq(2)
+      expect(data.total).to eq('2.34')
+      expect(data.section_id).to eq(1)
+      expect(data.valid?).to eq(true)
     end
 
     it "Update donation" do
@@ -122,9 +122,9 @@ describe "Gift Aid" do
         'notes' => 'Note',
         'sectionid' => 1,
       }
-      $api.should_receive(:post_query).with('giftaid.php?action=update&sectionid=1&termid=2', post_data: post_data).and_return([])
+      expect($api).to receive(:post_query).with('giftaid.php?action=update&sectionid=1&termid=2', post_data: post_data).and_return([])
 
-      Osm::GiftAid.update_donation(
+      expect(Osm::GiftAid.update_donation(
         api: $api,
         section: 1,
         term: 2,
@@ -132,7 +132,7 @@ describe "Gift Aid" do
         members: [3, 4],
         amount: '1.23',
         note: 'Note',
-      ).should == true
+      )).to eq(true)
     end
 
     describe "Update data" do
@@ -153,7 +153,7 @@ describe "Gift Aid" do
             Date.new(2012, 1, 3) => '2.34',
           }
         )
-        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(id: 4) }
+        allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 4) }
       end
 
       it "Tax payer" do
@@ -169,14 +169,14 @@ describe "Gift Aid" do
             {"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 0}
           ]
         }
-        $api.should_receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'parentname', 'value' => 'n'})).and_return(body_data)
-        $api.should_receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'address', 'value' => 'a'})).and_return(body_data)
-        $api.should_receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'postcode', 'value' => 'pc'})).and_return(body_data)
+        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'parentname', 'value' => 'n'})).and_return(body_data)
+        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'address', 'value' => 'a'})).and_return(body_data)
+        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'postcode', 'value' => 'pc'})).and_return(body_data)
 
         @data.tax_payer_name = 'n'
         @data.tax_payer_address = 'a'
         @data.tax_payer_postcode = 'pc'
-        @data.update($api).should == true
+        expect(@data.update($api)).to eq(true)
       end
 
       it "A donation" do
@@ -195,10 +195,10 @@ describe "Gift Aid" do
           ]
         }
         url = "https://www.onlinescoutmanager.co.uk/"
-        $api.should_receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data).and_return(body_data)
+        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data).and_return(body_data)
 
         @data.donations[Date.new(2012, 1, 3)] = '3.45'
-        @data.update($api).should == true
+        expect(@data.update($api)).to eq(true)
       end
 
     end # Describe update data

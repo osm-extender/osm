@@ -30,7 +30,8 @@ RSpec.configure do |config|
     # a consistent manner. The expect syntax gets around this problem by not
     # relying on RSpec specific methods being defined on every object in the
     # system.
-    configuration.syntax = [:expect, :should]
+    #configuration.syntax = [:expect, :should]
+    configuration.syntax = :expect
   end
 
   config.before(:each) do
@@ -51,8 +52,8 @@ RSpec.configure do |config|
     Osm::Model.prepend_to_cache_key = 'OSMAPI'
     Osm::Model.cache_ttl = 600
 
-    Osm::Model.stub(:require_ability_to).and_return(nil)
-    Osm::Model.stub(:require_access_to_section).and_return(nil)
+    allow(Osm::Model).to receive(:require_ability_to).and_return(nil)
+    allow(Osm::Model).to receive(:require_access_to_section).and_return(nil)
   end
 end
 

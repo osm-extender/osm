@@ -12,10 +12,10 @@ describe "API Access" do
     }
     api_access = Osm::ApiAccess.new(data)
 
-    api_access.id.should == 1
-    api_access.name.should == 'Name'
-    api_access.permissions.should == {permission: [:read]}
-    api_access.valid?.should == true
+    expect(api_access.id).to eq(1)
+    expect(api_access.name).to eq('Name')
+    expect(api_access.permissions).to eq({permission: [:read]})
+    expect(api_access.valid?).to eq(true)
   end
 
   it "Sorts by id" do
@@ -23,7 +23,7 @@ describe "API Access" do
     a2 = Osm::ApiAccess.new(id: 2)
 
     data = [a2, a1]
-    data.sort.should == [a1, a2]
+    expect(data.sort).to eq([a1, a2])
   end
 
 
@@ -43,35 +43,35 @@ describe "API Access" do
           }
         ]
       }
-      $api.should_receive(:post_query).with('ext/settings/access/?action=getAPIAccess&sectionid=1').and_return(body)
+      expect($api).to receive(:post_query).with('ext/settings/access/?action=getAPIAccess&sectionid=1').and_return(body)
     end
 
     describe "Get All" do
       it "From OSM" do
         api_accesses = Osm::ApiAccess.get_all(api: $api, section: 1)
   
-        api_accesses.size.should == 2
+        expect(api_accesses.size).to eq(2)
         api_access = api_accesses[0]
-        api_access.id.should == 1
-        api_access.name.should == 'API Name'
-        api_access.permissions.should == {read: [:read], readwrite: [:read, :write], administer: [:read, :write, :administer]}
+        expect(api_access.id).to eq(1)
+        expect(api_access.name).to eq('API Name')
+        expect(api_access.permissions).to eq({read: [:read], readwrite: [:read, :write], administer: [:read, :write, :administer]})
       end
 
       it "From cache" do
         api_accesses = Osm::ApiAccess.get_all(api: $api, section: 1)
-        $api.should_not_receive(:post_query)
-        Osm::ApiAccess.get_all(api: $api, section: 1).should == api_accesses
+        expect($api).not_to receive(:post_query)
+        expect(Osm::ApiAccess.get_all(api: $api, section: 1)).to eq(api_accesses)
       end
     end
 
     it "Get One" do
       api_access = Osm::ApiAccess.get(api: $api, section: 1, for_api: 2)
-      api_access.id.should == 2
+      expect(api_access.id).to eq(2)
     end
 
     it "Get Ours" do
       api_access = Osm::ApiAccess.get_ours(api: $api, section: 1)
-      api_access.id.should == 1
+      expect(api_access.id).to eq(1)
     end
 
   end

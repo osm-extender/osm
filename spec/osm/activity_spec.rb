@@ -13,24 +13,24 @@ describe "Activity" do
       instructions: 'Instructions',
       location: :indoors,
     )
-    activity.osm_link.should == 'https://www.onlinescoutmanager.co.uk/?l=p1'
+    expect(activity.osm_link).to eq('https://www.onlinescoutmanager.co.uk/?l=p1')
   end
 
   it "Sorts by id then version" do
-    Osm::Activity.new.send(:sort_by).should == ['id', 'version']
+    expect(Osm::Activity.new.send(:sort_by)).to eq(['id', 'version'])
   end
 
 
   describe "Activity::File" do
     it "Sorts by activity_id then name" do
-      Osm::Activity::File.new.send(:sort_by).should == ['activity_id', 'name']
+      expect(Osm::Activity::File.new.send(:sort_by)).to eq(['activity_id', 'name'])
     end
   end
 
 
   describe "Activity::Version" do
     it "Sorts by activity_id then version" do
-      Osm::Activity::Version.new.send(:sort_by).should == ['activity_id', 'version']
+      expect(Osm::Activity::Version.new.send(:sort_by)).to eq(['activity_id', 'version'])
     end
   end
 
@@ -93,44 +93,44 @@ describe "Activity" do
           }
         ]
       }
-      $api.should_receive(:post_query).with('programme.php?action=getActivity&id=1').and_return(body)
+      expect($api).to receive(:post_query).with('programme.php?action=getActivity&id=1').and_return(body)
 
       activity = Osm::Activity.get(api: $api, id: 1)
   
-      activity.id.should == 1
-      activity.version.should == 0
-      activity.group_id.should == 2
-      activity.user_id.should == 3
-      activity.title.should == 'Activity Name'
-      activity.description.should == 'Description'
-      activity.resources.should == 'Resources'
-      activity.instructions.should == 'Instructions'
-      activity.running_time.should == 15
-      activity.location.should == :indoors
-      activity.shared.should == 0
-      activity.rating.should == 4
-      activity.editable.should == true
-      activity.deletable.should == false
-      activity.used.should == 3
-      activity.versions[0].version.should == 0
-      activity.versions[0].created_by.should == 1
-      activity.versions[0].created_by_name.should == 'Alice'
-      activity.versions[0].label.should == 'Current version - Alice'
-      activity.sections.should == [:beavers, :cubs]
-      activity.tags.should == ['Tag 1', 'Tag2']
-      activity.files[0].id.should == 6
-      activity.files[0].activity_id.should == 1
-      activity.files[0].file_name.should == 'File Name'
-      activity.files[0].name.should == 'Name'
-      activity.badges[0].badge_type.should == :activity
-      activity.badges[0].badge_section.should == :cubs
-      activity.badges[0].badge_name.should == 'Fire Safety'
-      activity.badges[0].badge_id.should == 181
-      activity.badges[0].badge_version.should == 0
-      activity.badges[0].requirement_id.should == 93384
-      activity.badges[0].requirement_label.should == 'B: Fire drill'
-      activity.badges[0].data.should == 'Yes'
-      activity.valid?.should == true
+      expect(activity.id).to eq(1)
+      expect(activity.version).to eq(0)
+      expect(activity.group_id).to eq(2)
+      expect(activity.user_id).to eq(3)
+      expect(activity.title).to eq('Activity Name')
+      expect(activity.description).to eq('Description')
+      expect(activity.resources).to eq('Resources')
+      expect(activity.instructions).to eq('Instructions')
+      expect(activity.running_time).to eq(15)
+      expect(activity.location).to eq(:indoors)
+      expect(activity.shared).to eq(0)
+      expect(activity.rating).to eq(4)
+      expect(activity.editable).to eq(true)
+      expect(activity.deletable).to eq(false)
+      expect(activity.used).to eq(3)
+      expect(activity.versions[0].version).to eq(0)
+      expect(activity.versions[0].created_by).to eq(1)
+      expect(activity.versions[0].created_by_name).to eq('Alice')
+      expect(activity.versions[0].label).to eq('Current version - Alice')
+      expect(activity.sections).to eq([:beavers, :cubs])
+      expect(activity.tags).to eq(['Tag 1', 'Tag2'])
+      expect(activity.files[0].id).to eq(6)
+      expect(activity.files[0].activity_id).to eq(1)
+      expect(activity.files[0].file_name).to eq('File Name')
+      expect(activity.files[0].name).to eq('Name')
+      expect(activity.badges[0].badge_type).to eq(:activity)
+      expect(activity.badges[0].badge_section).to eq(:cubs)
+      expect(activity.badges[0].badge_name).to eq('Fire Safety')
+      expect(activity.badges[0].badge_id).to eq(181)
+      expect(activity.badges[0].badge_version).to eq(0)
+      expect(activity.badges[0].requirement_id).to eq(93384)
+      expect(activity.badges[0].requirement_label).to eq('B: Fire drill')
+      expect(activity.badges[0].data).to eq('Yes')
+      expect(activity.valid?).to eq(true)
     end
   
   
@@ -141,10 +141,10 @@ describe "Activity" do
         'activityid' => 2,
         'notes' => 'Notes',
       }
-      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 0})
+      expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 0})
   
       activity = Osm::Activity.new(id: 2)
-      activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes').should == true
+      expect(activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes')).to eq(true)
     end
   
     it "Add activity to programme (failed)" do
@@ -154,10 +154,10 @@ describe "Activity" do
         'activityid' => 2,
         'notes' => 'Notes',
       }
-      $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 1})
+      expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 1})
 
       activity = Osm::Activity.new(id: 2)
-      activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes').should == false
+      expect(activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes')).to eq(false)
     end
   
   
@@ -179,7 +179,7 @@ describe "Activity" do
         'secretEdit' => true,
       }
   
-      $api.should_receive(:post_query).with('programme.php?action=update', post_data: post_data).and_return({'result' => true})
+      expect($api).to receive(:post_query).with('programme.php?action=update', post_data: post_data).and_return({'result' => true})
   
       activity = Osm::Activity.new(
         id: 2,
@@ -205,7 +205,7 @@ describe "Activity" do
         shared: 0,
         section_id: 1,
       )
-      activity.update(api: $api, section: 1, secret_update: true).should == true
+      expect(activity.update(api: $api, section: 1, secret_update: true)).to eq(true)
     end
   
     it "Update activity in OSM (failed)" do
@@ -218,8 +218,8 @@ describe "Activity" do
         location: :indoors,
         running_time: 0,
       )
-      $api.should_receive(:post_query).and_return({"result" => false})
-      activity.update(api: $api, section: 1, secret_update: true).should == false
+      expect($api).to receive(:post_query).and_return({"result" => false})
+      expect(activity.update(api: $api, section: 1, secret_update: true)).to eq(false)
     end
   
   end
