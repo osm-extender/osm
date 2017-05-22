@@ -10,6 +10,7 @@
   * Osm::ConnectionError - messages are now more descriptive
   * Osm::Api instances now have an http_user_agent attribute
   * no_cache option is now no_read_cache
+  * Osm::Badges stuff has moved to Osm::Badge
 
 ## Version 1.3.0
 
