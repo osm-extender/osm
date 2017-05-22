@@ -1,8 +1,0 @@
-grep -d recurse FakeWeb spec/       --> Stub consistency & remove a dep
-grep -d recurse '\[Boolean\]' lib   --> Replace with [true, false]
-grep -d recurse 'perform_query.* true' lib   --> Get rid of raw option
-grep -d recurse 'DummyHttpResult' spec  --> Delete dummy class
-grep -d recurse ':[A-Za-z0-9 _]*=>' spec lib
-
-
-Move badges into badge
