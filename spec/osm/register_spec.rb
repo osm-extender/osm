@@ -87,9 +87,9 @@ describe "Register" do
         {"rows" => [{"name"=>"First name","field"=>"firstname","width"=>"100px"},{"name"=>"Last name","field"=>"lastname","width"=>"100px"},{"name"=>"Total","field"=>"total","width"=>"60px"}],"noscroll"=>true},
         {"rows" => []}
       ]
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with("users.php?action=registerStructure&sectionid=1&termid=2"){ data }
 
-      register_structure = Osm::Register.get_structure(@api, 1, 2)
+      register_structure = Osm::Register.get_structure(api: $api, section: 1, term: 2)
       register_structure.is_a?(Array).should == true
     end
 
@@ -109,14 +109,14 @@ describe "Register" do
           }
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with("users.php?action=register&sectionid=1&termid=2") { data }
       Osm::Register.stub(:get_structure) { [
         Osm::Register::Field.new(:id => '2000-01-01', :name => 'Name', :tooltip => 'Tooltip'),
         Osm::Register::Field.new(:id => '2000-01-02', :name => 'Name', :tooltip => 'Tooltip'),
         Osm::Register::Field.new(:id => '2000-01-03', :name => 'Name', :tooltip => 'Tooltip'),
       ] }
 
-      register = Osm::Register.get_attendance(@api, 1, 2)
+      register = Osm::Register.get_attendance(api: $api, section: 1, term: 2)
       register.is_a?(Array).should == true
       register.size.should == 1
       reg = register[0]
@@ -135,12 +135,7 @@ describe "Register" do
     end
 
     it "Update register attendance" do
-      url = 'https://www.onlinescoutmanager.co.uk/users.php?action=registerUpdate&sectionid=1&termid=2'
       post_data = {
-        'apiid' => @CONFIGURATION[:api][:osm][:id],
-        'token' => @CONFIGURATION[:api][:osm][:token],
-        'userid' => 'user_id',
-        'secret' => 'secret',
         'scouts' => '["3"]',
         'selectedDate' => '2000-01-02',
         'present' => 'Yes',
@@ -148,17 +143,17 @@ describe "Register" do
         'sectionid' => 1,
         'completedBadges' => '[{"a":"A"},{"b":"B"}]'
       }
+      $api.should_receive(:post_query).with("users.php?action=registerUpdate&sectionid=1&termid=2", post_data: post_data){ [] }
 
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'[]'}) }
-      Osm::Register.update_attendance({
-        :api => @api,
-        :section => Osm::Section.new(:id=>1, :type=>:cubs),
-        :term => 2,
-        :evening => Date.new(2000, 1, 2),
-        :attendance => :yes,
-        :members => 3,
-        :completed_badge_requirements => [{'a'=>'A'}, {'b'=>'B'}]
-      }).should == true
+      Osm::Register.update_attendance(
+        api: $api,
+        section: Osm::Section.new(id: 1, type: :cubs),
+        term: 2,
+        date: Date.new(2000, 1, 2),
+        attendance: :yes,
+        members: 3,
+        completed_badge_requirements: [{'a'=>'A'}, {'b'=>'B'}]
+      ).should == true
     end
 
     it "Handles the total row" do
@@ -182,10 +177,10 @@ describe "Register" do
           }
         ]
       }
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => data.to_json, :content_type => 'application/json')
+      $api.should_receive(:post_query).with("users.php?action=register&sectionid=1&termid=2"){ data }
       Osm::Register.stub(:get_structure) { [] }
 
-      register = Osm::Register.get_attendance(@api, 1, 2)
+      register = Osm::Register.get_attendance(api: $api, section: 1, term: 2)
       register.is_a?(Array).should == true
       register.size.should == 1
       reg = register[0]
@@ -194,16 +189,10 @@ describe "Register" do
     end
 
     it "Handles no data getting structure" do
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=registerStructure&sectionid=1&termid=2", :body => '', :content_type => 'application/json')
-      register_structure = Osm::Register.get_structure(@api, 1, 2)
+      $api.should_receive(:post_query).with("users.php?action=registerStructure&sectionid=1&termid=2") { nil }
+      register_structure = Osm::Register.get_structure(api: $api, section: 1, term: 2)
       register_structure.is_a?(Array).should == true
       register_structure.size.should == 0
-
-
-      FakeWeb.register_uri(:post, "https://www.onlinescoutmanager.co.uk/users.php?action=register&sectionid=1&termid=2", :body => '', :content_type => 'application/json')
-      register = Osm::Register.get_attendance(@api, 1, 2)
-      register.is_a?(Array).should == true
-      register.size.should == 0
     end
 
   end

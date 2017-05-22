@@ -3,131 +3,117 @@ module Osm
   class Register
 
     # Get register structure
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the structure for
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the structure for, passing nil causes the current term to be used
+    # @param api [Osm::Api] The api to use to make the request
+    # @param [section Osm::Section, Fixnum, #to_i] The section (or its ID) to get the structure for
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Register::Field>] representing the fields of the register
-    def self.get_structure(api, section, term=nil, options={})
-      Osm::Model.require_ability_to(api, :read, :register, section, options)
+    def self.get_structure(api:, section:, term: nil, no_read_cache: false)
+      Osm::Model.require_ability_to(api: api, to: :read, on: :register, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
       cache_key = ['register_structure', section_id, term_id]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
-      end
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query("users.php?action=registerStructure&sectionid=#{section_id}&termid=#{term_id}")
 
-      data = api.perform_query("users.php?action=registerStructure&sectionid=#{section_id}&termid=#{term_id}")
-
-      structure = []
-      if data.is_a?(Array)
-        data = (data.size == 2) ? data[1] : []
-        if data.is_a?(Hash) && data['rows'].is_a?(Array)
-          data['rows'].each do |row|
-            structure.push Field.new(
-              :id => row['field'],
-              :name => row['name'],
-              :tooltip => row['tooltip'],
-            )
-          end
-        end
-      end
-
-      Osm::Model.cache_write(api, cache_key, structure) unless structure.nil?
-      return structure
-    end
-
-    # Get register attendance
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the register for
-    # @param [Osm::Term, Fixnum, #to_i, nil] term The term (or its ID) to get the register for, passing nil causes the current term to be used
-    # @!macro options_get
-    # @return [Array<Register::Attendance>] representing the attendance of each member
-    def self.get_attendance(api, section, term=nil, options={})
-      Osm::Model.require_ability_to(api, :read, :register, section, options)
-      section_id = section.to_i
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
-      cache_key = ['register_attendance', section_id, term_id]
-
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
-      end
-
-      data = api.perform_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}")
-      dates_s = get_structure(api, section, term, options)
-      dates_s = dates_s.map{ |f| f.id }
-      dates_d = dates_s.map{ |d| Osm::parse_date(d) }
-
-      to_return = []
-      if data.is_a?(Hash) && data['items'].is_a?(Array)
-        data = data['items']
-        data.each do |item|
-          if item.is_a?(Hash)
-            unless item['scoutid'].to_i < 0  # It's a total row
-              attendance = {}
-              dates_d.each_with_index do |date, index|
-                item_attendance = item[dates_s[index]]
-                attendance[date] = :unadvised_absent
-                attendance[date] = :yes if item_attendance.eql?('Yes')
-                attendance[date] = :advised_absent if item_attendance.eql?('No')
-              end
-              to_return.push Osm::Register::Attendance.new(
-                :member_id => Osm::to_i_or_nil(item['scoutid']),
-                :grouping_id => Osm::to_i_or_nil(item ['patrolid']),
-                :section_id => section_id,
-                :first_name => item['firstname'],
-                :last_name => item['lastname'],
-                :total => item['total'].to_i,
-                :attendance => attendance,
+        structure = []
+        if data.is_a?(Array)
+          data = (data.size == 2) ? data[1] : []
+          if data.is_a?(Hash) && data['rows'].is_a?(Array)
+            data['rows'].each do |row|
+              structure.push Field.new(
+                :id => row['field'],
+                :name => row['name'],
+                :tooltip => row['tooltip'],
               )
             end
           end
         end
-        Osm::Model.cache_write(api, cache_key, to_return)
-      end
-      return to_return
+        structure
+      end # cache fetch
+    end
+
+    # Get register attendance
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the register for
+    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @!macro options_get
+    # @return [Array<Register::Attendance>] representing the attendance of each member
+    def self.get_attendance(api:, section:, term: nil, no_read_cache: false)
+      Osm::Model.require_ability_to(api: api, to: :read, on: :register, section: section, no_read_cache: no_read_cache)
+      section_id = section.to_i
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
+      cache_key = ['register_attendance', section_id, term_id]
+
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}")
+        dates_s = get_structure(api: api, section: section, term: term, no_read_cache: no_read_cache)
+        dates_s = dates_s.map{ |f| f.id }
+        dates_d = dates_s.map{ |d| Osm::parse_date(d) }
+
+        to_return = []
+        if data.is_a?(Hash) && data['items'].is_a?(Array)
+          data = data['items']
+          data.each do |item|
+            if item.is_a?(Hash)
+              unless item['scoutid'].to_i < 0  # It's a total row
+                attendance = {}
+                dates_d.each_with_index do |date, index|
+                  item_attendance = item[dates_s[index]]
+                  attendance[date] = :unadvised_absent
+                  attendance[date] = :yes if item_attendance.eql?('Yes')
+                  attendance[date] = :advised_absent if item_attendance.eql?('No')
+                end
+                to_return.push Osm::Register::Attendance.new(
+                  :member_id => Osm::to_i_or_nil(item['scoutid']),
+                  :grouping_id => Osm::to_i_or_nil(item ['patrolid']),
+                  :section_id => section_id,
+                  :first_name => item['firstname'],
+                  :last_name => item['lastname'],
+                  :total => item['total'].to_i,
+                  :attendance => attendance,
+                )
+              end
+            end
+          end
+        end
+        to_return
+      end # cache fetch
     end
 
     # Update attendance for an evening in OSM
-    # @param [Hash] data
-    # @option data [Osm::Api] :api The api to use to make the request
-    # @option data [Osm::Section] :section the section to update the register for
-    # @option data [Osm::Term, #to_i, nil] :term The term (or its ID) to get the register for, passing nil causes the current term to be used
-    # @option data [Osm::Evening, DateTime, Date] :evening the evening to update the register on
-    # @option data [Symbol] :attendance what to mark the attendance as, one of :yes, :unadvised_absent or :advised_absent
-    # @option data [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>] :members the members (or their ids) to update
-    # @option data [Array<Hash>] :completed_badge_requirements (optional) the badge requirements to mark as completed, selected from the Hash returned by the get_badge_requirements_for_evening method
+    # @param api [Osm::Api] The api to use to make the request
+    # @param section [Osm::Section] the section to update the register for
+    # @param term [Osm::Term, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param date [Osm::Evening, DateTime, Date] the date to update the register on
+    # @param attendance [Symbol] what to mark the attendance as, one of :yes, :unadvised_absent or :advised_absent
+    # @param members [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>] the members (or their ids) to update
+    # @param completed_badge_requirements [Array<Hash>] the badge requirements to mark as completed, selected from the Hash returned by the get_badge_requirements_for_evening method
     # @return [Boolean] whether the update succedded
     # @raise [Osm::ArgumentIsInvalid] If data[:attendance] is not "Yes", "No" or "Absent"
     # @raise [Osm::ArgumentIsInvalid] If data[:section] is missing
     # @raise [Osm::ArgumentIsInvalid] If data[:evening] is missing
     # @raise [Osm::ArgumentIsInvalid] If data[:members] is missing
     # @raise [Osm::ArgumentIsInvalid] If data[:api] is missing
-    def self.update_attendance(data={})
-      fail Osm::ArgumentIsInvalid, ':attendance is invalid' unless [:yes, :unadvised_absent, :advised_absent].include?(data[:attendance])
-      fail Osm::ArgumentIsInvalid, ':section is missing' if data[:section].nil?
-      fail Osm::ArgumentIsInvalid, ':evening is missing' if data[:evening].nil?
-      fail Osm::ArgumentIsInvalid, ':members is missing' if data[:members].nil?
-      fail Osm::ArgumentIsInvalid, ':api is missing' if data[:api].nil?
-      api = data[:api]
-      Osm::Model.require_ability_to(api, :write, :register, data[:section])
+    def self.update_attendance(api:, section:, term:, date:, attendance:,  members:, completed_badge_requirements: [])
+      fail Osm::ArgumentIsInvalid, 'attendance is invalid' unless [:yes, :unadvised_absent, :advised_absent].include?(attendance)
+      Osm::Model.require_ability_to(api: api, to: :write, on: :register, section: section)
 
-      term_id = data[:term].nil? ? Osm::Term.get_current_term_for_section(api, section).id : data[:term].to_i
+      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
+      members = [*members].map{ |member| (member.is_a?(Fixnum) ? member : member.id).to_s } # Make sure it's an Array of Strings
 
-      data[:members] = [*data[:members]].map{ |member| (member.is_a?(Fixnum) ? member : member.id).to_s } # Make sure it's an Array of Strings
-
-      response = api.perform_query("users.php?action=registerUpdate&sectionid=#{data[:section].id}&termid=#{term_id}", {
-        'scouts' => data[:members].inspect,
-        'selectedDate' => data[:evening].strftime(Osm::OSM_DATE_FORMAT),
-        'present' => {:yes => 'Yes', :unadvised_absent => nil, :advised_absent => 'No'}[data[:attendance]],
-        'section' => data[:section].type,
-        'sectionid' => data[:section].id,
-        'completedBadges' => (data[:completed_badge_requirements] || []).to_json
+      response = api.post_query("users.php?action=registerUpdate&sectionid=#{section.id}&termid=#{term_id}", post_data: {
+        'scouts' => members.inspect,
+        'selectedDate' => date.strftime(Osm::OSM_DATE_FORMAT),
+        'present' => {:yes => 'Yes', :unadvised_absent => nil, :advised_absent => 'No'}[attendance],
+        'section' => section.type,
+        'sectionid' => section.id,
+        'completedBadges' => completed_badge_requirements.to_json
       })
 
       # The cached attendance will be out of date - remove them
-      Osm::Model.cache_delete(api, ['register_attendance', data[:section].id, term_id])
+      Osm::Model.cache_delete(api: api, key: ['register_attendance', section.id, term_id])
 
       return response.is_a?(Array)
     end
@@ -158,8 +144,6 @@ module Osm
 
 
     class Attendance < Osm::Model
-      SORT_BY = [:section_id, :grouping_id, :last_name, :first_name]
-
       # @!attribute [rw] member_id
       #   @return [Fixnum] The OSM ID for the member
       # @!attribute [rw] grouping_id
@@ -212,6 +196,10 @@ module Osm
         attendance[date] != :yes
       end
 
+      private
+      def sort_by
+        [:section_id, :grouping_id, :last_name, :first_name]
+      end
     end # Class Register::Attendance
 
   end # Class Register
