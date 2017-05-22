@@ -3,19 +3,19 @@ module Osm
   class Sms
 
     # Send an SMS to some members on their enabled numbers
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to send the message to
-    # @param [Array<Osm::Member, Fixnum, #to_i>, Osm::Member, Fixnum, #to_i] members The members (or their IDs) to send the message to
-    # @param [String, #to_s] source_address The number to claim the message is from
-    # @param [String, #to_s] message The text of the message to send
+    # @param api [Osm::Api] the api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] the section (or its ID) to send the message to
+    # @param members [Array<Osm::Member, Fixnum, #to_i>, Osm::Member, Fixnum, #to_i] the members (or their IDs) to send the message to
+    # @param source_address[String, #to_s] the number to claim the message is from
+    # @param message [String, #to_s] the text of the message to send
     # @return [Boolean] whether the messages were sent
-    # @raise [Osm::Error] If the section doesn't have enough credits to send the message
-    def self.send_sms(api, section, members, source_address, message)
-      Osm::Model.require_access_to_section(api, section)
-      fail Osm::Error, 'You do not have enough credits to send that message.' if number_selected(api, section, members) > remaining_credits(api, section) 
+    # @raise [Osm::Error] if the section doesn't have enough credits to send the message
+    def self.send_sms(api:, section:, members:, source_address:, message:)
+      Osm::Model.require_access_to_section(api: api, section: section)
+      fail Osm::Error, 'You do not have enough credits to send that message.' if number_selected(api: api, section: section, members: members) > remaining_credits(api: api, section: section) 
 
       members = [*members]
-      data = api.perform_query("ext/members/sms/?action=sendText&sectionid=#{section.to_i}", {
+      data = api.post_query("ext/members/sms/?action=sendText&sectionid=#{section.to_i}", post_data: {
         'msg' => message,
         'scouts' => [*members.map{ |m| m.to_i }].join(','),
         'source' => source_address,
@@ -23,48 +23,43 @@ module Osm
       })
 
       if data.is_a?(Hash) && data['result']
-        Osm::Model.cache_write(api, ['sms_credits', section.to_i], data['msg'].match(/\A[^\d]*(\d+)[^\d]*\Z/)[1])
+        Osm::Model.cache_write(api: api, key: ['sms_credits', section.to_i], data: data['msg'].match(/\A[^\d]*(\d+)[^\d]*\Z/)[1])
         return true
       end
       return false
     end
 
     # Get the number of remaining SMS credits for a section
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to send the message to
+    # @param api [Osm::Api] the api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] the section (or its ID) to send the message to
     # @!macro options_get
     # @return [Fixnum] the number of remaining SMS credits for the section
-    def self.remaining_credits(api, section, options={})
-      Osm::Model.require_access_to_section(api, section) 
+    def self.remaining_credits(api:, section:, no_read_cache: false)
+      Osm::Model.require_access_to_section(api, section)
       cache_key = ['sms_credits', section.to_i]
 
-      if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-        return Osm::Model.cache_read(api, cache_key)
-      end
-
-      data = api.perform_query("ext/members/sms/?action=getNumbers&sectionid=#{section.to_i}&type=", {
-        'scouts' => '0'
-      })
-      data = data['sms_remaining']
-
-      Osm::Model.cache_write(api, cache_key, data)
-      return data
+      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query("ext/members/sms/?action=getNumbers&sectionid=#{section.to_i}&type=", post_data: {
+          'scouts' => '0'
+        })
+        data['sms_remaining']
+      end # cache fetch
     end
 
     # Get the number of SMS credits which will be used sending a message to the passed members
-    # @param [Osm::Api] api The api to use to make the request
-    # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to send the message to
-    # @param [Array<Osm::Member, Fixnum, #to_i>, Osm::Member, Fixnum, #to_i] members The members (or their IDs) to send the message to
+    # @param api [Osm::Api] the api to use to make the request
+    # @param section [Osm::Section, Fixnum, #to_i] the section (or its ID) to send the message to
+    # @param members [Array<Osm::Member, Fixnum, #to_i>, Osm::Member, Fixnum, #to_i] the members (or their IDs) to send the message to
     # @return [Fixnum] the number of SMS credits which will be used
-    def self.number_selected(api, section, members)
-      Osm::Model.require_access_to_section(api, section) 
+    def self.number_selected(api:, section:, members:)
+      Osm::Model.require_access_to_section(api: api, section: section) 
 
       members = [*members]
-      data = api.perform_query("ext/members/sms/?action=getNumbers&sectionid=#{section.to_i}&type=", {
+      data = api.post_query("ext/members/sms/?action=getNumbers&sectionid=#{section.to_i}&type=", post_data: {
         'scouts' => [*members.map{ |m| m.to_i }].join(',')
       })
 
-      Osm::Model.cache_write(api, ['sms_credits', section.to_i], data['sms_remaining'])
+      Osm::Model.cache_write(api: api, key: ['sms_credits', section.to_i], data: data['sms_remaining'])
       return data['numbers']
     end
 
@@ -128,49 +123,45 @@ module Osm
 
 
       # @!method initialize
-      #   Initialize a new Badge
+      #   Initialize a new Sms
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
 
       # Get delivery reports
-      # @param [Osm::Api] api The api to use to make the request
-      # @param [Osm::Section, Fixnum, #to_i] section The section (or its ID) to get the reports for
+      # @param api [Osm::Api] the api to use to make the request
+      # @param section [Osm::Section, Fixnum, #to_i] the section (or its ID) to get the reports for
       # @!macro options_get
       # @return [Array<Osm::Sms::DeliveryReport>]
-      def self.get_for_section(api, section, options={})
-        require_access_to_section(api, section, options)
+      def self.get_for_section(api:, section:, no_read_cache: false)
+        require_access_to_section(ai: api, section: section, no_read_cache: no_read_cache)
         section_id = section.to_i
         cache_key = ['sms_delivery_reports', section_id]
 
-        if !options[:no_cache] && Osm::Model.cache_exist?(api, cache_key)
-          return cache_read(api, cache_key)
-        end
-
-        reports = []
-        get_name_number_regex = /\A(?<name>.*\w)\W+(?<number>\d*)\Z/
-        data = api.perform_query("sms.php?action=deliveryReports&sectionid=#{section_id}&dateFormat=generic")
-        data['items'].each do |report|
-          from = report['from'].match(get_name_number_regex)
-          to = report['to'].match(get_name_number_regex)
-          reports.push new(
-            :sms_id => Osm.to_i_or_nil(report['smsid']),
-            :user_id => Osm.to_i_or_nil(report['userid']),
-            :member_id => Osm.to_i_or_nil(report['scoutid']),
-            :section_id => Osm.to_i_or_nil(report['sectionid']),
-            :from_name => from[:name],
-            :from_number => "+#{from[:number]}",
-            :to_name => to[:name],
-            :to_number => "+#{to[:number]}",
-            :message => report['message'],
-            :scheduled => Osm.parse_datetime(report['schedule']),
-            :last_updated => Osm.parse_datetime(report['lastupdated']),
-            :credits => Osm.to_i_or_nil(report['credits']),
-            :status => (report['status'] || 'error').downcase.to_sym,
-          )
-        end
-
-        cache_write(api, cache_key, reports)
-        return reports
+        cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+          reports = []
+          get_name_number_regex = /\A(?<name>.*\w)\W+(?<number>\d*)\Z/
+          data = api.post_query("sms.php?action=deliveryReports&sectionid=#{section_id}&dateFormat=generic")
+          data['items'].each do |report|
+            from = report['from'].match(get_name_number_regex)
+            to = report['to'].match(get_name_number_regex)
+            reports.push new(
+              :sms_id => Osm.to_i_or_nil(report['smsid']),
+              :user_id => Osm.to_i_or_nil(report['userid']),
+              :member_id => Osm.to_i_or_nil(report['scoutid']),
+              :section_id => Osm.to_i_or_nil(report['sectionid']),
+              :from_name => from[:name],
+              :from_number => "+#{from[:number]}",
+              :to_name => to[:name],
+              :to_number => "+#{to[:number]}",
+              :message => report['message'],
+              :scheduled => Osm.parse_datetime(report['schedule']),
+              :last_updated => Osm.parse_datetime(report['lastupdated']),
+              :credits => Osm.to_i_or_nil(report['credits']),
+              :status => (report['status'] || 'error').downcase.to_sym,
+            )
+          end
+          reports
+        end # cache fetch
       end
 
 
