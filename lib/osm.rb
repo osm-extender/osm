@@ -30,8 +30,6 @@ module Osm
 
   private
   # Set constants
-  OSM_EPOCH = '1970-01-01'
-  OSM_EPOCH_HUMAN = '1970-01-01'
   OSM_DATE_FORMAT = '%Y-%m-%d'
   OSM_TIME_FORMAT = '%H:%M:%S'
   OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
@@ -67,8 +65,8 @@ Dir[File.join(File.dirname(__FILE__) , 'osm', '*.rb')].each {|file| require file
 module Osm
 
   private
-  def self.make_datetime(date, time, options={})
-    date = nil if date.nil? || date.empty? || (!options[:ignore_epoch] && epoch_date?(date))
+  def self.make_datetime(date: nil, time: nil, ignore_epoch: false)
+    date = nil if date.nil? || date.empty? || (ignore_epoch && epoch_date?(date))
     time = nil if time.nil? || time.empty?
     if (!date.nil? && !time.nil?)
       begin
@@ -97,8 +95,8 @@ module Osm
   end
 
 
-  def self.parse_date(date, options={})
-    return nil if date.nil? || date.empty? || (!options[:ignore_epoch] && epoch_date?(date))
+  def self.parse_date(date, ignore_epoch: false)
+    return nil if date.nil? || date.empty? || (ignore_epoch && epoch_date?(date))
     begin
       return Date.strptime(date, (date.include?('-') ? OSM_DATE_FORMAT : OSM_DATE_FORMAT_HUMAN))
     rescue ArgumentError
@@ -120,6 +118,7 @@ module Osm
 
     hash_out = {}
     hash_in.each do |key, value|
+      key = key.to_s unless key.is_a?(Symbol)
       hash_out[key.to_sym] = value
     end
     hash_out
@@ -144,7 +143,9 @@ module Osm
   end
 
   def self.epoch_date?(date)
-    [OSM_EPOCH, OSM_EPOCH_HUMAN].include?(date)
+    epoch = Date.new(1970, 1, 1)
+    date = date.strftime('%Y-%m-%d') if date.respond_to?(:strftime)
+    Date.parse(date).eql?(epoch)
   end
 
   def self.inspect_instance(instance, options={})
