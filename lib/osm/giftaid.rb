@@ -87,7 +87,7 @@ module Osm
     # @param date [Date, #strftime] date the date the donation was made
     # @param amount[String, #to_s] the donation amount
     # @param note [String, #to_s] the description for the donation
-    # @return [Boolean] whether the update succedded
+    # @return true, false whether the update succedded
     def self.update_donation(api:, section:, term: nil, members:, date: Date.today, amount:, note:)
       Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section)
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
@@ -187,7 +187,7 @@ module Osm
 
       # Update data in OSM
       # @param [Osm::Api] api The api to use to make the request
-      # @return [Boolean] whether the data was updated in OSM
+      # @return true, false whether the data was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
         fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?

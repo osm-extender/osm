@@ -118,7 +118,7 @@ module Osm
     # @param name [String] (required) the name for the term
     # @param start [Date, #strftime] (required) the date for the start of term
     # @param finish [Date, #strftime] (required) the date for the finish of term
-    # @return [Boolean] if the operation suceeded or not
+    # @return true, false if the operation suceeded or not
     def self.create(api:, section:, name:, start:, finish:)
       require_access_to_section(api: api, section: section)
 
@@ -141,7 +141,7 @@ module Osm
 
     # Update a term in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] if the operation suceeded or not
+    # @return true, false if the operation suceeded or not
     # @raise [Osm::ObjectIsInvalid] If the Term is invalid
     def update(api)
       fail Osm::ObjectIsInvalid, 'term is invalid' unless valid?
@@ -173,7 +173,7 @@ module Osm
 
     # Determine if the term is completly before the passed date
     # @param date [Date]
-    # @return [Boolean] if the term is completly before the passed date
+    # @return true, false if the term is completly before the passed date
     def before?(date)
       return false if finish.nil?
       return finish < date.to_date
@@ -181,28 +181,28 @@ module Osm
 
     # Determine if the term is completly after the passed date
     # @param date [Date]
-    # @return [Boolean] if the term is completly after the passed date
+    # @return true, false if the term is completly after the passed date
     def after?(date)
       return false if start.nil?
       return start > date.to_date
     end
 
     # Determine if the term is in the future
-    # @return [Boolean] if the term starts after today
+    # @return true, false if the term starts after today
     def future?
       return false if start.nil?
       return start > Date.today
     end
 
     # Determine if the term is in the past
-    # @return [Boolean] if the term finished before today
+    # @return true, false if the term finished before today
     def past?
       return false if finish.nil?
       return finish < Date.today
     end
 
     # Determine if the term is current
-    # @return [Boolean] if the term started before today and finishes after today
+    # @return true, false if the term started before today and finishes after today
     def current?
       return false if start.nil?
       return false if finish.nil?
@@ -211,7 +211,7 @@ module Osm
 
     # Determine if the provided date is within the term
     # @param date [Date] The date to test
-    # @return [Boolean] if the term started before the date and finishes after the date
+    # @return true, false if the term started before the date and finishes after the date
     def contains_date?(date)
       return false if start.nil?
       return false if finish.nil?

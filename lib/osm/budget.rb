@@ -49,7 +49,7 @@ module Osm
 
     # Create the budget in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] whether the budget was created
+    # @return true, false whether the budget was created
     # @raise [Osm::ObjectIsInvalid] If the Budget is invalid
     # @raise [Osm::Error] If the budget already exists in OSM
     def create(api)
@@ -75,7 +75,7 @@ module Osm
 
     # Update budget in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] whether the budget was updated
+    # @return true, false whether the budget was updated
     # @raise [Osm::ObjectIsInvalid] If the Budget is invalid
     def update(api)
       fail Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
@@ -98,7 +98,7 @@ module Osm
 
     # Delete budget from OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] whether the budget was deleted
+    # @return true, false whether the budget was deleted
     def delete(api)
       Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 

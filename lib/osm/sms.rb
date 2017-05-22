@@ -8,7 +8,7 @@ module Osm
     # @param members [Array<Osm::Member, Integer, #to_i>, Osm::Member, Integer, #to_i] the members (or their IDs) to send the message to
     # @param source_address[String, #to_s] the number to claim the message is from
     # @param message [String, #to_s] the text of the message to send
-    # @return [Boolean] whether the messages were sent
+    # @return true, false whether the messages were sent
     # @raise [Osm::Error] if the section doesn't have enough credits to send the message
     def self.send_sms(api:, section:, members:, source_address:, message:)
       Osm::Model.require_access_to_section(api: api, section: section)

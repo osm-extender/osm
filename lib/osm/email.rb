@@ -47,7 +47,7 @@ module Osm
     # @param from [String] Email address to send the email from
     # @param subject [String] Email subject The subject of the email
     # @param body [String] Email body The bosy of the email
-    # @return [Boolean] Whether OSM reported the email as sent
+    # @return true, false Whether OSM reported the email as sent
     def self.send_email(api:, section:, to:, cc:'', from:, subject:, body:)
       data = api.post_query('ext/members/email/?action=send', post_data: {
         'sectionid' => section.to_i,
@@ -251,7 +251,7 @@ module Osm
 
         # Unblock email address from being sent emails
         # @param api [Osm::Api] The api to use to make the request
-        # @param [Boolean] whether removal was successful
+        # @param true, false whether removal was successful
         def unblock_address(api)
           return true unless bounced?
 

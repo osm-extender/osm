@@ -28,11 +28,11 @@ module Osm
       # @!attribute [rw] description
       #   @return [String] the description of what the schedule is for
       # @!attribute [rw] archived
-      #   @return [Boolean] whether the schedule has been archived
+      #   @return true, false whether the schedule has been archived
       # @!attribute [rw] gift_aid
-      #   @return [Boolean] whether payments made using this schedule are eligable for gift aid
+      #   @return true, false whether payments made using this schedule are eligable for gift aid
       # @!attribute [rw] require_all
-      #   @return [Boolean] whether to require all payments within the schedule by default
+      #   @return true, false whether to require all payments within the schedule by default
       # @!attribute [rw] pay_now
       #   @return [FixNum] controls the use of the pay now feature in OSM, see the PAY_NOW_OPTIONS hash
       # @!attribute [rw] annual_limit
@@ -195,7 +195,7 @@ module Osm
         payments.select{ |p| !p.archived? }
       end
       # Check if there are any unarchived payments for the schedule
-      # @return [Boolean]
+      # @return true, false
       def current_payments?
         payments.any?{ |p| !p.archived? }
       end
@@ -206,7 +206,7 @@ module Osm
         payments.select{ |p| p.archived? }
       end
       # Check if there are any archived payments for the schedule
-      # @return [Boolean]
+      # @return true, false
       def archived_payments?
         payments.any?{ |p| p.archived? }
       end
@@ -227,7 +227,7 @@ module Osm
         # @!attribute [rw] name
         #   @return [String] the name given to the payment
         # @!attribute [rw] archived
-        #   @return [Boolean] whether the payment has been archived
+        #   @return true, false whether the payment has been archived
         # @!attribute [rw] date
         #   @return [Date] the payment's due date
         # @!attribute [rw] schedule
@@ -255,7 +255,7 @@ module Osm
 
         # Check if the payment is past due (or will be past due on the passed date)
         # @param date [Date] The date to check for (defaults to today)
-        # @return [Boolean]
+        # @return true, false
         def past_due?(date=Date.today)
           date > due_date
         end
@@ -291,7 +291,7 @@ module Osm
 
         # Get the most recent status for a member's payment
         # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
-        # @return [Boolean]
+        # @return true, false
         def latest_status_for(payment)
           @latest_status ||= payments.map{ |k,v| [k, v.sort.first] }.to_h
           @latest_status[payment.to_i]
@@ -318,13 +318,13 @@ module Osm
         # Check if a payment is over due (or will be over due on the passed date)
         # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @param date [Date] The date to check for (defaults to today)
-        # @return [Boolean] whether the member's payment is unpaid and the payment's due date has passed
+        # @return true, false whether the member's payment is unpaid and the payment's due date has passed
         def over_due?(payment, date=nil)
           unpaid?(payment) && payment.past_due?(date)
         end
 
         # Check if the member has an active direct debit for this schedule
-        # @return [Boolean]
+        # @return true, false
         def active_direct_debit?
           direct_debit.eql?(:active)
         end
@@ -333,8 +333,8 @@ module Osm
         # @param api [Osm::Api] The api to use to make the request
         # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
         # @param status [Symbol] What to update the status to (:required, :not_required or :paid_manually)
-        # @param gift_aid [Boolean] Whether to update the gift aid record too (only relevant when setting to :paid_manually)
-        # @return [Boolean] whether the update was made in OSM
+        # @param gift_aid true, false Whether to update the gift aid record too (only relevant when setting to :paid_manually)
+        # @return true, false whether the update was made in OSM
         def update_payment_status(api:, payment:, status:, gift_aid: false)
           payment_id = payment.to_i
           fail ArgumentError, "#{payment_id} is not a valid payment for the schedule." unless schedule.payments.map(&:id).include?(payment_id)
@@ -369,7 +369,7 @@ module Osm
         # Mark a payment as required by the member
         # @param api [Osm::Api] The api to use to make the request
         # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
-        # @return [Boolean] whether the update was made in OSM
+        # @return true, false whether the update was made in OSM
         def mark_payment_required(api:, payment:)
           update_payment_status(api: api, payment: payment, status: :required)
         end
@@ -377,7 +377,7 @@ module Osm
         # Mark a payment as not required by the member
         # @param api [Osm::Api] The api to use to make the request
         # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
-        # @return [Boolean] whether the update was made in OSM
+        # @return true, false whether the update was made in OSM
         def mark_payment_not_required(api:, payment:)
           update_payment_status(api: api, payment: payment, status: :not_required)
         end
@@ -385,8 +385,8 @@ module Osm
         # Mark a payment as paid by the member
         # @param api [Osm::Api] The api to use to make the request
         # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
-        # @param gift_aid [Boolean] Whether to update the gift aid record too
-        # @return [Boolean] whether the update was made in OSM
+        # @param gift_aid true, false Whether to update the gift aid record too
+        # @return true, false whether the update was made in OSM
         def mark_payment_paid_manually(api:, payment:, gift_aid: false)
           update_payment_status(api: api, payment: payment, status: :paid_manually, gift_aid: gift_aid)
         end

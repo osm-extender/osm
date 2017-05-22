@@ -16,7 +16,7 @@ module Osm
     # @!attribute [r] user_secret
     #   @return [String, #to_s, nil] the secret for the user given by OSM
     # @!attribute [rw] debug
-    #   @return [Boolean] whether debugging output should be displayed (default false)
+    #   @return true, false whether debugging output should be displayed (default false)
     # @!attribute [rw] http_user_agent
     #   @return [String, #to_s, nil] what to send as the user-agent when making requests to OSM (default "#{name} (using osm gem version #{Osm::VERSION})")
 
@@ -72,13 +72,13 @@ module Osm
 
 
     # Checks if this API has valid looking user credentials
-    # @return [Boolean]
+    # @return true, false
     def has_valid_user?
       valid_user?(id: user_id, secret: user_secret)
     end
 
     # Checks if this API has invalid looking user credentials
-    # @return [Boolean]
+    # @return true, false
     def has_invalid_user?
       !has_valid_user?
     end
@@ -304,7 +304,7 @@ module Osm
     # Check if the passed id and secret look valid
     # @param id [String]
     # @param secret [String]
-    # @return [Boolean]
+    # @return true, false
     private def valid_user?(id:, secret:)
       !id.nil? && !secret.nil?
     end

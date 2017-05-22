@@ -21,7 +21,7 @@ module Osm
     # @!attribute [rw] group_name
     #   @return [String] what group (if any) this badge belongs to (eg Core, Partnership), used only for display sorting
     # @!attribute [rw] latest
-    #   @return [Boolean] whether this is the latest version of the badge
+    #   @return true, false whether this is the latest version of the badge
     # @!attribute [rw] sharing
     #   @return [Symbol] the sharing status of this badge (:draft, :private, :optin, :default_locked, :optin_locked)
     # @!attribute [rw] user_id
@@ -43,7 +43,7 @@ module Osm
     # @!attribute [rw] badges_required
     #   @return [Array<Hash>] the other badges required to complete this badge, {id: The ID of the badge, version: The version of the badge}
     # @!attribute [rw] show_level_letters
-    #   @return [Boolean] Whether to show letters not numbers for the levels of a staged badge
+    #   @return true, false Whether to show letters not numbers for the levels of a staged badge
 
     attribute :name, :type => String
     attribute :requirement_notes, :type => String
@@ -385,7 +385,7 @@ module Osm
       # @!attribute [rw] mod
       #   @return [Osm::Badge::RequirementModule] the module the requirement belongs to
       # @!attribute [rw] editable
-      #   @return [Boolean]
+      #   @return true, false
 
       attribute :badge, :type => Object
       attribute :name, :type => String
@@ -570,7 +570,7 @@ module Osm
 
 
       # Check if this badge has been earnt
-      # @return [Boolean] whether the badge has been earnt (ignores other badge's and their requirements which might be needed)
+      # @return true, false whether the badge has been earnt (ignores other badge's and their requirements which might be needed)
       def earnt?
         if badge.has_levels?
           return earnt > awarded
@@ -633,7 +633,7 @@ module Osm
 
 
       # Check if this badge has been started
-      # @return [Boolean] whether the badge has been started by the member (always false if the badge has been completed)
+      # @return true, false whether the badge has been started by the member (always false if the badge has been completed)
       def started?
         if badge.has_levels?
           return (started > due)
@@ -684,7 +684,7 @@ module Osm
       # @param api [Osm::Api] The api to use to make the request
       # @param date [Date] The date to mark the badge as awarded
       # @param level [Integer] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
-      # @return [Boolean] whether the data was updated in OSM
+      # @return true, false whether the data was updated in OSM
       def mark_awarded(api:, date: Date.today, level: due)
         fail ArgumentError, 'date is not a Date' unless date.is_a?(Date)
         fail ArgumentError, 'level can not be negative' if level < 0
@@ -718,7 +718,7 @@ module Osm
 
       # Mark the badge as not awarded in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] whether the data was updated in OSM
+      # @return true, false whether the data was updated in OSM
       def mark_not_awarded(api)
         mark_awarded(api, Date.today, 0)
       end
@@ -727,7 +727,7 @@ module Osm
       # Mark the badge as due in OSM
       # @param api [Osm::Api] The api to use to make the request
       # @param level [Integer] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
-      # @return [Boolean] whether the data was updated in OSM
+      # @return true, false whether the data was updated in OSM
       def mark_due(api, level=earnt)
         fail ArgumentError, 'level can not be negative' if level < 0
         section = Osm::Section.get(api: api, section: section_id)
@@ -748,14 +748,14 @@ module Osm
 
       # Mark the badge as not due in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] whether the data was updated in OSM
+      # @return true, false whether the data was updated in OSM
       def mark_not_due(api)
         mark_due(api, 0)
       end
 
       # Update data in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] whether the data was updated in OSM
+      # @return true, false whether the data was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
         fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
@@ -811,7 +811,7 @@ module Osm
 
       # Work out if the requirmeent has been met
       # @param requirement_id [Integer, #to_i] The id of the requirement to evaluate (e.g. "12", "xSomething", "Yes" or "")
-      # @return [Boolean] whether the requirmeent has been met
+      # @return true, false whether the requirmeent has been met
       def requirement_met?(requirement_id)
         data = requirements[requirement_id.to_i].to_s
         return false if data == '0'

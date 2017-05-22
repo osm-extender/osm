@@ -158,7 +158,7 @@ module Osm
 
     # Update a meeting in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] if the operation suceeded or not
+    # @return true, false if the operation suceeded or not
     # @raise [Osm::ObjectIsInvalid] If the Meeting is invalid
     def update(api)
       fail Osm::ObjectIsInvalid, 'meeting is invalid' unless valid?
@@ -221,7 +221,7 @@ module Osm
     # @param api [Osm::Api] The api to use to make the request
     # @param activity [Osm::Activity] The Activity to add to the Meeting
     # @param notes [String] The notes which should appear for this Activity on this Meeting
-    # @return [Boolean] Whether the activity ws successfully added
+    # @return true, false Whether the activity ws successfully added
     def add_activity(api:, activity:, notes: '')
       if activity.add_to_programme(api: api, section: section_id, date: date, notes: notes)
         activities.push Osm::Meeting::Activity.new(activity_id: activity.id, notes: notes, title: activity.title)
@@ -239,7 +239,7 @@ module Osm
 
     # Delete meeting from OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] true
+    # @return true, false true
     def delete(api)
       require_ability_to(api: api, to: :write, on: :programme, section: section_id)
       data = api.post_query("programme.php?action=deleteEvening&eveningid=#{id}&sectionid=#{section_id}")

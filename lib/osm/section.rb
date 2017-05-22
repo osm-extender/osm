@@ -18,7 +18,7 @@ module Osm
     # @!attribute [rw] flexi_records
     #   @return [Array<FlexiRecord>] list of the extra records the section has
     # @!attribute [rw] gocardless
-    #   @return [Boolean] does the section use gocardless
+    #   @return true, false does the section use gocardless
     # @!attribute [rw] myscout_events_expires
     #   @return [Date] when the subscription to Events in My.SCOUT expires
     # @!attribute [rw] myscout_badges_expires
@@ -28,15 +28,15 @@ module Osm
     # @!attribute [rw] myscout_events_expires
     #   @return [Date] when the subscription to Events in My.SCOUT expires
     # @!attribute [rw] myscout_details_expires
-    #   @return [Boolean] whether the section uses the Personal Details part of My.SCOUT
+    #   @return true, false whether the section uses the Personal Details part of My.SCOUT
     # @!attribute [rw] myscout_badges
-    #   @return [Boolean] whether the section uses the Badges part of My.SCOUT
+    #   @return true, false whether the section uses the Badges part of My.SCOUT
     # @!attribute [rw] myscout_programme
-    #   @return [Boolean] whether the section uses the Programme part of My.SCOUT
+    #   @return true, false whether the section uses the Programme part of My.SCOUT
     # @!attribute [rw] myscout_payments
-    #   @return [Boolean] whether the section uses the Payments part of My.SCOUT
+    #   @return true, false whether the section uses the Payments part of My.SCOUT
     # @!attribute [rw] myscout_details
-    #   @return [Boolean] whether the section uses the Personal Details part of My.SCOUT
+    #   @return true, false whether the section uses the Personal Details part of My.SCOUT
     # @!attribute [rw] myscout_emails
     #   @return [Hash of Symbol to Boolean] which email addresses are linked to MyScout for each Member
     # @!attribute [rw] myscout_email_address_from
@@ -44,11 +44,11 @@ module Osm
     # @!attribute [rw] myscout_email_address_copy
     #   @return [String] which email address to send copys of My.SCOUT emails to
     # @!attribute [rw] myscout_badges_partial
-    #   @return [Boolean] Wether parents can see partially completed badges
+    #   @return true, false Wether parents can see partially completed badges
     # @!attribute [rw] myscout_programme_summary
-    #   @return [Boolean] Wether parents can see summary of programme items
+    #   @return true, false Wether parents can see summary of programme items
     # @!attribute [rw] myscout_programme_times
-    #   @return [Boolean] Whether parents can see times of programme items
+    #   @return true, false Whether parents can see times of programme items
     # @!attribute [rw] myscout_programme_show
     #   @return [Integer] How many programme itemms parents can see (the next 5, 10, 15, 20 meetings, -1 (whole term), 0 (remaining this term) or -2 (all future))
     # @!attribute [rw] myscout_event_reminder_count
@@ -266,7 +266,7 @@ module Osm
     # Set the section's notepad in OSM
     # @param api [Osm::Api] The api to use to make the request
     # @param content [String] The content of the notepad
-    # @return [Boolean] whether the notepad was sucessfully updated
+    # @return true, false whether the notepad was sucessfully updated
     def set_notepad(api:, content:)
       require_access_to_section(api, self)
       data = api.post_query("users.php?action=updateNotepad&sectionid=#{id}", post_data: {'value' => content})
@@ -280,7 +280,7 @@ module Osm
 
 
     # Check if this section is one of the youth sections
-    # @return [Boolean]
+    # @return true, false
     def youth_section?
       [:beavers, :cubs, :scouts, :explorers].include?(type)
     end
@@ -323,7 +323,7 @@ module Osm
 
     # Check if the section has a subscription of a given level (or higher)
     # @param level [Integer, Symbol] the subscription level required
-    # @return [Boolean] Whether the section has a subscription of level (or higher)
+    # @return true, false Whether the section has a subscription of level (or higher)
     def subscription_at_least?(level)
       if level.is_a?(Symbol) # Convert to Integer
         case level

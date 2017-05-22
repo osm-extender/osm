@@ -90,7 +90,7 @@ module Osm
     # @param attendance [Symbol] what to mark the attendance as, one of :yes, :unadvised_absent or :advised_absent
     # @param members [Integer, Array<Integer>, Osm::Member, Array<Osm::Member>] the members (or their ids) to update
     # @param completed_badge_requirements [Array<Hash>] the badge requirements to mark as completed, selected from the Hash returned by the get_badge_requirements_for_evening method
-    # @return [Boolean] whether the update succedded
+    # @return true, false whether the update succedded
     # @raise [Osm::ArgumentIsInvalid] If data[:attendance] is not "Yes", "No" or "Absent"
     # @raise [Osm::ArgumentIsInvalid] If data[:section] is missing
     # @raise [Osm::ArgumentIsInvalid] If data[:evening] is missing
@@ -184,14 +184,14 @@ module Osm
 
       # Find out if the member was present on a date
       # @param [Date] date The date to check attendance for
-      # @return [Boolean] whether the member was presnt on the given date
+      # @return true, false whether the member was presnt on the given date
       def present_on?(date)
         attendance[date] == :yes
       end
 
       # Find out if the member was absent on a date
       # @param [Date] date The date to check attendance for
-      # @return [Boolean] whether the member was absent on the given date
+      # @return true, false whether the member was absent on the given date
       def absent_on?(date)
         attendance[date] != :yes
       end

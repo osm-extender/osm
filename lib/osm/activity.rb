@@ -30,9 +30,9 @@ module Osm
     # @!attribute [rw] rating
     #   @return [Integer] ?
     # @!attribute [rw] editable
-    #   @return [Boolean] Wether the current API user can edit this activity
+    #   @return true, false Wether the current API user can edit this activity
     # @!attribute [rw] deletable
-    #   @return [Boolean] Wether the current API user can delete this activity
+    #   @return true, false Wether the current API user can delete this activity
     # @!attribute [rw] used
     #   @return [Integer] How many times this activity has been used (total accross all of OSM)
     # @!attribute [rw] versions
@@ -194,7 +194,7 @@ module Osm
     # @param section [Osm::Section, Integer, #to_i] The Section (or it's ID) to add the Activity to
     # @param date [Date, DateTime] The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
     # @param notes [String] The notes which should appear for this Activity on this Evening
-    # @return [Boolean] Whether the activity was successfully added
+    # @return true, false Whether the activity was successfully added
     def add_to_programme(api:, section:, date:, notes: "")
       require_ability_to(api: api, to: :write, on: :programme, section: section)
 
@@ -217,8 +217,8 @@ module Osm
     # Update this activity in OSM
     # @param api [Osm::Api] The api to use to make the request
     # @param section [Osm::Section, Integer, #to_i] The Section (or it's ID)
-    # @param secret_update [Boolean] Whether this is a secret update
-    # @return [Boolean] Whether the activity was successfully added
+    # @param secret_update true, false Whether this is a secret update
+    # @return true, false Whether the activity was successfully added
     # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
     # @raise [Osm::Forbidden] If the Activity is not editable
     def update(api:, section:, secret_update: false)

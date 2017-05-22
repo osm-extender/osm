@@ -45,7 +45,7 @@ module Osm
     # Add a column in OSM
     # @param api [Osm::Api] The api to use to make the request
     # @param name [String] The name for the created column
-    # @return [Boolean] whether the column was created in OSM
+    # @return true, false whether the column was created in OSM
     def add_column(api:, name:)
       require_ability_to(api: api, to: :write, on: :flexi, section: section_id)
       fail ArgumentError, 'name is invalid' if name.blank?
@@ -114,13 +114,13 @@ module Osm
 
     class Column < Osm::Model
       # @!attribute [rw] flexi_record
-      #   @return [Boolean] The FlexiRecord this column belongs to
+      #   @return true, false The FlexiRecord this column belongs to
       # @!attribute [rw] id
       #   @return [String] OSM identifier for the field. Special ones are 'dob', 'total', 'completed', 'age', 'firstname' and 'lastname', user ones are of the format 'f\_NUMBER'
       # @!attribute [rw] name
       #   @return [String] Human readable name for the field
       # @!attribute [rw] editable
-      #   @return [Boolean] Wether the field can be edited
+      #   @return true, false Wether the field can be edited
 
       attribute :flexi_record, :type => Object
       attribute :id, :type => String
@@ -139,7 +139,7 @@ module Osm
 
       # Update a column in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] whether the column was updated in OSM
+      # @return true, false whether the column was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Column is invalid
       # @raise [Osm::Forbidden] If the COlumn is not editable
       def update(api)
@@ -167,7 +167,7 @@ module Osm
 
       # Delete a column in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] whether the column was deleted from OSM
+      # @return true, false whether the column was deleted from OSM
       # @raise [Osm::Forbidden] If this Column is not editable
       def delete(api)
         require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
@@ -220,7 +220,7 @@ module Osm
 
     class Data < Osm::Model
       # @!attribute [rw] flexi_record
-      #   @return [Boolean] The FlexiRecord this column belongs to
+      #   @return true, false The FlexiRecord this column belongs to
       # @!attribute [rw] member_id
       #   @return [Integer] OSM id for the member
       # @!attribute [rw] grouping__id
@@ -254,7 +254,7 @@ module Osm
 
       # Update data in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] whether the data was updated in OSM
+      # @return true, false whether the data was updated in OSM
       # @raise [Osm::ObjectIsInvalid] If the Data is invalid
       def update(api)
         fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?

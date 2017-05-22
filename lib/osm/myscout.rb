@@ -250,7 +250,7 @@ module Osm
       # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get login history for
       # @param key [String] The key of the template to get
       # @param content [String] The new content of the template
-      # @return [Boolean] Wheter OSM reported the template as updated 
+      # @return true, false Wheter OSM reported the template as updated 
       def self.update_template(api:, section:, key:, content:)
         fail ArgumentError, "Invalid template key: #{key.inspect}" unless VALID_TEMPLATE_KEYS.include?(key)
 

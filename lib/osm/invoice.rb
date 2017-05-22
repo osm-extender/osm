@@ -12,9 +12,9 @@ module Osm
     # @!attribute [rw] date
     #   @return [Date] When the invoice was created
     # @!attribute [rw] archived
-    #   @return [Boolean] Whether the invoice has been archived
+    #   @return true, false Whether the invoice has been archived
     # @!attribute [rw] finalised
-    #   @return [Boolean] Whether the invoice has been finalised
+    #   @return true, false Whether the invoice has been finalised
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -41,7 +41,7 @@ module Osm
     # @param api [Osm::Api] The api to use to make the request
     # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the invoices for
     # @!macro options_get
-    # @option options [Boolean] :include_archived (optional) if true then archived invoices will also be returned
+    # @option options true, false :include_archived (optional) if true then archived invoices will also be returned
     # @return [Array<Osm::Invoice>]
     def self.get_for_section(api:, section:, include_archived: false, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
@@ -99,7 +99,7 @@ module Osm
 
     # Create the invoice in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] Whether the invoice was created in OSM
+    # @return true, false Whether the invoice was created in OSM
     # @raise [Osm::ObjectIsInvalid] If the Invoice is invalid
     # @raise [Osm::Error] If the invoice already exists in OSM
     def create(api)
@@ -147,7 +147,7 @@ module Osm
 
     # Delete the invoice from OSM
     # @param api [Osm::Api] The api to use for the query
-    # @return [Boolean] Whether the invoice was deleted from OSM
+    # @return true, false Whether the invoice was deleted from OSM
     def delete(api)
       Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
       return false if finalised?
@@ -167,7 +167,7 @@ module Osm
     # Archive the invoice in OSM, updating the archived attribute if successful.
     # If the archived attribute is true then nothing happens and false is returned.
     # @param api [Osm::Api] The api to use for the request
-    # @return [Boolean] Whether the invoice was archived in OSM
+    # @return true, false Whether the invoice was archived in OSM
     # @raise [Osm::Error] If the invoice does not already exist in OSM
     def archive(api)
       Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
@@ -190,7 +190,7 @@ module Osm
     # Finalise the invoice in OSM, updating the finalised attribute if successful.
     # If the finalised attribute is true then nothing happens and false is returned.
     # @param api [Osm::Api] The api to use for the query
-    # @return [Boolean] Whether the invoice was finalised in OSM
+    # @return true, false Whether the invoice was finalised in OSM
     # @raise [Osm::Error] If the invoice does not already exist in OSM
     def finalise(api)
       Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
@@ -305,7 +305,7 @@ module Osm
 
       # Create the item in OSM
       # @param api [Osm::Api] The api to use for the query
-      # @return [Boolean] Whether the item was created in OSM
+      # @return true, false Whether the item was created in OSM
       # @raise [Osm::ObjectIsInvalid] If the Item is invalid
       # @raise [Osm::Error] If the invoice item already exists in OSM
       def create(api)
@@ -342,7 +342,7 @@ module Osm
 
       # Update invoice item in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] whether the update succedded
+      # @return true, false whether the update succedded
       # @raise [Osm::ObjectIsInvalid] If the Invoice is invalid
       def update(api)
         require_ability_to(api: api, to: :write, on: :finance, section: invoice.section_id)
@@ -380,7 +380,7 @@ module Osm
 
       # Delete invoice item from OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] whether the delete succedded
+      # @return true, false whether the delete succedded
       def delete(api)
         require_ability_to(api: api, to: :write, on: :finance, section: invoice.section_id)
 

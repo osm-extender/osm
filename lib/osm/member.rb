@@ -309,8 +309,8 @@ module Osm
 
     # Update the member in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @param force [Boolean] Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
-    # @return [Boolean] whether the member was successfully updated or not
+    # @param force true, false Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
+    # @return true, false whether the member was successfully updated or not
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     def update(api, force: false)
       fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
@@ -405,32 +405,32 @@ module Osm
     end
 
     # Check if the member is in the leaders grouping
-    # @return [Boolean]
+    # @return true, false
     def leader?
       grouping_id.eql?(-2)
     end
 
     # Check if the member is in a non-leaders grouping
-    # @return [Boolean]
+    # @return true, false
     def youth?
       grouping_id > 0
     end
 
     # Check if the member is male
-    # @return [Boolean]
+    # @return true, false
     def male?
       gender.eql?(:male)
     end
 
     # Check if the member is male
-    # @return [Boolean]
+    # @return true, false
     def female?
       gender.eql?(:female)
     end
 
     # Check if this is a current member of the section they were retrieved for
     # @param date [Date] The date to check membership status for
-    # @return [Boolean]
+    # @return true, false
     def current?(date=Date.today)
       if finished_section.nil?
         return (started_section <= date)
@@ -488,7 +488,7 @@ module Osm
 
     # Get the member's photo
     # @param api [Osm::Api] The api to use to make the request
-    # @param black_and_white [Boolean] Whether you want the photo in blank and white (defaults to false unless the member is not active)
+    # @param black_and_white true, false Whether you want the photo in blank and white (defaults to false unless the member is not active)
     # @!macro options_get
     # @raise [Osm:Error] if the member doesn't exist in OSM
     # @return the photo of the member
@@ -631,8 +631,8 @@ module Osm
       # Update the contact in OSM
       # @param api [Osm::Api] The api to use to make the request
       # @param section [Osm::Member] The member to update the contact for
-      # @param force [Boolean] Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
-      # @return [Boolean] whether the member was successfully updated or not
+      # @param force true, false Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
+      # @return true, false whether the member was successfully updated or not
       # @raise [Osm::ObjectIsInvalid] If the Contact is invalid
       def update(api:, member:, force: false)
         fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
@@ -700,13 +700,13 @@ module Osm
       # @!attribute [rw] email_2
       #   @return [String] the secondary email address for the member
       # @!attribute [rw] receive_email_1
-      #   @return [Boolean] whether the member should receive emails from leaders on their primary email address
+      #   @return true, false whether the member should receive emails from leaders on their primary email address
       # @!attribute [rw] receive_email_2
-      #   @return [Boolean] whether the member should receive emails from leaders on their secondary email address
+      #   @return true, false whether the member should receive emails from leaders on their secondary email address
       # @!attribute [rw] receive_phone_1
-      #   @return [Boolean] whether the member should receive SMSs from leaders on their primary phone number
+      #   @return true, false whether the member should receive SMSs from leaders on their primary phone number
       # @!attribute [rw] receive_phone_2
-      #   @return [Boolean] whether the member should receive SMSs from leaders on their secondary phone number
+      #   @return true, false whether the member should receive SMSs from leaders on their secondary phone number
 
       attribute :email_1, :type => String
       attribute :receive_email_1, :type => Boolean, :default => false
@@ -733,13 +733,13 @@ module Osm
       # @!attribute [rw] email_2
       #   @return [String] the secondary email address for the contact
       # @!attribute [rw] receive_email_1
-      #   @return [Boolean] whether the contact should receive emails from leaders on their primary email address
+      #   @return true, false whether the contact should receive emails from leaders on their primary email address
       # @!attribute [rw] receive_email_2
-      #   @return [Boolean] whether the contact should receive emails from leaders on their secondary email address
+      #   @return true, false whether the contact should receive emails from leaders on their secondary email address
       # @!attribute [rw] receive_phone_1
-      #   @return [Boolean] whether the contact should receive SMSs from leaders on their primary phone number
+      #   @return true, false whether the contact should receive SMSs from leaders on their primary phone number
       # @!attribute [rw] receive_phone_2
-      #   @return [Boolean] whether the contact should receive SMSs from leaders on their secondary phone number
+      #   @return true, false whether the contact should receive SMSs from leaders on their secondary phone number
 
       attribute :email_1, :type => String
       attribute :receive_email_1, :type => Boolean, :default => false

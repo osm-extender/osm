@@ -1,5 +1,5 @@
 # @!macro [new] options_get
-#   @param no_read_cache [Boolean] (optional) if true then the data will be retreived from OSM not the cache
+#   @param no_read_cache true, false (optional) if true then the data will be retreived from OSM not the cache
 
 
 module Osm
@@ -167,7 +167,7 @@ module Osm
     # @param api [Osm::Api] The api to use to make the query
     # @param section [Osm::Section, Integer, #to_i] The Section (or its ID) the $
     # @!macro options_get
-    # @return [Boolean] If the Api user has access the section
+    # @return true, false If the Api user has access the section
     def self.has_access_to_section?(api:, section:, **options)
       api.get_user_permissions(**options).keys.include?(section.to_i)
     end

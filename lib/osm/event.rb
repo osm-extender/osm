@@ -25,7 +25,7 @@ module Osm
     # @!attribute [rw] notes
     #   @return [String] notes about the event
     # @!attribute [rw] archived
-    #   @return [Boolean] if the event has been archived
+    #   @return true, false if the event has been archived
     # @!attribute [rw] badges
     #   @return [Array<Osm::Event::BadgeLink>] the badge links for the event
     # @!attribute [rw] files
@@ -39,17 +39,17 @@ module Osm
     # @!attribute [rw] confirm_by_date
     #   @return [Date] the date parents can no longer add/change their child's details
     # @!attribute [rw] allow_changes
-    #   @return [Boolean] whether parent's can change their child's details
+    #   @return true, false whether parent's can change their child's details
     # @!attribute [rw] reminders
-    #   @return [Boolean] whether email reminders are sent for the event
+    #   @return true, false whether email reminders are sent for the event
     # @!attribute [rw] attendance_limit
     #   @return [Integer] the maximum number of people who can attend the event (0 = no limit)
     # @!attendance [rw] attendance_limit_includes_leaders
-    #   @return [Boolean] whether the attendance limit includes leaders
+    #   @return true, false whether the attendance limit includes leaders
     # @!attribute [rw] attendance_reminder
     #   @return [Integer] how many days before the event to send a reminder to those attending (0 (off), 1, 3, 7, 14, 21, 28)
     # @!attribute [rw] allow_booking
-    #   @return [Boolean] whether booking is allowed through My.SCOUT
+    #   @return true, false whether booking is allowed through My.SCOUT
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -96,7 +96,7 @@ module Osm
     # Get events for a section
     # @param api [Osm::Api] The api to use to make the request
     # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the events for
-    # @param include_archived [Boolean] whether to include archived events
+    # @param include_archived true, false whether to include archived events
     # @!macro options_get
     # @return [Array<Osm::Event>]
     def self.get_for_section(api:, section:, include_archived: false, no_read_cache: false)
@@ -254,7 +254,7 @@ module Osm
 
     # Update event in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] whether the update succedded (will return true if no updates needed to be made)
+    # @return true, false whether the update succedded (will return true if no updates needed to be made)
     def update(api)
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
        updated = true
@@ -351,7 +351,7 @@ module Osm
 
     # Delete event from OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] whether the delete succedded
+    # @return true, false whether the delete succedded
     def delete(api)
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
 
@@ -369,7 +369,7 @@ module Osm
     # @param api [Osm::Api] The api to use to make the request
     # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
-    # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
+    # @option options true, false :include_archived (optional) if true then archived activities will also be returned
     # @return [Array<Osm::Event::Attendance>]
     def get_attendance(api:, term: nil, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :events, section: section_id, no_read_cache: no_read_cache)
@@ -415,7 +415,7 @@ module Osm
     # Add a badge link to the event in OSM
     # @param api [Osm::Api] The api to use to make the request
     # @param link [Osm::Event::BadgeLink] The badge link to add, if column_id is nil then a new column is created with requirement_label as the name
-    # @return [Boolean] whether the update succedded
+    # @return true, false whether the update succedded
     def add_badge_link(api:, link:)
       fail Osm::ObjectIsInvalid, 'link is invalid' unless link.valid?
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
@@ -438,8 +438,8 @@ module Osm
     # @param api [Osm::Api] The api to use to make the request
     # @param label [String] The label for the field in OSM
     # @param name [String] The label for the field in My.SCOUT (if this is blank then parents can't edit it)
-    # @param required [Boolean] Whether the parent is required to enter something
-    # @return [Boolean] whether the update succedded
+    # @param required true, false Whether the parent is required to enter something
+    # @return true, false whether the update succedded
     # @raise [Osm::ArgumentIsInvalid] If the name is blank
     def add_column(api:, name:, label: '', required: false)
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
@@ -462,14 +462,14 @@ module Osm
     end
 
     # Whether thete is a limit on attendance for this event
-    # @return [Boolean] whether thete is a limit on attendance for this event
+    # @return true, false whether thete is a limit on attendance for this event
     def limited_attendance?
       (attendance_limit != 0)
     end
 
     # Whether there are spaces left for the event
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Boolean] whether there are spaces left for the event
+    # @return true, false whether there are spaces left for the event
     def spaces?(api)
       return true unless limited_attendance?
       return attendance_limit > attendees(api)
@@ -484,13 +484,13 @@ module Osm
     end
 
     # Whether the cost is to be confirmed
-    # @return [Boolean] whether the cost is TBC
+    # @return true, false whether the cost is TBC
     def cost_tbc?
       cost.eql?('TBC')
     end
 
     # Whether the cost is zero
-    # @return [Boolean] whether the cost is zero
+    # @return true, false whether the cost is zero
     def cost_free?
       cost.eql?('0.00')
     end
@@ -619,7 +619,7 @@ module Osm
       # @!attribute [rw] label
       #   @return [String] label to display in My.SCOUT ("" prevents display in My.SCOUT)
       # @!attribute [rw] parent_required
-      #   @return [Boolean] whether the parent is required to enter something
+      #   @return true, false whether the parent is required to enter something
       # @!attriute [rw] event
       #   @return [Osm::Event] the event that this column belongs to
 
@@ -640,7 +640,7 @@ module Osm
 
       # Update event column in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] if the operation suceeded or not
+      # @return true, false if the operation suceeded or not
       def update(api)
         require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
 
@@ -668,7 +668,7 @@ module Osm
 
       # Delete event column from OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] whether the delete succedded
+      # @return true, false whether the delete succedded
       def delete(api)
         require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
 
@@ -766,7 +766,7 @@ module Osm
 
       # Update event attendance
       # @param api [Osm::Api] The api to use to make the request
-      # @return [Boolean] if the operation suceeded or not
+      # @return true, false if the operation suceeded or not
       def update(api)
         require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
 
@@ -875,10 +875,10 @@ module Osm
 
       # @! method automatic_payments?
       #  Check wether payments are made automatically for this member
-      #  @return [Boolean]
+      #  @return true, false
       # @! method manual_payments?
       #  Check wether payments are made manually for this member
-      #  @return [Boolean]
+      #  @return true, false
       [:automatic, :manual].each do |payment_control_type|
         define_method "#{payment_control_type}_payments?" do
           payments == payment_control_type
@@ -887,18 +887,18 @@ module Osm
 
       # @! method is_attending?
       #  Check wether the member has said they are attending the event
-      #  @return [Boolean]
+      #  @return true, false
       # @! method is_not_attending?
       #  Check wether the member has said they are not attending the event
-      #  @return [Boolean]
+      #  @return true, false
       # @! method is_invited?
       #  Check wether the member has been invited to the event
-      #  @return [Boolean]
+      #  @return true, false
       # @! method is_shown?
       #  Check wether the member can see the event in My.SCOUT
       # @! method is_reserved?
       #  Check wether the member has reserved a space when one becomes availible
-      #  @return [Boolean]
+      #  @return true, false
       [:attending, :not_attending, :invited, :shown, :reserved].each do |attending_type|
         define_method "is_#{attending_type}?" do
           attending == attending_type
