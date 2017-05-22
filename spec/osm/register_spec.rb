@@ -7,9 +7,9 @@ describe "Register" do
 
   it "Create Field" do
     field = Osm::Register::Field.new(
-      :name => 'Human name',
-      :id => 'machine_name',
-      :tooltip => 'Tooltip'
+      name: 'Human name',
+      id: 'machine_name',
+      tooltip: 'Tooltip'
     )
 
     field.id.should == 'machine_name'
@@ -19,8 +19,8 @@ describe "Register" do
   end
 
   it "Sorts Field by id" do
-    a1 = Osm::Register::Field.new(:id => 'a')
-    a2 = Osm::Register::Field.new(:id => 'a')
+    a1 = Osm::Register::Field.new(id: 'a')
+    a2 = Osm::Register::Field.new(id: 'a')
 
     data = [a2, a1]
     data.sort.should == [a1, a2]
@@ -29,13 +29,13 @@ describe "Register" do
 
   it "Create Attendance" do
     rd = Osm::Register::Attendance.new(
-      :member_id => '1',
-      :first_name => 'A',
-      :last_name => 'B',
-      :section_id => '2',
-      :grouping_id => '3',
-      :total => 4,
-      :attendance => {
+      member_id: '1',
+      first_name: 'A',
+      last_name: 'B',
+      section_id: '2',
+      grouping_id: '3',
+      total: 4,
+      attendance: {
         Date.new(2012, 1, 10) => :yes,
         Date.new(2012, 1, 24) => :unadvised_absent,
       }
@@ -55,11 +55,11 @@ describe "Register" do
   end
 
   it "Sorts Attendance by section_id, grouping_id, last_name then first_name" do
-    d1 = Osm::Register::Attendance.new(:section_id => 1, :grouping_id => 1, :last_name => 'a', :first_name => 'a')
-    d2 = Osm::Register::Attendance.new(:section_id => 2, :grouping_id => 1, :last_name => 'a', :first_name => 'a')
-    d3 = Osm::Register::Attendance.new(:section_id => 2, :grouping_id => 2, :last_name => 'a', :first_name => 'a')
-    d4 = Osm::Register::Attendance.new(:section_id => 2, :grouping_id => 2, :last_name => 'b', :first_name => 'a')
-    d5 = Osm::Register::Attendance.new(:section_id => 2, :grouping_id => 2, :last_name => 'b', :first_name => 'b')
+    d1 = Osm::Register::Attendance.new(section_id: 1, grouping_id: 1, last_name: 'a', first_name: 'a')
+    d2 = Osm::Register::Attendance.new(section_id: 2, grouping_id: 1, last_name: 'a', first_name: 'a')
+    d3 = Osm::Register::Attendance.new(section_id: 2, grouping_id: 2, last_name: 'a', first_name: 'a')
+    d4 = Osm::Register::Attendance.new(section_id: 2, grouping_id: 2, last_name: 'b', first_name: 'a')
+    d5 = Osm::Register::Attendance.new(section_id: 2, grouping_id: 2, last_name: 'b', first_name: 'b')
 
     data = [d4, d3, d5, d2, d1]
     data.sort.should == [d1, d2, d3, d4, d5]
@@ -67,16 +67,16 @@ describe "Register" do
 
   it "Reports if a member was present on a date" do
     date = Date.new(2000, 1, 1)
-    Osm::Register::Attendance.new(:attendance => {date => :yes}).present_on?(date).should == true
-    Osm::Register::Attendance.new(:attendance => {date => :known_absent}).present_on?(date).should == false
-    Osm::Register::Attendance.new(:attendance => {date => :unknown_absent}).present_on?(date).should == false
+    Osm::Register::Attendance.new(attendance: {date => :yes}).present_on?(date).should == true
+    Osm::Register::Attendance.new(attendance: {date => :known_absent}).present_on?(date).should == false
+    Osm::Register::Attendance.new(attendance: {date => :unknown_absent}).present_on?(date).should == false
   end
 
   it "Reports if a member was absent on a date" do
     date = Date.new(2000, 1, 1)
-    Osm::Register::Attendance.new(:attendance => {date => :yes}).absent_on?(date).should == false
-    Osm::Register::Attendance.new(:attendance => {date => :known_absent}).absent_on?(date).should == true
-    Osm::Register::Attendance.new(:attendance => {date => :unknown_absent}).absent_on?(date).should == true
+    Osm::Register::Attendance.new(attendance: {date => :yes}).absent_on?(date).should == false
+    Osm::Register::Attendance.new(attendance: {date => :known_absent}).absent_on?(date).should == true
+    Osm::Register::Attendance.new(attendance: {date => :unknown_absent}).absent_on?(date).should == true
   end
 
 
@@ -111,9 +111,9 @@ describe "Register" do
       }
       $api.should_receive(:post_query).with("users.php?action=register&sectionid=1&termid=2") { data }
       Osm::Register.stub(:get_structure) { [
-        Osm::Register::Field.new(:id => '2000-01-01', :name => 'Name', :tooltip => 'Tooltip'),
-        Osm::Register::Field.new(:id => '2000-01-02', :name => 'Name', :tooltip => 'Tooltip'),
-        Osm::Register::Field.new(:id => '2000-01-03', :name => 'Name', :tooltip => 'Tooltip'),
+        Osm::Register::Field.new(id: '2000-01-01', name: 'Name', tooltip: 'Tooltip'),
+        Osm::Register::Field.new(id: '2000-01-02', name: 'Name', tooltip: 'Tooltip'),
+        Osm::Register::Field.new(id: '2000-01-03', name: 'Name', tooltip: 'Tooltip'),
       ] }
 
       register = Osm::Register.get_attendance(api: $api, section: 1, term: 2)

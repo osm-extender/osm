@@ -23,9 +23,9 @@ module Osm
           if data.is_a?(Hash) && data['rows'].is_a?(Array)
             data['rows'].each do |row|
               structure.push Field.new(
-                :id => row['field'],
-                :name => row['name'],
-                :tooltip => row['tooltip'],
+                id: row['field'],
+                name: row['name'],
+                tooltip: row['tooltip'],
               )
             end
           end
@@ -66,13 +66,13 @@ module Osm
                   attendance[date] = :advised_absent if item_attendance.eql?('No')
                 end
                 to_return.push Osm::Register::Attendance.new(
-                  :member_id => Osm::to_i_or_nil(item['scoutid']),
-                  :grouping_id => Osm::to_i_or_nil(item ['patrolid']),
-                  :section_id => section_id,
-                  :first_name => item['firstname'],
-                  :last_name => item['lastname'],
-                  :total => item['total'].to_i,
-                  :attendance => attendance,
+                  member_id: Osm::to_i_or_nil(item['scoutid']),
+                  grouping_id: Osm::to_i_or_nil(item ['patrolid']),
+                  section_id: section_id,
+                  first_name: item['firstname'],
+                  last_name: item['lastname'],
+                  total: item['total'].to_i,
+                  attendance: attendance,
                 )
               end
             end
@@ -106,7 +106,7 @@ module Osm
       response = api.post_query("users.php?action=registerUpdate&sectionid=#{section.id}&termid=#{term_id}", post_data: {
         'scouts' => members.inspect,
         'selectedDate' => date.strftime(Osm::OSM_DATE_FORMAT),
-        'present' => {:yes => 'Yes', :unadvised_absent => nil, :advised_absent => 'No'}[attendance],
+        'present' => {yes: 'Yes', unadvised_absent: nil, advised_absent: 'No'}[attendance],
         'section' => section.type,
         'sectionid' => section.id,
         'completedBadges' => completed_badge_requirements.to_json
@@ -127,13 +127,13 @@ module Osm
       # @!attribute [rw] tooltip
       #   @return [String] Tooltip for the field
 
-      attribute :id, :type => String
-      attribute :name, :type => String
-      attribute :tooltip, :type => String, :default => ''
+      attribute :id, type: String
+      attribute :name, type: String
+      attribute :tooltip, type: String, default: ''
 
       validates_presence_of :id
       validates_presence_of :name
-      validates_presence_of :tooltip, :allow_blank => true
+      validates_presence_of :tooltip, allow_blank: true
 
 
       # @!method initialize
@@ -159,22 +159,22 @@ module Osm
       # @!attribute [rw] attendance
       #   @return [Hash] The data for each field - keys are the date, values one of :yes, :unadvised_absent or :advised_absent
 
-      attribute :member_id, :type => Integer
-      attribute :grouping_id, :type => Integer
-      attribute :section_id, :type => Integer
-      attribute :first_name, :type => String
-      attribute :last_name, :type => String
-      attribute :total, :type => Integer
-      attribute :attendance, :default => {}
+      attribute :member_id, type: Integer
+      attribute :grouping_id, type: Integer
+      attribute :section_id, type: Integer
+      attribute :first_name, type: String
+      attribute :last_name, type: String
+      attribute :total, type: Integer
+      attribute :attendance, default: {}
 
-      validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-      validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :total, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :member_id, only_integer:true, greater_than:0
+      validates_numericality_of :grouping_id, only_integer:true, greater_than_or_equal_to:-2
+      validates_numericality_of :section_id, only_integer:true, greater_than:0
+      validates_numericality_of :total, only_integer:true, greater_than_or_equal_to:0
       validates_presence_of :first_name
       validates_presence_of :last_name
 
-      validates :attendance, :hash => {:key_type => Date, :value_in => [:yes, :unadvised_absent, :advised_absent]}
+      validates :attendance, hash: {key_type: Date, value_in: [:yes, :unadvised_absent, :advised_absent]}
 
 
       # @!method initialize

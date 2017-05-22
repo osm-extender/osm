@@ -5,27 +5,27 @@ describe "Member" do
 
   it "Create" do
     attributes = {
-      :id => 1,
-      :section_id => 2,
-      :first_name => 'First',
-      :last_name => 'Last',
-      :date_of_birth => '2000-01-02',
-      :grouping_id => '3',
-      :grouping_leader => 0,
-      :grouping_label => 'Grouping',
-      :grouping_leader_label => '6er',
-      :age => '06 / 07',
-      :gender => :other,
-      :joined_movement => '2006-01-02',
-      :started_section => '2006-01-07',
-      :finished_section => '2007-12-31',
-      :additional_information => {'12_3' => '123'},
-      :additional_information_labels => {'12_3' => 'Label for 123'},
-      :contact => Osm::Member::MemberContact.new(postcode: 'A'),
-      :primary_contact => Osm::Member::PrimaryContact.new(postcode: 'B'),
-      :secondary_contact => Osm::Member::PrimaryContact.new(postcode: 'C'),
-      :emergency_contact => Osm::Member::EmergencyContact.new(postcode: 'D'),
-      :doctor => Osm::Member::DoctorContact.new(postcode: 'E'),
+      id: 1,
+      section_id: 2,
+      first_name: 'First',
+      last_name: 'Last',
+      date_of_birth: '2000-01-02',
+      grouping_id: '3',
+      grouping_leader: 0,
+      grouping_label: 'Grouping',
+      grouping_leader_label: '6er',
+      age: '06 / 07',
+      gender: :other,
+      joined_movement: '2006-01-02',
+      started_section: '2006-01-07',
+      finished_section: '2007-12-31',
+      additional_information: {'12_3' => '123'},
+      additional_information_labels: {'12_3' => 'Label for 123'},
+      contact: Osm::Member::MemberContact.new(postcode: 'A'),
+      primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
+      secondary_contact: Osm::Member::PrimaryContact.new(postcode: 'C'),
+      emergency_contact: Osm::Member::EmergencyContact.new(postcode: 'D'),
+      doctor: Osm::Member::DoctorContact.new(postcode: 'E'),
     }
     member = Osm::Member.new(attributes)
 
@@ -87,7 +87,7 @@ describe "Member" do
 
   it "Provides each part of age" do
     data = {
-      :age => '06/07',
+      age: '06/07',
     }
     member = Osm::Member.new(data)
 
@@ -137,13 +137,13 @@ describe "Member" do
 
 
   it "Sorts by section_id, grouping_id, grouping_leader (descending), last_name then first_name" do
-    m1 = Osm::Member.new(:section_id => 1, :grouping_id => 1, :grouping_leader => 1, :last_name => 'a', :first_name => 'a')
-    m2 = Osm::Member.new(:section_id => 2, :grouping_id => 1, :grouping_leader => 1, :last_name => 'a', :first_name => 'a')
-    m3 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 1, :last_name => 'a', :first_name => 'a')
-    m4 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 0, :last_name => 'a', :first_name => 'a')
-    m5 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 0, :last_name => 'a', :first_name => 'a')
-    m6 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 0, :last_name => 'b', :first_name => 'a')
-    m7 = Osm::Member.new(:section_id => 2, :grouping_id => 2, :grouping_leader => 0, :last_name => 'b', :first_name => 'b')
+    m1 = Osm::Member.new(section_id: 1, grouping_id: 1, grouping_leader: 1, last_name: 'a', first_name: 'a')
+    m2 = Osm::Member.new(section_id: 2, grouping_id: 1, grouping_leader: 1, last_name: 'a', first_name: 'a')
+    m3 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 1, last_name: 'a', first_name: 'a')
+    m4 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'a', first_name: 'a')
+    m5 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'a', first_name: 'a')
+    m6 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'b', first_name: 'a')
+    m7 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'b', first_name: 'b')
 
     data = [m4, m2, m3, m1, m7, m6, m5]
     data.sort.should == [m1, m2, m3, m4, m5, m6, m7]
@@ -539,26 +539,26 @@ describe "Member" do
 
       before :each do
         attributes = {
-          :section_id => 2,
-          :first_name => 'First',
-          :last_name => 'Last',
-          :date_of_birth => '2000-01-02',
-          :grouping_id => '3',
-          :grouping_leader => 0,
-          :grouping_label => 'Grouping',
-          :grouping_leader_label => '6er',
-          :age => '06 / 07',
-          :gender => :other,
-          :joined_movement => '2006-01-02',
-          :started_section => '2006-01-07',
-          :finished_section => '2007-12-31',
-          :additional_information => {'12_3' => '123'},
-          :additional_information_labels => {'12_3' => 'Label for 123'},
-          :contact => Osm::Member::MemberContact.new(postcode: 'A'),
-          :primary_contact => Osm::Member::PrimaryContact.new(postcode: 'B'),
-          :secondary_contact => Osm::Member::PrimaryContact.new(postcode: 'C'),
-          :emergency_contact => Osm::Member::EmergencyContact.new(postcode: 'D'),
-          :doctor => Osm::Member::DoctorContact.new(postcode: 'E'),
+          section_id: 2,
+          first_name: 'First',
+          last_name: 'Last',
+          date_of_birth: '2000-01-02',
+          grouping_id: '3',
+          grouping_leader: 0,
+          grouping_label: 'Grouping',
+          grouping_leader_label: '6er',
+          age: '06 / 07',
+          gender: :other,
+          joined_movement: '2006-01-02',
+          started_section: '2006-01-07',
+          finished_section: '2007-12-31',
+          additional_information: {'12_3' => '123'},
+          additional_information_labels: {'12_3' => 'Label for 123'},
+          contact: Osm::Member::MemberContact.new(postcode: 'A'),
+          primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
+          secondary_contact: Osm::Member::PrimaryContact.new(postcode: 'C'),
+          emergency_contact: Osm::Member::EmergencyContact.new(postcode: 'D'),
+          doctor: Osm::Member::DoctorContact.new(postcode: 'E'),
         }
         @member = Osm::Member.new(attributes)
       end
@@ -617,27 +617,27 @@ describe "Member" do
 
       before :each do
         attributes = {
-          :id => 1,
-          :section_id => 2,
-          :first_name => 'First',
-          :last_name => 'Last',
-          :date_of_birth => '2000-01-02',
-          :grouping_id => '3',
-          :grouping_leader => 0,
-          :grouping_label => 'Grouping',
-          :grouping_leader_label => '6er',
-          :age => '06 / 07',
-          :gender => :other,
-          :joined_movement => '2006-01-02',
-          :started_section => '2006-01-07',
-          :finished_section => '2007-12-31',
-          :additional_information => DirtyHashy[ 123, '123' ],
-          :additional_information_labels => {123 => 'Label for 123'},
-          :contact => Osm::Member::MemberContact.new(postcode: 'A'),
-          :primary_contact => Osm::Member::PrimaryContact.new(postcode: 'B'),
-          :secondary_contact => Osm::Member::SecondaryContact.new(postcode: 'C'),
-          :emergency_contact => Osm::Member::EmergencyContact.new(postcode: 'D'),
-          :doctor => Osm::Member::DoctorContact.new(postcode: 'E', additional_information: DirtyHashy['test_var', 'This is a test']),
+          id: 1,
+          section_id: 2,
+          first_name: 'First',
+          last_name: 'Last',
+          date_of_birth: '2000-01-02',
+          grouping_id: '3',
+          grouping_leader: 0,
+          grouping_label: 'Grouping',
+          grouping_leader_label: '6er',
+          age: '06 / 07',
+          gender: :other,
+          joined_movement: '2006-01-02',
+          started_section: '2006-01-07',
+          finished_section: '2007-12-31',
+          additional_information: DirtyHashy[ 123, '123' ],
+          additional_information_labels: {123 => 'Label for 123'},
+          contact: Osm::Member::MemberContact.new(postcode: 'A'),
+          primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
+          secondary_contact: Osm::Member::SecondaryContact.new(postcode: 'C'),
+          emergency_contact: Osm::Member::EmergencyContact.new(postcode: 'D'),
+          doctor: Osm::Member::DoctorContact.new(postcode: 'E', additional_information: DirtyHashy['test_var', 'This is a test']),
         }
         @member = Osm::Member.new(attributes)
       end
@@ -865,24 +865,24 @@ describe "Member" do
 
     it "Get Photo link" do
       member = Osm::Member.new(
-        :id => 1,
-        :section_id => 2,
-        :first_name => 'First',
-        :last_name => 'Last',
-        :date_of_birth => '2000-01-02',
-        :started_section => '2006-01-02',
-        :joined_movement => '2006-01-03',
-        :grouping_id => '3',
-        :grouping_leader => 0,
-        :grouping_label => 'Grouping',
-        :grouping_leader_label => '',
-        :additional_information => {},
-        :additional_information_labels => {},
-        :contact => Osm::Member::MemberContact.new(),
-        :primary_contact => Osm::Member::PrimaryContact.new(),
-        :secondary_contact => Osm::Member::PrimaryContact.new(),
-        :emergency_contact => Osm::Member::EmergencyContact.new(),
-        :doctor => Osm::Member::DoctorContact.new(),
+        id: 1,
+        section_id: 2,
+        first_name: 'First',
+        last_name: 'Last',
+        date_of_birth: '2000-01-02',
+        started_section: '2006-01-02',
+        joined_movement: '2006-01-03',
+        grouping_id: '3',
+        grouping_leader: 0,
+        grouping_label: 'Grouping',
+        grouping_leader_label: '',
+        additional_information: {},
+        additional_information_labels: {},
+        contact: Osm::Member::MemberContact.new(),
+        primary_contact: Osm::Member::PrimaryContact.new(),
+        secondary_contact: Osm::Member::PrimaryContact.new(),
+        emergency_contact: Osm::Member::EmergencyContact.new(),
+        doctor: Osm::Member::DoctorContact.new(),
       )
       $api.stub(:post_query).with('ext/members/contact/images/member.php?sectionid=2&scoutid=1&bw=false').and_return('abcdef')
 
@@ -894,24 +894,24 @@ describe "Member" do
 
       before :each do
         @member = Osm::Member.new(
-          :id => 1,
-          :section_id => 2,
-          :first_name => 'First',
-          :last_name => 'Last',
-          :date_of_birth => '2000-01-02',
-          :started_section => '2006-01-02',
-          :joined_movement => '2006-01-03',
-          :grouping_id => '3',
-          :grouping_leader => 0,
-          :grouping_label => 'Grouping',
-          :grouping_leader_label => '',
-          :additional_information => {},
-          :additional_information_labels => {},
-          :contact => Osm::Member::MemberContact.new(),
-          :primary_contact => Osm::Member::PrimaryContact.new(),
-          :secondary_contact => Osm::Member::PrimaryContact.new(),
-          :emergency_contact => Osm::Member::EmergencyContact.new(),
-          :doctor => Osm::Member::DoctorContact.new(),
+          id: 1,
+          section_id: 2,
+          first_name: 'First',
+          last_name: 'Last',
+          date_of_birth: '2000-01-02',
+          started_section: '2006-01-02',
+          joined_movement: '2006-01-03',
+          grouping_id: '3',
+          grouping_leader: 0,
+          grouping_label: 'Grouping',
+          grouping_leader_label: '',
+          additional_information: {},
+          additional_information_labels: {},
+          contact: Osm::Member::MemberContact.new(),
+          primary_contact: Osm::Member::PrimaryContact.new(),
+          secondary_contact: Osm::Member::PrimaryContact.new(),
+          emergency_contact: Osm::Member::EmergencyContact.new(),
+          doctor: Osm::Member::DoctorContact.new(),
         )
       end
 

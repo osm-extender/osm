@@ -6,9 +6,9 @@ describe "Budget" do
 
   it "Create Budget" do
     b = Osm::Budget.new(
-      :id => 1,
-      :section_id => 2,
-      :name => 'Name',
+      id: 1,
+      section_id: 2,
+      name: 'Name',
     )
 
     b.id.should == 1
@@ -18,9 +18,9 @@ describe "Budget" do
   end
 
   it "Sorts Budget by section ID then name" do
-    b1 = Osm::Budget.new(:section_id => 1, :name => 'a')
-    b2 = Osm::Budget.new(:section_id => 2, :name => 'a')
-    b3 = Osm::Budget.new(:section_id => 2, :name => 'b')
+    b1 = Osm::Budget.new(section_id: 1, name: 'a')
+    b2 = Osm::Budget.new(section_id: 2, name: 'a')
+    b3 = Osm::Budget.new(section_id: 2, name: 'b')
 
     data = [b2, b3, b1]
     data.sort.should == [b1, b2, b3]
@@ -44,16 +44,16 @@ describe "Budget" do
       $api.should_receive(:post_query).with('finances.php?action=getCategories&sectionid=3').and_return(data)
 
       budgets = Osm::Budget.get_for_section(api: $api, section: 3)
-      budgets.should == [Osm::Budget.new(:id => 2, :section_id => 3, :name => 'Name')]
+      budgets.should == [Osm::Budget.new(id: 2, section_id: 3, name: 'Name')]
     end
 
     it "Create budget (success)" do
       budget = Osm::Budget.new(
-        :section_id => 2,
-        :name => 'Budget Name',
+        section_id: 2,
+        name: 'Budget Name',
       )
 
-      Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(:id => 3, :section_id => 2, :name => 'Existing budget'), Osm::Budget.new(:id => 4, :section_id => 2, :name => '** Unnamed **')])
+      Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(id: 3, section_id: 2, name: 'Existing budget'), Osm::Budget.new(id: 4, section_id: 2, :name => '** Unnamed **')])
       $api.should_receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
       $api.should_receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 4,
@@ -69,23 +69,23 @@ describe "Budget" do
 
     it "Create budget (failure (not created))" do
       budget = Osm::Budget.new(
-        :section_id => 2,
-        :name => 'Budget Name',
+        section_id: 2,
+        name: 'Budget Name',
       )
     
       $api.should_receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
-      Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(:id => 3, :section_id => 2, :name => 'Existing budget')])
+      Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(id: 3, section_id: 2, name: 'Existing budget')])
 
       budget.create($api).should == false
     end
     
     it "Create budget (failure (not updated))" do
       budget = Osm::Budget.new(
-        :section_id => 2,
-        :name => 'Budget Name',
+        section_id: 2,
+        name: 'Budget Name',
       )
     
-      Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(:id => 3, :section_id => 2, :name => '** Unnamed **')])
+      Osm::Budget.should_receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(id: 3, section_id: 2, name: '** Unnamed **')])
       $api.should_receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return({'ok'=>true})
       $api.should_receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 3,
@@ -100,9 +100,9 @@ describe "Budget" do
     
     it "Update budget (success)" do
       budget = Osm::Budget.new(
-        :id => 1,
-        :section_id => 2,
-        :name => 'Budget Name',
+        id: 1,
+        section_id: 2,
+        name: 'Budget Name',
       )
 
       $api.should_receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
@@ -118,9 +118,9 @@ describe "Budget" do
     
     it "Update budget (failure)" do
       budget = Osm::Budget.new(
-        :id => 1,
-        :section_id => 2,
-        :name => 'Budget Name',
+        id: 1,
+        section_id: 2,
+        name: 'Budget Name',
       )
 
       $api.should_receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
@@ -136,9 +136,9 @@ describe "Budget" do
     
     it "Delete budget (success)" do
       budget = Osm::Budget.new(
-        :id => 1,
-        :section_id => 2,
-        :name => 'Budget Name',
+        id: 1,
+        section_id: 2,
+        name: 'Budget Name',
       )
 
       $api.should_receive(:post_query).with('finances.php?action=deleteCategory&sectionid=2', post_data: {'categoryid' => 1}).and_return({'ok'=>true})
@@ -148,9 +148,9 @@ describe "Budget" do
     
     it "Delete budget (failure)" do
       budget = Osm::Budget.new(
-        :id => 1,
-        :section_id => 2,
-        :name => 'Budget Name',
+        id: 1,
+        section_id: 2,
+        name: 'Budget Name',
       )
 
       $api.should_receive(:post_query).with('finances.php?action=deleteCategory&sectionid=2', post_data: {'categoryid' => 1}).and_return({'ok'=>false})

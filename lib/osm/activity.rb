@@ -46,48 +46,48 @@ module Osm
     # @!attribute [rw] badges
     #   @return [Array<Osm::Activity::Badge>
 
-    attribute :id, :type => Integer
-    attribute :version, :type => Integer
-    attribute :group_id, :type => Integer
-    attribute :user_id, :type => Integer
-    attribute :title, :type => String
-    attribute :description, :type => String
-    attribute :resources, :type => String
-    attribute :instructions, :type => String
-    attribute :running_time, :type => Integer
+    attribute :id, type: Integer
+    attribute :version, type: Integer
+    attribute :group_id, type: Integer
+    attribute :user_id, type: Integer
+    attribute :title, type: String
+    attribute :description, type: String
+    attribute :resources, type: String
+    attribute :instructions, type: String
+    attribute :running_time, type: Integer
     attribute :location
-    attribute :shared, :type => Integer
-    attribute :rating, :type => Integer
-    attribute :editable, :type => Boolean, :default => true
-    attribute :deletable, :type => Boolean, :default => true
-    attribute :used, :type => Integer
-    attribute :versions, :default => []
-    attribute :sections, :default => []
-    attribute :tags, :default => []
-    attribute :files, :default => []
-    attribute :badges, :default => []
+    attribute :shared, type: Integer
+    attribute :rating, type: Integer
+    attribute :editable, type: Boolean, default: true
+    attribute :deletable, type: Boolean, default: true
+    attribute :used, type: Integer
+    attribute :versions, default: []
+    attribute :sections, default: []
+    attribute :tags, default: []
+    attribute :files, default: []
+    attribute :badges, default: []
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
-    validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
-    validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
-    validates_numericality_of :user_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
-    validates_numericality_of :running_time, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :shared, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
-    validates_numericality_of :rating, :only_integer=>true, :allow_nil=>true
-    validates_numericality_of :used, :only_integer=>true, :allow_nil=>true
+    validates_numericality_of :id, only_integer:true, greater_than:0
+    validates_numericality_of :version, only_integer:true, greater_than_or_equal_to:0, allow_nil:true
+    validates_numericality_of :group_id, only_integer:true, greater_than:0, allow_nil:true
+    validates_numericality_of :user_id, only_integer:true, greater_than:0, allow_nil:true
+    validates_numericality_of :running_time, only_integer:true, greater_than_or_equal_to:0
+    validates_numericality_of :shared, only_integer:true, greater_than_or_equal_to:0, allow_nil:true
+    validates_numericality_of :rating, only_integer:true, allow_nil:true
+    validates_numericality_of :used, only_integer:true, allow_nil:true
     validates_presence_of :title
     validates_presence_of :description
     validates_presence_of :resources
     validates_presence_of :instructions
-    validates_inclusion_of :editable, :in => [true, false]
-    validates_inclusion_of :deletable, :in => [true, false]
-    validates_inclusion_of :location, :in => [:indoors, :outdoors, :both], :message => 'is not a valid location'
+    validates_inclusion_of :editable, in: [true, false]
+    validates_inclusion_of :deletable, in: [true, false]
+    validates_inclusion_of :location, in: [:indoors, :outdoors, :both], message: 'is not a valid location'
 
-    validates :sections, :array_of => {:item_type => Symbol}
-    validates :tags, :array_of => {:item_type => String}
-    validates :badges, :array_of => {:item_type => Osm::Activity::Badge, :item_valid => true}
-    validates :files, :array_of => {:item_type => Osm::Activity::File, :item_valid => true}
-    validates :versions, :array_of => {:item_type => Osm::Activity::Version, :item_valid => true}
+    validates :sections, array_of: {item_type: Symbol}
+    validates :tags, array_of: {item_type: String}
+    validates :badges, array_of: {item_type: Osm::Activity::Badge, item_valid: true}
+    validates :files, array_of: {item_type: Osm::Activity::File, item_valid: true}
+    validates :versions, array_of: {item_type: Osm::Activity::Version, item_valid: true}
 
 
     # Get activity details
@@ -141,30 +141,30 @@ module Osm
       # Populate Arrays
       (data['files'].is_a?(Array) ? data['files'] : []).each do |file_data|
         attributes[:files].push File.new(
-          :id => Osm::to_i_or_nil(file_data['fileid']),
-          :activity_id => Osm::to_i_or_nil(file_data['activityid']),
-          :file_name => file_data['filename'],
-          :name => file_data['name']
+          id: Osm::to_i_or_nil(file_data['fileid']),
+          activity_id: Osm::to_i_or_nil(file_data['activityid']),
+          file_name: file_data['filename'],
+          name: file_data['name']
         )
       end
       (data['badges'].is_a?(Array) ? data['badges'] : []).each do |badge_data|
         attributes[:badges].push Badge.new(
-          :badge_type => badge_data['badgetype'].to_sym,
-          :badge_section => badge_data['section'].to_sym,
-          :badge_name => badge_data['badgeLongName'],
-          :badge_id => Osm::to_i_or_nil(badge_data['badge_id']),
-          :badge_version => Osm::to_i_or_nil(badge_data['badge_version']),
-          :requirement_id => Osm::to_i_or_nil(badge_data['column_id']),
-          :requirement_label => badge_data['columnnameLongName'],
-          :data => badge_data['data'],
+          badge_type: badge_data['badgetype'].to_sym,
+          badge_section: badge_data['section'].to_sym,
+          badge_name: badge_data['badgeLongName'],
+          badge_id: Osm::to_i_or_nil(badge_data['badge_id']),
+          badge_version: Osm::to_i_or_nil(badge_data['badge_version']),
+          requirement_id: Osm::to_i_or_nil(badge_data['column_id']),
+          requirement_label: badge_data['columnnameLongName'],
+          data: badge_data['data'],
         )
       end
       (data['versions'].is_a?(Array) ? data['versions'] : []).each do |version_data|
         attributes[:versions].push Version.new(
-          :version => Osm::to_i_or_nil(version_data['value']),
-          :created_by => Osm::to_i_or_nil(version_data['userid']),
-          :created_by_name => version_data['firstname'],
-          :label => version_data['label']
+          version: Osm::to_i_or_nil(version_data['value']),
+          created_by: Osm::to_i_or_nil(version_data['userid']),
+          created_by_name: version_data['firstname'],
+          label: version_data['label']
         )
       end
 
@@ -285,13 +285,13 @@ module Osm
       # @!attribute [rw] name
       #   @return [String] the name of the file (more human readable than file_name)
 
-      attribute :id, :type => Integer
-      attribute :activity_id, :type => Integer
-      attribute :file_name, :type => String
-      attribute :name, :type => String
+      attribute :id, type: Integer
+      attribute :activity_id, type: Integer
+      attribute :file_name, type: String
+      attribute :name, type: String
 
-      validates_numericality_of :id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :id, only_integer:true, greater_than:0
+      validates_numericality_of :activity_id, only_integer:true, greater_than:0
       validates_presence_of :file_name
       validates_presence_of :name
 
@@ -325,21 +325,21 @@ module Osm
       # @!attribute [rw] requirement_id
       #   @return [Integer] the requirement's ID in OSM
 
-      attribute :badge_type, :type => Object
-      attribute :badge_section, :type => Object
-      attribute :requirement_label, :type => String
-      attribute :data, :type => String
-      attribute :badge_name, :type => String
-      attribute :badge_id, :type => Integer
-      attribute :badge_version, :type => Integer
-      attribute :requirement_id, :type => Integer
+      attribute :badge_type, type: Object
+      attribute :badge_section, type: Object
+      attribute :requirement_label, type: String
+      attribute :data, type: String
+      attribute :badge_name, type: String
+      attribute :badge_id, type: Integer
+      attribute :badge_version, type: Integer
+      attribute :requirement_id, type: Integer
 
       validates_presence_of :badge_name
-      validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
-      validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
-      validates_numericality_of :badge_id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :badge_version, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :requirement_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+      validates_inclusion_of :badge_section, in: [:beavers, :cubs, :scouts, :explorers, :staged]
+      validates_inclusion_of :badge_type, in: [:core, :staged, :activity, :challenge]
+      validates_numericality_of :badge_id, only_integer:true, greater_than:0
+      validates_numericality_of :badge_version, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :requirement_id, only_integer:true, greater_than:0, allow_nil:true
 
       # @!method initialize
       #   Initialize a new Meeting::Activity
@@ -363,13 +363,13 @@ module Osm
       # @!attribute [rw] label
       #   @return [String] the human readable label to use for this version
 
-      attribute :version, :type => Integer
-      attribute :created_by, :type => Integer
-      attribute :created_by_name, :type => String
-      attribute :label, :type => String
+      attribute :version, type: Integer
+      attribute :created_by, type: Integer
+      attribute :created_by_name, type: String
+      attribute :label, type: String
 
-      validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :created_by, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :version, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :created_by, only_integer:true, greater_than:0
       validates_presence_of :created_by_name
       validates_presence_of :label
 

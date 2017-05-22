@@ -6,27 +6,27 @@ describe "Event" do
 
   it "Create Event" do
     data = {
-      :id => 1,
-      :section_id => 2,
-      :name => 'Event name',
-      :start => DateTime.new(2001, 1, 2, 12 ,0 ,0),
-      :finish => nil,
-      :cost => '1.23',
-      :location => 'Somewhere',
-      :notes => 'None',
-      :archived => '0',
-      :badges => [],
-      :files => [],
-      :columns => [],
-      :notepad => 'notepad',
-      :public_notepad => 'public notepad',
-      :confirm_by_date => Date.new(2002, 1, 2),
-      :allow_changes => true,
-      :reminders => false,
-      :attendance_limit => 3,
-      :attendance_limit_includes_leaders => true,
-      :attendance_reminder => 14,
-      :allow_booking => false,
+      id: 1,
+      section_id: 2,
+      name: 'Event name',
+      start: DateTime.new(2001, 1, 2, 12 ,0 ,0),
+      finish: nil,
+      cost: '1.23',
+      location: 'Somewhere',
+      notes: 'None',
+      archived: '0',
+      badges: [],
+      files: [],
+      columns: [],
+      notepad: 'notepad',
+      public_notepad: 'public notepad',
+      confirm_by_date: Date.new(2002, 1, 2),
+      allow_changes: true,
+      reminders: false,
+      attendance_limit: 3,
+      attendance_limit_includes_leaders: true,
+      attendance_reminder: 14,
+      allow_booking: false,
     }
     event = Osm::Event.new(data)
 
@@ -55,46 +55,46 @@ describe "Event" do
   end
 
   it "Tells if attendance is limited" do
-    Osm::Event.new(:attendance_limit => 0).limited_attendance?.should == false
-    Osm::Event.new(:attendance_limit => 1).limited_attendance?.should == true
+    Osm::Event.new(attendance_limit: 0).limited_attendance?.should == false
+    Osm::Event.new(attendance_limit: 1).limited_attendance?.should == true
   end
 
   it "Tells if the cost is TBC" do
-    Osm::Event.new(:cost => 'TBC').cost_tbc?.should == true
-    Osm::Event.new(:cost => '1.23').cost_tbc?.should == false
+    Osm::Event.new(cost: 'TBC').cost_tbc?.should == true
+    Osm::Event.new(cost: '1.23').cost_tbc?.should == false
   end
 
   it "Tells if the cost is free" do
-    Osm::Event.new(:cost => 'TBC').cost_free?.should == false
-    Osm::Event.new(:cost => '1.23').cost_free?.should == false
-    Osm::Event.new(:cost => '0.00').cost_free?.should == true
+    Osm::Event.new(cost: 'TBC').cost_free?.should == false
+    Osm::Event.new(cost: '1.23').cost_free?.should == false
+    Osm::Event.new(cost: '0.00').cost_free?.should == true
   end
 
   it "Sorts by start, name then ID (unless IDs are equal)" do
-    e1 = Osm::Event.new(:start => '2000-01-01 01:00:00', :name => 'An event', :id => 1)
-    e2 = Osm::Event.new(:start => '2000-01-02 01:00:00', :name => 'An event', :id => 2)
-    e3 = Osm::Event.new(:start => '2000-01-02 01:00:00', :name => 'Event name', :id => 3)
-    e4 = Osm::Event.new(:start => '2000-01-02 01:00:00', :name => 'Event name', :id => 4)
+    e1 = Osm::Event.new(start: '2000-01-01 01:00:00', name: 'An event', id: 1)
+    e2 = Osm::Event.new(start: '2000-01-02 01:00:00', name: 'An event', id: 2)
+    e3 = Osm::Event.new(start: '2000-01-02 01:00:00', name: 'Event name', id: 3)
+    e4 = Osm::Event.new(start: '2000-01-02 01:00:00', name: 'Event name', id: 4)
     events = [e2, e4, e3, e1]
 
     events.sort.should == [e1, e2, e3, e4]
-    (Osm::Event.new(:id => 1) <=> Osm::Event.new(:id => 1)).should == 0
+    (Osm::Event.new(id: 1) <=> Osm::Event.new(id: 1)).should == 0
   end
 
   describe "Event::Attendance" do 
   
     it "Create" do
       data = {
-        :member_id => 1,
-        :grouping_id => 2,
-        :row => 3,
-        :first_name => 'First',
-        :last_name => 'Last',
-        :attending => :yes,
-        :date_of_birth => Date.new(2000, 1, 2),
-        :fields => {},
-        :payments => {},
-        :event => Osm::Event.new(:id => 1, :section_id => 1, :name => 'Name', :columns => [])
+        member_id: 1,
+        grouping_id: 2,
+        row: 3,
+        first_name: 'First',
+        last_name: 'Last',
+        attending: :yes,
+        date_of_birth: Date.new(2000, 1, 2),
+        fields: {},
+        payments: {},
+        event: Osm::Event.new(id: 1, section_id: 1, name: 'Name', columns: [])
       }
 
       ea = Osm::Event::Attendance.new(data)  
@@ -111,9 +111,9 @@ describe "Event" do
     end
 
     it "Sorts by event ID then row" do
-      ea1 = Osm::Event::Attendance.new(:event => Osm::Event.new(:id => 1), :row => 1)
-      ea2 = Osm::Event::Attendance.new(:event => Osm::Event.new(:id => 2), :row => 1)
-      ea3 = Osm::Event::Attendance.new(:event => Osm::Event.new(:id => 2), :row => 2)
+      ea1 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 1), row: 1)
+      ea2 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 2), row: 1)
+      ea3 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 2), row: 2)
       event_attendances = [ea3, ea2, ea1]
 
       event_attendances.sort.should == [ea1, ea2, ea3]
@@ -125,14 +125,14 @@ describe "Event" do
   
     it "Create" do
       bl = Osm::Event::BadgeLink.new(
-        :badge_type => :activity,
-        :badge_section => :cubs,
-        :requirement_label => 'A: Poster',
-        :data => 'abc',
-        :badge_name => 'Artist',
-        :badge_id => 1,
-        :badge_version => 0,
-        :requirement_id => 2,
+        badge_type: :activity,
+        badge_section: :cubs,
+        requirement_label: 'A: Poster',
+        data: 'abc',
+        badge_name: 'Artist',
+        badge_id: 1,
+        badge_version: 0,
+        requirement_id: 2,
       )
   
       bl.badge_type.should == :activity
@@ -208,7 +208,7 @@ describe "Event" do
         'allowbooking' => '1',
       }
 
-      Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
+      Osm::Model.stub(:get_user_permissions) { {events: [:read, :write]} }
     end
 
     describe "Get events for section" do
@@ -379,7 +379,7 @@ describe "Event" do
 
       it "No limit" do
         $api.should_not_receive(:post_query)
-        event = Osm::Event.new(:attendance_limit => 0, :id => 1, :section_id => 2)
+        event = Osm::Event.new(attendance_limit: 0, id: 1, section_id: 2)
         event.spaces?($api).should == true
         event.spaces($api).should be_nil
       end
@@ -400,9 +400,9 @@ describe "Event" do
             },
           ]
         })
-        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
+        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(id: 3) }
 
-        event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
+        event = Osm::Event.new(attendance_limit: 2, id: 1, section_id: 2)
         event.spaces?($api).should == true
         event.spaces($api).should == 1
       end
@@ -439,9 +439,9 @@ describe "Event" do
             }
           ]
         })
-        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
+        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(id: 3) }
 
-        event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
+        event = Osm::Event.new(attendance_limit: 2, id: 1, section_id: 2)
         event.spaces?($api).should == false
         event.spaces($api).should == -1
       end
@@ -470,9 +470,9 @@ describe "Event" do
             }
           ]
         })
-        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 3) }
+        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(id: 3) }
 
-        event = Osm::Event.new(:attendance_limit => 2, :id => 1, :section_id => 2)
+        event = Osm::Event.new(attendance_limit: 2, id: 1, section_id: 2)
         event.spaces?($api).should == false
         event.spaces($api).should == 0
       end
@@ -835,15 +835,15 @@ describe "Event" do
 
         before :each do
           @event = Osm::Event.new({
-            :id => 2,
-            :section_id => 1,
-            :name => 'Test event',
-            :start => DateTime.new(2000, 1, 2, 3, 4, 5),
-            :finish => DateTime.new(2001, 2, 3, 4, 5, 6),
-            :cost => '1.23',
-            :location => 'Somewhere',
-            :notes => 'none',
-            :badges => [Osm::Event::BadgeLink.new(
+            id: 2,
+            section_id: 1,
+            name: 'Test event',
+            start: DateTime.new(2000, 1, 2, 3, 4, 5),
+            finish: DateTime.new(2001, 2, 3, 4, 5, 6),
+            cost: '1.23',
+            location: 'Somewhere',
+            notes: 'none',
+            badges: [Osm::Event::BadgeLink.new(
               badge_type: :activity,
               badge_section: :scouts,
               requirement_label: 'A: Paint',
@@ -853,16 +853,16 @@ describe "Event" do
               badge_version: 2,
               requirement_id: 4,
             )],
-            :columns => [],
-            :notepad => '',
-            :public_notepad => '',
-            :confirm_by_date => Date.new(2000, 1, 1),
-            :allow_changes => true,
-            :reminders => true,
-            :attendance_limit => 3,
-            :attendance_limit_includes_leaders => true,
-            :attendance_reminder => 1,
-            :allow_booking => true,
+            columns: [],
+            notepad: '',
+            public_notepad: '',
+            confirm_by_date: Date.new(2000, 1, 1),
+            allow_changes: true,
+            reminders: true,
+            attendance_limit: 3,
+            attendance_limit_includes_leaders: true,
+            attendance_reminder: 1,
+            allow_booking: true,
           })
         end
 
@@ -907,14 +907,14 @@ describe "Event" do
       $api.should_receive(:post_query).exactly(1).times.and_return({})
 
       event = Osm::Event.new(
-        :section_id => 1,
-        :name => 'Test event',
-        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
-        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
-        :cost => '1.23',
-        :location => 'Somewhere',
-        :notes => 'none',
-        :id => 2
+        section_id: 1,
+        name: 'Test event',
+        start: DateTime.new(2000, 01, 02, 03, 04, 05),
+        finish: DateTime.new(2001, 02, 03, 04, 05, 06),
+        cost: '1.23',
+        location: 'Somewhere',
+        notes: 'none',
+        id: 2
       )
       event.id = 22
       event.update($api).should == false
@@ -925,14 +925,14 @@ describe "Event" do
       $api.should_receive(:post_query).with('events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({"ok" => true})
 
       event = Osm::Event.new(
-        :section_id => 1,
-        :name => 'Test event',
-        :start => DateTime.new(2000, 01, 02, 03, 04, 05),
-        :finish => DateTime.new(2001, 02, 03, 04, 05, 06),
-        :cost => '1.23',
-        :location => 'Somewhere',
-        :notes => 'none',
-        :id => 2
+        section_id: 1,
+        name: 'Test event',
+        start: DateTime.new(2000, 01, 02, 03, 04, 05),
+        finish: DateTime.new(2001, 02, 03, 04, 05, 06),
+        cost: '1.23',
+        location: 'Somewhere',
+        notes: 'none',
+        id: 2
       )
       event.delete($api).should == true
     end
@@ -1008,7 +1008,7 @@ describe "Event" do
     end
 
     it "Update attendance (succeded)" do
-      ea = Osm::Event::Attendance.new(:row => 0, :member_id => 4, :fields => {1 => 'old value', 2 => 'another old value'}, :event => Osm::Event.new(:id => 2, :section_id => 1))
+      ea = Osm::Event::Attendance.new(row: 0, member_id: 4, fields: {1 => 'old value', 2 => 'another old value'}, event: Osm::Event.new(id: 2, :section_id => 1))
 
       ea.fields[1] = 'value'
       $api.should_receive(:post_query).with(
@@ -1074,7 +1074,7 @@ describe "Event" do
     it "Add column (failed)" do
       $api.should_receive(:post_query).and_return({"config" => "[]"})
 
-      event = Osm::Event.new(:id => 2, :section_id => 1)
+      event = Osm::Event.new(id: 2, section_id: 1)
       event.should_not be_nil
       event.add_column(api: $api, name: 'Test name', label: 'Test label').should == false
     end
@@ -1093,8 +1093,8 @@ describe "Event" do
       }
       $api.should_receive(:post_query).with('events.php?action=renameColumn&sectionid=1&eventid=2', post_data: post_data).and_return(body)
 
-      event = Osm::Event.new(:id => 2, :section_id => 1)
-      event.columns = [Osm::Event::Column.new(:id => 'f_1', :event => event)]
+      event = Osm::Event.new(id: 2, section_id: 1)
+      event.columns = [Osm::Event::Column.new(id: 'f_1', event: event)]
       column = event.columns[0]
       column.name = 'New name'
       column.label = 'New label'
@@ -1111,8 +1111,8 @@ describe "Event" do
     it "Update column (failed)" do
       $api.should_receive(:post_query).and_return({"config" => "[]"})
 
-      event = Osm::Event.new(:id => 2, :section_id => 1)
-      column = Osm::Event::Column.new(:id => 'f_1', :event => event)
+      event = Osm::Event.new(id: 2, section_id: 1)
+      column = Osm::Event::Column.new(id: 'f_1', event: event)
       event.columns = [column]
       column.update($api).should == false
     end
@@ -1125,8 +1125,8 @@ describe "Event" do
 
       $api.should_receive(:post_query).with('events.php?action=deleteColumn&sectionid=1&eventid=2', post_data: post_data).and_return({"eventid" => "2", "config" => "[]"})
 
-      event = Osm::Event.new(:id => 2, :section_id => 1)
-      column = Osm::Event::Column.new(:id => 'f_1', :event => event)
+      event = Osm::Event.new(id: 2, section_id: 1)
+      column = Osm::Event::Column.new(id: 'f_1', event: event)
       event.columns = [column]
 
       column.delete($api).should == true
@@ -1136,8 +1136,8 @@ describe "Event" do
     it "Delete column (failed)" do
       $api.should_receive(:post_query).and_return({"config" => '[{"id":"f_1"}]'})
 
-      event = Osm::Event.new(:id => 2, :section_id => 1)
-      column = Osm::Event::Column.new(:id => 'f_1', :event => event)
+      event = Osm::Event.new(id: 2, section_id: 1)
+      column = Osm::Event::Column.new(id: 'f_1', event: event)
       event.columns = [column]
       column.delete($api).should == false
     end
@@ -1156,17 +1156,17 @@ describe "Event" do
       $api.should_receive(:post_query).with('events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3').and_return(data)
 
       ea = Osm::Event::Attendance.new(
-        :event => Osm::Event.new(:id => 3, :section_id => 1),
-        :member_id => 2,
+        event: Osm::Event.new(id: 3, section_id: 1),
+        member_id: 2,
       )
       ea.get_audit_trail($api).should == [
-        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 17), :by => 'My.SCOUT', :type => :detail, :description => "Set 'Test' to 'Test data'", :label => 'Test', :value => 'Test data'},
-        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 16), :by => 'My.SCOUT', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
-        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 15), :by => 'A Leader', :type => :attendance, :description => "Attendance: Reserved", :attendance => :reserved},
-        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 14), :by => 'A Leader', :type => :attendance, :description => "Attendance: No", :attendance => :no},
-        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 13), :by => 'A Leader', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
-        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 12), :by => 'A Leader', :type => :attendance, :description => "Attendance: Invited", :attendance => :invited},
-        {:event_attendance => ea, :event_id => 3, :member_id => 2, :at => DateTime.new(2013, 6, 10, 19, 11), :by => 'A Leader', :type => :attendance, :description => "Attendance: Show in My.SCOUT", :attendance => :shown},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 17), by: 'My.SCOUT', :type => :detail, :description => "Set 'Test' to 'Test data'", :label => 'Test', :value => 'Test data'},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 16), by: 'My.SCOUT', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 15), by: 'A Leader', :type => :attendance, :description => "Attendance: Reserved", :attendance => :reserved},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 14), by: 'A Leader', :type => :attendance, :description => "Attendance: No", :attendance => :no},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 13), by: 'A Leader', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 12), by: 'A Leader', :type => :attendance, :description => "Attendance: Invited", :attendance => :invited},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 11), by: 'A Leader', :type => :attendance, :description => "Attendance: Show in My.SCOUT", :attendance => :shown},
       ]
     end
 
@@ -1209,7 +1209,7 @@ describe "Event" do
 
       $api.should_receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(event_body)
 
-      Osm::Model.stub(:get_user_permissions) { {:events => [:read, :write]} }
+      Osm::Model.stub(:get_user_permissions) { {events: [:read, :write]} }
 
       event = Osm::Event.get(api: $api, section: 1, id: 2)
       event.should_not be_nil

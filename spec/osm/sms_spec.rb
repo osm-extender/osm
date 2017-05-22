@@ -101,19 +101,19 @@ describe "SMS" do
 
     it "Create" do
       report = Osm::Sms::DeliveryReport.new(
-        :sms_id => 1,
-        :user_id => 2,
-        :member_id => 3,
-        :section_id => 4,
-        :from_name => 'a',
-        :from_number => '5',
-        :to_name => 'b',
-        :to_number => '6',
-        :message => 'c',
-        :scheduled => DateTime.new(2000, 1, 2, 3, 4, 5),
-        :last_updated => DateTime.new(2000, 1, 2, 3, 5, 6),
-        :credits => 7,
-        :status => :delivered,
+        sms_id: 1,
+        user_id: 2,
+        member_id: 3,
+        section_id: 4,
+        from_name: 'a',
+        from_number: '5',
+        to_name: 'b',
+        to_number: '6',
+        message: 'c',
+        scheduled: DateTime.new(2000, 1, 2, 3, 4, 5),
+        last_updated: DateTime.new(2000, 1, 2, 3, 5, 6),
+        credits: 7,
+        status: :delivered,
       )
 
       report.sms_id.should == 1
@@ -137,7 +137,7 @@ describe "SMS" do
       statuses.each do |status|
         it "For #{status}" do
           statuses.each do |test_status|
-            Osm::Sms::DeliveryReport.new(:status => status).send("status_#{test_status}?").should == (status == test_status)
+            Osm::Sms::DeliveryReport.new(status: status).send("status_#{test_status}?").should == (status == test_status)
           end
         end
       end

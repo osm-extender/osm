@@ -31,28 +31,28 @@ module Osm
     # @!attribute [rw] finish_time
     #   @return [String] the end time (hh:mm)
 
-    attribute :id, :type => Integer
-    attribute :section_id, :type => Integer
-    attribute :title, :type => String, :default => 'Unnamed meeting'
-    attribute :notes_for_parents, :type => String, :default => ''
-    attribute :games, :type => String, :default => ''
-    attribute :pre_notes, :type => String, :default => ''
-    attribute :post_notes, :type => String, :default => ''
-    attribute :leaders, :type => String, :default => ''
-    attribute :date, :type => Date
-    attribute :start_time, :type => String
-    attribute :finish_time, :type => String
-    attribute :activities, :default => []
-    attribute :badge_links, :default => []
+    attribute :id, type: Integer
+    attribute :section_id, type: Integer
+    attribute :title, type: String, default: 'Unnamed meeting'
+    attribute :notes_for_parents, type: String, default: ''
+    attribute :games, type: String, default: ''
+    attribute :pre_notes, type: String, default: ''
+    attribute :post_notes, type: String, default: ''
+    attribute :leaders, type: String, default: ''
+    attribute :date, type: Date
+    attribute :start_time, type: String
+    attribute :finish_time, type: String
+    attribute :activities, default: []
+    attribute :badge_links, default: []
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :id, only_integer:true, greater_than:0
+    validates_numericality_of :section_id, only_integer:true, greater_than:0
     validates_presence_of :title
     validates_presence_of :date
-    validates_format_of :start_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
-    validates_format_of :finish_time, :with => Osm::OSM_TIME_REGEX, :message => 'is not in the correct format (HH:MM)', :allow_blank => true
-    validates :activities, :array_of => {:item_type => Osm::Meeting::Activity, :item_valid => true}
-    validates :badge_links, :array_of => {:item_type => Osm::Meeting::BadgeLink, :item_valid => true}
+    validates_format_of :start_time, with: Osm::OSM_TIME_REGEX, message: 'is not in the correct format (HH:MM)', allow_blank: true
+    validates_format_of :finish_time, with: Osm::OSM_TIME_REGEX, message: 'is not in the correct format (HH:MM)', allow_blank: true
+    validates :activities, array_of: {item_type: Osm::Meeting::Activity, item_valid: true}
+    validates :badge_links, array_of: {item_type: Osm::Meeting::BadgeLink, item_valid: true}
 
     # @!method initialize
     #   Initialize a new Meeting
@@ -100,9 +100,9 @@ module Osm
                 activity_data = activity_data.find{ |a| a.is_a?(Hash) && a.has_key?('activityid') }
               end
               attributes[:activities].push Osm::Meeting::Activity.new(
-                :activity_id => Osm::to_i_or_nil(activity_data['activityid']),
-                :title => activity_data['title'],
-                :notes => activity_data['notes'],
+                activity_id: Osm::to_i_or_nil(activity_data['activityid']),
+                title: activity_data['title'],
+                notes: activity_data['notes'],
               )
             end
           end # unless our_activities.nil?
@@ -112,14 +112,14 @@ module Osm
           unless our_badge_links.nil?
             our_badge_links.each do |badge_data|
               attributes[:badge_links].push Osm::Meeting::BadgeLink.new(
-                :badge_type => badge_data['badgetype'].to_sym,
-                :badge_section => badge_data['section'].to_sym,
-                :badge_name => badge_data['badgeLongName'],
-                :badge_id => Osm::to_i_or_nil(badge_data['badge_id']),
-                :badge_version => Osm::to_i_or_nil(badge_data['badge_version']),
-                :requirement_id => Osm::to_i_or_nil(badge_data['column_id']),
-                :requirement_label => badge_data['columnnameLongName'],
-                :data => badge_data['data'],
+                badge_type: badge_data['badgetype'].to_sym,
+                badge_section: badge_data['section'].to_sym,
+                badge_name: badge_data['badgeLongName'],
+                badge_id: Osm::to_i_or_nil(badge_data['badge_id']),
+                badge_version: Osm::to_i_or_nil(badge_data['badge_version']),
+                requirement_id: Osm::to_i_or_nil(badge_data['column_id']),
+                requirement_label: badge_data['columnnameLongName'],
+                data: badge_data['data'],
               )
             end
           end # unless our_badge_links.nil?
@@ -321,11 +321,11 @@ module Osm
       # @!attribute [rw] notes
       #   @return [String] notes relevant to doing this activity on this meeting
 
-      attribute :activity_id, :type => Integer
-      attribute :title, :type => String
-      attribute :notes, :type => String, :default => ''
+      attribute :activity_id, type: Integer
+      attribute :title, type: String
+      attribute :notes, type: String, default: ''
 
-      validates_numericality_of :activity_id, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :activity_id, only_integer:true, greater_than:0
       validates_presence_of :title
 
       # @!method initialize
@@ -363,21 +363,21 @@ module Osm
       # @!attribute [rw] requirement_id
       #   @return [Integer] the requirement's ID in OSM
 
-      attribute :badge_type, :type => Object
-      attribute :badge_section, :type => Object
-      attribute :requirement_label, :type => String
-      attribute :data, :type => String
-      attribute :badge_name, :type => String
-      attribute :badge_id, :type => Integer
-      attribute :badge_version, :type => Integer
-      attribute :requirement_id, :type => Integer
+      attribute :badge_type, type: Object
+      attribute :badge_section, type: Object
+      attribute :requirement_label, type: String
+      attribute :data, type: String
+      attribute :badge_name, type: String
+      attribute :badge_id, type: Integer
+      attribute :badge_version, type: Integer
+      attribute :requirement_id, type: Integer
 
       validates_presence_of :badge_name
-      validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
-      validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
-      validates_numericality_of :badge_id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :badge_version, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :requirement_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+      validates_inclusion_of :badge_section, in: [:beavers, :cubs, :scouts, :explorers, :staged]
+      validates_inclusion_of :badge_type, in: [:core, :staged, :activity, :challenge]
+      validates_numericality_of :badge_id, only_integer:true, greater_than:0
+      validates_numericality_of :badge_version, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :requirement_id, only_integer:true, greater_than:0, allow_nil:true
 
       # @!method initialize
       #   Initialize a new Meeting::Activity

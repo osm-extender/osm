@@ -63,64 +63,64 @@ module Osm
     #   @return [String] email address to send changes to personal details made through My.SCOUT to
 
 
-    attribute :id, :type => Integer
-    attribute :name, :type => String
-    attribute :group_id, :type => Integer
-    attribute :group_name, :type => String
-    attribute :subscription_level, :default => 1
-    attribute :subscription_expires, :type => Date
-    attribute :type, :default => :unknown
-    attribute :flexi_records, :default => []
-    attribute :gocardless, :type => Boolean
-    attribute :myscout_events_expires, :type => Date
-    attribute :myscout_badges_expires, :type => Date
-    attribute :myscout_programme_expires, :type => Date
-    attribute :myscout_details_expires, :type => Date
-    attribute :myscout_events, :type => Boolean
-    attribute :myscout_badges, :type => Boolean
-    attribute :myscout_programme, :type => Boolean
-    attribute :myscout_payments, :type => Boolean
-    attribute :myscout_details, :type => Boolean
-    attribute :myscout_emails, :default => {}
-    attribute :myscout_email_address_from, :type => String, :default => ''
-    attribute :myscout_email_address_copy, :type => String, :default => ''
-    attribute :myscout_badges_partial, :type => Boolean
-    attribute :myscout_programme_summary, :type => Boolean
-    attribute :myscout_programme_times, :type => Boolean
-    attribute :myscout_programme_show, :type => Integer, :default => 0
-    attribute :myscout_event_reminder_count, :type => Integer
-    attribute :myscout_event_reminder_frequency, :type => Integer
-    attribute :myscout_payment_reminder_count, :type => Integer
-    attribute :myscout_payment_reminder_frequency, :type => Integer
-    attribute :myscout_details_email_changes_to, :type => String, :default => ''
+    attribute :id, type: Integer
+    attribute :name, type: String
+    attribute :group_id, type: Integer
+    attribute :group_name, type: String
+    attribute :subscription_level, default: 1
+    attribute :subscription_expires, type: Date
+    attribute :type, default: :unknown
+    attribute :flexi_records, default: []
+    attribute :gocardless, type: Boolean
+    attribute :myscout_events_expires, type: Date
+    attribute :myscout_badges_expires, type: Date
+    attribute :myscout_programme_expires, type: Date
+    attribute :myscout_details_expires, type: Date
+    attribute :myscout_events, type: Boolean
+    attribute :myscout_badges, type: Boolean
+    attribute :myscout_programme, type: Boolean
+    attribute :myscout_payments, type: Boolean
+    attribute :myscout_details, type: Boolean
+    attribute :myscout_emails, default: {}
+    attribute :myscout_email_address_from, type: String, default: ''
+    attribute :myscout_email_address_copy, type: String, default: ''
+    attribute :myscout_badges_partial, type: Boolean
+    attribute :myscout_programme_summary, type: Boolean
+    attribute :myscout_programme_times, type: Boolean
+    attribute :myscout_programme_show, type: Integer, default: 0
+    attribute :myscout_event_reminder_count, type: Integer
+    attribute :myscout_event_reminder_frequency, type: Integer
+    attribute :myscout_payment_reminder_count, type: Integer
+    attribute :myscout_payment_reminder_frequency, type: Integer
+    attribute :myscout_details_email_changes_to, type: String, default: ''
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
-    validates_numericality_of :group_id, :only_integer=>true, :greater_than=>0, :allow_nil => true
-    validates_numericality_of :myscout_event_reminder_count, :only_integer=>true, :greater_than_or_equal_to=>-1
-    validates_numericality_of :myscout_event_reminder_frequency, :only_integer=>true, :greater_than_or_equal_to=>-1
-    validates_numericality_of :myscout_payment_reminder_count, :only_integer=>true, :greater_than_or_equal_to=>-1
-    validates_numericality_of :myscout_payment_reminder_frequency, :only_integer=>true, :greater_than_or_equal_to=>-1
+    validates_numericality_of :id, only_integer:true, greater_than:0, allow_nil: true
+    validates_numericality_of :group_id, only_integer:true, greater_than:0, allow_nil: true
+    validates_numericality_of :myscout_event_reminder_count, only_integer:true, greater_than_or_equal_to:-1
+    validates_numericality_of :myscout_event_reminder_frequency, only_integer:true, greater_than_or_equal_to:-1
+    validates_numericality_of :myscout_payment_reminder_count, only_integer:true, greater_than_or_equal_to:-1
+    validates_numericality_of :myscout_payment_reminder_frequency, only_integer:true, greater_than_or_equal_to:-1
     validates_presence_of :name
     validates_presence_of :group_name
     validates_presence_of :subscription_level
     validates_presence_of :subscription_expires
     validates_presence_of :type
-#    validates_presence_of :flexi_records, :unless => Proc.new { |a| a.flexi_records == [] }
+#    validates_presence_of :flexi_records, unless: Proc.new { |a| a.flexi_records == [] }
 
-    validates_inclusion_of :subscription_level, :in => (1..3), :message => 'is not a valid subscription level'
-    validates_inclusion_of :gocardless, :in => [true, false]
-    validates_inclusion_of :myscout_events, :in => [true, false]
-    validates_inclusion_of :myscout_badges, :in => [true, false]
-    validates_inclusion_of :myscout_programme, :in => [true, false]
-    validates_inclusion_of :myscout_payments, :in => [true, false]
-    validates_inclusion_of :myscout_details, :in => [true, false]
-    validates_inclusion_of :myscout_badges_partial, :in => [true, false]
-    validates_inclusion_of :myscout_programme_summary, :in => [true, false]
-    validates_inclusion_of :myscout_programme_times, :in => [true, false]
-    validates_inclusion_of :myscout_programme_show, :in => [-2, -1, 0, 5, 10, 15, 20]
+    validates_inclusion_of :subscription_level, in: (1..3), message: 'is not a valid subscription level'
+    validates_inclusion_of :gocardless, in: [true, false]
+    validates_inclusion_of :myscout_events, in: [true, false]
+    validates_inclusion_of :myscout_badges, in: [true, false]
+    validates_inclusion_of :myscout_programme, in: [true, false]
+    validates_inclusion_of :myscout_payments, in: [true, false]
+    validates_inclusion_of :myscout_details, in: [true, false]
+    validates_inclusion_of :myscout_badges_partial, in: [true, false]
+    validates_inclusion_of :myscout_programme_summary, in: [true, false]
+    validates_inclusion_of :myscout_programme_times, in: [true, false]
+    validates_inclusion_of :myscout_programme_show, in: [-2, -1, 0, 5, 10, 15, 20]
 
-    validates :myscout_emails, :hash => {:key_in => [:email1, :email2, :email3, :email4], :value_in => [true, false]}
-    validates :flexi_records, :array_of => {:item_type => Osm::FlexiRecord, :item_valid => true}
+    validates :myscout_emails, hash: {key_in: [:email1, :email2, :email3, :email4], value_in: [true, false]}
+    validates :flexi_records, array_of: {item_type: Osm::FlexiRecord, item_valid: true}
 
 
     # @!method initialize
@@ -158,48 +158,48 @@ module Osm
         fr_data = section_data['extraRecords'] if section_data['extraRecords'].is_a?(Array)
         fr_data = section_data['extraRecords'].values if section_data['extraRecords'].is_a?(Hash)
         fr_data.each do |record_data|
-          # Expect item to be: {:name=>String, :extraid=>Integer}
+          # Expect item to be: {name:String, extraid:Integer}
           # Sometimes get item as: [String, {"name"=>String, "extraid"=>Integer}]
           record_data = record_data[1] if record_data.is_a?(Array)
           flexi_records.push Osm::FlexiRecord.new(
-            :id => Osm::to_i_or_nil(record_data['extraid']),
-            :name => record_data['name'],
-            :section_id => section_id,
+            id: Osm::to_i_or_nil(record_data['extraid']),
+            name: record_data['name'],
+            section_id: section_id,
           )
         end
 
         section = new(
-          :id => section_id,
-          :name => role_data['sectionname'],
-          :subscription_level => Osm::to_i_or_nil(section_data['subscription_level']),
-          :subscription_expires => Osm::parse_date(section_data['subscription_expires']),
-          :type => !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : (!section_data['section'].nil? ? section_data['section'].to_sym : :unknown),
-          :num_scouts => section_data['numscouts'],
-          :flexi_records => flexi_records.sort,
-          :group_id => role_data['groupid'],
-          :group_name => role_data['groupname'],
-          :gocardless => (section_data['gocardless'] || 'false').downcase.eql?('true'),
-          :myscout_events_expires => Osm::parse_date(section_data['portalExpires']['events']),
-          :myscout_badges_expires => Osm::parse_date(section_data['portalExpires']['badges']),
-          :myscout_programme_expires => Osm::parse_date(section_data['portalExpires']['programme']),
-          :myscout_details_expires => Osm::parse_date(section_data['portalExpires']['details']),
-          :myscout_events => myscout_data['events'] == 1,
-          :myscout_badges => myscout_data['badges'] == 1,
-          :myscout_programme => myscout_data['programme'] == 1,
-          :myscout_payments => myscout_data['payments'] == 1,
-          :myscout_details => myscout_data['details'] == 1,
-          :myscout_emails => (myscout_data['emails'] || {}).inject({}) { |n,(k,v)| n[k.to_sym] = v.eql?('true'); n},
-          :myscout_email_address_from => myscout_data['emailAddress'] ? myscout_data['emailAddress'] : '',
-          :myscout_email_address_copy => myscout_data['emailAddressCopy'] ? myscout_data['emailAddressCopy'] : '',
-          :myscout_badges_partial => myscout_data['badgesPartial'] == 1,
-          :myscout_programme_summary => myscout_data['programmeSummary'] == 1,
-          :myscout_programme_times => myscout_data['programmeTimes'] == 1,
-          :myscout_programme_show => myscout_data['programmeShow'].to_i,
-          :myscout_event_reminder_count => myscout_data['eventRemindCount'].to_i,
-          :myscout_event_reminder_frequency => myscout_data['eventRemindFrequency'].to_i,
-          :myscout_payment_reminder_count => myscout_data['paymentRemindCount'].to_i,
-          :myscout_payment_reminder_frequency => myscout_data['paymentRemindFrequency'].to_i,
-          :myscout_details_email_changes_to => myscout_data['contactNotificationEmail'],
+          id: section_id,
+          name: role_data['sectionname'],
+          subscription_level: Osm::to_i_or_nil(section_data['subscription_level']),
+          subscription_expires: Osm::parse_date(section_data['subscription_expires']),
+          type: !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : (!section_data['section'].nil? ? section_data['section'].to_sym : :unknown),
+          num_scouts: section_data['numscouts'],
+          flexi_records: flexi_records.sort,
+          group_id: role_data['groupid'],
+          group_name: role_data['groupname'],
+          gocardless: (section_data['gocardless'] || 'false').downcase.eql?('true'),
+          myscout_events_expires: Osm::parse_date(section_data['portalExpires']['events']),
+          myscout_badges_expires: Osm::parse_date(section_data['portalExpires']['badges']),
+          myscout_programme_expires: Osm::parse_date(section_data['portalExpires']['programme']),
+          myscout_details_expires: Osm::parse_date(section_data['portalExpires']['details']),
+          myscout_events: myscout_data['events'] == 1,
+          myscout_badges: myscout_data['badges'] == 1,
+          myscout_programme: myscout_data['programme'] == 1,
+          myscout_payments: myscout_data['payments'] == 1,
+          myscout_details: myscout_data['details'] == 1,
+          myscout_emails: (myscout_data['emails'] || {}).inject({}) { |n,(k,v)| n[k.to_sym] = v.eql?('true'); n},
+          myscout_email_address_from: myscout_data['emailAddress'] ? myscout_data['emailAddress'] : '',
+          myscout_email_address_copy: myscout_data['emailAddressCopy'] ? myscout_data['emailAddressCopy'] : '',
+          myscout_badges_partial: myscout_data['badgesPartial'] == 1,
+          myscout_programme_summary: myscout_data['programmeSummary'] == 1,
+          myscout_programme_times: myscout_data['programmeTimes'] == 1,
+          myscout_programme_show: myscout_data['programmeShow'].to_i,
+          myscout_event_reminder_count: myscout_data['eventRemindCount'].to_i,
+          myscout_event_reminder_frequency: myscout_data['eventRemindFrequency'].to_i,
+          myscout_payment_reminder_count: myscout_data['paymentRemindCount'].to_i,
+          myscout_payment_reminder_frequency: myscout_data['paymentRemindFrequency'].to_i,
+          myscout_details_email_changes_to: myscout_data['contactNotificationEmail'],
         )
 
         result.push section

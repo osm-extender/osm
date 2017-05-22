@@ -8,12 +8,12 @@ module Osm
     # @!attribute [rw] name
     #   @return [String] the flexi record's name name
 
-    attribute :id, :type => Integer
-    attribute :section_id, :type => Integer
-    attribute :name, :type => String
+    attribute :id, type: Integer
+    attribute :section_id, type: Integer
+    attribute :name, type: String
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.id.nil? }
+    validates_numericality_of :section_id, only_integer:true, greater_than:0
     validates_presence_of :name
 
 
@@ -31,10 +31,10 @@ module Osm
         data['structure'].each do |item|
           item['rows'].each do |row|
             structure.push Osm::FlexiRecord::Column.new(
-              :id => row['field'],
-              :name => row['name'],
-              :editable => row['editable'] || false,
-              :flexi_record => self,
+              id: row['field'],
+              name: row['name'],
+              editable: row['editable'] || false,
+              flexi_record: self,
             )
           end
         end
@@ -94,10 +94,10 @@ module Osm
             )
   
             datas.push Osm::FlexiRecord::Data.new(
-              :member_id => Osm::to_i_or_nil(item['scoutid']),
-              :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
-              :fields => fields,
-              :flexi_record => self,
+              member_id: Osm::to_i_or_nil(item['scoutid']),
+              grouping_id: Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+              fields: fields,
+              flexi_record: self,
             )
           end # unless a total row
         end # each item in data
@@ -122,15 +122,15 @@ module Osm
       # @!attribute [rw] editable
       #   @return true, false Wether the field can be edited
 
-      attribute :flexi_record, :type => Object
-      attribute :id, :type => String
-      attribute :name, :type => String
-      attribute :editable, :type => Boolean, :default => false
+      attribute :flexi_record, type: Object
+      attribute :id, type: String
+      attribute :name, type: String
+      attribute :editable, type: Boolean, default: false
 
       validates_presence_of :flexi_record
       validates_presence_of :id
       validates_presence_of :name
-      validates_inclusion_of :editable, :in => [true, false]
+      validates_inclusion_of :editable, in: [true, false]
 
       # @!method initialize
       #   Initialize a new FlexiRecord::Column
@@ -212,7 +212,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options={:replace_with => {'flexi_record' => :id}})
+        Osm.inspect_instance(self, options={replace_with: {'flexi_record' => :id}})
       end
 
     end # Class FlexiRecord::Column
@@ -228,15 +228,15 @@ module Osm
       # @!attribute [rw] fields
       #   @return [DirtyHashy] Keys are the field's id, values are the field values
 
-      attribute :flexi_record, :type => Object
-      attribute :member_id, :type => Integer
-      attribute :grouping_id, :type => Integer
-      attribute :fields, :default => {}
+      attribute :flexi_record, type: Object
+      attribute :member_id, type: Integer
+      attribute :grouping_id, type: Integer
+      attribute :fields, default: {}
 
       validates_presence_of :flexi_record
-      validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-      validates :fields, :hash => {:key_type => String}
+      validates_numericality_of :member_id, only_integer:true, greater_than:0
+      validates_numericality_of :grouping_id, only_integer:true, greater_than_or_equal_to:-2
+      validates :fields, hash: {key_type: String}
 
 
       # @!method initialize
@@ -296,7 +296,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options={:replace_with => {'flexi_record' => :id}})
+        Osm.inspect_instance(self, options={replace_with: {'flexi_record' => :id}})
       end
 
       private def sort_by

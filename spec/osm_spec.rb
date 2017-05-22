@@ -143,7 +143,7 @@ describe "Online Scout Manager" do
     it "given a hash" do
       hash_in = {
         1 => 1,
-        :a => 'a',
+        a: 'a',
         'b' => 'b',
       }
       hash_out = {
@@ -168,14 +168,14 @@ describe "Online Scout Manager" do
     end
 
     it "Returns a string" do
-      this_one = TestA.new(:id => 1, :b => '1')
+      this_one = TestA.new(id: 1, b: '1')
       inspect = Osm.inspect_instance(this_one)
       inspect.should == '#<TestA b: "1", id: 1 >'
     end
 
     it "Replaces items with their attribute" do
-      this_one = TestA.new(:id => 1, :b => TestB.new(:id => 2))
-      inspect = Osm.inspect_instance(this_one, options={:replace_with => {'b' => :id}})
+      this_one = TestA.new(id: 1, b: TestB.new(id: 2))
+      inspect = Osm.inspect_instance(this_one, options={replace_with: {'b' => :id}})
       inspect.should == '#<TestA b.id: 2, id: 1 >'
     end
 
@@ -191,9 +191,9 @@ describe "Online Scout Manager" do
         'events' => 10,
       }
       Osm.make_permissions_hash(from_osm).should == {
-        :badge => [:read, :write, :administer],
-        :programme => [:read, :write],
-        :events => [:read],
+        badge: [:read, :write, :administer],
+        programme: [:read, :write],
+        events: [:read],
       }
     end
 

@@ -5,13 +5,13 @@ describe "Activity" do
 
   it "Get OSM link" do
     activity = Osm::Activity.new(
-      :id => 1,
-      :running_time => 10,
-      :title => 'Title',
-      :description => 'Description',
-      :resources => 'Resources',
-      :instructions => 'Instructions',
-      :location => :indoors,
+      id: 1,
+      running_time: 10,
+      title: 'Title',
+      description: 'Description',
+      resources: 'Resources',
+      instructions: 'Instructions',
+      location: :indoors,
     )
     activity.osm_link.should == 'https://www.onlinescoutmanager.co.uk/?l=p1'
   end
@@ -143,7 +143,7 @@ describe "Activity" do
       }
       $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 0})
   
-      activity = Osm::Activity.new(:id => 2)
+      activity = Osm::Activity.new(id: 2)
       activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes').should == true
     end
   
@@ -156,7 +156,7 @@ describe "Activity" do
       }
       $api.should_receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 1})
 
-      activity = Osm::Activity.new(:id => 2)
+      activity = Osm::Activity.new(id: 2)
       activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes').should == false
     end
   
@@ -182,41 +182,41 @@ describe "Activity" do
       $api.should_receive(:post_query).with('programme.php?action=update', post_data: post_data).and_return({'result' => true})
   
       activity = Osm::Activity.new(
-        :id => 2,
-        :title => 'title',
-        :description => 'description',
-        :resources => 'resources',
-        :instructions => 'instructions',
-        :files => [Osm::Activity::File.new(:id=>3, :activity_id=>2, :file_name=>'fn', :name=>'n'), Osm::Activity::File.new(:id=>4, :activity_id=>2, :file_name=>'fn2', :name=>'n2')],
-        :running_time => 5,
-        :location => :indoors,
-        :sections => [:beavers, :cubs],
-        :tags => ['tag1', 'tag2'],
-        :badges => [Osm::Activity::Badge.new(
-          :badge_type => :activity,
-          :badge_section => :beavers,
-          :requirement_label => 'l',
-          :data => '',
-          :badge_name => 'Badge name',
-          :badge_id => 181,
-          :badge_version => 0,
-          :requirement_id => 93384,
+        id: 2,
+        title: 'title',
+        description: 'description',
+        resources: 'resources',
+        instructions: 'instructions',
+        files: [Osm::Activity::File.new(id:3, activity_id:2, file_name:'fn', name:'n'), Osm::Activity::File.new(:id=>4, :activity_id=>2, :file_name=>'fn2', :name=>'n2')],
+        running_time: 5,
+        location: :indoors,
+        sections: [:beavers, :cubs],
+        tags: ['tag1', 'tag2'],
+        badges: [Osm::Activity::Badge.new(
+          badge_type: :activity,
+          badge_section: :beavers,
+          requirement_label: 'l',
+          data: '',
+          badge_name: 'Badge name',
+          badge_id: 181,
+          badge_version: 0,
+          requirement_id: 93384,
         )],
-        :shared => 0,
-        :section_id => 1,
+        shared: 0,
+        section_id: 1,
       )
       activity.update(api: $api, section: 1, secret_update: true).should == true
     end
   
     it "Update activity in OSM (failed)" do
       activity = Osm::Activity.new(
-        :id => 2,
-        :title => 'title',
-        :description => 'description',
-        :resources => 'resources',
-        :instructions => 'instructions',
-        :location => :indoors,
-        :running_time => 0,
+        id: 2,
+        title: 'title',
+        description: 'description',
+        resources: 'resources',
+        instructions: 'instructions',
+        location: :indoors,
+        running_time: 0,
       )
       $api.should_receive(:post_query).and_return({"result" => false})
       activity.update(api: $api, section: 1, secret_update: true).should == false

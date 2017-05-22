@@ -88,7 +88,7 @@ describe "Badges" do
       }
       $api.should_receive(:post_query).with('ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return(data)
 
-      db = Osm::Badges.get_due_badges(api: $api, section: Osm::Section.new(:id => 1, :type => :cubs), term: 2)
+      db = Osm::Badges.get_due_badges(api: $api, section: Osm::Section.new(id: 1, type: :cubs), term: 2)
       db.empty?.should == false
       db.badge_names.should == {'145_0_1'=>'Activity - Badge Name', '93_0_2'=>'Staged - Participation (Lvl 2)'}
       db.by_member.should == {1=>['93_0_2', '145_0_1'], 2=>['93_0_2']}
@@ -100,7 +100,7 @@ describe "Badges" do
 
     it "handles an empty array representing no due badges" do
       $api.should_receive(:post_query).with('ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return([])
-      db = Osm::Badges.get_due_badges(api: $api, section: Osm::Section.new(:id => 1, :type => :cubs), term: 2)
+      db = Osm::Badges.get_due_badges(api: $api, section: Osm::Section.new(id: 1, type: :cubs), term: 2)
       db.should_not be_nil
     end
 
@@ -114,9 +114,9 @@ describe "Badges" do
         ]
       }
       $api.should_receive(:post_query).with('ext/badges/stock/?action=getBadgeStock&section=beavers&section_id=1&term_id=2').and_return(badges_body)
-      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 2) }
+      Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(id: 2) }
 
-      section = Osm::Section.new(:id => 1, :type => :beavers)
+      section = Osm::Section.new(id: 1, type: :beavers)
       Osm::Badges.get_stock(api: $api, section: section).should == {'100_1' => 1, '200_2' => 2}
     end
 
@@ -132,7 +132,7 @@ describe "Badges" do
           'level' => 1,
           'badge_id' => 3
         }
-        @section = Osm::Section.new(:id => 2, :type => :beavers)
+        @section = Osm::Section.new(id: 2, type: :beavers)
       end
 
       it "Succeds" do

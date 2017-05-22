@@ -40,13 +40,13 @@ module Osm
   OSM_DATE_REGEX = /\A#{Osm::OSM_DATE_REGEX_UNANCHORED.to_s}\Z/
   subscription_level_names = {
     1 => 'Bronze',
-    :bronze => 'Bronze',
+    bronze: 'Bronze',
     2 => 'Silver',
-    :silver => 'Silver',
+    silver: 'Silver',
     3 => 'Gold',
-    :gold => 'Gold',
+    gold: 'Gold',
     4 => 'Gold+',
-    :gold_plus => 'Gold+',
+    gold_plus: 'Gold+',
   }
   subscription_level_names.default = 'Unknown'
   SUBSCRIPTION_LEVEL_NAMES = subscription_level_names

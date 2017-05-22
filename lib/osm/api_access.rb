@@ -9,14 +9,14 @@ module Osm
     # @!attribute [rw] permissions
     #   @return [Hash] the permissions assigned to this API by the user in OSM
 
-    attribute :id, :type => Integer
-    attribute :name, :type => String
-    attribute :permissions, :default => {}
+    attribute :id, type: Integer
+    attribute :name, type: String
+    attribute :permissions, default: {}
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :id, only_integer:true, greater_than:0
     validates_presence_of :name
 
-    validates :permissions, :hash => {:key_type => Symbol, :value_type => Array}
+    validates :permissions, hash: {key_type: Symbol, value_type: Array}
 
 
     # Get API access details for a given section

@@ -6,11 +6,11 @@ describe "Term" do
 
   before :each do
     @attributes = {
-      :id => 1,
-      :section_id => 2,
-      :name => 'Term name',
-      :start => Date.new(2001, 01, 01),
-      :finish => Date.new(2001, 03, 31)
+      id: 1,
+      section_id: 2,
+      name: 'Term name',
+      start: Date.new(2001, 01, 01),
+      finish: Date.new(2001, 03, 31)
     }
   end
 
@@ -34,24 +34,24 @@ describe "Term" do
   it "Compares two non-matching terms" do
     term = Osm::Term.new(@attributes)
 
-    term.should_not == Osm::Term.new(@attributes.merge(:id => 3))
+    term.should_not == Osm::Term.new(@attributes.merge(id: 3))
   end
 
   it "Sorts by Section ID, Start date and then Term ID" do
-    term1 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 11, :start => (Date.today - 60), :finish => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 12, :start => (Date.today -  0), :finish => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:section_id => 1, :term => 13, :start => (Date.today +  1), :finish => (Date.today + 60)))
-    term4 = Osm::Term.new(@attributes.merge(:section_id => 2, :term => 1, :start => (Date.today +  1), :finish => (Date.today + 60)))
-    term5 = Osm::Term.new(@attributes.merge(:section_id => 2, :term => 2, :start => (Date.today +  1), :finish => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(section_id: 1, term: 11, start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(section_id: 1, term: 12, start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(section_id: 1, term: 13, start: (Date.today +  1), finish: (Date.today + 60)))
+    term4 = Osm::Term.new(@attributes.merge(section_id: 2, term: 1, start: (Date.today +  1), finish: (Date.today + 60)))
+    term5 = Osm::Term.new(@attributes.merge(section_id: 2, term: 2, start: (Date.today +  1), finish: (Date.today + 60)))
 
     data = [term5, term3, term2, term4, term1]
     data.sort.should == [term1, term2, term3, term4, term5]
   end
 
   it "Works out if it is completly before a date" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     term1.before?(Date.today).should == true
     term2.before?(Date.today).should == false
@@ -59,9 +59,9 @@ describe "Term" do
   end
 
   it "Works out if it is completly after a date" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     term1.after?(Date.today).should == false
     term2.after?(Date.today).should == false
@@ -69,9 +69,9 @@ describe "Term" do
   end
 
   it "Works out if it has passed" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     term1.past?().should == true
     term2.past?().should == false
@@ -79,9 +79,9 @@ describe "Term" do
   end
 
   it "Works out if it is in the future" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     term1.future?().should == false
     term2.future?().should == false
@@ -89,9 +89,9 @@ describe "Term" do
   end
 
   it "Works out if it is the current term" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start=> (Date.today -  0), :finish => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     term1.current?().should == false
     term2.current?().should == true
@@ -99,9 +99,9 @@ describe "Term" do
   end
 
   it "Works out if it contains a date" do
-    term1 = Osm::Term.new(@attributes.merge(:start => (Date.today - 60), :finish => (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(:start => (Date.today -  0), :finish => (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(:start => (Date.today +  1), :finish => (Date.today + 60)))
+    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     term1.contains_date?(Date.today).should == false
     term2.contains_date?(Date.today).should == true
@@ -261,7 +261,7 @@ describe "Term" do
       Osm::Term.stub(:get_all) { [] }
       $api.should_receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({'terms'=>{}})
 
-      term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
+      term = Osm::Term.new(id:2, section_id:1, name:'A Term', start:Date.new(2010, 01, 01), finish:Date.new(2010, 12, 31))
       term.update($api).should == true
     end
 
@@ -275,7 +275,7 @@ describe "Term" do
       Osm::Term.stub(:get_all) { [] }
       $api.should_receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
 
-      term = Osm::Term.new(:id=>2, :section_id=>1, :name=>'A Term', :start=>Date.new(2010, 01, 01), :finish=>Date.new(2010, 12, 31))
+      term = Osm::Term.new(id:2, section_id:1, name:'A Term', start:Date.new(2010, 01, 01), finish:Date.new(2010, 12, 31))
       term.update($api).should == false
     end
 

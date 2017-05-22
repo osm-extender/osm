@@ -45,43 +45,43 @@ module Osm
     # @!attribute [rw] show_level_letters
     #   @return true, false Whether to show letters not numbers for the levels of a staged badge
 
-    attribute :name, :type => String
-    attribute :requirement_notes, :type => String
-    attribute :requirements, :type => Object
-    attribute :id, :type => Integer
-    attribute :version, :type => Integer
-    attribute :identifier, :type => String
-    attribute :group_name, :type => String
-    attribute :latest, :type => Boolean
-    attribute :sharing, :type => Object
-    attribute :user_id, :type => Integer
-    attribute :levels, :type => Object
-    attribute :modules, :type => Object
-    attribute :min_modules_required, :type => Integer
-    attribute :min_requirements_required, :type => Integer
-    attribute :add_columns_to_module, :type => Integer
-    attribute :level_requirement, :type => Integer
-    attribute :requires_modules, :type => Object
-    attribute :other_requirements_required, :type => Object
-    attribute :badges_required, :type => Object
-    attribute :show_level_letters, :type => Boolean
+    attribute :name, type: String
+    attribute :requirement_notes, type: String
+    attribute :requirements, type: Object
+    attribute :id, type: Integer
+    attribute :version, type: Integer
+    attribute :identifier, type: String
+    attribute :group_name, type: String
+    attribute :latest, type: Boolean
+    attribute :sharing, type: Object
+    attribute :user_id, type: Integer
+    attribute :levels, type: Object
+    attribute :modules, type: Object
+    attribute :min_modules_required, type: Integer
+    attribute :min_requirements_required, type: Integer
+    attribute :add_columns_to_module, type: Integer
+    attribute :level_requirement, type: Integer
+    attribute :requires_modules, type: Object
+    attribute :other_requirements_required, type: Object
+    attribute :badges_required, type: Object
+    attribute :show_level_letters, type: Boolean
 
     validates_presence_of :name
     validates_presence_of :requirement_notes
-    validates_numericality_of :id, :only_integer=>true, :greater_than_or_equal_to=>1
-    validates_numericality_of :version, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :id, only_integer:true, greater_than_or_equal_to:1
+    validates_numericality_of :version, only_integer:true, greater_than_or_equal_to:0
     validates_presence_of :identifier
-    validates_inclusion_of :sharing, :in => [:draft, :private, :optin, :optin_locked, :default_locked]
+    validates_inclusion_of :sharing, in: [:draft, :private, :optin, :optin_locked, :default_locked]
     validates_presence_of :user_id
-    validates :requirements, :array_of => {:item_type => Osm::Badge::Requirement, :item_valid => true}
-    validates :modules, :array_of => {:item_type => Osm::Badge::RequirementModule, :item_valid => true}
-    validates_inclusion_of :latest, :in => [true, false]
-    validates :levels, :array_of => {:item_type => Integer}, :allow_nil => true
-    validates_numericality_of :min_modules_required, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :min_requirements_required, :only_integer=>true, :greater_than_or_equal_to=>0
-    validates_numericality_of :add_columns_to_module, :only_integer=>true, :greater_than=>0, :allow_nil=>true
-    validates_numericality_of :level_requirement, :only_integer=>true, :greater_than=>0, :allow_nil=>true
-    validates_inclusion_of :show_level_letters, :in => [true, false]
+    validates :requirements, array_of: {item_type: Osm::Badge::Requirement, item_valid: true}
+    validates :modules, array_of: {item_type: Osm::Badge::RequirementModule, item_valid: true}
+    validates_inclusion_of :latest, in: [true, false]
+    validates :levels, array_of: {item_type: Integer}, allow_nil: true
+    validates_numericality_of :min_modules_required, only_integer:true, greater_than_or_equal_to:0
+    validates_numericality_of :min_requirements_required, only_integer:true, greater_than_or_equal_to:0
+    validates_numericality_of :add_columns_to_module, only_integer:true, greater_than:0, allow_nil:true
+    validates_numericality_of :level_requirement, only_integer:true, greater_than:0, allow_nil:true
+    validates_inclusion_of :show_level_letters, in: [true, false]
 
 
     # @!method initialize
@@ -123,24 +123,24 @@ module Osm
           config = JSON.parse(detail['config'] || '{}')
 
           badge = new(
-            :id => detail['badge_id'],
-            :version => detail['badge_version'],
-            :identifier => detail['badge_identifier'],
-            :name => detail['name'],
-            :requirement_notes => detail['description'],
-            :group_name => detail['group_name'],
-            :latest => detail['latest'].to_i.eql?(1),
-            :sharing => badge_sharing_map[detail['sharing']],
-            :user_id => Osm.to_i_or_nil(detail['userid']),
-            :levels => config['levelslist'],
-            :min_modules_required => config['numModulesRequired'].to_i,
-            :min_requirements_required => config['minRequirementsCompleted'].to_i,
-            :add_columns_to_module => Osm.to_i_or_nil(config['addcolumns']),
-            :level_requirement => Osm.to_i_or_nil(config['levels_column_id']),
-            :requires_modules => config['requires'],
-            :other_requirements_required => (config['columnsRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i} },
-            :badges_required => (config['badgesRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i} },
-            :show_level_letters => !!config['shownumbers'],
+            id: detail['badge_id'],
+            version: detail['badge_version'],
+            identifier: detail['badge_identifier'],
+            name: detail['name'],
+            requirement_notes: detail['description'],
+            group_name: detail['group_name'],
+            latest: detail['latest'].to_i.eql?(1),
+            sharing: badge_sharing_map[detail['sharing']],
+            user_id: Osm.to_i_or_nil(detail['userid']),
+            levels: config['levelslist'],
+            min_modules_required: config['numModulesRequired'].to_i,
+            min_requirements_required: config['minRequirementsCompleted'].to_i,
+            add_columns_to_module: Osm.to_i_or_nil(config['addcolumns']),
+            level_requirement: Osm.to_i_or_nil(config['levels_column_id']),
+            requires_modules: config['requires'],
+            other_requirements_required: (config['columnsRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i} },
+            badges_required: (config['badgesRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i} },
+            show_level_letters: !!config['shownumbers'],
           )
 
           modules = module_completion_data(api: api, badge: badge, no_read_cache: no_read_cache)
@@ -150,12 +150,12 @@ module Osm
           requirements = []
           ((structure[1] || {})['rows'] || []).each do |r|
             requirements.push Osm::Badge::Requirement.new(
-              :badge => badge,
-              :name => r['name'],
-              :description => r['tooltip'],
-              :mod => modules[r['module']],
-              :id => Osm::to_i_or_nil(r['field']),
-              :editable => r['editable'].to_s.eql?('true'),
+              badge: badge,
+              name: r['name'],
+              description: r['tooltip'],
+              mod: modules[r['module']],
+              id: Osm::to_i_or_nil(r['field']),
+              editable: r['editable'].to_s.eql?('true'),
             )
           end
           badge.requirements = requirements
@@ -185,10 +185,10 @@ module Osm
         data = api.post_query("ext/badges/records/summary/?action=get&mode=verbose&section=#{section.type}&sectionid=#{section.id}&termid=#{term_id}")
         data['items'].each do |item|
           new_item = {
-            :first_name => item['firstname'],
-            :last_name => item['lastname'],
-            :name => "#{item['firstname']} #{item['lastname']}",
-            :member_id => Osm.to_i_or_nil(item['scout_id']),
+            first_name: item['firstname'],
+            last_name: item['lastname'],
+            name: "#{item['firstname']} #{item['lastname']}",
+            member_id: Osm.to_i_or_nil(item['scout_id']),
           }
 
           badge_data = Hash[item.to_a.select{ |k,v| !!k.match(/\d+_\d+/) }]
@@ -245,15 +245,15 @@ module Osm
 
         data['items'].map do |d|
           Osm::Badge::Data.new(
-            :member_id => d['scoutid'],
-            :first_name => d['firstname'],
-            :last_name => d['lastname'],
-            :due => d['completed'].to_i,
-            :awarded => d['awarded'].to_i,
-            :awarded_date => Osm.parse_date(d['awardeddate']),
-            :requirements => d.map{ |k,v| [k.to_i, v] }.to_h.except(0),
-            :section_id => section.id,
-            :badge => self,
+            member_id: d['scoutid'],
+            first_name: d['firstname'],
+            last_name: d['lastname'],
+            due: d['completed'].to_i,
+            awarded: d['awarded'].to_i,
+            awarded_date: Osm.parse_date(d['awardeddate']),
+            requirements: d.map{ |k,v| [k.to_i, v] }.to_h.except(0),
+            section_id: section.id,
+            badge: self,
           )
         end
       end #cache fetch
@@ -387,19 +387,19 @@ module Osm
       # @!attribute [rw] editable
       #   @return true, false
 
-      attribute :badge, :type => Object
-      attribute :name, :type => String
-      attribute :description, :type => String
-      attribute :mod, :type => Object
-      attribute :id, :type => Integer
-      attribute :editable, :type => Boolean
+      attribute :badge, type: Object
+      attribute :name, type: String
+      attribute :description, type: String
+      attribute :mod, type: Object
+      attribute :id, type: Integer
+      attribute :editable, type: Boolean
 
       validates_presence_of :name
       validates_presence_of :description
       validates_presence_of :mod
-      validates_numericality_of :id, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :id, only_integer:true, greater_than:0
       validates_presence_of :badge
-      validates_inclusion_of :editable, :in => [true, false]
+      validates_inclusion_of :editable, in: [true, false]
 
       # @!method initialize
       #   Initialize a new Badge::Requirement
@@ -413,7 +413,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, {:replace_with => {'badge' => :identifier}})
+        Osm.inspect_instance(self, {replace_with: {'badge' => :identifier}})
       end
 
     end # Class Requirement
@@ -439,23 +439,23 @@ module Osm
       # @!attribute [rw] add_column_id_to_numeric
       #   @return [Integer, nil] ?
 
-      attribute :badge, :type => Object
-      attribute :letter, :type => String
-      attribute :id, :type => Integer
-      attribute :min_required, :type => Integer
-      attribute :custom_columns, :type => Integer
-      attribute :completed_into_column, :type => Integer
-      attribute :numeric_into_column, :type => Integer
-      attribute :add_column_id_to_numeric, :type => Integer
+      attribute :badge, type: Object
+      attribute :letter, type: String
+      attribute :id, type: Integer
+      attribute :min_required, type: Integer
+      attribute :custom_columns, type: Integer
+      attribute :completed_into_column, type: Integer
+      attribute :numeric_into_column, type: Integer
+      attribute :add_column_id_to_numeric, type: Integer
 
       validates_presence_of :badge
       validates_presence_of :letter
-      validates_numericality_of :id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :min_required, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :custom_columns, :only_integer=>true, :greater_than_or_equal_to=>0, :allow_nil=>true
-      validates_numericality_of :completed_into_column, :only_integer=>true, :greater_than=>0, :allow_nil=>true
-      validates_numericality_of :numeric_into_column, :only_integer=>true, :greater_than=>0, :allow_nil=>true
-      validates_numericality_of :add_column_id_to_numeric, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+      validates_numericality_of :id, only_integer:true, greater_than:0
+      validates_numericality_of :min_required, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :custom_columns, only_integer:true, greater_than_or_equal_to:0, allow_nil:true
+      validates_numericality_of :completed_into_column, only_integer:true, greater_than:0, allow_nil:true
+      validates_numericality_of :numeric_into_column, only_integer:true, greater_than:0, allow_nil:true
+      validates_numericality_of :add_column_id_to_numeric, only_integer:true, greater_than:0, allow_nil:true
 
       # @!method initialize
       #   Initialize a new Badge::RequirementModule
@@ -470,7 +470,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, {:replace_with => {'badge' => :identifier}})
+        Osm.inspect_instance(self, {replace_with: {'badge' => :identifier}})
       end
 
     end # Class RequirementModule
@@ -496,24 +496,24 @@ module Osm
       # @!attribute [rw] badge
       #   @return [Osm::Badge] the badge that the data belongs to
 
-      attribute :member_id, :type => Integer
-      attribute :first_name, :type => String
-      attribute :last_name, :type => String
-      attribute :due, :type => Integer, :default => 0
-      attribute :awarded, :type => Integer, :default => 0
-      attribute :awarded_date, :type => Date, :default => nil
-      attribute :requirements, :type => Object, :default => DirtyHashy.new
-      attribute :section_id, :type => Integer
-      attribute :badge, :type => Object
+      attribute :member_id, type: Integer
+      attribute :first_name, type: String
+      attribute :last_name, type: String
+      attribute :due, type: Integer, default: 0
+      attribute :awarded, type: Integer, default: 0
+      attribute :awarded_date, type: Date, default: nil
+      attribute :requirements, type: Object, default: DirtyHashy.new
+      attribute :section_id, type: Integer
+      attribute :badge, type: Object
 
       validates_presence_of :badge
       validates_presence_of :first_name
       validates_presence_of :last_name
-      validates_numericality_of :due, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :awarded, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
-      validates :requirements, :hash => {:key_type => Integer, :value_type => String}
+      validates_numericality_of :due, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :awarded, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :member_id, only_integer:true, greater_than:0
+      validates_numericality_of :section_id, only_integer:true, greater_than:0
+      validates :requirements, hash: {key_type: Integer, value_type: String}
 
 
       # @!method initialize
@@ -593,14 +593,14 @@ module Osm
             return false if requires.include?(false) # Only earnt if all combinations are met
           end
           badge.other_requirements_required.each do |c|
-            # {:id => ###, :min => #}
+            # {id: ###, min: #}
             if requirements.has_key?(c[:id]) # Only check it if the data is in the requirements Hash
               return false unless requirement_met?(c[:id])
               return false if requirements[c[:id]].to_i < c[:min]
             end
           end
           badge.badges_required.each do |b|
-            # {:id => ###, :version => #}
+            # {id: ###, version: #}
             #TODO
           end
           return true
@@ -806,7 +806,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, {:replace_with => {'badge' => :name}})
+        Osm.inspect_instance(self, {replace_with: {'badge' => :name}})
       end
 
       # Work out if the requirmeent has been met

@@ -6,13 +6,13 @@ describe "Invoice" do
 
   it "Create Invoice" do
     i = Osm::Invoice.new(
-      :id => 1,
-      :section_id => 2,
-      :name => 'Name',
-      :extra_details => 'Extra Details',
-      :date => Date.new(2001, 2, 3),
-      :archived => true,
-      :finalised => true,
+      id: 1,
+      section_id: 2,
+      name: 'Name',
+      extra_details: 'Extra Details',
+      date: Date.new(2001, 2, 3),
+      archived: true,
+      finalised: true,
     )
 
     i.id.should == 1
@@ -26,10 +26,10 @@ describe "Invoice" do
   end
 
   it "Sorts Invoice by Section ID, Name then Date" do
-    i1 = Osm::Invoice.new(:section_id => 1, :name => 'a', :date => Date.new(2000, 1, 2))
-    i2 = Osm::Invoice.new(:section_id => 2, :name => 'a', :date => Date.new(2000, 1, 2))
-    i3 = Osm::Invoice.new(:section_id => 2, :name => 'b', :date => Date.new(2000, 1, 2))
-    i4 = Osm::Invoice.new(:section_id => 2, :name => 'b', :date => Date.new(2000, 1, 3))
+    i1 = Osm::Invoice.new(section_id: 1, name: 'a', date: Date.new(2000, 1, 2))
+    i2 = Osm::Invoice.new(section_id: 2, name: 'a', date: Date.new(2000, 1, 2))
+    i3 = Osm::Invoice.new(section_id: 2, name: 'b', date: Date.new(2000, 1, 2))
+    i4 = Osm::Invoice.new(section_id: 2, name: 'b', date: Date.new(2000, 1, 3))
 
     data = [i2, i4, i1, i3]
     data.sort.should == [i1, i2, i3, i4]
@@ -38,15 +38,15 @@ describe "Invoice" do
   describe "Invoice Item" do
     it "Create" do
       ii = Osm::Invoice::Item.new(
-        :id => 1,
-        :invoice => Osm::Invoice.new,
-        :record_id => 3,
-        :date => Date.new(2002, 3, 4),
-        :amount => '5.00',
-        :type => :expense,
-        :payto => 'Name',
-        :description => 'Comments',
-        :budget_name => 'Budget',
+        id: 1,
+        invoice: Osm::Invoice.new,
+        record_id: 3,
+        date: Date.new(2002, 3, 4),
+        amount: '5.00',
+        type: :expense,
+        payto: 'Name',
+        description: 'Comments',
+        budget_name: 'Budget',
       )
   
       ii.id.should == 1
@@ -62,19 +62,19 @@ describe "Invoice" do
     end
   
     it "Sorts by Invoice then Date" do
-      i1 = Osm::Invoice.new(:section_id => 1, :name => 'a', :date => Date.new(2000, 1, 2))
-      i2 = Osm::Invoice.new(:section_id => 2, :name => 'a', :date => Date.new(2000, 1, 2))
-      ii1 = Osm::Invoice::Item.new(:invoice => i1, :date => Date.new(2000, 1, 1))
-      ii2 = Osm::Invoice::Item.new(:invoice => i2, :date => Date.new(2000, 1, 1))
-      ii3 = Osm::Invoice::Item.new(:invoice => i2, :date => Date.new(2000, 1, 2))
+      i1 = Osm::Invoice.new(section_id: 1, name: 'a', date: Date.new(2000, 1, 2))
+      i2 = Osm::Invoice.new(section_id: 2, name: 'a', date: Date.new(2000, 1, 2))
+      ii1 = Osm::Invoice::Item.new(invoice: i1, date: Date.new(2000, 1, 1))
+      ii2 = Osm::Invoice::Item.new(invoice: i2, date: Date.new(2000, 1, 1))
+      ii3 = Osm::Invoice::Item.new(invoice: i2, date: Date.new(2000, 1, 2))
   
       data = [ii2, ii3, ii1]
       data.sort.should == [ii1, ii2, ii3]
     end
 
     it "Calculates value for easy summing" do
-      Osm::Invoice::Item.new(:type => :income, :amount => '1.00').value.should == 1.00
-      Osm::Invoice::Item.new(:type => :expense, :amount => '2.00').value.should == -2.00
+      Osm::Invoice::Item.new(type: :income, amount: '1.00').value.should == 1.00
+      Osm::Invoice::Item.new(type: :expense, amount: '2.00').value.should == -2.00
     end
 
   end
@@ -214,10 +214,10 @@ describe "Invoice" do
 
       it "Create (success)" do
         invoice = Osm::Invoice.new(
-          :section_id => 1,
-          :name => 'Invoice name',
-          :extra_details => '',
-          :date => Date.new(2002, 3, 4),
+          section_id: 1,
+          name: 'Invoice name',
+          extra_details: '',
+          date: Date.new(2002, 3, 4),
         )
 
         $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
@@ -232,10 +232,10 @@ describe "Invoice" do
 
       it "Create (failure)" do
         invoice = Osm::Invoice.new(
-          :section_id => 1,
-          :name => 'Invoice name',
-          :extra_details => '',
-          :date => Date.new(2002, 3, 4),
+          section_id: 1,
+          name: 'Invoice name',
+          extra_details: '',
+          date: Date.new(2002, 3, 4),
         )
 
         $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
@@ -250,11 +250,11 @@ describe "Invoice" do
 
       it "Update (success)" do
         invoice = Osm::Invoice.new(
-          :id => 1,
-          :section_id => 2,
-          :name => 'Invoice name',
-          :extra_details => '',
-          :date => Date.new(2002, 3, 4),
+          id: 1,
+          section_id: 2,
+          name: 'Invoice name',
+          extra_details: '',
+          date: Date.new(2002, 3, 4),
         )
 
         $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {
@@ -269,11 +269,11 @@ describe "Invoice" do
 
       it "Update (failure)" do
         invoice = Osm::Invoice.new(
-          :id => 1,
-          :section_id => 2,
-          :name => 'Invoice name',
-          :extra_details => '',
-          :date => Date.new(2002, 3, 4),
+          id: 1,
+          section_id: 2,
+          name: 'Invoice name',
+          extra_details: '',
+          date: Date.new(2002, 3, 4),
         )
 
         $api.should_receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {
@@ -287,7 +287,7 @@ describe "Invoice" do
       end
 
       it "Delete (success)" do
-        invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
+        invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
         $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
@@ -297,7 +297,7 @@ describe "Invoice" do
       end
 
       it "Delete (failure)" do
-        invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
+        invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
         $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
@@ -307,7 +307,7 @@ describe "Invoice" do
       end
 
       it "Finalise invoice (success)" do
-        invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
+        invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
         $api.should_receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({"ok"=>true})
 
@@ -316,7 +316,7 @@ describe "Invoice" do
       end
 
       it "Finalise invoice (failure)" do
-        invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
+        invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
         $api.should_receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({"ok"=>false})
 
@@ -325,7 +325,7 @@ describe "Invoice" do
       end
 
       it "Finalise invoice (already finalised)" do
-        invoice = Osm::Invoice.new(:id => 1, :section_id => 2, :finalised => true)
+        invoice = Osm::Invoice.new(id: 1, section_id: 2, finalised: true)
 
         $api.should_not_receive(:post_query)
 
@@ -334,7 +334,7 @@ describe "Invoice" do
       end
 
       it "Archive invoice (success)" do
-        invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
+        invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
         $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
@@ -346,7 +346,7 @@ describe "Invoice" do
       end
 
       it "Archive invoice (failure)" do
-        invoice = Osm::Invoice.new(:id => 1, :section_id => 2)
+        invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
         $api.should_receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
@@ -358,7 +358,7 @@ describe "Invoice" do
       end
 
       it "Archive invoice (already archived)" do
-        invoice = Osm::Invoice.new(:id => 1, :section_id => 2, :archived => true)
+        invoice = Osm::Invoice.new(id: 1, section_id: 2, archived: true)
 
         $api.should_not_receive(:post_query)
 
@@ -396,23 +396,23 @@ describe "Invoice" do
       it "Create (success)" do
         invoice = Osm::Invoice.new(id: 3, section_id: 2)
         item = Osm::Invoice::Item.new(
-          :invoice => invoice,
-          :amount => '1.23',
-          :type => :expense,
-          :budget_name => 'A budget',
-          :date => Date.new(2003, 5, 6),
-          :description => 'A description',
-          :payto => 'Person to Pay',
+          invoice: invoice,
+          amount: '1.23',
+          type: :expense,
+          budget_name: 'A budget',
+          date: Date.new(2003, 5, 6),
+          description: 'A description',
+          payto: 'Person to Pay',
         )
 
         $api.should_receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({"ok"=>true})
 
         data1 = [
-          Osm::Invoice::Item.new(:id => 1, :invoice => invoice, :record_id => 3, :date => Date.new(2012, 1, 2), :amount => '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
+          Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
         ]
         data2 = [
-          Osm::Invoice::Item.new(:id => 1, :invoice => invoice, :record_id => 3, :date => Date.new(2012, 1, 2), :amount => '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
-          Osm::Invoice::Item.new(:id => 2, :invoice => invoice, :record_id => 4, :date => Date.new(2012, 1, 2), :amount => '1.23', :type => :expense, :payto => 'John Smith', :description => '', :budget_name => 'Default'),
+          Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
+          Osm::Invoice::Item.new(id: 2, invoice: invoice, record_id: 4, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => '', :budget_name => 'Default'),
         ]
         invoice.should_receive(:get_items).with($api, no_read_cache: true).and_return(data1, data2)
 
@@ -441,21 +441,21 @@ describe "Invoice" do
       end
 
       it "Create (failure to create)" do
-        invoice = Osm::Invoice.new(:id => 3, :section_id => 2)
+        invoice = Osm::Invoice.new(id: 3, section_id: 2)
         item = Osm::Invoice::Item.new(
-          :invoice => invoice,
-          :amount => '1.23',
-          :type => :expense,
-          :budget_name => 'A budget',
-          :date => Date.new(2003, 5, 6),
-          :description => 'A description',
-          :payto => 'Person to Pay',
+          invoice: invoice,
+          amount: '1.23',
+          type: :expense,
+          budget_name: 'A budget',
+          date: Date.new(2003, 5, 6),
+          description: 'A description',
+          payto: 'Person to Pay',
         )
 
         $api.should_receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({"ok"=>false})
 
         data = [
-          Osm::Invoice::Item.new(:id => 1, :invoice => invoice, :record_id => 3, :date => Date.new(2012, 1, 2), :amount => '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
+          Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
         ]
         invoice.should_receive(:get_items).with($api, no_read_cache: true).and_return(data)
 
@@ -464,9 +464,9 @@ describe "Invoice" do
 
       it "Update (success)" do
         item = Osm::Invoice::Item.new(
-          :id => 1,
-          :invoice => Osm::Invoice.new(:id => 3, :section_id => 2),
-          :record_id => 4,
+          id: 1,
+          invoice: Osm::Invoice.new(id: 3, section_id: 2),
+          record_id: 4,
         )
         item.amount = '1.23'
         item.type = :income
@@ -499,15 +499,15 @@ describe "Invoice" do
 
       it "Update (failure)" do
         item = Osm::Invoice::Item.new(
-          :id => 1,
-          :invoice => Osm::Invoice.new(:id => 3, :section_id => 2),
-          :record_id => 4,
-          :amount => '1.23',
-          :type => :expense,
-          :budget_name => 'A budget',
-          :date => Date.new(2003, 4, 5),
-          :description => 'A description',
-          :payto => 'Person to Pay',
+          id: 1,
+          invoice: Osm::Invoice.new(id: 3, section_id: 2),
+          record_id: 4,
+          amount: '1.23',
+          type: :expense,
+          budget_name: 'A budget',
+          date: Date.new(2003, 4, 5),
+          description: 'A description',
+          payto: 'Person to Pay',
         )
         item.description = 'A new description'
 
@@ -524,7 +524,7 @@ describe "Invoice" do
       end
 
       it "Delete (success)" do
-        item = Osm::Invoice::Item.new(:id => 1, :invoice => Osm::Invoice.new(:id => 3, :section_id => 2))
+        item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 3, section_id: 2))
 
         $api.should_receive(:post_query).with('finances.php?action=deleteEntry&sectionid=2', post_data: {
           'id' => 1,
@@ -534,7 +534,7 @@ describe "Invoice" do
       end
 
       it "Delete (failure)" do
-        item = Osm::Invoice::Item.new(:id => 1, :invoice => Osm::Invoice.new(:id => 2, :section_id => 4),)
+        item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 2, section_id: 4),)
 
         $api.should_receive(:post_query).with('finances.php?action=deleteEntry&sectionid=4', post_data: {
           'id' => 1,

@@ -74,44 +74,44 @@ module Osm
     # @!attribute [rw] doctor
     #   @return [Osm::Member::DoctorContact, nil] the member's doctor (nil if hidden in OSM)
 
-    attribute :id, :type => Integer
-    attribute :section_id, :type => Integer
-    attribute :first_name, :type => String
-    attribute :last_name, :type => String
-    attribute :grouping_id, :type => Integer
-    attribute :grouping_label, :type => String
-    attribute :grouping_leader, :type => Integer
-    attribute :grouping_leader_label, :type => String
-    attribute :age, :type => String
-    attribute :date_of_birth, :type => Date
-    attribute :started_section, :type => Date
-    attribute :finished_section, :type => Date
-    attribute :joined_movement, :type => Date
-    attribute :gender, :type => Object
-    attribute :additional_information, :type => Object, :default => DirtyHashy.new
-    attribute :additional_information_labels, :type => Object, :default => DirtyHashy.new
-    attribute :contact, :type => Object
-    attribute :primary_contact, :type => Object
-    attribute :secondary_contact, :type => Object
-    attribute :emergency_contact, :type => Object
-    attribute :doctor, :type => Object
+    attribute :id, type: Integer
+    attribute :section_id, type: Integer
+    attribute :first_name, type: String
+    attribute :last_name, type: String
+    attribute :grouping_id, type: Integer
+    attribute :grouping_label, type: String
+    attribute :grouping_leader, type: Integer
+    attribute :grouping_leader_label, type: String
+    attribute :age, type: String
+    attribute :date_of_birth, type: Date
+    attribute :started_section, type: Date
+    attribute :finished_section, type: Date
+    attribute :joined_movement, type: Date
+    attribute :gender, type: Object
+    attribute :additional_information, type: Object, default: DirtyHashy.new
+    attribute :additional_information_labels, type: Object, default: DirtyHashy.new
+    attribute :contact, type: Object
+    attribute :primary_contact, type: Object
+    attribute :secondary_contact, type: Object
+    attribute :emergency_contact, type: Object
+    attribute :doctor, type: Object
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
-    validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-    validates_numericality_of :grouping_leader, :only_integer=>true, :greater_than_or_equal_to=>0, :less_than_or_equal_to=>14, :allow_nil => true
+    validates_numericality_of :id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.id.nil? }
+    validates_numericality_of :section_id, only_integer:true, greater_than:0
+    validates_numericality_of :grouping_id, only_integer:true, greater_than_or_equal_to:-2
+    validates_numericality_of :grouping_leader, only_integer:true, greater_than_or_equal_to:0, less_than_or_equal_to:14, allow_nil: true
     validates_presence_of :first_name
     validates_presence_of :last_name
     validates_presence_of :date_of_birth
     validates_presence_of :started_section
     validates_presence_of :joined_movement
-    validates_format_of :age, :with => /\A[0-9]{1,3} \/ (?:0?[0-9]|1[012])\Z/, :message => 'age is not in the correct format (yy / mm)', :allow_blank => true
-    validates_inclusion_of :gender, :in => [:male, :female, :other, :unspecified], :allow_nil => true
-    validates :contact, :validity=>{allow_nil: true}
-    validates :primary_contact, :validity=>{allow_nil: true}
-    validates :secondary_contact, :validity=>{allow_nil: true}
-    validates :emergency_contact, :validity=>{allow_nil: true}
-    validates :doctor, :validity=>{allow_nil: true}
+    validates_format_of :age, with: /\A[0-9]{1,3} \/ (?:0?[0-9]|1[012])\Z/, message: 'age is not in the correct format (yy / mm)', allow_blank: true
+    validates_inclusion_of :gender, in: [:male, :female, :other, :unspecified], allow_nil: true
+    validates :contact, validity:{allow_nil: true}
+    validates :primary_contact, validity:{allow_nil: true}
+    validates :secondary_contact, validity:{allow_nil: true}
+    validates :emergency_contact, validity:{allow_nil: true}
+    validates :doctor, validity:{allow_nil: true}
 
 
     # Get members for a section
@@ -161,21 +161,21 @@ module Osm
           custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ]
 
           new(
-            :id => Osm::to_i_or_nil(item['member_id']),
-            :section_id => Osm::to_i_or_nil(item['section_id']),
-            :first_name => item['first_name'],
-            :last_name => item['last_name'],
-            :grouping_id => Osm::to_i_or_nil(item['patrol_id']),
-            :grouping_label => item['patrol'],
-            :grouping_leader => item['patrol_role_level'],
-            :grouping_leader_label => item['patrol_role_level_label'],
-            :age => item['age'],
-            :date_of_birth => Osm::parse_date(item['date_of_birth'], :ignore_epoch => true),
-            :started_section => Osm::parse_date(item['joined']),
-            :finished_section => Osm::parse_date(item['end_date']),
-            :joined_movement => Osm::parse_date(item['started']),
-            :gender => {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[(floating_data[CID_GENDER] || '').downcase],
-            :contact => member_contact.nil? ? nil : MemberContact.new(
+            id: Osm::to_i_or_nil(item['member_id']),
+            section_id: Osm::to_i_or_nil(item['section_id']),
+            first_name: item['first_name'],
+            last_name: item['last_name'],
+            grouping_id: Osm::to_i_or_nil(item['patrol_id']),
+            grouping_label: item['patrol'],
+            grouping_leader: item['patrol_role_level'],
+            grouping_leader_label: item['patrol_role_level_label'],
+            age: item['age'],
+            date_of_birth: Osm::parse_date(item['date_of_birth'], ignore_epoch: true),
+            started_section: Osm::parse_date(item['joined']),
+            finished_section: Osm::parse_date(item['end_date']),
+            joined_movement: Osm::parse_date(item['started']),
+            gender: {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[(floating_data[CID_GENDER] || '').downcase],
+            contact: member_contact.nil? ? nil : MemberContact.new(
               first_name: item['first_name'],
               last_name: item['last_name'],
               address_1: member_contact[CID_ADDRESS_1],
@@ -194,7 +194,7 @@ module Osm
               additional_information: member_custom,
               additional_information_labels: custom_labels[GID_MEMBER_CONTACT],
             ),
-            :primary_contact => primary_contact.nil? ? nil : PrimaryContact.new(
+            primary_contact: primary_contact.nil? ? nil : PrimaryContact.new(
               first_name: primary_contact[CID_FIRST_NAME],
               last_name: primary_contact[CID_LAST_NAME],
               address_1: primary_contact[CID_ADDRESS_1],
@@ -213,7 +213,7 @@ module Osm
               additional_information: primary_custom,
               additional_information_labels: custom_labels[GID_PRIMARY_CONTACT],
             ),
-            :secondary_contact => secondary_contact.nil? ? nil : SecondaryContact.new(
+            secondary_contact: secondary_contact.nil? ? nil : SecondaryContact.new(
               first_name: secondary_contact[CID_FIRST_NAME],
               last_name: secondary_contact[CID_LAST_NAME],
               address_1: secondary_contact[CID_ADDRESS_1],
@@ -232,7 +232,7 @@ module Osm
               additional_information: secondary_custom,
               additional_information_labels: custom_labels[GID_SECONDARY_CONTACT],
             ),
-            :emergency_contact => emergency_contact.nil? ? nil : EmergencyContact.new(
+            emergency_contact: emergency_contact.nil? ? nil : EmergencyContact.new(
               first_name: emergency_contact[CID_FIRST_NAME],
               last_name: emergency_contact[CID_LAST_NAME],
               address_1: emergency_contact[CID_ADDRESS_1],
@@ -247,7 +247,7 @@ module Osm
               additional_information: emergency_custom,
               additional_information_labels: custom_labels[GID_EMERGENCY_CONTACT],
             ),
-            :doctor => doctor_contact.nil? ? nil : DoctorContact.new(
+            doctor: doctor_contact.nil? ? nil : DoctorContact.new(
               first_name: doctor_contact[CID_FIRST_NAME],
               last_name: doctor_contact[CID_LAST_NAME],
               surgery: doctor_contact[CID_SURGERY],
@@ -599,17 +599,17 @@ module Osm
       # @!attribute [rw] additional_information_labels
       #   @return [DirtyHashy] the labels for the additional information (key is OSM's variable name, value is the label)
 
-      attribute :first_name, :type => String
-      attribute :last_name, :type => String
-      attribute :address_1, :type => String
-      attribute :address_2, :type => String
-      attribute :address_3, :type => String
-      attribute :address_4, :type => String
-      attribute :postcode, :type => String
-      attribute :phone_1, :type => String
-      attribute :phone_2, :type => String
-      attribute :additional_information, :type => Object, :default => DirtyHashy.new
-      attribute :additional_information_labels, :type => Object, :default => DirtyHashy.new
+      attribute :first_name, type: String
+      attribute :last_name, type: String
+      attribute :address_1, type: String
+      attribute :address_2, type: String
+      attribute :address_3, type: String
+      attribute :address_4, type: String
+      attribute :postcode, type: String
+      attribute :phone_1, type: String
+      attribute :phone_2, type: String
+      attribute :additional_information, type: Object, default: DirtyHashy.new
+      attribute :additional_information_labels, type: Object, default: DirtyHashy.new
 
       # @!method initialize
       #   Initialize a new Contact
@@ -708,17 +708,17 @@ module Osm
       # @!attribute [rw] receive_phone_2
       #   @return true, false whether the member should receive SMSs from leaders on their secondary phone number
 
-      attribute :email_1, :type => String
-      attribute :receive_email_1, :type => Boolean, :default => false
-      attribute :email_2, :type => String
-      attribute :receive_email_2, :type => Boolean, :default => false
-      attribute :receive_phone_1, :type => Boolean, :default => false
-      attribute :receive_phone_2, :type => Boolean, :default => false
+      attribute :email_1, type: String
+      attribute :receive_email_1, type: Boolean, default: false
+      attribute :email_2, type: String
+      attribute :receive_email_2, type: Boolean, default: false
+      attribute :receive_phone_1, type: Boolean, default: false
+      attribute :receive_phone_2, type: Boolean, default: false
 
-      validates_inclusion_of :receive_email_1, :in => [true, false]
-      validates_inclusion_of :receive_email_2, :in => [true, false]
-      validates_inclusion_of :receive_phone_1, :in => [true, false]
-      validates_inclusion_of :receive_phone_2, :in => [true, false]
+      validates_inclusion_of :receive_email_1, in: [true, false]
+      validates_inclusion_of :receive_email_2, in: [true, false]
+      validates_inclusion_of :receive_phone_1, in: [true, false]
+      validates_inclusion_of :receive_phone_2, in: [true, false]
     end
 
 
@@ -741,17 +741,17 @@ module Osm
       # @!attribute [rw] receive_phone_2
       #   @return true, false whether the contact should receive SMSs from leaders on their secondary phone number
 
-      attribute :email_1, :type => String
-      attribute :receive_email_1, :type => Boolean, :default => false
-      attribute :email_2, :type => String
-      attribute :receive_email_2, :type => Boolean, :default => false
-      attribute :receive_phone_1, :type => Boolean, :default => false
-      attribute :receive_phone_2, :type => Boolean, :default => false
+      attribute :email_1, type: String
+      attribute :receive_email_1, type: Boolean, default: false
+      attribute :email_2, type: String
+      attribute :receive_email_2, type: Boolean, default: false
+      attribute :receive_phone_1, type: Boolean, default: false
+      attribute :receive_phone_2, type: Boolean, default: false
 
-      validates_inclusion_of :receive_email_1, :in => [true, false]
-      validates_inclusion_of :receive_email_2, :in => [true, false]
-      validates_inclusion_of :receive_phone_1, :in => [true, false]
-      validates_inclusion_of :receive_phone_2, :in => [true, false]
+      validates_inclusion_of :receive_email_1, in: [true, false]
+      validates_inclusion_of :receive_email_2, in: [true, false]
+      validates_inclusion_of :receive_phone_1, in: [true, false]
+      validates_inclusion_of :receive_phone_2, in: [true, false]
     end # class PrimaryContact
 
     class SecondaryContact < Osm::Member::PrimaryContact
@@ -768,8 +768,8 @@ module Osm
       # @!attribute [rw] email_2
       #   @return [String] the secondary email address for the contact
 
-      attribute :email_1, :type => String
-      attribute :email_2, :type => String
+      attribute :email_1, type: String
+      attribute :email_2, type: String
 
     end # class EmergencyContact
 
@@ -780,7 +780,7 @@ module Osm
       # @!attribute [rw] surgery
       #   @return [String] the surgery name
 
-      attribute :surgery, :type => String
+      attribute :surgery, type: String
 
     end # class DoctorContact
 

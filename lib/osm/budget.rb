@@ -8,12 +8,12 @@ module Osm
     # @!attribute [rw] name
     #   @return [String] The name of the budget
 
-    attribute :id, :type => Integer
-    attribute :section_id, :type => Integer
-    attribute :name, :type => String
+    attribute :id, type: Integer
+    attribute :section_id, type: Integer
+    attribute :name, type: String
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.id.nil? }
+    validates_numericality_of :section_id, only_integer:true, greater_than:0
     validates_presence_of :name
 
 
@@ -38,9 +38,9 @@ module Osm
         data = data['items']
         data.map do |budget|
           Budget.new(
-            :id => Osm::to_i_or_nil(budget['categoryid']),
-            :section_id => Osm::to_i_or_nil(budget['sectionid']),
-            :name => budget['name'],
+            id: Osm::to_i_or_nil(budget['categoryid']),
+            section_id: Osm::to_i_or_nil(budget['sectionid']),
+            name: budget['name'],
           )
         end # data.map
       end # cache fetch

@@ -7,37 +7,37 @@ describe "Section" do
 
   before :each do
     @attributes = {
-      :id => 1,
-      :name => 'Name',
-      :subscription_level => 2,
-      :subscription_expires => (Date.today + 60).strftime('%Y-%m-%d'),
-      :type => :cubs,
-      :wizard => false,
-      :flexi_records => [],
-      :group_id => 3,
-      :group_name => '3rd Somewhere',
-      :gocardless => true,
-      :myscout_events_expires => (Date.today + 61).strftime('%Y-%m-%d'),
-      :myscout_badges_expires => (Date.today + 62).strftime('%Y-%m-%d'),
-      :myscout_programme_expires => (Date.today + 63).strftime('%Y-%m-%d'),
-      :myscout_details_expires => (Date.today + 64),
-      :myscout_events => true,
-      :myscout_badges => true,
-      :myscout_programme => true,
-      :myscout_payments => true,
-      :myscout_emails => {:email1 => true, :email2 => false},
-      :myscout_email_address_from => 'send_from@example.com',
-      :myscout_email_address_copy => '',
-      :myscout_badges_partial => true,
-      :myscout_programme_summary => true,
-      :myscout_programme_times => true,
-      :myscout_programme_show => 20,
-      :myscout_event_reminder_count => 4,
-      :myscout_event_reminder_frequency => 5,
-      :myscout_payment_reminder_count => 6,
-      :myscout_payment_reminder_frequency => 7,
-      :myscout_details => true,
-      :myscout_details_email_changes_to => 'notify-changes-to@example.com',
+      id: 1,
+      name: 'Name',
+      subscription_level: 2,
+      subscription_expires: (Date.today + 60).strftime('%Y-%m-%d'),
+      type: :cubs,
+      wizard: false,
+      flexi_records: [],
+      group_id: 3,
+      group_name: '3rd Somewhere',
+      gocardless: true,
+      myscout_events_expires: (Date.today + 61).strftime('%Y-%m-%d'),
+      myscout_badges_expires: (Date.today + 62).strftime('%Y-%m-%d'),
+      myscout_programme_expires: (Date.today + 63).strftime('%Y-%m-%d'),
+      myscout_details_expires: (Date.today + 64),
+      myscout_events: true,
+      myscout_badges: true,
+      myscout_programme: true,
+      myscout_payments: true,
+      myscout_emails: {email1: true, email2: false},
+      myscout_email_address_from: 'send_from@example.com',
+      myscout_email_address_copy: '',
+      myscout_badges_partial: true,
+      myscout_programme_summary: true,
+      myscout_programme_times: true,
+      myscout_programme_show: 20,
+      myscout_event_reminder_count: 4,
+      myscout_event_reminder_frequency: 5,
+      myscout_payment_reminder_count: 6,
+      myscout_payment_reminder_frequency: 7,
+      myscout_details: true,
+      myscout_details_email_changes_to: 'notify-changes-to@example.com',
     }
   end
 
@@ -62,7 +62,7 @@ describe "Section" do
     section.myscout_badges.should == true
     section.myscout_programme.should == true
     section.myscout_payments.should == true
-    section.myscout_emails.should == {:email1 => true, :email2 => false}
+    section.myscout_emails.should == {email1: true, email2: false}
     section.myscout_email_address_from.should == 'send_from@example.com'
     section.myscout_email_address_copy.should == ''
     section.myscout_badges_partial.should == true
@@ -129,7 +129,7 @@ describe "Section" do
         section.myscout_badges.should == true
         section.myscout_programme.should == true
         section.myscout_payments.should == true
-        section.myscout_emails.should == {:email1 => true, :email2 => false}
+        section.myscout_emails.should == {email1: true, email2: false}
         section.myscout_email_address_from.should == 'send_from@example.com'
         section.myscout_email_address_copy.should == ''
         section.myscout_badges_partial.should == true
@@ -161,19 +161,19 @@ describe "Section" do
 
     it "Gets the section's notepad" do
       $api.should_receive(:post_query).with('api.php?action=getNotepads').and_return({"1" => "Section 1", "2" => "Section 2"})
-      section = Osm::Section.new(:id => 1)
+      section = Osm::Section.new(id: 1)
       section.get_notepad($api).should == 'Section 1'
     end
 
     it "Sets the section's notepad (success)" do
       $api.should_receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: {"value"=>"content"}).and_return({"ok" => true})
-      section = Osm::Section.new(:id => 1)
+      section = Osm::Section.new(id: 1)
       section.set_notepad(api: $api, content: 'content').should == true
     end
 
     it "Sets the section's notepad (fail)" do
       $api.should_receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: {"value"=>"content"}).and_return({"ok" => false})
-      section = Osm::Section.new(:id => 1)
+      section = Osm::Section.new(id: 1)
       section.set_notepad(api: $api, content: 'content').should == false
     end
 
@@ -191,7 +191,7 @@ describe "Section" do
 
     it "They don't match" do
       section1 = Osm::Section.new(@attributes)
-      section2 = Osm::Section.new(@attributes.merge(:id => 2))
+      section2 = Osm::Section.new(@attributes.merge(id: 2))
 
       section1.should_not == section2
     end
@@ -200,10 +200,10 @@ describe "Section" do
 
 
   it "Sorts by Group Name, section type (age order) then name" do
-    section1 = Osm::Section.new(@attributes.merge(:group_id => 1, :group_name => '1st Somewhere', :type => :beavers, :name => 'a'))
-    section2 = Osm::Section.new(@attributes.merge(:group_id => 2, :group_name => '2nd Somewhere', :type => :beavers, :name => 'a'))
-    section3 = Osm::Section.new(@attributes.merge(:group_id => 2, :group_name => '2nd Somewhere', :type => :cubs, :name => 'a'))
-    section4 = Osm::Section.new(@attributes.merge(:group_id => 2, :group_name => '2nd Somewhere', :type => :cubs, :name => 'b'))
+    section1 = Osm::Section.new(@attributes.merge(group_id: 1, group_name: '1st Somewhere', type: :beavers, name: 'a'))
+    section2 = Osm::Section.new(@attributes.merge(group_id: 2, group_name: '2nd Somewhere', type: :beavers, name: 'a'))
+    section3 = Osm::Section.new(@attributes.merge(group_id: 2, group_name: '2nd Somewhere', type: :cubs, name: 'a'))
+    section4 = Osm::Section.new(@attributes.merge(group_id: 2, group_name: '2nd Somewhere', type: :cubs, name: 'b'))
 
     data = [section2, section4, section3, section1]
     data.sort.should == [section1, section2, section3, section4]
@@ -211,16 +211,16 @@ describe "Section" do
 
 
   describe "Correctly works out the section type" do
-    unknown   = Osm::Section.new(:type => :abc)
-    beavers   = Osm::Section.new(:type => :beavers)
-    cubs      = Osm::Section.new(:type => :cubs)
-    scouts    = Osm::Section.new(:type => :scouts)
-    explorers = Osm::Section.new(:type => :explorers)
-    network   = Osm::Section.new(:type => :network)
-    adults    = Osm::Section.new(:type => :adults)
-    waiting   = Osm::Section.new(:type => :waiting)
+    unknown   = Osm::Section.new(type: :abc)
+    beavers   = Osm::Section.new(type: :beavers)
+    cubs      = Osm::Section.new(type: :cubs)
+    scouts    = Osm::Section.new(type: :scouts)
+    explorers = Osm::Section.new(type: :explorers)
+    network   = Osm::Section.new(type: :network)
+    adults    = Osm::Section.new(type: :adults)
+    waiting   = Osm::Section.new(type: :waiting)
 
-    {:beavers => beavers, :cubs => cubs, :scouts => scouts, :explorers => explorers, :network => network, :adults => adults, :waiting => waiting, :unknown => unknown}.each do |section_type, section|
+    {beavers: beavers, cubs: cubs, scouts: scouts, explorers: explorers, network: network, :adults => adults, :waiting => waiting, :unknown => unknown}.each do |section_type, section|
       it "For a #{section_type} section" do
         [:beavers, :cubs, :scouts, :explorers, :network, :adults, :waiting].each do |type|
           section.send("#{type.to_s}?").should == (section_type == type)
@@ -231,14 +231,14 @@ describe "Section" do
 
 
   describe "Correctly works out if the section is a youth section" do
-    unknown =   Osm::Section.new(:type => :abc)
-    beavers =   Osm::Section.new(:type => :beavers)
-    cubs =      Osm::Section.new(:type => :cubs)
-    scouts =    Osm::Section.new(:type => :scouts)
-    explorers = Osm::Section.new(:type => :explorers)
-    network =   Osm::Section.new(:type => :network)
-    adults =    Osm::Section.new(:type => :adults)
-    waiting =   Osm::Section.new(:type => :waiting)
+    unknown =   Osm::Section.new(type: :abc)
+    beavers =   Osm::Section.new(type: :beavers)
+    cubs =      Osm::Section.new(type: :cubs)
+    scouts =    Osm::Section.new(type: :scouts)
+    explorers = Osm::Section.new(type: :explorers)
+    network =   Osm::Section.new(type: :network)
+    adults =    Osm::Section.new(type: :adults)
+    waiting =   Osm::Section.new(type: :waiting)
 
     [beavers, cubs, scouts, explorers].each do |section|
       it "For a #{section.type} section" do

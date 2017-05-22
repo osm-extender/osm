@@ -261,7 +261,7 @@ module Osm
         end
 
         def inspect
-          Osm.inspect_instance(self, {:replace_with => {'schedule' => :to_s}})
+          Osm.inspect_instance(self, {replace_with: {'schedule' => :to_s}})
         end
 
       end # Schedule::Payment class
@@ -447,7 +447,7 @@ module Osm
         end
 
         def inspect
-          Osm.inspect_instance(self, {:replace_with => {'payment' => :id}})
+          Osm.inspect_instance(self, {replace_with: {'payment' => :id}})
         end
 
         protected

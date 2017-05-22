@@ -7,7 +7,7 @@ describe "Gift Aid" do
 
   it "Create Donation" do
     d = Osm::GiftAid::Donation.new(
-      :donation_date => Date.new(2000, 1, 2),
+      donation_date: Date.new(2000, 1, 2),
     )
 
     d.donation_date.should == Date.new(2000, 1, 2)
@@ -15,8 +15,8 @@ describe "Gift Aid" do
   end
 
   it "Sorts Donation by date" do
-    d1 = Osm::GiftAid::Donation.new(:donation_date => Date.new(2000, 1, 2))
-    d2 = Osm::GiftAid::Donation.new(:donation_date => Date.new(2001, 1, 2))
+    d1 = Osm::GiftAid::Donation.new(donation_date: Date.new(2000, 1, 2))
+    d2 = Osm::GiftAid::Donation.new(donation_date: Date.new(2001, 1, 2))
 
     data = [d2, d1]
     data.sort.should == [d1, d2]
@@ -25,16 +25,16 @@ describe "Gift Aid" do
 
   it "Create Data" do
     d = Osm::GiftAid::Data.new(
-      :member_id => 1,
-      :first_name => 'A',
-      :last_name => 'B',
-      :tax_payer_name => 'C',
-      :tax_payer_address => 'D',
-      :tax_payer_postcode => 'E',
-      :section_id => 2,
-      :grouping_id => 3,
-      :total => '2.34',
-      :donations => {
+      member_id: 1,
+      first_name: 'A',
+      last_name: 'B',
+      tax_payer_name: 'C',
+      tax_payer_address: 'D',
+      tax_payer_postcode: 'E',
+      section_id: 2,
+      grouping_id: 3,
+      total: '2.34',
+      donations: {
         Date.new(2012, 1, 2) => '1.23',
       }
     )
@@ -55,11 +55,11 @@ describe "Gift Aid" do
   end
 
   it "Sorts Data by section_id, grouping_id, last_name then first_name" do
-    d1 = Osm::GiftAid::Data.new(:section_id => 1, :grouping_id => 1, :last_name => 'a', :first_name => 'a')
-    d2 = Osm::GiftAid::Data.new(:section_id => 2, :grouping_id => 1, :last_name => 'a', :first_name => 'a')
-    d3 = Osm::GiftAid::Data.new(:section_id => 2, :grouping_id => 2, :last_name => 'a', :first_name => 'a')
-    d4 = Osm::GiftAid::Data.new(:section_id => 2, :grouping_id => 2, :last_name => 'b', :first_name => 'a')
-    d5 = Osm::GiftAid::Data.new(:section_id => 2, :grouping_id => 2, :last_name => 'b', :first_name => 'b')
+    d1 = Osm::GiftAid::Data.new(section_id: 1, grouping_id: 1, last_name: 'a', first_name: 'a')
+    d2 = Osm::GiftAid::Data.new(section_id: 2, grouping_id: 1, last_name: 'a', first_name: 'a')
+    d3 = Osm::GiftAid::Data.new(section_id: 2, grouping_id: 2, last_name: 'a', first_name: 'a')
+    d4 = Osm::GiftAid::Data.new(section_id: 2, grouping_id: 2, last_name: 'b', first_name: 'a')
+    d5 = Osm::GiftAid::Data.new(section_id: 2, grouping_id: 2, last_name: 'b', first_name: 'b')
 
     data = [d4, d3, d5, d2, d1]
     data.sort.should == [d1, d2, d3, d4, d5]
@@ -83,7 +83,7 @@ describe "Gift Aid" do
       $api.should_receive(:post_query).with('giftaid.php?action=getStructure&sectionid=1&termid=2').and_return(data)
 
       donations = Osm::GiftAid.get_donations(api: $api, section: 1, term: 2)
-      donations.should == [Osm::GiftAid::Donation.new(:donation_date => Date.new(2000, 1, 2))]
+      donations.should == [Osm::GiftAid::Donation.new(donation_date: Date.new(2000, 1, 2))]
     end
 
     it "Fetch the data for a section" do
@@ -139,21 +139,21 @@ describe "Gift Aid" do
 
       before :each do
         @data = Osm::GiftAid::Data.new(
-          :member_id => 1,
-          :first_name => 'A',
-          :last_name => 'B',
-          :tax_payer_name => 'C',
-          :tax_payer_address => 'D',
-          :tax_payer_postcode => 'E',
-          :section_id => 2,
-          :grouping_id => 3,
-          :total => '2.34',
-          :donations => {
+          member_id: 1,
+          first_name: 'A',
+          last_name: 'B',
+          tax_payer_name: 'C',
+          tax_payer_address: 'D',
+          tax_payer_postcode: 'E',
+          section_id: 2,
+          grouping_id: 3,
+          total: '2.34',
+          donations: {
             Date.new(2012, 1, 2) => '1.23',
             Date.new(2012, 1, 3) => '2.34',
           }
         )
-        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(:id => 4) }
+        Osm::Term.stub(:get_current_term_for_section) { Osm::Term.new(id: 4) }
       end
 
       it "Tax payer" do

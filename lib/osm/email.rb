@@ -228,7 +228,7 @@ module Osm
         validates_numericality_of :member_id, only_integer: true, greater_than: 0
         validates_presence_of :address
         validates_presence_of :delivery_report
-        validates_inclusion_of :status, :in => VALID_STATUSES
+        validates_inclusion_of :status, in: VALID_STATUSES
 
 
         # @!method initialize

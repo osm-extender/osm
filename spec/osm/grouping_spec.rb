@@ -4,9 +4,9 @@ require 'spec_helper'
 describe "Grouping" do
 
   it "Sorts by section_id then name" do
-    g1 = Osm::Grouping.new(:section_id => 1, :name => 'a')
-    g2 = Osm::Grouping.new(:section_id => 2, :name => 'a')
-    g3 = Osm::Grouping.new(:section_id => 2, :name => 'b')
+    g1 = Osm::Grouping.new(section_id: 1, name: 'a')
+    g2 = Osm::Grouping.new(section_id: 2, name: 'a')
+    g3 = Osm::Grouping.new(section_id: 2, name: 'b')
 
     data = [g3, g1, g2]
     data.sort.should == [g1, g2, g3]

@@ -51,41 +51,41 @@ module Osm
     # @!attribute [rw] allow_booking
     #   @return true, false whether booking is allowed through My.SCOUT
 
-    attribute :id, :type => Integer
-    attribute :section_id, :type => Integer
-    attribute :name, :type => String
-    attribute :start, :type => DateTime
-    attribute :finish, :type => DateTime
-    attribute :cost, :type => String, :default => 'TBC'
-    attribute :location, :type => String, :default => ''
-    attribute :notes, :type => String, :default => ''
-    attribute :archived, :type => Boolean, :default => false
-    attribute :badges, :default => []
-    attribute :files, :default => []
-    attribute :columns, :default => []
-    attribute :notepad, :type => String, :default => ''
-    attribute :public_notepad, :type => String, :default => ''
-    attribute :confirm_by_date, :type => Date
-    attribute :allow_changes, :type => Boolean, :default => false
-    attribute :reminders, :type => Boolean, :default => true
-    attribute :attendance_limit, :type => Integer, :default => 0
-    attribute :attendance_limit_includes_leaders, :type => Boolean, :default => false
-    attribute :attendance_reminder, :type => Integer, :default => 0
-    attribute :allow_booking, :type => Boolean, :default => true
+    attribute :id, type: Integer
+    attribute :section_id, type: Integer
+    attribute :name, type: String
+    attribute :start, type: DateTime
+    attribute :finish, type: DateTime
+    attribute :cost, type: String, default: 'TBC'
+    attribute :location, type: String, default: ''
+    attribute :notes, type: String, default: ''
+    attribute :archived, type: Boolean, default: false
+    attribute :badges, default: []
+    attribute :files, default: []
+    attribute :columns, default: []
+    attribute :notepad, type: String, default: ''
+    attribute :public_notepad, type: String, default: ''
+    attribute :confirm_by_date, type: Date
+    attribute :allow_changes, type: Boolean, default: false
+    attribute :reminders, type: Boolean, default: true
+    attribute :attendance_limit, type: Integer, default: 0
+    attribute :attendance_limit_includes_leaders, type: Boolean, default: false
+    attribute :attendance_reminder, type: Integer, default: 0
+    attribute :allow_booking, type: Boolean, default: true
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :allow_nil => true
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
-    validates_numericality_of :attendance_limit, :only_integer=>true, :greater_than_or_equal_to=>0
+    validates_numericality_of :id, only_integer:true, greater_than:0, allow_nil: true
+    validates_numericality_of :section_id, only_integer:true, greater_than:0
+    validates_numericality_of :attendance_limit, only_integer:true, greater_than_or_equal_to:0
     validates_presence_of :name
-    validates :badges, :array_of => {:item_type => Osm::Event::BadgeLink, :item_valid => true}
-    validates :columns, :array_of => {:item_type => Osm::Event::Column, :item_valid => true}
-    validates :files, :array_of => {:item_type => String}
-    validates_inclusion_of :allow_changes, :in => [true, false]
-    validates_inclusion_of :reminders, :in => [true, false]
-    validates_inclusion_of :attendance_limit_includes_leaders, :in => [true, false]
-    validates_inclusion_of :allow_booking, :in => [true, false]
-    validates_inclusion_of :attendance_reminder, :in => [0, 1, 3, 7, 14, 21, 28]
-    validates_format_of :cost, :with => /\A(?:\d+\.\d{2}|TBC)\Z/
+    validates :badges, array_of: {item_type: Osm::Event::BadgeLink, item_valid: true}
+    validates :columns, array_of: {item_type: Osm::Event::Column, item_valid: true}
+    validates :files, array_of: {item_type: String}
+    validates_inclusion_of :allow_changes, in: [true, false]
+    validates_inclusion_of :reminders, in: [true, false]
+    validates_inclusion_of :attendance_limit_includes_leaders, in: [true, false]
+    validates_inclusion_of :allow_booking, in: [true, false]
+    validates_inclusion_of :attendance_reminder, in: [0, 1, 3, 7, 14, 21, 28]
+    validates_format_of :cost, with: /\A(?:\d+\.\d{2}|TBC)\Z/
 
 
     # @!method initialize
@@ -394,19 +394,19 @@ module Osm
 
         data.each_with_index.map do |item, index|
           Osm::Event::Attendance.new(
-            :event => self,
-            :member_id => Osm::to_i_or_nil(item['scoutid']),
-            :grouping_id => Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
-            :first_name => item['firstname'],
-            :last_name => item['lastname'],
-            :date_of_birth => item['dob'].nil? ? nil : Osm::parse_date(item['dob'], :ignore_epoch => true),
-            :attending => attending_values[item['attending']],
-            :payment_control => payment_values[item['payment']],
-            :fields => item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
+            event: self,
+            member_id: Osm::to_i_or_nil(item['scoutid']),
+            grouping_id: Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+            first_name: item['firstname'],
+            last_name: item['lastname'],
+            date_of_birth: item['dob'].nil? ? nil : Osm::parse_date(item['dob'], ignore_epoch: true),
+            attending: attending_values[item['attending']],
+            payment_control: payment_values[item['payment']],
+            fields: item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
                            .inject({}){ |h,(k,v)| h[k[2..-1].to_i] = v; h },
-            :payments => item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
+            payments: item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
                              .inject({}){ |h,(k,v)| h[k[1..-1].to_i] = v; h },
-            :row => index,
+            row: index,
           )
         end # each data
       end # cache fetch
@@ -507,23 +507,23 @@ module Osm
 
     def self.attributes_from_data(event_data)
       {
-        :id => Osm::to_i_or_nil(event_data['eventid']),
-        :section_id => Osm::to_i_or_nil(event_data['sectionid']),
-        :name => event_data['name'],
-        :start => Osm::make_datetime(date: event_data['startdate'], time: event_data['starttime']),
-        :finish => Osm::make_datetime(date: event_data['enddate'], time: event_data['endtime']),
-        :cost => event_data['cost'].eql?('-1') ? 'TBC' : event_data['cost'],
-        :location => event_data['location'],
-        :notes => event_data['notes'],
-        :archived => event_data['archived'].eql?('1'),
-        :public_notepad => event_data['publicnotes'],
-        :confirm_by_date => Osm::parse_date(event_data['confdate']),
-        :allow_changes => event_data['allowchanges'].eql?('1'),
-        :reminders => !event_data['disablereminders'].eql?('1'),
-        :attendance_limit => event_data['attendancelimit'].to_i,
-        :attendance_limit_includes_leaders => event_data['limitincludesleaders'].eql?('1'),
-        :attendance_reminder => event_data['attendancereminder'].to_i,
-        :allow_booking => event_data['allowbooking'].eql?('1'),
+        id: Osm::to_i_or_nil(event_data['eventid']),
+        section_id: Osm::to_i_or_nil(event_data['sectionid']),
+        name: event_data['name'],
+        start: Osm::make_datetime(date: event_data['startdate'], time: event_data['starttime']),
+        finish: Osm::make_datetime(date: event_data['enddate'], time: event_data['endtime']),
+        cost: event_data['cost'].eql?('-1') ? 'TBC' : event_data['cost'],
+        location: event_data['location'],
+        notes: event_data['notes'],
+        archived: event_data['archived'].eql?('1'),
+        public_notepad: event_data['publicnotes'],
+        confirm_by_date: Osm::parse_date(event_data['confdate']),
+        allow_changes: event_data['allowchanges'].eql?('1'),
+        reminders: !event_data['disablereminders'].eql?('1'),
+        attendance_limit: event_data['attendancelimit'].to_i,
+        attendance_limit_includes_leaders: event_data['limitincludesleaders'].eql?('1'),
+        attendance_reminder: event_data['attendancereminder'].to_i,
+        allow_booking: event_data['allowbooking'].eql?('1'),
       }
     end
 
@@ -537,7 +537,7 @@ module Osm
       column_data = JSON.parse(config_raw)
       column_data = [] unless column_data.is_a?(Array)
       column_data.each do |field|
-        columns.push Column.new(:id => field['id'], :name => field['name'], :label => field['pL'], :parent_required => field['pR'].to_s.eql?('1'), :event => event)
+        columns.push Column.new(id: field['id'], name: field['name'], label: field['pL'], parent_required: field['pR'].to_s.eql?('1'), event: event)
       end
       event.columns = columns
 
@@ -585,21 +585,21 @@ module Osm
       # @!attribute [rw] requirement_id
       #   @return [Integer] the requirement's ID in OSM
 
-      attribute :badge_type, :type => Object
-      attribute :badge_section, :type => Object
-      attribute :requirement_label, :type => String
-      attribute :data, :type => String
-      attribute :badge_name, :type => String
-      attribute :badge_id, :type => Integer
-      attribute :badge_version, :type => Integer
-      attribute :requirement_id, :type => Integer
+      attribute :badge_type, type: Object
+      attribute :badge_section, type: Object
+      attribute :requirement_label, type: String
+      attribute :data, type: String
+      attribute :badge_name, type: String
+      attribute :badge_id, type: Integer
+      attribute :badge_version, type: Integer
+      attribute :requirement_id, type: Integer
 
       validates_presence_of :badge_name
-      validates_inclusion_of :badge_section, :in => [:beavers, :cubs, :scouts, :explorers, :staged]
-      validates_inclusion_of :badge_type, :in => [:core, :staged, :activity, :challenge]
-      validates_numericality_of :badge_id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :badge_version, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :requirement_id, :only_integer=>true, :greater_than=>0, :allow_nil=>true
+      validates_inclusion_of :badge_section, in: [:beavers, :cubs, :scouts, :explorers, :staged]
+      validates_inclusion_of :badge_type, in: [:core, :staged, :activity, :challenge]
+      validates_numericality_of :badge_id, only_integer:true, greater_than:0
+      validates_numericality_of :badge_version, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :requirement_id, only_integer:true, greater_than:0, allow_nil:true
 
       # @!method initialize
       #   Initialize a new Meeting::Activity
@@ -623,10 +623,10 @@ module Osm
       # @!attriute [rw] event
       #   @return [Osm::Event] the event that this column belongs to
 
-      attribute :id, :type => String
-      attribute :name, :type => String
-      attribute :label, :type => String, :default => ''
-      attribute :parent_required, :type => Boolean, :default => false
+      attribute :id, type: String
+      attribute :name, type: String
+      attribute :label, type: String, default: ''
+      attribute :parent_required, type: Boolean, default: false
       attribute :event
 
       validates_presence_of :id
@@ -691,7 +691,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options={:replace_with => {'event' => :id}})
+        Osm.inspect_instance(self, options={replace_with: {'event' => :id}})
       end
 
       private def sort_by
@@ -725,31 +725,31 @@ module Osm
       # @!attribute [rw] payment_control
       #   @return [Symbol] whether payments are done manually or automatically (either :manual, :automatic or nil)
   
-      attribute :row, :type => Integer
-      attribute :member_id, :type => Integer
-      attribute :grouping_id, :type => Integer
-      attribute :fields, :default => {}
+      attribute :row, type: Integer
+      attribute :member_id, type: Integer
+      attribute :grouping_id, type: Integer
+      attribute :fields, default: {}
       attribute :event
-      attribute :first_name, :type => String
-      attribute :last_name, :type => String
-      attribute :date_of_birth, :type => Date
+      attribute :first_name, type: String
+      attribute :last_name, type: String
+      attribute :date_of_birth, type: Date
       attribute :attending
-      attribute :payments, :default => {}
+      attribute :payments, default: {}
       attribute :payment_control
 
-      validates_numericality_of :row, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-      validates :fields, :hash => { :key_type => Integer, :value_type => String }
-      validates :payments, :hash => { :key_type => Integer, :value_type => String }
+      validates_numericality_of :row, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :member_id, only_integer:true, greater_than:0
+      validates_numericality_of :grouping_id, only_integer:true, greater_than_or_equal_to:-2
+      validates :fields, hash: { key_type: Integer, value_type: String }
+      validates :payments, hash: { key_type: Integer, value_type: String }
       validates_each :event do |record, attr, value|
         record.event.valid?
       end
       validates_presence_of :first_name
       validates_presence_of :last_name
       validates_presence_of :date_of_birth
-      validates_inclusion_of :payment_control, :in => [:manual, :automatic, nil]
-      validates_inclusion_of :attending, :in => [:yes, :no, :invited, :shown, :reserved, nil]
+      validates_inclusion_of :payment_control, in: [:manual, :automatic, nil]
+      validates_inclusion_of :attending, in: [:yes, :no, :invited, :shown, :reserved, nil]
 
 
       # @!method initialize
@@ -771,15 +771,15 @@ module Osm
         require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
 
         payment_values = {
-          :manual => 'Manual',
-          :automatic => 'Automatic',
+          manual: 'Manual',
+          automatic: 'Automatic',
         }
         attending_values = {
-          :yes => 'Yes',
-          :no => 'No',
-          :invited => 'Invited',
-          :shown => 'Show in My.SCOUT',
-          :reserved => 'Reserved',
+          yes: 'Yes',
+          no: 'No',
+          invited: 'Invited',
+          shown: 'Show in My.SCOUT',
+          reserved: 'Reserved',
         }
 
         updated = true
@@ -850,13 +850,13 @@ module Osm
           trail = []
           data.each do |item|
             this_item = {
-              :at => DateTime.strptime(item['date'], '%d/%m/%Y %H:%M'),
-              :by => item['updatedby'].strip,
-              :type => item['type'].to_sym,
-              :description => item['desc'],
-              :event_id => event.id,
-              :member_id => member_id,
-              :event_attendance => self,
+              at: DateTime.strptime(item['date'], '%d/%m/%Y %H:%M'),
+              by: item['updatedby'].strip,
+              type: item['type'].to_sym,
+              description: item['desc'],
+              event_id: event.id,
+              member_id: member_id,
+              event_attendance: self,
             }
             if this_item[:type].eql?(:detail)
               results = this_item[:description].match(/\ASet '(?<label>.+)' to '(?<value>.+)'\Z/)
@@ -906,7 +906,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options={:replace_with => {'event' => :id}})
+        Osm.inspect_instance(self, options={replace_with: {'event' => :id}})
       end
 
       private def sort_by

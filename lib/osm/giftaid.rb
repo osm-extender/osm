@@ -23,7 +23,7 @@ module Osm
           if data.is_a?(Hash) && data['rows'].is_a?(Array)
             data['rows'].each do |row|
               structure.push Donation.new(
-                :donation_date => Osm::parse_date(row['field']),
+                donation_date: Osm::parse_date(row['field']),
               )
             end
           end
@@ -60,16 +60,16 @@ module Osm
                   end
                 end
                 to_return.push Osm::GiftAid::Data.new(
-                  :member_id => Osm::to_i_or_nil(item['scoutid']),
-                  :grouping_id => Osm::to_i_or_nil(item ['patrolid']),
-                  :section_id => section_id,
-                  :first_name => item['firstname'],
-                  :last_name => item['lastname'],
-                  :tax_payer_name => item['parentname'],
-                  :tax_payer_address => item['address'],
-                  :tax_payer_postcode => item['postcode'],
-                  :total => item['total'],
-                  :donations => donations,
+                  member_id: Osm::to_i_or_nil(item['scoutid']),
+                  grouping_id: Osm::to_i_or_nil(item ['patrolid']),
+                  section_id: section_id,
+                  first_name: item['firstname'],
+                  last_name: item['lastname'],
+                  tax_payer_name: item['parentname'],
+                  tax_payer_address: item['address'],
+                  tax_payer_postcode: item['postcode'],
+                  total: item['total'],
+                  donations: donations,
                 )
               end
             end
@@ -114,7 +114,7 @@ module Osm
       # @!attribute [rw] donation_date
       #   @return [Date] When the payment was made
 
-      attribute :donation_date, :type => Date
+      attribute :donation_date, type: Date
 
       validates_presence_of :donation_date
 
@@ -152,24 +152,24 @@ module Osm
       # @!attribute [rw] donations
       #   @return [DirtyHashy] The data for each payment - keys are the date, values are the value of the payment
 
-      attribute :member_id, :type => Integer
-      attribute :grouping_id, :type => Integer
-      attribute :section_id, :type => Integer
-      attribute :first_name, :type => String
-      attribute :last_name, :type => String
-      attribute :tax_payer_name, :type => String
-      attribute :tax_payer_address, :type => String
-      attribute :tax_payer_postcode, :type => String
-      attribute :total, :type => String
-      attribute :donations, :type => Object, :default => DirtyHashy.new
+      attribute :member_id, type: Integer
+      attribute :grouping_id, type: Integer
+      attribute :section_id, type: Integer
+      attribute :first_name, type: String
+      attribute :last_name, type: String
+      attribute :tax_payer_name, type: String
+      attribute :tax_payer_address, type: String
+      attribute :tax_payer_postcode, type: String
+      attribute :total, type: String
+      attribute :donations, type: Object, default: DirtyHashy.new
 
-      validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
-      validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-      validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
+      validates_numericality_of :member_id, only_integer:true, greater_than:0
+      validates_numericality_of :grouping_id, only_integer:true, greater_than_or_equal_to:-2
+      validates_numericality_of :section_id, only_integer:true, greater_than:0
       validates_presence_of :first_name
       validates_presence_of :last_name
 
-      validates :donations, :hash => {:key_type => Date, :value_type => String}
+      validates :donations, hash: {key_type: Date, value_type: String}
 
 
       # @!method initialize

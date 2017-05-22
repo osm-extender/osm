@@ -16,20 +16,20 @@ module Osm
     # @!attribute [rw] finalised
     #   @return true, false Whether the invoice has been finalised
 
-    attribute :id, :type => Integer
-    attribute :section_id, :type => Integer
-    attribute :name, :type => String
-    attribute :extra_details, :type => String, :default => ''
-    attribute :date, :type => Date, :default => Date.today
-    attribute :archived, :type => Boolean, :default => false
-    attribute :finalised, :type => Boolean, :default => false
+    attribute :id, type: Integer
+    attribute :section_id, type: Integer
+    attribute :name, type: String
+    attribute :extra_details, type: String, default: ''
+    attribute :date, type: Date, default: Date.today
+    attribute :archived, type: Boolean, default: false
+    attribute :finalised, type: Boolean, default: false
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.id.nil? }
+    validates_numericality_of :section_id, only_integer:true, greater_than:0
     validates_presence_of :name
     validates_presence_of :date
-    validates_inclusion_of :archived, :in => [true, false]
-    validates_inclusion_of :finalised, :in => [true, false]
+    validates_inclusion_of :archived, in: [true, false]
+    validates_inclusion_of :finalised, in: [true, false]
 
 
     # @!method initialize
@@ -219,15 +219,15 @@ module Osm
         data = api.post_query("finances.php?action=getInvoiceRecords&invoiceid=#{id}&sectionid=#{section_id}&dateFormat=generic")
         data['items'].map do |item|
           Osm::Invoice::Item.new(
-            :id => Osm::to_i_or_nil(item['id']),
-            :invoice => self,
-            :record_id => Osm::to_i_or_nil(item['recordid']),
-            :date => Osm::parse_date(item['entrydate']),
-            :amount => item['amount'],
-            :type => item['type'].to_s.downcase.to_sym,
-            :payto => item['payto_userid'].to_s.strip,
-            :description => item['comments'],
-            :budget_name => item['categoryid'],
+            id: Osm::to_i_or_nil(item['id']),
+            invoice: self,
+            record_id: Osm::to_i_or_nil(item['recordid']),
+            date: Osm::parse_date(item['entrydate']),
+            amount: item['amount'],
+            type: item['type'].to_s.downcase.to_sym,
+            payto: item['payto_userid'].to_s.strip,
+            description: item['comments'],
+            budget_name: item['categoryid'],
           )
         end
       end # cache fetch
@@ -242,13 +242,13 @@ module Osm
       invoice_data = invoice_data['invoice']
       return nil unless invoice_data.is_a?(Hash)
       Osm::Invoice.new(
-        :id => Osm::to_i_or_nil(invoice_data['invoiceid']),
-        :section_id => Osm::to_i_or_nil(invoice_data['sectionid']),
-        :name => invoice_data['name'],
-        :extra_details => invoice_data['extra'],
-        :date => Osm::parse_date(invoice_data['entrydate']),
-        :archived => invoice_data['archived'].eql?('1'),
-        :finalised => invoice_data['finalised'].eql?('1'),
+        id: Osm::to_i_or_nil(invoice_data['invoiceid']),
+        section_id: Osm::to_i_or_nil(invoice_data['sectionid']),
+        name: invoice_data['name'],
+        extra_details: invoice_data['extra'],
+        date: Osm::parse_date(invoice_data['entrydate']),
+        archived: invoice_data['archived'].eql?('1'),
+        finalised: invoice_data['finalised'].eql?('1'),
       )
     end
 
@@ -277,25 +277,25 @@ module Osm
       # @!attribute [rw] budget_name
       #   @return [Integer] The name of the budget this item is assigned to
 
-      attribute :id, :type => Integer
-      attribute :invoice, :type => Object
-      attribute :record_id, :type => Integer
-      attribute :date, :type => Date, :default => lambda { Date.today }
-      attribute :amount, :type => String, :default => '0.00'
-      attribute :type, :type => Object
-      attribute :payto, :type => String
-      attribute :description, :type => String
-      attribute :budget_name, :type => String, :default => 'Default'
+      attribute :id, type: Integer
+      attribute :invoice, type: Object
+      attribute :record_id, type: Integer
+      attribute :date, type: Date, default: lambda { Date.today }
+      attribute :amount, type: String, default: '0.00'
+      attribute :type, type: Object
+      attribute :payto, type: String
+      attribute :description, type: String
+      attribute :budget_name, type: String, default: 'Default'
 
-      validates_numericality_of :id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.id.nil? }
-      validates_numericality_of :record_id, :only_integer=>true, :greater_than=>0, :unless => Proc.new { |r| r.record_id.nil? }
+      validates_numericality_of :id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.id.nil? }
+      validates_numericality_of :record_id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.record_id.nil? }
       validates_presence_of :invoice
       validates_presence_of :date
       validates_presence_of :payto
       validates_presence_of :description
       validates_presence_of :budget_name
-      validates_inclusion_of :type, :in => [:expense, :income]
-      validates_format_of :amount, :with => /\A\d+\.\d{2}\Z/
+      validates_inclusion_of :type, in: [:expense, :income]
+      validates_format_of :amount, with: /\A\d+\.\d{2}\Z/
 
 
       # @!method initialize

@@ -6,21 +6,21 @@ describe "API Access" do
 
   it "Create" do
     data = {
-      :id => 1,
-      :name => 'Name',
-      :permissions => {:permission => [:read]},
+      id: 1,
+      name: 'Name',
+      permissions: {permission: [:read]},
     }
     api_access = Osm::ApiAccess.new(data)
 
     api_access.id.should == 1
     api_access.name.should == 'Name'
-    api_access.permissions.should == {:permission => [:read]}
+    api_access.permissions.should == {permission: [:read]}
     api_access.valid?.should == true
   end
 
   it "Sorts by id" do
-    a1 = Osm::ApiAccess.new(:id => 1)
-    a2 = Osm::ApiAccess.new(:id => 2)
+    a1 = Osm::ApiAccess.new(id: 1)
+    a2 = Osm::ApiAccess.new(id: 2)
 
     data = [a2, a1]
     data.sort.should == [a1, a2]
@@ -54,7 +54,7 @@ describe "API Access" do
         api_access = api_accesses[0]
         api_access.id.should == 1
         api_access.name.should == 'API Name'
-        api_access.permissions.should == {:read => [:read], :readwrite => [:read, :write], :administer => [:read, :write, :administer]}
+        api_access.permissions.should == {read: [:read], readwrite: [:read, :write], administer: [:read, :write, :administer]}
       end
 
       it "From cache" do

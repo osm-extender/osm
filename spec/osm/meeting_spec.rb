@@ -6,19 +6,19 @@ describe "Meeting" do
 
   it "Create" do
     e = Osm::Meeting.new(
-      :id => 1,
-      :section_id => 2,
-      :title => 'Meeting Name',
-      :notes_for_parents => 'Notes for parents',
-      :games => 'Games',
-      :pre_notes => 'Before',
-      :post_notes => 'After',
-      :leaders => 'Leaders',
-      :start_time => '19:00',
-      :finish_time => '21:00',
-      :date => Date.new(2000, 01, 02),
-      :activities => [],
-      :badge_links => []
+      id: 1,
+      section_id: 2,
+      title: 'Meeting Name',
+      notes_for_parents: 'Notes for parents',
+      games: 'Games',
+      pre_notes: 'Before',
+      post_notes: 'After',
+      leaders: 'Leaders',
+      start_time: '19:00',
+      finish_time: '21:00',
+      date: Date.new(2000, 01, 02),
+      activities: [],
+      badge_links: []
     )
 
     e.id.should == 1
@@ -38,11 +38,11 @@ describe "Meeting" do
   end
 
   it "Sorts by Section ID, Meeting date, Start time and then Meeting ID" do
-    meeting1 = Osm::Meeting.new(:section_id => 1, :id => 1, :date => (Date.today - 1), :start_time => '18:00')
-    meeting2 = Osm::Meeting.new(:section_id => 2, :id => 1, :date => (Date.today - 1), :start_time => '18:00')
-    meeting3 = Osm::Meeting.new(:section_id => 2, :id => 1, :date => (Date.today + 1), :start_time => '18:00')
-    meeting4 = Osm::Meeting.new(:section_id => 2, :id => 1, :date => (Date.today + 1), :start_time => '19:00')
-    meeting5 = Osm::Meeting.new(:section_id => 2, :id => 2, :date => (Date.today + 1), :start_time => '19:00')
+    meeting1 = Osm::Meeting.new(section_id: 1, id: 1, date: (Date.today - 1), start_time: '18:00')
+    meeting2 = Osm::Meeting.new(section_id: 2, id: 1, date: (Date.today - 1), start_time: '18:00')
+    meeting3 = Osm::Meeting.new(section_id: 2, id: 1, date: (Date.today + 1), start_time: '18:00')
+    meeting4 = Osm::Meeting.new(section_id: 2, id: 1, date: (Date.today + 1), start_time: '19:00')
+    meeting5 = Osm::Meeting.new(section_id: 2, id: 2, date: (Date.today + 1), start_time: '19:00')
 
     data = [meeting5, meeting3, meeting2, meeting4, meeting1]
     data.sort.should == [meeting1, meeting2, meeting3, meeting4, meeting5]
@@ -53,9 +53,9 @@ describe "Meeting" do
 
     it "Create" do
       ea = Osm::Meeting::Activity.new(
-        :activity_id => 2,
-        :title => 'Activity Name',
-        :notes => 'Notes',
+        activity_id: 2,
+        title: 'Activity Name',
+        notes: 'Notes',
       )
 
       ea.activity_id.should == 2
@@ -65,9 +65,9 @@ describe "Meeting" do
     end
 
     it "Sorts by title then activity_id" do
-      a1 = Osm::Meeting::Activity.new(:title => 'a', :activity_id => 1)
-      a2 = Osm::Meeting::Activity.new(:title => 'b', :activity_id => 1)
-      a3 = Osm::Meeting::Activity.new(:title => 'b', :activity_id => 2)
+      a1 = Osm::Meeting::Activity.new(title: 'a', activity_id: 1)
+      a2 = Osm::Meeting::Activity.new(title: 'b', activity_id: 1)
+      a3 = Osm::Meeting::Activity.new(title: 'b', activity_id: 2)
 
       data = [a2, a3, a1]
       data.sort.should == [a1, a2, a3]
@@ -148,7 +148,7 @@ describe "Meeting" do
     it "Fetch badge requirements for a meeting (iterating through activities)" do
       Osm::Model.stub('has_permission?').with(api: $api, to: :write, on: :badge, section: 3, no_read_cache: false).and_return(false)
       Osm::Section.stub(:get){ Osm::Section.new(id: 3, type: :cubs) }
-      Osm::Activity.stub(:get) { Osm::Activity.new(:badges => [
+      Osm::Activity.stub(:get) { Osm::Activity.new(badges: [
         Osm::Activity::Badge.new(badge_type: :activity, badge_section: :beavers, requirement_label: 'label', data: 'data', badge_name: 'badge', badge_id: 2, badge_version: 0, requirement_id: 200)
       ]) }
   
@@ -180,11 +180,11 @@ describe "Meeting" do
 
       Osm::Term.stub(:get_for_section) { [] }
       Osm::Meeting.create($api, **{
-        :section_id => 1,
-        :date => Date.new(2000, 1, 2),
-        :start_time => '11:11',
-        :finish_time => '22:22',
-        :title => 'Title',
+        section_id: 1,
+        date: Date.new(2000, 1, 2),
+        start_time: '11:11',
+        finish_time: '22:22',
+        title: 'Title',
       }).is_a?(Osm::Meeting).should == true
     end
 
@@ -192,11 +192,11 @@ describe "Meeting" do
       Osm::Term.stub(:get_for_section) { [] }
       $api.should_receive(:post_query).and_return([])
       Osm::Meeting.create($api, **{
-        :section_id => 1,
-        :date => Date.new(2000, 1, 2),
-        :start_time => '11:11',
-        :finish_time => '22:22',
-        :title => 'Title',
+        section_id: 1,
+        date: Date.new(2000, 1, 2),
+        start_time: '11:11',
+        finish_time: '22:22',
+        title: 'Title',
       }).should be_nil
     end
 
@@ -238,19 +238,19 @@ describe "Meeting" do
       Osm::Term.stub(:get_for_section) { [] }
 
       meeting = Osm::Meeting.new(
-        :id=>1,
-        :section_id=>2,
-        :date=>Date.new(2000, 01, 02),
-        :activities => [Osm::Meeting::Activity.new(:activity_id => 3, :title => 'Activity Title', :notes => 'Some notes')],
-        :badge_links => [Osm::Meeting::BadgeLink.new(
-          :badge_type => :activity,
-          :badge_section => :beavers,
-          :requirement_label => 'l',
-          :data => '',
-          :badge_name => 'Badge name',
-          :badge_id => 181,
-          :badge_version => 0,
-          :requirement_id => 93384,
+        id:1,
+        section_id:2,
+        date:Date.new(2000, 01, 02),
+        activities: [Osm::Meeting::Activity.new(activity_id: 3, title: 'Activity Title', notes: 'Some notes')],
+        badge_links: [Osm::Meeting::BadgeLink.new(
+          badge_type: :activity,
+          badge_section: :beavers,
+          requirement_label: 'l',
+          data: '',
+          badge_name: 'Badge name',
+          badge_id: 181,
+          badge_version: 0,
+          requirement_id: 93384,
         )]
       )
       meeting.update($api).should == true
@@ -264,7 +264,7 @@ describe "Meeting" do
       }).and_return({"result"=>1})
       Osm::Term.stub(:get_for_section) { [] }
 
-      meeting = Osm::Meeting.new(:id=>1, :section_id=>2, :date=>Date.new(2000, 01, 02))
+      meeting = Osm::Meeting.new(id:1, section_id:2, date:Date.new(2000, 01, 02))
       meeting.update($api).should == false
     end
 
@@ -278,7 +278,7 @@ describe "Meeting" do
       $api.should_receive(:post_query).with('programme.php?action=deleteEvening&eveningid=1&sectionid=2').and_return(nil)
       Osm::Term.stub(:get_for_section) { [] }
 
-      meeting = Osm::Meeting.new(:id=>1, :section_id=>2)
+      meeting = Osm::Meeting.new(id:1, section_id:2)
       meeting.delete($api).should == true
     end
 

@@ -82,10 +82,10 @@ module Osm
         end
 
         Osm::Badges::DueBadges.new(
-          :by_member => by_member,
-          :member_names => member_names,
-          :badge_names => badge_names,
-          :badge_stock => badge_stock,
+          by_member: by_member,
+          member_names: member_names,
+          badge_names: badge_names,
+          badge_stock: badge_stock,
         )
       end # cache fetch
     end
@@ -99,14 +99,14 @@ module Osm
       # @!attribute [rw] member_names
       #   @return [Hash] the name to display for each member
 
-      attribute :badge_names, :default => {}
-      attribute :by_member, :default => {}
-      attribute :member_names, :default => {}
-      attribute :badge_stock, :default => {}
+      attribute :badge_names, default: {}
+      attribute :by_member, default: {}
+      attribute :member_names, default: {}
+      attribute :badge_stock, default: {}
 
-      validates :badge_names, :hash => {:key_type => String, :value_type => String}
-      validates :member_names, :hash => {:key_type => Integer, :value_type => String}
-      validates :badge_stock, :hash => {:key_type => String, :value_type => Integer}
+      validates :badge_names, hash: {key_type: String, value_type: String}
+      validates :member_names, hash: {key_type: Integer, value_type: String}
+      validates :badge_stock, hash: {key_type: String, value_type: Integer}
 
       validates_each :by_member do |record, attr, value|
         badge_names_keys = record.badge_names.keys

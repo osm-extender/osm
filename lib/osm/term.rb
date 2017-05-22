@@ -12,14 +12,14 @@ module Osm
     # @!attribute [rw] finish
     #   @return [Date] when the term finishes
 
-    attribute :id, :type => Integer
-    attribute :section_id, :type => Integer
-    attribute :name, :type => String
-    attribute :start, :type => Date
-    attribute :finish, :type => Date
+    attribute :id, type: Integer
+    attribute :section_id, type: Integer
+    attribute :name, type: String
+    attribute :start, type: Date
+    attribute :finish, type: Date
 
-    validates_numericality_of :id, :only_integer=>true, :greater_than=>0
-    validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
+    validates_numericality_of :id, only_integer:true, greater_than:0
+    validates_numericality_of :section_id, only_integer:true, greater_than:0
     validates_presence_of :name
     validates_presence_of :start
     validates_presence_of :finish
@@ -44,11 +44,11 @@ module Osm
       data.each_key do |key|
         data[key].each do |term_data|
           term = Osm::Term.new(
-            :id => Osm::to_i_or_nil(term_data['termid']),
-            :section_id => Osm::to_i_or_nil(term_data['sectionid']),
-            :name => term_data['name'],
-            :start => Osm::parse_date(term_data['startdate']),
-            :finish => Osm::parse_date(term_data['enddate']),
+            id: Osm::to_i_or_nil(term_data['termid']),
+            section_id: Osm::to_i_or_nil(term_data['sectionid']),
+            name: term_data['name'],
+            start: Osm::parse_date(term_data['startdate']),
+            finish: Osm::parse_date(term_data['enddate']),
           )
           terms.push term
           ids.push term.id

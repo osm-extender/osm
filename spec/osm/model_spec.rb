@@ -10,9 +10,9 @@ describe "Model" do
 
     def self.test_get_config
       {
-        :cache => @@cache,
-        :prepend_to_cache_key => @@prepend_to_cache_key,
-        :cache_ttl => @@cache_ttl,
+        cache: @@cache,
+        prepend_to_cache_key: @@prepend_to_cache_key,
+        cache_ttl: @@cache_ttl,
       }
     end
 
@@ -42,9 +42,9 @@ describe "Model" do
 
     config = ModelTester.test_get_config
     config.should == {
-      :cache => OsmTest::Cache,
-      :cache_ttl => 100,
-      :prepend_to_cache_key => 'Hi',
+      cache: OsmTest::Cache,
+      cache_ttl: 100,
+      prepend_to_cache_key: 'Hi',
     }
   end
 
@@ -98,7 +98,7 @@ describe "Model" do
 
     describe "Writes" do
       it "With cache" do
-        OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', {:expires_in=>600}) { true }
+        OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', {expires_in:600}) { true }
         ModelTester.cache_write(api: $api, key: 'key', data: 'data').should == true
       end
 
@@ -129,7 +129,7 @@ describe "Model" do
 
       it "With cache" do
         block = Proc.new{ "ABC" }
-        OsmTest::Cache.should_receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", {:expires_in=>600}).and_yield { "abc" }
+        OsmTest::Cache.should_receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", {expires_in:600}).and_yield { "abc" }
         ModelTester.cache_fetch(api: $api, key: 'key', &block).should == "ABC"
       end
 
@@ -194,7 +194,7 @@ describe "Model" do
 
 
   describe "Track attribute changes" do
-    test = ModelTester.new(:id => 1)
+    test = ModelTester.new(id: 1)
     test.id.should == 1
     test.changed_attributes.should == []
 
@@ -319,7 +319,7 @@ describe "Model" do
 
       it "Only returns true if the user can and they have granted the api permission" do
         section = Osm::Section.new
-        options = {:foo => :bar}
+        options = {foo: :bar}
         expect(Osm::Model).to receive('user_has_permission?').with(api: $api, to: :can_do, on: :can_to, section: section, **options).and_return(true)
         expect(Osm::Model).to receive('api_has_permission?').with(api: $api, to: :can_do, on: :can_to, section: section, **options).and_return(true)
         Osm::Model.has_permission?(api: $api, to: :can_do, on: :can_to, section: section, **options).should == true

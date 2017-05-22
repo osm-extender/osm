@@ -6,25 +6,25 @@ module HashValidatorSpec
   class KeyTypeTestModel
     include ActiveAttr::Model
     attribute :hash_attr
-    validates :hash_attr, :hash => {:key_type => Integer}
+    validates :hash_attr, hash: {key_type: Integer}
   end
 
   class KeyInTestModel
     include ActiveAttr::Model
     attribute :hash_attr
-    validates :hash_attr, :hash => {:key_in => [1, 2]}
+    validates :hash_attr, hash: {key_in: [1, 2]}
   end
 
   class ValueTypeTestModel
     include ActiveAttr::Model
     attribute :hash_attr
-    validates :hash_attr, :hash => {:value_type => Integer}
+    validates :hash_attr, hash: {value_type: Integer}
   end
 
   class ValueInTestModel
     include ActiveAttr::Model
     attribute :hash_attr
-    validates :hash_attr, :hash => {:value_in => [1, 2]}
+    validates :hash_attr, hash: {value_in: [1, 2]}
   end
 
 

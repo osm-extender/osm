@@ -212,7 +212,7 @@ describe "API" do
     user_email = 'alice@example.com'
     user_password = 'alice'
     $api.should_receive(:post_query).with('users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => '100', 'secret' => 'secret'} }
-    $api.authorize_user(email_address: user_email, password: user_password).should == {:user_id => '100', :user_secret => 'secret'}
+    $api.authorize_user(email_address: user_email, password: user_password).should == {user_id: '100', user_secret: 'secret'}
   end
 
 
@@ -240,7 +240,7 @@ describe "API" do
   describe "User Permissions" do
 
     it "Get from cache" do
-      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
+      permissions = {1 => {a: [:read, :write]}, 2 => {a: [:read]}}
       OsmTest::Cache.should_receive('fetch').and_return(permissions)
       $api.get_user_permissions.should == permissions
     end
@@ -253,14 +253,14 @@ describe "API" do
       OsmTest::Cache.should_not_receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       OsmTest::Cache.should_not_receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       $api.should_receive(:post_query).with('api.php?action=getUserRoles') { data }
-      $api.get_user_permissions(no_read_cache: true).should == {1 => {:badge => [:read]}}
+      $api.get_user_permissions(no_read_cache: true).should == {1 => {badge: [:read]}}
     end
 
     it "Set" do
-      permissions = {1 => {:a => [:read, :write]}, 2 => {:a => [:read]}}
+      permissions = {1 => {a: [:read, :write]}, 2 => {a: [:read]}}
       $api.should_receive('get_user_permissions').and_return(permissions)
-      OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => {:a => [:read]}), {:expires_in=>600}) { true }
-      $api.set_user_permissions(section: 3, permissions: {:a => [:read]})
+      OsmTest::Cache.should_receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => {a: [:read]}), {expires_in:600}) { true }
+      $api.set_user_permissions(section: 3, permissions: {a: [:read]})
     end
 
   end # describe User Permissions

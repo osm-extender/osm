@@ -23,9 +23,9 @@ module Osm
     attr_reader :api_id, :api_secret, :name, :site, :debug, :user_id, :user_secret
 
     BASE_URLS = {
-      :osm => 'https://www.onlinescoutmanager.co.uk',
-      :osm_staging => 'http://staging.onlinescoutmanager.co.uk',
-      :osm_migration => 'https://migration.onlinescoutmanager.co.uk'
+      osm: 'https://www.onlinescoutmanager.co.uk',
+      osm_staging: 'http://staging.onlinescoutmanager.co.uk',
+      osm_migration: 'https://migration.onlinescoutmanager.co.uk'
     }.freeze
 
 

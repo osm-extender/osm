@@ -93,25 +93,25 @@ module Osm
       # @!attribute [rw] status
       #   @return [Symbol] the status of the SMS (usually :sent, :delivered, :not_delivered, :invalid_destination_address or :not_sent)
 
-      attribute :sms_id, :type => Integer
-      attribute :user_id, :type => Integer
-      attribute :member_id, :type => Integer
-      attribute :section_id, :type => Integer
-      attribute :from_name, :type => String
-      attribute :from_number, :type => String
-      attribute :to_name, :type => String
-      attribute :to_number, :type => String
-      attribute :message, :type => String
-      attribute :scheduled, :type => DateTime
-      attribute :last_updated, :type => DateTime
-      attribute :credits, :type => Integer
-      attribute :status, :type => Object
+      attribute :sms_id, type: Integer
+      attribute :user_id, type: Integer
+      attribute :member_id, type: Integer
+      attribute :section_id, type: Integer
+      attribute :from_name, type: String
+      attribute :from_number, type: String
+      attribute :to_name, type: String
+      attribute :to_number, type: String
+      attribute :message, type: String
+      attribute :scheduled, type: DateTime
+      attribute :last_updated, type: DateTime
+      attribute :credits, type: Integer
+      attribute :status, type: Object
 
-      validates_numericality_of :sms_id, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :user_id, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :member_id, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :section_id, :only_integer=>true, :greater_than_or_equal_to=>0
-      validates_numericality_of :credits, :only_integer=>true, :greater_than_or_equal_to=>0
+      validates_numericality_of :sms_id, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :user_id, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :member_id, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :section_id, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :credits, only_integer:true, greater_than_or_equal_to:0
       validates_presence_of :from_name
       validates_presence_of :from_number
       validates_presence_of :to_name
@@ -119,7 +119,7 @@ module Osm
       validates_presence_of :message
       validates_presence_of :scheduled
       validates_presence_of :last_updated
-      validates_inclusion_of :status, :in => VALID_STATUSES
+      validates_inclusion_of :status, in: VALID_STATUSES
 
 
       # @!method initialize
@@ -145,19 +145,19 @@ module Osm
             from = report['from'].match(get_name_number_regex)
             to = report['to'].match(get_name_number_regex)
             reports.push new(
-              :sms_id => Osm.to_i_or_nil(report['smsid']),
-              :user_id => Osm.to_i_or_nil(report['userid']),
-              :member_id => Osm.to_i_or_nil(report['scoutid']),
-              :section_id => Osm.to_i_or_nil(report['sectionid']),
-              :from_name => from[:name],
-              :from_number => "+#{from[:number]}",
-              :to_name => to[:name],
-              :to_number => "+#{to[:number]}",
-              :message => report['message'],
-              :scheduled => Osm.parse_datetime(report['schedule']),
-              :last_updated => Osm.parse_datetime(report['lastupdated']),
-              :credits => Osm.to_i_or_nil(report['credits']),
-              :status => (report['status'] || 'error').downcase.to_sym,
+              sms_id: Osm.to_i_or_nil(report['smsid']),
+              user_id: Osm.to_i_or_nil(report['userid']),
+              member_id: Osm.to_i_or_nil(report['scoutid']),
+              section_id: Osm.to_i_or_nil(report['sectionid']),
+              from_name: from[:name],
+              from_number: "+#{from[:number]}",
+              to_name: to[:name],
+              to_number: "+#{to[:number]}",
+              message: report['message'],
+              scheduled: Osm.parse_datetime(report['schedule']),
+              last_updated: Osm.parse_datetime(report['lastupdated']),
+              credits: Osm.to_i_or_nil(report['credits']),
+              status: (report['status'] || 'error').downcase.to_sym,
             )
           end
           reports
