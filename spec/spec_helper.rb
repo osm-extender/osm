@@ -7,13 +7,9 @@ end
 require 'coveralls' and Coveralls.wear! if ENV['TRAVIS']
 
 
-require 'fakeweb'
 require 'active_attr/rspec'
 
 require 'osm'
-
-FakeWeb.allow_net_connect = false
-FakeWeb.allow_net_connect = %r[^https://coveralls.io] # Allow coveralls to report coverage
 
 
 RSpec.configure do |config|
@@ -38,7 +34,6 @@ RSpec.configure do |config|
   end
 
   config.before(:each) do
-    FakeWeb.clean_registry
     OsmTest::Cache.clear
 
     $api = Osm::Api.new(

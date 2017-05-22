@@ -25,7 +25,6 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency 'rake', '~> 11.0'
   s.add_development_dependency 'rspec', '>= 2.14.1', '< 4'
-  s.add_development_dependency 'fakeweb', '~> 1.3'
   s.add_development_dependency 'guard-rspec', '~> 4.2', '>= 4.2.5'
   s.add_development_dependency 'rb-inotify', '~> 0.9'
   s.add_development_dependency 'coveralls', '~> 0.7'
