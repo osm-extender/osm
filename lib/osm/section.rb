@@ -147,7 +147,7 @@ module Osm
         next if role_data['section'].eql?('discount')  # It's not an actual section
         next if role_data['sectionConfig'].nil? # No config for the section = user hasn't got access
 
-        section_data = role_data['sectionConfig'].is_a?(String) ? ActiveSupport::JSON.decode(role_data['sectionConfig']) : role_data['sectionConfig']
+        section_data = role_data['sectionConfig'].is_a?(String) ? JSON.parse(role_data['sectionConfig']) : role_data['sectionConfig']
         myscout_data = section_data['portal'] || {}
         section_data['portalExpires'] ||= {}
         section_id = Osm::to_i_or_nil(role_data['sectionid'])

@@ -452,7 +452,7 @@ module Osm
 
         protected
         def self.build_from_json(json, payment=nil)
-          data = ActiveSupport::JSON.decode(json)
+          data = JSON.parse(json)
           return [] unless data.is_a?(Hash)
           data = data['status']
           return [] unless data.is_a?(Array)
