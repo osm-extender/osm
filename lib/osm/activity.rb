@@ -6,13 +6,13 @@ module Osm
     class Version; end # Ensure the constant exists for the validators
 
     # @!attribute [rw] id
-    #   @return [Fixnum] the id for the activity
+    #   @return [Integer] the id for the activity
     # @!attribute [rw] version
-    #   @return [Fixnum] the version of the activity
+    #   @return [Integer] the version of the activity
     # @!attribute [rw] group_id
-    #   @return [Fixnum] the group_id
+    #   @return [Integer] the group_id
     # @!attribute [rw] user_id
-    #   @return [Fixnum] the user_id of the creator of the activity
+    #   @return [Integer] the user_id of the creator of the activity
     # @!attribute [rw] title
     #   @return [String] the activity's title
     # @!attribute [rw] description
@@ -22,19 +22,19 @@ module Osm
     # @!attribute [rw] instructions
     #   @return [String] instructions for doing the activity
     # @!attribute [rw] running_time
-    #   @return [Fixnum] duration of the activity in minutes
+    #   @return [Integer] duration of the activity in minutes
     # @!attribute [rw] location
     #   @return [Symbol] :indoors, :outdoors or :both
     # @!attribute [rw] shared
-    #   @return [Fixnum] 2 - Public, 0 - Private
+    #   @return [Integer] 2 - Public, 0 - Private
     # @!attribute [rw] rating
-    #   @return [Fixnum] ?
+    #   @return [Integer] ?
     # @!attribute [rw] editable
     #   @return [Boolean] Wether the current API user can edit this activity
     # @!attribute [rw] deletable
     #   @return [Boolean] Wether the current API user can delete this activity
     # @!attribute [rw] used
-    #   @return [Fixnum] How many times this activity has been used (total accross all of OSM)
+    #   @return [Integer] How many times this activity has been used (total accross all of OSM)
     # @!attribute [rw] versions
     #   @return [Array<Osm::Activity::Version>]
     # @!attribute [rw] sections
@@ -92,8 +92,8 @@ module Osm
 
     # Get activity details
     # @param api [Osm::Api] The api to use to make the request
-    # @param id [Fixnum] The activity ID
-    # @param version [Fixnum] The version of the activity to retreive, if nil the latest version will be assumed
+    # @param id [Integer] The activity ID
+    # @param version [Integer] The version of the activity to retreive, if nil the latest version will be assumed
     # @!macro options_get
     # @return [Osm::Activity]
     def self.get(api:, id:, version: nil, no_read_cache: false)
@@ -191,7 +191,7 @@ module Osm
 
     # Add this activity to the programme in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The Section (or it's ID) to add the Activity to
+    # @param section [Osm::Section, Integer, #to_i] The Section (or it's ID) to add the Activity to
     # @param date [Date, DateTime] The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
     # @param notes [String] The notes which should appear for this Activity on this Evening
     # @return [Boolean] Whether the activity was successfully added
@@ -216,7 +216,7 @@ module Osm
 
     # Update this activity in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The Section (or it's ID)
+    # @param section [Osm::Section, Integer, #to_i] The Section (or it's ID)
     # @param secret_update [Boolean] Whether this is a secret update
     # @return [Boolean] Whether the activity was successfully added
     # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
@@ -277,9 +277,9 @@ module Osm
       include ActiveAttr::Model
 
       # @!attribute [rw] id
-      #   @return [Fixnum] the OSM ID for the file
+      #   @return [Integer] the OSM ID for the file
       # @!attribute [rw] activity_id
-      #   @return [Fixnum] the OSM ID for the activity
+      #   @return [Integer] the OSM ID for the activity
       # @!attribute [rw] file_name
       #   @return [String] the file name of the file
       # @!attribute [rw] name
@@ -319,11 +319,11 @@ module Osm
       # @!attribute [rw] badge_name
       #   @return [String] the badge's name
       # @!attribute [rw] badge_id
-      #   @return [Fixnum] the badge's ID in OSM
+      #   @return [Integer] the badge's ID in OSM
       # @!attribute [rw] badge_version
-      #   @return [Fixnum] the version of the badge
+      #   @return [Integer] the version of the badge
       # @!attribute [rw] requirement_id
-      #   @return [Fixnum] the requirement's ID in OSM
+      #   @return [Integer] the requirement's ID in OSM
 
       attribute :badge_type, :type => Object
       attribute :badge_section, :type => Object
@@ -355,9 +355,9 @@ module Osm
       include ActiveAttr::Model
 
       # @!attribute [rw] version
-      #   @return [Fixnum] the version of the activity
+      #   @return [Integer] the version of the activity
       # @!attribute [rw] created_by
-      #   @return [Fixnum] the OSM user ID of the person who created this version
+      #   @return [Integer] the OSM user ID of the person who created this version
       # @!attribute [rw] created_by_name
       #   @return [String] the aname of the OSM user who created this version
       # @!attribute [rw] label

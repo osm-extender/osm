@@ -247,7 +247,7 @@ module Osm
 
     # Set access permission for an API user for a given Section
     # @param [Osm::Api::Configuration] configuration The configuration detailing how to talk to OSM
-    # @param [Section, Fixnum] section The Section to set permissions for
+    # @param [Section, Integer] section The Section to set permissions for
     # @param [Hash] permissions The permissions Hash
     def set_user_permissions(section:, permissions:)
       key = ['permissions', user_id]

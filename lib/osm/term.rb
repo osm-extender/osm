@@ -2,11 +2,11 @@ module Osm
 
   class Term < Osm::Model
     # @!attribute [rw] id
-    #   @return [Fixnum] the id for the term
+    #   @return [Integer] the id for the term
     # @!attribute [rw] section_id
-    #   @return [Fixnum] the section the term belongs to
+    #   @return [Integer] the section the term belongs to
     # @!attribute [rw] name
-    #   @return [Fixnum] the name of the term
+    #   @return [Integer] the name of the term
     # @!attribute [rw] start
     #   @return [Date] when the term starts
     # @!attribute [rw] finish
@@ -62,7 +62,7 @@ module Osm
 
     # Get the terms that the OSM user can access for a given section
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Fixnum] The section (or its ID) of the section to get terms for
+    # @param section [Integer] The section (or its ID) of the section to get terms for
     # @!macro options_get
     # @return [Array<Osm::Term>, nil] An array of terms or nil if the user can not access that section
     def self.get_for_section(api:, section:, no_read_cache: false)
@@ -73,7 +73,7 @@ module Osm
 
     # Get a term
     # @param api [Osm::Api] The api to use to make the request
-    # @param id [Fixnum] The id of the required term
+    # @param id [Integer] The id of the required term
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that term
     # @return [Osm::Term]
@@ -98,7 +98,7 @@ module Osm
 
     # Get the current term for a given section
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID)  to get terms for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID)  to get terms for
     # @!macro options_get 
     # @return [Osm::Term, nil] The current term or nil if the user can not access that section
     # @raise [Osm::Error::NoCurrentTerm] If the Section doesn't have a Term which is current
@@ -114,7 +114,7 @@ module Osm
 
     # Create a term in OSM
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum] (required) section or section_id to add the term to
+    # @param section [Osm::Section, Integer] (required) section or section_id to add the term to
     # @param name [String] (required) the name for the term
     # @param start [Date, #strftime] (required) the date for the start of term
     # @param finish [Date, #strftime] (required) the date for the finish of term

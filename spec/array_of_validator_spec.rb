@@ -4,9 +4,9 @@ require 'spec_helper'
 
 module ArrayOfValidatorSpec
 
-  class FixnumTestModel < Osm::Model
+  class IntegerTestModel < Osm::Model
     attribute :array
-    validates :array, :array_of => {:item_type => Fixnum}
+    validates :array, :array_of => {:item_type => Integer}
   end
 
   class TestItem
@@ -37,7 +37,7 @@ module ArrayOfValidatorSpec
  describe "Array of validator" do
 
     it "Allows an empty array" do
-      i = FixnumTestModel.new(array: [])
+      i = IntegerTestModel.new(array: [])
       i.valid?.should == true
       i.errors.count.should == 0
     end
@@ -45,16 +45,16 @@ module ArrayOfValidatorSpec
     describe ":item_type option" do
 
       it "Allows arrays of the right type" do
-        i = FixnumTestModel.new(array: [1, 2, 3])
+        i = IntegerTestModel.new(array: [1, 2, 3])
         i.valid?.should == true
         i.errors.count.should == 0
       end
 
       it "Forbids arrays containing >= 1 incorrect type" do
-        i = FixnumTestModel.new(array: [1, '2', 3])
+        i = IntegerTestModel.new(array: [1, '2', 3])
         i.valid?.should == false
         i.errors.count.should == 1
-        i.errors.messages.should == {:array=>["items in the Array must be a Fixnum"]}
+        i.errors.messages.should == {:array=>["items in the Array must be a Integer"]}
       end
 
     end

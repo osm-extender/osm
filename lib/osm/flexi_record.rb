@@ -2,9 +2,9 @@ module Osm
 
   class FlexiRecord < Osm::Model
     # @!attribute [rw] id
-    #   @return [Fixnum] the id for the flexi_record
+    #   @return [Integer] the id for the flexi_record
     # @!attribute [rw] section_id
-    #   @return [Fixnum] the section the member belongs to
+    #   @return [Integer] the section the member belongs to
     # @!attribute [rw] name
     #   @return [String] the flexi record's name name
 
@@ -68,7 +68,7 @@ module Osm
 
     # Get data for flexi record
     # @param api [Osm::Api] The api to use to make the request
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<FlexiRecordData>]
     def get_data(api:, term: nil, no_read_cache: false)
@@ -222,9 +222,9 @@ module Osm
       # @!attribute [rw] flexi_record
       #   @return [Boolean] The FlexiRecord this column belongs to
       # @!attribute [rw] member_id
-      #   @return [Fixnum] OSM id for the member
+      #   @return [Integer] OSM id for the member
       # @!attribute [rw] grouping__id
-      #   @return [Fixnum] OSM id for the grouping the member is in
+      #   @return [Integer] OSM id for the grouping the member is in
       # @!attribute [rw] fields
       #   @return [DirtyHashy] Keys are the field's id, values are the field values
 

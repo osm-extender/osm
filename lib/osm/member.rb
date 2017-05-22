@@ -32,19 +32,19 @@ module Osm
 
 
     # @!attribute [rw] id
-    #   @return [Fixnum] the id for the member
+    #   @return [Integer] the id for the member
     # @!attribute [rw] section_id
-    #   @return [Fixnum] the section the member belongs to
+    #   @return [Integer] the section the member belongs to
     # @!attribute [rw] first_name
     #   @return [String] the member's first name
     # @!attribute [rw] last_name
     #   @return [String] the member's last name
     # @!attribute [rw] grouping_id
-    #   @return [Fixnum] the ID of the grouping within the section that the member belongs to
+    #   @return [Integer] the ID of the grouping within the section that the member belongs to
     # @!attribute [rw] grouping_label
     #   @return [String] the name of the grouping within the section that the member belongs to
     # @!attribute [rw] grouping_leader
-    #   @return [Fixnum] whether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL, 3=senior PL)
+    #   @return [Integer] whether the member is the grouping leader (0=no, 1=seconder/APL, 2=sixer/PL, 3=senior PL)
     # @!attribute [rw] grouping_leader_label
     #   @return [String] whether the member is the grouping leader
     # @!attribute [rw] age
@@ -116,14 +116,14 @@ module Osm
 
     # Get members for a section
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the members for
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the members for
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Member>]
     def self.get_for_section(api:, section:, term: nil, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :member, section: section, no_read_cache: no_read_cache)
       if term.nil?
-        section = Osm::Section.get(api: api, id: section) if section.is_a?(Fixnum)
+        section = Osm::Section.get(api: api, id: section) if section.is_a?(Integer)
         term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api: api, section: section)
       end
       cache_key = ['members', section.to_i, term.to_i]
@@ -386,13 +386,13 @@ module Osm
     end
 
     # Get the years element of this scout's age
-    # @return [Fixnum] the number of years this scout has been alive
+    # @return [Integer] the number of years this scout has been alive
     def age_years
       return age[0..1].to_i
     end
 
     # Get the months element of this scout's age
-    # @return [Fixnum] the number of months since this scout's last birthday
+    # @return [Integer] the number of months since this scout's last birthday
     def age_months
       return age[-2..-1].to_i
     end

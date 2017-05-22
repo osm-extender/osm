@@ -4,8 +4,8 @@ module Osm
 
     # Send an SMS to some members on their enabled numbers
     # @param api [Osm::Api] the api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] the section (or its ID) to send the message to
-    # @param members [Array<Osm::Member, Fixnum, #to_i>, Osm::Member, Fixnum, #to_i] the members (or their IDs) to send the message to
+    # @param section [Osm::Section, Integer, #to_i] the section (or its ID) to send the message to
+    # @param members [Array<Osm::Member, Integer, #to_i>, Osm::Member, Integer, #to_i] the members (or their IDs) to send the message to
     # @param source_address[String, #to_s] the number to claim the message is from
     # @param message [String, #to_s] the text of the message to send
     # @return [Boolean] whether the messages were sent
@@ -31,9 +31,9 @@ module Osm
 
     # Get the number of remaining SMS credits for a section
     # @param api [Osm::Api] the api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] the section (or its ID) to send the message to
+    # @param section [Osm::Section, Integer, #to_i] the section (or its ID) to send the message to
     # @!macro options_get
-    # @return [Fixnum] the number of remaining SMS credits for the section
+    # @return [Integer] the number of remaining SMS credits for the section
     def self.remaining_credits(api:, section:, no_read_cache: false)
       Osm::Model.require_access_to_section(api, section)
       cache_key = ['sms_credits', section.to_i]
@@ -48,9 +48,9 @@ module Osm
 
     # Get the number of SMS credits which will be used sending a message to the passed members
     # @param api [Osm::Api] the api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] the section (or its ID) to send the message to
-    # @param members [Array<Osm::Member, Fixnum, #to_i>, Osm::Member, Fixnum, #to_i] the members (or their IDs) to send the message to
-    # @return [Fixnum] the number of SMS credits which will be used
+    # @param section [Osm::Section, Integer, #to_i] the section (or its ID) to send the message to
+    # @param members [Array<Osm::Member, Integer, #to_i>, Osm::Member, Integer, #to_i] the members (or their IDs) to send the message to
+    # @return [Integer] the number of SMS credits which will be used
     def self.number_selected(api:, section:, members:)
       Osm::Model.require_access_to_section(api: api, section: section) 
 
@@ -67,13 +67,13 @@ module Osm
       VALID_STATUSES = [:sent, :not_sent, :delivered, :not_delivered, :invalid_destination_address, :invalid_source_address, :invalid_message_format, :route_not_available, :not_allowed]
 
       # @!attribute [rw] sms_id
-      #   @return [Fixnum] the id of the SMS
+      #   @return [Integer] the id of the SMS
       # @!attribute [rw] user_id
-      #   @return [Fixnum] the id of the OSM user who sent the SMS
+      #   @return [Integer] the id of the OSM user who sent the SMS
       # @!attribute [rw] member_id
-      #   @return [Fixnum] the id of the member the SMS was sent to
+      #   @return [Integer] the id of the member the SMS was sent to
       # @!attribute [rw] section_id
-      #   @return [Fixnum] the id of the section 'owning' the SMS
+      #   @return [Integer] the id of the section 'owning' the SMS
       # @!attribute [rw] from_name
       #   @return [String] the name of the person who sent the SMS
       # @!attribute [rw] from_number
@@ -89,7 +89,7 @@ module Osm
       # @!attribute [rw] last_updated
       #   @return [DateTime] when this report was last updated
       # @!attribute [rw] credits
-      #   @return [Fixnum] thow many credits the SMS cost
+      #   @return [Integer] thow many credits the SMS cost
       # @!attribute [rw] status
       #   @return [Symbol] the status of the SMS (usually :sent, :delivered, :not_delivered, :invalid_destination_address or :not_sent)
 
@@ -129,7 +129,7 @@ module Osm
 
       # Get delivery reports
       # @param api [Osm::Api] the api to use to make the request
-      # @param section [Osm::Section, Fixnum, #to_i] the section (or its ID) to get the reports for
+      # @param section [Osm::Section, Integer, #to_i] the section (or its ID) to get the reports for
       # @!macro options_get
       # @return [Array<Osm::Sms::DeliveryReport>]
       def self.get_for_section(api:, section:, no_read_cache: false)

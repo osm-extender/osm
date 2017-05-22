@@ -2,15 +2,15 @@ module Osm
 
   class Grouping < Osm::Model
     # @!attribute [rw] id
-    #   @return [Fixnum] the id for grouping
+    #   @return [Integer] the id for grouping
     # @!attribute [rw] section_id
-    #   @return [Fixnum] the id for the section this grouping belongs to
+    #   @return [Integer] the id for the section this grouping belongs to
     # @!attribute [rw] name
     #   @return [String] the name of the grouping
     # @!attribute [rw] active
     #   @return [Boolean] whether the grouping is active
     # @!attribute [rw] points
-    #   @return [Fixnum] the points awarded to the grouping
+    #   @return [Integer] the points awarded to the grouping
 
     attribute :id, :type => Integer
     attribute :section_id, :type => Integer
@@ -27,7 +27,7 @@ module Osm
 
     # Get the groupings that a section has
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Fixnum] The section (or its ID) of the section to get groupings for
+    # @param section [Integer] The section (or its ID) of the section to get groupings for
     # @!macro options_get
     # @return [Array<Osm::Grouping>, nil] An array of groupings or nil if the user can not access that section
     def self.get_for_section(api:, section:, no_read_cache: false)

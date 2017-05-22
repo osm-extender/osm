@@ -4,8 +4,8 @@ module Osm
 
     # Get register structure
     # @param api [Osm::Api] The api to use to make the request
-    # @param [section Osm::Section, Fixnum, #to_i] The section (or its ID) to get the structure for
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the structure for, passing nil causes the current term to be used
+    # @param [section Osm::Section, Integer, #to_i] The section (or its ID) to get the structure for
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Register::Field>] representing the fields of the register
     def self.get_structure(api:, section:, term: nil, no_read_cache: false)
@@ -36,8 +36,8 @@ module Osm
 
     # Get register attendance
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the register for
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the register for
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Register::Attendance>] representing the attendance of each member
     def self.get_attendance(api:, section:, term: nil, no_read_cache: false)
@@ -88,7 +88,7 @@ module Osm
     # @param term [Osm::Term, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
     # @param date [Osm::Evening, DateTime, Date] the date to update the register on
     # @param attendance [Symbol] what to mark the attendance as, one of :yes, :unadvised_absent or :advised_absent
-    # @param members [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>] the members (or their ids) to update
+    # @param members [Integer, Array<Integer>, Osm::Member, Array<Osm::Member>] the members (or their ids) to update
     # @param completed_badge_requirements [Array<Hash>] the badge requirements to mark as completed, selected from the Hash returned by the get_badge_requirements_for_evening method
     # @return [Boolean] whether the update succedded
     # @raise [Osm::ArgumentIsInvalid] If data[:attendance] is not "Yes", "No" or "Absent"
@@ -101,7 +101,7 @@ module Osm
       Osm::Model.require_ability_to(api: api, to: :write, on: :register, section: section)
 
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
-      members = [*members].map{ |member| (member.is_a?(Fixnum) ? member : member.id).to_s } # Make sure it's an Array of Strings
+      members = [*members].map{ |member| (member.is_a?(Integer) ? member : member.id).to_s } # Make sure it's an Array of Strings
 
       response = api.post_query("users.php?action=registerUpdate&sectionid=#{section.id}&termid=#{term_id}", post_data: {
         'scouts' => members.inspect,
@@ -145,11 +145,11 @@ module Osm
 
     class Attendance < Osm::Model
       # @!attribute [rw] member_id
-      #   @return [Fixnum] The OSM ID for the member
+      #   @return [Integer] The OSM ID for the member
       # @!attribute [rw] grouping_id
-      #   @return [Fixnum] The OSM ID for the member's grouping
+      #   @return [Integer] The OSM ID for the member's grouping
       # @!attribute [rw] section_id
-      #   @return [Fixnum] The OSM ID for the member's section
+      #   @return [Integer] The OSM ID for the member's section
       # @!attribute [rw] first_name
       #   @return [String] The member's first name
       # @!attribute [rw] last_name

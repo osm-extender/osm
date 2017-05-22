@@ -9,9 +9,9 @@ module Osm
     private_constant :LIST_ATTRIBUTES, :EXTRA_ATTRIBUTES
 
     # @!attribute [rw] id
-    #   @return [Fixnum] the id for the event
+    #   @return [Integer] the id for the event
     # @!attribute [rw] section_id
-    #   @return [Fixnum] the id for the section
+    #   @return [Integer] the id for the section
     # @!attribute [rw] name
     #   @return [String] the name of the event
     # @!attribute [rw] start
@@ -43,11 +43,11 @@ module Osm
     # @!attribute [rw] reminders
     #   @return [Boolean] whether email reminders are sent for the event
     # @!attribute [rw] attendance_limit
-    #   @return [Fixnum] the maximum number of people who can attend the event (0 = no limit)
+    #   @return [Integer] the maximum number of people who can attend the event (0 = no limit)
     # @!attendance [rw] attendance_limit_includes_leaders
     #   @return [Boolean] whether the attendance limit includes leaders
     # @!attribute [rw] attendance_reminder
-    #   @return [Fixnum] how many days before the event to send a reminder to those attending (0 (off), 1, 3, 7, 14, 21, 28)
+    #   @return [Integer] how many days before the event to send a reminder to those attending (0 (off), 1, 3, 7, 14, 21, 28)
     # @!attribute [rw] allow_booking
     #   @return [Boolean] whether booking is allowed through My.SCOUT
 
@@ -95,7 +95,7 @@ module Osm
 
     # Get events for a section
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the events for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the events for
     # @param include_archived [Boolean] whether to include archived events
     # @!macro options_get
     # @return [Array<Osm::Event>]
@@ -139,7 +139,7 @@ module Osm
 
     # Get event list for a section (not all details for each event)
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the events for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the events for
     # @!macro options_get
     # @return [Array<Hash>]
     def self.get_list(api:, section:, no_read_cache: false)
@@ -184,8 +184,8 @@ module Osm
 
     # Get an event
     # @param api [Osm::Api] api The to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the events for
-    # @param id [Fixnum, #to_i] The id of the event to get
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the events for
+    # @param id [Integer, #to_i] The id of the event to get
     # @!macro options_get
     # @return [Osm::Event, nil] the event (or nil if it couldn't be found
     def self.get(api:, section:, id:, no_read_cache: false)
@@ -367,7 +367,7 @@ module Osm
 
     # Get event attendance
     # @param api [Osm::Api] The api to use to make the request
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @option options [Boolean] :include_archived (optional) if true then archived activities will also be returned
     # @return [Array<Osm::Event::Attendance>]
@@ -477,7 +477,7 @@ module Osm
 
     # Get the number of spaces left for the event
     # @param api [Osm::Api] The api to use to make the request
-    # @return [Fixnum, nil] the number of spaces left (nil if there is no attendance limit)
+    # @return [Integer, nil] the number of spaces left (nil if there is no attendance limit)
     def spaces(api)
       return nil unless limited_attendance?
       return attendance_limit - attendees(api)
@@ -579,11 +579,11 @@ module Osm
       # @!attribute [rw] badge_name
       #   @return [String] the badge's name
       # @!attribute [rw] badge_id
-      #   @return [Fixnum] the badge's ID in OSM
+      #   @return [Integer] the badge's ID in OSM
       # @!attribute [rw] badge_version
-      #   @return [Fixnum] the version of the badge
+      #   @return [Integer] the version of the badge
       # @!attribute [rw] requirement_id
-      #   @return [Fixnum] the requirement's ID in OSM
+      #   @return [Integer] the requirement's ID in OSM
 
       attribute :badge_type, :type => Object
       attribute :badge_section, :type => Object
@@ -703,13 +703,13 @@ module Osm
 
     class Attendance < Osm::Model
       # @!attribute [rw] member_id
-      #   @return [Fixnum] OSM id for the member
+      #   @return [Integer] OSM id for the member
       # @!attribute [rw] grouping__id
-      #   @return [Fixnum] OSM id for the grouping the member is in
+      #   @return [Integer] OSM id for the grouping the member is in
       # @!attribute [rw] fields
       #   @return [Hash] Keys are the field's id, values are the field values
       # @!attribute [rw] row
-      #   @return [Fixnum] part of the OSM API
+      #   @return [Integer] part of the OSM API
       # @!attriute [rw] event
       #   @return [Osm::Event] the event that this attendance applies to
       # @!attribute [rw] first_name
@@ -740,8 +740,8 @@ module Osm
       validates_numericality_of :row, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :grouping_id, :only_integer=>true, :greater_than_or_equal_to=>-2
-      validates :fields, :hash => { :key_type => Fixnum, :value_type => String }
-      validates :payments, :hash => { :key_type => Fixnum, :value_type => String }
+      validates :fields, :hash => { :key_type => Integer, :value_type => String }
+      validates :payments, :hash => { :key_type => Integer, :value_type => String }
       validates_each :event do |record, attr, value|
         record.event.valid?
       end

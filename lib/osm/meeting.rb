@@ -5,9 +5,9 @@ module Osm
     class BadgeLink; end # Ensure the constant exists for the validators
 
     # @!attribute [rw] id
-    #   @return [Fixnum] the id of the meeting
+    #   @return [Integer] the id of the meeting
     # @!attribute [rw] section_id
-    #   @return [Fixnum] the section the meeting belongs to
+    #   @return [Integer] the section the meeting belongs to
     # @!attribute [rw] title
     #   @return [String] the title of the meeting
     # @!attribute [rw] notes_for_parents
@@ -61,8 +61,8 @@ module Osm
 
     # Get the programme for a given term
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the programme for
-    # @param term [Osm::term, Fixnum, nil] The term (or its ID) to get the programme for, passing nil causes the current term to be used
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the programme for
+    # @param term [Osm::term, Integer, nil] The term (or its ID) to get the programme for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Meeting>]
     def self.get_for_section(api:, section:, term: nil, no_read_cache: false)
@@ -315,7 +315,7 @@ module Osm
       include ActiveAttr::Model
 
       # @!attribute [rw] activity_id
-      #   @return [Fixnum] the activity being done
+      #   @return [Integer] the activity being done
       # @!attribute [rw] title
       #   @return [String] the activity's title
       # @!attribute [rw] notes
@@ -357,11 +357,11 @@ module Osm
       # @!attribute [rw] badge_name
       #   @return [String] the badge's name
       # @!attribute [rw] badge_id
-      #   @return [Fixnum] the badge's ID in OSM
+      #   @return [Integer] the badge's ID in OSM
       # @!attribute [rw] badge_version
-      #   @return [Fixnum] the version of the badge
+      #   @return [Integer] the version of the badge
       # @!attribute [rw] requirement_id
-      #   @return [Fixnum] the requirement's ID in OSM
+      #   @return [Integer] the requirement's ID in OSM
 
       attribute :badge_type, :type => Object
       attribute :badge_section, :type => Object

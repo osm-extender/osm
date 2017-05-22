@@ -3,7 +3,7 @@ module Osm
   class ApiAccess < Osm::Model
 
     # @!attribute [rw] id
-    #   @return [Fixnum] the id for the API
+    #   @return [Integer] the id for the API
     # @!attribute [rw] name
     #   @return [String] the name of the API
     # @!attribute [rw] permissions
@@ -21,7 +21,7 @@ module Osm
 
     # Get API access details for a given section
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the details for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the details for
     # @!macro options_get
     # @return [Array<Osm::ApiAccess>]
     def self.get_all(api:, section:, no_read_cache: false)
@@ -69,7 +69,7 @@ module Osm
 
     # Get our API access details for a given section
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the details for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the details for
     # @!macro options_get
     # @return [Osm::ApiAccess]
     def self.get_ours(api:, section:, no_read_cache: false)
@@ -79,7 +79,7 @@ module Osm
 
     # Get API Access for a given API
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the details for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the details for
     # @param for_api [Osm::Api] The api (or its ID) to get access for
     # @!macro options_get
     # @return [Osm::ApiAccess]

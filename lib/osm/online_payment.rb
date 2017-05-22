@@ -72,7 +72,7 @@ module Osm
 
       # Get a simple list of schedules for a section
       # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
+      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
       # @!macro options_get
       # @return [Array<Hash>]
       def self.get_list_for_section(api:, section:, no_read_cache: false)
@@ -91,7 +91,7 @@ module Osm
 
       # Get all payment schedules for a section
       # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
+      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
       # @!macro options_get
       # @return [Array<Osm::OnlinePayment::Schedule>]
       def self.get_for_section(api:, section:, no_read_cache: false)
@@ -105,8 +105,8 @@ module Osm
 
       # Get a payment schedules for a section
       # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
-      # @param schedule [Osm::OnlinePayment::Schedule, Fixnum, #to_i] The ID of the payment schedule to get
+      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
+      # @param schedule [Osm::OnlinePayment::Schedule, Integer, #to_i] The ID of the payment schedule to get
       # @!macro options_get
       # @return [Array<Osm::OnlinePayment::Schedule>]
       def self.get(api:, section:, schedule:, no_read_cache: false)
@@ -148,7 +148,7 @@ module Osm
 
       # Get payments made by members for the schedule
       # @param api [Osm::Api] The api to use to make the request
-      # @param term [Osm::Term, Fixnum, #to_i] The term (or it's id) to get details for (defaults to current term)
+      # @param term [Osm::Term, Integer, #to_i] The term (or it's id) to get details for (defaults to current term)
       # @!macro options_get
       # @return [Array<Osm::OnlinePayment::Schedule::PaymentsForMember>]
       def get_payments_for_members(api:, term: nil, no_read_cache: false)
@@ -281,7 +281,7 @@ module Osm
         validates_presence_of :last_name
         validates_presence_of :schedule
         validates_inclusion_of :direct_debit, in: [:active, :inactive, :cancelled]
-        validates :payments, hash: {key_type: Fixnum, value_type: Array}
+        validates :payments, hash: {key_type: Integer, value_type: Array}
 
 
         # @!method initialize
@@ -290,7 +290,7 @@ module Osm
 
 
         # Get the most recent status for a member's payment
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to check
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @return [Boolean]
         def latest_status_for(payment)
           @latest_status ||= payments.map{ |k,v| [k, v.sort.first] }.to_h
@@ -298,7 +298,7 @@ module Osm
         end
 
         # Check if the status of a member's payment is considered paid
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to check
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @return [Boolean, nil]
         def paid?(payment)
           status = latest_status_for(payment.to_i)
@@ -307,7 +307,7 @@ module Osm
         end
 
         # Check if the status of a member's payment is considered unpaid
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to check
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @return [Boolean, nil]
         def unpaid?(payment)
           status = latest_status_for(payment.to_i)
@@ -316,7 +316,7 @@ module Osm
         end
 
         # Check if a payment is over due (or will be over due on the passed date)
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to check
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @param date [Date] The date to check for (defaults to today)
         # @return [Boolean] whether the member's payment is unpaid and the payment's due date has passed
         def over_due?(payment, date=nil)
@@ -331,7 +331,7 @@ module Osm
 
         # Update the status of a payment for the member in OSM
         # @param api [Osm::Api] The api to use to make the request
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to update
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
         # @param status [Symbol] What to update the status to (:required, :not_required or :paid_manually)
         # @param gift_aid [Boolean] Whether to update the gift aid record too (only relevant when setting to :paid_manually)
         # @return [Boolean] whether the update was made in OSM
@@ -368,7 +368,7 @@ module Osm
 
         # Mark a payment as required by the member
         # @param api [Osm::Api] The api to use to make the request
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to update
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
         # @return [Boolean] whether the update was made in OSM
         def mark_payment_required(api:, payment:)
           update_payment_status(api: api, payment: payment, status: :required)
@@ -376,7 +376,7 @@ module Osm
 
         # Mark a payment as not required by the member
         # @param api [Osm::Api] The api to use to make the request
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to update
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
         # @return [Boolean] whether the update was made in OSM
         def mark_payment_not_required(api:, payment:)
           update_payment_status(api: api, payment: payment, status: :not_required)
@@ -384,7 +384,7 @@ module Osm
 
         # Mark a payment as paid by the member
         # @param api [Osm::Api] The api to use to make the request
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Fixnum, #to_i] The payment (or it's ID) to update
+        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
         # @param gift_aid [Boolean] Whether to update the gift aid record too
         # @return [Boolean] whether the update was made in OSM
         def mark_payment_paid_manually(api:, payment:, gift_aid: false)

@@ -20,7 +20,7 @@ module Osm
   class ObjectIsInvalid < Error; end
   class Osm::Error::NoCurrentTerm < Osm::Error
     # @!attribute [r] section_id
-    #   @return [Fixnum] the id of the section causing the error
+    #   @return [Integer] the id of the section causing the error
     attr_reader :section_id
     def initialize(message = nil, section_id = nil)
       super(message)

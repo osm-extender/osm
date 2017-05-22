@@ -13,9 +13,9 @@ module Osm
     # @!attribute [rw] modules
     #   @return [Array<Hash>] Details of the modules which make up the badge
     # @!attribute [rw] id
-    #   @return [Fixnum] the badge's id in OSM
+    #   @return [Integer] the badge's id in OSM
     # @!attribute [rw] version
-    #   @return [Fixnum] the version of the badge
+    #   @return [Integer] the version of the badge
     # @!attribute [rw] identifier
     #   @return [String] the identifier used by OSM for this badge & version
     # @!attribute [rw] group_name
@@ -25,17 +25,17 @@ module Osm
     # @!attribute [rw] sharing
     #   @return [Symbol] the sharing status of this badge (:draft, :private, :optin, :default_locked, :optin_locked)
     # @!attribute [rw] user_id
-    #   @return [Fixnum] the OSM user who created this (version of the) badge
+    #   @return [Integer] the OSM user who created this (version of the) badge
     # @!attribute [rw] levels
-    #   @return [Array<Fixnum>, nil] the levels available, nil if it's a single level badge
+    #   @return [Array<Integer>, nil] the levels available, nil if it's a single level badge
     # @!attribute [rw] min_modules_required
-    #   @return [Fixnum] the minimum number of modules which must be completed to earn the badge
+    #   @return [Integer] the minimum number of modules which must be completed to earn the badge
     # @!attribute [rw] min_requirements_required
-    #   @return [Fixnum] the minimum number of requirements which must be completed to earn the badge
+    #   @return [Integer] the minimum number of requirements which must be completed to earn the badge
     # @!attribute [rw] add_columns_to_module
-    #   @return [Fixnum, nil] the module to add columns to for nights away type badges
+    #   @return [Integer, nil] the module to add columns to for nights away type badges
     # @!attribute [rw] level_requirement
-    #   @return [Fixnum, nil] the column which stores the currently earnt level of nights away type badges
+    #   @return [Integer, nil] the column which stores the currently earnt level of nights away type badges
     # @!attribute [rw] requires_modules
     #   @return [Array<Array<String>>, nil] the module letters required to gain the badge, at least one from each inner Array
     # @!attribute [rw] other_requirements_required
@@ -76,7 +76,7 @@ module Osm
     validates :requirements, :array_of => {:item_type => Osm::Badge::Requirement, :item_valid => true}
     validates :modules, :array_of => {:item_type => Osm::Badge::RequirementModule, :item_valid => true}
     validates_inclusion_of :latest, :in => [true, false]
-    validates :levels, :array_of => {:item_type => Fixnum}, :allow_nil => true
+    validates :levels, :array_of => {:item_type => Integer}, :allow_nil => true
     validates_numericality_of :min_modules_required, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_numericality_of :min_requirements_required, :only_integer=>true, :greater_than_or_equal_to=>0
     validates_numericality_of :add_columns_to_module, :only_integer=>true, :greater_than=>0, :allow_nil=>true
@@ -90,7 +90,7 @@ module Osm
 
     # Get badges
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
     # @param section_type [Symbol] The type of section to get badges for (if nil uses the type of the section param)
     # @!macro options_get
     # @return [Array<Osm::Badge>]
@@ -169,8 +169,8 @@ module Osm
 
     # Get a summary of badges earnt by members
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Hash>]
     def self.get_summary_for_section(api:, section:, term: nil, no_read_cache: false)
@@ -229,8 +229,8 @@ module Osm
 
     # Get a list of badge requirements met by members
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::Badge::Data>]
     def get_data_for_section(api:, section:, term: nil, no_read_cache: false)
@@ -381,7 +381,7 @@ module Osm
       # @!attribute [rw] description
       #   @return [String] a description of the badge requirement
       # @!attribute [rw] id
-      #   @return [Fixnum] the id for the requirement (passed to OSM)
+      #   @return [Integer] the id for the requirement (passed to OSM)
       # @!attribute [rw] mod
       #   @return [Osm::Badge::RequirementModule] the module the requirement belongs to
       # @!attribute [rw] editable
@@ -427,17 +427,17 @@ module Osm
       # @!attribute [rw] letter
       #   @return [String] the letter of the module
       # @!attribute [rw] id
-      #   @return [Fixnum] the id for the module
+      #   @return [Integer] the id for the module
       # @!attribute [rw] min_required
-      #   @return [Fixnum] the minimum number of requirements which must be met to achieve this module
+      #   @return [Integer] the minimum number of requirements which must be met to achieve this module
       # @!attribute [rw] custom_columns
-      #   @return [Fixnum, nil] ?
+      #   @return [Integer, nil] ?
       # @!attribute [rw] completed_into_column
-      #   @return [Fixnum, nil] ?
+      #   @return [Integer, nil] ?
       # @!attribute [rw] numeric_into_column
-      #   @return [Fixnum, nil] ?
+      #   @return [Integer, nil] ?
       # @!attribute [rw] add_column_id_to_numeric
-      #   @return [Fixnum, nil] ?
+      #   @return [Integer, nil] ?
 
       attribute :badge, :type => Object
       attribute :letter, :type => String
@@ -478,13 +478,13 @@ module Osm
 
     class Data < Osm::Model
       # @!attribute [rw] member_id
-      #   @return [Fixnum] ID of the member this data relates to
+      #   @return [Integer] ID of the member this data relates to
       # @!attribute [rw] first_name
-      #   @return [Fixnum] the member's first name
+      #   @return [Integer] the member's first name
       # @!attribute [rw] last_name
-      #   @return [Fixnum] the member's last name
+      #   @return [Integer] the member's last name
       # @!attribute [rw] due
-      #   @return [Fixnum] whether this badge is due according to OSM, number indicates stage if appropriate
+      #   @return [Integer] whether this badge is due according to OSM, number indicates stage if appropriate
       # @!attribute [rw] awarded
       #   @return [Date] the last stage awarded
       # @!attribute [rw] awarded_date
@@ -492,7 +492,7 @@ module Osm
       # @!attribute [rw] requirements
       #   @return [DirtyHashy] the data for each badge requirement
       # @!attribute [rw] section_id
-      #   @return [Fixnum] the ID of the section the member belongs to
+      #   @return [Integer] the ID of the section the member belongs to
       # @!attribute [rw] badge
       #   @return [Osm::Badge] the badge that the data belongs to
 
@@ -513,7 +513,7 @@ module Osm
       validates_numericality_of :awarded, :only_integer=>true, :greater_than_or_equal_to=>0
       validates_numericality_of :member_id, :only_integer=>true, :greater_than=>0
       validates_numericality_of :section_id, :only_integer=>true, :greater_than=>0
-      validates :requirements, :hash => {:key_type => Fixnum, :value_type => String}
+      validates :requirements, :hash => {:key_type => Integer, :value_type => String}
 
 
       # @!method initialize
@@ -530,7 +530,7 @@ module Osm
 
 
       # Get the total number of gained requirements
-      # @return [Fixnum] the total number of requirements considered gained
+      # @return [Integer] the total number of requirements considered gained
       def total_gained
         count = 0
         badge.requirements.each do |requirement|
@@ -610,7 +610,7 @@ module Osm
 
       # Get what stage which has most recently been earnt
       # (using #earnt? will tell you if it's still due (not yet awarded))
-      # @return [Fixnum] the stage which has most recently been due
+      # @return [Integer] the stage which has most recently been due
       def earnt
         unless badge.has_levels?
           return earnt? ? 1 : 0
@@ -647,7 +647,7 @@ module Osm
 
 
       # Get which stage has been started
-      # @return [Fixnum] which stage of the badge has been started by the member (lowest)
+      # @return [Integer] which stage of the badge has been started by the member (lowest)
       def started
         unless badge.has_levels?
           return started? ? 1 : 0
@@ -683,7 +683,7 @@ module Osm
       # Mark the badge as awarded in OSM
       # @param api [Osm::Api] The api to use to make the request
       # @param date [Date] The date to mark the badge as awarded
-      # @param level [Fixnum] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
+      # @param level [Integer] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return [Boolean] whether the data was updated in OSM
       def mark_awarded(api:, date: Date.today, level: due)
         fail ArgumentError, 'date is not a Date' unless date.is_a?(Date)
@@ -726,7 +726,7 @@ module Osm
 
       # Mark the badge as due in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @param level [Fixnum] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
+      # @param level [Integer] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return [Boolean] whether the data was updated in OSM
       def mark_due(api, level=earnt)
         fail ArgumentError, 'level can not be negative' if level < 0
@@ -810,7 +810,7 @@ module Osm
       end
 
       # Work out if the requirmeent has been met
-      # @param requirement_id [Fixnum, #to_i] The id of the requirement to evaluate (e.g. "12", "xSomething", "Yes" or "")
+      # @param requirement_id [Integer, #to_i] The id of the requirement to evaluate (e.g. "12", "xSomething", "Yes" or "")
       # @return [Boolean] whether the requirmeent has been met
       def requirement_met?(requirement_id)
         data = requirements[requirement_id.to_i].to_s

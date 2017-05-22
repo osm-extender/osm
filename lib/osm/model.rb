@@ -17,7 +17,7 @@ module Osm
 
     # Configure the options used by all models
     # @param cache [Class, nil] An instance of a cache class, must provide the methods (exist?, delete, write, read, fetch), for details see Rails.cache. Set to nil to disable caching.
-    # @param ttl [Fixnum] (optional, default = 600 (10 minutes)) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
+    # @param ttl [Integer] (optional, default = 600 (10 minutes)) The default TTL value for the cache, note that some items are cached for twice this time and others are cached for half this time (in seconds)
     # @param prepend_to_cache_key [String] (optional, default = 'OSMAPI') Text to prepend to the key used to store data in the cache
     # @return nil
     def self.configure(cache: @@cache, prepend_to_cache_key: @@prepend_to_cache_key, cache_ttl: @@cache_ttl)
@@ -47,7 +47,7 @@ module Osm
     end
 
     def self.cache_ttl=(new_cache_ttl)
-      fail ArgumentError, "cache_ttl must be a FixNum greater than 0" if new_cache_ttl && !(new_cache_ttl.is_a?(Fixnum) && new_cache_ttl > 0)
+      fail ArgumentError, "cache_ttl must be a FixNum greater than 0" if new_cache_ttl && !(new_cache_ttl.is_a?(Integer) && new_cache_ttl > 0)
       @@cache_ttl = new_cache_ttl
     end
     def self.cache_ttl
@@ -165,7 +165,7 @@ module Osm
 
     # Check if the user has access to a section
     # @param api [Osm::Api] The api to use to make the query
-    # @param section [Osm::Section, Fixnum, #to_i] The Section (or its ID) the $
+    # @param section [Osm::Section, Integer, #to_i] The Section (or its ID) the $
     # @!macro options_get
     # @return [Boolean] If the Api user has access the section
     def self.has_access_to_section?(api:, section:, **options)
@@ -174,7 +174,7 @@ module Osm
 
     # Raise an exception if the user does not have access to a section
     # @param api [Osm::Api] The api to use to make the query
-    # @param section [Osm::Section, Fixnum, #to_i] The Section (or its ID) the permission is required on
+    # @param section [Osm::Section, Integer, #to_i] The Section (or its ID) the permission is required on
     # @!macro options_get
     # @raise [Osm::Forbidden] If the Api user can not access the section
     def self.require_access_to_section(api:, section:, **options)
@@ -187,7 +187,7 @@ module Osm
     # @param api [Osm::Api] The api to use to make the query
     # @param to [Symbol] What action is required to be done (e.g. :read or :write)
     # @param on [Symbol] What the OSM permission is required on (e.g. :member or :programme)
-    # @param section [Osm::Section, Fixnum, #to_i] The Section (or its ID) the permission is required on
+    # @param section [Osm::Section, Integer, #to_i] The Section (or its ID) the permission is required on
     # @!macro options_get
     def self.has_permission?(api:, to:, on:, section:, **options)
       user_has = user_has_permission?(api: api, to: to, on: on, section: section, **options)
@@ -199,7 +199,7 @@ module Osm
     # @param api [Osm::Api] The api to use to make the query
     # @param to [Symbol] What action is required to be done (e.g. :read or :write)
     # @param on [Symbol] What the OSM permission is required on (e.g. :member or :programme)
-    # @param section [Osm::Section, Fixnum, #to_i]  The Section (or its ID) the permission is required on
+    # @param section [Osm::Section, Integer, #to_i]  The Section (or its ID) the permission is required on
     # @!macro options_get
     def self.user_has_permission?(api:, to:, on:, section:, **options)
       section_id = section.to_i
@@ -216,7 +216,7 @@ module Osm
     # @param api [Osm::Api] The api to use to make the query
     # @param to [Symbol] What action is required to be done (e.g. :read or :write)
     # @param on [Symbol] What the OSM permission is required on (e.g. :member or :programme)
-    # @param section [Osm::Section, Fixnum, #to_i]  The Section (or its ID) the permission is required on
+    # @param section [Osm::Section, Integer, #to_i]  The Section (or its ID) the permission is required on
     # @!macro options_get
     def self.api_has_permission?(api:, to:, on:, section:, **options)
       access = Osm::ApiAccess.get_ours(api: api, section: section, **options)
@@ -228,7 +228,7 @@ module Osm
     # @param api [Osm::Api] The api to use to make the query
     # @param to [Symbol] What action is required to be done (e.g. :read or :write)
     # @param on [Symbol] What the OSM permission is required on (e.g. :member or :programme)
-    # @param section [Osm::Section, Fixnum, #to_i]  The Section (or its ID) the permission is required on
+    # @param section [Osm::Section, Integer, #to_i]  The Section (or its ID) the permission is required on
     # @!macro options_get
     # @raise [Osm::Forbidden] If the Api user does not have the required permission
     def self.require_permission(api:, to:, on:, section:, **options)
@@ -244,8 +244,8 @@ module Osm
 
     # Raise an exception if the user does not have the relevant permission
     # @param api [Osm::Api] The api to use to make the query
-    # @param level [Symbol, Fixnum] The OSM subscription level required (:bronze, :silver, :gold, :gold_plus)
-    # @param section [Osm::Section, Fixnum, #to_i] The Section (or its ID) the subscription is required on
+    # @param level [Symbol, Integer] The OSM subscription level required (:bronze, :silver, :gold, :gold_plus)
+    # @param section [Osm::Section, Integer, #to_i] The Section (or its ID) the subscription is required on
     # @!macro options_get
     # @raise [Osm::Forbidden] If the Section does not have the required OSM Subscription (or higher)
     def self.require_subscription(api:, level:, section:, **options)
@@ -259,7 +259,7 @@ module Osm
     # @param api [Osm::Api] The api to use to make the query
     # @param to [Symbol] What action is required to be done (e.g. :read or :write)
     # @param on [Symbol] What the OSM permission is required on (e.g. :member or :programme)
-    # @param section [Osm::Section, Fixnum, #to_i] The Section (or its ID) the permission is required on
+    # @param section [Osm::Section, Integer, #to_i] The Section (or its ID) the permission is required on
     # @!macro options_get
     def self.require_ability_to(api:, to:, on:, section:, **options)
       section = Osm::Section.get(api, section, options) unless section.is_a?(Osm::Section)
@@ -275,7 +275,7 @@ module Osm
 
     # Get a list of items given a list of item IDs
     # @param api [Osm::Api] The api to use to make the query
-    # @param ids [Array<Fixnum>] The ids of the items to get
+    # @param ids [Array<Integer>] The ids of the items to get
     # @param key_base [String] The base of the key for getting an item from the cache (the key [key_base, id] is generated)
     # @param method [Symbol] The method to get all items (either :get_all or :get_for_section)
     # @param arguments [Hash] The arguments to pass to get_all

@@ -4,7 +4,7 @@ module Osm
 
     # Get badge stock levels for a section
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the badge stock for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the badge stock for
     # @!macro options_get
     # @return Hash
     def self.get_stock(api:, section:, no_read_cache: false)
@@ -23,10 +23,10 @@ module Osm
 
     # Update badge stock levels
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to update ther badge stock for
-    # @param badge_id [Fixnum, #to_i] The badge to set the stock level for
-    # @param badge_level [Fixnum, #to_i] The level of a staged badge to set the stock for (default 1)
-    # @param stock_level [Fixnum, #to_i] How many of the provided badge there are
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to update ther badge stock for
+    # @param badge_id [Integer, #to_i] The badge to set the stock level for
+    # @param badge_level [Integer, #to_i] The level of a staged badge to set the stock for (default 1)
+    # @param stock_level [Integer, #to_i] How many of the provided badge there are
     # @return [Boolan] whether the update was successfull or not
     def self.update_stock(api:, section:, badge_id:, badge_level: 1, stock:)
       Osm::Model.require_ability_to(api: api, to: :write, on: :badge, section: section)
@@ -48,8 +48,8 @@ module Osm
 
     # Get due badges
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the due badges for
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the due badges for, passing nil causes the current term to be used
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the due badges for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Osm::Badges::DueBadges]
     def self.get_due_badges(api:, section:, term: nil, no_read_cache: false)
@@ -105,15 +105,15 @@ module Osm
       attribute :badge_stock, :default => {}
 
       validates :badge_names, :hash => {:key_type => String, :value_type => String}
-      validates :member_names, :hash => {:key_type => Fixnum, :value_type => String}
-      validates :badge_stock, :hash => {:key_type => String, :value_type => Fixnum}
+      validates :member_names, :hash => {:key_type => Integer, :value_type => String}
+      validates :badge_stock, :hash => {:key_type => String, :value_type => Integer}
 
       validates_each :by_member do |record, attr, value|
         badge_names_keys = record.badge_names.keys
         member_names_keys = record.member_names.keys
         record.errors.add(attr, 'must be a Hash') unless value.is_a?(Hash)
         value.each do |k, v|
-          record.errors.add(attr, 'keys must be Fixnum') unless k.is_a?(Fixnum)
+          record.errors.add(attr, 'keys must be Integer') unless k.is_a?(Integer)
           record.errors.add(attr, 'keys must exist as a key in :member_names') unless member_names_keys.include?(k)
           record.errors.add(attr, 'values must be Arrays') unless v.is_a?(Array)
           v.each do |vv|

@@ -4,8 +4,8 @@ module Osm
 
     # Get donations
     # @param api [Osm::Api] api The to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the structure for
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the structure for, passing nil causes the current term to be used
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the structure for
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the structure for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::GiftAid::Donation>] representing the donations made
     def self.get_donations(api:, section:, term: nil, no_read_cache: false)
@@ -34,8 +34,8 @@ module Osm
 
     # Get donation data
     # @param api [Osm::Api] api The to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the data for
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to get the data for, passing nil causes the current term to be used
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the data for
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the data for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<Osm::GiftAid::Data>] representing the donations of each member
     def self.get_data(api:, section:, term: nil, no_read_cache: false)
@@ -82,8 +82,8 @@ module Osm
     # Update information for a donation
     # @param api [Osm::Api] :api The api to use to make the request
     # @param section [Osm::Section] the section to update the donation for
-    # @param term [Osm::Term, Fixnum, #to_i, nil] The term (or its ID) to update the donation for
-    # @param members [Fixnum, Array<Fixnum>, Osm::Member, Array<Osm::Member>, #to_i, Array<#to_i>] the members (or their ids) to update
+    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to update the donation for
+    # @param members [Integer, Array<Integer>, Osm::Member, Array<Osm::Member>, #to_i, Array<#to_i>] the members (or their ids) to update
     # @param date [Date, #strftime] date the date the donation was made
     # @param amount[String, #to_s] the donation amount
     # @param note [String, #to_s] the description for the donation
@@ -132,11 +132,11 @@ module Osm
 
     class Data < Osm::Model
       # @!attribute [rw] member_id
-      #   @return [Fixnum] The OSM ID for the member
+      #   @return [Integer] The OSM ID for the member
       # @!attribute [rw] grouping_id
-      #   @return [Fixnum] The OSM ID for the member's grouping
+      #   @return [Integer] The OSM ID for the member's grouping
       # @!attribute [rw] section_id
-      #   @return [Fixnum] The OSM ID for the member's section
+      #   @return [Integer] The OSM ID for the member's section
       # @!attribute [rw] first_name
       #   @return [String] The member's first name
       # @!attribute [rw] last_name

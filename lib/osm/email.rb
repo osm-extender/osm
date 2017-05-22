@@ -5,9 +5,9 @@ module Osm
 
     # Get a list of selected email address for selected members ready to pass to send_email method
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to send the message to
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to send the message to
     # @param contacts [Array<Symbol>, Symbol] The contacts to get for members (:primary, :secondary and/or :member)
-    # @param members [Array<Osm::Member, Fixnum, #to_i>] The members (or their IDs) to get the email addresses for
+    # @param members [Array<Osm::Member, Integer, #to_i>] The members (or their IDs) to get the email addresses for
     # @return [Hash] member_id -> {firstname [String], lastname [String], emails [Array<String>]}
     def self.get_emails_for_contacts(api:, section:, contacts:, members:)
       # Convert contacts into OSM's format
@@ -41,7 +41,7 @@ module Osm
 
     # Get a list of selected email address for selected members ready to pass to send_email method
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to send the message to
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to send the message to
     # @param to [Hash] Email addresses to send the email to: member_id -> {firstname [String], lastname [String], emails [Array<String>]}
     # @param cc [String, nil] Email address (if any) to cc
     # @param from [String] Email address to send the email from
@@ -69,7 +69,7 @@ module Osm
       VALID_STATUSES = [:processed, :delivered, :bounced]
 
       # @!attribute [rw] id
-      #   @return [Fixnum] the id of the email
+      #   @return [Integer] the id of the email
       # @!attribute [rw] sent_at
       #   @return [Time] when the email was sent
       # @!attribute [rw] subject
@@ -77,7 +77,7 @@ module Osm
       # @!attribute [rw] recipients
       #   @return [Array<Osm::DeliveryReport::Email::Recipient>]
       # @!attribute [rw] section_id
-      #   @return [Fixnum] the id of the section which sent the email
+      #   @return [Integer] the id of the section which sent the email
 
       attribute :id, type: Integer
       attribute :sent_at, type: DateTime
@@ -99,7 +99,7 @@ module Osm
 
       # Get delivery reports
       # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the reports for
+      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the reports for
       # @!macro options_get
       # @return [Array<Osm::Email::DeliveryReport>]
       def self.get_for_section(api:, section:, no_read_cache: false)
@@ -208,7 +208,7 @@ module Osm
         VALID_STATUSES = Osm::Email::DeliveryReport::VALID_STATUSES.clone
 
         # @!attribute [rw] id
-        #   @return [Fixnum] the id of the email recipient
+        #   @return [Integer] the id of the email recipient
         # @!attribute [rw] delivery_report
         #   @return [Osm::Email::DeliveryReport] the report this recipient belongs to
         # @!attribute [rw] address
@@ -216,7 +216,7 @@ module Osm
         # @!attribute [rw] status
         #   @return [Symbol] the status of the email sent to the recipient
         # @!attribute [rw] member_id
-        #   @return [Fixnum] the id of the member the email was sent to
+        #   @return [Integer] the id of the member the email was sent to
 
         attribute :id, type: Integer
         attribute :delivery_report, type: Object

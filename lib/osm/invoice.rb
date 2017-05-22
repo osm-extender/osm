@@ -2,9 +2,9 @@ module Osm
 
   class Invoice < Osm::Model
     # @!attribute [rw] id
-    #   @return [Fixnum] The OSM ID for the invoice
+    #   @return [Integer] The OSM ID for the invoice
     # @!attribute [rw] section_id
-    #   @return [Fixnum] The OSM ID for the section the invoice belongs to
+    #   @return [Integer] The OSM ID for the section the invoice belongs to
     # @!attribute [rw] name
     #   @return [String] The name given to the invoice
     # @!attribute [rw] extra_details
@@ -39,7 +39,7 @@ module Osm
 
     # Get invoices for a section
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the invoices for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the invoices for
     # @!macro options_get
     # @option options [Boolean] :include_archived (optional) if true then archived invoices will also be returned
     # @return [Array<Osm::Invoice>]
@@ -78,8 +78,8 @@ module Osm
 
     # Get an invoice
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the events for
-    # @param id [Fixnum, #to_i] The id of the invoice to get
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the events for
+    # @param id [Integer, #to_i] The id of the invoice to get
     # @!macro options_get
     # @return [Osm::Invoice, nil] the invoice (or nil if it couldn't be found
     def self.get(api:, section:, id:, no_read_cache: false)
@@ -259,23 +259,23 @@ module Osm
 
     class Item < Osm::Model
       # @!attribute [rw] id
-      #   @return [Fixnum] The OSM ID for the invoice item
+      #   @return [Integer] The OSM ID for the invoice item
       # @!attribute [rw] invoice
       #   @return [Osm::Invoice] The Osm::Invoice the item belongs to
       # @!attribute [rw] record_id
-      #   @return [Fixnum] The id of the item within the invoice
+      #   @return [Integer] The id of the item within the invoice
       # @!attribute [rw] date
-      #   @return [Fixnum] The date the item was paid/received
+      #   @return [Integer] The date the item was paid/received
       # @!attribute [rw] amount
-      #   @return [Fixnum] The amount of the transaction
+      #   @return [Integer] The amount of the transaction
       # @!attribute [rw] type
-      #   @return [Fixnum] The type of transaction (:expense or :income)
+      #   @return [Integer] The type of transaction (:expense or :income)
       # @!attribute [rw] payto
-      #   @return [Fixnum] Who paid/reimbursed
+      #   @return [Integer] Who paid/reimbursed
       # @!attribute [rw] description
-      #   @return [Fixnum] A description for the transaction
+      #   @return [Integer] A description for the transaction
       # @!attribute [rw] budget_name
-      #   @return [Fixnum] The name of the budget this item is assigned to
+      #   @return [Integer] The name of the budget this item is assigned to
 
       attribute :id, :type => Integer
       attribute :invoice, :type => Object

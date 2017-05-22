@@ -1,6 +1,7 @@
 ## Version 2.0.0
 
   * Remove support for ruby <= 2.2.5, jruby, rails < 4
+  * Add support for ruby 2.4.0
   * Remove dependancy on active_support and httparty gems
   * Model is now configured through Osm::Model.configure
   * Model now has class accessors for cache, cache_ttl and prepend_to_cache_key attributes

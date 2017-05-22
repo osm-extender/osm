@@ -4,13 +4,13 @@ module Osm
 
     class ParentLoginHistory < Osm::Model
       # @!attribute [rw] member_id
-      #   @return [Fixnum] the id for the member
+      #   @return [Integer] the id for the member
       # @!attribute [rw] first_name
       #   @return [String] the member's first name
       # @!attribute [rw] last_name
       #   @return [String] the member's last name
       # @!attribute [rw] logins
-      #   @return [Fixnum] the total number of logins
+      #   @return [Integer] the total number of logins
       # @!attribute [rw] last_login
       #   @return [DateTime] the time and date of the last login
 
@@ -33,7 +33,7 @@ module Osm
 
       # Get parent login history
       # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get login history for
+      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get login history for
       # @!macro options_get
       # @return [Array<Osm::Myscout::ParentLoginHistory>]
       def self.get_for_section(api:, section:, no_read_cache: false)
@@ -227,7 +227,7 @@ module Osm
 
       # Get a template
       # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get login history for
+      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get login history for
       # @param key [String] The key of the template to get
       # @!macro options_get
       # @return [String, nil]
@@ -247,7 +247,7 @@ module Osm
 
       # Update a template in OSM
       # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get login history for
+      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get login history for
       # @param key [String] The key of the template to get
       # @param content [String] The new content of the template
       # @return [Boolean] Wheter OSM reported the template as updated 
@@ -284,7 +284,7 @@ module Osm
 
       # Restore a template to OSM's default for it
       # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get login history for
+      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get login history for
       # @param key [String] The key of the template to get
       # @param content [String] The new content of the template
       # @return [String, nil] The content of the template (nil if not restored)

@@ -2,9 +2,9 @@ module Osm
 
   class Budget < Osm::Model
     # @!attribute [rw] id
-    #   @return [Fixnum] The OSM ID for the budget
+    #   @return [Integer] The OSM ID for the budget
     # @!attribute [rw] section_id
-    #   @return [Fixnum] The OSM ID for the section the budget belongs to
+    #   @return [Integer] The OSM ID for the section the budget belongs to
     # @!attribute [rw] name
     #   @return [String] The name of the budget
 
@@ -24,7 +24,7 @@ module Osm
 
     # Get budgets for a section
     # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Fixnum, #to_i] The section (or its ID) to get the structure for
+    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the structure for
     # @!macro options_get
     # @return [Array<Osm::Budget>] representing the donations made
     def self.get_for_section(api:, section:, no_read_cache: false)

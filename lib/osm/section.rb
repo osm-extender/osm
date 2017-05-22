@@ -2,15 +2,15 @@ module Osm
 
   class Section < Osm::Model
     # @!attribute [rw] id
-    #   @return [Fixnum] the id for the section
+    #   @return [Integer] the id for the section
     # @!attribute [rw] name
     #   @return [String] the section name
     # @!attribute [rw] group_id
-    #   @return [Fixnum] the id for the group
+    #   @return [Integer] the id for the group
     # @!attribute [rw] group_name
     #   @return [String] the group name
     # @!attribute [rw] subscription_level
-    #   @return [Fixnum] what subscription the section has to OSM (1-bronze, 2-silver, 3-gold, 4-gold+)
+    #   @return [Integer] what subscription the section has to OSM (1-bronze, 2-silver, 3-gold, 4-gold+)
     # @!attribute [rw] subscription_expires
     #   @return [Date] when the section's subscription to OSM expires
     # @!attribute [rw] type
@@ -50,15 +50,15 @@ module Osm
     # @!attribute [rw] myscout_programme_times
     #   @return [Boolean] Whether parents can see times of programme items
     # @!attribute [rw] myscout_programme_show
-    #   @return [Fixnum] How many programme itemms parents can see (the next 5, 10, 15, 20 meetings, -1 (whole term), 0 (remaining this term) or -2 (all future))
+    #   @return [Integer] How many programme itemms parents can see (the next 5, 10, 15, 20 meetings, -1 (whole term), 0 (remaining this term) or -2 (all future))
     # @!attribute [rw] myscout_event_reminder_count
-    #   @return [Fixnum] How many event reminders to send to parents who haven't responded
+    #   @return [Integer] How many event reminders to send to parents who haven't responded
     # @!attribute [rw] myscout_event_reminder_frequency
-    #   @return [Fixnum] How many days to leave between event reminder emails
+    #   @return [Integer] How many days to leave between event reminder emails
     # @!attribute [rw] myscout_payment_reminder_count
-    #   @return [Fixnum] How many payment reminders to send to parents who haven't paid yet
+    #   @return [Integer] How many payment reminders to send to parents who haven't paid yet
     # @!attribute [rw] myscout_payment_reminder_frequency
-    #   @return [Fixnum] How many days to leave between payment reminder emails
+    #   @return [Integer] How many days to leave between payment reminder emails
     # @!attribute [rw] myscout_details_email_changes_to
     #   @return [String] email address to send changes to personal details made through My.SCOUT to
 
@@ -158,8 +158,8 @@ module Osm
         fr_data = section_data['extraRecords'] if section_data['extraRecords'].is_a?(Array)
         fr_data = section_data['extraRecords'].values if section_data['extraRecords'].is_a?(Hash)
         fr_data.each do |record_data|
-          # Expect item to be: {:name=>String, :extraid=>Fixnum}
-          # Sometimes get item as: [String, {"name"=>String, "extraid"=>Fixnum}]
+          # Expect item to be: {:name=>String, :extraid=>Integer}
+          # Sometimes get item as: [String, {"name"=>String, "extraid"=>Integer}]
           record_data = record_data[1] if record_data.is_a?(Array)
           flexi_records.push Osm::FlexiRecord.new(
             :id => Osm::to_i_or_nil(record_data['extraid']),
@@ -218,7 +218,7 @@ module Osm
 
     # Get a section
     # @param api [Osm::Api] The api to use to make the request
-    # @param id [Fixnum] The section id of the required section
+    # @param id [Integer] The section id of the required section
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that section
     # @return [Osm::Section]
@@ -322,10 +322,10 @@ module Osm
     end
 
     # Check if the section has a subscription of a given level (or higher)
-    # @param level [Fixnum, Symbol] the subscription level required
+    # @param level [Integer, Symbol] the subscription level required
     # @return [Boolean] Whether the section has a subscription of level (or higher)
     def subscription_at_least?(level)
-      if level.is_a?(Symbol) # Convert to Fixnum
+      if level.is_a?(Symbol) # Convert to Integer
         case level
         when :bronze
           level = 1
