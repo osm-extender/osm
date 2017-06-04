@@ -9,7 +9,6 @@ Master branch:
 Staging branch:
 [![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=staging)](http://travis-ci.org/robertgauld/osm)
 [![Coveralls Status](https://coveralls.io/repos/robertgauld/osm/badge.png?branch=master)](https://coveralls.io/r/robertgauld/osm)
-[![Code Climate](https://codeclimate.com/github/robertgauld/osm.png?branch=staging)](https://codeclimate.com/github/robertgauld/osm)
 
 
 ## Build State
