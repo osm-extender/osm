@@ -12,8 +12,6 @@ Gem::Specification.new do |s|
   s.summary     = %q{Use the Online Scout Manager API}
   s.description = %q{Use the Online Scout Manager API (https://www.onlinescoutmanager.co.uk) to retrieve and save data.}
 
-  s.rubyforge_project = "osm"
-
   s.files         = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }

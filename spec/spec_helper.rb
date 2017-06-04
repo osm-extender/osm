@@ -9,7 +9,7 @@ require 'coveralls' and Coveralls.wear! if ENV['TRAVIS']
 
 require 'active_attr/rspec'
 
-require 'osm'
+require_relative '../lib/osm'
 
 
 RSpec.configure do |config|
