@@ -1,10 +1,5 @@
 module Osm
-
   class Activity < Osm::Model
-    class Badge; end # Ensure the constant exists for the validators
-    class File; end # Ensure the constant exists for the validators
-    class Version; end # Ensure the constant exists for the validators
-
     # @!attribute [rw] id
     #   @return [Integer] the id for the activity
     # @!attribute [rw] version
@@ -268,121 +263,10 @@ module Osm
     end
 
 
-    protected def sort_by
+    protected
+    def sort_by
       ['id', 'version']
     end
 
-
-    class File
-      include ActiveAttr::Model
-
-      # @!attribute [rw] id
-      #   @return [Integer] the OSM ID for the file
-      # @!attribute [rw] activity_id
-      #   @return [Integer] the OSM ID for the activity
-      # @!attribute [rw] file_name
-      #   @return [String] the file name of the file
-      # @!attribute [rw] name
-      #   @return [String] the name of the file (more human readable than file_name)
-
-      attribute :id, type: Integer
-      attribute :activity_id, type: Integer
-      attribute :file_name, type: String
-      attribute :name, type: String
-
-      validates_numericality_of :id, only_integer:true, greater_than:0
-      validates_numericality_of :activity_id, only_integer:true, greater_than:0
-      validates_presence_of :file_name
-      validates_presence_of :name
-
-      # @!method initialize
-      #   Initialize a new Term
-      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-      protected def sort_by
-        ['activity_id', 'name']
-      end
-
-    end # Class Activity::File
-
-    class Badge
-      include ActiveAttr::Model
-
-      # @!attribute [rw] badge_type
-      #   @return [Symbol] the type of badge
-      # @!attribute [rw] badge_section
-      #   @return [Symbol] the section type that the badge belongs to
-      # @!attribute [rw] requirement_label
-      #   @return [String] human firendly requirement label
-      # @!attribute [rw] data
-      #   @return [String] what to put in the column when the badge records are updated
-      # @!attribute [rw] badge_name
-      #   @return [String] the badge's name
-      # @!attribute [rw] badge_id
-      #   @return [Integer] the badge's ID in OSM
-      # @!attribute [rw] badge_version
-      #   @return [Integer] the version of the badge
-      # @!attribute [rw] requirement_id
-      #   @return [Integer] the requirement's ID in OSM
-
-      attribute :badge_type, type: Object
-      attribute :badge_section, type: Object
-      attribute :requirement_label, type: String
-      attribute :data, type: String
-      attribute :badge_name, type: String
-      attribute :badge_id, type: Integer
-      attribute :badge_version, type: Integer
-      attribute :requirement_id, type: Integer
-
-      validates_presence_of :badge_name
-      validates_inclusion_of :badge_section, in: [:beavers, :cubs, :scouts, :explorers, :staged]
-      validates_inclusion_of :badge_type, in: [:core, :staged, :activity, :challenge]
-      validates_numericality_of :badge_id, only_integer:true, greater_than:0
-      validates_numericality_of :badge_version, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :requirement_id, only_integer:true, greater_than:0, allow_nil:true
-
-      # @!method initialize
-      #   Initialize a new Meeting::Activity
-      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-      protected def sort_by
-        ['section', 'type', 'badge_name', 'rerquirement_label', 'data']
-      end
-
-    end # Class Activity::Badge
-
-    class Version
-      include ActiveAttr::Model
-
-      # @!attribute [rw] version
-      #   @return [Integer] the version of the activity
-      # @!attribute [rw] created_by
-      #   @return [Integer] the OSM user ID of the person who created this version
-      # @!attribute [rw] created_by_name
-      #   @return [String] the aname of the OSM user who created this version
-      # @!attribute [rw] label
-      #   @return [String] the human readable label to use for this version
-
-      attribute :version, type: Integer
-      attribute :created_by, type: Integer
-      attribute :created_by_name, type: String
-      attribute :label, type: String
-
-      validates_numericality_of :version, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :created_by, only_integer:true, greater_than:0
-      validates_presence_of :created_by_name
-      validates_presence_of :label
-
-      # @!method initialize
-      #   Initialize a new Version
-      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-      protected def sort_by
-        ['activity_id', 'version']
-      end
-
-    end # Class Activity::Version
-
-  end # Class Activity
-
-end # Module
+  end
+end

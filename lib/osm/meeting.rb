@@ -1,9 +1,6 @@
 module Osm
 
   class Meeting < Osm::Model
-    class Activity; end # Ensure the constant exists for the validators
-    class BadgeLink; end # Ensure the constant exists for the validators
-
     # @!attribute [rw] id
     #   @return [Integer] the id of the meeting
     # @!attribute [rw] section_id
@@ -309,82 +306,5 @@ module Osm
       ['section_id', 'date', 'start_time', 'id']
     end
 
-
-    private
-    class Activity
-      include ActiveAttr::Model
-
-      # @!attribute [rw] activity_id
-      #   @return [Integer] the activity being done
-      # @!attribute [rw] title
-      #   @return [String] the activity's title
-      # @!attribute [rw] notes
-      #   @return [String] notes relevant to doing this activity on this meeting
-
-      attribute :activity_id, type: Integer
-      attribute :title, type: String
-      attribute :notes, type: String, default: ''
-
-      validates_numericality_of :activity_id, only_integer:true, greater_than:0
-      validates_presence_of :title
-
-      # @!method initialize
-      #   Initialize a new Meeting::Activity
-      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-
-      # Compare Activity based on title then activity_id
-      def <=>(another)
-        result = self.title <=> another.try(:title)
-        result = self.activity_id <=> another.try(:activity_id) if result == 0
-        return result
-      end
-
-    end # Class Meeting::Activity
-
-
-    class BadgeLink
-      include ActiveAttr::Model
-
-      # @!attribute [rw] badge_type
-      #   @return [Symbol] the type of badge
-      # @!attribute [rw] badge_section
-      #   @return [Symbol] the section type that the badge belongs to
-      # @!attribute [rw] requirement_label
-      #   @return [String] human firendly requirement label
-      # @!attribute [rw] data
-      #   @return [String] what to put in the column when the badge records are updated
-      # @!attribute [rw] badge_name
-      #   @return [String] the badge's name
-      # @!attribute [rw] badge_id
-      #   @return [Integer] the badge's ID in OSM
-      # @!attribute [rw] badge_version
-      #   @return [Integer] the version of the badge
-      # @!attribute [rw] requirement_id
-      #   @return [Integer] the requirement's ID in OSM
-
-      attribute :badge_type, type: Object
-      attribute :badge_section, type: Object
-      attribute :requirement_label, type: String
-      attribute :data, type: String
-      attribute :badge_name, type: String
-      attribute :badge_id, type: Integer
-      attribute :badge_version, type: Integer
-      attribute :requirement_id, type: Integer
-
-      validates_presence_of :badge_name
-      validates_inclusion_of :badge_section, in: [:beavers, :cubs, :scouts, :explorers, :staged]
-      validates_inclusion_of :badge_type, in: [:core, :staged, :activity, :challenge]
-      validates_numericality_of :badge_id, only_integer:true, greater_than:0
-      validates_numericality_of :badge_version, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :requirement_id, only_integer:true, greater_than:0, allow_nil:true
-
-      # @!method initialize
-      #   Initialize a new Meeting::Activity
-      #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
-
-    end # Class Meeting::BadgeLink
-
-  end # Class Meeting
-
-end # Module
+  end
+end

@@ -133,7 +133,7 @@ describe "SMS" do
     end
 
     describe "Status helpers" do
-      statuses = Osm::Sms::DeliveryReport::VALID_STATUSES
+      statuses = [:sent, :not_sent, :delivered, :not_delivered, :invalid_destination_address, :invalid_source_address, :invalid_message_format, :route_not_available, :not_allowed]
       statuses.each do |status|
         it "For #{status}" do
           statuses.each do |test_status|

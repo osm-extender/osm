@@ -12,7 +12,7 @@ describe "My.SCOUT" do
       ]}
       expect($api).to receive(:post_query).with('ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=1').and_return(data)
       
-      histories = Osm::Myscout::ParentLoginHistory.get_for_section(api: $api, section: 1)
+      histories = Osm::MyScout::ParentLoginHistory.get_for_section(api: $api, section: 1)
       expect(histories.size).to eq(2)
       expect(histories[0].member_id).to eq(2)
       expect(histories[0].first_name).to eq('John')
@@ -33,7 +33,7 @@ describe "My.SCOUT" do
 
       expect($api).to receive(:post_query).with('ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=1').and_return(data)
       
-      history = Osm::Myscout::ParentLoginHistory.get_for_section(api: $api, section: 1)[0]
+      history = Osm::MyScout::ParentLoginHistory.get_for_section(api: $api, section: 1)[0]
       expect(history.last_login).to be_nil
     end
 
@@ -43,7 +43,7 @@ describe "My.SCOUT" do
       ]}
       expect($api).to receive(:post_query).with('ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=1').and_return(data)
 
-      history = Osm::Myscout::ParentLoginHistory.get_for_section(api: $api, section: 1)[0]
+      history = Osm::MyScout::ParentLoginHistory.get_for_section(api: $api, section: 1)[0]
       expect(history.last_login).to be_nil
     end
 
@@ -56,12 +56,12 @@ describe "My.SCOUT" do
 
       it "Success" do
         expect($api).to receive(:post_query).with('ext/settings/parents/?action=getTemplate&key=email-first&section_id=1').and_return({"status"=>true, "error"=>nil, "data"=>"TEMPLATE GOES HERE", "meta"=>[]})
-        expect(Osm::Myscout::Template.get_template(api: $api, section: 1, key: 'email-first')).to eq('TEMPLATE GOES HERE')
+        expect(Osm::MyScout::Template.get_template(api: $api, section: 1, key: 'email-first')).to eq('TEMPLATE GOES HERE')
       end
 
       it "Failed" do
         expect($api).to receive(:post_query).with('ext/settings/parents/?action=getTemplate&key=email-first&section_id=1').and_return({"status"=>false, "error"=>nil, "data"=>"", "meta"=>[]})
-        expect(Osm::Myscout::Template.get_template(api: $api, section: 1, key: 'email-first')).to be_nil
+        expect(Osm::MyScout::Template.get_template(api: $api, section: 1, key: 'email-first')).to be_nil
       end
 
     end
@@ -71,18 +71,18 @@ describe "My.SCOUT" do
       it "Success" do
         template = 'CONTENT WHICH CONTAINS [DIRECT_LINK].'
         expect($api).to receive(:post_query).with('ext/settings/parents/?action=updateTemplate', post_data: {'section_id'=>1, 'key'=>'email-invitation', 'value'=>template}).and_return({"status"=>true, "error"=>nil, "data"=>true, "meta"=>[]})
-        expect(Osm::Myscout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: template)).to be true
+        expect(Osm::MyScout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: template)).to be true
       end
 
       it "Failed" do
         template = 'CONTENT WHICH CONTAINS [DIRECT_LINK].'
         expect($api).to receive(:post_query).with('ext/settings/parents/?action=updateTemplate', post_data: {'section_id'=>1, 'key'=>'email-invitation', 'value'=>template}).and_return({"status"=>false, "error"=>nil, "data"=>false, "meta"=>[]})
-        expect(Osm::Myscout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: template)).to be false
+        expect(Osm::MyScout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: template)).to be false
       end
 
       it "Missing a required tag" do
         expect($api).not_to receive(:post_query)
-        expect{ Osm::Myscout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: 'CONTENT') }.to raise_error ArgumentError, 'Required tag [DIRECT_LINK] not found in template content.'
+        expect{ Osm::MyScout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: 'CONTENT') }.to raise_error ArgumentError, 'Required tag [DIRECT_LINK] not found in template content.'
       end
 
     end
@@ -91,12 +91,12 @@ describe "My.SCOUT" do
 
       it "Success" do
         expect($api).to receive(:post_query).with('ext/settings/parents/?action=restoreTemplate', post_data: {'section_id'=>1, 'key'=>'email-first'}).and_return({"status"=>true, "error"=>nil, "data"=>"TEMPLATE GOES HERE", "meta"=>[]})
-        expect(Osm::Myscout::Template.restore_template(api: $api, section: 1, key: 'email-first')).to eq('TEMPLATE GOES HERE')
+        expect(Osm::MyScout::Template.restore_template(api: $api, section: 1, key: 'email-first')).to eq('TEMPLATE GOES HERE')
       end
 
       it "Failed" do
         expect($api).to receive(:post_query).with('ext/settings/parents/?action=restoreTemplate', post_data: {'section_id'=>1, 'key'=>'email-first'}).and_return({"status"=>false, "error"=>nil, "data"=>"TEMPLATE GOES HERE", "meta"=>[]})
-        expect(Osm::Myscout::Template.restore_template(api: $api, section: 1, key: 'email-first')).to be_nil
+        expect(Osm::MyScout::Template.restore_template(api: $api, section: 1, key: 'email-first')).to be_nil
       end
 
     end

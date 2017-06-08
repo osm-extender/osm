@@ -56,10 +56,29 @@ end
 # Require file for this gem
 require File.join(File.dirname(__FILE__), '..', 'version')
 Dir[File.join(File.dirname(__FILE__) , '*_validator.rb')].each {|file| require file }
-['model', 'flexi_record'].each do |file| # These must be included before the rest
-  require File.join(File.dirname(__FILE__), 'osm', file)
-end
-Dir[File.join(File.dirname(__FILE__) , 'osm', '*.rb')].each {|file| require file }
+# These must be included before the rest
+require File.join(File.dirname(__FILE__), 'osm', 'model')
+require File.join(File.dirname(__FILE__), 'osm', 'flexi_record')
+require File.join(File.dirname(__FILE__), 'osm', 'member', 'contact')
+require File.join(File.dirname(__FILE__), 'osm', 'member', 'emailable_contact')
+require File.join(File.dirname(__FILE__), 'osm', 'member', 'enableable_emailable_contact')
+require File.join(File.dirname(__FILE__), 'osm', 'member', 'enableable_phoneable_contact')
+require File.join(File.dirname(__FILE__), 'osm', 'member')
+require File.join(File.dirname(__FILE__), 'osm', 'meeting', 'activity')
+require File.join(File.dirname(__FILE__), 'osm', 'meeting', 'badge_link')
+require File.join(File.dirname(__FILE__), 'osm', 'invoice', 'item')
+require File.join(File.dirname(__FILE__), 'osm', 'event', 'badge_link')
+require File.join(File.dirname(__FILE__), 'osm', 'event', 'column')
+require File.join(File.dirname(__FILE__), 'osm', 'email', 'delivery_report', 'recipient.rb')
+require File.join(File.dirname(__FILE__), 'osm', 'activity', 'badge')
+require File.join(File.dirname(__FILE__), 'osm', 'activity', 'file')
+require File.join(File.dirname(__FILE__), 'osm', 'activity', 'version')
+require File.join(File.dirname(__FILE__), 'osm', 'badge', 'requirement.rb')
+require File.join(File.dirname(__FILE__), 'osm', 'badge', 'requirement_module.rb')
+require File.join(File.dirname(__FILE__), 'osm', 'badge')
+
+# And finally the rest
+Dir[File.join(File.dirname(__FILE__) , 'osm', '**', '*.rb')].each {|file| require file }
 
 
 module Osm
