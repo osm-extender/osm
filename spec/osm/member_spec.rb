@@ -1,7 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-
-describe "Member" do
+describe Osm::Member do
 
   it "Create" do
     attributes = {
@@ -54,22 +51,11 @@ describe "Member" do
   end
 
 
-  describe "Provides full name" do
-
-    it "Member" do
-      expect(Osm::Member.new(first_name: 'First').name).to eq('First')
-      expect(Osm::Member.new(last_name: 'Last').name).to eq('Last')
-      expect(Osm::Member.new(first_name: 'First', last_name: 'Last').name).to eq('First Last')
-      expect(Osm::Member.new(first_name: 'First', last_name: 'Last').name('*')).to eq('First*Last')
-    end
-
-    it "Contact" do
-      expect(Osm::Member::Contact.new(first_name: 'First').name).to eq('First')
-      expect(Osm::Member::Contact.new(last_name: 'Last').name).to eq('Last')
-      expect(Osm::Member::Contact.new(first_name: 'First', last_name: 'Last').name).to eq('First Last')
-      expect(Osm::Member::Contact.new(first_name: 'First', last_name: 'Last').name('*')).to eq('First*Last')
-    end
-
+  it "Provides full name" do
+    expect(Osm::Member.new(first_name: 'First').name).to eq('First')
+    expect(Osm::Member.new(last_name: 'Last').name).to eq('Last')
+    expect(Osm::Member.new(first_name: 'First', last_name: 'Last').name).to eq('First Last')
+    expect(Osm::Member.new(first_name: 'First', last_name: 'Last').name('*')).to eq('First*Last')
   end
 
 

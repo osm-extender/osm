@@ -1,29 +1,6 @@
-# encoding: utf-8
-require 'spec_helper'
-require 'date'
+describe Osm::GiftAid::Data do
 
-
-describe "Gift Aid" do
-
-  it "Create Donation" do
-    d = Osm::GiftAid::Donation.new(
-      donation_date: Date.new(2000, 1, 2),
-    )
-
-    expect(d.donation_date).to eq(Date.new(2000, 1, 2))
-    expect(d.valid?).to eq(true)
-  end
-
-  it "Sorts Donation by date" do
-    d1 = Osm::GiftAid::Donation.new(donation_date: Date.new(2000, 1, 2))
-    d2 = Osm::GiftAid::Donation.new(donation_date: Date.new(2001, 1, 2))
-
-    data = [d2, d1]
-    expect(data.sort).to eq([d1, d2])
-  end
-
-
-  it "Create Data" do
+  it "Create" do
     d = Osm::GiftAid::Data.new(
       member_id: 1,
       first_name: 'A',
@@ -54,7 +31,7 @@ describe "Gift Aid" do
     expect(d.valid?).to eq(true)
   end
 
-  it "Sorts Data by section_id, grouping_id, last_name then first_name" do
+  it "Sorts by section_id, grouping_id, last_name then first_name" do
     d1 = Osm::GiftAid::Data.new(section_id: 1, grouping_id: 1, last_name: 'a', first_name: 'a')
     d2 = Osm::GiftAid::Data.new(section_id: 2, grouping_id: 1, last_name: 'a', first_name: 'a')
     d3 = Osm::GiftAid::Data.new(section_id: 2, grouping_id: 2, last_name: 'a', first_name: 'a')
@@ -66,76 +43,9 @@ describe "Gift Aid" do
   end
 
 
-  describe "Using the API" do
+  describe "Using the OSM API" do
 
-    it "Fetch the donations for a section" do
-      data = [
-    	  {"rows" => [
-          {"name" => "First name","field" => "firstname","width" => "100px","formatter" => "boldFormatter"},
-          {"name" => "Last name","field" => "lastname","width" => "100px","formatter" => "boldFormatter"},
-          {"name" => "Tax payer's name","field" => "parentname","width" => "150px","editable" => true,"formatter" => "boldFormatter"},
-          {"name" => "Total","field" => "total","width" => "60px","formatter" => "boldFormatter"}
-	      ],"noscroll" => true},
-	      {"rows" => [
-          {"name" => "2000-01-02", "field" => "2000-01-02", "width" => "110px", "editable" => true, "formatter" => "boldFormatter"}
-      	]}
-      ]
-      expect($api).to receive(:post_query).with('giftaid.php?action=getStructure&sectionid=1&termid=2').and_return(data)
-
-      donations = Osm::GiftAid.get_donations(api: $api, section: 1, term: 2)
-      expect(donations).to eq([Osm::GiftAid::Donation.new(donation_date: Date.new(2000, 1, 2))])
-    end
-
-    it "Fetch the data for a section" do
-      data = {
-      	"identifier" => "scoutid",
-	      "label" => "name",
-	      "items" => [
-	        {"2000-01-02" => "1.23", "total" => 2.34, "scoutid" => "2", "firstname" => "First", "lastname" => "Last", "patrolid" => "3", "parentname" => "Tax"},
-	        {"2000-01-02" => 1.23,"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 1.23}
-	      ]
-      }
-      expect($api).to receive(:post_query).with('giftaid.php?action=getGrid&sectionid=1&termid=2').and_return(data)
-
-      data = Osm::GiftAid.get_data(api: $api, section: 1, term: 2)
-      expect(data.is_a?(Array)).to eq(true)
-      expect(data.size).to eq(1)
-      data = data[0]
-      expect(data.donations).to eq({
-        Date.new(2000, 1, 2) => '1.23',
-      })
-      expect(data.first_name).to eq('First')
-      expect(data.last_name).to eq('Last')
-      expect(data.tax_payer_name).to eq('Tax')
-      expect(data.grouping_id).to eq(3)
-      expect(data.member_id).to eq(2)
-      expect(data.total).to eq('2.34')
-      expect(data.section_id).to eq(1)
-      expect(data.valid?).to eq(true)
-    end
-
-    it "Update donation" do
-      post_data = {
-        'scouts' => '["3", "4"]',
-        'donatedate'=> '2000-01-02',
-        'amount' => '1.23',
-        'notes' => 'Note',
-        'sectionid' => 1,
-      }
-      expect($api).to receive(:post_query).with('giftaid.php?action=update&sectionid=1&termid=2', post_data: post_data).and_return([])
-
-      expect(Osm::GiftAid.update_donation(
-        api: $api,
-        section: 1,
-        term: 2,
-        date: Date.new(2000, 1, 2),
-        members: [3, 4],
-        amount: '1.23',
-        note: 'Note',
-      )).to eq(true)
-    end
-
-    describe "Update data" do
+    describe "Update" do
 
       before :each do
         @data = Osm::GiftAid::Data.new(
@@ -203,6 +113,6 @@ describe "Gift Aid" do
 
     end # Describe update data
 
-  end # Describe using the API
+  end # describe using the OSM API
 
 end

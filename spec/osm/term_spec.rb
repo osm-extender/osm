@@ -1,8 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-require 'date'
-
-describe "Term" do
+describe Osm::Term do
 
   before :each do
     @attributes = {

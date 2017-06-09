@@ -1,6 +1,3 @@
-# encoding: utf-8
-require 'spec_helper'
-
 module HashValidatorSpec
 
   class KeyTypeTestModel
@@ -28,8 +25,7 @@ module HashValidatorSpec
   end
 
 
-  describe "Hash validator" do
-
+  describe HashValidator do
 
     describe "Key type option" do
 
@@ -105,6 +101,7 @@ module HashValidatorSpec
 
     end
 
+
     describe "Value in option" do
 
       it "Has only correct keys" do
@@ -128,7 +125,6 @@ module HashValidatorSpec
       end
 
     end
-
 
   end
 

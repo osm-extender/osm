@@ -1,6 +1,3 @@
-# encoding: utf-8
-require 'spec_helper'
-
 module ValidityValidatorSpec
   class TestItem
     include ActiveAttr::Model
@@ -25,7 +22,7 @@ module ValidityValidatorSpec
   end
 
 
-  describe "validity validator" do
+  describe ValidityValidator do
 
     it "Item is valid" do
       model = TestModel.new(item: TestItem.new(validity: true))

@@ -1,7 +1,3 @@
-# encoding: utf-8
-require 'spec_helper'
-
-
 module ArrayOfValidatorSpec
 
   class IntegerTestModel < Osm::Model
@@ -34,7 +30,7 @@ module ArrayOfValidatorSpec
   end
 
 
- describe "Array of validator" do
+ describe ArrayOfValidator do
 
     it "Allows an empty array" do
       i = IntegerTestModel.new(array: [])

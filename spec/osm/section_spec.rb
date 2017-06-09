@@ -1,9 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-require 'date'
-
-
-describe "Section" do
+describe Osm::Section do
 
   before :each do
     @attributes = {

@@ -1,8 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-
-
-describe "Model" do
+describe Osm::Model do
 
   class ModelTester < Osm::Model
     attribute :id

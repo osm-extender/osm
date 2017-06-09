@@ -1,8 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-
-
-describe "API Access" do
+describe Osm::ApiAccess do
 
   it "Create" do
     data = {

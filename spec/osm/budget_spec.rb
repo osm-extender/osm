@@ -1,8 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-
-
-describe "Budget" do
+describe Osm::Budget do
 
   it "Create Budget" do
     b = Osm::Budget.new(

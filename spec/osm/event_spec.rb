@@ -1,8 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-require 'date'
-
-describe "Event" do
+describe Osm::Event do
 
   it "Create Event" do
     data = {
@@ -81,72 +77,6 @@ describe "Event" do
     expect(Osm::Event.new(id: 1) <=> Osm::Event.new(id: 1)).to eq(0)
   end
 
-  describe "Event::Attendance" do 
-  
-    it "Create" do
-      data = {
-        member_id: 1,
-        grouping_id: 2,
-        row: 3,
-        first_name: 'First',
-        last_name: 'Last',
-        attending: :yes,
-        date_of_birth: Date.new(2000, 1, 2),
-        fields: {},
-        payments: {},
-        event: Osm::Event.new(id: 1, section_id: 1, name: 'Name', columns: [])
-      }
-
-      ea = Osm::Event::Attendance.new(data)  
-      expect(ea.member_id).to eq(1)
-      expect(ea.grouping_id).to eq(2)
-      expect(ea.fields).to eq({})
-      expect(ea.payments).to eq({})
-      expect(ea.row).to eq(3)
-      expect(ea.first_name).to eq('First')
-      expect(ea.last_name).to eq('Last')
-      expect(ea.date_of_birth).to eq(Date.new(2000, 1, 2))
-      expect(ea.attending).to eq(:yes)
-      expect(ea.valid?).to eq(true)
-    end
-
-    it "Sorts by event ID then row" do
-      ea1 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 1), row: 1)
-      ea2 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 2), row: 1)
-      ea3 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 2), row: 2)
-      event_attendances = [ea3, ea2, ea1]
-
-      expect(event_attendances.sort).to eq([ea1, ea2, ea3])
-    end
-  
-  end
-
-  describe "Event::BadgeLink" do
-  
-    it "Create" do
-      bl = Osm::Event::BadgeLink.new(
-        badge_type: :activity,
-        badge_section: :cubs,
-        requirement_label: 'A: Poster',
-        data: 'abc',
-        badge_name: 'Artist',
-        badge_id: 1,
-        badge_version: 0,
-        requirement_id: 2,
-      )
-  
-      expect(bl.badge_type).to eq(:activity)
-      expect(bl.badge_section).to eq(:cubs)
-      expect(bl.badge_name).to eq('Artist')
-      expect(bl.badge_id).to eq(1)
-      expect(bl.badge_version).to eq(0)
-      expect(bl.requirement_id).to eq(2)
-      expect(bl.requirement_label).to eq('A: Poster')
-      expect(bl.data).to eq('abc')
-      expect(bl.valid?).to eq(true)
-    end
-  
-  end
 
   describe "Using the API" do
 
@@ -1007,49 +937,6 @@ describe "Event" do
       expect(attendance).to eq([])
     end
 
-    it "Update attendance (succeded)" do
-      ea = Osm::Event::Attendance.new(row: 0, member_id: 4, fields: {1 => 'old value', 2 => 'another old value'}, event: Osm::Event.new(id: 2, :section_id => 1))
-
-      ea.fields[1] = 'value'
-      expect($api).to receive(:post_query).with(
-        'events.php?action=updateScout',
-        post_data: {
-          'scoutid' => 4,
-          'column' => 'f_1',
-          'value' => 'value',
-          'sectionid' => 1,
-          'row' => 0,
-          'eventid' => 2,
-        }).and_return({})
-
-      ea.attending = :yes
-      expect($api).to receive(:post_query).with(
-        'events.php?action=updateScout',
-        post_data: {
-          'scoutid' => 4,
-          'column' => 'attending',
-          'value' => 'Yes',
-          'sectionid' => 1,
-          'row' => 0,
-          'eventid' => 2,
-        }).and_return({})
-
-      ea.payment_control = :automatic
-      expect($api).to receive(:post_query).with(
-        'events.php?action=updateScout',
-        post_data: {
-          'scoutid' => 4,
-          'column' => 'payment',
-          'value' => 'Automatic',
-          'sectionid' => 1,
-          'row' => 0,
-          'eventid' => 2,
-        }).and_return({})
-
-      expect(ea.update($api)).to eq(true)
-    end
-
-
     it "Add column (succeded)" do
       post_data = {
         'columnName' => 'Test name',
@@ -1079,98 +966,7 @@ describe "Event" do
       expect(event.add_column(api: $api, name: 'Test name', label: 'Test label')).to eq(false)
     end
 
-
-    it "Update column (succeded)" do
-      post_data = {
-        'columnId' => 'f_1',
-        'columnName' => 'New name',
-        'pL' => 'New label',
-        'pR' => 1
-      }
-      body = {
-        'eventid' => '2',
-        'config' => '[{"id":"f_1","name":"New name","pL":"New label","pR":"1"}]'
-      }
-      expect($api).to receive(:post_query).with('events.php?action=renameColumn&sectionid=1&eventid=2', post_data: post_data).and_return(body)
-
-      event = Osm::Event.new(id: 2, section_id: 1)
-      event.columns = [Osm::Event::Column.new(id: 'f_1', event: event)]
-      column = event.columns[0]
-      column.name = 'New name'
-      column.label = 'New label'
-      column.parent_required = true
-
-      expect(column.update($api)).to eq(true)
-
-      expect(column.name).to eq('New name')
-      expect(column.label).to eq('New label')
-      expect(event.columns[0].name).to eq('New name')
-      expect(event.columns[0].label).to eq('New label')
-    end
-
-    it "Update column (failed)" do
-      expect($api).to receive(:post_query).and_return({"config" => "[]"})
-
-      event = Osm::Event.new(id: 2, section_id: 1)
-      column = Osm::Event::Column.new(id: 'f_1', event: event)
-      event.columns = [column]
-      expect(column.update($api)).to eq(false)
-    end
-
-
-    it "Delete column (succeded)" do
-      post_data = {
-        'columnId' => 'f_1'
-      }
-
-      expect($api).to receive(:post_query).with('events.php?action=deleteColumn&sectionid=1&eventid=2', post_data: post_data).and_return({"eventid" => "2", "config" => "[]"})
-
-      event = Osm::Event.new(id: 2, section_id: 1)
-      column = Osm::Event::Column.new(id: 'f_1', event: event)
-      event.columns = [column]
-
-      expect(column.delete($api)).to eq(true)
-      expect(event.columns).to eq([])
-    end
-
-    it "Delete column (failed)" do
-      expect($api).to receive(:post_query).and_return({"config" => '[{"id":"f_1"}]'})
-
-      event = Osm::Event.new(id: 2, section_id: 1)
-      column = Osm::Event::Column.new(id: 'f_1', event: event)
-      event.columns = [column]
-      expect(column.delete($api)).to eq(false)
-    end
-
-    it "Get audit trail" do
-      data = [
-      	{"date" => "10/06/2013 19:17","updatedby" => "My.SCOUT","type" => "detail","desc" => "Set 'Test' to 'Test data'"},
-      	{"date" => "10/06/2013 19:16","updatedby" => "My.SCOUT","type" => "attendance","desc" => "Attendance: Yes"},
-	      {"date" => "10/06/2013 19:15","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Reserved"},
-	      {"date" => "10/06/2013 19:14","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: No"},
-	      {"date" => "10/06/2013 19:13","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Yes"},
-	      {"date" => "10/06/2013 19:12","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Invited"},
-	      {"date" => "10/06/2013 19:11","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Show in My.SCOUT"},
-      ]
-
-      expect($api).to receive(:post_query).with('events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3').and_return(data)
-
-      ea = Osm::Event::Attendance.new(
-        event: Osm::Event.new(id: 3, section_id: 1),
-        member_id: 2,
-      )
-      expect(ea.get_audit_trail($api)).to eq([
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 17), by: 'My.SCOUT', :type => :detail, :description => "Set 'Test' to 'Test data'", :label => 'Test', :value => 'Test data'},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 16), by: 'My.SCOUT', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 15), by: 'A Leader', :type => :attendance, :description => "Attendance: Reserved", :attendance => :reserved},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 14), by: 'A Leader', :type => :attendance, :description => "Attendance: No", :attendance => :no},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 13), by: 'A Leader', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 12), by: 'A Leader', :type => :attendance, :description => "Attendance: Invited", :attendance => :invited},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 11), by: 'A Leader', :type => :attendance, :description => "Attendance: Show in My.SCOUT", :attendance => :shown},
-      ])
-    end
-
-  end
+  end # describe using the OSM API
 
 
   describe "API Strangeness" do
@@ -1217,6 +1013,6 @@ describe "Event" do
       expect(event.columns).to eq([])
     end
 
-  end
+  end # describe API strangeness
 
 end

@@ -1,7 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-
-describe "Activity" do
+describe Osm::Activity do
 
   it "Get OSM link" do
     activity = Osm::Activity.new(
@@ -18,20 +15,6 @@ describe "Activity" do
 
   it "Sorts by id then version" do
     expect(Osm::Activity.new.send(:sort_by)).to eq(['id', 'version'])
-  end
-
-
-  describe "Activity::File" do
-    it "Sorts by activity_id then name" do
-      expect(Osm::Activity::File.new.send(:sort_by)).to eq(['activity_id', 'name'])
-    end
-  end
-
-
-  describe "Activity::Version" do
-    it "Sorts by activity_id then version" do
-      expect(Osm::Activity::Version.new.send(:sort_by)).to eq(['activity_id', 'version'])
-    end
   end
 
 

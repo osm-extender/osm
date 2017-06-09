@@ -1,8 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-
-
-describe "API" do
+describe Osm::Api do
 
   it "Create" do
     expect($api).not_to be_nil

@@ -1,8 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-require 'date'
-
-describe "Online Scout Manager" do
+describe Osm do
 
   describe "Make a DateTime" do
     it "is given a date and a time" do

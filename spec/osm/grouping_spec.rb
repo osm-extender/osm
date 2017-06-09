@@ -1,7 +1,4 @@
-# encoding: utf-8
-require 'spec_helper'
-
-describe "Grouping" do
+describe Osm::Grouping do
 
   it "Sorts by section_id then name" do
     g1 = Osm::Grouping.new(section_id: 1, name: 'a')
