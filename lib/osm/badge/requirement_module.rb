@@ -31,12 +31,12 @@ module Osm
 
       validates_presence_of :badge
       validates_presence_of :letter
-      validates_numericality_of :id, only_integer:true, greater_than:0
-      validates_numericality_of :min_required, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :custom_columns, only_integer:true, greater_than_or_equal_to:0, allow_nil:true
-      validates_numericality_of :completed_into_column, only_integer:true, greater_than:0, allow_nil:true
-      validates_numericality_of :numeric_into_column, only_integer:true, greater_than:0, allow_nil:true
-      validates_numericality_of :add_column_id_to_numeric, only_integer:true, greater_than:0, allow_nil:true
+      validates_numericality_of :id, only_integer: true, greater_than: 0
+      validates_numericality_of :min_required, only_integer: true, greater_than_or_equal_to: 0
+      validates_numericality_of :custom_columns, only_integer: true, greater_than_or_equal_to: 0, allow_nil: true
+      validates_numericality_of :completed_into_column, only_integer: true, greater_than: 0, allow_nil: true
+      validates_numericality_of :numeric_into_column, only_integer: true, greater_than: 0, allow_nil: true
+      validates_numericality_of :add_column_id_to_numeric, only_integer: true, greater_than: 0, allow_nil: true
 
       # @!method initialize
       #   Initialize a new Badge::RequirementModule

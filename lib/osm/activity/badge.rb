@@ -32,9 +32,9 @@ module Osm
       validates_presence_of :badge_name
       validates_inclusion_of :badge_section, in: [:beavers, :cubs, :scouts, :explorers, :staged]
       validates_inclusion_of :badge_type, in: [:core, :staged, :activity, :challenge]
-      validates_numericality_of :badge_id, only_integer:true, greater_than:0
-      validates_numericality_of :badge_version, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :requirement_id, only_integer:true, greater_than:0, allow_nil:true
+      validates_numericality_of :badge_id, only_integer: true, greater_than: 0
+      validates_numericality_of :badge_version, only_integer: true, greater_than_or_equal_to: 0
+      validates_numericality_of :requirement_id, only_integer: true, greater_than: 0, allow_nil: true
 
       # @!method initialize
       #   Initialize a new Meeting::Activity

@@ -30,8 +30,8 @@ module Osm
       attribute :description, type: String
       attribute :budget_name, type: String, default: 'Default'
 
-      validates_numericality_of :id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.id.nil? }
-      validates_numericality_of :record_id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.record_id.nil? }
+      validates_numericality_of :id, only_integer: true, greater_than: 0, unless: Proc.new { |r| r.id.nil? }
+      validates_numericality_of :record_id, only_integer: true, greater_than: 0, unless: Proc.new { |r| r.record_id.nil? }
       validates_presence_of :invoice
       validates_presence_of :date
       validates_presence_of :payto

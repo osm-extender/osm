@@ -12,8 +12,8 @@ module Osm
     attribute :section_id, type: Integer
     attribute :name, type: String
 
-    validates_numericality_of :id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.id.nil? }
-    validates_numericality_of :section_id, only_integer:true, greater_than:0
+    validates_numericality_of :id, only_integer: true, greater_than: 0, unless: Proc.new { |r| r.id.nil? }
+    validates_numericality_of :section_id, only_integer: true, greater_than: 0
     validates_presence_of :name
 
 

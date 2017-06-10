@@ -17,8 +17,8 @@ module Osm
       attribute :created_by_name, type: String
       attribute :label, type: String
 
-      validates_numericality_of :version, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :created_by, only_integer:true, greater_than:0
+      validates_numericality_of :version, only_integer: true, greater_than_or_equal_to: 0
+      validates_numericality_of :created_by, only_integer: true, greater_than: 0
       validates_presence_of :created_by_name
       validates_presence_of :label
 

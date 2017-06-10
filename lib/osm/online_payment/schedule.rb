@@ -155,7 +155,7 @@ module Osm
         end
 
         cache_key = ['online_payments', 'for_members', id, term.to_i]
-        cache_fetch(api: api, key: cache_key, no_read_cache:no_read_cache) do
+        cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
           data = api.post_query("ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=#{section_id}&schemeid=#{id}&termid=#{term.to_i}")
           data = data['items'] || []
           data.map! do |item|

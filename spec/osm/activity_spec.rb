@@ -170,7 +170,7 @@ describe Osm::Activity do
         description: 'description',
         resources: 'resources',
         instructions: 'instructions',
-        files: [Osm::Activity::File.new(id:3, activity_id:2, file_name:'fn', name:'n'), Osm::Activity::File.new(:id=>4, :activity_id=>2, :file_name=>'fn2', :name=>'n2')],
+        files: [Osm::Activity::File.new(id: 3, activity_id: 2, file_name: 'fn', name: 'n'), Osm::Activity::File.new(:id=>4, :activity_id=>2, :file_name=>'fn2', :name=>'n2')],
         running_time: 5,
         location: :indoors,
         sections: [:beavers, :cubs],

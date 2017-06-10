@@ -44,11 +44,11 @@ module Osm
       attribute :credits, type: Integer
       attribute :status, type: Object
 
-      validates_numericality_of :sms_id, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :user_id, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :member_id, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :section_id, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :credits, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :sms_id, only_integer: true, greater_than_or_equal_to: 0
+      validates_numericality_of :user_id, only_integer: true, greater_than_or_equal_to: 0
+      validates_numericality_of :member_id, only_integer: true, greater_than_or_equal_to: 0
+      validates_numericality_of :section_id, only_integer: true, greater_than_or_equal_to: 0
+      validates_numericality_of :credits, only_integer: true, greater_than_or_equal_to: 0
       validates_presence_of :from_name
       validates_presence_of :from_number
       validates_presence_of :to_name

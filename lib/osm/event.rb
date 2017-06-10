@@ -69,9 +69,9 @@ module Osm
     attribute :attendance_reminder, type: Integer, default: 0
     attribute :allow_booking, type: Boolean, default: true
 
-    validates_numericality_of :id, only_integer:true, greater_than:0, allow_nil: true
-    validates_numericality_of :section_id, only_integer:true, greater_than:0
-    validates_numericality_of :attendance_limit, only_integer:true, greater_than_or_equal_to:0
+    validates_numericality_of :id, only_integer: true, greater_than: 0, allow_nil: true
+    validates_numericality_of :section_id, only_integer: true, greater_than: 0
+    validates_numericality_of :attendance_limit, only_integer: true, greater_than_or_equal_to: 0
     validates_presence_of :name
     validates :badges, array_of: {item_type: Osm::Event::BadgeLink, item_valid: true}
     validates :columns, array_of: {item_type: Osm::Event::Column, item_valid: true}

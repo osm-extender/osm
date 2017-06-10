@@ -96,10 +96,10 @@ module Osm
     attribute :emergency_contact, type: Object
     attribute :doctor, type: Object
 
-    validates_numericality_of :id, only_integer:true, greater_than:0, unless: Proc.new { |r| r.id.nil? }
-    validates_numericality_of :section_id, only_integer:true, greater_than:0
-    validates_numericality_of :grouping_id, only_integer:true, greater_than_or_equal_to:-2
-    validates_numericality_of :grouping_leader, only_integer:true, greater_than_or_equal_to:0, less_than_or_equal_to:14, allow_nil: true
+    validates_numericality_of :id, only_integer: true, greater_than: 0, unless: Proc.new { |r| r.id.nil? }
+    validates_numericality_of :section_id, only_integer: true, greater_than: 0
+    validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
+    validates_numericality_of :grouping_leader, only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 14, allow_nil: true
     validates_presence_of :first_name
     validates_presence_of :last_name
     validates_presence_of :date_of_birth
@@ -107,11 +107,11 @@ module Osm
     validates_presence_of :joined_movement
     validates_format_of :age, with: /\A[0-9]{1,3} \/ (?:0?[0-9]|1[012])\Z/, message: 'age is not in the correct format (yy / mm)', allow_blank: true
     validates_inclusion_of :gender, in: [:male, :female, :other, :unspecified], allow_nil: true
-    validates :contact, validity:{allow_nil: true}
-    validates :primary_contact, validity:{allow_nil: true}
-    validates :secondary_contact, validity:{allow_nil: true}
-    validates :emergency_contact, validity:{allow_nil: true}
-    validates :doctor, validity:{allow_nil: true}
+    validates :contact, validity: {allow_nil: true}
+    validates :primary_contact, validity: {allow_nil: true}
+    validates :secondary_contact, validity: {allow_nil: true}
+    validates :emergency_contact, validity: {allow_nil: true}
+    validates :doctor, validity: {allow_nil: true}
 
 
     # Get members for a section

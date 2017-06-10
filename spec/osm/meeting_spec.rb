@@ -210,9 +210,9 @@ describe Osm::Meeting do
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
       meeting = Osm::Meeting.new(
-        id:1,
-        section_id:2,
-        date:Date.new(2000, 01, 02),
+        id: 1,
+        section_id: 2,
+        date: Date.new(2000, 01, 02),
         activities: [Osm::Meeting::Activity.new(activity_id: 3, title: 'Activity Title', notes: 'Some notes')],
         badge_links: [Osm::Meeting::BadgeLink.new(
           badge_type: :activity,
@@ -236,7 +236,7 @@ describe Osm::Meeting do
       }).and_return({'result'=>1})
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
-      meeting = Osm::Meeting.new(id:1, section_id:2, date:Date.new(2000, 01, 02))
+      meeting = Osm::Meeting.new(id: 1, section_id: 2, date: Date.new(2000, 01, 02))
       expect(meeting.update($api)).to eq(false)
     end
 
@@ -250,7 +250,7 @@ describe Osm::Meeting do
       expect($api).to receive(:post_query).with('programme.php?action=deleteEvening&eveningid=1&sectionid=2').and_return(nil)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
-      meeting = Osm::Meeting.new(id:1, section_id:2)
+      meeting = Osm::Meeting.new(id: 1, section_id: 2)
       expect(meeting.delete($api)).to eq(true)
     end
 

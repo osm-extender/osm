@@ -42,8 +42,8 @@ module Osm
     attribute :activities, default: []
     attribute :badge_links, default: []
 
-    validates_numericality_of :id, only_integer:true, greater_than:0
-    validates_numericality_of :section_id, only_integer:true, greater_than:0
+    validates_numericality_of :id, only_integer: true, greater_than: 0
+    validates_numericality_of :section_id, only_integer: true, greater_than: 0
     validates_presence_of :title
     validates_presence_of :date
     validates_format_of :start_time, with: Osm::OSM_TIME_REGEX, message: 'is not in the correct format (HH:MM)', allow_blank: true

@@ -17,8 +17,8 @@ module Osm
       attribute :file_name, type: String
       attribute :name, type: String
 
-      validates_numericality_of :id, only_integer:true, greater_than:0
-      validates_numericality_of :activity_id, only_integer:true, greater_than:0
+      validates_numericality_of :id, only_integer: true, greater_than: 0
+      validates_numericality_of :activity_id, only_integer: true, greater_than: 0
       validates_presence_of :file_name
       validates_presence_of :name
 

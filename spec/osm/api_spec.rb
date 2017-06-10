@@ -303,7 +303,7 @@ describe Osm::Api do
     it 'Set' do
       permissions = {1 => {a: [:read, :write]}, 2 => {a: [:read]}}
       expect($api).to receive('get_user_permissions').and_return(permissions)
-      expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => {a: [:read]}), {expires_in:600}) { true }
+      expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => {a: [:read]}), {expires_in: 600}) { true }
       $api.set_user_permissions(section: 3, permissions: {a: [:read]})
     end
 

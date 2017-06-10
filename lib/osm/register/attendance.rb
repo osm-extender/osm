@@ -24,10 +24,10 @@ module Osm
       attribute :total, type: Integer
       attribute :attendance, default: {}
 
-      validates_numericality_of :member_id, only_integer:true, greater_than:0
-      validates_numericality_of :grouping_id, only_integer:true, greater_than_or_equal_to:-2
-      validates_numericality_of :section_id, only_integer:true, greater_than:0
-      validates_numericality_of :total, only_integer:true, greater_than_or_equal_to:0
+      validates_numericality_of :member_id, only_integer: true, greater_than: 0
+      validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
+      validates_numericality_of :section_id, only_integer: true, greater_than: 0
+      validates_numericality_of :total, only_integer: true, greater_than_or_equal_to: 0
       validates_presence_of :first_name
       validates_presence_of :last_name
 

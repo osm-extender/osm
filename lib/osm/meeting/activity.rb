@@ -14,7 +14,7 @@ module Osm
       attribute :title, type: String
       attribute :notes, type: String, default: ''
 
-      validates_numericality_of :activity_id, only_integer:true, greater_than:0
+      validates_numericality_of :activity_id, only_integer: true, greater_than: 0
       validates_presence_of :title
 
       # @!method initialize

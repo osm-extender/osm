@@ -36,9 +36,9 @@ module Osm
       attribute :payments, default: {}
       attribute :payment_control
 
-      validates_numericality_of :row, only_integer:true, greater_than_or_equal_to:0
-      validates_numericality_of :member_id, only_integer:true, greater_than:0
-      validates_numericality_of :grouping_id, only_integer:true, greater_than_or_equal_to:-2
+      validates_numericality_of :row, only_integer: true, greater_than_or_equal_to: 0
+      validates_numericality_of :member_id, only_integer: true, greater_than: 0
+      validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
       validates :fields, hash: { key_type: Integer, value_type: String }
       validates :payments, hash: { key_type: Integer, value_type: String }
       validates_each :event do |record, attr, value|

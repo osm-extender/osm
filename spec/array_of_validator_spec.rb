@@ -16,12 +16,12 @@ module ArrayOfValidatorSpec
 
   class ValidTestModel < Osm::Model
     attribute :array
-    validates :array, array_of: {item_type: TestItem, item_valid:true}
+    validates :array, array_of: {item_type: TestItem, item_valid: true}
   end
 
   class InvalidTestModel < Osm::Model
     attribute :array
-    validates :array, array_of: {item_type: TestItem, item_valid:false}
+    validates :array, array_of: {item_type: TestItem, item_valid: false}
   end
 
   class NovalidTestModel < Osm::Model
@@ -50,7 +50,7 @@ module ArrayOfValidatorSpec
         i = IntegerTestModel.new(array: [1, '2', 3])
         expect(i.valid?).to eq(false)
         expect(i.errors.count).to eq(1)
-        expect(i.errors.messages).to eq({array:['items in the Array must be a Integer']})
+        expect(i.errors.messages).to eq({array: ['items in the Array must be a Integer']})
       end
 
     end

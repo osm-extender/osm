@@ -18,10 +18,10 @@ module Osm
     attribute :active, type: Boolean
     attribute :points, type: Integer
 
-    validates_numericality_of :id, only_integer:true, greater_than_or_equal_to:-2
-    validates_numericality_of :section_id, only_integer:true, greater_than:0
+    validates_numericality_of :id, only_integer: true, greater_than_or_equal_to: -2
+    validates_numericality_of :section_id, only_integer: true, greater_than: 0
     validates_presence_of :name
-    validates_numericality_of :points, only_integer:true
+    validates_numericality_of :points, only_integer: true
     validates_presence_of :active
 
 

@@ -26,7 +26,7 @@ module Osm
       validates_presence_of :name
       validates_presence_of :description
       validates_presence_of :mod
-      validates_numericality_of :id, only_integer:true, greater_than:0
+      validates_numericality_of :id, only_integer: true, greater_than: 0
       validates_presence_of :badge
       validates_inclusion_of :editable, in: [true, false]
 

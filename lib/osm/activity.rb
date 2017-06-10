@@ -62,14 +62,14 @@ module Osm
     attribute :files, default: []
     attribute :badges, default: []
 
-    validates_numericality_of :id, only_integer:true, greater_than:0
-    validates_numericality_of :version, only_integer:true, greater_than_or_equal_to:0, allow_nil:true
-    validates_numericality_of :group_id, only_integer:true, greater_than:0, allow_nil:true
-    validates_numericality_of :user_id, only_integer:true, greater_than:0, allow_nil:true
-    validates_numericality_of :running_time, only_integer:true, greater_than_or_equal_to:0
-    validates_numericality_of :shared, only_integer:true, greater_than_or_equal_to:0, allow_nil:true
-    validates_numericality_of :rating, only_integer:true, allow_nil:true
-    validates_numericality_of :used, only_integer:true, allow_nil:true
+    validates_numericality_of :id, only_integer: true, greater_than: 0
+    validates_numericality_of :version, only_integer: true, greater_than_or_equal_to: 0, allow_nil: true
+    validates_numericality_of :group_id, only_integer: true, greater_than: 0, allow_nil: true
+    validates_numericality_of :user_id, only_integer: true, greater_than: 0, allow_nil: true
+    validates_numericality_of :running_time, only_integer: true, greater_than_or_equal_to: 0
+    validates_numericality_of :shared, only_integer: true, greater_than_or_equal_to: 0, allow_nil: true
+    validates_numericality_of :rating, only_integer: true, allow_nil: true
+    validates_numericality_of :used, only_integer: true, allow_nil: true
     validates_presence_of :title
     validates_presence_of :description
     validates_presence_of :resources

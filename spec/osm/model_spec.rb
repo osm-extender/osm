@@ -94,7 +94,7 @@ describe Osm::Model do
 
     describe 'Writes' do
       it 'With cache' do
-        expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', {expires_in:600}) { true }
+        expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', {expires_in: 600}) { true }
         expect(ModelTester.cache_write(api: $api, key: 'key', data: 'data')).to eq(true)
       end
 
@@ -125,7 +125,7 @@ describe Osm::Model do
 
       it 'With cache' do
         block = Proc.new{ 'ABC' }
-        expect(OsmTest::Cache).to receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", {expires_in:600}).and_yield { 'abc' }
+        expect(OsmTest::Cache).to receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", {expires_in: 600}).and_yield { 'abc' }
         expect(ModelTester.cache_fetch(api: $api, key: 'key', &block)).to eq('ABC')
       end
 

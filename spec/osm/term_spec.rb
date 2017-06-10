@@ -271,7 +271,7 @@ describe Osm::Term do
       allow(Osm::Term).to receive(:get_all) { [] }
       expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({'terms'=>{}})
 
-      term = Osm::Term.new(id:2, section_id:1, name:'A Term', start:Date.new(2010, 01, 01), finish:Date.new(2010, 12, 31))
+      term = Osm::Term.new(id: 2, section_id: 1, name: 'A Term', start: Date.new(2010, 01, 01), finish: Date.new(2010, 12, 31))
       expect(term.update($api)).to eq(true)
     end
 
@@ -285,7 +285,7 @@ describe Osm::Term do
       allow(Osm::Term).to receive(:get_all) { [] }
       expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
 
-      term = Osm::Term.new(id:2, section_id:1, name:'A Term', start:Date.new(2010, 01, 01), finish:Date.new(2010, 12, 31))
+      term = Osm::Term.new(id: 2, section_id: 1, name: 'A Term', start: Date.new(2010, 01, 01), finish: Date.new(2010, 12, 31))
       expect(term.update($api)).to eq(false)
     end
 

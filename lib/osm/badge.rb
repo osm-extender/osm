@@ -64,8 +64,8 @@ module Osm
 
     validates_presence_of :name
     validates_presence_of :requirement_notes
-    validates_numericality_of :id, only_integer:true, greater_than_or_equal_to:1
-    validates_numericality_of :version, only_integer:true, greater_than_or_equal_to:0
+    validates_numericality_of :id, only_integer: true, greater_than_or_equal_to: 1
+    validates_numericality_of :version, only_integer: true, greater_than_or_equal_to: 0
     validates_presence_of :identifier
     validates_inclusion_of :sharing, in: [:draft, :private, :optin, :optin_locked, :default_locked]
     validates_presence_of :user_id
@@ -73,10 +73,10 @@ module Osm
     validates :modules, array_of: {item_type: Osm::Badge::RequirementModule, item_valid: true}
     validates_inclusion_of :latest, in: [true, false]
     validates :levels, array_of: {item_type: Integer}, allow_nil: true
-    validates_numericality_of :min_modules_required, only_integer:true, greater_than_or_equal_to:0
-    validates_numericality_of :min_requirements_required, only_integer:true, greater_than_or_equal_to:0
-    validates_numericality_of :add_columns_to_module, only_integer:true, greater_than:0, allow_nil:true
-    validates_numericality_of :level_requirement, only_integer:true, greater_than:0, allow_nil:true
+    validates_numericality_of :min_modules_required, only_integer: true, greater_than_or_equal_to: 0
+    validates_numericality_of :min_requirements_required, only_integer: true, greater_than_or_equal_to: 0
+    validates_numericality_of :add_columns_to_module, only_integer: true, greater_than: 0, allow_nil: true
+    validates_numericality_of :level_requirement, only_integer: true, greater_than: 0, allow_nil: true
     validates_inclusion_of :show_level_letters, in: [true, false]
 
 

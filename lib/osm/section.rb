@@ -94,12 +94,12 @@ module Osm
     attribute :myscout_payment_reminder_frequency, type: Integer
     attribute :myscout_details_email_changes_to, type: String, default: ''
 
-    validates_numericality_of :id, only_integer:true, greater_than:0, allow_nil: true
-    validates_numericality_of :group_id, only_integer:true, greater_than:0, allow_nil: true
-    validates_numericality_of :myscout_event_reminder_count, only_integer:true, greater_than_or_equal_to:-1
-    validates_numericality_of :myscout_event_reminder_frequency, only_integer:true, greater_than_or_equal_to:-1
-    validates_numericality_of :myscout_payment_reminder_count, only_integer:true, greater_than_or_equal_to:-1
-    validates_numericality_of :myscout_payment_reminder_frequency, only_integer:true, greater_than_or_equal_to:-1
+    validates_numericality_of :id, only_integer: true, greater_than: 0, allow_nil: true
+    validates_numericality_of :group_id, only_integer: true, greater_than: 0, allow_nil: true
+    validates_numericality_of :myscout_event_reminder_count, only_integer: true, greater_than_or_equal_to: -1
+    validates_numericality_of :myscout_event_reminder_frequency, only_integer: true, greater_than_or_equal_to: -1
+    validates_numericality_of :myscout_payment_reminder_count, only_integer: true, greater_than_or_equal_to: -1
+    validates_numericality_of :myscout_payment_reminder_frequency, only_integer: true, greater_than_or_equal_to: -1
     validates_presence_of :name
     validates_presence_of :group_name
     validates_presence_of :subscription_level

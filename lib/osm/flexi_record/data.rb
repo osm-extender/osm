@@ -16,8 +16,8 @@ module Osm
       attribute :fields, default: {}
 
       validates_presence_of :flexi_record
-      validates_numericality_of :member_id, only_integer:true, greater_than:0
-      validates_numericality_of :grouping_id, only_integer:true, greater_than_or_equal_to:-2
+      validates_numericality_of :member_id, only_integer: true, greater_than: 0
+      validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
       validates :fields, hash: {key_type: String}
 
 
