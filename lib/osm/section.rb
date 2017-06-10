@@ -358,10 +358,10 @@ module Osm
     def <=>(other)
       type_order = [:beavers, :cubs, :scouts, :explorers, :network, :adults, :waiting]
       result = group_name <=> other.try(:group_name)
-      if result == 0
+      if result.zero?
         result = type_order.find_index(type) <=> type_order.find_index(other.try(:type))
       end
-      result = name <=> other.try(:name) if result == 0
+      result = name <=> other.try(:name) if result.zero?
       return result
     end
 

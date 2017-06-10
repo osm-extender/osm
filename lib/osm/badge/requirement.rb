@@ -37,7 +37,7 @@ module Osm
       # Compare Badge::Requirement based on badge then requirement
       def <=>(other)
         result = badge <=> other.try(:badge)
-        result = id <=> other.try(:id) if result == 0
+        result = id <=> other.try(:id) if result.zero?
         return result
       end
 

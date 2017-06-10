@@ -45,8 +45,8 @@ module Osm
       # Compare Badge::RequirementModule based on badge then letter
       def <=>(other)
         result = badge <=> other.try(:badge)
-        result = letter <=> other.try(:letter) if result == 0
-        result = id <=> other.try(:id) if result == 0
+        result = letter <=> other.try(:letter) if result.zero?
+        result = id <=> other.try(:id) if result.zero?
         return result
       end
 
