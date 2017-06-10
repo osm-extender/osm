@@ -62,7 +62,7 @@ module Osm
             fail Osm::Error, data['error'].to_s unless data['error'].nil?
             return !!data['status']
           end
-          return false
+          false
         end
 
         # @!method processed?

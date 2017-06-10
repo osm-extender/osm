@@ -152,7 +152,7 @@ module Osm
       100 => [:read, :write, :administer],
     }
 
-    return permissions.inject({}) do |new_hash, (key, value)|
+    permissions.inject({}) do |new_hash, (key, value)|
       if ['badge', 'member', 'user', 'register', 'contact', 'programme','events', 'flexi', 'finance', 'quartermaster'].include?(key)
         # This is a permission we care about
         new_hash[key.to_sym] = permissions_map[value.to_i]
@@ -174,7 +174,7 @@ module Osm
       (replace_with.keys.include?(k) && !v.nil?) ? "#{k}.#{replace_with[k]}: #{v.try(replace_with[k]).inspect}" : "#{k}: #{v.inspect}"
     }
 
-    return "#<#{instance.class.name} #{values.join(', ')} >"
+    "#<#{instance.class.name} #{values.join(', ')} >"
   end
 
 end # Module

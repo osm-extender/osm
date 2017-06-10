@@ -50,7 +50,7 @@ module Osm
             end
           end
         end
-        return false
+        false
       end
 
       # Delete a column in OSM
@@ -76,7 +76,7 @@ module Osm
 
         # The cached columns for the flexi record will be out of date - remove them
         cache_delete(api: api, key: ['flexi_record_columns', flexi_record.id])
-        return true
+        true
       end
 
       # Is this column a user column
@@ -99,7 +99,7 @@ module Osm
           return -1 if system_column? && other.try(:user_column?)
           return id <=> other.try(:id)
         end
-        return result
+        result
       end
 
       def inspect

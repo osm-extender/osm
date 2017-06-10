@@ -206,7 +206,7 @@ module Osm
           return true
         end
 
-        return false
+        false
       end
 
       # Restore a template to OSM's default for it
@@ -233,7 +233,7 @@ module Osm
           return content
         end
 
-        return nil
+        nil
       end
 
       private def sort_by

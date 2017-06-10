@@ -212,7 +212,7 @@ module Osm
         api.set_user_permissions(section: s_id, permissions: perms)
       end
       cache_write(api: api, key: cache_key, data: ids)
-      return result
+      result
     end
 
 
@@ -235,7 +235,7 @@ module Osm
       sections.each do |section|
         return section if section.id == id
       end
-      return nil
+      nil
     end
 
 
@@ -260,7 +260,7 @@ module Osm
         notepad = value if key.to_i == id
       end
 
-      return notepad
+      notepad
     end
 
     # Set the section's notepad in OSM
@@ -275,7 +275,7 @@ module Osm
         cache_write(api: api, key: ['notepad', id], data: content)
         return true
       end
-      return false
+      false
     end
 
 
@@ -332,7 +332,7 @@ module Osm
         end
       end
 
-      return subscription_level >= level
+      subscription_level >= level
     end
 
     # @!method bronze?
@@ -362,7 +362,7 @@ module Osm
         result = type_order.find_index(type) <=> type_order.find_index(other.try(:type))
       end
       result = name <=> other.try(:name) if result.zero?
-      return result
+      result
     end
 
   end # Class Section

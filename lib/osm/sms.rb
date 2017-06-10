@@ -25,7 +25,7 @@ module Osm
         Osm::Model.cache_write(api: api, key: ['sms_credits', section.to_i], data: data['msg'].match(/\A[^\d]*(\d+)[^\d]*\Z/)[1])
         return true
       end
-      return false
+      false
     end
 
     # Get the number of remaining SMS credits for a section
@@ -59,7 +59,7 @@ module Osm
       })
 
       Osm::Model.cache_write(api: api, key: ['sms_credits', section.to_i], data: data['sms_remaining'])
-      return data['numbers']
+      data['numbers']
     end
 
   end

@@ -26,7 +26,7 @@ module Osm
       def <=>(other)
         result = title <=> other.try(:title)
         result = activity_id <=> other.try(:activity_id) if result.zero?
-        return result
+        result
       end
 
     end

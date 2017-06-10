@@ -106,7 +106,7 @@ module Osm
       Osm::Model.cache_delete(api: api, key: ['gift_aid_donations', section_id, term_id])
       Osm::Model.cache_delete(api: api, key: ['gift_aid_data', section_id, term_id])
 
-      return response.is_a?(Array)
+      response.is_a?(Array)
     end
 
   end

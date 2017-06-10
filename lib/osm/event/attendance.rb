@@ -123,7 +123,7 @@ module Osm
           # The cached event attedance will be out of date
           cache_delete(api: api, key: ['event_attendance', event.id])
         end
-        return updated
+        updated
       end
 
       # Get audit trail

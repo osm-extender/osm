@@ -115,7 +115,7 @@ module Osm
       # The cached attendance will be out of date - remove them
       Osm::Model.cache_delete(api: api, key: ['register_attendance', section.id, term_id])
 
-      return response.is_a?(Array)
+      response.is_a?(Array)
     end
 
   end  

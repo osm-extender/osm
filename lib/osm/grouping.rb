@@ -94,7 +94,7 @@ module Osm
         Osm::Model.cache_delete(api: api, key: ['groupings', section_id])
       end
 
-      return result
+      result
     end
 
     private def sort_by

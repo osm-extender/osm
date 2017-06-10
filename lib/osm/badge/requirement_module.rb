@@ -47,7 +47,7 @@ module Osm
         result = badge <=> other.try(:badge)
         result = letter <=> other.try(:letter) if result.zero?
         result = id <=> other.try(:id) if result.zero?
-        return result
+        result
       end
 
       def inspect

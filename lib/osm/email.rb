@@ -35,7 +35,7 @@ module Osm
         data = data['emails']
         return data if data.is_a?(Hash)
       end
-      return false
+      false
     end
 
     # Get a list of selected email address for selected members ready to pass to send_email method
@@ -58,7 +58,7 @@ module Osm
         'body' => body,
       })
 
-      return data.is_a?(Hash) && data['ok']
+      data.is_a?(Hash) && data['ok']
     end
 
   end

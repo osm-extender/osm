@@ -382,26 +382,26 @@ module Osm
           cache_delete(api: api, key: ['members', section_id, term.id])
         end
       end
-      return updated
+      updated
     end
 
     # Get the years element of this scout's age
     # @return [Integer] the number of years this scout has been alive
     def age_years
-      return age[0..1].to_i
+      age[0..1].to_i
     end
 
     # Get the months element of this scout's age
     # @return [Integer] the number of months since this scout's last birthday
     def age_months
-      return age[-2..-1].to_i
+      age[-2..-1].to_i
     end
 
     # Get the full name
     # @param seperatpr [String] What to split the member's first name and last name with
     # @return [String] this scout's full name seperated by the optional seperator
     def name(seperator=' ')
-      return [first_name, last_name].select{ |i| !i.blank? }.join(seperator)
+      [first_name, last_name].select{ |i| !i.blank? }.join(seperator)
     end
 
     # Check if the member is in the leaders grouping
@@ -433,9 +433,9 @@ module Osm
     # @return true, false
     def current?(date=Date.today)
       if finished_section.nil?
-        return (started_section <= date)
+        (started_section <= date)
       else
-        return (started_section <= date) && (finished_section >= date)
+        (started_section <= date) && (finished_section >= date)
       end
     end
 
@@ -484,7 +484,7 @@ module Osm
         @myscout_link_key = data['key']
       end
 
-      return @myscout_link_key
+      @myscout_link_key
     end
 
     # Get the member's photo
@@ -520,7 +520,7 @@ module Osm
 
       link = "#{Osm::Api::BASE_URLS[api.site]}/parents/#{link_to}.php?sc=#{id}&se=#{section_id}&c=#{myscout_link_key(api)}"
       link += "&e=#{item_id.to_i}" if item_id && link_to.eql?(:events)
-      return link
+      link
     end
 
     private def sort_by

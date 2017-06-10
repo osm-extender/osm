@@ -321,7 +321,7 @@ module Osm
         to_return = to_return['message'] unless to_return['message'].blank?
       end
       to_return = false if to_return.blank?
-      return to_return
+      to_return
     end
 
   end # class Api

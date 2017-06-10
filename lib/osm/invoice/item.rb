@@ -80,7 +80,7 @@ module Osm
             return true
           end
         end
-        return false
+        false
       end
 
       # Update invoice item in OSM
@@ -136,7 +136,7 @@ module Osm
           cache_delete(api: api, key: ['invoice_items', invoice.id])
           return true
         end
-        return false
+        false
       end
 
       # Get value of this item for easy totaling
@@ -144,7 +144,7 @@ module Osm
       def value
         return amount.to_f if type.eql?(:income)
         return -amount.to_f if type.eql?(:expense)
-        return 0.0
+        0.0
       end
 
       private def sort_by

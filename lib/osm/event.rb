@@ -128,7 +128,7 @@ module Osm
       end
 
       return events if include_archived
-      return events.reject do |event|
+      events.reject do |event|
         event.archived?
       end
     end
@@ -175,7 +175,7 @@ module Osm
       end
 
       cache_write(api: api, key: cache_key, data: events)
-      return events
+      events
     end
 
     # Get an event
@@ -357,7 +357,7 @@ module Osm
         cache_delete(api: api, key: ['event', id])
         return true
       end
-      return false
+      false
     end
 
 
@@ -427,7 +427,7 @@ module Osm
         'column_data' => link.data,
         'new_column_name' => link.requirement_id.to_i.eql?(0) ? link.requirement_label : '',
       })
-      return (data.is_a?(Hash) && data['status'])
+      (data.is_a?(Hash) && data['status'])
     end
 
     # Add a column to the event in OSM
@@ -454,7 +454,7 @@ module Osm
 
       self.columns = self.class.new_event_from_data(data).columns
 
-      return data.is_a?(Hash) && (data['eventid'].to_i == id)
+      data.is_a?(Hash) && (data['eventid'].to_i == id)
     end
 
     # Whether thete is a limit on attendance for this event
@@ -468,7 +468,7 @@ module Osm
     # @return true, false whether there are spaces left for the event
     def spaces?(api)
       return true unless limited_attendance?
-      return attendance_limit > attendees(api)
+      attendance_limit > attendees(api)
     end
 
     # Get the number of spaces left for the event
@@ -476,7 +476,7 @@ module Osm
     # @return [Integer, nil] the number of spaces left (nil if there is no attendance limit)
     def spaces(api)
       return nil unless limited_attendance?
-      return attendance_limit - attendees(api)
+      attendance_limit - attendees(api)
     end
 
     # Whether the cost is to be confirmed
@@ -498,7 +498,7 @@ module Osm
       get_attendance(api: api).each do |a|
         attendees += 1 unless attendance_limit_includes_leaders && (a.grouping_id == -2)
       end
-      return attendees
+      attendees
     end
 
     def self.attributes_from_data(event_data)
@@ -554,7 +554,7 @@ module Osm
       end
       event.badges = badges
 
-      return event
+      event
     end
 
     def sort_by

@@ -63,7 +63,7 @@ module Osm
       end
       cache_write(api: api, key: cache_key, data: ids)
 
-      return result
+      result
     end
 
 

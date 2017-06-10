@@ -209,7 +209,7 @@ module Osm
       unless permissions.include?(to)
         return false
       end
-      return true
+      true
     end
 
     # Check if the user has granted the relevant permission to the API
@@ -292,7 +292,7 @@ module Osm
           return send(method, api: api, no_read_cache: true, **arguments)
         end
       end
-      return items
+      items
     end
 
 

@@ -61,7 +61,7 @@ module Osm
           next unless requirement_met?(requirement.id)
           count += 1
         end
-        return count
+        count
       end
 
       # Get the letters of modules gained
@@ -97,7 +97,7 @@ module Osm
       # @return true, false whether the badge has been earnt (ignores other badge's and their requirements which might be needed)
       def earnt?
         if badge.has_levels?
-          return earnt > awarded
+          earnt > awarded
         else
           return false if (due.eql?(1) && awarded.eql?(1))
           return true if (due.eql?(1) && awarded.eql?(0))
@@ -127,7 +127,7 @@ module Osm
             # {id: ###, version: #}
             #TODO
           end
-          return true
+          true
         end
       end
 
@@ -152,7 +152,7 @@ module Osm
             return level if modules.include?(letters[level - 1])
           end
         end
-        return 0
+        0
       end
 
 
@@ -166,7 +166,7 @@ module Osm
         requirements.each do |key, value|
           return true if requirement_met?(key)
         end
-        return false
+        false
       end
 
 
@@ -237,7 +237,7 @@ module Osm
           awarded = level
           awarded_date = date
         end
-        return updated
+        updated
       end
 
       # Mark the badge as not awarded in OSM
@@ -267,7 +267,7 @@ module Osm
         updated = result.is_a?(Hash) &&
                   (result['scoutid'].to_i == member_id) &&
                   (result['completed'].to_i == level)
-        return updated
+        updated
       end
 
       # Mark the badge as not due in OSM
@@ -326,7 +326,7 @@ module Osm
           reset_changed_attributes
         end
 
-        return requirements_updated && due_updated && awarded_updated
+        requirements_updated && due_updated && awarded_updated
       end
 
       def inspect

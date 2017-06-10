@@ -74,7 +74,7 @@ module Osm
           cache_delete(api: api, key: ['flexi_record_data', flexi_record.id])
         end
 
-        return updated
+        updated
       end
 
       def inspect

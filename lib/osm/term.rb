@@ -57,7 +57,7 @@ module Osm
       end
 
       cache_write(api: api, key: cache_key, data: ids)
-      return terms
+      terms
     end
 
     # Get the terms that the OSM user can access for a given section
@@ -68,7 +68,7 @@ module Osm
     def self.get_for_section(api:, section:, no_read_cache: false)
       require_access_to_section(api: api, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
-      return get_all(api, no_read_cache: no_read_cache).select{ |term| term.section_id == section_id }
+      get_all(api, no_read_cache: no_read_cache).select{ |term| term.section_id == section_id }
     end
 
     # Get a term
@@ -93,7 +93,7 @@ module Osm
           return term
         end
       end
-      return nil
+      nil
     end
 
     # Get the current term for a given section
@@ -135,7 +135,7 @@ module Osm
       end
       cache_delete(api: api, key: ['terms', api.user_id])
 
-      return data.is_a?(Hash) && data['terms'].is_a?(Hash)
+      data.is_a?(Hash) && data['terms'].is_a?(Hash)
     end
 
 
@@ -176,7 +176,7 @@ module Osm
     # @return true, false if the term is completly before the passed date
     def before?(date)
       return false if finish.nil?
-      return finish < date.to_date
+      finish < date.to_date
     end
 
     # Determine if the term is completly after the passed date
@@ -184,21 +184,21 @@ module Osm
     # @return true, false if the term is completly after the passed date
     def after?(date)
       return false if start.nil?
-      return start > date.to_date
+      start > date.to_date
     end
 
     # Determine if the term is in the future
     # @return true, false if the term starts after today
     def future?
       return false if start.nil?
-      return start > Date.today
+      start > Date.today
     end
 
     # Determine if the term is in the past
     # @return true, false if the term finished before today
     def past?
       return false if finish.nil?
-      return finish < Date.today
+      finish < Date.today
     end
 
     # Determine if the term is current
@@ -206,7 +206,7 @@ module Osm
     def current?
       return false if start.nil?
       return false if finish.nil?
-      return (start <= Date.today) && (finish >= Date.today)
+      (start <= Date.today) && (finish >= Date.today)
     end
 
     # Determine if the provided date is within the term
@@ -215,7 +215,7 @@ module Osm
     def contains_date?(date)
       return false if start.nil?
       return false if finish.nil?
-      return (start <= date) && (finish >= date)
+      (start <= date) && (finish >= date)
     end
 
     private def sort_by

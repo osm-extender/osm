@@ -52,7 +52,7 @@ module Osm
             end
           end
         end
-        return false
+        false
       end
 
       # Delete event column from OSM
@@ -76,7 +76,7 @@ module Osm
         event.columns = new_columns
 
         cache_write(api: api, key: ['event', event.id], data: event)
-        return true
+        true
       end
 
       def inspect

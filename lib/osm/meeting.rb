@@ -149,7 +149,7 @@ module Osm
         cache_delete(api: api, cache_key: ['programme', meeting.section_id, term.id])
       end
 
-      return data.is_a?(Hash) ? meeting : nil
+      data.is_a?(Hash) ? meeting : nil
     end
 
 
@@ -231,7 +231,7 @@ module Osm
         return true
       end
 
-      return false
+      false
     end
 
     # Delete meeting from OSM
@@ -246,7 +246,7 @@ module Osm
         cache_delete(api: api, key: ['programme', section_id, term.id]) if term.contains_date?(date)
       end
 
-      return true
+      true
     end
 
 

@@ -97,7 +97,7 @@ module Osm
           data = data.sort.first
           return false if data.nil?                     # No history for payment so it didn't get updated
           return false unless data.status.eql?(status)  # Latest status is not what we set
-          return true
+          true
         end
 
         # Mark a payment as required by the member

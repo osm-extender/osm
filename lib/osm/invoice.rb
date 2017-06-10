@@ -70,7 +70,7 @@ module Osm
       end
 
       return invoices if include_archived
-      return invoices.reject do |invoice|
+      invoices.reject do |invoice|
         invoice.archived?
       end
     end
@@ -92,7 +92,7 @@ module Osm
       end
 
       invoice_data = api.post_query("finances.php?action=getInvoice&sectionid=#{section_id}&invoiceid=#{id}")
-      return new_invoice_from_data(invoice_data)
+      new_invoice_from_data(invoice_data)
     end
 
 
@@ -117,7 +117,7 @@ module Osm
         self.id = data['id'].to_i
         return true
       end
-      return false
+      false
     end
 
     # Update the invoice in OSM
@@ -141,7 +141,7 @@ module Osm
         cache_delete(api: api, key: ['invoice', id])
         return true
       end
-      return false
+      false
     end
 
     # Delete the invoice from OSM
@@ -160,7 +160,7 @@ module Osm
         cache_delete(api: api, key: ['invoice', id])
         return true
       end
-      return false
+      false
     end
 
     # Archive the invoice in OSM, updating the archived attribute if successful.
@@ -183,7 +183,7 @@ module Osm
         cache_delete(api: api, key: ['invoice', id])
         return true
       end
-      return false
+      false
     end
 
     # Finalise the invoice in OSM, updating the finalised attribute if successful.
@@ -203,7 +203,7 @@ module Osm
         cache_delete(api: api, key: ['invoice', id])
         return true
       end
-      return false
+      false
     end
 
     # Get items for the invoice
@@ -232,7 +232,7 @@ module Osm
       end # cache fetch
 
       cache_write(api: api, key: cache_key, data: items)
-      return items
+      items
     end
 
 

@@ -167,7 +167,7 @@ module Osm
 
       cache_write(api: api, key: [*cache_key, nil], data: activity) if version.nil?
       cache_write(api: api, key: [*cache_key, version], data: activity)
-      return activity
+      activity
     end
 
 
@@ -181,7 +181,7 @@ module Osm
     # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
     def osm_link
       fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
-      return "https://www.onlinescoutmanager.co.uk/?l=p#{id}"
+      "https://www.onlinescoutmanager.co.uk/?l=p#{id}"
     end
 
     # Add this activity to the programme in OSM

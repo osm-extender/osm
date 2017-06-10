@@ -62,7 +62,7 @@ module Osm
           end
         end
       end
-      return false
+      false
     end
 
     # Get data for flexi record

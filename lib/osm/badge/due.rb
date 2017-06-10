@@ -41,7 +41,7 @@ module Osm
       # Check if there are no badges due
       # @return true, false
       def empty?
-        return by_member.empty?
+        by_member.empty?
       end
 
       # Calculate the total number of badges needed
@@ -54,7 +54,7 @@ module Osm
             totals[badge] += 1
           end
         end
-        return totals
+        totals
       end
 
     end

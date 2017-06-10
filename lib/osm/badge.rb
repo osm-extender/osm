@@ -125,7 +125,7 @@ module Osm
         'level' => badge_level.to_i,
         'badge_id' => badge_id.to_i,
       })
-      return data.is_a?(Hash) && data['ok']
+      data.is_a?(Hash) && data['ok']
     end
 
 
@@ -405,7 +405,7 @@ module Osm
       fail ArgumentError, "That badge does't exist (bad version)." if data.nil?
 
       data.each{ |i| i.badge = badge }
-      return data
+      data
     end
 
     # Return a 2 dimensional hash/array (badge ID, badge version) of hashes representing the modules

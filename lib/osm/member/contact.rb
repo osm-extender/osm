@@ -44,7 +44,7 @@ module Osm
       # @param seperator [String] What to split the contact's first name and last name with
       # @return [String] this scout's full name seperated by the optional seperator
       def name(seperator=' ')
-        return [first_name, last_name].select{ |i| !i.blank? }.join(seperator)
+        [first_name, last_name].select{ |i| !i.blank? }.join(seperator)
       end
 
       # Get an array of all phone numbers for the contact
@@ -108,7 +108,7 @@ module Osm
           reset_changed_attributes
           additional_information.clean_up!
         end
-        return updated
+        updated
       end
 
     end

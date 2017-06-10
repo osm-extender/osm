@@ -113,7 +113,7 @@ module Osm
 
         Osm::Model.cache_delete(api: api, key: ['gift_aid_data', section_id, term_id]) if updated
 
-        return updated
+        updated
       end
 
       private def sort_by

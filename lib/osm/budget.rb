@@ -70,7 +70,7 @@ module Osm
           return true
         end
       end
-      return false
+      false
     end
 
     # Update budget in OSM
@@ -93,7 +93,7 @@ module Osm
         cache_delete(api: api, key: ['budgets', section_id])
         return true
       end
-      return false
+      false
     end
 
     # Delete budget from OSM
@@ -110,7 +110,7 @@ module Osm
         cache_delete(api: api, key: ['budgets', section_id])
         return true
       end
-      return false
+      false
     end
 
     private def sort_by
