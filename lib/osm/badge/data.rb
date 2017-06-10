@@ -288,7 +288,7 @@ module Osm
 
         # Update requirements that changed
         requirements_updated = true
-        editable_requirements = badge.requirements.select { |r| r.editable }.map { |r| r.id }
+        editable_requirements = badge.requirements.select(&:editable).map(&:id)
         requirements.changes.each do |requirement, (was,now)|
           next unless editable_requirements.include?(requirement)
           result = api.post_query('ext/badges/records/?action=updateSingleRecord', post_data: {

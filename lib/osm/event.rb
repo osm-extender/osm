@@ -128,9 +128,7 @@ module Osm
       end
 
       return events if include_archived
-      events.reject do |event|
-        event.archived?
-      end
+      events.reject(&:archived?)
     end
 
     # Get event list for a section (not all details for each event)

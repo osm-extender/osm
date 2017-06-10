@@ -49,7 +49,7 @@ module Osm
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}")
         dates_s = get_structure(api: api, section: section, term: term, no_read_cache: no_read_cache)
-        dates_s = dates_s.map { |f| f.id }
+        dates_s = dates_s.map(&:id)
         dates_d = dates_s.map { |d| Osm.parse_date(d) }
 
         to_return = []

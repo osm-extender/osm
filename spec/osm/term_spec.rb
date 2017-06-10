@@ -136,7 +136,7 @@ describe Osm::Term do
       it 'From OSM' do
         terms = Osm::Term.get_all($api)
         expect(terms.size).to eq(3)
-        expect(terms.map { |i| i.id }).to eq([1, 2, 3])
+        expect(terms.map(&:id)).to eq([1, 2, 3])
         term = terms[0]
         expect(term.is_a?(Osm::Term)).to eq(true)
         expect(term.id).to eq(1)
@@ -162,7 +162,7 @@ describe Osm::Term do
         ])
       terms = Osm::Term.get_for_section(api: $api, section: 10)
       expect(terms.size).to eq(2)
-      expect(terms.map { |i| i.id }).to eq([2, 3])
+      expect(terms.map(&:id)).to eq([2, 3])
     end
 
     describe 'Gets a term' do

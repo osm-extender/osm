@@ -198,12 +198,12 @@ module Osm
       # Get archived payments for the schedule
       # @return [Array<Osm::OnlinePayment::Schedule::Payment>]
       def archived_payments
-        payments.select { |p| p.archived? }
+        payments.select(&:archived?)
       end
       # Check if there are any archived payments for the schedule
       # @return true, false
       def archived_payments?
-        payments.any? { |p| p.archived? }
+        payments.any?(&:archived?)
       end
 
       def to_s

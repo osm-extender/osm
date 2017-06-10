@@ -70,9 +70,7 @@ module Osm
       end
 
       return invoices if include_archived
-      invoices.reject do |invoice|
-        invoice.archived?
-      end
+      invoices.reject(&:archived?)
     end
 
     # Get an invoice

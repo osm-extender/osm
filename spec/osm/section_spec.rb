@@ -101,7 +101,7 @@ describe Osm::Section do
     describe 'Gets all sections' do
       it 'From OSM' do
         sections = Osm::Section.get_all(api: $api)
-        expect(sections.map { |i| i.id }).to eq([1, 2])
+        expect(sections.map(&:id)).to eq([1, 2])
   
         section = sections[0]
         expect(section.id).to eq(1)

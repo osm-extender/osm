@@ -34,7 +34,7 @@ module Osm
       fail ArgumentError, 'You must provide an api_id (get this by requesting one from OSM)' if api_id.to_s.empty?
       fail ArgumentError, 'You must provide an api_secret (get this by requesting one from OSM)' if api_secret.to_s.empty?
       fail ArgumentError, 'You must provide a name for your API (this should be what appears in OSM)' if name.to_s.empty?
-      fail ArgumentError, "#{site.inspect} is not a valid site (must be one of #{BASE_URLS.keys.map { |i| i.inspect }.join(', ')})" unless BASE_URLS.keys.include?(site)
+      fail ArgumentError, "#{site.inspect} is not a valid site (must be one of #{BASE_URLS.keys.map(&:inspect).join(', ')})" unless BASE_URLS.keys.include?(site)
 
       @api_id = api_id.to_s.clone
       @api_secret = api_secret.to_s.clone

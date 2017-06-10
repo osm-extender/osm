@@ -368,11 +368,11 @@ module Osm
     end
 
     def module_letters
-      @module_letters ||= modules.map { |m| m.letter }.sort
+      @module_letters ||= modules.map(&:letter).sort
     end
 
     def module_ids
-      @module_ids ||= modules.map { |m| m.id }.sort
+      @module_ids ||= modules.map(&:id).sort
     end
 
 
