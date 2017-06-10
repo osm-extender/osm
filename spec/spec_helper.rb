@@ -45,7 +45,7 @@ RSpec.configure do |config|
       debug:            false,
       http_user_agent:  'HTTP-USER-AGENT',
       user_id:          '2',
-      user_secret:      'USER-SECRET',
+      user_secret:      'USER-SECRET'
     )
 
     Osm::Model.cache = OsmTest::Cache

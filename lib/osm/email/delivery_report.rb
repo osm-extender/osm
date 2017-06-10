@@ -58,7 +58,7 @@ module Osm
                 id:         id,
                 sent_at:    Time.strptime(sent_at_str, TIME_FORMAT),
                 subject:    subject,
-                section_id: section_id,
+                section_id: section_id
               )
               recipients[id] = []
 
@@ -72,7 +72,7 @@ module Osm
                 id:         id,
                 address:    item['email'],
                 status:     status,
-                member_id:  member_id,
+                member_id:  member_id
               )
 
             end

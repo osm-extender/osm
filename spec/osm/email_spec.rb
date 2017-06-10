@@ -95,7 +95,7 @@ describe Osm::Email do
         cc: 'cc@example.com',
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
-        body: 'Body of email',
+        body: 'Body of email'
       )).to eq(true)
     end
 
@@ -116,7 +116,7 @@ describe Osm::Email do
         to: { '2'=>{ 'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com'] } },
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
-        body: 'Body of email',
+        body: 'Body of email'
       )).to eq(true)
     end
 
@@ -137,7 +137,7 @@ describe Osm::Email do
         to: { '2'=>{ 'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com'] },'3'=>{ 'firstname'=>'Jane', 'lastname'=>'Smith', 'emails'=>['jane@example.com'] } },
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
-        body: 'Body of email',
+        body: 'Body of email'
       )).to eq(true)
     end
 

@@ -127,7 +127,7 @@ module Osm
       # Add required attributes for API authentication
       post_data = post_data.merge(
         'apiid' => api_id,
-        'token' => api_secret,
+        'token' => api_secret
       )
 
       # Add required attributes for user authentication

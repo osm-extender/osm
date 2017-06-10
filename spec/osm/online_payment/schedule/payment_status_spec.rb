@@ -10,7 +10,7 @@ describe Osm::OnlinePayment::Schedule::PaymentStatus do
       timestamp:      Time.new(2016, 4, 5, 6, 7),
       status:         :paid,
       updated_by:     'My.SCOUT',
-      updated_by_id:  -2,
+      updated_by_id:  -2
     )
     expect(status.id).to eq(1)
     expect(status.payment).to eq(payment)

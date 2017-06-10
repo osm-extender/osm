@@ -94,7 +94,7 @@ module Osm
               scheduled: Osm.parse_datetime(report['schedule']),
               last_updated: Osm.parse_datetime(report['lastupdated']),
               credits: Osm.to_i_or_nil(report['credits']),
-              status: (report['status'] || 'error').downcase.to_sym,
+              status: (report['status'] || 'error').downcase.to_sym
             )
           end
           reports

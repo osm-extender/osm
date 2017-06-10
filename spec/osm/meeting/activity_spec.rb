@@ -4,7 +4,7 @@ describe Osm::Meeting::Activity do
       ea = Osm::Meeting::Activity.new(
         activity_id: 2,
         title: 'Activity Name',
-        notes: 'Notes',
+        notes: 'Notes'
       )
 
       expect(ea.activity_id).to eq(2)

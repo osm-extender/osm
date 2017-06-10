@@ -10,7 +10,7 @@ describe Osm::Badge::Data do
       awarded_date: Date.new(2000, 1, 2),
       requirements: {},
       section_id: 2,
-      badge: Osm::Badge.new(identifier: 'key'),
+      badge: Osm::Badge.new(identifier: 'key')
     )
 
     expect(data.member_id).to eq(1)
@@ -155,7 +155,7 @@ describe Osm::Badge::Data do
           Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'b', id: 2), id: 21),
           Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 30),
           Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 31),
-        ],
+        ]
       )
 
       data = Osm::Badge::Data.new(due: 1, awarded: 1, badge: badge)
@@ -247,7 +247,7 @@ describe Osm::Badge::Data do
           Osm::Badge::RequirementModule.new(id: 2, letter: 'b', min_required: 1),
           Osm::Badge::RequirementModule.new(id: 3, letter: 'c', min_required: 1),
         ],
-        show_level_letters: true,
+        show_level_letters: true
       )
       badge.requirements = [
         Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'a', id: 1), id: 10),
@@ -322,7 +322,7 @@ describe Osm::Badge::Data do
         ]
       ),
       requirements: { 1000 => 'Yes', 2000 => 'Yes', 2001 => '' },
-      due: 1,
+      due: 1
     ).started?).to eq(true)
 
     # Staged Count Badge
@@ -330,13 +330,13 @@ describe Osm::Badge::Data do
       badge: Osm::StagedBadge.new(levels: [0,1,2,3,4,5,10,15,20], show_level_letters: false, level_requirement: 1000),
       requirements: { 1000 => 5, 2000 => '5', 3000 => '' },
       due: 5,
-      awarded: 4,
+      awarded: 4
     ).started?).to eq(false) # Finished lvl 5 & not started lvl 10
     expect(Osm::Badge::Data.new(
       badge: Osm::StagedBadge.new(levels: [0,1,2,3,4,5,10,15,20], show_level_letters: false, level_requirement: 1000),
       requirements: { 1000 => 6, 2000 => '6', 3000 => '' },
       due: 5,
-      awarded: 3,
+      awarded: 3
     ).started?).to eq(true) # Finished lvl 5 & started lvl 10
   end
 
@@ -362,22 +362,22 @@ describe Osm::Badge::Data do
     expect(Osm::Badge::Data.new(
       badge: staged_activity,
       requirements: { 100 => 'Yes', 200 => 'Yes', 201 => '' },
-      due: 1,
+      due: 1
     ).started).to eq(2)
     expect(Osm::Badge::Data.new(
       badge: staged_activity,
       requirements: { 100 => 'Yes', 200 => 'Yes', 201 => '' },
-      due: 1,
+      due: 1
     ).started).to eq(2)
     expect(Osm::Badge::Data.new(
       badge: staged_activity,
       requirements: { 100 => 'Yes', 200 => 'Yes', 201 => 'Yes' },
-      due: 2,
+      due: 2
     ).started).to eq(0) # No more stages to do
     expect(Osm::Badge::Data.new(
       badge: staged_activity,
       requirements: {},
-      due: 0,
+      due: 0
     ).started).to eq(0) # No stages started
 
 
@@ -392,12 +392,12 @@ describe Osm::Badge::Data do
     expect(Osm::Badge::Data.new(
       badge: staged_count,
       requirements: { 3000 => 7 },
-      due: 5,
+      due: 5
     ).started).to eq(10)
     expect(Osm::Badge::Data.new(
       badge: staged_count,
       requirements: { 3000 => 3 },
-      due: 3,
+      due: 3
     ).started).to eq(0)
   end
 
@@ -430,7 +430,7 @@ describe Osm::Badge::Data do
               Osm::Badge::Requirement.new(id: 2345, editable: true),
               Osm::Badge::Requirement.new(id: 6789, editable: true),
             ]),
-          due: 0,
+          due: 0
         )
      end
 

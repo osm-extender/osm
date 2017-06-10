@@ -51,7 +51,7 @@ module Osm
               first_name:   item['firstname'],
               last_name:    item['lastname'],
               logins:       Osm.to_i_or_nil(item['numlogins']),
-              last_login:   get_last_login_date(item['lastlogin'],)
+              last_login:   get_last_login_date(item['lastlogin'])
             )
           end
         end # cache fetch

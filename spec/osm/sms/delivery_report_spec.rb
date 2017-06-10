@@ -14,7 +14,7 @@ describe Osm::Sms::DeliveryReport do
       scheduled: DateTime.new(2000, 1, 2, 3, 4, 5),
       last_updated: DateTime.new(2000, 1, 2, 3, 5, 6),
       credits: 7,
-      status: :delivered,
+      status: :delivered
     )
 
     expect(report.sms_id).to eq(1)

@@ -62,7 +62,7 @@ describe Osm::Grouping do
         id: 1,
         section_id: 2,
         active: true,
-        name: 'Grouping',
+        name: 'Grouping'
       )
       grouping.points = 3
 
@@ -79,7 +79,7 @@ describe Osm::Grouping do
       grouping = Osm::Grouping.new(
         id: 1,
         section_id: 2,
-        points: 3,
+        points: 3
       )
       grouping.name = 'Grouping'
       grouping.active = true
@@ -94,7 +94,7 @@ describe Osm::Grouping do
         id: 1,
         section_id: 2,
         name: 'Name',
-        active: true,
+        active: true
       )
       grouping.points = 3
 

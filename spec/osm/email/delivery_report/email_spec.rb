@@ -6,7 +6,7 @@ describe Osm::Email::DeliveryReport::Email do
         to:       'to@example.com',
         from:     'from@example.com',
         subject:  'Subject of email',
-        body:     'Body of email message.',
+        body:     'Body of email message.'
       )
     end
     %w{to from subject body}.each do |attribute|

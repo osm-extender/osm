@@ -48,7 +48,7 @@ module Osm
             section_id: Osm.to_i_or_nil(term_data['sectionid']),
             name: term_data['name'],
             start: Osm.parse_date(term_data['startdate']),
-            finish: Osm.parse_date(term_data['enddate']),
+            finish: Osm.parse_date(term_data['enddate'])
           )
           terms.push term
           ids.push term.id

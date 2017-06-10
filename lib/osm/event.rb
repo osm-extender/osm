@@ -402,7 +402,7 @@ module Osm
                            .inject({}){ |h,(k,v)| h[k[2..-1].to_i] = v; h },
             payments: item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
                              .inject({}){ |h,(k,v)| h[k[1..-1].to_i] = v; h },
-            row: index,
+            row: index
           )
         end # each data
       end # cache fetch
@@ -549,7 +549,7 @@ module Osm
           requirement_label: field['columnnameLongName'],
           data: field['data'],
           badge_id: field['badge_id'],
-          badge_version: field['badge_version'],
+          badge_version: field['badge_version']
         )
       end
       event.badges = badges

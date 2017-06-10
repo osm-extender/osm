@@ -13,7 +13,7 @@ describe Osm::OnlinePayment::Schedule do
       require_all:    true,
       pay_now:        14,
       annual_limit:   '100',
-      payments:       [],
+      payments:       []
     )
     expect(schedule.id).to eq(1)
     expect(schedule.section_id).to eq(2)

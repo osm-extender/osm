@@ -40,7 +40,7 @@ module Osm
           Budget.new(
             id: Osm.to_i_or_nil(budget['categoryid']),
             section_id: Osm.to_i_or_nil(budget['sectionid']),
-            name: budget['name'],
+            name: budget['name']
           )
         end # data.map
       end # cache fetch

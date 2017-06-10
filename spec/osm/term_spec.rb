@@ -227,7 +227,7 @@ describe Osm::Term do
         section: 1,
         name: 'A Term',
         start: Date.new(2010, 01, 01),
-        finish: Date.new(2010, 12, 31),
+        finish: Date.new(2010, 12, 31)
       )).to eq(true)
     end
 
@@ -247,7 +247,7 @@ describe Osm::Term do
         section: 1,
         name: 'A Term',
         start: Date.new(2010, 01, 01),
-        finish: Date.new(2010, 12, 31),
+        finish: Date.new(2010, 12, 31)
       )).to eq(false)
     end
 

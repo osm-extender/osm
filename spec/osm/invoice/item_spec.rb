@@ -10,7 +10,7 @@ describe Osm::Invoice::Item do
       type: :expense,
       payto: 'Name',
       description: 'Comments',
-      budget_name: 'Budget',
+      budget_name: 'Budget'
     )
 
     expect(ii.id).to eq(1)
@@ -77,7 +77,7 @@ describe Osm::Invoice::Item do
           budget_name: 'A budget',
           date: Date.new(2003, 5, 6),
           description: 'A description',
-          payto: 'Person to Pay',
+          payto: 'Person to Pay'
         )
         expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return('ok'=>true)
 
@@ -123,7 +123,7 @@ describe Osm::Invoice::Item do
           budget_name: 'A budget',
           date: Date.new(2003, 5, 6),
           description: 'A description',
-          payto: 'Person to Pay',
+          payto: 'Person to Pay'
         )
         expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return('ok'=>false)
 
@@ -143,7 +143,7 @@ describe Osm::Invoice::Item do
         item = Osm::Invoice::Item.new(
           id: 1,
           invoice: Osm::Invoice.new(id: 3, section_id: 2),
-          record_id: 4,
+          record_id: 4
         )
         item.amount = '1.23'
         item.type = :income
@@ -184,7 +184,7 @@ describe Osm::Invoice::Item do
           budget_name: 'A budget',
           date: Date.new(2003, 4, 5),
           description: 'A description',
-          payto: 'Person to Pay',
+          payto: 'Person to Pay'
         )
         expect($api).to receive(:post_query).with('finances.php?action=updateRecord&sectionid=2&dateFormat=generic', post_data: {
           'section_id' => 2,
@@ -214,7 +214,7 @@ describe Osm::Invoice::Item do
       end
 
       it 'Failure' do
-        item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 2, section_id: 4),)
+        item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 2, section_id: 4))
         expect($api).to receive(:post_query).with('finances.php?action=deleteEntry&sectionid=4', post_data: {
           'id' => 1,
         }).and_return('ok'=>false)

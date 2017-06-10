@@ -8,7 +8,7 @@ describe Osm::Activity do
       description: 'Description',
       resources: 'Resources',
       instructions: 'Instructions',
-      location: :indoors,
+      location: :indoors
     )
     expect(activity.osm_link).to eq('https://www.onlinescoutmanager.co.uk/?l=p1')
   end
@@ -183,10 +183,10 @@ describe Osm::Activity do
           badge_name: 'Badge name',
           badge_id: 181,
           badge_version: 0,
-          requirement_id: 93384,
+          requirement_id: 93384
         )],
         shared: 0,
-        section_id: 1,
+        section_id: 1
       )
       expect(activity.update(api: $api, section: 1, secret_update: true)).to eq(true)
     end
@@ -199,7 +199,7 @@ describe Osm::Activity do
         resources: 'resources',
         instructions: 'instructions',
         location: :indoors,
-        running_time: 0,
+        running_time: 0
       )
       expect($api).to receive(:post_query).and_return('result' => false)
       expect(activity.update(api: $api, section: 1, secret_update: true)).to eq(false)

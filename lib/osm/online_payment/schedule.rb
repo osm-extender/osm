@@ -122,7 +122,7 @@ module Osm
             gift_aid:      data['giftaid'].eql?('1'),
             require_all:   data['defaulton'].eql?('1'),
             pay_now:       data['paynow'],
-            annual_limit:  data['preauth_amount'],
+            annual_limit:  data['preauth_amount']
           )
 
           (data['payments'] || []).each do |payment_data|
@@ -132,7 +132,7 @@ module Osm
               due_date: Osm.parse_date(payment_data['date']),
               name:     payment_data['name'].to_s,
               id:       Osm.to_i_or_nil(payment_data['paymentid']),
-              schedule: schedule,
+              schedule: schedule
             )
             schedule.payments.push payment
           end
@@ -175,7 +175,7 @@ module Osm
               start_date:     require_all ? Osm.parse_date(item['startdate']) : nil,
               direct_debit:   item['directdebit'].downcase.to_sym,
               payments:       payments_data,
-              schedule:       self,
+              schedule:       self
             )
           end
           data

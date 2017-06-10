@@ -192,7 +192,7 @@ module Osm
               receive_email_1: member_contact[CID_RECIEVE_EMAIL_1],
               receive_email_2: member_contact[CID_RECIEVE_EMAIL_2],
               additional_information: member_custom,
-              additional_information_labels: custom_labels[GID_MEMBER_CONTACT],
+              additional_information_labels: custom_labels[GID_MEMBER_CONTACT]
             ),
             primary_contact: primary_contact.nil? ? nil : PrimaryContact.new(
               first_name: primary_contact[CID_FIRST_NAME],
@@ -211,7 +211,7 @@ module Osm
               receive_email_1: primary_contact[CID_RECIEVE_EMAIL_1],
               receive_email_2: primary_contact[CID_RECIEVE_EMAIL_2],
               additional_information: primary_custom,
-              additional_information_labels: custom_labels[GID_PRIMARY_CONTACT],
+              additional_information_labels: custom_labels[GID_PRIMARY_CONTACT]
             ),
             secondary_contact: secondary_contact.nil? ? nil : SecondaryContact.new(
               first_name: secondary_contact[CID_FIRST_NAME],
@@ -230,7 +230,7 @@ module Osm
               receive_email_1: secondary_contact[CID_RECIEVE_EMAIL_1],
               receive_email_2: secondary_contact[CID_RECIEVE_EMAIL_2],
               additional_information: secondary_custom,
-              additional_information_labels: custom_labels[GID_SECONDARY_CONTACT],
+              additional_information_labels: custom_labels[GID_SECONDARY_CONTACT]
             ),
             emergency_contact: emergency_contact.nil? ? nil : EmergencyContact.new(
               first_name: emergency_contact[CID_FIRST_NAME],
@@ -245,7 +245,7 @@ module Osm
               email_1: emergency_contact[CID_EMAIL_1],
               email_2: emergency_contact[CID_EMAIL_2],
               additional_information: emergency_custom,
-              additional_information_labels: custom_labels[GID_EMERGENCY_CONTACT],
+              additional_information_labels: custom_labels[GID_EMERGENCY_CONTACT]
             ),
             doctor: doctor_contact.nil? ? nil : DoctorContact.new(
               first_name: doctor_contact[CID_FIRST_NAME],
@@ -259,10 +259,10 @@ module Osm
               phone_1: doctor_contact[CID_PHONE_1],
               phone_2: doctor_contact[CID_PHONE_2],
               additional_information: doctor_custom,
-              additional_information_labels: custom_labels[GID_DOCTOR_CONTACT],
+              additional_information_labels: custom_labels[GID_DOCTOR_CONTACT]
             ),
             additional_information: custom_data,
-            additional_information_labels: custom_labels[GID_CUSTOM],
+            additional_information_labels: custom_labels[GID_CUSTOM]
           )
         end # data.map
       end # cache fetch

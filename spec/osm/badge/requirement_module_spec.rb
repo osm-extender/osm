@@ -10,7 +10,7 @@ describe Osm::Badge::RequirementModule do
       custom_columns: 2,
       completed_into_column: 3,
       numeric_into_column: 4,
-      add_column_id_to_numeric: 5,
+      add_column_id_to_numeric: 5
     )
 
     expect(m.badge).to eq(b)

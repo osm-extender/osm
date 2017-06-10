@@ -96,7 +96,7 @@ describe Osm::Event::Attendance do
 
       ea = Osm::Event::Attendance.new(
         event: Osm::Event.new(id: 3, section_id: 1),
-        member_id: 2,
+        member_id: 2
       )
       expect(ea.get_audit_trail($api)).to eq([
         { event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 17), by: 'My.SCOUT', :type => :detail, :description => "Set 'Test' to 'Test data'", :label => 'Test', :value => 'Test data' },

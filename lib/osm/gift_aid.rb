@@ -22,7 +22,7 @@ module Osm
           if data.is_a?(Hash) && data['rows'].is_a?(Array)
             data['rows'].each do |row|
               structure.push Donation.new(
-                donation_date: Osm.parse_date(row['field']),
+                donation_date: Osm.parse_date(row['field'])
               )
             end
           end
@@ -68,7 +68,7 @@ module Osm
                   tax_payer_address: item['address'],
                   tax_payer_postcode: item['postcode'],
                   total: item['total'],
-                  donations: donations,
+                  donations: donations
                 )
               end
             end

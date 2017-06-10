@@ -63,7 +63,7 @@ describe Osm::GiftAid do
         date: Date.new(2000, 1, 2),
         members: [3, 4],
         amount: '1.23',
-        note: 'Note',
+        note: 'Note'
       )).to eq(true)
     end
 

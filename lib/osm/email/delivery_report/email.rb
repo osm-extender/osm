@@ -56,7 +56,7 @@ module Osm
             to:       email_data['to'],
             from:     email_data['from'],
             subject:  email_data['subject'],
-            body:     body,
+            body:     body
           )
         end
 

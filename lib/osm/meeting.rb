@@ -99,7 +99,7 @@ module Osm
               attributes[:activities].push Osm::Meeting::Activity.new(
                 activity_id: Osm.to_i_or_nil(activity_data['activityid']),
                 title: activity_data['title'],
-                notes: activity_data['notes'],
+                notes: activity_data['notes']
               )
             end
           end # unless our_activities.nil?
@@ -116,7 +116,7 @@ module Osm
                 badge_version: Osm.to_i_or_nil(badge_data['badge_version']),
                 requirement_id: Osm.to_i_or_nil(badge_data['column_id']),
                 requirement_label: badge_data['columnnameLongName'],
-                data: badge_data['data'],
+                data: badge_data['data']
               )
             end
           end # unless our_badge_links.nil?

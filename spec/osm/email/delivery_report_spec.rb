@@ -8,7 +8,7 @@ describe Osm::Email::DeliveryReport do
         section_id:     1,
         sent_at:        Time.new(2016, 10, 27, 13, 0),
         subject:        'Subject line of email',
-        recipients:     [],
+        recipients:     []
       )
     end
 

@@ -8,7 +8,7 @@ describe Osm::Invoice do
       extra_details: 'Extra Details',
       date: Date.new(2001, 2, 3),
       archived: true,
-      finalised: true,
+      finalised: true
     )
 
     expect(i.id).to eq(1)
@@ -169,7 +169,7 @@ describe Osm::Invoice do
           section_id: 1,
           name: 'Invoice name',
           extra_details: '',
-          date: Date.new(2002, 3, 4),
+          date: Date.new(2002, 3, 4)
         )
 
         expect($api).to receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
@@ -187,7 +187,7 @@ describe Osm::Invoice do
           section_id: 1,
           name: 'Invoice name',
           extra_details: '',
-          date: Date.new(2002, 3, 4),
+          date: Date.new(2002, 3, 4)
         )
 
         expect($api).to receive(:post_query).with('finances.php?action=addInvoice&sectionid=1', post_data: {
@@ -206,7 +206,7 @@ describe Osm::Invoice do
           section_id: 2,
           name: 'Invoice name',
           extra_details: '',
-          date: Date.new(2002, 3, 4),
+          date: Date.new(2002, 3, 4)
         )
 
         expect($api).to receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {
@@ -225,7 +225,7 @@ describe Osm::Invoice do
           section_id: 2,
           name: 'Invoice name',
           extra_details: '',
-          date: Date.new(2002, 3, 4),
+          date: Date.new(2002, 3, 4)
         )
 
         expect($api).to receive(:post_query).with('finances.php?action=addInvoice&sectionid=2', post_data: {

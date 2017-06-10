@@ -151,7 +151,7 @@ module Osm
           badge_version: Osm.to_i_or_nil(badge_data['badge_version']),
           requirement_id: Osm.to_i_or_nil(badge_data['column_id']),
           requirement_label: badge_data['columnnameLongName'],
-          data: badge_data['data'],
+          data: badge_data['data']
         )
       end
       (data['versions'].is_a?(Array) ? data['versions'] : []).each do |version_data|

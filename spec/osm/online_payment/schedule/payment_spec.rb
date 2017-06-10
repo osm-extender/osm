@@ -9,7 +9,7 @@ describe Osm::OnlinePayment::Schedule::Payment do
       name:     'A payment',
       archived: true,
       due_date: Date.new(2016, 5, 1),
-      schedule: schedule,
+      schedule: schedule
     )
     expect(payment.id).to eq(1)
     expect(payment.amount).to eq('12.34')

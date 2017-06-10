@@ -8,7 +8,7 @@ describe Osm::Badge::Requirement do
       mod: m,
       id: 1,
       editable: true,
-      badge: Osm::Badge.new(identifier: 'key'),
+      badge: Osm::Badge.new(identifier: 'key')
     )
 
     expect(requirement.name).to eq('name')

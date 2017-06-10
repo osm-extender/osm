@@ -33,7 +33,7 @@ module Osm
               id: row['field'],
               name: row['name'],
               editable: row['editable'] || false,
-              flexi_record: self,
+              flexi_record: self
             )
           end
         end
@@ -89,14 +89,14 @@ module Osm
               'dob' => item['dob'].empty? ? nil : item['dob'],
               'total' => item['total'].to_s.empty? ? nil : item['total'],
               'completed' => item['completed'].to_s.empty? ? nil : item['completed'],
-              'age' => item['age'].empty? ? nil : item['age'],
+              'age' => item['age'].empty? ? nil : item['age']
             )
   
             datas.push Osm::FlexiRecord::Data.new(
               member_id: Osm.to_i_or_nil(item['scoutid']),
               grouping_id: Osm.to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
               fields: fields,
-              flexi_record: self,
+              flexi_record: self
             )
           end # unless a total row
         end # each item in data

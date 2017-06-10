@@ -168,7 +168,7 @@ module Osm
           by_member: by_member,
           member_names: member_names,
           badge_names: badge_names,
-          badge_stock: badge_stock,
+          badge_stock: badge_stock
         )
       end # cache fetch
     end
@@ -225,7 +225,7 @@ module Osm
             requires_modules: config['requires'],
             other_requirements_required: (config['columnsRequired'] || []).map{ |i| { id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i } },
             badges_required: (config['badgesRequired'] || []).map{ |i| { id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i } },
-            show_level_letters: !!config['shownumbers'],
+            show_level_letters: !!config['shownumbers']
           )
 
           modules = module_completion_data(api: api, badge: badge, no_read_cache: no_read_cache)
@@ -240,7 +240,7 @@ module Osm
               description: r['tooltip'],
               mod: modules[r['module']],
               id: Osm.to_i_or_nil(r['field']),
-              editable: r['editable'].to_s.eql?('true'),
+              editable: r['editable'].to_s.eql?('true')
             )
           end
           badge.requirements = requirements
@@ -338,7 +338,7 @@ module Osm
             awarded_date: Osm.parse_date(d['awardeddate']),
             requirements: d.map{ |k,v| [k.to_i, v] }.to_h.except(0),
             section_id: section.id,
-            badge: self,
+            badge: self
           )
         end
       end #cache fetch

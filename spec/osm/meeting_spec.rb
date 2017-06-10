@@ -128,7 +128,7 @@ describe Osm::Meeting do
         activities: [Osm::Meeting::Activity.new(activity_id: 4)],
         badge_links: [
           Osm::Activity::Badge.new(badge_type: :activity, badge_section: :beavers, requirement_label: 'label 2', data: 'data 2', badge_name: 'badge 2', badge_id: 4, badge_version: 1, requirement_id: 400)
-        ],
+        ]
       )
 
       expect(meeting.get_badge_requirements($api)).to eq([
@@ -222,7 +222,7 @@ describe Osm::Meeting do
           badge_name: 'Badge name',
           badge_id: 181,
           badge_version: 0,
-          requirement_id: 93384,
+          requirement_id: 93384
         )]
       )
       expect(meeting.update($api)).to eq(true)

@@ -25,7 +25,7 @@ module Osm
               structure.push Field.new(
                 id: row['field'],
                 name: row['name'],
-                tooltip: row['tooltip'],
+                tooltip: row['tooltip']
               )
             end
           end
@@ -72,7 +72,7 @@ module Osm
                   first_name: item['firstname'],
                   last_name: item['lastname'],
                   total: item['total'].to_i,
-                  attendance: attendance,
+                  attendance: attendance
                 )
               end
             end

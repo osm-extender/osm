@@ -226,7 +226,7 @@ module Osm
             type: item['type'].to_s.downcase.to_sym,
             payto: item['payto_userid'].to_s.strip,
             description: item['comments'],
-            budget_name: item['categoryid'],
+            budget_name: item['categoryid']
           )
         end
       end # cache fetch
@@ -247,7 +247,7 @@ module Osm
         extra_details: invoice_data['extra'],
         date: Osm.parse_date(invoice_data['entrydate']),
         archived: invoice_data['archived'].eql?('1'),
-        finalised: invoice_data['finalised'].eql?('1'),
+        finalised: invoice_data['finalised'].eql?('1')
       )
     end
 

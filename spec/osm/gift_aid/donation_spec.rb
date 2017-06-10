@@ -2,7 +2,7 @@ describe Osm::GiftAid::Donation do
 
   it 'Create' do
     d = Osm::GiftAid::Donation.new(
-      donation_date: Date.new(2000, 1, 2),
+      donation_date: Date.new(2000, 1, 2)
     )
 
     expect(d.donation_date).to eq(Date.new(2000, 1, 2))

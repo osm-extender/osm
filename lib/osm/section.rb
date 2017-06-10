@@ -164,7 +164,7 @@ module Osm
           flexi_records.push Osm::FlexiRecord.new(
             id: Osm.to_i_or_nil(record_data['extraid']),
             name: record_data['name'],
-            section_id: section_id,
+            section_id: section_id
           )
         end
 
@@ -199,7 +199,7 @@ module Osm
           myscout_event_reminder_frequency: myscout_data['eventRemindFrequency'].to_i,
           myscout_payment_reminder_count: myscout_data['paymentRemindCount'].to_i,
           myscout_payment_reminder_frequency: myscout_data['paymentRemindFrequency'].to_i,
-          myscout_details_email_changes_to: myscout_data['contactNotificationEmail'],
+          myscout_details_email_changes_to: myscout_data['contactNotificationEmail']
         )
 
         result.push section

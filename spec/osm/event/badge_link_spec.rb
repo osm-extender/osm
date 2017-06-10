@@ -9,7 +9,7 @@ describe Osm::Event::BadgeLink do
       badge_name: 'Artist',
       badge_id: 1,
       badge_version: 0,
-      requirement_id: 2,
+      requirement_id: 2
     )
 
     expect(bl.badge_type).to eq(:activity)

@@ -446,7 +446,7 @@ describe Osm::Event do
           attendance_limit: 3,
           attendance_limit_includes_leaders: true,
           attendance_reminder: 1,
-          allow_booking: true,
+          allow_booking: true
         )
         expect(event).not_to be_nil
         expect(event.id).to eq(2)
@@ -492,7 +492,7 @@ describe Osm::Event do
           reminders: true,
           attendance_limit: 3,
           attendance_limit_includes_leaders: true,
-          allow_booking: true,
+          allow_booking: true
         )
         expect(event).not_to be_nil
         expect(event.id).to eq(2)
@@ -567,7 +567,7 @@ describe Osm::Event do
             badge_name: 'Test badge',
             badge_id: 3,
             badge_version: 2,
-            requirement_id: 1,
+            requirement_id: 1
           )]
           event = Osm::Event.create(api: $api, **@attributes)
           expect(event).not_to be_nil
@@ -595,7 +595,7 @@ describe Osm::Event do
             data: '1',
             badge_name: 'Test badge',
             badge_id: 3,
-            badge_version: 2,
+            badge_version: 2
           )]
           event = Osm::Event.create(api: $api, **@attributes)
           expect(event).not_to be_nil
@@ -624,7 +624,7 @@ describe Osm::Event do
             badge_name: 'Test badge',
             badge_id: 3,
             badge_version: 2,
-            requirement_id: 4,
+            requirement_id: 4
           )]
           event = Osm::Event.create(api: $api, **@attributes)
           expect(event).not_to be_nil
@@ -653,7 +653,7 @@ describe Osm::Event do
         public_notepad: '',
         confirm_by_date: nil,
         allow_changes: true,
-        reminders: true,
+        reminders: true
       )
       expect(event).to be_nil
     end
@@ -702,7 +702,7 @@ describe Osm::Event do
           attendance_limit: 3,
           attendance_limit_includes_leaders: true,
           attendance_reminder: 2,
-          allow_booking: true,
+          allow_booking: true
         )
         event.name = 'Test event'
         event.notepad = 'notepad'
@@ -749,7 +749,7 @@ describe Osm::Event do
           attendance_limit: 3,
           attendance_limit_includes_leaders: true,
           attendance_reminder: 1,
-          allow_booking: true,
+          allow_booking: true
         )
         event.cost = 'TBC'
         expect(event.update($api)).to eq(true)
@@ -774,7 +774,7 @@ describe Osm::Event do
               badge_name: 'Artist',
               badge_id: 3,
               badge_version: 2,
-              requirement_id: 4,
+              requirement_id: 4
             )],
             columns: [],
             notepad: '',
@@ -797,7 +797,7 @@ describe Osm::Event do
             badge_name: 'Artist',
             badge_id: 3,
             badge_version: 2,
-            requirement_id: 6,
+            requirement_id: 6
           )
           expect(@event).to receive(:add_badge_link).with(api: $api, link: badge) { true }
 

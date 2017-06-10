@@ -990,7 +990,7 @@ describe Osm::Member do
         primary_contact: Osm::Member::PrimaryContact.new(),
         secondary_contact: Osm::Member::PrimaryContact.new(),
         emergency_contact: Osm::Member::EmergencyContact.new(),
-        doctor: Osm::Member::DoctorContact.new(),
+        doctor: Osm::Member::DoctorContact.new()
       )
       allow($api).to receive(:post_query).with('ext/members/contact/images/member.php?sectionid=2&scoutid=1&bw=false').and_return('abcdef')
 
@@ -1019,7 +1019,7 @@ describe Osm::Member do
           primary_contact: Osm::Member::PrimaryContact.new(),
           secondary_contact: Osm::Member::PrimaryContact.new(),
           emergency_contact: Osm::Member::EmergencyContact.new(),
-          doctor: Osm::Member::DoctorContact.new(),
+          doctor: Osm::Member::DoctorContact.new()
         )
       end
 

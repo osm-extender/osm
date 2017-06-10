@@ -5,7 +5,7 @@ describe Osm::FlexiRecord::Column do
       id: 'f_1',
       name: 'Field Name',
       editable: true,
-      flexi_record: Osm::FlexiRecord.new(),
+      flexi_record: Osm::FlexiRecord.new()
     )
 
     expect(field.id).to eq('f_1')

@@ -9,7 +9,7 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
       direct_debit:   :active,
       start_date:     Date.new(2016, 6, 7),
       payments:       {},
-      schedule:       schedule,
+      schedule:       schedule
     )
     expect(p4m.first_name).to eq('John')
     expect(p4m.last_name).to eq('Smith')

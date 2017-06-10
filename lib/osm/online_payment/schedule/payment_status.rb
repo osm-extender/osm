@@ -81,7 +81,7 @@ module Osm
               status:         status_map[item['status']],
               details:        item['details'],
               updated_by:     item['firstname'],
-              updated_by_id:  item['who'].to_i,
+              updated_by_id:  item['who'].to_i
             )
           end
         end
