@@ -10,7 +10,7 @@ describe Osm::ApiAccess do
 
     expect(api_access.id).to eq(1)
     expect(api_access.name).to eq('Name')
-    expect(api_access.permissions).to eq({ permission: [:read] })
+    expect(api_access.permissions).to eq(permission: [:read])
     expect(api_access.valid?).to eq(true)
   end
 
@@ -50,7 +50,7 @@ describe Osm::ApiAccess do
         api_access = api_accesses[0]
         expect(api_access.id).to eq(1)
         expect(api_access.name).to eq('API Name')
-        expect(api_access.permissions).to eq({ read: [:read], readwrite: [:read, :write], administer: [:read, :write, :administer] })
+        expect(api_access.permissions).to eq(read: [:read], readwrite: [:read, :write], administer: [:read, :write, :administer])
       end
 
       it 'From cache' do

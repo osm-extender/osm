@@ -50,7 +50,7 @@ module ArrayOfValidatorSpec
         i = IntegerTestModel.new(array: [1, '2', 3])
         expect(i.valid?).to eq(false)
         expect(i.errors.count).to eq(1)
-        expect(i.errors.messages).to eq({ array: ['items in the Array must be a Integer'] })
+        expect(i.errors.messages).to eq(array: ['items in the Array must be a Integer'])
       end
 
     end
@@ -75,7 +75,7 @@ module ArrayOfValidatorSpec
           i = InvalidTestModel.new(array: [TestItem.new(valid: true)])
           expect(i.valid?).to eq(false)
           expect(i.errors.count).to eq(1)
-          expect(i.errors.messages).to eq({ array: ['contains a valid item'] })
+          expect(i.errors.messages).to eq(array: ['contains a valid item'])
         end
 
       end
@@ -92,7 +92,7 @@ module ArrayOfValidatorSpec
           i = ValidTestModel.new(array: [TestItem.new(valid: false)])
           expect(i.valid?).to eq(false)
           expect(i.errors.count).to eq(1)
-          expect(i.errors.messages).to eq({ array: ['contains an invalid item'] })
+          expect(i.errors.messages).to eq(array: ['contains an invalid item'])
         end
 
       end

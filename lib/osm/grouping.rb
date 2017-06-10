@@ -41,13 +41,11 @@ module Osm
         result = Array.new
         if data.is_a?(Hash) && data['patrols'].is_a?(Array)
           data['patrols'].each do |item|
-            result.push Osm::Grouping.new({
-              id: Osm::to_i_or_nil(item['patrolid']),
+            result.push Osm::Grouping.new(              id: Osm::to_i_or_nil(item['patrolid']),
               section_id: section_id,
               name: item['name'],
               active: (item['active'] == 1),
-              points: Osm::to_i_or_nil(item['points']),
-            })
+              points: Osm::to_i_or_nil(item['points']))
           end
         end
         result

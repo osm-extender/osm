@@ -190,11 +190,9 @@ describe Osm do
         'programme' => 20,
         'events' => 10,
       }
-      expect(Osm.make_permissions_hash(from_osm)).to eq({
-        badge: [:read, :write, :administer],
+      expect(Osm.make_permissions_hash(from_osm)).to eq(        badge: [:read, :write, :administer],
         programme: [:read, :write],
-        events: [:read],
-      })
+        events: [:read])
     end
 
     it 'Includes only relevant permissions' do

@@ -84,7 +84,7 @@ describe Osm::Grouping do
       grouping.name = 'Grouping'
       grouping.active = true
 
-      expect($api).to receive(:post_query).and_return({ 'done' => false })
+      expect($api).to receive(:post_query).and_return('done' => false)
 
       expect(grouping.update($api)).to eq(false)
     end
@@ -98,7 +98,7 @@ describe Osm::Grouping do
       )
       grouping.points = 3
 
-      expect($api).to receive(:post_query).and_return({ 'done' => false })
+      expect($api).to receive(:post_query).and_return('done' => false)
 
       expect(grouping.update($api)).to eq(false)
     end

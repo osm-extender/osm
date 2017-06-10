@@ -143,16 +143,14 @@ describe Osm::FlexiRecord do
       record = records[0]
       expect(record.member_id).to eq(1)
       expect(record.grouping_id).to eq(2)
-      expect(record.fields).to eq({
-        'firstname' => 'First',
+      expect(record.fields).to eq(        'firstname' => 'First',
         'lastname' => 'Last',
         'dob' => nil,
         'total' => nil,
         'completed' => nil,
         'age' => nil,
         'f_1' => 'A',
-        'f_2' => 'B',
-      })
+        'f_2' => 'B')
       expect(record.valid?).to eq(true)
     end
 

@@ -57,7 +57,7 @@ describe Osm::Section do
     expect(section.myscout_badges).to eq(true)
     expect(section.myscout_programme).to eq(true)
     expect(section.myscout_payments).to eq(true)
-    expect(section.myscout_emails).to eq({ email1: true, email2: false })
+    expect(section.myscout_emails).to eq(email1: true, email2: false)
     expect(section.myscout_email_address_from).to eq('send_from@example.com')
     expect(section.myscout_email_address_copy).to eq('')
     expect(section.myscout_badges_partial).to eq(true)
@@ -124,7 +124,7 @@ describe Osm::Section do
         expect(section.myscout_badges).to eq(true)
         expect(section.myscout_programme).to eq(true)
         expect(section.myscout_payments).to eq(true)
-        expect(section.myscout_emails).to eq({ email1: true, email2: false })
+        expect(section.myscout_emails).to eq(email1: true, email2: false)
         expect(section.myscout_email_address_from).to eq('send_from@example.com')
         expect(section.myscout_email_address_copy).to eq('')
         expect(section.myscout_badges_partial).to eq(true)
@@ -164,13 +164,13 @@ describe Osm::Section do
 
     describe "Gets the section's notepad" do
       it 'From OSM' do
-        expect($api).to receive(:post_query).with('api.php?action=getNotepads').and_return({ '1' => 'Section 1', '2' => 'Section 2' })
+        expect($api).to receive(:post_query).with('api.php?action=getNotepads').and_return('1' => 'Section 1', '2' => 'Section 2')
         section = Osm::Section.new(id: 1)
         expect(section.get_notepad($api)).to eq('Section 1')
       end
 
       it 'From cache' do
-        expect($api).to receive(:post_query).with('api.php?action=getNotepads').and_return({ '1' => 'Section 1', '2' => 'Section 2' })
+        expect($api).to receive(:post_query).with('api.php?action=getNotepads').and_return('1' => 'Section 1', '2' => 'Section 2')
         section = Osm::Section.new(id: 1)
         expect(section.get_notepad($api)).to eq('Section 1')
         expect($api).not_to receive(:post_query).with('api.php?action=getNotepads')
@@ -179,13 +179,13 @@ describe Osm::Section do
     end
 
     it "Sets the section's notepad (success)" do
-      expect($api).to receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: { 'value'=>'content' }).and_return({ 'ok' => true })
+      expect($api).to receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: { 'value'=>'content' }).and_return('ok' => true)
       section = Osm::Section.new(id: 1)
       expect(section.set_notepad(api: $api, content: 'content')).to eq(true)
     end
 
     it "Sets the section's notepad (fail)" do
-      expect($api).to receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: { 'value'=>'content' }).and_return({ 'ok' => false })
+      expect($api).to receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: { 'value'=>'content' }).and_return('ok' => false)
       section = Osm::Section.new(id: 1)
       expect(section.set_notepad(api: $api, content: 'content')).to eq(false)
     end

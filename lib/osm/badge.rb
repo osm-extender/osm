@@ -418,15 +418,13 @@ module Osm
           [
             Osm.to_i_or_nil(i['badge_id']),
             Osm.to_i_or_nil(i['badge_version']),
-            Osm::Badge::RequirementModule.new({
-              id: Osm.to_i_or_nil(i['module_id']),
+            Osm::Badge::RequirementModule.new(              id: Osm.to_i_or_nil(i['module_id']),
               letter: i['module_letter'],
               min_required: i['num_required'].to_i,
               custom_columns: i['custom_columns'].to_i,
               completed_into_column: i['completed_into_column_id'].to_i.eql?(0) ? nil : i['completed_into_column_id'].to_i,
               numeric_into_column: i['numeric_into_column_id'].to_i.eql?(0) ? nil : i['numeric_into_column_id'].to_i,
-              add_column_id_to_numeric: i['add_column_id_to_numeric'].to_i.eql?(0) ? nil : i['add_column_id_to_numeric'].to_i,
-            })
+              add_column_id_to_numeric: i['add_column_id_to_numeric'].to_i.eql?(0) ? nil : i['add_column_id_to_numeric'].to_i)
           ]
         end # osm_data.map!
 

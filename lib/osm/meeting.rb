@@ -278,8 +278,7 @@ module Osm
 
           badges = []
           links.each do |badge|
-            badges.push({
-              'badge' => nil,#"activity_animalcarer",
+            badges.push(              'badge' => nil,#"activity_animalcarer",
               'badge_id' => badge.badge_id,
               'badge_version' => badge.badge_version,
               'column_id' => badge.requirement_id,
@@ -292,8 +291,7 @@ module Osm
               'meetingdate' => date,
               'name' => badge.requirement_label,
               'section' => badge.badge_section,
-              'sectionid' => section_id
-            })
+              'sectionid' => section_id)
           end
         end # if to pick which method to use to get the data from OSM
 

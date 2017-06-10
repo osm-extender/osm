@@ -277,10 +277,8 @@ module Osm
         debug:      @debug,
       }
       if has_valid_user?
-        attributes.merge!({
-          user_id:      @user_id.clone,
-          user_secret:  @user_secret.clone,
-        })
+        attributes.merge!(          user_id:      @user_id.clone,
+          user_secret:  @user_secret.clone)
       end
     end
 

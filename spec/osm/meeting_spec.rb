@@ -145,7 +145,7 @@ describe Osm::Meeting do
         'starttime' => '11:11',
         'endtime' => '22:22',
         'title' => 'Title',
-      }).and_return({ 'result'=>0 })
+      }).and_return('result'=>0)
 
       term = Osm::Term.new(id: 2)
       allow(Osm::Term).to receive(:get_for_section) { [term] }
@@ -178,7 +178,7 @@ describe Osm::Meeting do
         'sectionid' => 1,
         'activityid' => 2,
         'notes' => 'Notes',
-      }).and_return({ 'result'=>0 })
+      }).and_return('result'=>0)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
       activity = Osm::Activity.new(id: 2, title: 'Title')
@@ -192,7 +192,7 @@ describe Osm::Meeting do
         'sectionid' => 1,
         'activityid' => 2,
         'notes' => 'Notes',
-      }).and_return({ 'result'=>1 })
+      }).and_return('result'=>1)
       activity = Osm::Activity.new(id: 2, title: 'Title')
       meeting = Osm::Meeting.new(section_id: 1, date: Date.new(2000, 1, 2))
       expect(meeting.add_activity(api: $api, activity: activity, notes: 'Notes')).to eq(false)
@@ -206,7 +206,7 @@ describe Osm::Meeting do
         'postnotes' => '', 'games' => '', 'leaders' => '',
         'activity' => '[{"activityid":3,"notes":"Some notes"}]',
         'badgelinks' => '[{"badge_id":"181","badge_version":"0","column_id":"93384","badge":null,"badgeLongName":"Badge name","columnname":null,"columnnameLongName":"l","data":"","section":"beavers","sectionLongName":null,"badgetype":"activity","badgetypeLongName":null}]',
-      }).and_return({ 'result'=>0 })
+      }).and_return('result'=>0)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
       meeting = Osm::Meeting.new(
@@ -233,7 +233,7 @@ describe Osm::Meeting do
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'badgelinks' => '[]',
-      }).and_return({ 'result'=>1 })
+      }).and_return('result'=>1)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
       meeting = Osm::Meeting.new(id: 1, section_id: 2, date: Date.new(2000, 01, 02))

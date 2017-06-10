@@ -3,30 +3,25 @@ describe Osm::Email do
   describe 'Get emails for contacts' do
 
     it 'Single member' do
-      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2', post_data: { 'contactGroups' => '["contact_primary_member"]' }).and_return({
-        'emails'=>{
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2', post_data: { 'contactGroups' => '["contact_primary_member"]' }).and_return(        'emails'=>{
           '2'=>{
             'emails'=>['john@example.com'],
             'firstname'=>'John',
             'lastname'=>'Smith'
           }
         },
-        'count'=>1
-      })
+        'count'=>1)
 
       result = Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: :member, members: 2)
-      expect(result).to eq({
-        '2' => {
+      expect(result).to eq(        '2' => {
           'emails' => ['john@example.com'],
           'firstname' => 'John',
           'lastname' => 'Smith'
-        }
-      })
+        })
     end
 
     it 'Several members' do
-      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3', post_data: { 'contactGroups' => '["contact_primary_member"]' }).and_return({
-        'emails'=>{
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3', post_data: { 'contactGroups' => '["contact_primary_member"]' }).and_return(        'emails'=>{
           '2'=>{
             'emails'=>['john@example.com'],
             'firstname'=>'John',
@@ -38,12 +33,10 @@ describe Osm::Email do
             'lastname'=>'Smith'
           }
         },
-        'count'=>3
-      })
+        'count'=>3)
 
       result = Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: :member, members: [2,3])
-      expect(result).to eq({
-        '2' => {
+      expect(result).to eq(        '2' => {
           'emails' => ['john@example.com'],
           'firstname' => 'John',
           'lastname' => 'Smith'
@@ -52,8 +45,7 @@ describe Osm::Email do
           'emails' => ['jane@example.com', 'jane2@example.com'],
           'firstname' => 'Jane',
           'lastname' => 'Smith'
-        }
-      })
+        })
     end
 
     it 'Requires at least one contact' do

@@ -97,7 +97,7 @@ describe Osm::Badge::Data do
       badge: badge,
       requirements: { 1=>'x', 2=>'', 3=>'yes', 4=>'2000-01-02', 5=>1 }
     )
-    expect(data.gained_in_modules).to eq({ 'a'=>0, 'b'=>2, 'c'=>1, 100=>0, 200=>2, 300=>1 })
+    expect(data.gained_in_modules).to eq('a'=>0, 'b'=>2, 'c'=>1, 100=>0, 200=>2, 300=>1)
   end
 
   it 'Get modules met for a member' do

@@ -124,15 +124,13 @@ describe Osm::Term do
           { 'sectionConfig'=>"{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member's Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member's Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[],\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}", 'groupname'=>'1st Somewhere', 'groupid'=>'1', 'groupNormalised'=>'1', 'sectionid'=>'10', 'sectionname'=>'Section 2', 'section'=>'cubs', 'isDefault'=>'0', 'permissions'=>{ 'badge'=>100, 'member'=>100, 'user'=>100, 'register'=>100, 'contact'=>100, 'programme'=>100, 'originator'=>1, 'events'=>100, 'finance'=>100, 'flexi'=>100 } }
         ]
 
-        expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return({
-          '9' => [
+        expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return(          '9' => [
             { 'termid' => '1', 'name' => 'Term 1', 'sectionid' => '9', 'startdate' => (Date.today + 31).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 90).strftime('%Y-%m-%d') }
           ],
           '10' => [
             { 'termid' => '2', 'name' => 'Term 2', 'sectionid' => '10', 'startdate' => (Date.today + 31).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 90).strftime('%Y-%m-%d') },
             { 'termid' => '3', 'name' => 'Term 3', 'sectionid' => '10', 'startdate' => (Date.today + 91).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 180).strftime('%Y-%m-%d') }
-          ]
-        })
+          ])
       end
 
       it 'From OSM' do
@@ -155,15 +153,13 @@ describe Osm::Term do
     end # Get all terms
 
     it 'Gets all terms for a section' do
-      expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return({
-        '9' => [
+      expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return(        '9' => [
           { 'termid' => '1', 'name' => 'Term 1', 'sectionid' => '9', 'startdate' => (Date.today + 31).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 90).strftime('%Y-%m-%d') }
         ],
         '10' => [
           { 'termid' => '2', 'name' => 'Term 2', 'sectionid' => '10', 'startdate' => (Date.today + 31).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 90).strftime('%Y-%m-%d') },
           { 'termid' => '3', 'name' => 'Term 3', 'sectionid' => '10', 'startdate' => (Date.today + 91).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 180).strftime('%Y-%m-%d') }
-        ]
-      })
+        ])
       terms = Osm::Term.get_for_section(api: $api, section: 10)
       expect(terms.size).to eq(2)
       expect(terms.map{ |i| i.id }).to eq([2, 3])
@@ -171,12 +167,10 @@ describe Osm::Term do
 
     describe 'Gets a term' do
       before :each do
-        expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return({
-          '10' => [
+        expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return(          '10' => [
             { 'termid' => '2', 'name' => 'Term 2', 'sectionid' => '10', 'startdate' => (Date.today + 31).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 90).strftime('%Y-%m-%d') },
             { 'termid' => '3', 'name' => 'Term 3', 'sectionid' => '10', 'startdate' => (Date.today + 91).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 180).strftime('%Y-%m-%d') }
-          ]
-        })
+          ])
       end
 
       it 'From OSM' do
@@ -194,22 +188,18 @@ describe Osm::Term do
 
     describe 'Find current term' do
       it 'Returns the current term for the section from all terms returned by OSM' do
-        expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return({
-          '9' => [
+        expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return(          '9' => [
             { 'termid'=>'1', 'name'=>'Term 1', 'sectionid'=>'9', 'startdate'=>(Date.today - 90).strftime('%Y-%m-%d'), 'enddate'=>(Date.today - 31).strftime('%Y-%m-%d') },
             { 'termid'=>'2', 'name'=>'Term 2', 'sectionid'=>'9', 'startdate'=>(Date.today - 30).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 30).strftime('%Y-%m-%d') },
             { 'termid'=>'3', 'name'=>'Term 3', 'sectionid'=>'9', 'startdate'=>(Date.today + 31).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 90).strftime('%Y-%m-%d') },
-          ]
-        })
+          ])
         expect(Osm::Term.get_current_term_for_section(api: $api, section: 9).id).to eq(2)
       end
     
       it 'Raises an error if there is no current term' do
-        expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return({
-          '9' => [
+        expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return(          '9' => [
             { 'termid'=>'1', 'name'=>'Term 1', 'sectionid'=>'9', 'startdate'=>(Date.today + 31).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 31).strftime('%Y-%m-%d') }
-          ]
-        })
+          ])
         expect{ Osm::Term.get_current_term_for_section(api: $api, section: 9) }.to raise_error do |error|
           expect(error).to be_a(Osm::Error::NoCurrentTerm)
           expect(error.message).to eq('There is no current term for the section.')
@@ -227,7 +217,7 @@ describe Osm::Term do
       }
 
       allow(Osm::Term).to receive(:get_all) { [Osm::Term.new(id: 1, section_id: 1), Osm::Term.new(id: 9, section_id: 9)] }
-      expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({ 'terms'=>{} })
+      expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return('terms'=>{})
       expect(Osm::Term).to receive(:cache_delete).with(api: $api, key: ['term', 1])
       expect(Osm::Term).to_not receive(:cache_delete).with(api: $api, key: ['term', 9])
       expect(Osm::Term).to receive(:cache_delete).with(api: $api, key: ['terms', $api.user_id])
@@ -269,7 +259,7 @@ describe Osm::Term do
         'termid' => 2
       }
       allow(Osm::Term).to receive(:get_all) { [] }
-      expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({ 'terms'=>{} })
+      expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return('terms'=>{})
 
       term = Osm::Term.new(id: 2, section_id: 1, name: 'A Term', start: Date.new(2010, 01, 01), finish: Date.new(2010, 12, 31))
       expect(term.update($api)).to eq(true)

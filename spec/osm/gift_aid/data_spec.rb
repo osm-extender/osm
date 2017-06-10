@@ -25,9 +25,7 @@ describe Osm::GiftAid::Data do
     expect(d.tax_payer_address).to eq('D')
     expect(d.tax_payer_postcode).to eq('E')
     expect(d.total).to eq('2.34')
-    expect(d.donations).to eq({
-      Date.new(2012, 1, 2) => '1.23',
-    })
+    expect(d.donations).to eq(      Date.new(2012, 1, 2) => '1.23')
     expect(d.valid?).to eq(true)
   end
 
@@ -79,9 +77,9 @@ describe Osm::GiftAid::Data do
             { 'firstname' => 'TOTAL','lastname' => '','scoutid' => -1,'patrolid' => -1,'parentname' => '','total' => 0 }
           ]
         }
-        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({ 'column' => 'parentname', 'value' => 'n' })).and_return(body_data)
-        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({ 'column' => 'address', 'value' => 'a' })).and_return(body_data)
-        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({ 'column' => 'postcode', 'value' => 'pc' })).and_return(body_data)
+        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge('column' => 'parentname', 'value' => 'n')).and_return(body_data)
+        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge('column' => 'address', 'value' => 'a')).and_return(body_data)
+        expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge('column' => 'postcode', 'value' => 'pc')).and_return(body_data)
 
         @data.tax_payer_name = 'n'
         @data.tax_payer_address = 'a'

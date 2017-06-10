@@ -20,10 +20,8 @@ describe Osm::Register::Attendance do
     expect(rd.first_name).to eq('A')
     expect(rd.last_name).to eq('B')
     expect(rd.total).to eq(4)
-    expect(rd.attendance).to eq({
-      Date.new(2012, 01, 10) => :yes,
-      Date.new(2012, 01, 24) => :unadvised_absent
-    })
+    expect(rd.attendance).to eq(      Date.new(2012, 01, 10) => :yes,
+      Date.new(2012, 01, 24) => :unadvised_absent)
     expect(rd.valid?).to eq(true)
   end
 

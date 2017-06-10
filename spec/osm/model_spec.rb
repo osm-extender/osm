@@ -37,11 +37,9 @@ describe Osm::Model do
     )
 
     config = ModelTester.test_get_config
-    expect(config).to eq({
-      cache: OsmTest::Cache,
+    expect(config).to eq(      cache: OsmTest::Cache,
       cache_ttl: 100,
-      prepend_to_cache_key: 'Hi',
-    })
+      prepend_to_cache_key: 'Hi')
   end
 
   it 'Configure (bad arguments)' do
@@ -94,7 +92,7 @@ describe Osm::Model do
 
     describe 'Writes' do
       it 'With cache' do
-        expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', { expires_in: 600 }) { true }
+        expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', expires_in: 600) { true }
         expect(ModelTester.cache_write(api: $api, key: 'key', data: 'data')).to eq(true)
       end
 
@@ -125,7 +123,7 @@ describe Osm::Model do
 
       it 'With cache' do
         block = Proc.new{ 'ABC' }
-        expect(OsmTest::Cache).to receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", { expires_in: 600 }).and_yield { 'abc' }
+        expect(OsmTest::Cache).to receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", expires_in: 600).and_yield { 'abc' }
         expect(ModelTester.cache_fetch(api: $api, key: 'key', &block)).to eq('ABC')
       end
 
@@ -269,7 +267,7 @@ describe Osm::Model do
     describe 'user_has_permission?' do
 
       before :each do
-        allow($api).to receive(:get_user_permissions).and_return( { 1 => { foo: [:bar] } } )
+        allow($api).to receive(:get_user_permissions).and_return( 1 => { foo: [:bar] } )
       end
 
       it 'Has permission' do
@@ -336,7 +334,7 @@ describe Osm::Model do
     describe 'has_access_to_section?' do
 
       before :each do
-        allow($api).to receive(:get_user_permissions).and_return( { 1=>{} } )
+        allow($api).to receive(:get_user_permissions).and_return( 1=>{} )
       end
 
       it 'Has access' do

@@ -330,7 +330,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, { replace_with: { 'badge' => :name } })
+        Osm.inspect_instance(self, replace_with: { 'badge' => :name })
       end
 
       # Work out if the requirmeent has been met
