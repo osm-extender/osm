@@ -52,7 +52,7 @@ module Osm
 
             when 'email'
               # Create an Osm::Email::DeliveryReport in reports array
-              id = Osm::to_i_or_nil(item['id'])
+              id = Osm.to_i_or_nil(item['id'])
               sent_at_str, subject = item['name'].to_s.split(' - ', 2).map{ |i| i.to_s.strip }
               reports.push Osm::Email::DeliveryReport.new(
                 id:         id,
@@ -64,10 +64,10 @@ module Osm
 
             when 'oneEmail'
               # Create an Osm::Email::DeliveryReport::Email::Recipient in recipients[email_id] array
-              report_id, id = item['id'].to_s.strip.split('-').map{ |i| Osm::to_i_or_nil(i) }
+              report_id, id = item['id'].to_s.strip.split('-').map{ |i| Osm.to_i_or_nil(i) }
               status = item['status_raw'].to_sym
               status = :bounced if status.eql?(:bounce)
-              member_id = Osm::to_i_or_nil(item['member_id'])
+              member_id = Osm.to_i_or_nil(item['member_id'])
               recipients[report_id].push Osm::Email::DeliveryReport::Recipient.new(
                 id:         id,
                 address:    item['email'],

@@ -112,17 +112,17 @@ module Osm
       end
 
       attributes = {}
-      attributes[:id] = Osm::to_i_or_nil(data['details']['activityid'])
+      attributes[:id] = Osm.to_i_or_nil(data['details']['activityid'])
       attributes[:version] = data['details']['version'].to_i
-      attributes[:group_id] = Osm::to_i_or_nil(data['details']['groupid'])
-      attributes[:user_id] = Osm::to_i_or_nil(data['details']['userid'])
+      attributes[:group_id] = Osm.to_i_or_nil(data['details']['groupid'])
+      attributes[:user_id] = Osm.to_i_or_nil(data['details']['userid'])
       attributes[:title] = data['details']['title']
       attributes[:description] = data['details']['description']
       attributes[:resources] = data['details']['resources']
       attributes[:instructions] = data['details']['instructions']
-      attributes[:running_time] = Osm::to_i_or_nil(data['details']['runningtime'])
+      attributes[:running_time] = Osm.to_i_or_nil(data['details']['runningtime'])
       attributes[:location] = data['details']['location'].to_sym
-      attributes[:shared] = Osm::to_i_or_nil(data['details']['shared'])
+      attributes[:shared] = Osm.to_i_or_nil(data['details']['shared'])
       attributes[:rating] = data['details']['rating'].to_i
       attributes[:editable] = data['editable']
       attributes[:deletable] = data['deletable'] ? true : false
@@ -136,8 +136,8 @@ module Osm
       # Populate Arrays
       (data['files'].is_a?(Array) ? data['files'] : []).each do |file_data|
         attributes[:files].push File.new(
-          id: Osm::to_i_or_nil(file_data['fileid']),
-          activity_id: Osm::to_i_or_nil(file_data['activityid']),
+          id: Osm.to_i_or_nil(file_data['fileid']),
+          activity_id: Osm.to_i_or_nil(file_data['activityid']),
           file_name: file_data['filename'],
           name: file_data['name']
         )
@@ -147,17 +147,17 @@ module Osm
           badge_type: badge_data['badgetype'].to_sym,
           badge_section: badge_data['section'].to_sym,
           badge_name: badge_data['badgeLongName'],
-          badge_id: Osm::to_i_or_nil(badge_data['badge_id']),
-          badge_version: Osm::to_i_or_nil(badge_data['badge_version']),
-          requirement_id: Osm::to_i_or_nil(badge_data['column_id']),
+          badge_id: Osm.to_i_or_nil(badge_data['badge_id']),
+          badge_version: Osm.to_i_or_nil(badge_data['badge_version']),
+          requirement_id: Osm.to_i_or_nil(badge_data['column_id']),
           requirement_label: badge_data['columnnameLongName'],
           data: badge_data['data'],
         )
       end
       (data['versions'].is_a?(Array) ? data['versions'] : []).each do |version_data|
         attributes[:versions].push Version.new(
-          version: Osm::to_i_or_nil(version_data['value']),
-          created_by: Osm::to_i_or_nil(version_data['userid']),
+          version: Osm.to_i_or_nil(version_data['value']),
+          created_by: Osm.to_i_or_nil(version_data['userid']),
           created_by_name: version_data['firstname'],
           label: version_data['label']
         )

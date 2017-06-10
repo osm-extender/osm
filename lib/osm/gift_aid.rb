@@ -22,7 +22,7 @@ module Osm
           if data.is_a?(Hash) && data['rows'].is_a?(Array)
             data['rows'].each do |row|
               structure.push Donation.new(
-                donation_date: Osm::parse_date(row['field']),
+                donation_date: Osm.parse_date(row['field']),
               )
             end
           end
@@ -55,12 +55,12 @@ module Osm
                 donations = {}
                 item.each do |key, value|
                   if key.match(Osm::OSM_DATE_REGEX)
-                    donations[Osm::parse_date(key)] = value
+                    donations[Osm.parse_date(key)] = value
                   end
                 end
                 to_return.push Osm::GiftAid::Data.new(
-                  member_id: Osm::to_i_or_nil(item['scoutid']),
-                  grouping_id: Osm::to_i_or_nil(item ['patrolid']),
+                  member_id: Osm.to_i_or_nil(item['scoutid']),
+                  grouping_id: Osm.to_i_or_nil(item ['patrolid']),
                   section_id: section_id,
                   first_name: item['firstname'],
                   last_name: item['lastname'],

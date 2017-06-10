@@ -218,10 +218,10 @@ module Osm
         data = api.post_query("finances.php?action=getInvoiceRecords&invoiceid=#{id}&sectionid=#{section_id}&dateFormat=generic")
         data['items'].map do |item|
           Osm::Invoice::Item.new(
-            id: Osm::to_i_or_nil(item['id']),
+            id: Osm.to_i_or_nil(item['id']),
             invoice: self,
-            record_id: Osm::to_i_or_nil(item['recordid']),
-            date: Osm::parse_date(item['entrydate']),
+            record_id: Osm.to_i_or_nil(item['recordid']),
+            date: Osm.parse_date(item['entrydate']),
             amount: item['amount'],
             type: item['type'].to_s.downcase.to_sym,
             payto: item['payto_userid'].to_s.strip,
@@ -241,11 +241,11 @@ module Osm
       invoice_data = invoice_data['invoice']
       return nil unless invoice_data.is_a?(Hash)
       Osm::Invoice.new(
-        id: Osm::to_i_or_nil(invoice_data['invoiceid']),
-        section_id: Osm::to_i_or_nil(invoice_data['sectionid']),
+        id: Osm.to_i_or_nil(invoice_data['invoiceid']),
+        section_id: Osm.to_i_or_nil(invoice_data['sectionid']),
         name: invoice_data['name'],
         extra_details: invoice_data['extra'],
-        date: Osm::parse_date(invoice_data['entrydate']),
+        date: Osm.parse_date(invoice_data['entrydate']),
         archived: invoice_data['archived'].eql?('1'),
         finalised: invoice_data['finalised'].eql?('1'),
       )

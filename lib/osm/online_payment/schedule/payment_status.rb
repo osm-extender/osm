@@ -75,7 +75,7 @@ module Osm
 
           data.map! do |item|
             new(
-              id:             Osm::to_i_or_nil(item['statusid']),
+              id:             Osm.to_i_or_nil(item['statusid']),
               payment:        payment,
               timestamp:      Time.strptime(item['statustimestamp'], '%d/%m/%Y %H:%M'),
               status:         status_map[item['status']],

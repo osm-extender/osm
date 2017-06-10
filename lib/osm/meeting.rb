@@ -77,8 +77,8 @@ module Osm
 
         items.map do |item|
           attributes = {}
-          attributes[:id] = Osm::to_i_or_nil(item['eveningid'])
-          attributes[:section_id] = Osm::to_i_or_nil(item['sectionid'])
+          attributes[:id] = Osm.to_i_or_nil(item['eveningid'])
+          attributes[:section_id] = Osm.to_i_or_nil(item['sectionid'])
           attributes[:title] = item['title'] || 'Unnamed meeting'
           attributes[:notes_for_parents] = item['notesforparents'] || ''
           attributes[:games] = item['games'] || ''
@@ -87,7 +87,7 @@ module Osm
           attributes[:leaders] = item['leaders'] || ''
           attributes[:start_time] = item['starttime'].nil? ? nil : item['starttime'][0..4]
           attributes[:finish_time] = item['endtime'].nil? ? nil : item['endtime'][0..4]
-          attributes[:date] = Osm::parse_date(item['meetingdate'])
+          attributes[:date] = Osm.parse_date(item['meetingdate'])
 
           our_activities = activities[item['eveningid']]
           attributes[:activities] = Array.new
@@ -97,7 +97,7 @@ module Osm
                 activity_data = activity_data.find{ |a| a.is_a?(Hash) && a.has_key?('activityid') }
               end
               attributes[:activities].push Osm::Meeting::Activity.new(
-                activity_id: Osm::to_i_or_nil(activity_data['activityid']),
+                activity_id: Osm.to_i_or_nil(activity_data['activityid']),
                 title: activity_data['title'],
                 notes: activity_data['notes'],
               )
@@ -112,9 +112,9 @@ module Osm
                 badge_type: badge_data['badgetype'].to_sym,
                 badge_section: badge_data['section'].to_sym,
                 badge_name: badge_data['badgeLongName'],
-                badge_id: Osm::to_i_or_nil(badge_data['badge_id']),
-                badge_version: Osm::to_i_or_nil(badge_data['badge_version']),
-                requirement_id: Osm::to_i_or_nil(badge_data['column_id']),
+                badge_id: Osm.to_i_or_nil(badge_data['badge_id']),
+                badge_version: Osm.to_i_or_nil(badge_data['badge_version']),
+                requirement_id: Osm.to_i_or_nil(badge_data['column_id']),
                 requirement_label: badge_data['columnnameLongName'],
                 data: badge_data['data'],
               )

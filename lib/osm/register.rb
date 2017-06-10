@@ -50,7 +50,7 @@ module Osm
         data = api.post_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}")
         dates_s = get_structure(api: api, section: section, term: term, no_read_cache: no_read_cache)
         dates_s = dates_s.map{ |f| f.id }
-        dates_d = dates_s.map{ |d| Osm::parse_date(d) }
+        dates_d = dates_s.map{ |d| Osm.parse_date(d) }
 
         to_return = []
         if data.is_a?(Hash) && data['items'].is_a?(Array)
@@ -66,8 +66,8 @@ module Osm
                   attendance[date] = :advised_absent if item_attendance.eql?('No')
                 end
                 to_return.push Osm::Register::Attendance.new(
-                  member_id: Osm::to_i_or_nil(item['scoutid']),
-                  grouping_id: Osm::to_i_or_nil(item ['patrolid']),
+                  member_id: Osm.to_i_or_nil(item['scoutid']),
+                  grouping_id: Osm.to_i_or_nil(item ['patrolid']),
                   section_id: section_id,
                   first_name: item['firstname'],
                   last_name: item['lastname'],

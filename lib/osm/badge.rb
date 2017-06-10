@@ -239,7 +239,7 @@ module Osm
               name: r['name'],
               description: r['tooltip'],
               mod: modules[r['module']],
-              id: Osm::to_i_or_nil(r['field']),
+              id: Osm.to_i_or_nil(r['field']),
               editable: r['editable'].to_s.eql?('true'),
             )
           end

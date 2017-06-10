@@ -38,8 +38,8 @@ module Osm
         data = data['items']
         data.map do |budget|
           Budget.new(
-            id: Osm::to_i_or_nil(budget['categoryid']),
-            section_id: Osm::to_i_or_nil(budget['sectionid']),
+            id: Osm.to_i_or_nil(budget['categoryid']),
+            section_id: Osm.to_i_or_nil(budget['sectionid']),
             name: budget['name'],
           )
         end # data.map

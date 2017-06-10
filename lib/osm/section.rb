@@ -150,7 +150,7 @@ module Osm
         section_data = role_data['sectionConfig'].is_a?(String) ? JSON.parse(role_data['sectionConfig']) : role_data['sectionConfig']
         myscout_data = section_data['portal'] || {}
         section_data['portalExpires'] ||= {}
-        section_id = Osm::to_i_or_nil(role_data['sectionid'])
+        section_id = Osm.to_i_or_nil(role_data['sectionid'])
 
         # Make sense of flexi records
         fr_data = []
@@ -162,7 +162,7 @@ module Osm
           # Sometimes get item as: [String, {"name"=>String, "extraid"=>Integer}]
           record_data = record_data[1] if record_data.is_a?(Array)
           flexi_records.push Osm::FlexiRecord.new(
-            id: Osm::to_i_or_nil(record_data['extraid']),
+            id: Osm.to_i_or_nil(record_data['extraid']),
             name: record_data['name'],
             section_id: section_id,
           )
@@ -171,18 +171,18 @@ module Osm
         section = new(
           id: section_id,
           name: role_data['sectionname'],
-          subscription_level: Osm::to_i_or_nil(section_data['subscription_level']),
-          subscription_expires: Osm::parse_date(section_data['subscription_expires']),
+          subscription_level: Osm.to_i_or_nil(section_data['subscription_level']),
+          subscription_expires: Osm.parse_date(section_data['subscription_expires']),
           type: !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : (!section_data['section'].nil? ? section_data['section'].to_sym : :unknown),
           num_scouts: section_data['numscouts'],
           flexi_records: flexi_records.sort,
           group_id: role_data['groupid'],
           group_name: role_data['groupname'],
           gocardless: (section_data['gocardless'] || 'false').downcase.eql?('true'),
-          myscout_events_expires: Osm::parse_date(section_data['portalExpires']['events']),
-          myscout_badges_expires: Osm::parse_date(section_data['portalExpires']['badges']),
-          myscout_programme_expires: Osm::parse_date(section_data['portalExpires']['programme']),
-          myscout_details_expires: Osm::parse_date(section_data['portalExpires']['details']),
+          myscout_events_expires: Osm.parse_date(section_data['portalExpires']['events']),
+          myscout_badges_expires: Osm.parse_date(section_data['portalExpires']['badges']),
+          myscout_programme_expires: Osm.parse_date(section_data['portalExpires']['programme']),
+          myscout_details_expires: Osm.parse_date(section_data['portalExpires']['details']),
           myscout_events: myscout_data['events'] == 1,
           myscout_badges: myscout_data['badges'] == 1,
           myscout_programme: myscout_data['programme'] == 1,

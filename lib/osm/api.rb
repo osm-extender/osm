@@ -238,7 +238,7 @@ module Osm
         all_permissions = Hash.new
         get_user_roles(no_read_cache: no_read_cache).each do |item|
           unless item['section'].eql?('discount')  # It's not an actual section
-            all_permissions.merge!(Osm::to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
+            all_permissions.merge!(Osm.to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
           end
         end
         all_permissions

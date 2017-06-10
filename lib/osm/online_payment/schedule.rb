@@ -79,7 +79,7 @@ module Osm
           data = api.post_query("ext/finances/onlinepayments/?action=getSchemes&sectionid=#{section_id}")
           data = data.is_a?(Hash) ? data['items'] : nil
           data ||= []
-          data.map!{ |i| { id: Osm::to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
+          data.map!{ |i| { id: Osm.to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
         end
       end
 
@@ -113,9 +113,9 @@ module Osm
         cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
           data = api.post_query("ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=#{section_id}&schemeid=#{schedule_id}&allpayments=true")
           schedule = new(
-            id:            Osm::to_i_or_nil(data['schemeid']),
+            id:            Osm.to_i_or_nil(data['schemeid']),
             section_id:    section_id,
-            account_id:    Osm::to_i_or_nil(data['accountid']),
+            account_id:    Osm.to_i_or_nil(data['accountid']),
             name:          data['name'],
             description:   data['description'],
             archived:      data['archived'].eql?('1'),
@@ -129,9 +129,9 @@ module Osm
             payment = Payment.new(
               amount:   payment_data['amount'],
               archived: payment_data['archived'].eql?('1'),
-              due_date: Osm::parse_date(payment_data['date']),
+              due_date: Osm.parse_date(payment_data['date']),
               name:     payment_data['name'].to_s,
-              id:       Osm::to_i_or_nil(payment_data['paymentid']),
+              id:       Osm.to_i_or_nil(payment_data['paymentid']),
               schedule: schedule,
             )
             schedule.payments.push payment
@@ -167,12 +167,12 @@ module Osm
             end
 
             PaymentsForMember.new(
-              member_id:      Osm::to_i_or_nil(item['scoutid']),
+              member_id:      Osm.to_i_or_nil(item['scoutid']),
               section_id:     section_id,
-              grouping_id:    Osm::to_i_or_nil(item['patrolid']),
+              grouping_id:    Osm.to_i_or_nil(item['patrolid']),
               first_name:     item['firstname'],
               last_name:      item['lastname'],
-              start_date:     require_all ? Osm::parse_date(item['startdate']) : nil,
+              start_date:     require_all ? Osm.parse_date(item['startdate']) : nil,
               direct_debit:   item['directdebit'].downcase.to_sym,
               payments:       payments_data,
               schedule:       self,

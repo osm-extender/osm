@@ -47,10 +47,10 @@ module Osm
 
           data.map do |item|
             new(
-              member_id:    Osm::to_i_or_nil(item['scoutid']),
+              member_id:    Osm.to_i_or_nil(item['scoutid']),
               first_name:   item['firstname'],
               last_name:    item['lastname'],
-              logins:       Osm::to_i_or_nil(item['numlogins']),
+              logins:       Osm.to_i_or_nil(item['numlogins']),
               last_login:   get_last_login_date(item['lastlogin'],)
             )
           end

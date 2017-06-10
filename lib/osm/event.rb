@@ -391,11 +391,11 @@ module Osm
         data.each_with_index.map do |item, index|
           Osm::Event::Attendance.new(
             event: self,
-            member_id: Osm::to_i_or_nil(item['scoutid']),
-            grouping_id: Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+            member_id: Osm.to_i_or_nil(item['scoutid']),
+            grouping_id: Osm.to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
             first_name: item['firstname'],
             last_name: item['lastname'],
-            date_of_birth: item['dob'].nil? ? nil : Osm::parse_date(item['dob'], ignore_epoch: true),
+            date_of_birth: item['dob'].nil? ? nil : Osm.parse_date(item['dob'], ignore_epoch: true),
             attending: attending_values[item['attending']],
             payment_control: payment_values[item['payment']],
             fields: item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
@@ -503,17 +503,17 @@ module Osm
 
     def self.attributes_from_data(event_data)
       {
-        id: Osm::to_i_or_nil(event_data['eventid']),
-        section_id: Osm::to_i_or_nil(event_data['sectionid']),
+        id: Osm.to_i_or_nil(event_data['eventid']),
+        section_id: Osm.to_i_or_nil(event_data['sectionid']),
         name: event_data['name'],
-        start: Osm::make_datetime(date: event_data['startdate'], time: event_data['starttime']),
-        finish: Osm::make_datetime(date: event_data['enddate'], time: event_data['endtime']),
+        start: Osm.make_datetime(date: event_data['startdate'], time: event_data['starttime']),
+        finish: Osm.make_datetime(date: event_data['enddate'], time: event_data['endtime']),
         cost: event_data['cost'].eql?('-1') ? 'TBC' : event_data['cost'],
         location: event_data['location'],
         notes: event_data['notes'],
         archived: event_data['archived'].eql?('1'),
         public_notepad: event_data['publicnotes'],
-        confirm_by_date: Osm::parse_date(event_data['confdate']),
+        confirm_by_date: Osm.parse_date(event_data['confdate']),
         allow_changes: event_data['allowchanges'].eql?('1'),
         reminders: !event_data['disablereminders'].eql?('1'),
         attendance_limit: event_data['attendancelimit'].to_i,

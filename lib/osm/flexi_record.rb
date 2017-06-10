@@ -93,8 +93,8 @@ module Osm
             )
   
             datas.push Osm::FlexiRecord::Data.new(
-              member_id: Osm::to_i_or_nil(item['scoutid']),
-              grouping_id: Osm::to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+              member_id: Osm.to_i_or_nil(item['scoutid']),
+              grouping_id: Osm.to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
               fields: fields,
               flexi_record: self,
             )

@@ -85,7 +85,7 @@ module Osm
         end
 
         def inspect
-          Osm::inspect_instance(self, replace_with: { 'delivery_report' => :id })
+          Osm.inspect_instance(self, replace_with: { 'delivery_report' => :id })
         end
 
         private def sort_by

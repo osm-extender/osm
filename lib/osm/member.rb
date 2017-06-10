@@ -161,19 +161,19 @@ module Osm
           custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map{ |k,v| [k.to_i, v] } ]
 
           new(
-            id: Osm::to_i_or_nil(item['member_id']),
-            section_id: Osm::to_i_or_nil(item['section_id']),
+            id: Osm.to_i_or_nil(item['member_id']),
+            section_id: Osm.to_i_or_nil(item['section_id']),
             first_name: item['first_name'],
             last_name: item['last_name'],
-            grouping_id: Osm::to_i_or_nil(item['patrol_id']),
+            grouping_id: Osm.to_i_or_nil(item['patrol_id']),
             grouping_label: item['patrol'],
             grouping_leader: item['patrol_role_level'],
             grouping_leader_label: item['patrol_role_level_label'],
             age: item['age'],
-            date_of_birth: Osm::parse_date(item['date_of_birth'], ignore_epoch: true),
-            started_section: Osm::parse_date(item['joined']),
-            finished_section: Osm::parse_date(item['end_date']),
-            joined_movement: Osm::parse_date(item['started']),
+            date_of_birth: Osm.parse_date(item['date_of_birth'], ignore_epoch: true),
+            started_section: Osm.parse_date(item['joined']),
+            finished_section: Osm.parse_date(item['end_date']),
+            joined_movement: Osm.parse_date(item['started']),
             gender: { 'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified }[(floating_data[CID_GENDER] || '').downcase],
             contact: member_contact.nil? ? nil : MemberContact.new(
               first_name: item['first_name'],
