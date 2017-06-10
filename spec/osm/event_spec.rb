@@ -5,7 +5,7 @@ describe Osm::Event do
       id: 1,
       section_id: 2,
       name: 'Event name',
-      start: DateTime.new(2001, 1, 2, 12 ,0 ,0),
+      start: DateTime.new(2001, 1, 2, 12,0,0),
       finish: nil,
       cost: '1.23',
       location: 'Somewhere',
