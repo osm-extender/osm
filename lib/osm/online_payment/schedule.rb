@@ -57,7 +57,7 @@ module Osm
       validates_inclusion_of :archived, in: [true, false]
       validates_inclusion_of :gift_aid, in: [true, false]
       validates_inclusion_of :require_all, in: [true, false]
-      validates :payments, array_of: {item_type: Osm::OnlinePayment::Schedule::Payment, item_valid: true}
+      validates :payments, array_of: { item_type: Osm::OnlinePayment::Schedule::Payment, item_valid: true }
 
 
       # @!method initialize
@@ -79,7 +79,7 @@ module Osm
           data = api.post_query("ext/finances/onlinepayments/?action=getSchemes&sectionid=#{section_id}")
           data = data.is_a?(Hash) ? data['items'] : nil
           data ||= []
-          data.map!{ |i| {id: Osm::to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
+          data.map!{ |i| { id: Osm::to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
         end
       end
 

@@ -124,7 +124,7 @@ describe Osm::Activity do
         'activityid' => 2,
         'notes' => 'Notes',
       }
-      expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 0})
+      expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({ 'result' => 0 })
   
       activity = Osm::Activity.new(id: 2)
       expect(activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes')).to eq(true)
@@ -137,7 +137,7 @@ describe Osm::Activity do
         'activityid' => 2,
         'notes' => 'Notes',
       }
-      expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({'result' => 1})
+      expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return({ 'result' => 1 })
 
       activity = Osm::Activity.new(id: 2)
       expect(activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes')).to eq(false)
@@ -162,7 +162,7 @@ describe Osm::Activity do
         'secretEdit' => true,
       }
   
-      expect($api).to receive(:post_query).with('programme.php?action=update', post_data: post_data).and_return({'result' => true})
+      expect($api).to receive(:post_query).with('programme.php?action=update', post_data: post_data).and_return({ 'result' => true })
   
       activity = Osm::Activity.new(
         id: 2,
@@ -201,7 +201,7 @@ describe Osm::Activity do
         location: :indoors,
         running_time: 0,
       )
-      expect($api).to receive(:post_query).and_return({'result' => false})
+      expect($api).to receive(:post_query).and_return({ 'result' => false })
       expect(activity.update(api: $api, section: 1, secret_update: true)).to eq(false)
     end
   

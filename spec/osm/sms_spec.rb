@@ -11,7 +11,7 @@ describe Osm::Sms do
         'scouts' => '4',
         'source' => '441234567890',
         'type' => '',
-      }){ {'result' => true, 'msg' => "Message sent - you have <b>131<\/b> credits left.", 'config' => {}} }
+      }){ { 'result' => true, 'msg' => "Message sent - you have <b>131<\/b> credits left.", 'config' => {} } }
 
       result = Osm::Sms.send_sms(
         api:     $api,
@@ -32,7 +32,7 @@ describe Osm::Sms do
         'scouts' => '2,3',
         'source' => '441234567890',
         'type' => '',
-      }){ {'result' => true, 'msg' => "Message sent - you have <b>95<\/b> credits left.", 'config' => {}} }
+      }){ { 'result' => true, 'msg' => "Message sent - you have <b>95<\/b> credits left.", 'config' => {} } }
 
       result = Osm::Sms.send_sms(
         api:     $api,
@@ -53,7 +53,7 @@ describe Osm::Sms do
         'scouts' => '4',
         'source' => '441234567890',
         'type' => '',
-      }){ {'result' => false,'config' => {}} }
+      }){ { 'result' => false,'config' => {} } }
 
       result = Osm::Sms.send_sms(
         api:     $api,
@@ -80,7 +80,7 @@ describe Osm::Sms do
   it 'Gets remaining credits' do
     expect($api).to receive(:post_query).with('ext/members/sms/?action=getNumbers&sectionid=4&type=', post_data: {
       'scouts' => '0',
-    }){ {'members' => 0, 'numbers'=> 0, 'sms_remaining' => 5} }
+    }){ { 'members' => 0, 'numbers'=> 0, 'sms_remaining' => 5 } }
 
     expect(Osm::Sms.remaining_credits(api: $api, section: 4)).to eq(5)
   end
@@ -88,7 +88,7 @@ describe Osm::Sms do
   it 'Gets selected numbers' do
     expect($api).to receive(:post_query).with('ext/members/sms/?action=getNumbers&sectionid=4&type=', post_data: {
       'scouts' => '12,56',
-    }){ {'members' => 2, 'numbers' => 3, 'sms_remaining' => 5} }
+    }){ { 'members' => 2, 'numbers' => 3, 'sms_remaining' => 5 } }
 
     expect(Osm::Sms.number_selected(api: $api, section: 4, members: [12, 56])).to eq(3)
   end

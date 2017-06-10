@@ -13,9 +13,9 @@ module Osm
       attribute :member_names, default: {}
       attribute :badge_stock, default: {}
 
-      validates :badge_names, hash: {key_type: String, value_type: String}
-      validates :member_names, hash: {key_type: Integer, value_type: String}
-      validates :badge_stock, hash: {key_type: String, value_type: Integer}
+      validates :badge_names, hash: { key_type: String, value_type: String }
+      validates :member_names, hash: { key_type: Integer, value_type: String }
+      validates :badge_stock, hash: { key_type: String, value_type: Integer }
 
       validates_each :by_member do |record, attr, value|
         badge_names_keys = record.badge_names.keys

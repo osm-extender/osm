@@ -25,7 +25,7 @@ module Osm
       validates_numericality_of :section_id, only_integer: true, greater_than: 0
       validates_presence_of :sent_at
       validates_presence_of :subject
-      validates :recipients, array_of: {item_type: Osm::Email::DeliveryReport::Recipient, item_valid: true}
+      validates :recipients, array_of: { item_type: Osm::Email::DeliveryReport::Recipient, item_valid: true }
 
 
       # @!method initialize

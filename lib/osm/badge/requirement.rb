@@ -42,7 +42,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, {replace_with: {'badge' => :identifier}})
+        Osm.inspect_instance(self, { replace_with: { 'badge' => :identifier } })
       end
 
     end

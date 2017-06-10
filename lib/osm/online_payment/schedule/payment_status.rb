@@ -54,7 +54,7 @@ module Osm
         end
 
         def inspect
-          Osm.inspect_instance(self, {replace_with: {'payment' => :id}})
+          Osm.inspect_instance(self, { replace_with: { 'payment' => :id } })
         end
 
         protected

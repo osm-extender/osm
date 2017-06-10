@@ -57,7 +57,7 @@ describe Osm::FlexiRecord::Data do
 
       data = {
         'items' => [
-          {'f_1' => 'value', 'scoutid' => '4'},
+          { 'f_1' => 'value', 'scoutid' => '4' },
         ]
       }
       expect($api).to receive(:post_query).with('extras.php?action=updateScout', post_data: post_data).and_return(data)
@@ -69,7 +69,7 @@ describe Osm::FlexiRecord::Data do
         flexi_record: fr,
         member_id: 4,
         grouping_id: 5,
-        fields: {'f_1' => '', 'f_2' => 'value'}
+        fields: { 'f_1' => '', 'f_2' => 'value' }
       )
       fr_data.fields['f_1'] = 'value'
       expect(fr_data.update($api)).to eq(true)
@@ -78,7 +78,7 @@ describe Osm::FlexiRecord::Data do
     it 'Failed' do
       data = {
         'items' => [
-          {'f_1' => 'old value', 'scoutid' => '4'},
+          { 'f_1' => 'old value', 'scoutid' => '4' },
         ]
       }
 
@@ -92,7 +92,7 @@ describe Osm::FlexiRecord::Data do
         flexi_record: fr,
         member_id: 4,
         grouping_id: 5,
-        fields: {'f_1' => 'old value'}
+        fields: { 'f_1' => 'old value' }
       )
       fr_data.fields['f_1'] = 'new value'
       expect(fr_data.update($api)).to eq(false)
@@ -108,7 +108,7 @@ describe Osm::FlexiRecord::Data do
         flexi_record: fr,
         member_id: 4,
         grouping_id: 5,
-        fields: {'f_1' => 'value'}
+        fields: { 'f_1' => 'value' }
       )
       expect(fr_data.update($api)).to eq(true)
     end

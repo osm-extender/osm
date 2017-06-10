@@ -35,14 +35,14 @@ describe Osm::Badge::Data do
   end
 
   it 'Works out if a requirement has been met' do
-    data = expect(Osm::Badge::Data.new(requirements: {1 => ''}).requirement_met?(1)).to eq(false)
-    data = expect(Osm::Badge::Data.new(requirements: {1 => 'xStuff'}).requirement_met?(1)).to eq(false)
-    data = expect(Osm::Badge::Data.new(requirements: {1 => '0'}).requirement_met?(1)).to eq(false)
-    data = expect(Osm::Badge::Data.new(requirements: {1 => 0}).requirement_met?(1)).to eq(false)
+    data = expect(Osm::Badge::Data.new(requirements: { 1 => '' }).requirement_met?(1)).to eq(false)
+    data = expect(Osm::Badge::Data.new(requirements: { 1 => 'xStuff' }).requirement_met?(1)).to eq(false)
+    data = expect(Osm::Badge::Data.new(requirements: { 1 => '0' }).requirement_met?(1)).to eq(false)
+    data = expect(Osm::Badge::Data.new(requirements: { 1 => 0 }).requirement_met?(1)).to eq(false)
     data = expect(Osm::Badge::Data.new(requirements: {}).requirement_met?(1)).to eq(false)
-    data = expect(Osm::Badge::Data.new(requirements: {1 => 'Stuff'}).requirement_met?(1)).to eq(true)
-    data = expect(Osm::Badge::Data.new(requirements: {1 => '1'}).requirement_met?(1)).to eq(true)
-    data = expect(Osm::Badge::Data.new(requirements: {1 => 1}).requirement_met?(1)).to eq(true)
+    data = expect(Osm::Badge::Data.new(requirements: { 1 => 'Stuff' }).requirement_met?(1)).to eq(true)
+    data = expect(Osm::Badge::Data.new(requirements: { 1 => '1' }).requirement_met?(1)).to eq(true)
+    data = expect(Osm::Badge::Data.new(requirements: { 1 => 1 }).requirement_met?(1)).to eq(true)
   end
 
 
@@ -78,7 +78,7 @@ describe Osm::Badge::Data do
 
   it 'Get total requirements met in each module for a member' do
     badge = Osm::Badge.new(
-      needed_from_section: {'a' => 1, 'b' => 2},
+      needed_from_section: { 'a' => 1, 'b' => 2 },
       requirements: [
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'a', id: 100), id: 1),
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'a', id: 100), id: 2),
@@ -97,7 +97,7 @@ describe Osm::Badge::Data do
       badge: badge,
       requirements: { 1=>'x', 2=>'', 3=>'yes', 4=>'2000-01-02', 5=>1 }
     )
-    expect(data.gained_in_modules).to eq({'a'=>0, 'b'=>2, 'c'=>1, 100=>0, 200=>2, 300=>1})
+    expect(data.gained_in_modules).to eq({ 'a'=>0, 'b'=>2, 'c'=>1, 100=>0, 200=>2, 300=>1 })
   end
 
   it 'Get modules met for a member' do
@@ -117,7 +117,7 @@ describe Osm::Badge::Data do
     )
     data = Osm::Badge::Data.new(
       badge: badge,
-      requirements: {1=>'x', 2=>'', 3=>'yes', 4=>'2000-01-02', 5=>'yes'}
+      requirements: { 1=>'x', 2=>'', 3=>'yes', 4=>'2000-01-02', 5=>'yes' }
     )
     expect(data.modules_gained).to eq(['b', 'c'])
   end
@@ -169,10 +169,10 @@ describe Osm::Badge::Data do
       this_badge = badge.clone
       this_badge.min_modules_required = 2
 
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 11=>'y', 20=>'y'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 11=>'y', 20=>'y' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true)
 
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 11=>'y', 20=>'x'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 11=>'y', 20=>'x' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(false)
 
 
@@ -181,13 +181,13 @@ describe Osm::Badge::Data do
       this_badge.min_modules_required = 0
       this_badge.min_requirements_required = 2
 
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 11=>'y', 20=>'y'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 11=>'y', 20=>'y' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true)
 
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 11=>'x', 20=>'y'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 11=>'x', 20=>'y' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true)
 
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 11=>'x', 20=>'x'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 11=>'x', 20=>'x' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(false)
 
 
@@ -195,16 +195,16 @@ describe Osm::Badge::Data do
       this_badge = badge.clone
       this_badge.requires_modules = [['a'], ['b', 'c']]
 
-      data = Osm::Badge::Data.new(requirements: {10=>'x', 11=>'x', 20=>'x', 30=>'x'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'x', 11=>'x', 20=>'x', 30=>'x' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(false)
 
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 11=>'y', 20=>'x', 30=>'x'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 11=>'y', 20=>'x', 30=>'x' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(false)
 
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 11=>'y', 20=>'y', 30=>'x'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 11=>'y', 20=>'y', 30=>'x' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true)
 
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 11=>'y', 20=>'x', 30=>'y'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 11=>'y', 20=>'x', 30=>'y' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true)
 
       # Requirements from another badge
@@ -213,24 +213,24 @@ describe Osm::Badge::Data do
       this_badge.min_requirements_required = 1
       this_badge.requires_modules = nil
       # Simply met
-      this_badge.other_requirements_required = [{id: 100, min: 0}]
-      data = Osm::Badge::Data.new(requirements: {10=>'y'}, due: 0, awarded: 0, badge: this_badge)
+      this_badge.other_requirements_required = [{ id: 100, min: 0 }]
+      data = Osm::Badge::Data.new(requirements: { 10=>'y' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true) # Assume met if not in requirements Hash
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 100=>'x'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 100=>'x' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(false)
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 100=>'y'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 100=>'y' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true)
       # Minimum value
-      this_badge.other_requirements_required = [{id: 100, min: 2}]
-      data = Osm::Badge::Data.new(requirements: {10=>'y'}, due: 0, awarded: 0, badge: this_badge)
+      this_badge.other_requirements_required = [{ id: 100, min: 2 }]
+      data = Osm::Badge::Data.new(requirements: { 10=>'y' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true) # Assume met if not in requirements Hash
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 100=>'x'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 100=>'x' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(false)
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 100=>'1'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 100=>'1' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(false)
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 100=>'2'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 100=>'2' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true)
-      data = Osm::Badge::Data.new(requirements: {10=>'y', 100=>'3'}, due: 0, awarded: 0, badge: this_badge)
+      data = Osm::Badge::Data.new(requirements: { 10=>'y', 100=>'3' }, due: 0, awarded: 0, badge: this_badge)
       expect(data.earnt?).to eq(true)
     end
   end
@@ -258,23 +258,23 @@ describe Osm::Badge::Data do
         Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 31),
       ]
 
-      requirements = {10=>'',11=>'',20=>'',21=>'',30=>'',31=>''}
+      requirements = { 10=>'',11=>'',20=>'',21=>'',30=>'',31=>'' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(0)
 
-      requirements = {10=>'y',11=>'',20=>'',21=>'',30=>'',31=>''}
+      requirements = { 10=>'y',11=>'',20=>'',21=>'',30=>'',31=>'' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(1)
 
-      requirements = {10=>'y',11=>'',20=>'',21=>'y',30=>'',31=>''}
+      requirements = { 10=>'y',11=>'',20=>'',21=>'y',30=>'',31=>'' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(2)
 
-      requirements = {10=>'',11=>'',20=>'',21=>'y',30=>'',31=>''}
+      requirements = { 10=>'',11=>'',20=>'',21=>'y',30=>'',31=>'' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(2)
 
-      requirements = {10=>'y',11=>'',20=>'y',21=>'',30=>'y',31=>''}
+      requirements = { 10=>'y',11=>'',20=>'y',21=>'',30=>'y',31=>'' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(3)
     end
@@ -287,10 +287,10 @@ describe Osm::Badge::Data do
         requirements: []
       )
 
-      expect(Osm::Badge::Data.new(requirements: {3000 => 9},   badge: badge).earnt).to eq(5)
-      expect(Osm::Badge::Data.new(requirements: {3000 => 10},  badge: badge).earnt).to eq(10)
-      expect(Osm::Badge::Data.new(requirements: {3000 => 11},  badge: badge).earnt).to eq(10)
-      expect(Osm::Badge::Data.new(requirements: {3000 => 999}, badge: badge).earnt).to eq(20)
+      expect(Osm::Badge::Data.new(requirements: { 3000 => 9 },   badge: badge).earnt).to eq(5)
+      expect(Osm::Badge::Data.new(requirements: { 3000 => 10 },  badge: badge).earnt).to eq(10)
+      expect(Osm::Badge::Data.new(requirements: { 3000 => 11 },  badge: badge).earnt).to eq(10)
+      expect(Osm::Badge::Data.new(requirements: { 3000 => 999 }, badge: badge).earnt).to eq(20)
     end
 
     it 'Non staged' do
@@ -305,10 +305,10 @@ describe Osm::Badge::Data do
   end
 
   it 'Works out if the badge has been started' do
-    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {1 => 'Yes', 2 => ''}).started?).to eq(true)
-    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {1 => 'Yes', 2 => ''}, due: 1).started?).to eq(false)
-    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {1 => 'xNo', 2 => ''}).started?).to eq(false)
-    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {1 => '', 2 => ''}).started?).to eq(false)
+    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: { 1 => 'Yes', 2 => '' }).started?).to eq(true)
+    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: { 1 => 'Yes', 2 => '' }, due: 1).started?).to eq(false)
+    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: { 1 => 'xNo', 2 => '' }).started?).to eq(false)
+    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: { 1 => '', 2 => '' }).started?).to eq(false)
 
     # Staged Activity Badge
     expect(Osm::Badge::Data.new(
@@ -321,20 +321,20 @@ describe Osm::Badge::Data do
           Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b'), id: 2001),
         ]
       ),
-      requirements: {1000 => 'Yes', 2000 => 'Yes', 2001 => ''},
+      requirements: { 1000 => 'Yes', 2000 => 'Yes', 2001 => '' },
       due: 1,
     ).started?).to eq(true)
 
     # Staged Count Badge
     expect(Osm::Badge::Data.new(
       badge: Osm::StagedBadge.new(levels: [0,1,2,3,4,5,10,15,20], show_level_letters: false, level_requirement: 1000),
-      requirements: {1000 => 5, 2000 => '5', 3000 => ''},
+      requirements: { 1000 => 5, 2000 => '5', 3000 => '' },
       due: 5,
       awarded: 4,
     ).started?).to eq(false) # Finished lvl 5 & not started lvl 10
     expect(Osm::Badge::Data.new(
       badge: Osm::StagedBadge.new(levels: [0,1,2,3,4,5,10,15,20], show_level_letters: false, level_requirement: 1000),
-      requirements: {1000 => 6, 2000 => '6', 3000 => ''},
+      requirements: { 1000 => 6, 2000 => '6', 3000 => '' },
       due: 5,
       awarded: 3,
     ).started?).to eq(true) # Finished lvl 5 & started lvl 10
@@ -342,10 +342,10 @@ describe Osm::Badge::Data do
 
   it 'Works out what stage of the badge has been started' do
     # Non-Staged badges (0 or 1)
-    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {10 => 'Yes', 11 => ''}).started).to eq(1)
-    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {10 => 'Yes', 11 => ''}, due: 1).started).to eq(0)
-    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {10 => 'xNo', 11 => ''}).started).to eq(0)
-    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {10 => '', 11 => ''}).started).to eq(0)
+    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: { 10 => 'Yes', 11 => '' }).started).to eq(1)
+    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: { 10 => 'Yes', 11 => '' }, due: 1).started).to eq(0)
+    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: { 10 => 'xNo', 11 => '' }).started).to eq(0)
+    expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: { 10 => '', 11 => '' }).started).to eq(0)
 
 
     # Staged Activity
@@ -361,17 +361,17 @@ describe Osm::Badge::Data do
 
     expect(Osm::Badge::Data.new(
       badge: staged_activity,
-      requirements: {100 => 'Yes', 200 => 'Yes', 201 => ''},
+      requirements: { 100 => 'Yes', 200 => 'Yes', 201 => '' },
       due: 1,
     ).started).to eq(2)
     expect(Osm::Badge::Data.new(
       badge: staged_activity,
-      requirements: {100 => 'Yes', 200 => 'Yes', 201 => ''},
+      requirements: { 100 => 'Yes', 200 => 'Yes', 201 => '' },
       due: 1,
     ).started).to eq(2)
     expect(Osm::Badge::Data.new(
       badge: staged_activity,
-      requirements: {100 => 'Yes', 200 => 'Yes', 201 => 'Yes'},
+      requirements: { 100 => 'Yes', 200 => 'Yes', 201 => 'Yes' },
       due: 2,
     ).started).to eq(0) # No more stages to do
     expect(Osm::Badge::Data.new(
@@ -391,12 +391,12 @@ describe Osm::Badge::Data do
 
     expect(Osm::Badge::Data.new(
       badge: staged_count,
-      requirements: {3000 => 7},
+      requirements: { 3000 => 7 },
       due: 5,
     ).started).to eq(10)
     expect(Osm::Badge::Data.new(
       badge: staged_count,
-      requirements: {3000 => 3},
+      requirements: { 3000 => 3 },
       due: 3,
     ).started).to eq(0)
   end
@@ -415,14 +415,14 @@ describe Osm::Badge::Data do
           'field' => 2345,
           'value' => '2'
         }
-        @update_body_data = {'scoutid' => '1', '2345' => '2', 'completed' => '0', 'awarded' => '0', 'firstname' => 'fn', 'lastname' => 'ln'}
+        @update_body_data = { 'scoutid' => '1', '2345' => '2', 'completed' => '0', 'awarded' => '0', 'firstname' => 'fn', 'lastname' => 'ln' }
 
         @data = Osm::Badge::Data.new(
           member_id: 1,
           first_name: 'fn',
           last_name: 'ln',
           section_id: 2,
-          requirements: {2345 => '1', 6789 => '2'},
+          requirements: { 2345 => '1', 6789 => '2' },
           badge: Osm::CoreBadge.new(
             id: 123,
             version: 0,
@@ -546,7 +546,7 @@ describe Osm::Badge::Data do
         'sectionid' => 2,
         'entries' => '[{"badge_id":"123","badge_version":"0","scout_id":"1","level":"1"}]',
       }
-      awarded_body_data = {'scoutid'=>'1', 'completed'=>'1', 'awarded' => '1', 'awardeddate'=>'2000-01-02', 'firstname' => 'fn', 'lastname' => 'ln'}
+      awarded_body_data = { 'scoutid'=>'1', 'completed'=>'1', 'awarded' => '1', 'awardeddate'=>'2000-01-02', 'firstname' => 'fn', 'lastname' => 'ln' }
 
       data = Osm::Badge::Data.new(
         member_id: 1,
@@ -572,7 +572,7 @@ describe Osm::Badge::Data do
         'scoutid' => 1,
         'level' => 1
       }
-      awarded_body_data = {'scoutid'=>'1', 'completed'=>'1', 'awarded' => '1', 'awardeddate'=>'2000-01-02', 'firstname' => 'fn', 'lastname' => 'ln'}
+      awarded_body_data = { 'scoutid'=>'1', 'completed'=>'1', 'awarded' => '1', 'awardeddate'=>'2000-01-02', 'firstname' => 'fn', 'lastname' => 'ln' }
 
       data = Osm::Badge::Data.new(
         member_id: 1,

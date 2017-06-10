@@ -39,15 +39,15 @@ describe Osm::FlexiRecord do
         'structure' => [
           {
             'rows' => [
-              {'name' => 'First name','field' => 'firstname','width' => '150px'},
-              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
+              { 'name' => 'First name','field' => 'firstname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
             ],
             'noscroll' => true
           },
-          {'rows' => [
-            {'name' => 'Field 1','field' => 'f_1','width' => '150px','editable' => true},
-            {'name' => 'Filed 2','field' => 'f_2','width' => '150px','editable' => true},
-          ]}
+          { 'rows' => [
+            { 'name' => 'Field 1','field' => 'f_1','width' => '150px','editable' => true },
+            { 'name' => 'Filed 2','field' => 'f_2','width' => '150px','editable' => true },
+          ] }
         ]
       }
       expect($api).to receive(:post_query).with('extras.php?action=getExtra&sectionid=1&extraid=2').and_return(data)
@@ -76,14 +76,14 @@ describe Osm::FlexiRecord do
         'structure' => [
           {
             'rows' => [
-              {'name' => 'First name','field' => 'firstname','width' => '150px'},
-              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
+              { 'name' => 'First name','field' => 'firstname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
             ],
             'noscroll' => true
           },
-          {'rows' => [
-            {'name' => 'name','field' => 'f_1','width' => '150px','editable' => true},
-          ]}
+          { 'rows' => [
+            { 'name' => 'name','field' => 'f_1','width' => '150px','editable' => true },
+          ] }
         ]
       }
       expect($api).to receive(:post_query).with('extras.php?action=addColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
@@ -102,13 +102,13 @@ describe Osm::FlexiRecord do
         'structure' => [
           {
             'rows' => [
-              {'name' => 'First name','field' => 'firstname','width' => '150px'},
-              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
+              { 'name' => 'First name','field' => 'firstname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
             ],
             'noscroll' => true
           },
-          {'rows' => [
-          ]}
+          { 'rows' => [
+          ] }
         ]
       }
       expect($api).to receive(:post_query).and_return(data)

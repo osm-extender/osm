@@ -42,8 +42,8 @@ describe Osm::Invoice do
             'identifier' => 'invoiceid',
             'label' => 'name',
             'items' => [
-              {'invoiceid' => '1', 'name' => 'Invoice 1'},
-              {'invoiceid' => '2', 'name' => 'Invoice 2'},
+              { 'invoiceid' => '1', 'name' => 'Invoice 1' },
+              { 'invoiceid' => '2', 'name' => 'Invoice 2' },
             ]
           }
 
@@ -133,7 +133,7 @@ describe Osm::Invoice do
           'identifier' => 'invoiceid',
           'label' => 'name',
           'items' => [
-            {'invoiceid' => '1', 'name' => 'Invoice 1'},
+            { 'invoiceid' => '1', 'name' => 'Invoice 1' },
           ]
         }
 
@@ -176,7 +176,7 @@ describe Osm::Invoice do
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
-        }).and_return({'id'=>2})
+        }).and_return({ 'id'=>2 })
 
         expect(invoice.create($api)).to eq(true)
         expect(invoice.id).to eq(2)
@@ -194,7 +194,7 @@ describe Osm::Invoice do
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
-        }).and_return({'message'=>'Something went wrong'})
+        }).and_return({ 'message'=>'Something went wrong' })
 
         expect(invoice.create($api)).to eq(false)
         expect(invoice.id).to be_nil
@@ -214,7 +214,7 @@ describe Osm::Invoice do
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
-        }).and_return({'ok'=>true})
+        }).and_return({ 'ok'=>true })
 
         expect(invoice.update($api)).to eq(true)
       end
@@ -233,7 +233,7 @@ describe Osm::Invoice do
           'name' => 'Invoice name',
           'extra' => '',
           'date' => '2002-03-04',
-        }).and_return({'ok'=>false})
+        }).and_return({ 'ok'=>false })
 
         expect(invoice.update($api)).to eq(false)
       end
@@ -243,7 +243,7 @@ describe Osm::Invoice do
 
         expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
-        }).and_return({'ok'=>true})
+        }).and_return({ 'ok'=>true })
 
         expect(invoice.delete($api)).to eq(true)
       end
@@ -253,7 +253,7 @@ describe Osm::Invoice do
 
         expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
-        }).and_return({'ok'=>false})
+        }).and_return({ 'ok'=>false })
 
         expect(invoice.delete($api)).to eq(false)
       end
@@ -261,7 +261,7 @@ describe Osm::Invoice do
       it 'Finalise invoice (success)' do
         invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
-        expect($api).to receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({'ok'=>true})
+        expect($api).to receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({ 'ok'=>true })
 
         expect(invoice.finalise($api)).to eq(true)
         expect(invoice.finalised).to eq(true)
@@ -270,7 +270,7 @@ describe Osm::Invoice do
       it 'Finalise invoice (failure)' do
         invoice = Osm::Invoice.new(id: 1, section_id: 2)
 
-        expect($api).to receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({'ok'=>false})
+        expect($api).to receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return({ 'ok'=>false })
 
         expect(invoice.finalise($api)).to eq(false)
         expect(invoice.finalised).to eq(false)
@@ -291,7 +291,7 @@ describe Osm::Invoice do
         expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'archived' => 1,
-        }).and_return({'ok'=>true})
+        }).and_return({ 'ok'=>true })
 
         expect(invoice.archive($api)).to eq(true)
         expect(invoice.archived).to eq(true)
@@ -303,7 +303,7 @@ describe Osm::Invoice do
         expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
           'archived' => 1,
-        }).and_return({'ok'=>false})
+        }).and_return({ 'ok'=>false })
 
         expect(invoice.archive($api)).to eq(false)
         expect(invoice.archived).to eq(false)

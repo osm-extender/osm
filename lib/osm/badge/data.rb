@@ -37,7 +37,7 @@ module Osm
       validates_numericality_of :awarded, only_integer: true, greater_than_or_equal_to: 0
       validates_numericality_of :member_id, only_integer: true, greater_than: 0
       validates_numericality_of :section_id, only_integer: true, greater_than: 0
-      validates :requirements, hash: {key_type: Integer, value_type: String}
+      validates :requirements, hash: { key_type: Integer, value_type: String }
 
 
       # @!method initialize
@@ -330,7 +330,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, {replace_with: {'badge' => :name}})
+        Osm.inspect_instance(self, { replace_with: { 'badge' => :name } })
       end
 
       # Work out if the requirmeent has been met

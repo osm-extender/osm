@@ -13,12 +13,12 @@ module ValidityValidatorSpec
   class TestModelAllowNil
     include ActiveAttr::Model
     attribute :item
-    validates :item, validity: {allow_nil: true}
+    validates :item, validity: { allow_nil: true }
   end
   class TestModelDisallowNil
     include ActiveAttr::Model
     attribute :item
-    validates :item, validity: {allow_nil: false}
+    validates :item, validity: { allow_nil: false }
   end
 
 
@@ -34,7 +34,7 @@ module ValidityValidatorSpec
       model = TestModel.new(item: TestItem.new(validity: false))
       expect(model.valid?).to eq(false)
       expect(model.errors.count).to eq(2)
-      expect(model.errors.messages).to eq({item: ['must be valid', 'validity attribute is invalid: is not included in the list']})
+      expect(model.errors.messages).to eq({ item: ['must be valid', 'validity attribute is invalid: is not included in the list'] })
     end
 
     describe 'Allow nil' do

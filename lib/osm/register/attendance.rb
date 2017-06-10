@@ -31,7 +31,7 @@ module Osm
       validates_presence_of :first_name
       validates_presence_of :last_name
 
-      validates :attendance, hash: {key_type: Date, value_in: [:yes, :unadvised_absent, :advised_absent]}
+      validates :attendance, hash: { key_type: Date, value_in: [:yes, :unadvised_absent, :advised_absent] }
 
 
       # @!method initialize

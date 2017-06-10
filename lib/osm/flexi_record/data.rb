@@ -18,7 +18,7 @@ module Osm
       validates_presence_of :flexi_record
       validates_numericality_of :member_id, only_integer: true, greater_than: 0
       validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
-      validates :fields, hash: {key_type: String}
+      validates :fields, hash: { key_type: String }
 
 
       # @!method initialize
@@ -78,7 +78,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options={replace_with: {'flexi_record' => :id}})
+        Osm.inspect_instance(self, options={ replace_with: { 'flexi_record' => :id } })
       end
 
       private def sort_by

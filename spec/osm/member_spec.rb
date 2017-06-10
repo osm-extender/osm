@@ -16,8 +16,8 @@ describe Osm::Member do
       joined_movement: '2006-01-02',
       started_section: '2006-01-07',
       finished_section: '2007-12-31',
-      additional_information: {'12_3' => '123'},
-      additional_information_labels: {'12_3' => 'Label for 123'},
+      additional_information: { '12_3' => '123' },
+      additional_information_labels: { '12_3' => 'Label for 123' },
       contact: Osm::Member::MemberContact.new(postcode: 'A'),
       primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
       secondary_contact: Osm::Member::PrimaryContact.new(postcode: 'C'),
@@ -40,8 +40,8 @@ describe Osm::Member do
     expect(member.joined_movement).to eq(Date.new(2006, 1, 2))
     expect(member.started_section).to eq(Date.new(2006, 1, 7))
     expect(member.finished_section).to eq(Date.new(2007, 12, 31))
-    expect(member.additional_information).to eq({'12_3' => '123'})
-    expect(member.additional_information_labels).to eq({'12_3' => 'Label for 123'})
+    expect(member.additional_information).to eq({ '12_3' => '123' })
+    expect(member.additional_information_labels).to eq({ '12_3' => 'Label for 123' })
     expect(member.contact.postcode).to eq('A')
     expect(member.primary_contact.postcode).to eq('B')
     expect(member.secondary_contact.postcode).to eq('C')
@@ -276,13 +276,13 @@ describe Osm::Member do
               'section_id' => 1,
               'started' => '2006-07-17',
               'custom_data' => {
-                '1' => {'2' => 'Primary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'primary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8441' => 'Data for 8441'},
-                '2' => {'2' => 'Secondary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'secondary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8442' => 'Data for 8442'},
-                '3' => {'2' => 'Emergency', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'emergency@example.com', '14' => '', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '8443' => 'Data for 8443'},
-                '4' => {'2' => 'Doctor', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '54' => 'Surgery', '8444' => 'Data for 8444'},
-                '5' => {'4848' => 'Data for 4848'},
-                '6' => {'7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'member@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8446' => 'Data for 8446'},
-                '7' => {'34' => 'Unspecified'},
+                '1' => { '2' => 'Primary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'primary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8441' => 'Data for 8441' },
+                '2' => { '2' => 'Secondary', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'secondary@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8442' => 'Data for 8442' },
+                '3' => { '2' => 'Emergency', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'emergency@example.com', '14' => '', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '8443' => 'Data for 8443' },
+                '4' => { '2' => 'Doctor', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '54' => 'Surgery', '8444' => 'Data for 8444' },
+                '5' => { '4848' => 'Data for 4848' },
+                '6' => { '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'member@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8446' => 'Data for 8446' },
+                '7' => { '34' => 'Unspecified' },
               },
             }
           },
@@ -291,85 +291,85 @@ describe Osm::Member do
             'member_count' => 30,
             'status' => true,
             'structure' => [
-              {'group_id' => 1, 'description' => '', 'identifier' => 'contact_primary_1', 'name' => 'Primary Contact 1', 'columns' => [
-                {'column_id' => 2, 'group_column_id' => '1_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 3, 'group_column_id' => '1_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 7, 'group_column_id' => '1_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8, 'group_column_id' => '1_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 9, 'group_column_id' => '1_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 10, 'group_column_id' => '1_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 11, 'group_column_id' => '1_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 12, 'group_column_id' => '1_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-                {'column_id' => 14, 'group_column_id' => '1_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-                {'column_id' => 18, 'group_column_id' => '1_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 20, 'group_column_id' => '1_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8441, 'group_column_id' => '1_8441', 'label' => 'Label for 8441', 'varname' => 'label_for_8441', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
-              {'group_id' => 2, 'description' => '', 'identifier' => 'contact_primary_2', 'name' => 'Primary Contact 2', 'columns' => [
-                {'column_id' => 2, 'group_column_id' => '2_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 3, 'group_column_id' => '2_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 7, 'group_column_id' => '2_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8, 'group_column_id' => '2_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 9, 'group_column_id' => '2_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 10, 'group_column_id' => '2_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 11, 'group_column_id' => '2_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 12, 'group_column_id' => '2_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-                {'column_id' => 14, 'group_column_id' => '2_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-                {'column_id' => 18, 'group_column_id' => '2_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 20, 'group_column_id' => '2_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8442, 'group_column_id' => '2_8442', 'label' => 'Label for 8442', 'varname' => 'label_for_8442', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
-              {'group_id' => 3, 'description' => '', 'identifier' => 'emergency', 'name' => 'Emergency Contact', 'columns' => [
-                {'column_id' => 2, 'group_column_id' => '3_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 3, 'group_column_id' => '3_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 7, 'group_column_id' => '3_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8, 'group_column_id' => '3_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 9, 'group_column_id' => '3_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 10, 'group_column_id' => '3_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 11, 'group_column_id' => '3_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 12, 'group_column_id' => '3_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-                {'column_id' => 14, 'group_column_id' => '3_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-                {'column_id' => 18, 'group_column_id' => '3_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 20, 'group_column_id' => '3_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8443, 'group_column_id' => '3_8443', 'label' => 'Label for 8443', 'varname' => 'label_for_8443', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
-              {'group_id' => 4, 'description' => '', 'identifier' => 'doctor', 'name' => "Doctor's Surgery", 'columns' => [
-                {'column_id' => 2, 'group_column_id' => '4_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 3, 'group_column_id' => '4_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 54, 'group_column_id' => '4_54', 'label' => 'Surgery', 'varname' => 'surgery', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 7, 'group_column_id' => '4_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8, 'group_column_id' => '4_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 9, 'group_column_id' => '4_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 10, 'group_column_id' => '4_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 11, 'group_column_id' => '4_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 18, 'group_column_id' => '4_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 20, 'group_column_id' => '4_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8444, 'group_column_id' => '4_8444', 'label' => 'Label for 8444', 'varname' => 'label_for_8444', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
-              {'group_id' => 6, 'description' => '', 'identifier' => 'contact_member', 'name' => 'Member', 'columns' => [
-                {'column_id' => 2, 'group_column_id' => '6_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 3, 'group_column_id' => '6_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 7, 'group_column_id' => '6_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8, 'group_column_id' => '6_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 9, 'group_column_id' => '6_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 10, 'group_column_id' => '6_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 11, 'group_column_id' => '6_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 12, 'group_column_id' => '6_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-                {'column_id' => 14, 'group_column_id' => '6_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120},
-                {'column_id' => 18, 'group_column_id' => '6_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 20, 'group_column_id' => '6_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-                {'column_id' => 8446, 'group_column_id' => '6_8446', 'label' => 'Label for 8446', 'varname' => 'label_for_8446', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
-              {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-                {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
-              {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-                {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
+              { 'group_id' => 1, 'description' => '', 'identifier' => 'contact_primary_1', 'name' => 'Primary Contact 1', 'columns' => [
+                { 'column_id' => 2, 'group_column_id' => '1_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 3, 'group_column_id' => '1_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 7, 'group_column_id' => '1_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8, 'group_column_id' => '1_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 9, 'group_column_id' => '1_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 10, 'group_column_id' => '1_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 11, 'group_column_id' => '1_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 12, 'group_column_id' => '1_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
+                { 'column_id' => 14, 'group_column_id' => '1_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
+                { 'column_id' => 18, 'group_column_id' => '1_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 20, 'group_column_id' => '1_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8441, 'group_column_id' => '1_8441', 'label' => 'Label for 8441', 'varname' => 'label_for_8441', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
+              { 'group_id' => 2, 'description' => '', 'identifier' => 'contact_primary_2', 'name' => 'Primary Contact 2', 'columns' => [
+                { 'column_id' => 2, 'group_column_id' => '2_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 3, 'group_column_id' => '2_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 7, 'group_column_id' => '2_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8, 'group_column_id' => '2_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 9, 'group_column_id' => '2_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 10, 'group_column_id' => '2_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 11, 'group_column_id' => '2_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 12, 'group_column_id' => '2_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
+                { 'column_id' => 14, 'group_column_id' => '2_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
+                { 'column_id' => 18, 'group_column_id' => '2_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 20, 'group_column_id' => '2_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8442, 'group_column_id' => '2_8442', 'label' => 'Label for 8442', 'varname' => 'label_for_8442', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
+              { 'group_id' => 3, 'description' => '', 'identifier' => 'emergency', 'name' => 'Emergency Contact', 'columns' => [
+                { 'column_id' => 2, 'group_column_id' => '3_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 3, 'group_column_id' => '3_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 7, 'group_column_id' => '3_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8, 'group_column_id' => '3_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 9, 'group_column_id' => '3_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 10, 'group_column_id' => '3_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 11, 'group_column_id' => '3_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 12, 'group_column_id' => '3_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
+                { 'column_id' => 14, 'group_column_id' => '3_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
+                { 'column_id' => 18, 'group_column_id' => '3_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 20, 'group_column_id' => '3_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8443, 'group_column_id' => '3_8443', 'label' => 'Label for 8443', 'varname' => 'label_for_8443', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
+              { 'group_id' => 4, 'description' => '', 'identifier' => 'doctor', 'name' => "Doctor's Surgery", 'columns' => [
+                { 'column_id' => 2, 'group_column_id' => '4_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 3, 'group_column_id' => '4_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 54, 'group_column_id' => '4_54', 'label' => 'Surgery', 'varname' => 'surgery', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 7, 'group_column_id' => '4_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8, 'group_column_id' => '4_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 9, 'group_column_id' => '4_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 10, 'group_column_id' => '4_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 11, 'group_column_id' => '4_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 18, 'group_column_id' => '4_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 20, 'group_column_id' => '4_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8444, 'group_column_id' => '4_8444', 'label' => 'Label for 8444', 'varname' => 'label_for_8444', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
+              { 'group_id' => 6, 'description' => '', 'identifier' => 'contact_member', 'name' => 'Member', 'columns' => [
+                { 'column_id' => 2, 'group_column_id' => '6_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 3, 'group_column_id' => '6_3', 'label' => 'Last Name', 'varname' => 'lastname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 7, 'group_column_id' => '6_7', 'label' => 'Address 1', 'varname' => 'address1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8, 'group_column_id' => '6_8', 'label' => 'Address 2', 'varname' => 'address2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 9, 'group_column_id' => '6_9', 'label' => 'Address 3', 'varname' => 'address3', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 10, 'group_column_id' => '6_10', 'label' => 'Address 4', 'varname' => 'address4', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 11, 'group_column_id' => '6_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 12, 'group_column_id' => '6_12', 'label' => 'Email 1', 'varname' => 'email1', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
+                { 'column_id' => 14, 'group_column_id' => '6_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
+                { 'column_id' => 18, 'group_column_id' => '6_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 20, 'group_column_id' => '6_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8446, 'group_column_id' => '6_8446', 'label' => 'Label for 8446', 'varname' => 'label_for_8446', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
+              { 'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
+              { 'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
             ],
           },
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {'section_id'=>1, 'term_id'=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
@@ -388,8 +388,8 @@ describe Osm::Member do
         expect(member.joined_movement).to eq(Date.new(2006, 7, 17))
         expect(member.started_section).to eq(Date.new(2008, 7, 12))
         expect(member.finished_section).to eq(Date.new(2010, 6, 3))
-        expect(member.additional_information).to eq({4848 => 'Data for 4848'})
-        expect(member.additional_information_labels).to eq({4848 => 'Label for 4848'})
+        expect(member.additional_information).to eq({ 4848 => 'Data for 4848' })
+        expect(member.additional_information_labels).to eq({ 4848 => 'Label for 4848' })
         expect(member.contact.first_name).to eq('John')
         expect(member.contact.last_name).to eq('Smith')
         expect(member.contact.address_1).to eq('Address 1')
@@ -405,8 +405,8 @@ describe Osm::Member do
         expect(member.contact.receive_email_1).to eq(true)
         expect(member.contact.email_2).to eq('')
         expect(member.contact.receive_email_2).to eq(false)
-        expect(member.contact.additional_information).to eq({8446=>'Data for 8446'})
-        expect(member.contact.additional_information_labels).to eq({8446=>'Label for 8446'})
+        expect(member.contact.additional_information).to eq({ 8446=>'Data for 8446' })
+        expect(member.contact.additional_information_labels).to eq({ 8446=>'Label for 8446' })
         expect(member.primary_contact.first_name).to eq('Primary')
         expect(member.primary_contact.last_name).to eq('Contact')
         expect(member.primary_contact.address_1).to eq('Address 1')
@@ -422,8 +422,8 @@ describe Osm::Member do
         expect(member.primary_contact.receive_email_1).to eq(true)
         expect(member.primary_contact.email_2).to eq('')
         expect(member.primary_contact.receive_email_2).to eq(false)
-        expect(member.primary_contact.additional_information).to eq({8441=>'Data for 8441'})
-        expect(member.primary_contact.additional_information_labels).to eq({8441=>'Label for 8441'})
+        expect(member.primary_contact.additional_information).to eq({ 8441=>'Data for 8441' })
+        expect(member.primary_contact.additional_information_labels).to eq({ 8441=>'Label for 8441' })
         expect(member.secondary_contact.first_name).to eq('Secondary')
         expect(member.secondary_contact.last_name).to eq('Contact')
         expect(member.secondary_contact.address_1).to eq('Address 1')
@@ -439,8 +439,8 @@ describe Osm::Member do
         expect(member.secondary_contact.receive_email_1).to eq(true)
         expect(member.secondary_contact.email_2).to eq('')
         expect(member.secondary_contact.receive_email_2).to eq(false)
-        expect(member.secondary_contact.additional_information).to eq({8442=>'Data for 8442'})
-        expect(member.secondary_contact.additional_information_labels).to eq({8442=>'Label for 8442'})
+        expect(member.secondary_contact.additional_information).to eq({ 8442=>'Data for 8442' })
+        expect(member.secondary_contact.additional_information_labels).to eq({ 8442=>'Label for 8442' })
         expect(member.emergency_contact.first_name).to eq('Emergency')
         expect(member.emergency_contact.last_name).to eq('Contact')
         expect(member.emergency_contact.address_1).to eq('Address 1')
@@ -452,8 +452,8 @@ describe Osm::Member do
         expect(member.emergency_contact.phone_2).to eq('0987 654321')
         expect(member.emergency_contact.email_1).to eq('emergency@example.com')
         expect(member.emergency_contact.email_2).to eq('')
-        expect(member.emergency_contact.additional_information).to eq({8443=>'Data for 8443'})
-        expect(member.emergency_contact.additional_information_labels).to eq({8443=>'Label for 8443'})
+        expect(member.emergency_contact.additional_information).to eq({ 8443=>'Data for 8443' })
+        expect(member.emergency_contact.additional_information_labels).to eq({ 8443=>'Label for 8443' })
         expect(member.doctor.first_name).to eq('Doctor')
         expect(member.doctor.last_name).to eq('Contact')
         expect(member.doctor.surgery).to eq('Surgery')
@@ -464,8 +464,8 @@ describe Osm::Member do
         expect(member.doctor.postcode).to eq('Postcode')
         expect(member.doctor.phone_1).to eq('01234 567890')
         expect(member.doctor.phone_2).to eq('0987 654321')
-        expect(member.doctor.additional_information).to eq({8444=>'Data for 8444'})
-        expect(member.doctor.additional_information_labels).to eq({8444=>'Label for 8444'})
+        expect(member.doctor.additional_information).to eq({ 8444=>'Data for 8444' })
+        expect(member.doctor.additional_information_labels).to eq({ 8444=>'Label for 8444' })
         expect(member.valid?).to eq(true)
       end
 
@@ -490,8 +490,8 @@ describe Osm::Member do
               'section_id' => 1,
               'started' => '2006-07-17',
               'custom_data' => {
-                '5' => {'4848' => 'Data for 4848'},
-                '7' => {'34' => 'Unspecified'},
+                '5' => { '4848' => 'Data for 4848' },
+                '7' => { '34' => 'Unspecified' },
               },
             }
           },
@@ -500,16 +500,16 @@ describe Osm::Member do
             'member_count' => 30,
             'status' => true,
             'structure' => [
-              {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-                {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
-              {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-                {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
+              { 'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
+              { 'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
             ],
           },
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {'section_id'=>1, 'term_id'=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
@@ -544,7 +544,7 @@ describe Osm::Member do
               'section_id' => 1,
               'started' => '2006-07-17',
               'custom_data' => {
-                '7' => {'34' => 'Unspecified'},
+                '7' => { '34' => 'Unspecified' },
               },
             }
           },
@@ -553,16 +553,16 @@ describe Osm::Member do
             'member_count' => 30,
             'status' => true,
             'structure' => [
-              {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-                {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
-              {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-                {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
+              { 'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
+              { 'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
             ],
           },
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {'section_id'=>1, 'term_id'=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
@@ -593,7 +593,7 @@ describe Osm::Member do
               'section_id' => 1,
               'started' => '2006-07-17',
               'custom_data' => {
-                '5' => {'4848' => 'Data for 4848'},
+                '5' => { '4848' => 'Data for 4848' },
               },
             }
           },
@@ -602,16 +602,16 @@ describe Osm::Member do
             'member_count' => 30,
             'status' => true,
             'structure' => [
-              {'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-                {'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
-              {'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-                {'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120},
-              ]},
+              { 'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
+                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
+              { 'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
+                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+              ] },
             ],
           },
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {'section_id'=>1, 'term_id'=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
@@ -628,7 +628,7 @@ describe Osm::Member do
           'data' => [],
           'meta' => {},
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: {'section_id'=>1, 'term_id'=>2}).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
         expect(Osm::Member.get_for_section(api: $api, section: 1, term: 2)).to eq([])
       end
@@ -653,8 +653,8 @@ describe Osm::Member do
           joined_movement: '2006-01-02',
           started_section: '2006-01-07',
           finished_section: '2007-12-31',
-          additional_information: {'12_3' => '123'},
-          additional_information_labels: {'12_3' => 'Label for 123'},
+          additional_information: { '12_3' => '123' },
+          additional_information_labels: { '12_3' => 'Label for 123' },
           contact: Osm::Member::MemberContact.new(postcode: 'A'),
           primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
           secondary_contact: Osm::Member::PrimaryContact.new(postcode: 'C'),
@@ -672,7 +672,7 @@ describe Osm::Member do
           'dob' => '2000-01-02',
           'started' => '2006-01-02',
           'startedsection' => '2006-01-07',
-        }).and_return({'result'=>'ok','scoutid'=>577743})
+        }).and_return({ 'result'=>'ok','scoutid'=>577743 })
 
         allow(@member).to receive(:update) { true }
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
@@ -683,7 +683,7 @@ describe Osm::Member do
       end
 
       it 'Failed the create stage in OSM' do
-        expect($api).to receive(:post_query).with('users.php?action=newMember', post_data: {'firstname'=>'First', 'lastname'=>'Last', 'dob'=>'2000-01-02', 'started'=>'2006-01-02', 'startedsection'=>'2006-01-07', 'sectionid'=>2}).and_return({})
+        expect($api).to receive(:post_query).with('users.php?action=newMember', post_data: { 'firstname'=>'First', 'lastname'=>'Last', 'dob'=>'2000-01-02', 'started'=>'2006-01-02', 'startedsection'=>'2006-01-07', 'sectionid'=>2 }).and_return({})
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
         expect(@member).to_not receive(:cache_delete)
         expect(@member.create($api)).to eq(false)
@@ -697,7 +697,7 @@ describe Osm::Member do
           'dob' => '2000-01-02',
           'started' => '2006-01-02',
           'startedsection' => '2006-01-07',
-        }).and_return({'result'=>'ok','scoutid'=>577743})
+        }).and_return({ 'result'=>'ok','scoutid'=>577743 })
 
         allow(@member).to receive(:update) { false }
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
@@ -737,7 +737,7 @@ describe Osm::Member do
           started_section: '2006-01-07',
           finished_section: '2007-12-31',
           additional_information: DirtyHashy[ 123, '123' ],
-          additional_information_labels: {123 => 'Label for 123'},
+          additional_information_labels: { 123 => 'Label for 123' },
           contact: Osm::Member::MemberContact.new(postcode: 'A'),
           primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
           secondary_contact: Osm::Member::SecondaryContact.new(postcode: 'C'),
@@ -753,7 +753,7 @@ describe Osm::Member do
           'scoutid' => 1,
           'column' => 'firstname',
           'value' => 'John',
-        }).and_return({'ok'=>true})
+        }).and_return({ 'ok'=>true })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           'context' => 'members',
@@ -762,7 +762,7 @@ describe Osm::Member do
           'group_id' => 7,
           'column_id' => 34,
           'value' => 'Unspecified',
-        }).and_return({'data'=>{'value'=>'Unspecified'}})
+        }).and_return({ 'data'=>{ 'value'=>'Unspecified' } })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -770,7 +770,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 6,
           'data[address1]' => 'Address 1',
-        }).and_return({'status'=>true})
+        }).and_return({ 'status'=>true })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -778,7 +778,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 1,
           'data[address2]' => 'Address 2',
-        }).and_return({'status'=>true})
+        }).and_return({ 'status'=>true })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -786,7 +786,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 2,
           'data[address3]' => 'Address 3',
-        }).and_return({'status'=>true})
+        }).and_return({ 'status'=>true })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -794,7 +794,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 3,
           'data[address4]' => 'Address 4',
-        }).and_return({'status'=>true})
+        }).and_return({ 'status'=>true })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -803,7 +803,7 @@ describe Osm::Member do
           'group_id' => 4,
           'data[surgery]' => 'Surgery',
           'data[test_var]' => 'This is still a test',
-        }).and_return({'status'=>true})
+        }).and_return({ 'status'=>true })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           'context' => 'members',
@@ -812,7 +812,7 @@ describe Osm::Member do
           'group_id' => 5,
           'column_id' => 123,
           'value' => '321',
-        }).and_return({'data'=>{'value'=>'321'}})
+        }).and_return({ 'data'=>{ 'value'=>'321' } })
 
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
         expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
@@ -830,13 +830,13 @@ describe Osm::Member do
       end
 
       it 'All fields' do
-        {'firstname'=>'First', 'lastname'=>'Last', 'patrolid'=>3, 'patrolleader'=>0, 'dob'=>'2000-01-02', 'startedsection'=>'2006-01-07', 'started'=>'2006-01-02'}.each do |key, value|
+        { 'firstname'=>'First', 'lastname'=>'Last', 'patrolid'=>3, 'patrolleader'=>0, 'dob'=>'2000-01-02', 'startedsection'=>'2006-01-07', 'started'=>'2006-01-02' }.each do |key, value|
           expect($api).to receive(:post_query).with('ext/members/contact/?action=update', post_data: {
             'sectionid' => 2,
             'scoutid' => 1,
             'column' => key,
             'value' => value,
-          }).and_return({'ok'=>true})
+          }).and_return({ 'ok'=>true })
         end
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
@@ -846,7 +846,7 @@ describe Osm::Member do
           'group_id' => 7,
           'column_id' => 34,
           'value' => 'Other',
-        }).and_return({'data'=>{'value'=>'Other'}})
+        }).and_return({ 'data'=>{ 'value'=>'Other' } })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           'context' => 'members',
@@ -855,9 +855,9 @@ describe Osm::Member do
           'group_id' => 5,
           'column_id' => 123,
           'value' => '123',
-        }).and_return({'data'=>{'value'=>'123'}})
+        }).and_return({ 'data'=>{ 'value'=>'123' } })
 
-        {6=>'A', 1=>'B', 2=>'C'}.each do |group_id, postcode|
+        { 6=>'A', 1=>'B', 2=>'C' }.each do |group_id, postcode|
           expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
             'context' => 'members',
             'associated_type' => 'member',
@@ -878,7 +878,7 @@ describe Osm::Member do
             'data[email2_leaders]' => false,
             'data[phone1_sms]' => false,
             'data[phone2_sms]' => false,
-          }).and_return({'status'=>true})
+          }).and_return({ 'status'=>true })
         end
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
@@ -897,7 +897,7 @@ describe Osm::Member do
           'data[phone2]' => nil,
           'data[email1]' => nil,
           'data[email2]' => nil,
-        }).and_return({'status'=>true})
+        }).and_return({ 'status'=>true })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -915,7 +915,7 @@ describe Osm::Member do
           'data[phone1]' => nil,
           'data[phone2]' => nil,
           'data[test_var]' => 'This is a test',
-        }).and_return({'status'=>true})
+        }).and_return({ 'status'=>true })
 
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
         expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
@@ -950,7 +950,7 @@ describe Osm::Member do
           'scoutid' => 1,
           'column' => 'firstname',
           'value' => '',
-        }).and_return({'ok'=>true})
+        }).and_return({ 'ok'=>true })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           'context' => 'members',
@@ -959,7 +959,7 @@ describe Osm::Member do
           'group_id' => 5,
           'column_id' => 123,
           'value' => '',
-        }).and_return({'data'=>{'value'=>nil}})
+        }).and_return({ 'data'=>{ 'value'=>nil } })
 
         allow(Osm::Term).to receive(:get_for_section) { [] }
 
@@ -1024,7 +1024,7 @@ describe Osm::Member do
       end
 
       it 'Get the key' do
-        expect($api).to receive(:post_query).with('api.php?action=getMyScoutKey&sectionid=2&scoutid=1').and_return({'ok'=>true,'key'=>'KEY-HERE'})
+        expect($api).to receive(:post_query).with('api.php?action=getMyScoutKey&sectionid=2&scoutid=1').and_return({ 'ok'=>true,'key'=>'KEY-HERE' })
         expect(@member.myscout_link_key($api)).to eq('KEY-HERE')
       end
 

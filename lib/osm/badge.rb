@@ -69,10 +69,10 @@ module Osm
     validates_presence_of :identifier
     validates_inclusion_of :sharing, in: [:draft, :private, :optin, :optin_locked, :default_locked]
     validates_presence_of :user_id
-    validates :requirements, array_of: {item_type: Osm::Badge::Requirement, item_valid: true}
-    validates :modules, array_of: {item_type: Osm::Badge::RequirementModule, item_valid: true}
+    validates :requirements, array_of: { item_type: Osm::Badge::Requirement, item_valid: true }
+    validates :modules, array_of: { item_type: Osm::Badge::RequirementModule, item_valid: true }
     validates_inclusion_of :latest, in: [true, false]
-    validates :levels, array_of: {item_type: Integer}, allow_nil: true
+    validates :levels, array_of: { item_type: Integer }, allow_nil: true
     validates_numericality_of :min_modules_required, only_integer: true, greater_than_or_equal_to: 0
     validates_numericality_of :min_requirements_required, only_integer: true, greater_than_or_equal_to: 0
     validates_numericality_of :add_columns_to_module, only_integer: true, greater_than: 0, allow_nil: true
@@ -223,8 +223,8 @@ module Osm
             add_columns_to_module: Osm.to_i_or_nil(config['addcolumns']),
             level_requirement: Osm.to_i_or_nil(config['levels_column_id']),
             requires_modules: config['requires'],
-            other_requirements_required: (config['columnsRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i} },
-            badges_required: (config['badgesRequired'] || []).map{ |i| {id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i} },
+            other_requirements_required: (config['columnsRequired'] || []).map{ |i| { id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i } },
+            badges_required: (config['badgesRequired'] || []).map{ |i| { id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i } },
             show_level_letters: !!config['shownumbers'],
           )
 

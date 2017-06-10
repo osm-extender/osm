@@ -107,11 +107,11 @@ module Osm
     validates_presence_of :joined_movement
     validates_format_of :age, with: /\A[0-9]{1,3} \/ (?:0?[0-9]|1[012])\Z/, message: 'age is not in the correct format (yy / mm)', allow_blank: true
     validates_inclusion_of :gender, in: [:male, :female, :other, :unspecified], allow_nil: true
-    validates :contact, validity: {allow_nil: true}
-    validates :primary_contact, validity: {allow_nil: true}
-    validates :secondary_contact, validity: {allow_nil: true}
-    validates :emergency_contact, validity: {allow_nil: true}
-    validates :doctor, validity: {allow_nil: true}
+    validates :contact, validity: { allow_nil: true }
+    validates :primary_contact, validity: { allow_nil: true }
+    validates :secondary_contact, validity: { allow_nil: true }
+    validates :emergency_contact, validity: { allow_nil: true }
+    validates :doctor, validity: { allow_nil: true }
 
 
     # Get members for a section
@@ -174,7 +174,7 @@ module Osm
             started_section: Osm::parse_date(item['joined']),
             finished_section: Osm::parse_date(item['end_date']),
             joined_movement: Osm::parse_date(item['started']),
-            gender: {'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified}[(floating_data[CID_GENDER] || '').downcase],
+            gender: { 'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified }[(floating_data[CID_GENDER] || '').downcase],
             contact: member_contact.nil? ? nil : MemberContact.new(
               first_name: item['first_name'],
               last_name: item['last_name'],
@@ -340,7 +340,7 @@ module Osm
 
       # Do 'floating' attributes
       if force || changed_attributes.include?('gender')
-        new_value = {male: 'Male', female: 'Female', other: 'Other'}[gender] || 'Unspecified'
+        new_value = { male: 'Male', female: 'Female', other: 'Other' }[gender] || 'Unspecified'
         data = api.post_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", post_data: {
           'associated_id' => id,
           'associated_type' => 'member',

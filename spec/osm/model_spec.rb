@@ -94,7 +94,7 @@ describe Osm::Model do
 
     describe 'Writes' do
       it 'With cache' do
-        expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', {expires_in: 600}) { true }
+        expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', { expires_in: 600 }) { true }
         expect(ModelTester.cache_write(api: $api, key: 'key', data: 'data')).to eq(true)
       end
 
@@ -125,7 +125,7 @@ describe Osm::Model do
 
       it 'With cache' do
         block = Proc.new{ 'ABC' }
-        expect(OsmTest::Cache).to receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", {expires_in: 600}).and_yield { 'abc' }
+        expect(OsmTest::Cache).to receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", { expires_in: 600 }).and_yield { 'abc' }
         expect(ModelTester.cache_fetch(api: $api, key: 'key', &block)).to eq('ABC')
       end
 
@@ -269,7 +269,7 @@ describe Osm::Model do
     describe 'user_has_permission?' do
 
       before :each do
-        allow($api).to receive(:get_user_permissions).and_return( { 1 => {foo: [:bar]} } )
+        allow($api).to receive(:get_user_permissions).and_return( { 1 => { foo: [:bar] } } )
       end
 
       it 'Has permission' do
@@ -292,7 +292,7 @@ describe Osm::Model do
         allow(Osm::ApiAccess).to receive(:get_ours).and_return(Osm::ApiAccess.new(
           id: $api.api_id,
           name: $api.name,
-          permissions: {foo: [:bar]}
+          permissions: { foo: [:bar] }
         ))
       end
 
@@ -315,7 +315,7 @@ describe Osm::Model do
 
       it 'Only returns true if the user can and they have granted the api permission' do
         section = Osm::Section.new
-        options = {foo: :bar}
+        options = { foo: :bar }
         expect(Osm::Model).to receive('user_has_permission?').with(api: $api, to: :can_do, on: :can_to, section: section, **options).and_return(true)
         expect(Osm::Model).to receive('api_has_permission?').with(api: $api, to: :can_do, on: :can_to, section: section, **options).and_return(true)
         expect(Osm::Model.has_permission?(api: $api, to: :can_do, on: :can_to, section: section, **options)).to eq(true)
@@ -336,7 +336,7 @@ describe Osm::Model do
     describe 'has_access_to_section?' do
 
       before :each do
-        allow($api).to receive(:get_user_permissions).and_return( {1=>{}} )
+        allow($api).to receive(:get_user_permissions).and_return( { 1=>{} } )
       end
 
       it 'Has access' do
@@ -458,7 +458,7 @@ describe Osm::Model do
 
       it 'Requires permission' do
         section = Osm::Section.new(type: :waiting)
-        options = {foo: 'bar'}
+        options = { foo: 'bar' }
         expect(Osm::Model).to receive(:require_permission).with(api: $api, to: :can_do, on: :can_on, section: section, **options).and_return(true)
         expect(Osm::Model).not_to receive(:require_subscription)
         expect{ Osm::Model.require_ability_to(api: $api, to: :can_do, on: :can_on, section: section, **options) }.not_to raise_error
@@ -468,7 +468,7 @@ describe Osm::Model do
 
         before :each do
           @section = Osm::Section.new(type: :beavers)
-          @options = {bar: 'foo'}
+          @options = { bar: 'foo' }
           allow(Osm::Model).to receive(:require_permission).and_return(nil)
         end
 

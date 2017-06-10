@@ -39,7 +39,7 @@ module Osm
       validates_presence_of :first_name
       validates_presence_of :last_name
 
-      validates :donations, hash: {key_type: Date, value_type: String}
+      validates :donations, hash: { key_type: Date, value_type: String }
 
 
       # @!method initialize

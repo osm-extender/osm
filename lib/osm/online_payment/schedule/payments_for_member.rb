@@ -15,7 +15,7 @@ module Osm
         validates_presence_of :last_name
         validates_presence_of :schedule
         validates_inclusion_of :direct_debit, in: [:active, :inactive, :cancelled]
-        validates :payments, hash: {key_type: Integer, value_type: Array}
+        validates :payments, hash: { key_type: Integer, value_type: Array }
 
 
         # @!method initialize

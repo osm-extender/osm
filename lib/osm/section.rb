@@ -119,8 +119,8 @@ module Osm
     validates_inclusion_of :myscout_programme_times, in: [true, false]
     validates_inclusion_of :myscout_programme_show, in: [-2, -1, 0, 5, 10, 15, 20]
 
-    validates :myscout_emails, hash: {key_in: [:email1, :email2, :email3, :email4], value_in: [true, false]}
-    validates :flexi_records, array_of: {item_type: Osm::FlexiRecord, item_valid: true}
+    validates :myscout_emails, hash: { key_in: [:email1, :email2, :email3, :email4], value_in: [true, false] }
+    validates :flexi_records, array_of: { item_type: Osm::FlexiRecord, item_valid: true }
 
 
     # @!method initialize
@@ -269,7 +269,7 @@ module Osm
     # @return true, false whether the notepad was sucessfully updated
     def set_notepad(api:, content:)
       require_access_to_section(api, self)
-      data = api.post_query("users.php?action=updateNotepad&sectionid=#{id}", post_data: {'value' => content})
+      data = api.post_query("users.php?action=updateNotepad&sectionid=#{id}", post_data: { 'value' => content })
 
       if data.is_a?(Hash) && data['ok'] # Success
         cache_write(api: api, key: ['notepad', id], data: content)

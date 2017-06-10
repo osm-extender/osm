@@ -1,6 +1,6 @@
 module Osm
   class Email
-    TAGS = [{id: 'FIRSTNAME', description: "Member's first name"}, {id: 'LASTNAME', description: "Member's last name"}].freeze
+    TAGS = [{ id: 'FIRSTNAME', description: "Member's first name" }, { id: 'LASTNAME', description: "Member's last name" }].freeze
 
     # Get a list of selected email address for selected members ready to pass to send_email method
     # @param api [Osm::Api] The api to use to make the request

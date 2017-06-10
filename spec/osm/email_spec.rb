@@ -3,7 +3,7 @@ describe Osm::Email do
   describe 'Get emails for contacts' do
 
     it 'Single member' do
-      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2', post_data: {'contactGroups' => '["contact_primary_member"]'}).and_return({
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2', post_data: { 'contactGroups' => '["contact_primary_member"]' }).and_return({
         'emails'=>{
           '2'=>{
             'emails'=>['john@example.com'],
@@ -25,7 +25,7 @@ describe Osm::Email do
     end
 
     it 'Several members' do
-      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3', post_data: {'contactGroups' => '["contact_primary_member"]'}).and_return({
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3', post_data: { 'contactGroups' => '["contact_primary_member"]' }).and_return({
         'emails'=>{
           '2'=>{
             'emails'=>['john@example.com'],
@@ -72,12 +72,12 @@ describe Osm::Email do
     end
 
     it 'Handles no emails returned' do
-      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1', post_data: {'contactGroups' => '["contact_primary_1"]'}).and_return({})
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1', post_data: { 'contactGroups' => '["contact_primary_1"]' }).and_return({})
       expect(Osm::Email.get_emails_for_contacts(api: $api, section: 1, members: 1, contacts: [:primary])).to be false
     end
 
     it 'Handles no data hash returned' do
-      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1', post_data: {'contactGroups' => '["contact_primary_1"]'}).and_return([])
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1', post_data: { 'contactGroups' => '["contact_primary_1"]' }).and_return([])
       expect(Osm::Email.get_emails_for_contacts(api: $api, section: 1, members: 1, contacts: [:primary])).to be false
     end
 
@@ -94,12 +94,12 @@ describe Osm::Email do
         'from' => 'Sender <from@example.com>',
         'subject' => 'Subject of email',
         'body' => 'Body of email',
-      }){ {'ok'=>true} }
+      }){ { 'ok'=>true } }
 
       expect(Osm::Email.send_email(
         api: $api,
         section: 1,
-        to: {'2'=>{'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com']}},
+        to: { '2'=>{ 'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com'] } },
         cc: 'cc@example.com',
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
@@ -116,12 +116,12 @@ describe Osm::Email do
         'from' => 'Sender <from@example.com>',
         'subject' => 'Subject of email',
         'body' => 'Body of email',
-      }){ {'ok'=>true} }
+      }){ { 'ok'=>true } }
 
       expect(Osm::Email.send_email(
         api: $api,
         section: 1,
-        to: {'2'=>{'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com']}},
+        to: { '2'=>{ 'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com'] } },
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
         body: 'Body of email',
@@ -137,12 +137,12 @@ describe Osm::Email do
         'from' => 'Sender <from@example.com>',
         'subject' => 'Subject of email',
         'body' => 'Body of email',
-      }){ {'ok'=>true} }
+      }){ { 'ok'=>true } }
 
       expect(Osm::Email.send_email(
         api: $api,
         section: 1,
-        to: {'2'=>{'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com']},'3'=>{'firstname'=>'Jane', 'lastname'=>'Smith', 'emails'=>['jane@example.com']}},
+        to: { '2'=>{ 'firstname'=>'John', 'lastname'=>'Smith', 'emails'=>['john@example.com'] },'3'=>{ 'firstname'=>'Jane', 'lastname'=>'Smith', 'emails'=>['jane@example.com'] } },
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
         body: 'Body of email',

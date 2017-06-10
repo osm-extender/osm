@@ -45,9 +45,9 @@ describe Osm::Invoice::Item do
   describe 'Using the OSM API' do
 
     it 'Get for invoice' do
-      data = {'identifier' => 'id','items' => [
-        {'id' => '1','invoiceid' => '2','recordid' => '3','sectionid' => '4','entrydate' => '2012-01-02','amount' => '1.23','type' => 'Expense','payto_userid' => 'John Smith','comments' => 'Comment','categoryid' => 'Default','firstname' => 'John Smith'}
-      ]}
+      data = { 'identifier' => 'id','items' => [
+        { 'id' => '1','invoiceid' => '2','recordid' => '3','sectionid' => '4','entrydate' => '2012-01-02','amount' => '1.23','type' => 'Expense','payto_userid' => 'John Smith','comments' => 'Comment','categoryid' => 'Default','firstname' => 'John Smith' }
+      ] }
       expect($api).to receive(:post_query).with('finances.php?action=getInvoiceRecords&invoiceid=2&sectionid=4&dateFormat=generic').and_return(data)
 
       invoice = Osm::Invoice.new(id: 2, section_id: 4)
@@ -79,7 +79,7 @@ describe Osm::Invoice::Item do
           description: 'A description',
           payto: 'Person to Pay',
         )
-        expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({'ok'=>true})
+        expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({ 'ok'=>true })
 
         data1 = [
           Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
@@ -106,7 +106,7 @@ describe Osm::Invoice::Item do
             'row' => 0,
             'column' => osm_name,
             'value' => new_value,
-          }).and_return({osm_name => new_value})
+          }).and_return({ osm_name => new_value })
         end
 
         expect(item.create($api)).to eq(true)
@@ -125,7 +125,7 @@ describe Osm::Invoice::Item do
           description: 'A description',
           payto: 'Person to Pay',
         )
-        expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({'ok'=>false})
+        expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return({ 'ok'=>false })
 
         data = [
           Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
@@ -168,7 +168,7 @@ describe Osm::Invoice::Item do
             'row' => 0,
             'column' => osm_name,
             'value' => new_value,
-          }).and_return({osm_name => new_value})
+          }).and_return({ osm_name => new_value })
         end
 
         expect(item.update($api)).to eq(true)
@@ -193,7 +193,7 @@ describe Osm::Invoice::Item do
           'row' => 0,
           'column' => 'comments',
           'value' => 'A new description',
-        }).and_return({'comments'=>'A description'})
+        }).and_return({ 'comments'=>'A description' })
 
         item.description = 'A new description'
         expect(item.update($api)).to eq(false)
@@ -208,7 +208,7 @@ describe Osm::Invoice::Item do
         item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 3, section_id: 2))
         expect($api).to receive(:post_query).with('finances.php?action=deleteEntry&sectionid=2', post_data: {
           'id' => 1,
-        }).and_return({'ok'=>true})
+        }).and_return({ 'ok'=>true })
 
         expect(item.delete($api)).to eq(true)
       end
@@ -217,7 +217,7 @@ describe Osm::Invoice::Item do
         item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 2, section_id: 4),)
         expect($api).to receive(:post_query).with('finances.php?action=deleteEntry&sectionid=4', post_data: {
           'id' => 1,
-        }).and_return({'ok'=>false})
+        }).and_return({ 'ok'=>false })
 
         expect(item.delete($api)).to eq(false)
       end

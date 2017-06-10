@@ -78,11 +78,11 @@ module Osm
     validates_inclusion_of :deletable, in: [true, false]
     validates_inclusion_of :location, in: [:indoors, :outdoors, :both], message: 'is not a valid location'
 
-    validates :sections, array_of: {item_type: Symbol}
-    validates :tags, array_of: {item_type: String}
-    validates :badges, array_of: {item_type: Osm::Activity::Badge, item_valid: true}
-    validates :files, array_of: {item_type: Osm::Activity::File, item_valid: true}
-    validates :versions, array_of: {item_type: Osm::Activity::Version, item_valid: true}
+    validates :sections, array_of: { item_type: Symbol }
+    validates :tags, array_of: { item_type: String }
+    validates :badges, array_of: { item_type: Osm::Activity::Badge, item_valid: true }
+    validates :files, array_of: { item_type: Osm::Activity::File, item_valid: true }
+    validates :versions, array_of: { item_type: Osm::Activity::Version, item_valid: true }
 
 
     # Get activity details
@@ -200,7 +200,7 @@ module Osm
         'notes' => notes,
       })
 
-      if (data == {'result'=>0})
+      if (data == { 'result'=>0 })
         # The cached activity will be out of date - remove it
         cache_delete(api: api, key: ['activity', id])
         return true
@@ -253,7 +253,7 @@ module Osm
         'secretEdit' => secret_update,
       })
 
-      if (data == {'result'=>true})
+      if (data == { 'result'=>true })
         # The cached activity will be out of date - remove it
         cache_delete(api: api, key: ['activity', id])
         return true

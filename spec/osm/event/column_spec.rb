@@ -31,7 +31,7 @@ describe Osm::Event::Column do
     end
 
     it 'Update column (failed)' do
-      expect($api).to receive(:post_query).and_return({'config' => '[]'})
+      expect($api).to receive(:post_query).and_return({ 'config' => '[]' })
 
       event = Osm::Event.new(id: 2, section_id: 1)
       column = Osm::Event::Column.new(id: 'f_1', event: event)
@@ -44,7 +44,7 @@ describe Osm::Event::Column do
         'columnId' => 'f_1'
       }
 
-      expect($api).to receive(:post_query).with('events.php?action=deleteColumn&sectionid=1&eventid=2', post_data: post_data).and_return({'eventid' => '2', 'config' => '[]'})
+      expect($api).to receive(:post_query).with('events.php?action=deleteColumn&sectionid=1&eventid=2', post_data: post_data).and_return({ 'eventid' => '2', 'config' => '[]' })
 
       event = Osm::Event.new(id: 2, section_id: 1)
       column = Osm::Event::Column.new(id: 'f_1', event: event)
@@ -55,7 +55,7 @@ describe Osm::Event::Column do
     end
 
     it 'Delete column (failed)' do
-      expect($api).to receive(:post_query).and_return({'config' => '[{"id":"f_1"}]'})
+      expect($api).to receive(:post_query).and_return({ 'config' => '[{"id":"f_1"}]' })
 
       event = Osm::Event.new(id: 2, section_id: 1)
       column = Osm::Event::Column.new(id: 'f_1', event: event)

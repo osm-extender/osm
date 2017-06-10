@@ -12,12 +12,12 @@ describe Osm::Grouping do
   describe 'Using the API' do
 
     it 'Get for section' do
-      data = {'patrols' => [{
+      data = { 'patrols' => [{
         'patrolid' => 1,
         'name' => 'Patrol Name',
         'active' => 1,
         'points' => '3',
-      }]}
+      }] }
       expect($api).to receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(data)
 
       patrols = Osm::Grouping.get_for_section(api: $api, section: 2)
@@ -84,7 +84,7 @@ describe Osm::Grouping do
       grouping.name = 'Grouping'
       grouping.active = true
 
-      expect($api).to receive(:post_query).and_return({'done' => false})
+      expect($api).to receive(:post_query).and_return({ 'done' => false })
 
       expect(grouping.update($api)).to eq(false)
     end
@@ -98,7 +98,7 @@ describe Osm::Grouping do
       )
       grouping.points = 3
 
-      expect($api).to receive(:post_query).and_return({'done' => false})
+      expect($api).to receive(:post_query).and_return({ 'done' => false })
 
       expect(grouping.update($api)).to eq(false)
     end

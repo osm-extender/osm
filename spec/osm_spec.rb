@@ -175,7 +175,7 @@ describe Osm do
 
     it 'Replaces items with their attribute' do
       this_one = TestA.new(id: 1, b: TestB.new(id: 2))
-      inspect = Osm.inspect_instance(this_one, options={replace_with: {'b' => :id}})
+      inspect = Osm.inspect_instance(this_one, options={ replace_with: { 'b' => :id } })
       expect(inspect).to eq('#<TestA b.id: 2, id: 1 >')
     end
 

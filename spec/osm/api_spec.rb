@@ -120,22 +120,22 @@ describe Osm::Api do
     end
 
     it 'Without user credentials' do
-      expect($request).to receive(:set_form_data).with({'apiid' => '1', 'token' => 'API-SECRET'}).and_return(nil)
+      expect($request).to receive(:set_form_data).with({ 'apiid' => '1', 'token' => 'API-SECRET' }).and_return(nil)
       expect($http).to receive(:request).with($request).and_return($response)
       api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
       expect(api.post_query('path/to/load')).to eq({})
     end
 
     it 'With user credentials' do
-      expect($request).to receive(:set_form_data).with({'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET'}).and_return(nil)
+      expect($request).to receive(:set_form_data).with({ 'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET' }).and_return(nil)
       expect($http).to receive(:request).with($request).and_return($response)
       expect($api.post_query('path/to/load')).to eq({})
     end
 
     it 'Using passed post attributes' do
-      expect($request).to receive(:set_form_data).with({'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET', 'attribute' => 'value'}).and_return(nil)
+      expect($request).to receive(:set_form_data).with({ 'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET', 'attribute' => 'value' }).and_return(nil)
       expect($http).to receive(:request).with($request).and_return($response)
-      expect($api.post_query('path/to/load', post_data: {'attribute' => 'value'})).to eq({})
+      expect($api.post_query('path/to/load', post_data: { 'attribute' => 'value' })).to eq({})
     end
 
     it 'Returns nil if body is empty' do
@@ -221,21 +221,21 @@ describe Osm::Api do
     describe 'Handles OSM errors' do
 
       it 'Raises an error if OSM returns an error (as a hash)' do
-        expect($request).to receive(:set_form_data).with({'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET'}).and_return(nil)
+        expect($request).to receive(:set_form_data).with({ 'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET' }).and_return(nil)
         allow($response).to receive(:body){ '{"error":"Error message"}' }
         expect($http).to receive(:request).with($request).and_return($response)
         expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it 'Raises an error if OSM returns an error (as a hash in a hash)' do
-        expect($request).to receive(:set_form_data).with({'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET'}).and_return(nil)
+        expect($request).to receive(:set_form_data).with({ 'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET' }).and_return(nil)
         allow($response).to receive(:body){ '{"error":{"message":"Error message"}}' }
         expect($http).to receive(:request).with($request).and_return($response)
         expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it 'Raises an error if OSM returns an error (as a plain string)' do
-        expect($request).to receive(:set_form_data).with({'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET'}).and_return(nil)
+        expect($request).to receive(:set_form_data).with({ 'apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET' }).and_return(nil)
         allow($response).to receive(:body){ 'Error message' }
         expect($http).to receive(:request).with($request).and_return($response)
         expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
@@ -248,8 +248,8 @@ describe Osm::Api do
   it 'Authorizes a user to use the OSM API' do
     user_email = 'alice@example.com'
     user_password = 'alice'
-    expect($api).to receive(:post_query).with('users.php?action=authorise', post_attributes: {'email' => user_email, 'password' => user_password}) { {'userid' => '100', 'secret' => 'secret'} }
-    expect($api.authorize_user(email_address: user_email, password: user_password)).to eq({user_id: '100', user_secret: 'secret'})
+    expect($api).to receive(:post_query).with('users.php?action=authorise', post_attributes: { 'email' => user_email, 'password' => user_password }) { { 'userid' => '100', 'secret' => 'secret' } }
+    expect($api.authorize_user(email_address: user_email, password: user_password)).to eq({ user_id: '100', user_secret: 'secret' })
   end
 
 
@@ -284,27 +284,27 @@ describe Osm::Api do
   describe 'User Permissions' do
 
     it 'Get from cache' do
-      permissions = {1 => {a: [:read, :write]}, 2 => {a: [:read]}}
+      permissions = { 1 => { a: [:read, :write] }, 2 => { a: [:read] } }
       expect(OsmTest::Cache).to receive('fetch').and_return(permissions)
       expect($api.get_user_permissions).to eq(permissions)
     end
 
     it 'Get ignoring cache' do
       data = [
-        {'sectionid'=>'1', 'permissions'=>{'badge'=>10}},
+        { 'sectionid'=>'1', 'permissions'=>{ 'badge'=>10 } },
       ]
 
       expect(OsmTest::Cache).not_to receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       expect(OsmTest::Cache).not_to receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
       expect($api).to receive(:post_query).with('api.php?action=getUserRoles') { data }
-      expect($api.get_user_permissions(no_read_cache: true)).to eq({1 => {badge: [:read]}})
+      expect($api.get_user_permissions(no_read_cache: true)).to eq({ 1 => { badge: [:read] } })
     end
 
     it 'Set' do
-      permissions = {1 => {a: [:read, :write]}, 2 => {a: [:read]}}
+      permissions = { 1 => { a: [:read, :write] }, 2 => { a: [:read] } }
       expect($api).to receive('get_user_permissions').and_return(permissions)
-      expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => {a: [:read]}), {expires_in: 600}) { true }
-      $api.set_user_permissions(section: 3, permissions: {a: [:read]})
+      expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => { a: [:read] }), { expires_in: 600 }) { true }
+      $api.set_user_permissions(section: 3, permissions: { a: [:read] })
     end
 
   end # describe User Permissions

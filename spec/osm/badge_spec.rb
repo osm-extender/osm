@@ -81,7 +81,7 @@ describe Osm::Badge do
       Osm::Badge::RequirementModule.new(id: 1, letter: 'a'),
     ])
 
-    expect(badge.module_map).to eq({1=>'a', 10=>'b', 2=>'c', 'a'=>1, 'b'=>10, 'c'=>2})
+    expect(badge.module_map).to eq({ 1=>'a', 10=>'b', 2=>'c', 'a'=>1, 'b'=>10, 'c'=>2 })
   end
 
   it 'Gets the number of requirements needed per module' do
@@ -91,7 +91,7 @@ describe Osm::Badge do
       Osm::Badge::RequirementModule.new(id: 1, letter: 'a', min_required: 3),
     ])
 
-    expect(badge.needed_per_module).to eq({'a'=>3, 'b'=>4, 'c'=>5, 2=>5, 10=>4, 1=>3})
+    expect(badge.needed_per_module).to eq({ 'a'=>3, 'b'=>4, 'c'=>5, 2=>5, 10=>4, 1=>3 })
   end
 
   it 'Produces a list of modules' do
@@ -147,23 +147,23 @@ describe Osm::Badge do
             '123_0' => [
               {
                 'rows' => [
-                  {'name' => 'First name','field' => 'firstname','width' => '120px'},
-                  {'name' => 'Last name','field' => 'lastname','width' => '120px'},
-                  {'name' => 'Done','field' => 'completed','width' => '70px','formatter' => 'doneFormatter'},
-                  {'name' => 'Awarded','field' => 'awardeddate','width' => '100px','formatter' => 'dueFormatter'}
+                  { 'name' => 'First name','field' => 'firstname','width' => '120px' },
+                  { 'name' => 'Last name','field' => 'lastname','width' => '120px' },
+                  { 'name' => 'Done','field' => 'completed','width' => '70px','formatter' => 'doneFormatter' },
+                  { 'name' => 'Awarded','field' => 'awardeddate','width' => '100px','formatter' => 'dueFormatter' }
                 ],
                 'numactivities' => '23',
                 'noscroll' => true
                },{
                 'rows' => [
-                  {'name' => 'r_name','field' => '2345','width' => '80px','formatter' => 'cellFormatter','tooltip' => 'r_description','editable' => 'true','module'=>'a'}
+                  { 'name' => 'r_name','field' => '2345','width' => '80px','formatter' => 'cellFormatter','tooltip' => 'r_description','editable' => 'true','module'=>'a' }
                 ]
               }
             ],
           }
         }
 
-        @module_data = {'items' => [
+        @module_data = { 'items' => [
           {
             'badge_id' => '123',
             'badge_version' => '0',
@@ -175,7 +175,7 @@ describe Osm::Badge do
             'numeric_into_column_id' => '',
             'add_column_id_to_numeric' => '',
           },
-        ]}
+        ] }
       end
 
       urls = {
@@ -261,7 +261,7 @@ describe Osm::Badge do
       expect(data.due).to eq(2)
       expect(data.awarded).to eq(1)
       expect(data.awarded_date).to eq(Date.new(2000, 1, 2))
-      expect(data.requirements).to eq({2345 => 'd'})
+      expect(data.requirements).to eq({ 2345 => 'd' })
       expect(data.section_id).to eq(1)
       expect(data.badge.id).to eq(123)
     end
@@ -396,11 +396,11 @@ describe Osm::Badge do
 
       db = Osm::Badge.get_due_badges(api: $api, section: Osm::Section.new(id: 1, type: :cubs), term: 2)
       expect(db.empty?).to eq(false)
-      expect(db.badge_names).to eq({'145_0_1'=>'Activity - Badge Name', '93_0_2'=>'Staged - Participation (Lvl 2)'})
-      expect(db.by_member).to eq({1=>['93_0_2', '145_0_1'], 2=>['93_0_2']})
-      expect(db.member_names).to eq({1 => 'John Doe', 2 => 'Jane Doe'})
-      expect(db.badge_stock).to eq({'93_0_2'=>20, '145_0_1'=>10})
-      expect(db.totals).to eq({'93_0_2'=>2, '145_0_1'=>1})
+      expect(db.badge_names).to eq({ '145_0_1'=>'Activity - Badge Name', '93_0_2'=>'Staged - Participation (Lvl 2)' })
+      expect(db.by_member).to eq({ 1=>['93_0_2', '145_0_1'], 2=>['93_0_2'] })
+      expect(db.member_names).to eq({ 1 => 'John Doe', 2 => 'Jane Doe' })
+      expect(db.badge_stock).to eq({ '93_0_2'=>20, '145_0_1'=>10 })
+      expect(db.totals).to eq({ '93_0_2'=>2, '145_0_1'=>1 })
       expect(db.valid?).to eq(true)
     end
 
@@ -423,7 +423,7 @@ describe Osm::Badge do
       allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 2) }
 
       section = Osm::Section.new(id: 1, type: :beavers)
-      expect(Osm::Badge.get_stock(api: $api, section: section)).to eq({'100_1' => 1, '200_2' => 2})
+      expect(Osm::Badge.get_stock(api: $api, section: section)).to eq({ '100_1' => 1, '200_2' => 2 })
     end
 
     describe 'Update badge stock levels' do
@@ -442,12 +442,12 @@ describe Osm::Badge do
       end
 
       it 'Succeds' do
-        expect($api).to receive(:post_query).with(@path, post_data: @post_body).and_return({'ok' => true})
+        expect($api).to receive(:post_query).with(@path, post_data: @post_body).and_return({ 'ok' => true })
         expect(Osm::Badge.update_stock(api: $api, section: @section, badge_id: 3, stock: 10)).to eq(true)
       end
 
       it 'Fails' do
-        expect($api).to receive(:post_query).with(@path, post_data: @post_body).and_return({'ok' => false})
+        expect($api).to receive(:post_query).with(@path, post_data: @post_body).and_return({ 'ok' => false })
         expect(Osm::Badge.update_stock(api: $api, section: @section, badge_id: 3, stock: 10)).to eq(false)
       end
 

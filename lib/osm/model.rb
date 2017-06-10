@@ -135,7 +135,7 @@ module Osm
       fail ArgumentError, 'A block is required' unless block_given?
       return yield if no_cache? || no_read_cache
       key = cache_key(api: api, key: key)
-      @@cache.fetch(key, {expires_in: ttl}){ yield }
+      @@cache.fetch(key, { expires_in: ttl }){ yield }
     end
     def self.cache_read(api:, key:, no_read_cache: false)
       return nil if no_cache? || no_read_cache
@@ -145,7 +145,7 @@ module Osm
     def self.cache_write(api:, key:, data:, ttl: @@cache_ttl)
       return false if no_cache?
       key = cache_key(api: api, key: key)
-      @@cache.write(key, data, {expires_in: ttl})
+      @@cache.write(key, data, { expires_in: ttl })
     end
     def self.cache_exist?(api:, key:, no_read_cache: false)
       return false if no_cache? || no_read_cache

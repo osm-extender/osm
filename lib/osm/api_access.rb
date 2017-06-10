@@ -16,7 +16,7 @@ module Osm
     validates_numericality_of :id, only_integer: true, greater_than: 0
     validates_presence_of :name
 
-    validates :permissions, hash: {key_type: Symbol, value_type: Array}
+    validates :permissions, hash: { key_type: Symbol, value_type: Array }
 
 
     # Get API access details for a given section

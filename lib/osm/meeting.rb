@@ -48,8 +48,8 @@ module Osm
     validates_presence_of :date
     validates_format_of :start_time, with: Osm::OSM_TIME_REGEX, message: 'is not in the correct format (HH:MM)', allow_blank: true
     validates_format_of :finish_time, with: Osm::OSM_TIME_REGEX, message: 'is not in the correct format (HH:MM)', allow_blank: true
-    validates :activities, array_of: {item_type: Osm::Meeting::Activity, item_valid: true}
-    validates :badge_links, array_of: {item_type: Osm::Meeting::BadgeLink, item_valid: true}
+    validates :activities, array_of: { item_type: Osm::Meeting::Activity, item_valid: true }
+    validates :badge_links, array_of: { item_type: Osm::Meeting::BadgeLink, item_valid: true }
 
     # @!method initialize
     #   Initialize a new Meeting
@@ -70,7 +70,7 @@ module Osm
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("programme.php?action=getProgramme&sectionid=#{section_id}&termid=#{term_id}")
-        data = {'items'=>[],'activities'=>{}} if data.is_a? Array
+        data = { 'items'=>[],'activities'=>{} } if data.is_a? Array
         items = data['items'] || []
         activities = data['activities'] || {}
         badge_links = data['badgelinks'] || {}

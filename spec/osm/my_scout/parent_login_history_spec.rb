@@ -1,10 +1,10 @@
 describe Osm::MyScout::ParentLoginHistory do
 
   it 'Get from OSM' do
-    data = {'items' => [
-      {'scoutid'=>'2','firstname'=>'John','lastname'=>'Smith','numlogins'=>271,'lastlogin'=>'16/04/2016 17:49'},
-      {'scoutid'=>'3','firstname'=>'Jane','lastname'=>'Jones','numlogins'=>1,'lastlogin'=>'10/11/2015 14:21'},
-    ]}
+    data = { 'items' => [
+      { 'scoutid'=>'2','firstname'=>'John','lastname'=>'Smith','numlogins'=>271,'lastlogin'=>'16/04/2016 17:49' },
+      { 'scoutid'=>'3','firstname'=>'Jane','lastname'=>'Jones','numlogins'=>1,'lastlogin'=>'10/11/2015 14:21' },
+    ] }
     expect($api).to receive(:post_query).with('ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=1').and_return(data)
     
     histories = Osm::MyScout::ParentLoginHistory.get_for_section(api: $api, section: 1)
@@ -22,9 +22,9 @@ describe Osm::MyScout::ParentLoginHistory do
   end
 
   it 'Handles a last_login of "Invitation not sent"' do
-    data = {'items' => [
-      {'scoutid'=>'2','firstname'=>'John','lastname'=>'Smith','numlogins'=>271,'lastlogin'=>'Invitation not sent'},
-    ]}
+    data = { 'items' => [
+      { 'scoutid'=>'2','firstname'=>'John','lastname'=>'Smith','numlogins'=>271,'lastlogin'=>'Invitation not sent' },
+    ] }
 
     expect($api).to receive(:post_query).with('ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=1').and_return(data)
     
@@ -33,9 +33,9 @@ describe Osm::MyScout::ParentLoginHistory do
   end
 
   it 'Handles a nil last_login' do
-    data = {'items' => [
-      {'scoutid'=>'2','firstname'=>'John','lastname'=>'Smith','numlogins'=>271,'lastlogin'=>nil},
-    ]}
+    data = { 'items' => [
+      { 'scoutid'=>'2','firstname'=>'John','lastname'=>'Smith','numlogins'=>271,'lastlogin'=>nil },
+    ] }
     expect($api).to receive(:post_query).with('ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=1').and_return(data)
 
     history = Osm::MyScout::ParentLoginHistory.get_for_section(api: $api, section: 1)[0]

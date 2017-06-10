@@ -106,7 +106,7 @@ module Osm
       response = api.post_query("users.php?action=registerUpdate&sectionid=#{section.id}&termid=#{term_id}", post_data: {
         'scouts' => members.inspect,
         'selectedDate' => date.strftime(Osm::OSM_DATE_FORMAT),
-        'present' => {yes: 'Yes', unadvised_absent: nil, advised_absent: 'No'}[attendance],
+        'present' => { yes: 'Yes', unadvised_absent: nil, advised_absent: 'No' }[attendance],
         'section' => section.type,
         'sectionid' => section.id,
         'completedBadges' => completed_badge_requirements.to_json

@@ -73,9 +73,9 @@ module Osm
     validates_numericality_of :section_id, only_integer: true, greater_than: 0
     validates_numericality_of :attendance_limit, only_integer: true, greater_than_or_equal_to: 0
     validates_presence_of :name
-    validates :badges, array_of: {item_type: Osm::Event::BadgeLink, item_valid: true}
-    validates :columns, array_of: {item_type: Osm::Event::Column, item_valid: true}
-    validates :files, array_of: {item_type: String}
+    validates :badges, array_of: { item_type: Osm::Event::BadgeLink, item_valid: true }
+    validates :columns, array_of: { item_type: Osm::Event::Column, item_valid: true }
+    validates :files, array_of: { item_type: String }
     validates_inclusion_of :allow_changes, in: [true, false]
     validates_inclusion_of :reminders, in: [true, false]
     validates_inclusion_of :attendance_limit_includes_leaders, in: [true, false]
