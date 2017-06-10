@@ -82,6 +82,7 @@ module Osm
       end
 
       private
+
       def sort_by
         ['event', 'id']
       end

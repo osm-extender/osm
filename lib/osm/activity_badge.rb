@@ -2,6 +2,7 @@ module Osm
   class ActivityBadge < Osm::Badge
 
     private
+
     def self.type
       :activity
     end

@@ -237,6 +237,7 @@ module Osm
 
 
     private
+
     def self.new_invoice_from_data(invoice_data)
       invoice_data = invoice_data['invoice']
       return nil unless invoice_data.is_a?(Hash)

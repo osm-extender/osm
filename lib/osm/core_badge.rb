@@ -2,6 +2,7 @@ module Osm
   class CoreBadge < Osm::Badge
 
     private
+
     def self.type
       :core
     end

@@ -32,6 +32,7 @@ module Osm
         end
 
         protected
+
         # Get email contents
         # @param api [Osm::Api] The api to use to make the request
         # @param section [Integer, #to_i]

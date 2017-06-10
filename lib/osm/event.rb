@@ -493,6 +493,7 @@ module Osm
 
 
     private
+
     def attendees(api)
       attendees = 0
       get_attendance(api: api).each do |a|

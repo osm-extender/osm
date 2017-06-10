@@ -264,6 +264,7 @@ module Osm
 
 
     protected
+
     def sort_by
       ['id', 'version']
     end

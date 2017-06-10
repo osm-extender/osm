@@ -130,6 +130,7 @@ module Osm
 
 
     private
+
     # Wrap cache calls
     def self.cache_fetch(api:, key:, ttl: @@cache_ttl, no_read_cache: false)
       fail ArgumentError, 'A block is required' unless block_given?

@@ -377,12 +377,14 @@ module Osm
 
 
     protected
+
     def sort_by
       ['name', 'id', '-version']
     end
 
 
     private
+
     # return an array of hashes representing the modules of the badge
     def self.module_completion_data(api:, badge:, no_read_cache: false)
       fetched_this_time = @module_completion_data.nil? # Flag to ensure we only get the data once (at most) per invocation
@@ -439,6 +441,7 @@ module Osm
     end
 
     public
+
     def self.type
       nil
     end
@@ -447,6 +450,7 @@ module Osm
     end
 
     private
+
     def self.subscription_required
       :bronze
     end

@@ -28,7 +28,6 @@ module Osm
     end
   end
 
-  private
   # Set constants
   OSM_DATE_FORMAT = '%Y-%m-%d'
   OSM_TIME_FORMAT = '%H:%M:%S'
@@ -84,6 +83,7 @@ Dir[File.join(File.dirname(__FILE__) , 'osm', '**', '*.rb')].each {|file| requir
 module Osm
 
   private
+
   def self.make_datetime(date: nil, time: nil, ignore_epoch: false)
     date = nil if date.nil? || date.empty? || (ignore_epoch && epoch_date?(date))
     time = nil if time.nil? || time.empty?

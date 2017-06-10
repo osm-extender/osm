@@ -342,6 +342,7 @@ module Osm
       end
 
       protected
+
       def sort_by
         ['badge', 'section_id', 'member_id']
       end

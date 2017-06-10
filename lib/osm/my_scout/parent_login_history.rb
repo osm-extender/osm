@@ -58,6 +58,7 @@ module Osm
       end
 
       private
+
       def self.get_last_login_date(date_str)
         return nil if date_str.nil?
         return nil if date_str.eql?('Invitation not sent')

@@ -104,6 +104,7 @@ module Osm
 
 
     private
+
     def sort_by
       ['section_id', 'name']
     end

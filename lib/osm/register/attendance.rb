@@ -54,6 +54,7 @@ module Osm
       end
 
       private
+
       def sort_by
         [:section_id, :grouping_id, :last_name, :first_name]
       end

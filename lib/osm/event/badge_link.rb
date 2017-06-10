@@ -41,6 +41,7 @@ module Osm
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
       private
+
       def sort_by
         ['badge_section', 'badge_type', 'badge_name', 'requirement_label']
       end

@@ -136,6 +136,7 @@ module Osm
       end
 
       private
+
       def sort_by
         ['sent_at', 'id']
       end

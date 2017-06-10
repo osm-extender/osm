@@ -58,6 +58,7 @@ module Osm
         end
 
         protected
+
         def self.build_from_json(json, payment=nil)
           data = JSON.parse(json)
           return [] unless data.is_a?(Hash)

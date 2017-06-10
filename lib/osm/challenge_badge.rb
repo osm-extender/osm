@@ -2,6 +2,7 @@ module Osm
   class ChallengeBadge < Osm::Badge
 
     private
+
     def self.type
       :challenge
     end
