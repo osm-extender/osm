@@ -85,7 +85,7 @@ describe Osm::Email do
         'cc' => 'cc@example.com',
         'from' => 'Sender <from@example.com>',
         'subject' => 'Subject of email',
-        'body' => 'Body of email',
+        'body' => 'Body of email'
       }){ { 'ok'=>true } }
 
       expect(Osm::Email.send_email(
@@ -107,7 +107,7 @@ describe Osm::Email do
         'cc' => '',
         'from' => 'Sender <from@example.com>',
         'subject' => 'Subject of email',
-        'body' => 'Body of email',
+        'body' => 'Body of email'
       }){ { 'ok'=>true } }
 
       expect(Osm::Email.send_email(
@@ -128,7 +128,7 @@ describe Osm::Email do
         'cc' => '',
         'from' => 'Sender <from@example.com>',
         'subject' => 'Subject of email',
-        'body' => 'Body of email',
+        'body' => 'Body of email'
       }){ { 'ok'=>true } }
 
       expect(Osm::Email.send_email(

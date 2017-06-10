@@ -22,7 +22,7 @@ describe Osm::Member do
       primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
       secondary_contact: Osm::Member::PrimaryContact.new(postcode: 'C'),
       emergency_contact: Osm::Member::EmergencyContact.new(postcode: 'D'),
-      doctor: Osm::Member::DoctorContact.new(postcode: 'E'),
+      doctor: Osm::Member::DoctorContact.new(postcode: 'E')
     }
     member = Osm::Member.new(attributes)
 
@@ -73,7 +73,7 @@ describe Osm::Member do
 
   it 'Provides each part of age' do
     data = {
-      age: '06/07',
+      age: '06/07'
     }
     member = Osm::Member.new(data)
 
@@ -227,7 +227,7 @@ describe Osm::Member do
       expect(@member.enabled_emails).to eq [
         'enabled.member@example.com',
         'enabled.primary@example.com',
-        'enabled.secondary@example.com',
+        'enabled.secondary@example.com'
       ]
       expect(@member_nil_contacts.enabled_emails).to eq []
     end
@@ -235,7 +235,7 @@ describe Osm::Member do
       expect(@member.enabled_emails_with_name).to eq [
         '"A Member" <enabled.member@example.com>',
         '"Primary Contact" <enabled.primary@example.com>',
-        '"Secondary Contact" <enabled.secondary@example.com>',
+        '"Secondary Contact" <enabled.secondary@example.com>'
       ]
       expect(@member_nil_contacts.enabled_emails_with_name).to eq []
     end
@@ -282,8 +282,8 @@ describe Osm::Member do
                 '4' => { '2' => 'Doctor', '3' => 'Contact', '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '18' => '01234 567890', '20' => '0987 654321', '21' => '', '54' => 'Surgery', '8444' => 'Data for 8444' },
                 '5' => { '4848' => 'Data for 4848' },
                 '6' => { '7' => 'Address 1', '8' => 'Address 2', '9' => 'Address 3', '10' => 'Address 4', '11' => 'Postcode', '12' => 'member@example.com', '13' => 'yes', '14' => '', '15' => '', '18' => '01234 567890', '19' => 'yes', '20' => '0987 654321', '21' => '', '8446' => 'Data for 8446' },
-                '7' => { '34' => 'Unspecified' },
-              },
+                '7' => { '34' => 'Unspecified' }
+              }
             }
           },
           'meta' => {
@@ -303,7 +303,7 @@ describe Osm::Member do
                 { 'column_id' => 14, 'group_column_id' => '1_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
                 { 'column_id' => 18, 'group_column_id' => '1_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
                 { 'column_id' => 20, 'group_column_id' => '1_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
-                { 'column_id' => 8441, 'group_column_id' => '1_8441', 'label' => 'Label for 8441', 'varname' => 'label_for_8441', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8441, 'group_column_id' => '1_8441', 'label' => 'Label for 8441', 'varname' => 'label_for_8441', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
               ] },
               { 'group_id' => 2, 'description' => '', 'identifier' => 'contact_primary_2', 'name' => 'Primary Contact 2', 'columns' => [
                 { 'column_id' => 2, 'group_column_id' => '2_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
@@ -317,7 +317,7 @@ describe Osm::Member do
                 { 'column_id' => 14, 'group_column_id' => '2_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
                 { 'column_id' => 18, 'group_column_id' => '2_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
                 { 'column_id' => 20, 'group_column_id' => '2_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
-                { 'column_id' => 8442, 'group_column_id' => '2_8442', 'label' => 'Label for 8442', 'varname' => 'label_for_8442', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8442, 'group_column_id' => '2_8442', 'label' => 'Label for 8442', 'varname' => 'label_for_8442', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
               ] },
               { 'group_id' => 3, 'description' => '', 'identifier' => 'emergency', 'name' => 'Emergency Contact', 'columns' => [
                 { 'column_id' => 2, 'group_column_id' => '3_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
@@ -331,7 +331,7 @@ describe Osm::Member do
                 { 'column_id' => 14, 'group_column_id' => '3_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
                 { 'column_id' => 18, 'group_column_id' => '3_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
                 { 'column_id' => 20, 'group_column_id' => '3_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
-                { 'column_id' => 8443, 'group_column_id' => '3_8443', 'label' => 'Label for 8443', 'varname' => 'label_for_8443', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8443, 'group_column_id' => '3_8443', 'label' => 'Label for 8443', 'varname' => 'label_for_8443', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
               ] },
               { 'group_id' => 4, 'description' => '', 'identifier' => 'doctor', 'name' => "Doctor's Surgery", 'columns' => [
                 { 'column_id' => 2, 'group_column_id' => '4_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
@@ -344,7 +344,7 @@ describe Osm::Member do
                 { 'column_id' => 11, 'group_column_id' => '4_11', 'label' => 'Postcode', 'varname' => 'postcode', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
                 { 'column_id' => 18, 'group_column_id' => '4_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
                 { 'column_id' => 20, 'group_column_id' => '4_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
-                { 'column_id' => 8444, 'group_column_id' => '4_8444', 'label' => 'Label for 8444', 'varname' => 'label_for_8444', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8444, 'group_column_id' => '4_8444', 'label' => 'Label for 8444', 'varname' => 'label_for_8444', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
               ] },
               { 'group_id' => 6, 'description' => '', 'identifier' => 'contact_member', 'name' => 'Member', 'columns' => [
                 { 'column_id' => 2, 'group_column_id' => '6_2', 'label' => 'First Name', 'varname' => 'firstname', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
@@ -358,16 +358,16 @@ describe Osm::Member do
                 { 'column_id' => 14, 'group_column_id' => '6_14', 'label' => 'Email 2', 'varname' => 'email2', 'read_only' => 'no', 'required' => 'no', 'type' => 'email', 'width' => 120 },
                 { 'column_id' => 18, 'group_column_id' => '6_18', 'label' => 'Phone 1', 'varname' => 'phone1', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
                 { 'column_id' => 20, 'group_column_id' => '6_20', 'label' => 'Phone 2', 'varname' => 'phone2', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
-                { 'column_id' => 8446, 'group_column_id' => '6_8446', 'label' => 'Label for 8446', 'varname' => 'label_for_8446', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 8446, 'group_column_id' => '6_8446', 'label' => 'Label for 8446', 'varname' => 'label_for_8446', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
               ] },
               { 'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
               ] },
               { 'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
-              ] },
-            ],
-          },
+                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
+              ] }
+            ]
+          }
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
@@ -491,8 +491,8 @@ describe Osm::Member do
               'started' => '2006-07-17',
               'custom_data' => {
                 '5' => { '4848' => 'Data for 4848' },
-                '7' => { '34' => 'Unspecified' },
-              },
+                '7' => { '34' => 'Unspecified' }
+              }
             }
           },
           'meta' => {
@@ -501,13 +501,13 @@ describe Osm::Member do
             'status' => true,
             'structure' => [
               { 'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
               ] },
               { 'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
-              ] },
-            ],
-          },
+                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
+              ] }
+            ]
+          }
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
@@ -544,8 +544,8 @@ describe Osm::Member do
               'section_id' => 1,
               'started' => '2006-07-17',
               'custom_data' => {
-                '7' => { '34' => 'Unspecified' },
-              },
+                '7' => { '34' => 'Unspecified' }
+              }
             }
           },
           'meta' => {
@@ -554,13 +554,13 @@ describe Osm::Member do
             'status' => true,
             'structure' => [
               { 'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
               ] },
               { 'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
-              ] },
-            ],
-          },
+                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
+              ] }
+            ]
+          }
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
@@ -593,8 +593,8 @@ describe Osm::Member do
               'section_id' => 1,
               'started' => '2006-07-17',
               'custom_data' => {
-                '5' => { '4848' => 'Data for 4848' },
-              },
+                '5' => { '4848' => 'Data for 4848' }
+              }
             }
           },
           'meta' => {
@@ -603,13 +603,13 @@ describe Osm::Member do
             'status' => true,
             'structure' => [
               { 'group_id' => 5, 'description' => 'This allows you to add  extra information for your members.', 'identifier' => 'customisable_data', 'name' => 'Customisable Data', 'columns' => [
-                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
+                { 'column_id' => 4848, 'group_column_id' => '5_4848', 'label' => 'Label for 4848', 'varname' => 'label_for_4848', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
               ] },
               { 'group_id' => 7, 'description' => '', 'identifier' => 'floating', 'name' => 'Floating', 'columns' => [
-                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 },
-              ] },
-            ],
-          },
+                { 'column_id' => 34, 'group_column_id' => '7_34', 'label' => 'Gender', 'varname' => 'gender', 'read_only' => 'no', 'required' => 'no', 'type' => 'text', 'width' => 120 }
+              ] }
+            ]
+          }
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
@@ -626,7 +626,7 @@ describe Osm::Member do
           'status' => true,
           'error' => nil,
           'data' => [],
-          'meta' => {},
+          'meta' => {}
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
 
@@ -659,7 +659,7 @@ describe Osm::Member do
           primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
           secondary_contact: Osm::Member::PrimaryContact.new(postcode: 'C'),
           emergency_contact: Osm::Member::EmergencyContact.new(postcode: 'D'),
-          doctor: Osm::Member::DoctorContact.new(postcode: 'E'),
+          doctor: Osm::Member::DoctorContact.new(postcode: 'E')
         }
         @member = Osm::Member.new(attributes)
       end
@@ -671,7 +671,7 @@ describe Osm::Member do
           'lastname' => 'Last',
           'dob' => '2000-01-02',
           'started' => '2006-01-02',
-          'startedsection' => '2006-01-07',
+          'startedsection' => '2006-01-07'
         }).and_return('result'=>'ok','scoutid'=>577743)
 
         allow(@member).to receive(:update) { true }
@@ -696,7 +696,7 @@ describe Osm::Member do
           'lastname' => 'Last',
           'dob' => '2000-01-02',
           'started' => '2006-01-02',
-          'startedsection' => '2006-01-07',
+          'startedsection' => '2006-01-07'
         }).and_return('result'=>'ok','scoutid'=>577743)
 
         allow(@member).to receive(:update) { false }
@@ -742,7 +742,7 @@ describe Osm::Member do
           primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
           secondary_contact: Osm::Member::SecondaryContact.new(postcode: 'C'),
           emergency_contact: Osm::Member::EmergencyContact.new(postcode: 'D'),
-          doctor: Osm::Member::DoctorContact.new(postcode: 'E', additional_information: DirtyHashy['test_var', 'This is a test']),
+          doctor: Osm::Member::DoctorContact.new(postcode: 'E', additional_information: DirtyHashy['test_var', 'This is a test'])
         }
         @member = Osm::Member.new(attributes)
       end
@@ -752,7 +752,7 @@ describe Osm::Member do
           'sectionid' => 2,
           'scoutid' => 1,
           'column' => 'firstname',
-          'value' => 'John',
+          'value' => 'John'
         }).and_return('ok'=>true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
@@ -761,7 +761,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 7,
           'column_id' => 34,
-          'value' => 'Unspecified',
+          'value' => 'Unspecified'
         }).and_return('data'=>{ 'value'=>'Unspecified' })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
@@ -769,7 +769,7 @@ describe Osm::Member do
           'associated_type' => 'member',
           'associated_id' => 1,
           'group_id' => 6,
-          'data[address1]' => 'Address 1',
+          'data[address1]' => 'Address 1'
         }).and_return('status'=>true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
@@ -777,7 +777,7 @@ describe Osm::Member do
           'associated_type' => 'member',
           'associated_id' => 1,
           'group_id' => 1,
-          'data[address2]' => 'Address 2',
+          'data[address2]' => 'Address 2'
         }).and_return('status'=>true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
@@ -785,7 +785,7 @@ describe Osm::Member do
           'associated_type' => 'member',
           'associated_id' => 1,
           'group_id' => 2,
-          'data[address3]' => 'Address 3',
+          'data[address3]' => 'Address 3'
         }).and_return('status'=>true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
@@ -793,7 +793,7 @@ describe Osm::Member do
           'associated_type' => 'member',
           'associated_id' => 1,
           'group_id' => 3,
-          'data[address4]' => 'Address 4',
+          'data[address4]' => 'Address 4'
         }).and_return('status'=>true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
@@ -802,7 +802,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 4,
           'data[surgery]' => 'Surgery',
-          'data[test_var]' => 'This is still a test',
+          'data[test_var]' => 'This is still a test'
         }).and_return('status'=>true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
@@ -811,7 +811,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 5,
           'column_id' => 123,
-          'value' => '321',
+          'value' => '321'
         }).and_return('data'=>{ 'value'=>'321' })
 
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
@@ -835,7 +835,7 @@ describe Osm::Member do
             'sectionid' => 2,
             'scoutid' => 1,
             'column' => key,
-            'value' => value,
+            'value' => value
           }).and_return('ok'=>true)
         end
 
@@ -845,7 +845,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 7,
           'column_id' => 34,
-          'value' => 'Other',
+          'value' => 'Other'
         }).and_return('data'=>{ 'value'=>'Other' })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
@@ -854,7 +854,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 5,
           'column_id' => 123,
-          'value' => '123',
+          'value' => '123'
         }).and_return('data'=>{ 'value'=>'123' })
 
         { 6=>'A', 1=>'B', 2=>'C' }.each do |group_id, postcode|
@@ -877,7 +877,7 @@ describe Osm::Member do
             'data[email2]' => nil,
             'data[email2_leaders]' => false,
             'data[phone1_sms]' => false,
-            'data[phone2_sms]' => false,
+            'data[phone2_sms]' => false
           }).and_return('status'=>true)
         end
 
@@ -896,7 +896,7 @@ describe Osm::Member do
           'data[phone1]' => nil,
           'data[phone2]' => nil,
           'data[email1]' => nil,
-          'data[email2]' => nil,
+          'data[email2]' => nil
         }).and_return('status'=>true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
@@ -914,7 +914,7 @@ describe Osm::Member do
           'data[postcode]' => 'E',
           'data[phone1]' => nil,
           'data[phone2]' => nil,
-          'data[test_var]' => 'This is a test',
+          'data[test_var]' => 'This is a test'
         }).and_return('status'=>true)
 
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
@@ -949,7 +949,7 @@ describe Osm::Member do
           'sectionid' => 2,
           'scoutid' => 1,
           'column' => 'firstname',
-          'value' => '',
+          'value' => ''
         }).and_return('ok'=>true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
@@ -958,7 +958,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 5,
           'column_id' => 123,
-          'value' => '',
+          'value' => ''
         }).and_return('data'=>{ 'value'=>nil })
 
         allow(Osm::Term).to receive(:get_for_section) { [] }

@@ -37,7 +37,7 @@ module Osm
           'columnId' => id,
           'columnName' => name,
           'pL' => label,
-          'pR' => (parent_required ? 1 : 0),
+          'pR' => (parent_required ? 1 : 0)
         })
 
         (JSON.parse(data['config']) || []).each do |i|

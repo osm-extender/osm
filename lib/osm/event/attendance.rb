@@ -71,14 +71,14 @@ module Osm
 
         payment_values = {
           manual: 'Manual',
-          automatic: 'Automatic',
+          automatic: 'Automatic'
         }
         attending_values = {
           yes: 'Yes',
           no: 'No',
           invited: 'Invited',
           shown: 'Show in My.SCOUT',
-          reserved: 'Reserved',
+          reserved: 'Reserved'
         }
 
         updated = true
@@ -89,7 +89,7 @@ module Osm
             'value' => now,
             'sectionid' => event.section_id,
             'row' => row,
-            'eventid' => event.id,
+            'eventid' => event.id
           })
           updated = false unless data.is_a?(Hash)
         end
@@ -101,7 +101,7 @@ module Osm
             'value' => payment_values[payment_control],
             'sectionid' => event.section_id,
             'row' => row,
-            'eventid' => event.id,
+            'eventid' => event.id
           })
           updated = false unless data.is_a?(Hash)
         end
@@ -112,7 +112,7 @@ module Osm
             'value' => attending_values[attending],
             'sectionid' => event.section_id,
             'row' => row,
-            'eventid' => event.id,
+            'eventid' => event.id
           })
           updated = false unless data.is_a?(Hash)
         end
@@ -143,7 +143,7 @@ module Osm
             'No' => :no,
             'Invited' => :invited,
             'Show in My.SCOUT' => :shown,
-            'Reserved' => :reserved,
+            'Reserved' => :reserved
           }
 
           trail = []
@@ -155,7 +155,7 @@ module Osm
               description: item['desc'],
               event_id: event.id,
               member_id: member_id,
-              event_attendance: self,
+              event_attendance: self
             }
             if this_item[:type].eql?(:detail)
               results = this_item[:description].match(/\ASet '(?<label>.+)' to '(?<value>.+)'\Z/)

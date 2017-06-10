@@ -144,12 +144,12 @@ describe Osm do
       hash_in = {
         '1' => 1,
         :a  => 'a',
-        'b' => 'b',
+        'b' => 'b'
       }
       hash_out = {
         :'1' => 1,
         :a   => 'a',
-        :b   => 'b',
+        :b   => 'b'
       }
       expect(Osm.symbolize_hash(hash_in)).to eq(hash_out)
     end
@@ -188,7 +188,7 @@ describe Osm do
       from_osm = {
         'badge' => 100,
         'programme' => 20,
-        'events' => 10,
+        'events' => 10
       }
       expect(Osm.make_permissions_hash(from_osm)).to eq(        badge: [:read, :write, :administer],
         programme: [:read, :write],
@@ -199,7 +199,7 @@ describe Osm do
       from_osm = {
         't' => true,
         'f' => false,
-        'badge' => 100,
+        'badge' => 100
       }
       expect(Osm.make_permissions_hash(from_osm).keys).to eq([:badge])
     end

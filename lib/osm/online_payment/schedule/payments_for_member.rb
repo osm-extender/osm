@@ -78,7 +78,7 @@ module Osm
           api_status = {
             required:       'Payment required',
             not_required:   'Payment not required',
-            paid_manually:  'Paid manually',
+            paid_manually:  'Paid manually'
           }[status]
 
           data = api.post_query('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: {
@@ -87,7 +87,7 @@ module Osm
             'scoutid' => member_id,
             'paymentid' => payment_id,
             'giftaid' => gift_aid,
-            'value' => api_status,
+            'value' => api_status
           })
 
           data = data[payment_id.to_s]

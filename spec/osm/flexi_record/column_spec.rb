@@ -46,7 +46,7 @@ describe Osm::FlexiRecord::Column do
     it 'Success' do
       post_data = {
         'columnId' => 'f_1',
-        'columnName' => 'name',
+        'columnName' => 'name'
       }
 
       data = {
@@ -60,12 +60,12 @@ describe Osm::FlexiRecord::Column do
           {
             'rows' => [
               { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
             ],
             'noscroll' => true
           },
           { 'rows' => [
-            { 'name' => 'name','field' => 'f_1','width' => '150px','editable' => true },
+            { 'name' => 'name','field' => 'f_1','width' => '150px','editable' => true }
           ] }
         ]
       }
@@ -92,7 +92,7 @@ describe Osm::FlexiRecord::Column do
           {
             'rows' => [
               { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
             ],
             'noscroll' => true
           },
@@ -133,7 +133,7 @@ describe Osm::FlexiRecord::Column do
 
     it 'Success' do
       post_data = {
-        'columnId' => 'f_1',
+        'columnId' => 'f_1'
       }
       data = {
         'extraid' => '2',
@@ -146,7 +146,7 @@ describe Osm::FlexiRecord::Column do
           {
             'rows' => [
               { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
             ],
             'noscroll' => true
           },
@@ -176,7 +176,7 @@ describe Osm::FlexiRecord::Column do
           {
             'rows' => [
               { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
             ],
             'noscroll' => true
           },

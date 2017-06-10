@@ -32,7 +32,7 @@ describe Osm::Section do
       myscout_payment_reminder_count: 6,
       myscout_payment_reminder_frequency: 7,
       myscout_details: true,
-      myscout_details_email_changes_to: 'notify-changes-to@example.com',
+      myscout_details_email_changes_to: 'notify-changes-to@example.com'
     }
   end
 

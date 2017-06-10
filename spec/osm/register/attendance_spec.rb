@@ -10,7 +10,7 @@ describe Osm::Register::Attendance do
       total: 4,
       attendance: {
         Date.new(2012, 1, 10) => :yes,
-        Date.new(2012, 1, 24) => :unadvised_absent,
+        Date.new(2012, 1, 24) => :unadvised_absent
       }
     )
 

@@ -74,7 +74,7 @@ module Osm
                 'recordid' => record_id,
                 'row' => 0,
                 'column' => osm_name,
-                'value' => value,
+                'value' => value
               })
             end
             return true
@@ -106,7 +106,7 @@ module Osm
             'recordid' => record_id,
             'row' => 0,
             'column' => osm_name,
-            'value' => value,
+            'value' => value
           })
           updated &&= (data.is_a?(Hash) && data[osm_name].to_s.eql?(value.to_s))
         end
@@ -128,7 +128,7 @@ module Osm
         require_ability_to(api: api, to: :write, on: :finance, section: invoice.section_id)
 
         data = api.post_query("finances.php?action=deleteEntry&sectionid=#{invoice.section_id}", post_data: {
-          'id' => id,
+          'id' => id
         })
 
         if data.is_a?(Hash) && data['ok']

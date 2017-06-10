@@ -18,7 +18,7 @@ module Osm
         'msg' => message,
         'scouts' => [*members.map{ |m| m.to_i }].join(','),
         'source' => source_address,
-        'type' => '',
+        'type' => ''
       })
 
       if data.is_a?(Hash) && data['result']

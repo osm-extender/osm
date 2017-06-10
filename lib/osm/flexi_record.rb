@@ -50,7 +50,7 @@ module Osm
       fail ArgumentError, 'name is invalid' if name.blank?
 
       data = api.post_query("extras.php?action=addColumn&sectionid=#{section_id}&extraid=#{id}", post_data: {
-        'columnName' => name,
+        'columnName' => name
       })
 
       if (data.is_a?(Hash) && data.has_key?('config'))

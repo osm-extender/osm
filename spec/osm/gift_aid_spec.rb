@@ -52,7 +52,7 @@ describe Osm::GiftAid do
         'donatedate'=> '2000-01-02',
         'amount' => '1.23',
         'notes' => 'Note',
-        'sectionid' => 1,
+        'sectionid' => 1
       }
       expect($api).to receive(:post_query).with('giftaid.php?action=update&sectionid=1&termid=2', post_data: post_data).and_return([])
 

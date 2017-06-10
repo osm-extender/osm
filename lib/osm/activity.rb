@@ -197,7 +197,7 @@ module Osm
         'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
         'activityid' => id,
         'sectionid' => section.to_i,
-        'notes' => notes,
+        'notes' => notes
       })
 
       if (data == { 'result'=>0 })
@@ -245,12 +245,12 @@ module Osm
             'sectionLongName' => nil,
             'sections' => sections.map{ |s| s.to_s },
             'badgetype' => b.badge_type.to_s,
-            'badgetypeLongName' => nil,
+            'badgetypeLongName' => nil
           }
         }.to_json,
         'shared' => shared,
         'sectionid' => section.to_i,
-        'secretEdit' => secret_update,
+        'secretEdit' => secret_update
       })
 
       if (data == { 'result'=>true })

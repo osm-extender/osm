@@ -131,7 +131,7 @@ module Osm
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         api_response = api.post_query('ext/members/contact/grid/?action=getMembers', post_data: {
           'section_id' => section.to_i,
-          'term_id' => term.to_i,
+          'term_id' => term.to_i
         })
 
         data = api_response['data'].is_a?(Hash) ? api_response['data'].values : []
@@ -290,7 +290,7 @@ module Osm
         'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
         'started' => joined_movement.strftime(Osm::OSM_DATE_FORMAT),
         'startedsection' => started_section.strftime(Osm::OSM_DATE_FORMAT),
-        'sectionid' => section_id,
+        'sectionid' => section_id
       })
 
       if (data.is_a?(Hash) && (data['result'] == 'ok') && (data['scoutid'].to_i > 0))
@@ -326,14 +326,14 @@ module Osm
         ['grouping_leader', 'patrolleader', grouping_leader],
         ['date_of_birth', 'dob', date_of_birth.strftime(Osm::OSM_DATE_FORMAT)],
         ['started_section', 'startedsection', started_section.strftime(Osm::OSM_DATE_FORMAT)],
-        ['joined_movement', 'started', joined_movement.strftime(Osm::OSM_DATE_FORMAT)],
+        ['joined_movement', 'started', joined_movement.strftime(Osm::OSM_DATE_FORMAT)]
       ] # our name => OSM name
       attribute_map.select{ |attr,col,val| force || changed_attributes.include?(attr) }.each do |attr,col,val|
         data = api.post_query('ext/members/contact/?action=update', post_data: {
           'scoutid' => id,
           'column' => col,
           'value' => val,
-          'sectionid' => section_id,
+          'sectionid' => section_id
         })
         updated = updated && data.is_a?(Hash) && data['ok'].eql?(true)
       end # each attr to update
@@ -347,7 +347,7 @@ module Osm
           'value' => new_value,
           'column_id' => CID_GENDER,
           'group_id' => GID_FLOATING,
-          'context' => 'members',
+          'context' => 'members'
         })
         updated = updated && data.is_a?(Hash) && data['data'].is_a?(Hash) && data['data']['value'].eql?(new_value)
       end
@@ -361,7 +361,7 @@ module Osm
           'value' => new_value,
           'column_id' => attr,
           'group_id' => GID_CUSTOM,
-          'context' => 'members',
+          'context' => 'members'
         })
         updated = updated && data.is_a?(Hash) && data['data'].is_a?(Hash) && data['data']['value'].to_s.eql?(new_value.to_s)
       end # each attr to update

@@ -68,7 +68,7 @@ module Osm
         fields = [
           ['tax_payer_name', 'parentname', tax_payer_name],
           ['tax_payer_address', 'address', tax_payer_address],
-          ['tax_payer_postcode', 'postcode', tax_payer_postcode],
+          ['tax_payer_postcode', 'postcode', tax_payer_postcode]
         ]
         fields.each do |field|
           next unless changed_attributes.include?(field[0])
@@ -78,7 +78,7 @@ module Osm
             'column' => field[1],
             'value' => field[2],
             'sectionid' => section_id,
-            'row' => 0,
+            'row' => 0
           })
           if result.is_a?(Hash)
             (result['items'] || []).each do |i|
@@ -98,7 +98,7 @@ module Osm
             'column' => date,
             'value' => now,
             'sectionid' => section_id,
-            'row' => 0,
+            'row' => 0
           })
           if result.is_a?(Hash)
             (result['items'] || []).each do |i|

@@ -291,7 +291,7 @@ describe Osm::Api do
 
     it 'Get ignoring cache' do
       data = [
-        { 'sectionid'=>'1', 'permissions'=>{ 'badge'=>10 } },
+        { 'sectionid'=>'1', 'permissions'=>{ 'badge'=>10 } }
       ]
 
       expect(OsmTest::Cache).not_to receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")

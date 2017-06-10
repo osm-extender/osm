@@ -86,7 +86,7 @@ module Osm
         'column' => 'name',
         'value' => name,
         'section_id' => section_id,
-        'row' => 0,
+        'row' => 0
       })
       if (data.is_a?(Hash) && data['ok'].eql?(true))
         # The cached budgets for the section will be out of date - remove them
@@ -103,7 +103,7 @@ module Osm
       Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
       data = api.post_query("finances.php?action=deleteCategory&sectionid=#{section_id}", post_data: {
-        'categoryid' => id,
+        'categoryid' => id
       })
       if (data.is_a?(Hash) && data['ok'].eql?(true))
         # The cached budgets for the section will be out of date - remove them

@@ -109,7 +109,7 @@ module Osm
       data = api.post_query("finances.php?action=addInvoice&sectionid=#{section_id}", post_data: {
         'name' => name,
         'extra' => extra_details,
-        'date' => date.strftime(Osm::OSM_DATE_FORMAT),
+        'date' => date.strftime(Osm::OSM_DATE_FORMAT)
       })
       if data.is_a?(Hash) && !data['id'].nil?
         # The cached invoices for the section will be out of date - remove them
@@ -132,7 +132,7 @@ module Osm
         'invoiceid' => id,
         'name' => name,
         'extra' => extra_details,
-        'date' => date.strftime(Osm::OSM_DATE_FORMAT),
+        'date' => date.strftime(Osm::OSM_DATE_FORMAT)
       })
 
       if data.is_a?(Hash) && data['ok'].eql?(true)
@@ -152,7 +152,7 @@ module Osm
       return false if finalised?
 
       data = api.post_query("finances.php?action=deleteInvoice&sectionid=#{section_id}", post_data: {
-        'invoiceid' => id,
+        'invoiceid' => id
       })
       if (data.is_a?(Hash) && data['ok'].eql?(true))
         # The cached invoices for the section will be out of date - remove them
@@ -175,7 +175,7 @@ module Osm
 
       data = api.post_query("finances.php?action=deleteInvoice&sectionid=#{section_id}", post_data: {
         'invoiceid' => id,
-        'archived' => 1,
+        'archived' => 1
       })
       if (data.is_a?(Hash) && data['ok'].eql?(true))
         self.archived = true

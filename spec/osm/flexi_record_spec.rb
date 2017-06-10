@@ -40,13 +40,13 @@ describe Osm::FlexiRecord do
           {
             'rows' => [
               { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
             ],
             'noscroll' => true
           },
           { 'rows' => [
             { 'name' => 'Field 1','field' => 'f_1','width' => '150px','editable' => true },
-            { 'name' => 'Filed 2','field' => 'f_2','width' => '150px','editable' => true },
+            { 'name' => 'Filed 2','field' => 'f_2','width' => '150px','editable' => true }
           ] }
         ]
       }
@@ -63,7 +63,7 @@ describe Osm::FlexiRecord do
 
     it 'Add field (success)' do
       post_data = {
-        'columnName' => 'name',
+        'columnName' => 'name'
       }
 
       data = {
@@ -77,12 +77,12 @@ describe Osm::FlexiRecord do
           {
             'rows' => [
               { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
             ],
             'noscroll' => true
           },
           { 'rows' => [
-            { 'name' => 'name','field' => 'f_1','width' => '150px','editable' => true },
+            { 'name' => 'name','field' => 'f_1','width' => '150px','editable' => true }
           ] }
         ]
       }
@@ -103,7 +103,7 @@ describe Osm::FlexiRecord do
           {
             'rows' => [
               { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' },
+              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
             ],
             'noscroll' => true
           },

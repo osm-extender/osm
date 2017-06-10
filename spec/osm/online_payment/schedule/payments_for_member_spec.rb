@@ -25,7 +25,7 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
     payments = {
       1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 1, timestamp: Time.new(2016, 1, 2, 3, 4))],
       2 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 2, timestamp: Time.new(2016, 1, 2, 3, 4))],
-      3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 3, timestamp: Time.new(2016, 1, 2, 3, 4)), Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 4, timestamp: Time.new(2016, 1, 2, 3, 5))],
+      3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 3, timestamp: Time.new(2016, 1, 2, 3, 4)), Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 4, timestamp: Time.new(2016, 1, 2, 3, 5))]
     }
     p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
 
@@ -41,7 +41,7 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
       3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :initiated)],
       4 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid)],
       5 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :received)],
-      6 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)],
+      6 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)]
     }
     p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
 
@@ -61,7 +61,7 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
       3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :initiated)],
       4 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid)],
       5 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :received)],
-      6 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)],
+      6 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)]
     }
     p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
 

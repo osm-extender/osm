@@ -21,7 +21,7 @@ describe Osm::Badge do
         add_columns_to_module: 7,
         level_requirement: 8,
         requires_modules: [['A'], ['B', 'C']],
-        show_level_letters: true,
+        show_level_letters: true
       }
     end
 
@@ -78,7 +78,7 @@ describe Osm::Badge do
     badge = Osm::Badge.new(modules: [
       Osm::Badge::RequirementModule.new(id: 2, letter: 'c'),
       Osm::Badge::RequirementModule.new(id: 10, letter: 'b'),
-      Osm::Badge::RequirementModule.new(id: 1, letter: 'a'),
+      Osm::Badge::RequirementModule.new(id: 1, letter: 'a')
     ])
 
     expect(badge.module_map).to eq(1=>'a', 10=>'b', 2=>'c', 'a'=>1, 'b'=>10, 'c'=>2)
@@ -88,7 +88,7 @@ describe Osm::Badge do
     badge = Osm::Badge.new(modules: [
       Osm::Badge::RequirementModule.new(id: 2, letter: 'c', min_required: 5),
       Osm::Badge::RequirementModule.new(id: 10, letter: 'b', min_required: 4),
-      Osm::Badge::RequirementModule.new(id: 1, letter: 'a', min_required: 3),
+      Osm::Badge::RequirementModule.new(id: 1, letter: 'a', min_required: 3)
     ])
 
     expect(badge.needed_per_module).to eq('a'=>3, 'b'=>4, 'c'=>5, 2=>5, 10=>4, 1=>3)
@@ -98,7 +98,7 @@ describe Osm::Badge do
     badge = Osm::Badge.new(modules: [
       Osm::Badge::RequirementModule.new(id: 2, letter: 'c'),
       Osm::Badge::RequirementModule.new(id: 10, letter: 'b'),
-      Osm::Badge::RequirementModule.new(id: 1, letter: 'a'),
+      Osm::Badge::RequirementModule.new(id: 1, letter: 'a')
     ])
 
     expect(badge.module_letters).to eq(['a', 'b', 'c'])
@@ -140,7 +140,7 @@ describe Osm::Badge do
               'portal_config' => '{"position":{"x":58,"y":282,"w":20,"h":20,"r":6}}',
               'sharing' => 'default-locked',
               'shortname' => '00',
-              'userid' => '0',
+              'userid' => '0'
             }
           },
           'structure' => {
@@ -159,7 +159,7 @@ describe Osm::Badge do
                   { 'name' => 'r_name','field' => '2345','width' => '80px','formatter' => 'cellFormatter','tooltip' => 'r_description','editable' => 'true','module'=>'a' }
                 ]
               }
-            ],
+            ]
           }
         }
 
@@ -173,8 +173,8 @@ describe Osm::Badge do
             'custom_columns' => '',
             'completed_into_column_id' => '',
             'numeric_into_column_id' => '',
-            'add_column_id_to_numeric' => '',
-          },
+            'add_column_id_to_numeric' => ''
+          }
         ] }
       end
 
@@ -182,7 +182,7 @@ describe Osm::Badge do
         Osm::CoreBadge =>      'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=4&term_id=2&section_id=1',
         Osm::ChallengeBadge => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=1&term_id=2&section_id=1',
         Osm::StagedBadge =>    'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=3&term_id=2&section_id=1',
-        Osm::ActivityBadge =>  'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=2&term_id=2&section_id=1',
+        Osm::ActivityBadge =>  'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=2&term_id=2&section_id=1'
       }
       urls.each do |type, path|
         it type.type.to_s.titleize do
@@ -247,7 +247,7 @@ describe Osm::Badge do
           'completed' => '2',
           'awarded' => '1',
           'awardeddate' => '2000-01-02',
-          '2345' => 'd',
+          '2345' => 'd'
         }]
       }
 
@@ -283,7 +283,7 @@ describe Osm::Badge do
             '95_0' => 'Awarded',
             '96_0' => 'Awarded Lvl 2',
             '97_0' => '01/02/2003',
-            '98_0' => '02/03/2004 (Lvl 1)',
+            '98_0' => '02/03/2004 (Lvl 1)'
           }
         ]
       }
@@ -330,7 +330,7 @@ describe Osm::Badge do
             'picture' => '',
             'typeLabel' => 'Activity',
             'type_id' => 2
-          },
+          }
         },
         'pending' => {
           '93_0' => [
@@ -350,7 +350,7 @@ describe Osm::Badge do
               'picture' => '',
               'scout_id' => '1',
               'sid' => '1',
-              'type_id' => '3',
+              'type_id' => '3'
             },
             {
               'badge_id' => '93',
@@ -368,8 +368,8 @@ describe Osm::Badge do
               'picture' => '',
               'scout_id' => '2',
               'sid' => '2',
-              'type_id' => '3',
-            },
+              'type_id' => '3'
+            }
           ],
           '145_0' => [{
             'badge_id' => '145',
@@ -386,9 +386,9 @@ describe Osm::Badge do
             'picture' => '',
             'scout_id' => '1',
             'sid' => '1',
-            'type_id' => '2',
-          }],
-        },
+            'type_id' => '2'
+          }]
+        }
       }
       expect($api).to receive(:post_query).with('ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return(data)
 
@@ -414,7 +414,7 @@ describe Osm::Badge do
         'identifier' => 'badge_id_level',
         'items' => [
           { 'shortname' => 'badge_1', 'stock' => 1, 'desired' => 0, 'due' => 0, 'badge_id_level' => '100_1' },
-          { 'shortname' => 'badge_2', 'stock' => 2, 'desired' => 0, 'due' => 0, 'badge_id_level' => '200_2' },
+          { 'shortname' => 'badge_2', 'stock' => 2, 'desired' => 0, 'due' => 0, 'badge_id_level' => '200_2' }
         ]
       }
       expect($api).to receive(:post_query).with('ext/badges/stock/?action=getBadgeStock&section=beavers&section_id=1&term_id=2').and_return(badges_body)

@@ -71,7 +71,7 @@ module Osm
             'Initiated' => :initiated,
             'Paid' => :paid,
             'Received' => :received,
-            'Paid manually' => :paid_manually,
+            'Paid manually' => :paid_manually
           }
 
           data.map! do |item|

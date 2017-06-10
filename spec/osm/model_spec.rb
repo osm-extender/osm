@@ -8,7 +8,7 @@ describe Osm::Model do
       {
         cache: @@cache,
         prepend_to_cache_key: @@prepend_to_cache_key,
-        cache_ttl: @@cache_ttl,
+        cache_ttl: @@cache_ttl
       }
     end
 

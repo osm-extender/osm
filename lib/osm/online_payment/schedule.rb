@@ -9,7 +9,7 @@ module Osm
         21 => 'Allowed within 3 weeks of due day',
         28 => 'Allowed within 4 weeks of due day',
         42 => 'Allowed within 6 weeks of due day',
-        56 => 'Allowed within 8 weeks of due day',
+        56 => 'Allowed within 8 weeks of due day'
       }.freeze
 
       # @!attribute [rw] id

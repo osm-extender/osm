@@ -22,7 +22,7 @@ describe Osm::Event do
       attendance_limit: 3,
       attendance_limit_includes_leaders: true,
       attendance_reminder: 14,
-      allow_booking: false,
+      allow_booking: false
     }
     event = Osm::Event.new(data)
 
@@ -103,7 +103,7 @@ describe Osm::Event do
           'attendancelimit' => '3',
           'attendancereminder' => '7',
           'limitincludesleaders' => '1',
-          'allowbooking' => '1',
+          'allowbooking' => '1'
         }]
       }
 
@@ -122,7 +122,7 @@ describe Osm::Event do
         'config' => '[{"id":"f_1","name":"Name","pL":"Label","pR":"1"}]',
         'badgelinks' => [
           { 'section'=>'cubs', 'badgetype'=>'activity', 'badge'=>'activity_athletics', 'columnname'=>'b', 'data'=>'Yes', 'badgeLongName'=>'Athletics', 'columnnameLongName'=>'B: Run', 'sectionLongName'=>'Cubs', 'badgetypeLongName'=>'Activity', 'badge_id'=>'179', 'badge_version'=>'0', 'column_id'=>'3' },
-          { 'section'=>'staged', 'badgetype'=>'staged', 'badge'=>'hikes', 'columnname'=>'custom', 'data'=>'1', 'badgeLongName'=>'Hikes', 'columnnameLongName'=>'C: Hike name = 1', 'sectionLongName'=>'Staged', 'badgetypeLongName'=>'Staged', 'badge_id'=>'197', 'badge_version'=>'0', 'column_id'=>'4' },
+          { 'section'=>'staged', 'badgetype'=>'staged', 'badge'=>'hikes', 'columnname'=>'custom', 'data'=>'1', 'badgeLongName'=>'Hikes', 'columnnameLongName'=>'C: Hike name = 1', 'sectionLongName'=>'Staged', 'badgetypeLongName'=>'Staged', 'badge_id'=>'197', 'badge_version'=>'0', 'column_id'=>'4' }
         ],
         'sectionid' => '1',
         'googlecalendar' => nil,
@@ -135,7 +135,7 @@ describe Osm::Event do
         'attendancelimit' => '3',
         'attendancereminder' => '7',
         'limitincludesleaders' => '1',
-        'allowbooking' => '1',
+        'allowbooking' => '1'
       }
 
       allow(Osm::Model).to receive(:get_user_permissions) { { events: [:read, :write] } }
@@ -325,8 +325,8 @@ describe Osm::Event do
               'lastname' => 'Last',
               'dob' => '1980-01-02',
               'patrolid' => '2',
-              'f_1' => 'a',
-            },
+              'f_1' => 'a'
+            }
           ])
         allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 3) }
 
@@ -346,7 +346,7 @@ describe Osm::Event do
               'lastname' => 'Last',
               'dob' => '1980-01-02',
               'patrolid' => '2',
-              'f_1' => 'a',
+              'f_1' => 'a'
             },{
               'scoutid' => '5',
               'attending' => 'Yes',
@@ -354,7 +354,7 @@ describe Osm::Event do
               'lastname' => 'Last',
               'dob' => '1980-01-02',
               'patrolid' => '2',
-              'f_1' => 'a',
+              'f_1' => 'a'
             },{
               'scoutid' => '6',
               'attending' => 'Yes',
@@ -362,7 +362,7 @@ describe Osm::Event do
               'lastname' => 'Last',
               'dob' => '1980-01-02',
               'patrolid' => '2',
-              'f_1' => 'a',
+              'f_1' => 'a'
             }
           ])
         allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 3) }
@@ -383,7 +383,7 @@ describe Osm::Event do
               'lastname' => 'Last',
               'dob' => '1980-01-02',
               'patrolid' => '2',
-              'f_1' => 'a',
+              'f_1' => 'a'
             },{
               'scoutid' => '5',
               'attending' => 'Yes',
@@ -391,7 +391,7 @@ describe Osm::Event do
               'lastname' => 'Last',
               'dob' => '1980-01-02',
               'patrolid' => '2',
-              'f_1' => 'a',
+              'f_1' => 'a'
             }
           ])
         allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 3) }
@@ -421,7 +421,7 @@ describe Osm::Event do
           'attendancelimit' => 3,
           'limitincludesleaders' => 'true',
           'allowbooking' => 'true',
-          'attendancereminder' => 1,
+          'attendancereminder' => 1
         }
 
         allow(Osm::Event).to receive(:get_for_section) { [] }
@@ -468,7 +468,7 @@ describe Osm::Event do
           'attendancelimit' => 3,
           'attendancereminder' => 0,
           'limitincludesleaders' => 'true',
-          'allowbooking' => 'true',
+          'allowbooking' => 'true'
         }
 
         allow(Osm::Event).to receive(:get_for_section) { [] }
@@ -516,7 +516,7 @@ describe Osm::Event do
             'attendancelimit' => 3,
             'limitincludesleaders' => 'true',
             'allowbooking' => 'true',
-            'attendancereminder' => 1,
+            'attendancereminder' => 1
           }
 
           allow(Osm::Event).to receive(:get_for_section) { [] }
@@ -540,7 +540,7 @@ describe Osm::Event do
             attendance_limit: 3,
             attendance_limit_includes_leaders: true,
             attendance_reminder: 1,
-            allow_booking: true,
+            allow_booking: true
           }
           @badge_path = 'ext/badges/records/index.php?action=linkBadgeToItem&sectionid=1'
         end
@@ -555,7 +555,7 @@ describe Osm::Event do
             'badge_version' => 2,
             'column_id' => 1,
             'column_data' => '',
-            'new_column_name' => '',
+            'new_column_name' => ''
           }
           expect($api).to receive(:post_query).with(@badge_path, post_data: post_data).and_return('status' => true)
 
@@ -584,7 +584,7 @@ describe Osm::Event do
             'badge_version' => 2,
             'column_id' => -2,
             'column_data' => '1',
-            'new_column_name' => 'Label for added column',
+            'new_column_name' => 'Label for added column'
           }
           expect($api).to receive(:post_query).with(@badge_path, post_data: post_data).and_return('status' => true)
 
@@ -612,7 +612,7 @@ describe Osm::Event do
             'badge_version' => 2,
             'column_id' => 4,
             'column_data' => '2',
-            'new_column_name' => '',
+            'new_column_name' => ''
           }
           expect($api).to receive(:post_query).with(@badge_path, post_data: post_data).and_return('status' => true)
 
@@ -678,7 +678,7 @@ describe Osm::Event do
           'attendancelimit' => 3,
           'attendancereminder' => 2,
           'limitincludesleaders' => 'true',
-          'allowbooking' => 'true',
+          'allowbooking' => 'true'
         }
 
         expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return('id' => 2)
@@ -727,7 +727,7 @@ describe Osm::Event do
           'attendancelimit' => 3,
           'attendancereminder' => 1,
           'limitincludesleaders' => 'true',
-          'allowbooking' => 'true',
+          'allowbooking' => 'true'
         }
 
         expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return('id' => 2)
@@ -813,7 +813,7 @@ describe Osm::Event do
             'id' => 2,
             'badge_id' => 3,
             'badge_version' => 2,
-            'column_id' => 4,
+            'column_id' => 4
           }
           expect($api).to receive(:post_query).with('ext/badges/records/index.php?action=deleteBadgeLink&sectionid=1', post_data: post_data).and_return('status' => true)
 
@@ -915,7 +915,7 @@ describe Osm::Event do
     it 'Get attendance (no items)' do
       attendance_body = {
       	'identifier' => 'scoutid',
-	      'eventid' => '2',
+	      'eventid' => '2'
       }
 
       expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=2&sectionid=1&termid=3').and_return(attendance_body)
@@ -988,7 +988,7 @@ describe Osm::Event do
         'pnnotepad' => '',
         'structure' => [],
         'attendancelimit' => '3',
-        'limitincludesleaders' => '1',
+        'limitincludesleaders' => '1'
       }
 
       expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(event_body)

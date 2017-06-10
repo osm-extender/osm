@@ -12,7 +12,7 @@ describe Osm::FlexiRecord::Data do
         'completed' => nil,
         'age' => nil,
         'f_1' => 'a',
-        'f_2' => 'b',
+        'f_2' => 'b'
       },
       flexi_record: Osm::FlexiRecord.new()
     )
@@ -50,12 +50,12 @@ describe Osm::FlexiRecord::Data do
         'column' => 'f_1',
         'value' => 'value',
         'sectionid' => 1,
-        'extraid' => 2,
+        'extraid' => 2
       }
 
       data = {
         'items' => [
-          { 'f_1' => 'value', 'scoutid' => '4' },
+          { 'f_1' => 'value', 'scoutid' => '4' }
         ]
       }
       expect($api).to receive(:post_query).with('extras.php?action=updateScout', post_data: post_data).and_return(data)
@@ -76,7 +76,7 @@ describe Osm::FlexiRecord::Data do
     it 'Failed' do
       data = {
         'items' => [
-          { 'f_1' => 'old value', 'scoutid' => '4' },
+          { 'f_1' => 'old value', 'scoutid' => '4' }
         ]
       }
 

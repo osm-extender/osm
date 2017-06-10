@@ -54,7 +54,7 @@ module Osm
             'column' => field,
             'value' => now,
             'sectionid' => flexi_record.section_id,
-            'extraid' => flexi_record.id,
+            'extraid' => flexi_record.id
           })
           if (data.is_a?(Hash) && data['items'].is_a?(Array))
             data['items'].each do |item|

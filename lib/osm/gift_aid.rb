@@ -98,7 +98,7 @@ module Osm
         'sectionid' => section_id,
         'donatedate'=> date.strftime(Osm::OSM_DATE_FORMAT),
         'amount' => amount,
-        'notes' => note,
+        'notes' => note
       })
 
       # The cached donations and data will be out of date - remove them

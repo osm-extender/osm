@@ -135,7 +135,7 @@ describe Osm::OnlinePayment::Schedule do
         body = { 'items'=>[ {
           'directdebit'=>'Active', 'firstname'=>'John', 'lastname'=>'Snow', 'patrolid'=>'5', 'scoutid'=>'6',
           'startdate'=>'2015-02-03',
-          '4'=>'{"status":[{"statusid":"7","scoutid":"6","schemeid":"1","paymentid":"8","statustimestamp":"03/02/2016 20:51","status":"Paid manually","details":"","editable":"1","latest":"1","who":"0","firstname":"System"}]}',
+          '4'=>'{"status":[{"statusid":"7","scoutid":"6","schemeid":"1","paymentid":"8","statustimestamp":"03/02/2016 20:51","status":"Paid manually","details":"","editable":"1","latest":"1","who":"0","firstname":"System"}]}'
         } ] }
         expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=2&schemeid=1&termid=3').once{ body }
       end

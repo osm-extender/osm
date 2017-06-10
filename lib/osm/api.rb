@@ -65,7 +65,7 @@ module Osm
         site:         site,
         debug:        debug,
         user_id:      user_id.clone,
-        user_secret:  user_secret.clone,
+        user_secret:  user_secret.clone
       }.merge(attributes)
       Osm::Api.new(attributes)
     end
@@ -102,7 +102,7 @@ module Osm
     def authorize_user(email_address:, password:)
       api_data = {
         'email' => email_address.to_s,
-        'password' => password.to_s,
+        'password' => password.to_s
       }
       data = post_query('users.php?action=authorise', post_attributes: api_data)
 
@@ -111,7 +111,7 @@ module Osm
       if valid_user?(id: data['userid'], secret: ['secret'])
         return {
           user_id: data['userid'],
-          user_secret: data['secret'],
+          user_secret: data['secret']
         }
       else
         return nil
@@ -274,7 +274,7 @@ module Osm
         name:       @name.clone,
         api_id:     @api_id.clone,
         api_secret: @api_secret.clone,
-        debug:      @debug,
+        debug:      @debug
       }
       if has_valid_user?
         attributes.merge!(          user_id:      @user_id.clone,

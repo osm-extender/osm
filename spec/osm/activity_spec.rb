@@ -56,7 +56,7 @@ describe Osm::Activity do
             'fileid' => '6',
             'activityid' => '1',
             'filename' => 'File Name',
-            'name' => 'Name',
+            'name' => 'Name'
           }
         ],
         'badges' => [
@@ -72,7 +72,7 @@ describe Osm::Activity do
             'columnnameLongName' => 'B: Fire drill',
             'data' => 'Yes',
             'section' => 'cubs',
-            'sectionLongName' => 'Cubs',
+            'sectionLongName' => 'Cubs'
           }
         ]
       }
@@ -122,7 +122,7 @@ describe Osm::Activity do
         'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => 2,
-        'notes' => 'Notes',
+        'notes' => 'Notes'
       }
       expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return('result' => 0)
   
@@ -135,7 +135,7 @@ describe Osm::Activity do
         'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => 2,
-        'notes' => 'Notes',
+        'notes' => 'Notes'
       }
       expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return('result' => 1)
 
@@ -159,7 +159,7 @@ describe Osm::Activity do
         'links' => '[{"badge_id":"181","badge_version":"0","column_id":"93384","badge":null,"badgeLongName":"Badge name","columnname":null,"columnnameLongName":"l","data":"","section":"beavers","sectionLongName":null,"sections":["beavers","cubs"],"badgetype":"activity","badgetypeLongName":null}]',
         'shared' => 0,
         'sectionid' => 1,
-        'secretEdit' => true,
+        'secretEdit' => true
       }
   
       expect($api).to receive(:post_query).with('programme.php?action=update', post_data: post_data).and_return('result' => true)

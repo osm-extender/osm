@@ -4,7 +4,7 @@ describe Osm::ApiAccess do
     data = {
       id: 1,
       name: 'Name',
-      permissions: { permission: [:read] },
+      permissions: { permission: [:read] }
     }
     api_access = Osm::ApiAccess.new(data)
 

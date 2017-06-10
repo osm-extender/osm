@@ -123,7 +123,7 @@ module Osm
         'section' => section.type,
         'type' => 'current',
         'level' => badge_level.to_i,
-        'badge_id' => badge_id.to_i,
+        'badge_id' => badge_id.to_i
       })
       data.is_a?(Hash) && data['ok']
     end
@@ -273,7 +273,7 @@ module Osm
             first_name: item['firstname'],
             last_name: item['lastname'],
             name: "#{item['firstname']} #{item['lastname']}",
-            member_id: Osm.to_i_or_nil(item['scout_id']),
+            member_id: Osm.to_i_or_nil(item['scout_id'])
           }
 
           badge_data = Hash[item.to_a.select{ |k,v| !!k.match(/\d+_\d+/) }]

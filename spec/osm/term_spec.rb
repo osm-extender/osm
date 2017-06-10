@@ -191,7 +191,7 @@ describe Osm::Term do
         expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return(          '9' => [
             { 'termid'=>'1', 'name'=>'Term 1', 'sectionid'=>'9', 'startdate'=>(Date.today - 90).strftime('%Y-%m-%d'), 'enddate'=>(Date.today - 31).strftime('%Y-%m-%d') },
             { 'termid'=>'2', 'name'=>'Term 2', 'sectionid'=>'9', 'startdate'=>(Date.today - 30).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 30).strftime('%Y-%m-%d') },
-            { 'termid'=>'3', 'name'=>'Term 3', 'sectionid'=>'9', 'startdate'=>(Date.today + 31).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 90).strftime('%Y-%m-%d') },
+            { 'termid'=>'3', 'name'=>'Term 3', 'sectionid'=>'9', 'startdate'=>(Date.today + 31).strftime('%Y-%m-%d'), 'enddate'=>(Date.today + 90).strftime('%Y-%m-%d') }
           ])
         expect(Osm::Term.get_current_term_for_section(api: $api, section: 9).id).to eq(2)
       end

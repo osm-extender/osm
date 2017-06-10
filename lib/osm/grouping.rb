@@ -73,7 +73,7 @@ module Osm
         data = api.post_query("users.php?action=editPatrol&sectionid=#{section_id}", post_data: {
           'patrolid' => id,
           'name' => name,
-          'active' => active,
+          'active' => active
         })
         result &= data.nil?
       end
@@ -81,7 +81,7 @@ module Osm
       if to_update.include?('points')
         data = api.post_query("users.php?action=updatePatrolPoints&sectionid=#{section_id}", post_data: {
           'patrolid' => id,
-          'points' => points,
+          'points' => points
         })
         result &= (data == {})
       end

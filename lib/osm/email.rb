@@ -55,7 +55,7 @@ module Osm
         'cc' => cc,
         'from' => from,
         'subject' => subject,
-        'body' => body,
+        'body' => body
       })
 
       data.is_a?(Hash) && data['ok']

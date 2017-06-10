@@ -37,7 +37,7 @@ describe Osm::Register do
       allow(Osm::Register).to receive(:get_structure) { [
         Osm::Register::Field.new(id: '2000-01-01', name: 'Name', tooltip: 'Tooltip'),
         Osm::Register::Field.new(id: '2000-01-02', name: 'Name', tooltip: 'Tooltip'),
-        Osm::Register::Field.new(id: '2000-01-03', name: 'Name', tooltip: 'Tooltip'),
+        Osm::Register::Field.new(id: '2000-01-03', name: 'Name', tooltip: 'Tooltip')
       ] }
 
       register = Osm::Register.get_attendance(api: $api, section: 1, term: 2)

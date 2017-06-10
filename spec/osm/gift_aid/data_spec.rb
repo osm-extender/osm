@@ -12,7 +12,7 @@ describe Osm::GiftAid::Data do
       grouping_id: 3,
       total: '2.34',
       donations: {
-        Date.new(2012, 1, 2) => '1.23',
+        Date.new(2012, 1, 2) => '1.23'
       }
     )
 
@@ -58,7 +58,7 @@ describe Osm::GiftAid::Data do
           total: '2.34',
           donations: {
             Date.new(2012, 1, 2) => '1.23',
-            Date.new(2012, 1, 3) => '2.34',
+            Date.new(2012, 1, 3) => '2.34'
           }
         )
         allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 4) }
@@ -69,7 +69,7 @@ describe Osm::GiftAid::Data do
           'scoutid' => 1,
           'termid' => 4,
           'sectionid' => 2,
-          'row' => 0,
+          'row' => 0
         }
         body_data = {
           'items' => [
@@ -94,7 +94,7 @@ describe Osm::GiftAid::Data do
           'column' => '2012-01-03',
           'value' => '3.45',
           'sectionid' => 2,
-          'row' => 0,
+          'row' => 0
         }
         body_data = {
           'items' => [

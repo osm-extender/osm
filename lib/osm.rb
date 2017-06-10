@@ -45,7 +45,7 @@ module Osm
     3 => 'Gold',
     gold: 'Gold',
     4 => 'Gold+',
-    gold_plus: 'Gold+',
+    gold_plus: 'Gold+'
   }
   subscription_level_names.default = 'Unknown'
   SUBSCRIPTION_LEVEL_NAMES = subscription_level_names
@@ -149,7 +149,7 @@ module Osm
     permissions_map = {
       10  => [:read],
       20  => [:read, :write],
-      100 => [:read, :write, :administer],
+      100 => [:read, :write, :administer]
     }
 
     permissions.inject({}) do |new_hash, (key, value)|

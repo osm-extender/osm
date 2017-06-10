@@ -79,7 +79,7 @@ module Osm
           'email_1' => 'data[email1]',
           'receive_email_1' => 'data[email1_leaders]',
           'email_2' => 'data[email2]',
-          'receive_email_2' => 'data[email2_leaders]',
+          'receive_email_2' => 'data[email2_leaders]'
         } # our name => OSM name
 
         data = {}
@@ -98,7 +98,7 @@ module Osm
             'associated_id' => member.id,
             'associated_type' => 'member',
             'context' => 'members',
-            'group_id' => self.class::GROUP_ID,
+            'group_id' => self.class::GROUP_ID
           }.merge(data))
           updated = result.is_a?(Hash) && result['status'].eql?(true)
         end

@@ -51,7 +51,7 @@ describe Osm::Event::Attendance do
           'value' => 'value',
           'sectionid' => 1,
           'row' => 0,
-          'eventid' => 2,
+          'eventid' => 2
         }).and_return({})
 
       ea.attending = :yes
@@ -63,7 +63,7 @@ describe Osm::Event::Attendance do
           'value' => 'Yes',
           'sectionid' => 1,
           'row' => 0,
-          'eventid' => 2,
+          'eventid' => 2
         }).and_return({})
 
       ea.payment_control = :automatic
@@ -75,7 +75,7 @@ describe Osm::Event::Attendance do
           'value' => 'Automatic',
           'sectionid' => 1,
           'row' => 0,
-          'eventid' => 2,
+          'eventid' => 2
         }).and_return({})
 
       expect(ea.update($api)).to eq(true)
@@ -89,7 +89,7 @@ describe Osm::Event::Attendance do
 	      { 'date' => '10/06/2013 19:14','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: No' },
 	      { 'date' => '10/06/2013 19:13','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Yes' },
 	      { 'date' => '10/06/2013 19:12','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Invited' },
-	      { 'date' => '10/06/2013 19:11','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Show in My.SCOUT' },
+	      { 'date' => '10/06/2013 19:11','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Show in My.SCOUT' }
       ]
 
       expect($api).to receive(:post_query).with('events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3').and_return(data)
@@ -105,7 +105,7 @@ describe Osm::Event::Attendance do
         { event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 14), by: 'A Leader', :type => :attendance, :description => 'Attendance: No', :attendance => :no },
         { event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 13), by: 'A Leader', :type => :attendance, :description => 'Attendance: Yes', :attendance => :yes },
         { event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 12), by: 'A Leader', :type => :attendance, :description => 'Attendance: Invited', :attendance => :invited },
-        { event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 11), by: 'A Leader', :type => :attendance, :description => 'Attendance: Show in My.SCOUT', :attendance => :shown },
+        { event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 11), by: 'A Leader', :type => :attendance, :description => 'Attendance: Show in My.SCOUT', :attendance => :shown }
       ])
     end
 

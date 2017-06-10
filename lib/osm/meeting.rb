@@ -141,7 +141,7 @@ module Osm
         'start' => meeting.date.strftime(Osm::OSM_DATE_FORMAT),
         'starttime' => meeting.start_time,
         'endtime' => meeting.finish_time,
-        'title' => meeting.title,
+        'title' => meeting.title
       })
 
       # The cached programmes for the section will be out of date - remove them
@@ -165,7 +165,7 @@ module Osm
       activities.each do |activity|
         this_activity = {
           'activityid' => activity.activity_id,
-          'notes' => activity.notes,
+          'notes' => activity.notes
         }
         activities_data.push this_activity
       end
@@ -196,7 +196,7 @@ module Osm
             'section' => b.badge_section,
             'sectionLongName' => nil,
             'badgetype' => b.badge_type.to_s,
-            'badgetypeLongName' => nil,
+            'badgetypeLongName' => nil
           }
         }.to_json
       }

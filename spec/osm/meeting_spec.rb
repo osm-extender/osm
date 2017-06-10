@@ -67,8 +67,8 @@ describe Osm::Meeting do
           'data' => '',
           'label' => 'Disability Awareness Activity Guide dogs',
           'section' => 'cubs',
-          'sectionLongName' => 'Cubs',
-         }] },
+          'sectionLongName' => 'Cubs'
+         }] }
       }
       expect($api).to receive(:post_query).with('programme.php?action=getProgramme&sectionid=3&termid=4').and_return(body)
 
@@ -144,7 +144,7 @@ describe Osm::Meeting do
         'start' => '2000-01-02',
         'starttime' => '11:11',
         'endtime' => '22:22',
-        'title' => 'Title',
+        'title' => 'Title'
       }).and_return('result'=>0)
 
       term = Osm::Term.new(id: 2)
@@ -156,7 +156,7 @@ describe Osm::Meeting do
         date: Date.new(2000, 1, 2),
         start_time: '11:11',
         finish_time: '22:22',
-        title: 'Title',
+        title: 'Title'
       }).is_a?(Osm::Meeting)).to eq(true)
     end
 
@@ -168,7 +168,7 @@ describe Osm::Meeting do
         date: Date.new(2000, 1, 2),
         start_time: '11:11',
         finish_time: '22:22',
-        title: 'Title',
+        title: 'Title'
       })).to be_nil
     end
 
@@ -177,7 +177,7 @@ describe Osm::Meeting do
       expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => 2,
-        'notes' => 'Notes',
+        'notes' => 'Notes'
       }).and_return('result'=>0)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
@@ -191,7 +191,7 @@ describe Osm::Meeting do
       expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: {        'meetingdate' => '2000-01-02',
         'sectionid' => 1,
         'activityid' => 2,
-        'notes' => 'Notes',
+        'notes' => 'Notes'
       }).and_return('result'=>1)
       activity = Osm::Activity.new(id: 2, title: 'Title')
       meeting = Osm::Meeting.new(section_id: 1, date: Date.new(2000, 1, 2))
@@ -205,7 +205,7 @@ describe Osm::Meeting do
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '',
         'activity' => '[{"activityid":3,"notes":"Some notes"}]',
-        'badgelinks' => '[{"badge_id":"181","badge_version":"0","column_id":"93384","badge":null,"badgeLongName":"Badge name","columnname":null,"columnnameLongName":"l","data":"","section":"beavers","sectionLongName":null,"badgetype":"activity","badgetypeLongName":null}]',
+        'badgelinks' => '[{"badge_id":"181","badge_version":"0","column_id":"93384","badge":null,"badgeLongName":"Badge name","columnname":null,"columnnameLongName":"l","data":"","section":"beavers","sectionLongName":null,"badgetype":"activity","badgetypeLongName":null}]'
       }).and_return('result'=>0)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
@@ -232,7 +232,7 @@ describe Osm::Meeting do
       expect($api).to receive(:post_query).with('programme.php?action=editEvening', post_data: {
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
         'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
-        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'badgelinks' => '[]',
+        'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'badgelinks' => '[]'
       }).and_return('result'=>1)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
@@ -261,9 +261,9 @@ describe Osm::Meeting do
       body = {
         'items' => [{ 'eveningid' => '5', 'sectionid' =>'3', 'title' => 'Weekly Meeting 1', 'notesforparents' => 'parents', 'games' => 'games', 'prenotes' => 'before', 'postnotes' => 'after', 'leaders' => 'leaders', 'meetingdate' => '2001-02-03', 'starttime' => '19:15:00', 'endtime' => '20:30:00', 'googlecalendar' => '' }],
         'activities' => { '5' => [
-          ['6', { 'activityid' => '6', 'title' => 'Activity 6', 'notes' => 'Some notes', 'eveningid' => '5' }],
+          ['6', { 'activityid' => '6', 'title' => 'Activity 6', 'notes' => 'Some notes', 'eveningid' => '5' }]
         ] },
-        'badgelinks' => { '5' => [] },
+        'badgelinks' => { '5' => [] }
       }
       expect($api).to receive(:post_query).with('programme.php?action=getProgramme&sectionid=3&termid=4').and_return(body)
 

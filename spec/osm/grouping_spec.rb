@@ -16,7 +16,7 @@ describe Osm::Grouping do
         'patrolid' => 1,
         'name' => 'Patrol Name',
         'active' => 1,
-        'points' => '3',
+        'points' => '3'
       }] }
       expect($api).to receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(data)
 
@@ -50,7 +50,7 @@ describe Osm::Grouping do
       post_data = {
         'patrolid' => grouping.id,
         'name' => grouping.name,
-        'active' => grouping.active,
+        'active' => grouping.active
       }
       expect($api).to receive(:post_query).with('users.php?action=editPatrol&sectionid=2', post_data: post_data).and_return(nil)
 
@@ -68,7 +68,7 @@ describe Osm::Grouping do
 
       post_data = {
         'patrolid' => grouping.id,
-        'points' => grouping.points,
+        'points' => grouping.points
       }
       expect($api).to receive(:post_query).with('users.php?action=updatePatrolPoints&sectionid=2', post_data: post_data).and_return({})
 

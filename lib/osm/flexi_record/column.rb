@@ -37,7 +37,7 @@ module Osm
 
         data = api.post_query("extras.php?action=renameColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
           'columnId' => id,
-          'columnName' => name,
+          'columnName' => name
         })
 
         if (data.is_a?(Hash) && data.has_key?('config'))
@@ -61,7 +61,7 @@ module Osm
         fail Osm::Forbidden, 'this column is not editable' unless editable
 
         data = api.post_query("extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
-          'columnId' => id,
+          'columnId' => id
         })
 
         if (data.is_a?(Hash) && data.has_key?('config'))

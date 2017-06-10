@@ -56,7 +56,7 @@ describe Osm::Budget do
         'column' => 'name',
         'value' => 'Budget Name',
         'section_id' => 2,
-        'row' => 0,
+        'row' => 0
       }).and_return('ok'=>true)
 
       expect(budget.create($api)).to eq(true)
@@ -88,7 +88,7 @@ describe Osm::Budget do
         'column' => 'name',
         'value' => 'Budget Name',
         'section_id' => 2,
-        'row' => 0,
+        'row' => 0
       }).and_return('ok'=>false)
 
       expect(budget.create($api)).to eq(false)
@@ -106,7 +106,7 @@ describe Osm::Budget do
         'column' => 'name',
         'value' => 'Budget Name',
         'section_id' => 2,
-        'row' => 0,
+        'row' => 0
       }).and_return('ok'=>true)
     
       expect(budget.update($api)).to eq(true)
@@ -124,7 +124,7 @@ describe Osm::Budget do
         'column' => 'name',
         'value' => 'Budget Name',
         'section_id' => 2,
-        'row' => 0,
+        'row' => 0
       }).and_return('ok'=>false)
     
       expect(budget.update($api)).to eq(false)

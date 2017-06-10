@@ -58,7 +58,7 @@ describe Osm::Badge::Data do
           Osm::Badge::Requirement.new(id: 6),
           Osm::Badge::Requirement.new(id: 7),
           Osm::Badge::Requirement.new(id: 8),
-          Osm::Badge::Requirement.new(id: 9),
+          Osm::Badge::Requirement.new(id: 9)
         ]
       ),
       requirements: {
@@ -70,7 +70,7 @@ describe Osm::Badge::Data do
         6 => 'xYES',
         7 => '',
         8 => nil,
-        9 => 0,
+        9 => 0
       }
     )
     expect(data.total_gained).to eq(4)
@@ -85,12 +85,12 @@ describe Osm::Badge::Data do
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b', id: 200), id: 3),
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b', id: 200), id: 4),
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 300), id: 5),
-        Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 300), id: 6),
+        Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 300), id: 6)
       ],
       modules: [
         Osm::Badge::RequirementModule.new(letter: 'a', id: 100),
         Osm::Badge::RequirementModule.new(letter: 'b', id: 200),
-        Osm::Badge::RequirementModule.new(letter: 'c', id: 300),
+        Osm::Badge::RequirementModule.new(letter: 'c', id: 300)
       ]
     )
     data = Osm::Badge::Data.new(
@@ -107,7 +107,7 @@ describe Osm::Badge::Data do
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'a', id: 1000), id: 2),
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b', id: 2000), id: 3),
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b', id: 2000), id: 4),
-        Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3000), id: 5),
+        Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3000), id: 5)
       ],
       modules: [
         Osm::Badge::RequirementModule.new(letter: 'a', id: 1000, min_required: 1 ),
@@ -144,7 +144,7 @@ describe Osm::Badge::Data do
         modules: [
           Osm::Badge::RequirementModule.new(id: 1, letter: 'a', min_required: 2),
           Osm::Badge::RequirementModule.new(id: 2, letter: 'b', min_required: 1),
-          Osm::Badge::RequirementModule.new(id: 3, letter: 'c', min_required: 1),
+          Osm::Badge::RequirementModule.new(id: 3, letter: 'c', min_required: 1)
         ],
         badges_required: [],
         other_requirements_required: [],
@@ -154,7 +154,7 @@ describe Osm::Badge::Data do
           Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'b', id: 2), id: 20),
           Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'b', id: 2), id: 21),
           Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 30),
-          Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 31),
+          Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 31)
         ]
       )
 
@@ -245,7 +245,7 @@ describe Osm::Badge::Data do
         modules: [
           Osm::Badge::RequirementModule.new(id: 1, letter: 'a', min_required: 1),
           Osm::Badge::RequirementModule.new(id: 2, letter: 'b', min_required: 1),
-          Osm::Badge::RequirementModule.new(id: 3, letter: 'c', min_required: 1),
+          Osm::Badge::RequirementModule.new(id: 3, letter: 'c', min_required: 1)
         ],
         show_level_letters: true
       )
@@ -255,7 +255,7 @@ describe Osm::Badge::Data do
         Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'b', id: 2), id: 20),
         Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'b', id: 2), id: 21),
         Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 30),
-        Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 31),
+        Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 31)
       ]
 
       requirements = { 10=>'',11=>'',20=>'',21=>'',30=>'',31=>'' }
@@ -318,7 +318,7 @@ describe Osm::Badge::Data do
         requirements: [
           Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'a'), id: 1000),
           Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b'), id: 2000),
-          Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b'), id: 2001),
+          Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b'), id: 2001)
         ]
       ),
       requirements: { 1000 => 'Yes', 2000 => 'Yes', 2001 => '' },
@@ -355,7 +355,7 @@ describe Osm::Badge::Data do
       requirements: [
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'a'), id: 100),
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b'), id: 200),
-        Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b'), id: 201),
+        Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'b'), id: 201)
       ]
     )
 
@@ -428,7 +428,7 @@ describe Osm::Badge::Data do
             version: 0,
             requirements: [
               Osm::Badge::Requirement.new(id: 2345, editable: true),
-              Osm::Badge::Requirement.new(id: 6789, editable: true),
+              Osm::Badge::Requirement.new(id: 6789, editable: true)
             ]),
           due: 0
         )
@@ -544,7 +544,7 @@ describe Osm::Badge::Data do
       awarded_post_data = {
         'date' => '2000-01-02',
         'sectionid' => 2,
-        'entries' => '[{"badge_id":"123","badge_version":"0","scout_id":"1","level":"1"}]',
+        'entries' => '[{"badge_id":"123","badge_version":"0","scout_id":"1","level":"1"}]'
       }
       awarded_body_data = { 'scoutid'=>'1', 'completed'=>'1', 'awarded' => '1', 'awardeddate'=>'2000-01-02', 'firstname' => 'fn', 'lastname' => 'ln' }
 

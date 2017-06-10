@@ -221,7 +221,7 @@ module Osm
         'attendancelimit' => event.attendance_limit,
         'attendancereminder' => event.attendance_reminder,
         'limitincludesleaders' => event.attendance_limit_includes_leaders ? 'true' : 'false',
-        'allowbooking' => event.allow_booking ? 'true' : 'false',
+        'allowbooking' => event.allow_booking ? 'true' : 'false'
       })
 
       if (data.is_a?(Hash) && data.has_key?('id'))
@@ -280,7 +280,7 @@ module Osm
           'attendancelimit' => attendance_limit,
           'attendancereminder' => attendance_reminder,
           'limitincludesleaders' => attendance_limit_includes_leaders ? 'true' : 'false',
-          'allowbooking' => allow_booking ? 'true' : 'false',
+          'allowbooking' => allow_booking ? 'true' : 'false'
         })
         updated &= data.is_a?(Hash) && (data['id'].to_i == id)
       end
@@ -289,7 +289,7 @@ module Osm
       if changed_attributes.include?('notepad')
         data = api.post_query("events.php?action=saveNotepad&sectionid=#{section_id}", post_data: {
           'eventid' => id,
-          'notepad' => notepad,
+          'notepad' => notepad
         })
         updated &= data.is_a?(Hash)
       end
@@ -298,7 +298,7 @@ module Osm
       if changed_attributes.include?('public_notepad')
         data = api.post_query("events.php?action=saveNotepad&sectionid=#{section_id}", post_data: {
           'eventid' => id,
-          'pnnotepad' => public_notepad,
+          'pnnotepad' => public_notepad
         })
         updated &= data.is_a?(Hash)
       end
@@ -322,7 +322,7 @@ module Osm
             'id' => id,
             'badge_id' => badge.badge_id,
             'badge_version' => badge.badge_version,
-            'column_id' => badge.requirement_id,
+            'column_id' => badge.requirement_id
           })
           updated &= data.is_a?(Hash) && data['status']
         end
@@ -378,14 +378,14 @@ module Osm
 
         payment_values = {
           'Manual' => :manual,
-          'Automatic' => :automatic,
+          'Automatic' => :automatic
         }
         attending_values = {
           'Yes' => :yes,
           'No' => :no,
           'Invited' => :invited,
           'Show in My.SCOUT' => :shown,
-          'Reserved' => :reserved,
+          'Reserved' => :reserved
         }
 
         data.each_with_index.map do |item, index|
@@ -425,7 +425,7 @@ module Osm
         'badge_version' => link.badge_version,
         'column_id' => link.requirement_id.to_i.eql?(0) ? -2 : link.requirement_id,
         'column_data' => link.data,
-        'new_column_name' => link.requirement_id.to_i.eql?(0) ? link.requirement_label : '',
+        'new_column_name' => link.requirement_id.to_i.eql?(0) ? link.requirement_label : ''
       })
       (data.is_a?(Hash) && data['status'])
     end
@@ -444,7 +444,7 @@ module Osm
       data = api.post_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", post_data: {
         'columnName' => name,
         'parentLabel' => label,
-        'parentRequire' => (required ? 1 : 0),
+        'parentRequire' => (required ? 1 : 0)
       })
 
       # The cached events for the section will be out of date - remove them
@@ -520,7 +520,7 @@ module Osm
         attendance_limit: event_data['attendancelimit'].to_i,
         attendance_limit_includes_leaders: event_data['limitincludesleaders'].eql?('1'),
         attendance_reminder: event_data['attendancereminder'].to_i,
-        allow_booking: event_data['allowbooking'].eql?('1'),
+        allow_booking: event_data['allowbooking'].eql?('1')
       }
     end
 
