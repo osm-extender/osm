@@ -1,7 +1,7 @@
 module Osm
   class Email
     class DeliveryReport < Osm::Model
-      TIME_FORMAT = '%d/%m/%Y %H:%M'
+      TIME_FORMAT = '%d/%m/%Y %H:%M'.freeze
       VALID_STATUSES = [:processed, :delivered, :bounced].freeze
 
       # @!attribute [rw] id

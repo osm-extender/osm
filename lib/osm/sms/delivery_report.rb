@@ -1,7 +1,7 @@
 module Osm
   class Sms
     class DeliveryReport < Osm::Model
-      VALID_STATUSES = [:sent, :not_sent, :delivered, :not_delivered, :invalid_destination_address, :invalid_source_address, :invalid_message_format, :route_not_available, :not_allowed]
+      VALID_STATUSES = [:sent, :not_sent, :delivered, :not_delivered, :invalid_destination_address, :invalid_source_address, :invalid_message_format, :route_not_available, :not_allowed].freeze
 
       # @!attribute [rw] sms_id
       #   @return [Integer] the id of the SMS

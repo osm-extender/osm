@@ -2,7 +2,7 @@ module Osm
   module OnlinePayment
     class Schedule < Osm::Model
       class PaymentStatus < Osm::Model
-        VALID_STATUSES = [:required, :not_required, :initiated, :paid, :received, :paid_manually]
+        VALID_STATUSES = [:required, :not_required, :initiated, :paid, :received, :paid_manually].freeze
 
         attribute :id, type: Integer
         attribute :payment, type: Object

@@ -29,11 +29,11 @@ module Osm
   end
 
   # Set constants
-  OSM_DATE_FORMAT = '%Y-%m-%d'
-  OSM_TIME_FORMAT = '%H:%M:%S'
-  OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
-  OSM_DATE_FORMAT_HUMAN = '%d/%m/%Y'
-  OSM_DATETIME_FORMAT_HUMAN = '%d/%m/%Y %H:%M:%S'
+  OSM_DATE_FORMAT = '%Y-%m-%d'.freeze
+  OSM_TIME_FORMAT = '%H:%M:%S'.freeze
+  OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'.freeze
+  OSM_DATE_FORMAT_HUMAN = '%d/%m/%Y'.freeze
+  OSM_DATETIME_FORMAT_HUMAN = '%d/%m/%Y %H:%M:%S'.freeze
   OSM_TIME_REGEX = /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/
   OSM_DATE_REGEX_UNANCHORED = /(?:[1-9]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1]))|(?:(?:0?[1-9]|[1-2][0-9]|3[0-1])\/(?:0?[1-9]|1[0-2])\/(?:\d{2}|[1-9]\d{3}))/
   OSM_DATE_REGEX = /\A#{Osm::OSM_DATE_REGEX_UNANCHORED.to_s}\Z/
@@ -49,7 +49,7 @@ module Osm
   }
   subscription_level_names.default = 'Unknown'
   SUBSCRIPTION_LEVEL_NAMES = subscription_level_names
-  SUBSCRIPTION_LEVELS = [nil, :bronze, :silver, :gold, :gold_plus]
+  SUBSCRIPTION_LEVELS = [nil, :bronze, :silver, :gold, :gold_plus].freeze
 end
 
 # Require file for this gem

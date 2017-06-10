@@ -1,7 +1,7 @@
 module Osm
   class Event < Osm::Model
-    LIST_ATTRIBUTES = [:id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived, :public_notepad, :confirm_by_date, :allow_changes, :reminders, :attendance_limit, :attendance_limit_includes_leaders, :attendance_reminder, :allow_booking]
-    EXTRA_ATTRIBUTES = [:notepad, :columns, :badges]
+    LIST_ATTRIBUTES = [:id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived, :public_notepad, :confirm_by_date, :allow_changes, :reminders, :attendance_limit, :attendance_limit_includes_leaders, :attendance_reminder, :allow_booking].freeze
+    EXTRA_ATTRIBUTES = [:notepad, :columns, :badges].freeze
     private_constant :LIST_ATTRIBUTES, :EXTRA_ATTRIBUTES
 
     # @!attribute [rw] id
