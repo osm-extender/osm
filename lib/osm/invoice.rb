@@ -60,7 +60,7 @@ module Osm
         unless data['items'].nil?
           data['items'].map { |i| i['invoiceid'].to_i }.each do |invoice_id|
             invoice_data = api.post_query("finances.php?action=getInvoice&sectionid=#{section_id}&invoiceid=#{invoice_id}")
-            invoice = self.new_invoice_from_data(invoice_data)
+            invoice = new_invoice_from_data(invoice_data)
             invoices.push invoice
             ids.push invoice.id
             cache_write(api: api, key: ['invoice', invoice.id], data: invoice)
@@ -92,7 +92,7 @@ module Osm
       end
 
       invoice_data = api.post_query("finances.php?action=getInvoice&sectionid=#{section_id}&invoiceid=#{id}")
-      return self.new_invoice_from_data(invoice_data)
+      return new_invoice_from_data(invoice_data)
     end
 
 
@@ -138,7 +138,7 @@ module Osm
       if data.is_a?(Hash) && data['ok'].eql?(true)
         reset_changed_attributes
         # The cached invoice will be out of date - remove it
-        cache_delete(api: api, key: ['invoice', self.id])
+        cache_delete(api: api, key: ['invoice', id])
         return true
       end
       return false
@@ -157,7 +157,7 @@ module Osm
       if (data.is_a?(Hash) && data['ok'].eql?(true))
         # The cached invoices for the section will be out of date - remove them
         cache_delete(api: api, key: ['invoice_ids', section_id])
-        cache_delete(api: api, key: ['invoice', self.id])
+        cache_delete(api: api, key: ['invoice', id])
         return true
       end
       return false
@@ -180,7 +180,7 @@ module Osm
       if (data.is_a?(Hash) && data['ok'].eql?(true))
         self.archived = true
         # The cached invoice for the section will be out of date - remove it
-        cache_delete(api: api, key: ['invoice', self.id])
+        cache_delete(api: api, key: ['invoice', id])
         return true
       end
       return false
@@ -200,7 +200,7 @@ module Osm
       if (data.is_a?(Hash) && data['ok'].eql?(true))
         self.finalised = true
         # The cached invoice for the section will be out of date - remove it
-        cache_delete(api: api, key: ['invoice', self.id])
+        cache_delete(api: api, key: ['invoice', id])
         return true
       end
       return false

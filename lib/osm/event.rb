@@ -117,7 +117,7 @@ module Osm
             files = files_data.is_a?(Hash) ? files_data['files'] : files_data
             files = [] unless files.is_a?(Array)
 
-            event = self.new_event_from_data(event_data)
+            event = new_event_from_data(event_data)
             event.files = files
             events.push event
             ids.push event.id
@@ -191,7 +191,7 @@ module Osm
       cache_key = ['event', event_id]
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        self.new_event_from_data(api.post_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}"))
+        new_event_from_data(api.post_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}"))
       end
     end
 

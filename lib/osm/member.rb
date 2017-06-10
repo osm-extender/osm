@@ -330,7 +330,7 @@ module Osm
       ] # our name => OSM name
       attribute_map.select{ |attr,col,val| force || changed_attributes.include?(attr) }.each do |attr,col,val|
         data = api.post_query('ext/members/contact/?action=update', post_data: {
-          'scoutid' => self.id,
+          'scoutid' => id,
           'column' => col,
           'value' => val,
           'sectionid' => section_id,
@@ -342,7 +342,7 @@ module Osm
       if force || changed_attributes.include?('gender')
         new_value = {male: 'Male', female: 'Female', other: 'Other'}[gender] || 'Unspecified'
         data = api.post_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", post_data: {
-          'associated_id' => self.id,
+          'associated_id' => id,
           'associated_type' => 'member',
           'value' => new_value,
           'column_id' => CID_GENDER,
@@ -356,7 +356,7 @@ module Osm
       additional_information.keys.select{ |a| force || additional_information.changes.keys.include?(a) }.each do |attr|
         new_value = additional_information[attr]
         data = api.post_query("ext/customdata/?action=updateColumn&section_id=#{section_id}", post_data: {
-          'associated_id' => self.id,
+          'associated_id' => id,
           'associated_type' => 'member',
           'value' => new_value,
           'column_id' => attr,
@@ -479,7 +479,7 @@ module Osm
       fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
 
       if @myscout_link_key.nil?
-        data = api.post_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{self.id}")
+        data = api.post_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{id}")
         fail Osm::Error, 'Could not retrieve the key for the link from OSM' unless data['ok']
         @myscout_link_key = data['key']
       end
@@ -498,9 +498,9 @@ module Osm
       require_ability_to(api, :read, :member, section_id)
       fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
 
-      cache_key = ['member_photo', self.id, black_and_white]
+      cache_key = ['member_photo', id, black_and_white]
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        api.post_query("ext/members/contact/images/member.php?sectionid=#{section_id}&scoutid=#{self.id}&bw=#{black_and_white}")
+        api.post_query("ext/members/contact/images/member.php?sectionid=#{section_id}&scoutid=#{id}&bw=#{black_and_white}")
       end
     end
 
@@ -518,7 +518,7 @@ module Osm
       fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
       fail Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice, :details, :census, :giftaid].include?(link_to)
 
-      link = "#{Osm::Api::BASE_URLS[api.site]}/parents/#{link_to}.php?sc=#{self.id}&se=#{section_id}&c=#{myscout_link_key(api)}"
+      link = "#{Osm::Api::BASE_URLS[api.site]}/parents/#{link_to}.php?sc=#{id}&se=#{section_id}&c=#{myscout_link_key(api)}"
       link += "&e=#{item_id.to_i}" if item_id && link_to.eql?(:events)
       return link
     end

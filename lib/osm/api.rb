@@ -258,9 +258,9 @@ module Osm
 
     def to_s
       if has_valid_user?
-        "#{self.site} - #{self.api_id} - #{self.name} - #{self.user_id}"
+        "#{site} - #{api_id} - #{name} - #{user_id}"
       else
-        "#{self.site} - #{self.api_id} - #{self.name}"
+        "#{site} - #{api_id} - #{name}"
       end
     end
 

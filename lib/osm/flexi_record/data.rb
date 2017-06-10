@@ -28,8 +28,8 @@ module Osm
       old_initialize = instance_method(:initialize)
       define_method :initialize do |*args|
         ret_val = old_initialize.bind(self).call(*args)
-        self.fields = DirtyHashy.new(self.fields)
-        self.fields.clean_up!
+        self.fields = DirtyHashy.new(fields)
+        fields.clean_up!
         return ret_val
       end
 
@@ -50,7 +50,7 @@ module Osm
           if editable_fields.include?(field)
             data = api.post_query('extras.php?action=updateScout', post_data: {
               'termid' => term_id,
-              'scoutid' => self.member_id,
+              'scoutid' => member_id,
               'column' => field,
               'value' => now,
               'sectionid' => flexi_record.section_id,

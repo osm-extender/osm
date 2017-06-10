@@ -24,8 +24,8 @@ module Osm
 
       # Compare Activity based on title then activity_id
       def <=>(other)
-        result = self.title <=> other.try(:title)
-        result = self.activity_id <=> other.try(:activity_id) if result == 0
+        result = title <=> other.try(:title)
+        result = activity_id <=> other.try(:activity_id) if result == 0
         return result
       end
 

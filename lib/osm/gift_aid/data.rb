@@ -49,8 +49,8 @@ module Osm
       old_initialize = instance_method(:initialize)
       define_method :initialize do |*args|
         ret_val = old_initialize.bind(self).call(*args)
-        self.donations = DirtyHashy.new(self.donations)
-        self.donations.clean_up!
+        self.donations = DirtyHashy.new(donations)
+        donations.clean_up!
         return ret_val
       end
 

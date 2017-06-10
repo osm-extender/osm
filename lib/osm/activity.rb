@@ -181,7 +181,7 @@ module Osm
     # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
     def osm_link
       fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
-      return "https://www.onlinescoutmanager.co.uk/?l=p#{self.id}"
+      return "https://www.onlinescoutmanager.co.uk/?l=p#{id}"
     end
 
     # Add this activity to the programme in OSM
@@ -202,7 +202,7 @@ module Osm
 
       if (data == {'result'=>0})
         # The cached activity will be out of date - remove it
-        cache_delete(api: api, key: ['activity', self.id])
+        cache_delete(api: api, key: ['activity', id])
         return true
       else
         return false
@@ -218,7 +218,7 @@ module Osm
     # @raise [Osm::Forbidden] If the Activity is not editable
     def update(api:, section:, secret_update: false)
       fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
-      fail Osm::Forbidden, 'You are not allowed to update this activity' unless self.editable
+      fail Osm::Forbidden, 'You are not allowed to update this activity' unless editable
 
       data = api.post_query('programme.php?action=update', post_data: {
         'title' => title,
@@ -255,7 +255,7 @@ module Osm
 
       if (data == {'result'=>true})
         # The cached activity will be out of date - remove it
-        cache_delete(api: api, key: ['activity', self.id])
+        cache_delete(api: api, key: ['activity', id])
         return true
       else
         return false

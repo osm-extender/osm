@@ -22,10 +22,10 @@ module Osm
     # @return [Array<Osm::FlexiRecordColumn>] representing the columns of the flexi record
     def get_columns(api, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :flexi, section: section_id, no_read_cache: no_read_cache)
-      cache_key = ['flexi_record_columns', self.id]
+      cache_key = ['flexi_record_columns', id]
 
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        data = api.post_query("extras.php?action=getExtra&sectionid=#{self.section_id}&extraid=#{self.id}")
+        data = api.post_query("extras.php?action=getExtra&sectionid=#{section_id}&extraid=#{id}")
         structure = []
         data['structure'].each do |item|
           item['rows'].each do |row|
@@ -72,7 +72,7 @@ module Osm
     # @return [Array<FlexiRecordData>]
     def get_data(api:, term: nil, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :flexi, section: section_id, no_read_cache: no_read_cache)
-      section = Osm::Section.get(api: api, id: self.section_id)
+      section = Osm::Section.get(api: api, id: section_id)
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
       cache_key = ['flexi_record_data', id, term_id]
 

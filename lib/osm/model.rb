@@ -82,10 +82,10 @@ module Osm
         if attribute[0].eql?('-')
           # Reverse order
           a = other.try(attribute[1..-1])
-          b = self.try(attribute[1..-1])
+          b = try(attribute[1..-1])
         else
           # Forward order
-          a = self.try(attribute)
+          a = try(attribute)
           b = other.try(attribute)
         end
         result = a <=> b
@@ -289,7 +289,7 @@ module Osm
           items.push cache_read(api: api, key: [*key_base, id])
         else
           # At least this one item is not in the cache - we might as well refresh the lot
-          return self.send(method, api: api, no_read_cache: true, **arguments)
+          return send(method, api: api, no_read_cache: true, **arguments)
         end
       end
       return items

@@ -33,16 +33,16 @@ module Osm
       def update(api)
         fail Osm::ObjectIsInvalid, 'column is invalid' unless valid?
         require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
-        fail Osm::Forbidden, 'this column is not editable' unless self.editable
+        fail Osm::Forbidden, 'this column is not editable' unless editable
 
         data = api.post_query("extras.php?action=renameColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
-          'columnId' => self.id,
-          'columnName' => self.name,
+          'columnId' => id,
+          'columnName' => name,
         })
 
         if (data.is_a?(Hash) && data.has_key?('config'))
           JSON.parse(data['config']).each do |f|
-            if (f['id'] == self.id) && (f['name'] == self.name)
+            if (f['id'] == id) && (f['name'] == name)
               reset_changed_attributes
               # The cached columns for the flexi record will be out of date - remove them
               cache_delete(api: api, key: ['flexi_record_columns', flexi_record.id])
@@ -59,15 +59,15 @@ module Osm
       # @raise [Osm::Forbidden] If this Column is not editable
       def delete(api)
         require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
-        fail Osm::Forbidden, 'this column is not editable' unless self.editable
+        fail Osm::Forbidden, 'this column is not editable' unless editable
 
         data = api.post_query("extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
-          'columnId' => self.id,
+          'columnId' => id,
         })
 
         if (data.is_a?(Hash) && data.has_key?('config'))
           JSON.parse(data['config']).each do |f|
-            if f['id'] == self.id
+            if f['id'] == id
               # It wasn't deleted
               return false
             end
@@ -93,11 +93,11 @@ module Osm
 
       # Compare Column based on flexi_record then id
       def <=>(other)
-        result = self.flexi_record <=> other.try(:flexi_record)
+        result = flexi_record <=> other.try(:flexi_record)
         if result == 0
           return 1 if user_column? && other.try(:system_column?)
           return -1 if system_column? && other.try(:user_column?)
-          return self.id <=> other.try(:id)
+          return id <=> other.try(:id)
         end
         return result
       end
