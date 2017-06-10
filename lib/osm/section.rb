@@ -355,13 +355,13 @@ module Osm
 
 
     # Compare Section based on group_name type (age order), then name
-    def <=>(another)
+    def <=>(other)
       type_order = [:beavers, :cubs, :scouts, :explorers, :network, :adults, :waiting]
-      result = self.group_name <=> another.try(:group_name)
+      result = self.group_name <=> other.try(:group_name)
       if result == 0
-        result = type_order.find_index(self.type) <=> type_order.find_index(another.try(:type))
+        result = type_order.find_index(self.type) <=> type_order.find_index(other.try(:type))
       end
-      result = self.name <=> another.try(:name) if result == 0
+      result = self.name <=> other.try(:name) if result == 0
       return result
     end
 

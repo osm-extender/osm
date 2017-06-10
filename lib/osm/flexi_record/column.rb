@@ -92,12 +92,12 @@ module Osm
       end
 
       # Compare Column based on flexi_record then id
-      def <=>(another)
-        result = self.flexi_record <=> another.try(:flexi_record)
+      def <=>(other)
+        result = self.flexi_record <=> other.try(:flexi_record)
         if result == 0
-          return 1 if user_column? && another.try(:system_column?)
-          return -1 if system_column? && another.try(:user_column?)
-          return self.id <=> another.try(:id)
+          return 1 if user_column? && other.try(:system_column?)
+          return -1 if system_column? && other.try(:user_column?)
+          return self.id <=> other.try(:id)
         end
         return result
       end

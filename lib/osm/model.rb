@@ -75,18 +75,18 @@ module Osm
 
 
     # Compare functions
-    def <=>(another)
+    def <=>(other)
       result = nil
       sort_by.each do |attribute|
         a = b= nil
         if attribute[0].eql?('-')
           # Reverse order
-          a = another.try(attribute[1..-1])
+          a = other.try(attribute[1..-1])
           b = self.try(attribute[1..-1])
         else
           # Forward order
           a = self.try(attribute)
-          b = another.try(attribute)
+          b = other.try(attribute)
         end
         result = a <=> b
         if result.nil?

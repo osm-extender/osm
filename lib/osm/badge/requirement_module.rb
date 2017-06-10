@@ -43,10 +43,10 @@ module Osm
       #   @param [Hash] attributes The hash of attributes (see attributes for descriptions, use Symbol of attribute name as the key)
 
       # Compare Badge::RequirementModule based on badge then letter
-      def <=>(another)
-        result = self.badge <=> another.try(:badge)
-        result = self.letter <=> another.try(:letter) if result == 0
-        result = self.id <=> another.try(:id) if result == 0
+      def <=>(other)
+        result = self.badge <=> other.try(:badge)
+        result = self.letter <=> other.try(:letter) if result == 0
+        result = self.id <=> other.try(:id) if result == 0
         return result
       end
 
