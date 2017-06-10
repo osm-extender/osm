@@ -1,6 +1,6 @@
 describe Osm::Budget do
 
-  it "Create Budget" do
+  it 'Create Budget' do
     b = Osm::Budget.new(
       id: 1,
       section_id: 2,
@@ -13,7 +13,7 @@ describe Osm::Budget do
     expect(b.valid?).to eq(true)
   end
 
-  it "Sorts Budget by section ID then name" do
+  it 'Sorts Budget by section ID then name' do
     b1 = Osm::Budget.new(section_id: 1, name: 'a')
     b2 = Osm::Budget.new(section_id: 2, name: 'a')
     b3 = Osm::Budget.new(section_id: 2, name: 'b')
@@ -23,17 +23,17 @@ describe Osm::Budget do
   end
 
 
-  describe "Using the API" do
+  describe 'Using the API' do
 
-    it "Get budgets for section" do
+    it 'Get budgets for section' do
       data = {
-        "identifier" => "categoryid",
-        "items" => [
+        'identifier' => 'categoryid',
+        'items' => [
           {
-            "categoryid" => "2",
-            "sectionid" => "3",
-            "name" => "Name",
-            "archived" => "1"
+            'categoryid' => '2',
+            'sectionid' => '3',
+            'name' => 'Name',
+            'archived' => '1'
           }
         ]
       }
@@ -43,7 +43,7 @@ describe Osm::Budget do
       expect(budgets).to eq([Osm::Budget.new(id: 2, section_id: 3, name: 'Name')])
     end
 
-    it "Create budget (success)" do
+    it 'Create budget (success)' do
       budget = Osm::Budget.new(
         section_id: 2,
         name: 'Budget Name',
@@ -63,7 +63,7 @@ describe Osm::Budget do
       expect(budget.id).to eq(4)
     end
 
-    it "Create budget (failure (not created))" do
+    it 'Create budget (failure (not created))' do
       budget = Osm::Budget.new(
         section_id: 2,
         name: 'Budget Name',
@@ -75,7 +75,7 @@ describe Osm::Budget do
       expect(budget.create($api)).to eq(false)
     end
     
-    it "Create budget (failure (not updated))" do
+    it 'Create budget (failure (not updated))' do
       budget = Osm::Budget.new(
         section_id: 2,
         name: 'Budget Name',
@@ -94,7 +94,7 @@ describe Osm::Budget do
       expect(budget.create($api)).to eq(false)
     end
     
-    it "Update budget (success)" do
+    it 'Update budget (success)' do
       budget = Osm::Budget.new(
         id: 1,
         section_id: 2,
@@ -112,7 +112,7 @@ describe Osm::Budget do
       expect(budget.update($api)).to eq(true)
     end
     
-    it "Update budget (failure)" do
+    it 'Update budget (failure)' do
       budget = Osm::Budget.new(
         id: 1,
         section_id: 2,
@@ -130,7 +130,7 @@ describe Osm::Budget do
       expect(budget.update($api)).to eq(false)
     end
     
-    it "Delete budget (success)" do
+    it 'Delete budget (success)' do
       budget = Osm::Budget.new(
         id: 1,
         section_id: 2,
@@ -142,7 +142,7 @@ describe Osm::Budget do
       expect(budget.delete($api)).to eq(true)
     end
     
-    it "Delete budget (failure)" do
+    it 'Delete budget (failure)' do
       budget = Osm::Budget.new(
         id: 1,
         section_id: 2,

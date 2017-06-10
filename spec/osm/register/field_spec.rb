@@ -1,6 +1,6 @@
 describe Osm::Register::Field do
 
-  it "Create" do
+  it 'Create' do
     field = Osm::Register::Field.new(
       name: 'Human name',
       id: 'machine_name',
@@ -13,7 +13,7 @@ describe Osm::Register::Field do
     expect(field.valid?).to eq(true)
   end
 
-  it "Sorts by id" do
+  it 'Sorts by id' do
     a1 = Osm::Register::Field.new(id: 'a')
     a2 = Osm::Register::Field.new(id: 'a')
 

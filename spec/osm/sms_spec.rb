@@ -1,8 +1,8 @@
 describe Osm::Sms do
 
-  describe "Send an SMS" do
+  describe 'Send an SMS' do
 
-    it "One person" do
+    it 'One person' do
       allow(Osm::Sms).to receive(:number_selected) { 2 }
       allow(Osm::Sms).to receive(:remaining_credits) { 3 }
 
@@ -11,7 +11,7 @@ describe Osm::Sms do
         'scouts' => '4',
         'source' => '441234567890',
         'type' => '',
-      }){ {"result" => true, "msg" => "Message sent - you have <b>131<\/b> credits left.", "config" => {}} }
+      }){ {'result' => true, 'msg' => "Message sent - you have <b>131<\/b> credits left.", 'config' => {}} }
 
       result = Osm::Sms.send_sms(
         api:     $api,
@@ -23,7 +23,7 @@ describe Osm::Sms do
       expect(result).to eq(true)
     end
 
-    it "Several people" do
+    it 'Several people' do
       allow(Osm::Sms).to receive(:number_selected) { 3 }
       allow(Osm::Sms).to receive(:remaining_credits) { 3 }
 
@@ -32,7 +32,7 @@ describe Osm::Sms do
         'scouts' => '2,3',
         'source' => '441234567890',
         'type' => '',
-      }){ {"result" => true, "msg" => "Message sent - you have <b>95<\/b> credits left.", "config" => {}} }
+      }){ {'result' => true, 'msg' => "Message sent - you have <b>95<\/b> credits left.", 'config' => {}} }
 
       result = Osm::Sms.send_sms(
         api:     $api,
@@ -44,7 +44,7 @@ describe Osm::Sms do
       expect(result).to eq(true)
     end
 
-    it "Failed" do
+    it 'Failed' do
       allow(Osm::Sms).to receive(:number_selected) { 3 }
       allow(Osm::Sms).to receive(:remaining_credits) { 3 }
 
@@ -53,7 +53,7 @@ describe Osm::Sms do
         'scouts' => '4',
         'source' => '441234567890',
         'type' => '',
-      }){ {"result" => false,"config" => {}} }
+      }){ {'result' => false,'config' => {}} }
 
       result = Osm::Sms.send_sms(
         api:     $api,
@@ -65,7 +65,7 @@ describe Osm::Sms do
       expect(result).to eq(false)
     end
 
-    it "Raises error if not enough credits" do
+    it 'Raises error if not enough credits' do
       allow(Osm::Sms).to receive(:number_selected) { 3 }
       allow(Osm::Sms).to receive(:remaining_credits) { 2 }
       expect($api).not_to receive(:post_query)
@@ -77,18 +77,18 @@ describe Osm::Sms do
 
   end
 
-  it "Gets remaining credits" do
+  it 'Gets remaining credits' do
     expect($api).to receive(:post_query).with('ext/members/sms/?action=getNumbers&sectionid=4&type=', post_data: {
       'scouts' => '0',
-    }){ {"members" => 0, "numbers"=> 0, "sms_remaining" => 5} }
+    }){ {'members' => 0, 'numbers'=> 0, 'sms_remaining' => 5} }
 
     expect(Osm::Sms.remaining_credits(api: $api, section: 4)).to eq(5)
   end
 
-  it "Gets selected numbers" do
+  it 'Gets selected numbers' do
     expect($api).to receive(:post_query).with('ext/members/sms/?action=getNumbers&sectionid=4&type=', post_data: {
       'scouts' => '12,56',
-    }){ {"members" => 2, "numbers" => 3, "sms_remaining" => 5} }
+    }){ {'members' => 2, 'numbers' => 3, 'sms_remaining' => 5} }
 
     expect(Osm::Sms.number_selected(api: $api, section: 4, members: [12, 56])).to eq(3)
   end

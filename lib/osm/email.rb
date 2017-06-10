@@ -11,7 +11,7 @@ module Osm
     def self.get_emails_for_contacts(api:, section:, contacts:, members:)
       # Convert contacts into OSM's format
       contacts = [*contacts]
-      fail ArgumentError, "You must pass at least one contact" if contacts.none?
+      fail ArgumentError, 'You must pass at least one contact' if contacts.none?
       contact_group_map = {
         primary: '"contact_primary_1"',
         secondary: '"contact_primary_2"',
@@ -25,7 +25,7 @@ module Osm
 
       # Convert member_ids to array of numbers
       members = [*members]
-      fail ArgumentError, "You must pass at least one member" if members.none?
+      fail ArgumentError, 'You must pass at least one member' if members.none?
       members.map!{ |member| member.to_i }
 
       data = api.post_query("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=#{section.to_i}&scouts=#{members.join(',')}", post_data: {

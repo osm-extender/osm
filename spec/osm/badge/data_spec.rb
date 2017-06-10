@@ -1,6 +1,6 @@
 describe Osm::Badge::Data do
 
-  it "Create" do
+  it 'Create' do
     data = Osm::Badge::Data.new(
       member_id: 1,
       first_name: 'First',
@@ -25,7 +25,7 @@ describe Osm::Badge::Data do
     expect(data.valid?).to eq(true)
   end
 
-  it "Compare by badge, section_id then member_id" do
+  it 'Compare by badge, section_id then member_id' do
     b1 = Osm::Badge::Data.new(badge: Osm::Badge.new(name: 'A'), section_id: 1, member_id: 1)
     b2 = Osm::Badge::Data.new(badge: Osm::Badge.new(name: 'B'), section_id: 1, member_id: 1)
     b3 = Osm::Badge::Data.new(badge: Osm::Badge.new(name: 'B'), section_id: 2, member_id: 1)
@@ -34,7 +34,7 @@ describe Osm::Badge::Data do
     expect(badges.sort).to eq([b1, b2, b3, b4])
   end
 
-  it "Works out if a requirement has been met" do
+  it 'Works out if a requirement has been met' do
     data = expect(Osm::Badge::Data.new(requirements: {1 => ''}).requirement_met?(1)).to eq(false)
     data = expect(Osm::Badge::Data.new(requirements: {1 => 'xStuff'}).requirement_met?(1)).to eq(false)
     data = expect(Osm::Badge::Data.new(requirements: {1 => '0'}).requirement_met?(1)).to eq(false)
@@ -46,7 +46,7 @@ describe Osm::Badge::Data do
   end
 
 
-  it "Get total requirements gained for a member" do
+  it 'Get total requirements gained for a member' do
     data = Osm::Badge::Data.new(
       badge: Osm::Badge.new(
         requirements: [
@@ -76,7 +76,7 @@ describe Osm::Badge::Data do
     expect(data.total_gained).to eq(4)
   end
 
-  it "Get total requirements met in each module for a member" do
+  it 'Get total requirements met in each module for a member' do
     badge = Osm::Badge.new(
       needed_from_section: {'a' => 1, 'b' => 2},
       requirements: [
@@ -100,7 +100,7 @@ describe Osm::Badge::Data do
     expect(data.gained_in_modules).to eq({'a'=>0, 'b'=>2, 'c'=>1, 100=>0, 200=>2, 300=>1})
   end
 
-  it "Get modules met for a member" do
+  it 'Get modules met for a member' do
     badge = Osm::Badge.new(
       requirements: [
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'a', id: 1000), id: 1),
@@ -122,8 +122,8 @@ describe Osm::Badge::Data do
     expect(data.modules_gained).to eq(['b', 'c'])
   end
 
-  describe "Works out if the badge has been earnt" do
-    it "Staged" do
+  describe 'Works out if the badge has been earnt' do
+    it 'Staged' do
       badge = Osm::StagedBadge.new(levels: [0, 1, 2, 3])
       data = Osm::Badge::Data.new(awarded: 2, badge: badge)
 
@@ -137,7 +137,7 @@ describe Osm::Badge::Data do
       expect(data.earnt?).to eq(true)
     end
 
-    it "Non staged" do
+    it 'Non staged' do
       badge = Osm::ActivityBadge.new(
         min_modules_required: 0,
         min_requirements_required: 0,
@@ -235,9 +235,9 @@ describe Osm::Badge::Data do
     end
   end
 
-  describe "Works out what level of a badge has been earnt" do
+  describe 'Works out what level of a badge has been earnt' do
 
-    it "Staged (activity)" do
+    it 'Staged (activity)' do
       badge = Osm::StagedBadge.new(
         levels: [0, 1, 2, 3],
         min_modules_required: 0,
@@ -279,7 +279,7 @@ describe Osm::Badge::Data do
       expect(data.earnt).to eq(3)
     end
 
-    it "Staged (count)" do
+    it 'Staged (count)' do
       badge = Osm::StagedBadge.new(
         levels: [0,1,2,3,4,5,10,15,20],
         show_level_letters: false,
@@ -293,7 +293,7 @@ describe Osm::Badge::Data do
       expect(Osm::Badge::Data.new(requirements: {3000 => 999}, badge: badge).earnt).to eq(20)
     end
 
-    it "Non staged" do
+    it 'Non staged' do
       data = Osm::Badge::Data.new(badge: Osm::ActivityBadge.new)
 
       allow(data).to receive(:earnt?) { true }
@@ -304,7 +304,7 @@ describe Osm::Badge::Data do
     end
   end
 
-  it "Works out if the badge has been started" do
+  it 'Works out if the badge has been started' do
     expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {1 => 'Yes', 2 => ''}).started?).to eq(true)
     expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {1 => 'Yes', 2 => ''}, due: 1).started?).to eq(false)
     expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {1 => 'xNo', 2 => ''}).started?).to eq(false)
@@ -340,7 +340,7 @@ describe Osm::Badge::Data do
     ).started?).to eq(true) # Finished lvl 5 & started lvl 10
   end
 
-  it "Works out what stage of the badge has been started" do
+  it 'Works out what stage of the badge has been started' do
     # Non-Staged badges (0 or 1)
     expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {10 => 'Yes', 11 => ''}).started).to eq(1)
     expect(Osm::Badge::Data.new(badge: Osm::CoreBadge.new, requirements: {10 => 'Yes', 11 => ''}, due: 1).started).to eq(0)
@@ -402,9 +402,9 @@ describe Osm::Badge::Data do
   end
 
 
-  describe "Using the OSM API" do
+  describe 'Using the OSM API' do
 
-    describe "Update badge data in OSM" do
+    describe 'Update badge data in OSM' do
 
       before :each do
         @update_post_data = {
@@ -434,12 +434,12 @@ describe Osm::Badge::Data do
         )
      end
 
-     it "Success (requirmeent, due & awarded)" do
+     it 'Success (requirmeent, due & awarded)' do
         date = Date.new(2000, 1, 2)
         allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 2, type: :beavers) }
         expect(@data).to receive(:mark_awarded).with($api, date, 1) { true }
         expect(@data).to receive(:mark_due).with($api, 1) { true }
-        expect($api).to receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body_data)
+        expect($api).to receive(:post_query).with('ext/badges/records/?action=updateSingleRecord', post_data: @update_post_data).and_return(@update_body_data)
 
         @data.requirements[2345] = '2'
         @data.due = 1
@@ -448,29 +448,29 @@ describe Osm::Badge::Data do
         expect(@data.update($api)).to eq(true)
       end
 
-      it "Success (just requirement)" do
+      it 'Success (just requirement)' do
         date = Date.new(2000, 1, 2)
         allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 2, type: :beavers) }
         expect(@data).not_to receive(:mark_awarded)
         expect(@data).not_to receive(:mark_due)
-        expect($api).to receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body_data)
+        expect($api).to receive(:post_query).with('ext/badges/records/?action=updateSingleRecord', post_data: @update_post_data).and_return(@update_body_data)
 
         @data.requirements[2345] = '2'
         expect(@data.update($api)).to eq(true)
       end
 
-      it "Success (just requirement) (to blank)" do
+      it 'Success (just requirement) (to blank)' do
         date = Date.new(2000, 1, 2)
         allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 2, type: :beavers) }
         expect(@data).not_to receive(:mark_awarded)
         expect(@data).not_to receive(:mark_due)
-        expect($api).to receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data.merge('value' => '')).and_return(@update_body_data.merge('2345' => ''))
+        expect($api).to receive(:post_query).with('ext/badges/records/?action=updateSingleRecord', post_data: @update_post_data.merge('value' => '')).and_return(@update_body_data.merge('2345' => ''))
 
         @data.requirements[2345] = ''
         expect(@data.update($api)).to eq(true)
       end
 
-      it "Success (just due)" do
+      it 'Success (just due)' do
         date = Date.new(2000, 1, 2)
         allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 2, type: :beavers) }
         expect(@data).not_to receive(:mark_awarded)
@@ -481,7 +481,7 @@ describe Osm::Badge::Data do
         expect(@data.update($api)).to eq(true)
       end
 
-      it "Success (just awarded)" do
+      it 'Success (just awarded)' do
         date = Date.new(2000, 1, 2)
         allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 2, type: :beavers) }
         expect(@data).to receive(:mark_awarded).with($api, date, 1) { true }
@@ -493,13 +493,13 @@ describe Osm::Badge::Data do
         expect(@data.update($api)).to eq(true)
       end
 
-      it "Failed (requirement)" do
+      it 'Failed (requirement)' do
         date = Date.new(2000, 1, 2)
         @update_body_data['2345'] = '1'
         allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 2, type: :beavers) }
         expect(@data).to receive(:mark_awarded).with($api, date, 1) { true }
         expect(@data).to receive(:mark_due).with($api, 1) { true }
-        expect($api).to receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
+        expect($api).to receive(:post_query).with('ext/badges/records/?action=updateSingleRecord', post_data: @update_post_data).and_return(@update_body)
 
         @data.requirements[2345] = '2'
         @data.due = 1
@@ -508,12 +508,12 @@ describe Osm::Badge::Data do
         expect(@data.update($api)).to eq(false)
       end
 
-      it "Failed (due)" do
+      it 'Failed (due)' do
         date = Date.new(2000, 1, 2)
         allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 2, type: :beavers) }
         expect(@data).to receive(:mark_awarded).with($api, date, 1) { true }
         expect(@data).to receive(:mark_due).with($api, 1) { false }
-        expect($api).to receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
+        expect($api).to receive(:post_query).with('ext/badges/records/?action=updateSingleRecord', post_data: @update_post_data).and_return(@update_body)
 
         @data.requirements[2345] = '2'
         @data.due = 1
@@ -522,12 +522,12 @@ describe Osm::Badge::Data do
         expect(@data.update($api)).to eq(false)
       end
 
-      it "Failed (awarded)" do
+      it 'Failed (awarded)' do
         date = Date.new(2000, 1, 2)
         allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 2, type: :beavers) }
         expect(@data).to receive(:mark_awarded).with($api, date, 1) { false }
         expect(@data).to receive(:mark_due).with($api, 1) { true }
-        expect($api).to receive(:post_query).with("ext/badges/records/?action=updateSingleRecord", post_data: @update_post_data).and_return(@update_body)
+        expect($api).to receive(:post_query).with('ext/badges/records/?action=updateSingleRecord', post_data: @update_post_data).and_return(@update_body)
 
         @data.requirements[2345] = '2'
         @data.due = 1
@@ -539,7 +539,7 @@ describe Osm::Badge::Data do
     end # describe update badges in OSM
 
 
-    it "Mark badge awarded" do
+    it 'Mark badge awarded' do
 
       awarded_post_data = {
         'date' => '2000-01-02',
@@ -563,7 +563,7 @@ describe Osm::Badge::Data do
       expect(data.mark_awarded(api: $api, date: Date.new(2000, 1, 2), level: 1)).to eq(true)
     end
 
-    it "Mark badge due" do
+    it 'Mark badge due' do
 
       awarded_post_data = {
         'section_id' => 2,

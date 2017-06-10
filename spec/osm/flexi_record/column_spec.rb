@@ -1,9 +1,9 @@
 describe Osm::FlexiRecord::Column do
 
-  it "Create" do
+  it 'Create' do
     field = Osm::FlexiRecord::Column.new(
-      id: "f_1",
-      name: "Field Name",
+      id: 'f_1',
+      name: 'Field Name',
       editable: true,
       flexi_record: Osm::FlexiRecord.new(),
     )
@@ -14,7 +14,7 @@ describe Osm::FlexiRecord::Column do
     expect(field.valid?).to eq(true)
   end
 
-  it "Sorts by flexirecord then id (system first then user)" do
+  it 'Sorts by flexirecord then id (system first then user)' do
     frc1 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 1), id: 'f_1')
     frc2 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), id: 'a')
     frc3 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), id: 'b')
@@ -37,35 +37,35 @@ describe Osm::FlexiRecord::Column do
   end
 
 
-  describe "Update" do
+  describe 'Update' do
 
     before :each do
       @flexi_record = Osm::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
     end
 
-    it "Success" do
+    it 'Success' do
       post_data = {
         'columnId' => 'f_1',
         'columnName' => 'name',
       }
 
       data = {
-        "extraid" => "2",
-        "sectionid" => "1",
-        "name" => "A Flexi Record",
-        "config" => "[{\"id\":\"f_1\",\"name\":\"name\",\"width\":\"150\"}]",
-        "total" => "none",
-        "extrafields" => "[]",
-        "structure" => [
+        'extraid' => '2',
+        'sectionid' => '1',
+        'name' => 'A Flexi Record',
+        'config' => '[{"id":"f_1","name":"name","width":"150"}]',
+        'total' => 'none',
+        'extrafields' => '[]',
+        'structure' => [
           {
-            "rows" => [
-              {"name" => "First name","field" => "firstname","width" => "150px"},
-              {"name" => "Last name","field" => "lastname","width" => "150px"},
+            'rows' => [
+              {'name' => 'First name','field' => 'firstname','width' => '150px'},
+              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
             ],
-            "noscroll" => true
+            'noscroll' => true
           },
-          {"rows" => [
-            {"name" => "name","field" => "f_1","width" => "150px","editable" => true},
+          {'rows' => [
+            {'name' => 'name','field' => 'f_1','width' => '150px','editable' => true},
           ]}
         ]
       }
@@ -80,23 +80,23 @@ describe Osm::FlexiRecord::Column do
       expect(col.update($api)).to eq(true)
     end
 
-    it "Failure" do
+    it 'Failure' do
       data = {
-        "extraid" => "2",
-        "sectionid" => "1",
-        "name" => "A Flexi Record",
-        "config" => "[]",
-        "total" => "none",
-        "extrafields" => "[]",
-        "structure" => [
+        'extraid' => '2',
+        'sectionid' => '1',
+        'name' => 'A Flexi Record',
+        'config' => '[]',
+        'total' => 'none',
+        'extrafields' => '[]',
+        'structure' => [
           {
-            "rows" => [
-              {"name" => "First name","field" => "firstname","width" => "150px"},
-              {"name" => "Last name","field" => "lastname","width" => "150px"},
+            'rows' => [
+              {'name' => 'First name','field' => 'firstname','width' => '150px'},
+              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
             ],
-            "noscroll" => true
+            'noscroll' => true
           },
-          {"rows" => [
+          {'rows' => [
           ]}
         ]
       }
@@ -111,7 +111,7 @@ describe Osm::FlexiRecord::Column do
       expect(col.update($api)).to eq(false)
     end
 
-    it "Uneditable" do
+    it 'Uneditable' do
       col = Osm::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
         id: 'f_1',
@@ -125,32 +125,32 @@ describe Osm::FlexiRecord::Column do
   end # desxribe update
 
 
-  describe "Delete" do
+  describe 'Delete' do
 
     before :each do
       @flexi_record = Osm::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
     end
 
-    it "Success" do
+    it 'Success' do
       post_data = {
         'columnId' => 'f_1',
       }
       data = {
-        "extraid" => "2",
-        "sectionid" => "1",
-        "name" => "A Flexi Record",
-        "config" => "[]",
-        "total" => "none",
-        "extrafields" => "[]",
-        "structure" => [
+        'extraid' => '2',
+        'sectionid' => '1',
+        'name' => 'A Flexi Record',
+        'config' => '[]',
+        'total' => 'none',
+        'extrafields' => '[]',
+        'structure' => [
           {
-            "rows" => [
-              {"name" => "First name","field" => "firstname","width" => "150px"},
-              {"name" => "Last name","field" => "lastname","width" => "150px"},
+            'rows' => [
+              {'name' => 'First name','field' => 'firstname','width' => '150px'},
+              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
             ],
-            "noscroll" => true
+            'noscroll' => true
           },
-          {"rows" => []}
+          {'rows' => []}
         ]
       }
       expect($api).to receive(:post_query).with('extras.php?action=deleteColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
@@ -164,23 +164,23 @@ describe Osm::FlexiRecord::Column do
       expect(col.delete($api)).to eq(true)
     end
 
-    it "Failure" do
+    it 'Failure' do
       data = {
-        "extraid" => "2",
-        "sectionid" => "1",
-        "name" => "A Flexi Record",
-        "config" => "[{\"id\":\"f_1\",\"name\":\"name\",\"width\":\"150\"}]",
-        "total" => "none",
-        "extrafields" => "[]",
-        "structure" => [
+        'extraid' => '2',
+        'sectionid' => '1',
+        'name' => 'A Flexi Record',
+        'config' => '[{"id":"f_1","name":"name","width":"150"}]',
+        'total' => 'none',
+        'extrafields' => '[]',
+        'structure' => [
           {
-            "rows" => [
-              {"name" => "First name","field" => "firstname","width" => "150px"},
-              {"name" => "Last name","field" => "lastname","width" => "150px"},
+            'rows' => [
+              {'name' => 'First name','field' => 'firstname','width' => '150px'},
+              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
             ],
-            "noscroll" => true
+            'noscroll' => true
           },
-          {"rows" => [
+          {'rows' => [
           ]}
         ]
       }
@@ -195,7 +195,7 @@ describe Osm::FlexiRecord::Column do
       expect(col.delete($api)).to eq(false)
     end
 
-    it "Uneditable" do
+    it 'Uneditable' do
       col = Osm::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
         id: 'f_1',

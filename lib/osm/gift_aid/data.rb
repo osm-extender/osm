@@ -72,7 +72,7 @@ module Osm
         ]
         fields.each do |field|
           if changed_attributes.include?(field[0])
-            result = api.post_query("giftaid.php?action=updateScout", post_data: {
+            result = api.post_query('giftaid.php?action=updateScout', post_data: {
               'scoutid' => member_id,
               'termid' => term_id,
               'column' => field[1],
@@ -93,7 +93,7 @@ module Osm
 
         donations.changes.each do |date, (was,now)|
           date = date.strftime(Osm::OSM_DATE_FORMAT)
-          result = api.post_query("giftaid.php?action=updateScout", post_data: {
+          result = api.post_query('giftaid.php?action=updateScout', post_data: {
             'scoutid' => member_id,
             'termid' => term_id,
             'column' => date,

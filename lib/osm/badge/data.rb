@@ -223,7 +223,7 @@ module Osm
           'level' => level.to_s
         }]
 
-        result = api.post_query("ext/badges/records/?action=awardBadge", post_data: {
+        result = api.post_query('ext/badges/records/?action=awardBadge', post_data: {
           'date' => date_formatted,
           'sectionid' => section_id,
           'entries' => entries.to_json
@@ -257,7 +257,7 @@ module Osm
         section = Osm::Section.get(api: api, section: section_id)
         require_ability_to(api, :write, :badge, section)
 
-        result = api.post_query("ext/badges/records/?action=overrideCompletion", post_data: {
+        result = api.post_query('ext/badges/records/?action=overrideCompletion', post_data: {
           'section_id' => section.id,
           'badge_id' => badge.id,
           'badge_version' => badge.version,
@@ -291,7 +291,7 @@ module Osm
         editable_requirements = badge.requirements.select{ |r| r.editable }.map{ |r| r.id }
         requirements.changes.each do |requirement, (was,now)|
           if editable_requirements.include?(requirement)
-            result = api.post_query("ext/badges/records/?action=updateSingleRecord", post_data: {
+            result = api.post_query('ext/badges/records/?action=updateSingleRecord', post_data: {
               'scoutid' => member_id,
               'section_id' => section_id,
               'badge_id' => badge.id,

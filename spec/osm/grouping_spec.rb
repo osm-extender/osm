@@ -1,6 +1,6 @@
 describe Osm::Grouping do
 
-  it "Sorts by section_id then name" do
+  it 'Sorts by section_id then name' do
     g1 = Osm::Grouping.new(section_id: 1, name: 'a')
     g2 = Osm::Grouping.new(section_id: 2, name: 'a')
     g3 = Osm::Grouping.new(section_id: 2, name: 'b')
@@ -9,9 +9,9 @@ describe Osm::Grouping do
     expect(data.sort).to eq([g1, g2, g3])
   end
 
-  describe "Using the API" do
+  describe 'Using the API' do
 
-    it "Get for section" do
+    it 'Get for section' do
       data = {'patrols' => [{
         'patrolid' => 1,
         'name' => 'Patrol Name',
@@ -31,14 +31,14 @@ describe Osm::Grouping do
       expect(patrol.valid?).to eq(true)
     end
 
-    it "Handles no data" do
+    it 'Handles no data' do
       expect($api).to receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(nil)
       patrols = Osm::Grouping.get_for_section(api: $api, section: 2)
       expect(patrols.size).to eq(0)
     end
 
 
-    it "Update in OSM (succeded)" do
+    it 'Update in OSM (succeded)' do
       grouping = Osm::Grouping.new(
         id: 1,
         section_id: 2,
@@ -57,7 +57,7 @@ describe Osm::Grouping do
       expect(grouping.update($api)).to eq(true)
     end
 
-    it "Update points in OSM (succeded)" do
+    it 'Update points in OSM (succeded)' do
       grouping = Osm::Grouping.new(
         id: 1,
         section_id: 2,
@@ -75,7 +75,7 @@ describe Osm::Grouping do
       expect(grouping.update($api)).to eq(true)
     end
 
-    it "Update in OSM (failed)" do
+    it 'Update in OSM (failed)' do
       grouping = Osm::Grouping.new(
         id: 1,
         section_id: 2,
@@ -84,12 +84,12 @@ describe Osm::Grouping do
       grouping.name = 'Grouping'
       grouping.active = true
 
-      expect($api).to receive(:post_query).and_return({"done" => false})
+      expect($api).to receive(:post_query).and_return({'done' => false})
 
       expect(grouping.update($api)).to eq(false)
     end
 
-    it "Update points in OSM (failed)" do
+    it 'Update points in OSM (failed)' do
       grouping = Osm::Grouping.new(
         id: 1,
         section_id: 2,
@@ -98,7 +98,7 @@ describe Osm::Grouping do
       )
       grouping.points = 3
 
-      expect($api).to receive(:post_query).and_return({"done" => false})
+      expect($api).to receive(:post_query).and_return({'done' => false})
 
       expect(grouping.update($api)).to eq(false)
     end

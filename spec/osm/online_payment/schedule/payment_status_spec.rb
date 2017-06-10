@@ -1,6 +1,6 @@
 describe Osm::OnlinePayment::Schedule::PaymentStatus do
 
-  it "Create" do
+  it 'Create' do
     payment = Osm::OnlinePayment::Schedule::Payment.new
     allow(payment).to receive('valid?'){ true }
     status = Osm::OnlinePayment::Schedule::PaymentStatus.new(
@@ -22,7 +22,7 @@ describe Osm::OnlinePayment::Schedule::PaymentStatus do
     expect(status.valid?).to eq(true)
   end
 
-  it "Sorts by timestamp (desc), payment then id" do
+  it 'Sorts by timestamp (desc), payment then id' do
     status1 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 6), payment: 1, id: 1)
     status2 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 1, id: 1)
     status3 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 2, id: 1)
@@ -31,7 +31,7 @@ describe Osm::OnlinePayment::Schedule::PaymentStatus do
     expect(statuses.sort).to eq([status1, status2, status3, status4])
   end
 
-  describe "Has status checking method for" do
+  describe 'Has status checking method for' do
     before :each do
       @payments = []
       Osm::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES.each do |status|

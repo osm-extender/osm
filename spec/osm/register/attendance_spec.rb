@@ -1,6 +1,6 @@
 describe Osm::Register::Attendance do
 
-  it "Create" do
+  it 'Create' do
     rd = Osm::Register::Attendance.new(
       member_id: '1',
       first_name: 'A',
@@ -27,7 +27,7 @@ describe Osm::Register::Attendance do
     expect(rd.valid?).to eq(true)
   end
 
-  it "Sorts by section_id, grouping_id, last_name then first_name" do
+  it 'Sorts by section_id, grouping_id, last_name then first_name' do
     d1 = Osm::Register::Attendance.new(section_id: 1, grouping_id: 1, last_name: 'a', first_name: 'a')
     d2 = Osm::Register::Attendance.new(section_id: 2, grouping_id: 1, last_name: 'a', first_name: 'a')
     d3 = Osm::Register::Attendance.new(section_id: 2, grouping_id: 2, last_name: 'a', first_name: 'a')
@@ -38,14 +38,14 @@ describe Osm::Register::Attendance do
     expect(data.sort).to eq([d1, d2, d3, d4, d5])
   end
 
-  it "Reports if a member was present on a date" do
+  it 'Reports if a member was present on a date' do
     date = Date.new(2000, 1, 1)
     expect(Osm::Register::Attendance.new(attendance: {date => :yes}).present_on?(date)).to eq(true)
     expect(Osm::Register::Attendance.new(attendance: {date => :known_absent}).present_on?(date)).to eq(false)
     expect(Osm::Register::Attendance.new(attendance: {date => :unknown_absent}).present_on?(date)).to eq(false)
   end
 
-  it "Reports if a member was absent on a date" do
+  it 'Reports if a member was absent on a date' do
     date = Date.new(2000, 1, 1)
     expect(Osm::Register::Attendance.new(attendance: {date => :yes}).absent_on?(date)).to eq(false)
     expect(Osm::Register::Attendance.new(attendance: {date => :known_absent}).absent_on?(date)).to eq(true)

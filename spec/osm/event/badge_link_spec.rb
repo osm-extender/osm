@@ -1,6 +1,6 @@
 describe Osm::Event::BadgeLink do
 
-  it "Create" do
+  it 'Create' do
     bl = Osm::Event::BadgeLink.new(
       badge_type: :activity,
       badge_section: :cubs,
@@ -24,7 +24,7 @@ describe Osm::Event::BadgeLink do
   end
 
 
-  describe "Using to OSM API" do
+  describe 'Using to OSM API' do
   end # describe using to OSM API
 
 end

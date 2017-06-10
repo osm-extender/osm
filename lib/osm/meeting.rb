@@ -134,7 +134,7 @@ module Osm
       require_ability_to(api: api, to: :write, on: :programme, section: attributes[:section_id])
       meeting = new(**attributes)
 
-      data = api.post_query("programme.php?action=addActivityToProgramme", post_data: {
+      data = api.post_query('programme.php?action=addActivityToProgramme', post_data: {
         'meetingdate' => meeting.date.strftime(Osm::OSM_DATE_FORMAT),
         'sectionid' => meeting.section_id,
         'activityid' => -1,
@@ -200,7 +200,7 @@ module Osm
           }
         }.to_json
       }
-      response = api.post_query("programme.php?action=editEvening", post_data: api_data)
+      response = api.post_query('programme.php?action=editEvening', post_data: api_data)
 
       if response.is_a?(Hash) && (response['result'] == 0)
         reset_changed_attributes
@@ -279,20 +279,20 @@ module Osm
           badges = []
           links.each do |badge|
             badges.push({
-              "badge" => nil,#"activity_animalcarer",
-              "badge_id" => badge.badge_id,
-              "badge_version" => badge.badge_version,
-              "column_id" => badge.requirement_id,
-              "badgeName" => badge.badge_name,
-              "badgetype" => badge.badge_type,
-              "columngroup" => nil,#"A",
-              "columnname" => nil,#"a",
-              "data" => badge.data,
-              "eveningid" => id,
-              "meetingdate" => date,
-              "name" => badge.requirement_label,
-              "section" => badge.badge_section,
-              "sectionid" => section_id
+              'badge' => nil,#"activity_animalcarer",
+              'badge_id' => badge.badge_id,
+              'badge_version' => badge.badge_version,
+              'column_id' => badge.requirement_id,
+              'badgeName' => badge.badge_name,
+              'badgetype' => badge.badge_type,
+              'columngroup' => nil,#"A",
+              'columnname' => nil,#"a",
+              'data' => badge.data,
+              'eveningid' => id,
+              'meetingdate' => date,
+              'name' => badge.requirement_label,
+              'section' => badge.badge_section,
+              'sectionid' => section_id
             })
           end
         end # if to pick which method to use to get the data from OSM

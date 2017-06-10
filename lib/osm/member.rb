@@ -284,7 +284,7 @@ module Osm
       fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :write, :member, section_id)
 
-      data = api.post_query("users.php?action=newMember", post_data: {
+      data = api.post_query('users.php?action=newMember', post_data: {
         'firstname' => first_name,
         'lastname' => last_name,
         'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
@@ -329,7 +329,7 @@ module Osm
         ['joined_movement', 'started', joined_movement.strftime(Osm::OSM_DATE_FORMAT)],
       ] # our name => OSM name
       attribute_map.select{ |attr,col,val| force || changed_attributes.include?(attr) }.each do |attr,col,val|
-        data = api.post_query("ext/members/contact/?action=update", post_data: {
+        data = api.post_query('ext/members/contact/?action=update', post_data: {
           'scoutid' => self.id,
           'column' => col,
           'value' => val,

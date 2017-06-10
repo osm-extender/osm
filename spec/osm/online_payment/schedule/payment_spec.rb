@@ -1,6 +1,6 @@
 describe Osm::OnlinePayment::Schedule::Payment do
 
-  it "Create" do
+  it 'Create' do
     schedule = Osm::OnlinePayment::Schedule.new()
     allow(schedule).to receive('valid?'){ true }
     payment = Osm::OnlinePayment::Schedule::Payment.new(
@@ -20,7 +20,7 @@ describe Osm::OnlinePayment::Schedule::Payment do
     expect(payment.valid?).to eq(true)
   end
 
-  it "Checks if a payment is past due" do
+  it 'Checks if a payment is past due' do
     payment = Osm::OnlinePayment::Schedule::Payment.new(due_date: Date.new(2016, 5, 2))
     expect(payment.past_due?(Date.new(2016, 5, 1))).to eq(false)
     expect(payment.past_due?(Date.new(2016, 5, 2))).to eq(false)

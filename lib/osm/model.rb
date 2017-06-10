@@ -47,7 +47,7 @@ module Osm
     end
 
     def self.cache_ttl=(new_cache_ttl)
-      fail ArgumentError, "cache_ttl must be a FixNum greater than 0" if new_cache_ttl && !(new_cache_ttl.is_a?(Integer) && new_cache_ttl > 0)
+      fail ArgumentError, 'cache_ttl must be a FixNum greater than 0' if new_cache_ttl && !(new_cache_ttl.is_a?(Integer) && new_cache_ttl > 0)
       @@cache_ttl = new_cache_ttl
     end
     def self.cache_ttl
@@ -55,7 +55,7 @@ module Osm
     end
 
     def self.prepend_to_cache_key=(new_prepend_to_cache_key)
-      fail ArgumentError, "prepend_to_cache_key must be a String" if new_prepend_to_cache_key && !new_prepend_to_cache_key.is_a?(String)
+      fail ArgumentError, 'prepend_to_cache_key must be a String' if new_prepend_to_cache_key && !new_prepend_to_cache_key.is_a?(String)
       @@prepend_to_cache_key = new_prepend_to_cache_key
     end
     def self.prepend_to_cache_key
@@ -132,7 +132,7 @@ module Osm
     private
     # Wrap cache calls
     def self.cache_fetch(api:, key:, ttl: @@cache_ttl, no_read_cache: false)
-      fail ArgumentError, "A block is required" unless block_given?
+      fail ArgumentError, 'A block is required' unless block_given?
       return yield if no_cache? || no_read_cache
       key = cache_key(api: api, key: key)
       @@cache.fetch(key, {expires_in: ttl}){ yield }
@@ -179,7 +179,7 @@ module Osm
     # @raise [Osm::Forbidden] If the Api user can not access the section
     def self.require_access_to_section(api:, section:, **options)
       unless has_access_to_section?(api: api, section: section, **options)
-        fail Osm::Forbidden, "You do not have access to that section"
+        fail Osm::Forbidden, 'You do not have access to that section'
       end
     end
 
@@ -282,7 +282,7 @@ module Osm
     # @!macro options_get
     # @return [Array] An array of the items
     def self.get_from_ids(api:, ids:, key_base:, method:, no_read_cache: false, arguments: {})
-      fail ArgumentError, "method is invalid" unless [:get_all, :get_for_section].include?(method)
+      fail ArgumentError, 'method is invalid' unless [:get_all, :get_for_section].include?(method)
       items = Array.new
       ids.each do |id|
         if cache_exist?(api: api, key: [*key_base, id], no_read_cache: no_read_cache)

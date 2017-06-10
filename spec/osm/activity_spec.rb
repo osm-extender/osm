@@ -1,6 +1,6 @@
 describe Osm::Activity do
 
-  it "Get OSM link" do
+  it 'Get OSM link' do
     activity = Osm::Activity.new(
       id: 1,
       running_time: 10,
@@ -13,14 +13,14 @@ describe Osm::Activity do
     expect(activity.osm_link).to eq('https://www.onlinescoutmanager.co.uk/?l=p1')
   end
 
-  it "Sorts by id then version" do
+  it 'Sorts by id then version' do
     expect(Osm::Activity.new.send(:sort_by)).to eq(['id', 'version'])
   end
 
 
-  describe "Using The API" do
+  describe 'Using The API' do
   
-    it "Get One" do
+    it 'Get One' do
       body = {
           'details' => {
           'activityid' => '1',
@@ -117,7 +117,7 @@ describe Osm::Activity do
     end
   
   
-    it "Add activity to programme (succeded)" do
+    it 'Add activity to programme (succeded)' do
       post_data = {
         'meetingdate' => '2000-01-02',
         'sectionid' => 1,
@@ -130,7 +130,7 @@ describe Osm::Activity do
       expect(activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes')).to eq(true)
     end
   
-    it "Add activity to programme (failed)" do
+    it 'Add activity to programme (failed)' do
       post_data = {
         'meetingdate' => '2000-01-02',
         'sectionid' => 1,
@@ -144,7 +144,7 @@ describe Osm::Activity do
     end
   
   
-    it "Update activity in OSM (succeded)" do
+    it 'Update activity in OSM (succeded)' do
       post_data = {
         'title' => 'title',
         'description' => 'description',
@@ -191,7 +191,7 @@ describe Osm::Activity do
       expect(activity.update(api: $api, section: 1, secret_update: true)).to eq(true)
     end
   
-    it "Update activity in OSM (failed)" do
+    it 'Update activity in OSM (failed)' do
       activity = Osm::Activity.new(
         id: 2,
         title: 'title',
@@ -201,7 +201,7 @@ describe Osm::Activity do
         location: :indoors,
         running_time: 0,
       )
-      expect($api).to receive(:post_query).and_return({"result" => false})
+      expect($api).to receive(:post_query).and_return({'result' => false})
       expect(activity.update(api: $api, section: 1, secret_update: true)).to eq(false)
     end
   

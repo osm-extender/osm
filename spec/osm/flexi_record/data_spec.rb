@@ -1,6 +1,6 @@
 describe Osm::FlexiRecord::Data do
 
-  it "Create" do
+  it 'Create' do
     rd = Osm::FlexiRecord::Data.new(
       member_id: 1,
       grouping_id: 2,
@@ -32,7 +32,7 @@ describe Osm::FlexiRecord::Data do
     expect(rd.valid?).to eq(true)
   end
 
-  it "Sorts by flexirecord, grouping_id then member_id" do
+  it 'Sorts by flexirecord, grouping_id then member_id' do
     frd1 = Osm::FlexiRecord::Data.new(flexi_record: Osm::FlexiRecord.new(section_id: 1), grouping_id: 1, member_id: 1)
     frd2 = Osm::FlexiRecord::Data.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), grouping_id: 1, member_id: 1)
     frd3 = Osm::FlexiRecord::Data.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), grouping_id: 2, member_id: 1)
@@ -43,9 +43,9 @@ describe Osm::FlexiRecord::Data do
   end
 
 
-  describe "Update" do
+  describe 'Update' do
 
-    it "Success" do
+    it 'Success' do
       post_data = {
         'termid' => 3,
         'scoutid' => 4,
@@ -75,7 +75,7 @@ describe Osm::FlexiRecord::Data do
       expect(fr_data.update($api)).to eq(true)
     end
 
-    it "Failed" do
+    it 'Failed' do
       data = {
         'items' => [
           {'f_1' => 'old value', 'scoutid' => '4'},
@@ -98,7 +98,7 @@ describe Osm::FlexiRecord::Data do
       expect(fr_data.update($api)).to eq(false)
     end
 
-    it "Uneditable field" do
+    it 'Uneditable field' do
       allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 1) }
       fr = Osm::FlexiRecord.new(section_id: 1, id: 2)
       allow(fr).to receive(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: false)] }

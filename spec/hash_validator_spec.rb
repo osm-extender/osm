@@ -27,22 +27,22 @@ module HashValidatorSpec
 
   describe HashValidator do
 
-    describe "Key type option" do
+    describe 'Key type option' do
 
-      it "Has only correct keys" do
+      it 'Has only correct keys' do
         model = KeyTypeTestModel.new(hash_attr: {1=>'1', 2=>'2'})
         expect(model.valid?).to eq(true)
         expect(model.errors.count).to eq(0)
       end
 
-      it "Has an incorrect key" do
+      it 'Has an incorrect key' do
         model = KeyTypeTestModel.new(hash_attr: {1=>'1', 2=>'2', '3'=>'3'})
         expect(model.valid?).to eq(false)
         expect(model.errors.count).to eq(1)
         expect(model.errors.messages).to eq({hash_attr: ['keys must be a Integer ("3" is not).']})
       end
 
-      it "Has several incorrect keys" do
+      it 'Has several incorrect keys' do
         model = KeyTypeTestModel.new(hash_attr: {1=>'1', 2=>'2', '3'=>'3', '4'=>'4'})
         expect(model.valid?).to eq(false)
         expect(model.errors.count).to eq(2)
@@ -52,22 +52,22 @@ module HashValidatorSpec
     end
 
 
-    describe "Key in option" do
+    describe 'Key in option' do
 
-      it "Has only correct keys" do
+      it 'Has only correct keys' do
         model = KeyInTestModel.new(hash_attr: {1=>'1', 2=>'2'})
         expect(model.valid?).to eq(true)
         expect(model.errors.count).to eq(0)
       end
 
-      it "Has an incorrect key" do
+      it 'Has an incorrect key' do
         model = KeyInTestModel.new(hash_attr: {1=>'1', 2=>'2', 3=>'3'})
         expect(model.valid?).to eq(false)
         expect(model.errors.count).to eq(1)
         expect(model.errors.messages).to eq({hash_attr: ['keys must be in [1, 2] (3 is not).']})
       end
 
-      it "Has several incorrect keys" do
+      it 'Has several incorrect keys' do
         model = KeyInTestModel.new(hash_attr: {1=>'1', 2=>'2', 3=>'3', 4=>'4'})
         expect(model.valid?).to eq(false)
         expect(model.errors.count).to eq(2)
@@ -77,22 +77,22 @@ module HashValidatorSpec
     end
 
 
-    describe "Value type option" do
+    describe 'Value type option' do
 
-      it "Has only correct keys" do
+      it 'Has only correct keys' do
         model = ValueTypeTestModel.new(hash_attr: {'1'=>1, '2'=>2})
         expect(model.valid?).to eq(true)
         expect(model.errors.count).to eq(0)
       end
 
-      it "Has an incorrect key" do
+      it 'Has an incorrect key' do
         model = ValueTypeTestModel.new(hash_attr: {'1'=>1, '2'=>2, '3'=>'3'})
         expect(model.valid?).to eq(false)
         expect(model.errors.count).to eq(1)
         expect(model.errors.messages).to eq({hash_attr: ['values must be a Integer ("3" for key "3" is not).']})
       end
 
-      it "Has several incorrect keys" do
+      it 'Has several incorrect keys' do
         model = ValueTypeTestModel.new(hash_attr: {'1'=>1, '2'=>2, '3'=>'3', '4'=>'4'})
         expect(model.valid?).to eq(false)
         expect(model.errors.count).to eq(2)
@@ -102,22 +102,22 @@ module HashValidatorSpec
     end
 
 
-    describe "Value in option" do
+    describe 'Value in option' do
 
-      it "Has only correct keys" do
+      it 'Has only correct keys' do
         model = ValueInTestModel.new(hash_attr: {'1'=>1, '2'=>2})
         expect(model.valid?).to eq(true)
         expect(model.errors.count).to eq(0)
       end
 
-      it "Has an incorrect key" do
+      it 'Has an incorrect key' do
         model = ValueInTestModel.new(hash_attr: {'1'=>1, '2'=>2, '3'=>'3'})
         expect(model.valid?).to eq(false)
         expect(model.errors.count).to eq(1)
         expect(model.errors.messages).to eq({hash_attr: ['values must be in [1, 2] ("3" for key "3" is not).']})
       end
 
-      it "Has several incorrect keys" do
+      it 'Has several incorrect keys' do
         model = ValueInTestModel.new(hash_attr: {'1'=>1, '2'=>2, '3'=>'3', '4'=>'4'})
         expect(model.valid?).to eq(false)
         expect(model.errors.count).to eq(2)

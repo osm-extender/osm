@@ -1,6 +1,6 @@
 describe Osm::Meeting::Activity do
 
-    it "Create" do
+    it 'Create' do
       ea = Osm::Meeting::Activity.new(
         activity_id: 2,
         title: 'Activity Name',
@@ -13,7 +13,7 @@ describe Osm::Meeting::Activity do
       expect(ea.valid?).to eq(true)
     end
 
-    it "Sorts by title then activity_id" do
+    it 'Sorts by title then activity_id' do
       a1 = Osm::Meeting::Activity.new(title: 'a', activity_id: 1)
       a2 = Osm::Meeting::Activity.new(title: 'b', activity_id: 1)
       a3 = Osm::Meeting::Activity.new(title: 'b', activity_id: 2)

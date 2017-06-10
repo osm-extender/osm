@@ -212,12 +212,12 @@ module Osm
           user_roles = post_query('api.php?action=getUserRoles')
           if user_roles.eql?(false)
             # false equates to no roles
-            fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
+            fail Osm::NoActiveRoles, 'You do not have any active roles in OSM.'
           end
 
         rescue Osm::Error => e
           if e.message.eql?('false')
-            fail Osm::NoActiveRoles, "You do not have any active roles in OSM."
+            fail Osm::NoActiveRoles, 'You do not have any active roles in OSM.'
           else
             raise e
           end

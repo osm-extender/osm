@@ -1,6 +1,6 @@
 describe Osm::Event::Attendance do
 
-  it "Create" do
+  it 'Create' do
     data = {
       member_id: 1,
       grouping_id: 2,
@@ -27,7 +27,7 @@ describe Osm::Event::Attendance do
     expect(ea.valid?).to eq(true)
   end
 
-  it "Sorts by event ID then row" do
+  it 'Sorts by event ID then row' do
     ea1 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 1), row: 1)
     ea2 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 2), row: 1)
     ea3 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 2), row: 2)
@@ -37,9 +37,9 @@ describe Osm::Event::Attendance do
   end
 
 
-  describe "Using to OSM API" do
+  describe 'Using to OSM API' do
 
-    it "Update attendance (succeded)" do
+    it 'Update attendance (succeded)' do
       ea = Osm::Event::Attendance.new(row: 0, member_id: 4, fields: {1 => 'old value', 2 => 'another old value'}, event: Osm::Event.new(id: 2, :section_id => 1))
 
       ea.fields[1] = 'value'
@@ -81,15 +81,15 @@ describe Osm::Event::Attendance do
       expect(ea.update($api)).to eq(true)
     end # it update attendance (success)
 
-    it "Get audit trail" do
+    it 'Get audit trail' do
       data = [
-      	{"date" => "10/06/2013 19:17","updatedby" => "My.SCOUT","type" => "detail","desc" => "Set 'Test' to 'Test data'"},
-      	{"date" => "10/06/2013 19:16","updatedby" => "My.SCOUT","type" => "attendance","desc" => "Attendance: Yes"},
-	      {"date" => "10/06/2013 19:15","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Reserved"},
-	      {"date" => "10/06/2013 19:14","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: No"},
-	      {"date" => "10/06/2013 19:13","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Yes"},
-	      {"date" => "10/06/2013 19:12","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Invited"},
-	      {"date" => "10/06/2013 19:11","updatedby" => "A Leader ","type" => "attendance","desc" => "Attendance: Show in My.SCOUT"},
+      	{'date' => '10/06/2013 19:17','updatedby' => 'My.SCOUT','type' => 'detail','desc' => "Set 'Test' to 'Test data'"},
+      	{'date' => '10/06/2013 19:16','updatedby' => 'My.SCOUT','type' => 'attendance','desc' => 'Attendance: Yes'},
+	      {'date' => '10/06/2013 19:15','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Reserved'},
+	      {'date' => '10/06/2013 19:14','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: No'},
+	      {'date' => '10/06/2013 19:13','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Yes'},
+	      {'date' => '10/06/2013 19:12','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Invited'},
+	      {'date' => '10/06/2013 19:11','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Show in My.SCOUT'},
       ]
 
       expect($api).to receive(:post_query).with('events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3').and_return(data)
@@ -100,12 +100,12 @@ describe Osm::Event::Attendance do
       )
       expect(ea.get_audit_trail($api)).to eq([
         {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 17), by: 'My.SCOUT', :type => :detail, :description => "Set 'Test' to 'Test data'", :label => 'Test', :value => 'Test data'},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 16), by: 'My.SCOUT', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 15), by: 'A Leader', :type => :attendance, :description => "Attendance: Reserved", :attendance => :reserved},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 14), by: 'A Leader', :type => :attendance, :description => "Attendance: No", :attendance => :no},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 13), by: 'A Leader', :type => :attendance, :description => "Attendance: Yes", :attendance => :yes},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 12), by: 'A Leader', :type => :attendance, :description => "Attendance: Invited", :attendance => :invited},
-        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 11), by: 'A Leader', :type => :attendance, :description => "Attendance: Show in My.SCOUT", :attendance => :shown},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 16), by: 'My.SCOUT', :type => :attendance, :description => 'Attendance: Yes', :attendance => :yes},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 15), by: 'A Leader', :type => :attendance, :description => 'Attendance: Reserved', :attendance => :reserved},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 14), by: 'A Leader', :type => :attendance, :description => 'Attendance: No', :attendance => :no},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 13), by: 'A Leader', :type => :attendance, :description => 'Attendance: Yes', :attendance => :yes},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 12), by: 'A Leader', :type => :attendance, :description => 'Attendance: Invited', :attendance => :invited},
+        {event_attendance: ea, event_id: 3, member_id: 2, at: DateTime.new(2013, 6, 10, 19, 11), by: 'A Leader', :type => :attendance, :description => 'Attendance: Show in My.SCOUT', :attendance => :shown},
       ])
     end
 

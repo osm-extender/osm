@@ -190,10 +190,10 @@ module Osm
     # @param date [Date, DateTime] The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
     # @param notes [String] The notes which should appear for this Activity on this Evening
     # @return true, false Whether the activity was successfully added
-    def add_to_programme(api:, section:, date:, notes: "")
+    def add_to_programme(api:, section:, date:, notes: '')
       require_ability_to(api: api, to: :write, on: :programme, section: section)
 
-      data = api.post_query("programme.php?action=addActivityToProgramme", post_data: {
+      data = api.post_query('programme.php?action=addActivityToProgramme', post_data: {
         'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
         'activityid' => id,
         'sectionid' => section.to_i,
@@ -218,9 +218,9 @@ module Osm
     # @raise [Osm::Forbidden] If the Activity is not editable
     def update(api:, section:, secret_update: false)
       fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
-      fail Osm::Forbidden, "You are not allowed to update this activity" unless self.editable
+      fail Osm::Forbidden, 'You are not allowed to update this activity' unless self.editable
 
-      data = api.post_query("programme.php?action=update", post_data: {
+      data = api.post_query('programme.php?action=update', post_data: {
         'title' => title,
         'description' => description,
         'resources' => resources,

@@ -81,7 +81,7 @@ module Osm
             paid_manually:  'Paid manually',
           }[status]
 
-          data = api.post_query("ext/finances/onlinepayments/?action=updatePaymentStatus", post_data: {
+          data = api.post_query('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: {
             'sectionid' => schedule.section_id,
             'schemeid' => schedule.id,
             'scoutid' => member_id,

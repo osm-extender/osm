@@ -1,6 +1,6 @@
 describe Osm::GiftAid::Donation do
 
-  it "Create" do
+  it 'Create' do
     d = Osm::GiftAid::Donation.new(
       donation_date: Date.new(2000, 1, 2),
     )
@@ -9,7 +9,7 @@ describe Osm::GiftAid::Donation do
     expect(d.valid?).to eq(true)
   end
 
-  it "Sorts by date" do
+  it 'Sorts by date' do
     d1 = Osm::GiftAid::Donation.new(donation_date: Date.new(2000, 1, 2))
     d2 = Osm::GiftAid::Donation.new(donation_date: Date.new(2001, 1, 2))
 

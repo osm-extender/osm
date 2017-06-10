@@ -1,6 +1,6 @@
 describe Osm::Badge::RequirementModule do
 
-  it "Create" do
+  it 'Create' do
     b = Osm::Badge.new
     m = Osm::Badge::RequirementModule.new(
       badge: b,
@@ -24,7 +24,7 @@ describe Osm::Badge::RequirementModule do
     expect(m.valid?).to eq(true)
   end
 
-  it "Compare by badge then letter then id" do
+  it 'Compare by badge then letter then id' do
     b1 = Osm::Badge::RequirementModule.new(badge: Osm::Badge.new(name: 'A'), letter: 'a', id: 1)
     b2 = Osm::Badge::RequirementModule.new(badge: Osm::Badge.new(name: 'B'), letter: 'a', id: 1)
     b3 = Osm::Badge::RequirementModule.new(badge: Osm::Badge.new(name: 'B'), letter: 'b', id: 1)

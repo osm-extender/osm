@@ -83,7 +83,7 @@ module Osm
 
         updated = true
         fields.changes.each do |field, (was,now)|
-          data = api.post_query("events.php?action=updateScout", post_data: {
+          data = api.post_query('events.php?action=updateScout', post_data: {
             'scoutid' => member_id,
             'column' => "f_#{field}",
             'value' => now,
@@ -95,7 +95,7 @@ module Osm
         end
 
         if changed_attributes.include?('payment_control')
-          data = api.post_query("events.php?action=updateScout", post_data: {
+          data = api.post_query('events.php?action=updateScout', post_data: {
             'scoutid' => member_id,
             'column' => 'payment',
             'value' => payment_values[payment_control],
@@ -106,7 +106,7 @@ module Osm
           updated = false unless data.is_a?(Hash)
         end
         if changed_attributes.include?('attending')
-          data = api.post_query("events.php?action=updateScout", post_data: {
+          data = api.post_query('events.php?action=updateScout', post_data: {
             'scoutid' => member_id,
             'column' => 'attending',
             'value' => attending_values[attending],

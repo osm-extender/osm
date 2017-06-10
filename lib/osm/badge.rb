@@ -117,7 +117,7 @@ module Osm
 
       Osm::Model.cache_delete(api: api, key: ['badge_stock', section.id])
 
-      data = api.post_query("ext/badges.php?action=updateStock", post_data: {
+      data = api.post_query('ext/badges.php?action=updateStock', post_data: {
         'stock' => stock,
         'sectionid' => section.id,
         'section' => section.type,
@@ -198,9 +198,9 @@ module Osm
         }
 
         data = api.post_query("ext/badges/records/?action=getBadgeStructureByType&section=#{section_type}&type_id=#{type_id}&term_id=#{term_id}&section_id=#{section.id}")
-        badge_order = data["badgeOrder"].to_s.split(',')
-        structures = data["structure"] || {}
-        details = data["details"] || {}
+        badge_order = data['badgeOrder'].to_s.split(',')
+        structures = data['structure'] || {}
+        details = data['details'] || {}
 
         badge_order.each do |b|
           structure = structures[b]

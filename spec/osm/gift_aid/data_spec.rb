@@ -1,6 +1,6 @@
 describe Osm::GiftAid::Data do
 
-  it "Create" do
+  it 'Create' do
     d = Osm::GiftAid::Data.new(
       member_id: 1,
       first_name: 'A',
@@ -31,7 +31,7 @@ describe Osm::GiftAid::Data do
     expect(d.valid?).to eq(true)
   end
 
-  it "Sorts by section_id, grouping_id, last_name then first_name" do
+  it 'Sorts by section_id, grouping_id, last_name then first_name' do
     d1 = Osm::GiftAid::Data.new(section_id: 1, grouping_id: 1, last_name: 'a', first_name: 'a')
     d2 = Osm::GiftAid::Data.new(section_id: 2, grouping_id: 1, last_name: 'a', first_name: 'a')
     d3 = Osm::GiftAid::Data.new(section_id: 2, grouping_id: 2, last_name: 'a', first_name: 'a')
@@ -43,9 +43,9 @@ describe Osm::GiftAid::Data do
   end
 
 
-  describe "Using the OSM API" do
+  describe 'Using the OSM API' do
 
-    describe "Update" do
+    describe 'Update' do
 
       before :each do
         @data = Osm::GiftAid::Data.new(
@@ -66,7 +66,7 @@ describe Osm::GiftAid::Data do
         allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 4) }
       end
 
-      it "Tax payer" do
+      it 'Tax payer' do
         post_data = {
           'scoutid' => 1,
           'termid' => 4,
@@ -74,9 +74,9 @@ describe Osm::GiftAid::Data do
           'row' => 0,
         }
         body_data = {
-          "items" => [
-            {"parentname" => "n", "address" => "a", "postcode" => "pc", "scoutid" => "1"},
-            {"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 0}
+          'items' => [
+            {'parentname' => 'n', 'address' => 'a', 'postcode' => 'pc', 'scoutid' => '1'},
+            {'firstname' => 'TOTAL','lastname' => '','scoutid' => -1,'patrolid' => -1,'parentname' => '','total' => 0}
           ]
         }
         expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge({'column' => 'parentname', 'value' => 'n'})).and_return(body_data)
@@ -89,7 +89,7 @@ describe Osm::GiftAid::Data do
         expect(@data.update($api)).to eq(true)
       end
 
-      it "A donation" do
+      it 'A donation' do
         post_data = {
           'scoutid' => 1,
           'termid' => 4,
@@ -99,12 +99,12 @@ describe Osm::GiftAid::Data do
           'row' => 0,
         }
         body_data = {
-          "items" => [
-            {"2012-01-03" => "3.45","scoutid" => "1"},
-            {"firstname" => "TOTAL","lastname" => "","scoutid" => -1,"patrolid" => -1,"parentname" => "","total" => 0}
+          'items' => [
+            {'2012-01-03' => '3.45','scoutid' => '1'},
+            {'firstname' => 'TOTAL','lastname' => '','scoutid' => -1,'patrolid' => -1,'parentname' => '','total' => 0}
           ]
         }
-        url = "https://www.onlinescoutmanager.co.uk/"
+        url = 'https://www.onlinescoutmanager.co.uk/'
         expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data).and_return(body_data)
 
         @data.donations[Date.new(2012, 1, 3)] = '3.45'

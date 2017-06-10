@@ -1,17 +1,17 @@
 describe Osm::Email do
 
-  describe "Get emails for contacts" do
+  describe 'Get emails for contacts' do
 
-    it "Single member" do
-      expect($api).to receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
-        "emails"=>{
-          "2"=>{
-            "emails"=>["john@example.com"],
-            "firstname"=>"John",
-            "lastname"=>"Smith"
+    it 'Single member' do
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2', post_data: {'contactGroups' => '["contact_primary_member"]'}).and_return({
+        'emails'=>{
+          '2'=>{
+            'emails'=>['john@example.com'],
+            'firstname'=>'John',
+            'lastname'=>'Smith'
           }
         },
-        "count"=>1
+        'count'=>1
       })
 
       result = Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: :member, members: 2)
@@ -24,21 +24,21 @@ describe Osm::Email do
       })
     end
 
-    it "Several members" do
-      expect($api).to receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3", post_data: {"contactGroups" => '["contact_primary_member"]'}).and_return({
-        "emails"=>{
-          "2"=>{
-            "emails"=>["john@example.com"],
-            "firstname"=>"John",
-            "lastname"=>"Smith"
+    it 'Several members' do
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=2,3', post_data: {'contactGroups' => '["contact_primary_member"]'}).and_return({
+        'emails'=>{
+          '2'=>{
+            'emails'=>['john@example.com'],
+            'firstname'=>'John',
+            'lastname'=>'Smith'
           },
-          "3"=>{
-            "emails"=>["jane@example.com","jane2@example.com"],
-            "firstname"=>"Jane",
-            "lastname"=>"Smith"
+          '3'=>{
+            'emails'=>['jane@example.com','jane2@example.com'],
+            'firstname'=>'Jane',
+            'lastname'=>'Smith'
           }
         },
-        "count"=>3
+        'count'=>3
       })
 
       result = Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: :member, members: [2,3])
@@ -56,37 +56,37 @@ describe Osm::Email do
       })
     end
 
-    it "Requires at least one contact" do
+    it 'Requires at least one contact' do
       expect($api).not_to receive(:post_query)
-      expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [], members: [2]) }.to raise_error ArgumentError, "You must pass at least one contact"
+      expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [], members: [2]) }.to raise_error ArgumentError, 'You must pass at least one contact'
     end
 
-    it "Checks for invalid contacts" do
+    it 'Checks for invalid contacts' do
       expect($api).not_to receive(:post_query)
-      expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:invalid_contact], members: [2]) }.to raise_error ArgumentError, "Invalid contact - :invalid_contact"
+      expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:invalid_contact], members: [2]) }.to raise_error ArgumentError, 'Invalid contact - :invalid_contact'
     end
 
-    it "Requires at least one member" do
+    it 'Requires at least one member' do
       expect($api).not_to receive(:post_query)
-      expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:primary], members: []) }.to raise_error ArgumentError, "You must pass at least one member"
+      expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:primary], members: []) }.to raise_error ArgumentError, 'You must pass at least one member'
     end
 
-    it "Handles no emails returned" do
-      expect($api).to receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1", post_data: {"contactGroups" => '["contact_primary_1"]'}).and_return({})
+    it 'Handles no emails returned' do
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1', post_data: {'contactGroups' => '["contact_primary_1"]'}).and_return({})
       expect(Osm::Email.get_emails_for_contacts(api: $api, section: 1, members: 1, contacts: [:primary])).to be false
     end
 
-    it "Handles no data hash returned" do
-      expect($api).to receive(:post_query).with("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1", post_data: {"contactGroups" => '["contact_primary_1"]'}).and_return([])
+    it 'Handles no data hash returned' do
+      expect($api).to receive(:post_query).with('/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=1&scouts=1', post_data: {'contactGroups' => '["contact_primary_1"]'}).and_return([])
       expect(Osm::Email.get_emails_for_contacts(api: $api, section: 1, members: 1, contacts: [:primary])).to be false
     end
 
   end # describe Get emails for conatcts
 
-  describe "Send email" do
+  describe 'Send email' do
 
-    it "With cc" do
-      expect($api).to receive(:post_query).with("ext/members/email/?action=send", post_data: {
+    it 'With cc' do
+      expect($api).to receive(:post_query).with('ext/members/email/?action=send', post_data: {
         'sectionid' => 1,
         'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]}}',
         'scouts' => '2',
@@ -107,8 +107,8 @@ describe Osm::Email do
       )).to eq(true)
     end
 
-    it "Without cc" do
-      expect($api).to receive(:post_query).with("ext/members/email/?action=send", post_data: {
+    it 'Without cc' do
+      expect($api).to receive(:post_query).with('ext/members/email/?action=send', post_data: {
         'sectionid' => 1,
         'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]}}',
         'scouts' => '2',
@@ -128,8 +128,8 @@ describe Osm::Email do
       )).to eq(true)
     end
 
-    it "To several members" do
-      expect($api).to receive(:post_query).with("ext/members/email/?action=send", post_data: {
+    it 'To several members' do
+      expect($api).to receive(:post_query).with('ext/members/email/?action=send', post_data: {
         'sectionid' => 1,
         'emails' => '{"2":{"firstname":"John","lastname":"Smith","emails":["john@example.com"]},"3":{"firstname":"Jane","lastname":"Smith","emails":["jane@example.com"]}}',
         'scouts' => '2,3',

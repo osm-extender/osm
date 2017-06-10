@@ -1,6 +1,6 @@
 describe Osm::Email::DeliveryReport do
 
-  describe "Attribute validity -" do
+  describe 'Attribute validity -' do
 
     before :each do
       @report = Osm::Email::DeliveryReport.new(
@@ -16,7 +16,7 @@ describe Osm::Email::DeliveryReport do
       it attribute do
         @report.send("#{attribute}=", 0)
         expect(@report.valid?).to eq(false)
-        expect(@report.errors.messages[attribute.to_sym]).to eq(["must be greater than 0"])
+        expect(@report.errors.messages[attribute.to_sym]).to eq(['must be greater than 0'])
       end
     end
 
@@ -28,24 +28,24 @@ describe Osm::Email::DeliveryReport do
       end
     end
 
-    describe "recipients" do
+    describe 'recipients' do
 
-      it "Empty array allowed" do
+      it 'Empty array allowed' do
         @report.recipients = []
         expect(@report.valid?).to eq(true)
         expect(@report.errors.messages[:recipients]).to eq(nil)
       end
 
-      it "Invalid item in array not allowed" do
+      it 'Invalid item in array not allowed' do
         @report.recipients = [Osm::Email::DeliveryReport::Recipient.new()]
         expect(@report.valid?).to eq(false)
-        expect(@report.errors.messages[:recipients]).to eq(["contains an invalid item"])
+        expect(@report.errors.messages[:recipients]).to eq(['contains an invalid item'])
       end
 
-      it "Something other than a recipient not allowed" do
+      it 'Something other than a recipient not allowed' do
         @report.recipients = [Time.now]
         expect(@report.valid?).to eq(false)
-        expect(@report.errors.messages[:recipients]).to eq(["items in the Array must be a Osm::Email::DeliveryReport::Recipient"])
+        expect(@report.errors.messages[:recipients]).to eq(['items in the Array must be a Osm::Email::DeliveryReport::Recipient'])
       end
 
     end # describe recipients
@@ -53,9 +53,9 @@ describe Osm::Email::DeliveryReport do
   end # describe Attribute validity
 
 
-  it "Fetch delivery reports from OSM" do
+  it 'Fetch delivery reports from OSM' do
     expect($api).to receive(:post_query).with('ext/settings/emails/?action=getDeliveryReport&sectionid=1234').and_return([
-      {'id'=>"0", 'name'=>"ALL", 'type'=>"all", 'count'=>47},
+      {'id'=>'0', 'name'=>'ALL', 'type'=>'all', 'count'=>47},
       {'id'=>123, 'name'=>'01/02/2003 04:05 - Subject of email - 1', 'type'=>'email', 'parent'=>'0', 'hascontent'=>true, 'errors'=>0, 'opens'=>0, 'warnings'=>0},
       {'id'=>'123-1', 'name'=>'a@example.com - delivered', 'type'=>'oneEmail', 'status'=>'delivered', 'email'=>'a@example.com', 'email_key'=>'aexamplecom', 'hascontent'=>true, 'member_id'=>'12', 'parent'=>123, 'status_raw'=>'delivered'},
       {'id'=>'123-2', 'name'=>'b@example.com - processed', 'type'=>'oneEmail', 'status'=>'processed', 'email'=>'b@example.com', 'email_key'=>'bexamplecom', 'hascontent'=>true, 'member_id'=>'23', 'parent'=>123, 'status_raw'=>'processed'},
@@ -89,7 +89,7 @@ describe Osm::Email::DeliveryReport do
     expect(recipients[2].status).to eq(:bounced)
   end
 
-  it "Fetch email from OSM" do
+  it 'Fetch email from OSM' do
     email = Osm::Email::DeliveryReport::Email.new
     report = Osm::Email::DeliveryReport.new(id: 3, section_id: 4)
 
@@ -97,7 +97,7 @@ describe Osm::Email::DeliveryReport do
     expect(report.get_email($api)).to eq(email)
   end
 
-  describe "Get recipients of a certain status -" do
+  describe 'Get recipients of a certain status -' do
     before :each do
       @processed_recipient = Osm::Email::DeliveryReport::Recipient.new(status: :processed)
       @delivered_recipient = Osm::Email::DeliveryReport::Recipient.new(status: :delivered)
@@ -112,7 +112,7 @@ describe Osm::Email::DeliveryReport do
     end
   end # describe Get recipients of a certain status
 
-  describe "Check for recipients of a certain status -" do
+  describe 'Check for recipients of a certain status -' do
     before :each do
       @processed_recipient = Osm::Email::DeliveryReport::Recipient.new(status: :processed)
       @delivered_recipient = Osm::Email::DeliveryReport::Recipient.new(status: :delivered)
@@ -128,12 +128,12 @@ describe Osm::Email::DeliveryReport do
     end
   end # describe Check for recipients of a certain status
 
-  it "Converts to a string" do
+  it 'Converts to a string' do
     report = Osm::Email::DeliveryReport.new(sent_at: Time.new(2016, 4, 17, 11, 50, 45), subject: 'Subject line of email')
     expect(report.to_s).to eq('17/04/2016 11:50 - Subject line of email')
   end
 
-  it "Sorts by sent_at then id" do
+  it 'Sorts by sent_at then id' do
     report1 = Osm::Email::DeliveryReport.new(sent_at: Time.new(2016), id: 1)
     report2 = Osm::Email::DeliveryReport.new(sent_at: Time.new(2017), id: 1)
     report3 = Osm::Email::DeliveryReport.new(sent_at: Time.new(2017), id: 2)

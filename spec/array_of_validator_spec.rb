@@ -32,46 +32,46 @@ module ArrayOfValidatorSpec
 
  describe ArrayOfValidator do
 
-    it "Allows an empty array" do
+    it 'Allows an empty array' do
       i = IntegerTestModel.new(array: [])
       expect(i.valid?).to eq(true)
       expect(i.errors.count).to eq(0)
     end
 
-    describe ":item_type option" do
+    describe ':item_type option' do
 
-      it "Allows arrays of the right type" do
+      it 'Allows arrays of the right type' do
         i = IntegerTestModel.new(array: [1, 2, 3])
         expect(i.valid?).to eq(true)
         expect(i.errors.count).to eq(0)
       end
 
-      it "Forbids arrays containing >= 1 incorrect type" do
+      it 'Forbids arrays containing >= 1 incorrect type' do
         i = IntegerTestModel.new(array: [1, '2', 3])
         expect(i.valid?).to eq(false)
         expect(i.errors.count).to eq(1)
-        expect(i.errors.messages).to eq({array:["items in the Array must be a Integer"]})
+        expect(i.errors.messages).to eq({array:['items in the Array must be a Integer']})
       end
 
     end
 
-    describe ":valid option" do
+    describe ':valid option' do
 
-      it "Allows (in)valid items unless valid option is passed" do
+      it 'Allows (in)valid items unless valid option is passed' do
         i = NovalidTestModel.new(array: [TestItem.new(valid: false), TestItem.new(valid: true)])
         expect(i.valid?).to eq(true)
         expect(i.errors.count).to eq(0)
       end
 
-      describe "Valid option is false" do
+      describe 'Valid option is false' do
 
-        it "Contains all invalid items" do
+        it 'Contains all invalid items' do
           i = InvalidTestModel.new(array: [TestItem.new(valid: false)])
           expect(i.valid?).to eq(true)
           expect(i.errors.count).to eq(0)
         end
 
-        it "Contains a valid item" do
+        it 'Contains a valid item' do
           i = InvalidTestModel.new(array: [TestItem.new(valid: true)])
           expect(i.valid?).to eq(false)
           expect(i.errors.count).to eq(1)
@@ -80,15 +80,15 @@ module ArrayOfValidatorSpec
 
       end
 
-      describe "Valid option is true" do
+      describe 'Valid option is true' do
 
-        it "Contains all valid items" do
+        it 'Contains all valid items' do
           i = ValidTestModel.new(array: [TestItem.new(valid: true)])
           expect(i.valid?).to eq(true)
           expect(i.errors.count).to eq(0)
         end
 
-        it "Contains an invalid item" do
+        it 'Contains an invalid item' do
           i = ValidTestModel.new(array: [TestItem.new(valid: false)])
           expect(i.valid?).to eq(false)
           expect(i.errors.count).to eq(1)

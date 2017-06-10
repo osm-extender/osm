@@ -1,6 +1,6 @@
 describe Osm::FlexiRecord do
 
-  it "Create" do
+  it 'Create' do
     fr = Osm::FlexiRecord.new(
       id: 1,
       section_id: 2,
@@ -12,7 +12,7 @@ describe Osm::FlexiRecord do
     expect(fr.valid?).to eq(true)
   end
 
-  it "Sorts by section ID then name" do
+  it 'Sorts by section ID then name' do
     fr1 = Osm::FlexiRecord.new(section_id: 1, name: 'A')
     fr2 = Osm::FlexiRecord.new(section_id: 2, name: 'B')
     fr3 = Osm::FlexiRecord.new(section_id: 2, name: 'C')
@@ -22,31 +22,31 @@ describe Osm::FlexiRecord do
   end
 
 
-  describe "Using the API" do
+  describe 'Using the API' do
 
     before :each do
       @flexi_record = Osm::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
     end
 
-    it "Fetch Fields" do
+    it 'Fetch Fields' do
       data = {
-        "extraid" => "2",
-        "sectionid" => "1",
-        "name" => "A Flexi Record",
-        "config" => "[{\"id\":\"f_1\",\"name\":\"Field 1\",\"width\":\"150\"},{\"id\":\"f_2\",\"name\":\"Field 2\",\"width\":\"150\"}]",
-        "total" => "none",
-        "extrafields" => "[]",
-        "structure" => [
+        'extraid' => '2',
+        'sectionid' => '1',
+        'name' => 'A Flexi Record',
+        'config' => '[{"id":"f_1","name":"Field 1","width":"150"},{"id":"f_2","name":"Field 2","width":"150"}]',
+        'total' => 'none',
+        'extrafields' => '[]',
+        'structure' => [
           {
-            "rows" => [
-              {"name" => "First name","field" => "firstname","width" => "150px"},
-              {"name" => "Last name","field" => "lastname","width" => "150px"},
+            'rows' => [
+              {'name' => 'First name','field' => 'firstname','width' => '150px'},
+              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
             ],
-            "noscroll" => true
+            'noscroll' => true
           },
-          {"rows" => [
-            {"name" => "Field 1","field" => "f_1","width" => "150px","editable" => true},
-            {"name" => "Filed 2","field" => "f_2","width" => "150px","editable" => true},
+          {'rows' => [
+            {'name' => 'Field 1','field' => 'f_1','width' => '150px','editable' => true},
+            {'name' => 'Filed 2','field' => 'f_2','width' => '150px','editable' => true},
           ]}
         ]
       }
@@ -61,28 +61,28 @@ describe Osm::FlexiRecord do
       expect(fields[3].id).to eq('f_2')
     end
 
-    it "Add field (success)" do
+    it 'Add field (success)' do
       post_data = {
         'columnName' => 'name',
       }
 
       data = {
-        "extraid" => "2",
-        "sectionid" => "1",
-        "name" => "A Flexi Record",
-        "config" => "[{\"id\":\"f_1\",\"name\":\"name\",\"width\":\"150\"}]",
-        "total" => "none",
-        "extrafields" => "[]",
-        "structure" => [
+        'extraid' => '2',
+        'sectionid' => '1',
+        'name' => 'A Flexi Record',
+        'config' => '[{"id":"f_1","name":"name","width":"150"}]',
+        'total' => 'none',
+        'extrafields' => '[]',
+        'structure' => [
           {
-            "rows" => [
-              {"name" => "First name","field" => "firstname","width" => "150px"},
-              {"name" => "Last name","field" => "lastname","width" => "150px"},
+            'rows' => [
+              {'name' => 'First name','field' => 'firstname','width' => '150px'},
+              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
             ],
-            "noscroll" => true
+            'noscroll' => true
           },
-          {"rows" => [
-            {"name" => "name","field" => "f_1","width" => "150px","editable" => true},
+          {'rows' => [
+            {'name' => 'name','field' => 'f_1','width' => '150px','editable' => true},
           ]}
         ]
       }
@@ -91,23 +91,23 @@ describe Osm::FlexiRecord do
       expect(@flexi_record.add_column(api: $api, name: 'name')).to eq(true)
     end
 
-    it "Add field (failure)" do
+    it 'Add field (failure)' do
       data = {
-        "extraid" => "2",
-        "sectionid" => "1",
-        "name" => "A Flexi Record",
-        "config" => "[]",
-        "total" => "none",
-        "extrafields" => "[]",
-        "structure" => [
+        'extraid' => '2',
+        'sectionid' => '1',
+        'name' => 'A Flexi Record',
+        'config' => '[]',
+        'total' => 'none',
+        'extrafields' => '[]',
+        'structure' => [
           {
-            "rows" => [
-              {"name" => "First name","field" => "firstname","width" => "150px"},
-              {"name" => "Last name","field" => "lastname","width" => "150px"},
+            'rows' => [
+              {'name' => 'First name','field' => 'firstname','width' => '150px'},
+              {'name' => 'Last name','field' => 'lastname','width' => '150px'},
             ],
-            "noscroll" => true
+            'noscroll' => true
           },
-          {"rows" => [
+          {'rows' => [
           ]}
         ]
       }
@@ -116,22 +116,22 @@ describe Osm::FlexiRecord do
       expect(@flexi_record.add_column(api: $api, name: 'name')).to eq(false)
     end
 
-    it "Fetch Data" do
+    it 'Fetch Data' do
       data = {
         'identifier' => 'scoutid',
-        'label' => "name",
+        'label' => 'name',
         'items' => [{
-          "scoutid" => "1",
-          "firstname" => "First",
-          "lastname" => "Last",
-          "dob" => "",
-          "patrolid" => "2",
-          "total" => "",
-          "completed" => "",
-          "f_1" => "A",
-          "f_2" => "B",
-          "age" => "",
-          "patrol" => "Green"
+          'scoutid' => '1',
+          'firstname' => 'First',
+          'lastname' => 'Last',
+          'dob' => '',
+          'patrolid' => '2',
+          'total' => '',
+          'completed' => '',
+          'f_1' => 'A',
+          'f_2' => 'B',
+          'age' => '',
+          'patrol' => 'Green'
         }]
       }
       expect($api).to receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
@@ -156,34 +156,34 @@ describe Osm::FlexiRecord do
       expect(record.valid?).to eq(true)
     end
 
-    it "Handles the total row" do
+    it 'Handles the total row' do
       data = {
         'identifier' => 'scoutid',
-        'label' => "name",
+        'label' => 'name',
         'items' => [{
-          "scoutid" => "-1",
-          "firstname" => "TOTAL",
-          "lastname" => "",
-          "dob" => "",
-          "patrolid" => "-1",
-          "total" => 100,
-          "completed" => 0,
-          "f_1" => 25,
-          "f_2" => 75,
-          "age" => "",
-          "patrol" => ""
+          'scoutid' => '-1',
+          'firstname' => 'TOTAL',
+          'lastname' => '',
+          'dob' => '',
+          'patrolid' => '-1',
+          'total' => 100,
+          'completed' => 0,
+          'f_1' => 25,
+          'f_2' => 75,
+          'age' => '',
+          'patrol' => ''
         },{
-          "scoutid" => "1",
-          "firstname" => "First",
-          "lastname" => "Last",
-          "dob" => "",
-          "patrolid" => "2",
-          "total" => "",
-          "completed" => "",
-          "f_1" => "A",
-          "f_2" => "B",
-          "age" => "",
-          "patrol" => "Green"
+          'scoutid' => '1',
+          'firstname' => 'First',
+          'lastname' => 'Last',
+          'dob' => '',
+          'patrolid' => '2',
+          'total' => '',
+          'completed' => '',
+          'f_1' => 'A',
+          'f_2' => 'B',
+          'age' => '',
+          'patrol' => 'Green'
         }]
       }
       expect($api).to receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
@@ -201,24 +201,24 @@ describe Osm::FlexiRecord do
 
   end
 
-  describe "API Strangeness" do
+  describe 'API Strangeness' do
 
-    it "Calculated columns containing numbers not strings" do
+    it 'Calculated columns containing numbers not strings' do
       data = {
         'identifier' => 'scoutid',
-        'label' => "name",
+        'label' => 'name',
         'items' => [{
-          "scoutid" => "1",
-          "firstname" => "First",
-          "lastname" => "Last",
-          "dob" => "",
-          "patrolid" => "2",
-          "total" => 3,
-          "completed" => 4,
-          "f_1" => "A",
-          "f_2" => "B",
-          "age" => "",
-          "patrol" => "Green"
+          'scoutid' => '1',
+          'firstname' => 'First',
+          'lastname' => 'Last',
+          'dob' => '',
+          'patrolid' => '2',
+          'total' => 3,
+          'completed' => 4,
+          'f_1' => 'A',
+          'f_2' => 'B',
+          'age' => '',
+          'patrol' => 'Green'
         }]
       }
       expect($api).to receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)

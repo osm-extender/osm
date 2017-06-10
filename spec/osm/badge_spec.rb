@@ -1,6 +1,6 @@
 describe Osm::Badge do
 
-  describe "Create" do
+  describe 'Create' do
 
     before :each do
       @badge_options = {
@@ -25,7 +25,7 @@ describe Osm::Badge do
       }
     end
 
-    it "Attributes set" do
+    it 'Attributes set' do
       badge = Osm::Badge.new(@badge_options)
       expect(badge.name).to eq('name')
       expect(badge.identifier).to eq('12_3')
@@ -48,19 +48,19 @@ describe Osm::Badge do
       expect(badge.valid?).to eq(true)
     end
 
-    it "Valid with nil for levels" do
+    it 'Valid with nil for levels' do
       badge = Osm::Badge.new(@badge_options.merge(levels: nil))
       expect(badge.levels).to be_nil
       expect(badge.valid?).to eq(true)
     end
 
-    it "Valid with nil for level_requirement" do
+    it 'Valid with nil for level_requirement' do
       badge = Osm::Badge.new(@badge_options.merge(level_requirement: nil))
       expect(badge.level_requirement).to be_nil
       expect(badge.valid?).to eq(true)
     end
     
-    it "Valid with nil for add_columns_to_module" do
+    it 'Valid with nil for add_columns_to_module' do
       badge = Osm::Badge.new(@badge_options.merge(add_columns_to_module: nil))
       expect(badge.add_columns_to_module).to be_nil
       expect(badge.valid?).to eq(true)
@@ -69,12 +69,12 @@ describe Osm::Badge do
   end
 
 
-  it "Works out if we add columns to this badge" do
+  it 'Works out if we add columns to this badge' do
     expect(Osm::Badge.new(add_columns_to_module: 123).add_columns?).to eq(true)
     expect(Osm::Badge.new(add_columns_to_module: nil).add_columns?).to eq(false)
   end
 
-  it "Produces a map of module letter <-> module id" do
+  it 'Produces a map of module letter <-> module id' do
     badge = Osm::Badge.new(modules: [
       Osm::Badge::RequirementModule.new(id: 2, letter: 'c'),
       Osm::Badge::RequirementModule.new(id: 10, letter: 'b'),
@@ -84,7 +84,7 @@ describe Osm::Badge do
     expect(badge.module_map).to eq({1=>'a', 10=>'b', 2=>'c', 'a'=>1, 'b'=>10, 'c'=>2})
   end
 
-  it "Gets the number of requirements needed per module" do
+  it 'Gets the number of requirements needed per module' do
     badge = Osm::Badge.new(modules: [
       Osm::Badge::RequirementModule.new(id: 2, letter: 'c', min_required: 5),
       Osm::Badge::RequirementModule.new(id: 10, letter: 'b', min_required: 4),
@@ -94,7 +94,7 @@ describe Osm::Badge do
     expect(badge.needed_per_module).to eq({'a'=>3, 'b'=>4, 'c'=>5, 2=>5, 10=>4, 1=>3})
   end
 
-  it "Produces a list of modules" do
+  it 'Produces a list of modules' do
     badge = Osm::Badge.new(modules: [
       Osm::Badge::RequirementModule.new(id: 2, letter: 'c'),
       Osm::Badge::RequirementModule.new(id: 10, letter: 'b'),
@@ -106,7 +106,7 @@ describe Osm::Badge do
   end
 
 
-  it "Compare by name then id then version (descending)" do
+  it 'Compare by name then id then version (descending)' do
     b1 = Osm::Badge.new(name: 'A', id: 1, version: 1)
     b2 = Osm::Badge.new(name: 'B', id: 1, version: 1)
     b3 = Osm::Badge.new(name: 'B', id: 2, version: 2)
@@ -116,9 +116,9 @@ describe Osm::Badge do
   end
 
 
-  describe "Using the OSM API" do
+  describe 'Using the OSM API' do
 
-    describe "Get Badges" do
+    describe 'Get Badges' do
 
       before :each do
         @badge_data = {
@@ -147,16 +147,16 @@ describe Osm::Badge do
             '123_0' => [
               {
                 'rows' => [
-                  {"name" => "First name","field" => "firstname","width" => "120px"},
-                  {"name" => "Last name","field" => "lastname","width" => "120px"},
-                  {"name" => "Done","field" => "completed","width" => "70px","formatter" => "doneFormatter"},
-                  {"name" => "Awarded","field" => "awardeddate","width" => "100px","formatter" => "dueFormatter"}
+                  {'name' => 'First name','field' => 'firstname','width' => '120px'},
+                  {'name' => 'Last name','field' => 'lastname','width' => '120px'},
+                  {'name' => 'Done','field' => 'completed','width' => '70px','formatter' => 'doneFormatter'},
+                  {'name' => 'Awarded','field' => 'awardeddate','width' => '100px','formatter' => 'dueFormatter'}
                 ],
-                "numactivities" => "23",
-                "noscroll" => true
+                'numactivities' => '23',
+                'noscroll' => true
                },{
                 'rows' => [
-                  {"name" => "r_name","field" => "2345","width" => "80px","formatter" => "cellFormatter","tooltip" => "r_description","editable" => "true","module"=>"a"}
+                  {'name' => 'r_name','field' => '2345','width' => '80px','formatter' => 'cellFormatter','tooltip' => 'r_description','editable' => 'true','module'=>'a'}
                 ]
               }
             ],
@@ -237,7 +237,7 @@ describe Osm::Badge do
     end
 
 
-    it "Get badge data for a section" do
+    it 'Get badge data for a section' do
       data = {
         'identifier' => 'scoutid',
         'items' => [{
@@ -251,7 +251,7 @@ describe Osm::Badge do
         }]
       }
 
-      expect($api).to receive(:post_query).with("ext/badges/records/?action=getBadgeRecords&term_id=2&section=beavers&badge_id=123&section_id=1&badge_version=0").and_return(data)
+      expect($api).to receive(:post_query).with('ext/badges/records/?action=getBadgeRecords&term_id=2&section=beavers&badge_id=123&section_id=1&badge_version=0').and_return(data)
       datas = Osm::CoreBadge.new(id: 123, version: 0).get_data_for_section(api: $api, section: Osm::Section.new(id: 1, type: :beavers), term: 2)
       expect(datas.size).to eq(1)
       data = datas[0]
@@ -266,7 +266,7 @@ describe Osm::Badge do
       expect(data.badge.id).to eq(123)
     end
 
-    it "Get summary data for a section" do
+    it 'Get summary data for a section' do
 
       data = {
         'identifier' => 'scout_id',
@@ -289,7 +289,7 @@ describe Osm::Badge do
       }
       data = data
 
-      expect($api).to receive(:post_query).with("ext/badges/records/summary/?action=get&mode=verbose&section=beavers&sectionid=1&termid=2").and_return(data)
+      expect($api).to receive(:post_query).with('ext/badges/records/summary/?action=get&mode=verbose&section=beavers&sectionid=1&termid=2').and_return(data)
       summary = Osm::Badge.get_summary_for_section(api: $api, section: Osm::Section.new(id: 1, type: :beavers), term: 2)
       expect(summary.size).to eq(1)
       expect(summary[0]).to eq({
@@ -312,7 +312,7 @@ describe Osm::Badge do
       })
     end
 
-    it "Get due badges" do
+    it 'Get due badges' do
       data = {
         'includeStock' => true,
         'count' => 2,
@@ -404,14 +404,14 @@ describe Osm::Badge do
       expect(db.valid?).to eq(true)
     end
 
-    it "handles an empty array representing no due badges" do
+    it 'handles an empty array representing no due badges' do
       expect($api).to receive(:post_query).with('ext/badges/due/?action=get&section=cubs&sectionid=1&termid=2').and_return([])
       db = Osm::Badge.get_due_badges(api: $api, section: Osm::Section.new(id: 1, type: :cubs), term: 2)
       expect(db).not_to be_nil
     end
 
 
-    it "Fetch badge stock levels" do
+    it 'Fetch badge stock levels' do
       badges_body = {
         'identifier' => 'badge_id_level',
         'items' => [
@@ -426,10 +426,10 @@ describe Osm::Badge do
       expect(Osm::Badge.get_stock(api: $api, section: section)).to eq({'100_1' => 1, '200_2' => 2})
     end
 
-    describe "Update badge stock levels" do
+    describe 'Update badge stock levels' do
 
       before :each do
-        @path = "ext/badges.php?action=updateStock"
+        @path = 'ext/badges.php?action=updateStock'
         @post_body = {
           'stock' => 10,
           'sectionid' => 2,
@@ -441,12 +441,12 @@ describe Osm::Badge do
         @section = Osm::Section.new(id: 2, type: :beavers)
       end
 
-      it "Succeds" do
+      it 'Succeds' do
         expect($api).to receive(:post_query).with(@path, post_data: @post_body).and_return({'ok' => true})
         expect(Osm::Badge.update_stock(api: $api, section: @section, badge_id: 3, stock: 10)).to eq(true)
       end
 
-      it "Fails" do
+      it 'Fails' do
         expect($api).to receive(:post_query).with(@path, post_data: @post_body).and_return({'ok' => false})
         expect(Osm::Badge.update_stock(api: $api, section: @section, badge_id: 3, stock: 10)).to eq(false)
       end

@@ -1,6 +1,6 @@
 describe Osm::Event do
 
-  it "Create Event" do
+  it 'Create Event' do
     data = {
       id: 1,
       section_id: 2,
@@ -50,23 +50,23 @@ describe Osm::Event do
     expect(event.valid?).to eq(true)
   end
 
-  it "Tells if attendance is limited" do
+  it 'Tells if attendance is limited' do
     expect(Osm::Event.new(attendance_limit: 0).limited_attendance?).to eq(false)
     expect(Osm::Event.new(attendance_limit: 1).limited_attendance?).to eq(true)
   end
 
-  it "Tells if the cost is TBC" do
+  it 'Tells if the cost is TBC' do
     expect(Osm::Event.new(cost: 'TBC').cost_tbc?).to eq(true)
     expect(Osm::Event.new(cost: '1.23').cost_tbc?).to eq(false)
   end
 
-  it "Tells if the cost is free" do
+  it 'Tells if the cost is free' do
     expect(Osm::Event.new(cost: 'TBC').cost_free?).to eq(false)
     expect(Osm::Event.new(cost: '1.23').cost_free?).to eq(false)
     expect(Osm::Event.new(cost: '0.00').cost_free?).to eq(true)
   end
 
-  it "Sorts by start, name then ID (unless IDs are equal)" do
+  it 'Sorts by start, name then ID (unless IDs are equal)' do
     e1 = Osm::Event.new(start: '2000-01-01 01:00:00', name: 'An event', id: 1)
     e2 = Osm::Event.new(start: '2000-01-02 01:00:00', name: 'An event', id: 2)
     e3 = Osm::Event.new(start: '2000-01-02 01:00:00', name: 'Event name', id: 3)
@@ -78,7 +78,7 @@ describe Osm::Event do
   end
 
 
-  describe "Using the API" do
+  describe 'Using the API' do
 
     before :each do
       @events_body = {
@@ -121,8 +121,8 @@ describe Osm::Event do
         'publicnotes' => 'public notepad',
         'config' => '[{"id":"f_1","name":"Name","pL":"Label","pR":"1"}]',
         'badgelinks' => [
-          {"section"=>"cubs", "badgetype"=>"activity", "badge"=>"activity_athletics", "columnname"=>"b", "data"=>"Yes", "badgeLongName"=>"Athletics", "columnnameLongName"=>"B: Run", "sectionLongName"=>"Cubs", "badgetypeLongName"=>"Activity", "badge_id"=>"179", "badge_version"=>"0", "column_id"=>"3"},
-          {"section"=>"staged", "badgetype"=>"staged", "badge"=>"hikes", "columnname"=>"custom", "data"=>"1", "badgeLongName"=>"Hikes", "columnnameLongName"=>"C: Hike name = 1", "sectionLongName"=>"Staged", "badgetypeLongName"=>"Staged", "badge_id"=>"197", "badge_version"=>"0", "column_id"=>"4"},
+          {'section'=>'cubs', 'badgetype'=>'activity', 'badge'=>'activity_athletics', 'columnname'=>'b', 'data'=>'Yes', 'badgeLongName'=>'Athletics', 'columnnameLongName'=>'B: Run', 'sectionLongName'=>'Cubs', 'badgetypeLongName'=>'Activity', 'badge_id'=>'179', 'badge_version'=>'0', 'column_id'=>'3'},
+          {'section'=>'staged', 'badgetype'=>'staged', 'badge'=>'hikes', 'columnname'=>'custom', 'data'=>'1', 'badgeLongName'=>'Hikes', 'columnnameLongName'=>'C: Hike name = 1', 'sectionLongName'=>'Staged', 'badgetypeLongName'=>'Staged', 'badge_id'=>'197', 'badge_version'=>'0', 'column_id'=>'4'},
         ],
         'sectionid' => '1',
         'googlecalendar' => nil,
@@ -141,11 +141,11 @@ describe Osm::Event do
       allow(Osm::Model).to receive(:get_user_permissions) { {events: [:read, :write]} }
     end
 
-    describe "Get events for section" do
-      it "From OSM" do
+    describe 'Get events for section' do
+      it 'From OSM' do
         expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({'files' => ['file1.txt', 'file2.txt']})
         events = Osm::Event.get_for_section(api: $api, section: 1)
         expect(events.size).to eq(1)
         event = events[0]
@@ -188,13 +188,13 @@ describe Osm::Event do
         expect(event.valid?).to eq(true)
       end
 
-      it "Handles no files being an empty array not a hash" do
+      it 'Handles no files being an empty array not a hash' do
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
         expect{ @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
         expect(@event.files).to eq([])
       end
 
-      it "Handles a blank config" do
+      it 'Handles a blank config' do
         @event_body['config'] = ''
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
         expect { @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
@@ -205,7 +205,7 @@ describe Osm::Event do
         @event_body['cost'] = '-1'
         expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({'files' => ['file1.txt', 'file2.txt']})
 
         events = Osm::Event.get_for_section(api: $api, section: 1)
         event = events[0]
@@ -213,16 +213,16 @@ describe Osm::Event do
         expect(event.valid?).to eq(true)
       end
 
-      it "From cache" do
+      it 'From cache' do
         expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({'files' => ['file1.txt', 'file2.txt']})
         events = Osm::Event.get_for_section(api: $api, section: 1)
         expect($api).not_to receive(:post_query)
         expect(Osm::Event.get_for_section(api: $api, section: 1)).to eq(events)
       end
 
-      it "Honours archived option" do
+      it 'Honours archived option' do
         body = {
           'identifier' => 'eventid',
           'label' => 'name',
@@ -258,8 +258,8 @@ describe Osm::Event do
         expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').twice.and_return(body)
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=1').twice.and_return({'config' => '[]', 'archived' => '0', 'eventid' => '1'})
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').twice.and_return({'config' => '[]', 'archived' => '1', 'eventid' => '2'})
-        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=1').twice.and_return({"files" => []})
-        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').twice.and_return({"files" => []})
+        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=1').twice.and_return({'files' => []})
+        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').twice.and_return({'files' => []})
 
         events = Osm::Event.get_for_section(api: $api, section: 1, include_archived: false)
         OsmTest::Cache.clear
@@ -271,24 +271,24 @@ describe Osm::Event do
       end
     end
 
-    describe "Get events list for section" do
-      it "From OSM" do
+    describe 'Get events list for section' do
+      it 'From OSM' do
         expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         events = Osm::Event.get_list(api: $api, section: 1)
         expect(events.map{ |e| e[:id]}).to eq([2])
       end
 
-      it "From cache" do
+      it 'From cache' do
         expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         events = Osm::Event.get_list(api: $api, section: 1)
         expect($api).not_to receive(:post_query)
         expect(Osm::Event.get_list(api: $api, section: 1)).to eq(events)
       end
 
-      it "From cached events" do
+      it 'From cached events' do
         expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({"files" => ["file1.txt", "file2.txt"]})
+        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return({'files' => ['file1.txt', 'file2.txt']})
         Osm::Event.get_for_section(api: $api, section: 1)
         expect($api).not_to receive(:post_query)
         events = Osm::Event.get_list(api: $api, section: 1)
@@ -298,23 +298,23 @@ describe Osm::Event do
     end # describe get events list for section
 
 
-    it "Get event" do
+    it 'Get event' do
       expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
       event = Osm::Event.get(api: $api, section: 1, id: 2)
       expect(event).not_to be_nil
       expect(event.id).to eq(2)
     end
 
-    describe "Tells if there are spaces" do
+    describe 'Tells if there are spaces' do
 
-      it "No limit" do
+      it 'No limit' do
         expect($api).not_to receive(:post_query)
         event = Osm::Event.new(attendance_limit: 0, id: 1, section_id: 2)
         expect(event.spaces?($api)).to eq(true)
         expect(event.spaces($api)).to be_nil
       end
 
-      it "Under limit" do
+      it 'Under limit' do
         expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
           'identifier' => 'scoutid',
           'eventid' => '1',
@@ -337,7 +337,7 @@ describe Osm::Event do
         expect(event.spaces($api)).to eq(1)
       end
 
-      it "Over limit" do
+      it 'Over limit' do
         expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
           'identifier' => 'scoutid',
           'eventid' => '1',
@@ -376,7 +376,7 @@ describe Osm::Event do
         expect(event.spaces($api)).to eq(-1)
       end
 
-      it "At limit" do
+      it 'At limit' do
         expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return({
           'identifier' => 'scoutid',
           'eventid' => '1',
@@ -409,9 +409,9 @@ describe Osm::Event do
 
     end
 
-    describe "Create (succeded)" do
+    describe 'Create (succeded)' do
 
-      it "Normal" do
+      it 'Normal' do
         post_data = {
           'name' => 'Test event',
           'startdate' => '2000-01-02',
@@ -431,7 +431,7 @@ describe Osm::Event do
         }
 
         allow(Osm::Event).to receive(:get_for_section) { [] }
-        expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+        expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({'id' => 2})
 
         event = Osm::Event.create(
           api: $api,
@@ -458,7 +458,7 @@ describe Osm::Event do
         expect(event.id).to eq(2)
       end
 
-      it "TBC cost" do
+      it 'TBC cost' do
         post_data = {
           'name' => 'Test event',
           'startdate' => '2000-01-02',
@@ -478,7 +478,7 @@ describe Osm::Event do
         }
 
         allow(Osm::Event).to receive(:get_for_section) { [] }
-        expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+        expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({'id' => 2})
 
         event = Osm::Event.create(
           api: $api,
@@ -504,7 +504,7 @@ describe Osm::Event do
         expect(event.id).to eq(2)
       end
 
-      describe "With badges" do
+      describe 'With badges' do
 
         before :each do
           post_data = {
@@ -526,7 +526,7 @@ describe Osm::Event do
           }
 
           allow(Osm::Event).to receive(:get_for_section) { [] }
-          expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+          expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({'id' => 2})
 
           @attributes = {
             section_id: 1,
@@ -563,7 +563,7 @@ describe Osm::Event do
             'column_data' => '',
             'new_column_name' => '',
           }
-          expect($api).to receive(:post_query).with(@badge_path, post_data: post_data).and_return({"status" => true})
+          expect($api).to receive(:post_query).with(@badge_path, post_data: post_data).and_return({'status' => true})
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
             badge_type: :activity,
@@ -580,7 +580,7 @@ describe Osm::Event do
           expect(event.id).to eq(2)
         end
 
-        it "Add a hikes column" do
+        it 'Add a hikes column' do
           post_data = {
             'type' => 'event',
             'id' => 2,
@@ -592,7 +592,7 @@ describe Osm::Event do
             'column_data' => '1',
             'new_column_name' => 'Label for added column',
           }
-          expect($api).to receive(:post_query).with(@badge_path, post_data: post_data).and_return({"status" => true})
+          expect($api).to receive(:post_query).with(@badge_path, post_data: post_data).and_return({'status' => true})
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
             badge_type: :staged,
@@ -608,7 +608,7 @@ describe Osm::Event do
           expect(event.id).to eq(2)
         end
 
-        it "Existing nights away column" do
+        it 'Existing nights away column' do
           post_data = {
             'type' => 'event',
             'id' => 2,
@@ -620,7 +620,7 @@ describe Osm::Event do
             'column_data' => '2',
             'new_column_name' => '',
           }
-          expect($api).to receive(:post_query).with(@badge_path, post_data: post_data).and_return({"status" => true})
+          expect($api).to receive(:post_query).with(@badge_path, post_data: post_data).and_return({'status' => true})
 
           @attributes[:badges] = [Osm::Event::BadgeLink.new(
             badge_type: :staged,
@@ -641,7 +641,7 @@ describe Osm::Event do
 
     end
 
-    it "Create (failed)" do
+    it 'Create (failed)' do
       allow(Osm::Event).to receive(:get_for_section) { [] }
       expect($api).to receive(:post_query).and_return({})
 
@@ -665,9 +665,9 @@ describe Osm::Event do
     end
 
 
-    describe "Update (succeded)" do
+    describe 'Update (succeded)' do
 
-      it "Normal" do
+      it 'Normal' do
         post_data = {
           'name' => 'Test event',
           'startdate' => '2000-01-02',
@@ -687,9 +687,9 @@ describe Osm::Event do
           'allowbooking' => 'true',
         }
 
-        expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
-        expect($api).to receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: {"eventid"=>2, "notepad"=>"notepad"}).and_return({})
-        expect($api).to receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: {"eventid"=>2, "pnnotepad"=>"public notepad"}).and_return({})
+        expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({'id' => 2})
+        expect($api).to receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: {'eventid'=>2, 'notepad'=>'notepad'}).and_return({})
+        expect($api).to receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: {'eventid'=>2, 'pnnotepad'=>'public notepad'}).and_return({})
 
         event = Osm::Event.new(
           section_id: 1,
@@ -716,7 +716,7 @@ describe Osm::Event do
         expect(event.update($api)).to eq(true)
       end
 
-      it "TBC cost" do
+      it 'TBC cost' do
         post_data = {
           'name' => 'Test event',
           'startdate' => '2000-01-02',
@@ -736,7 +736,7 @@ describe Osm::Event do
           'allowbooking' => 'true',
         }
 
-        expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({"id" => 2})
+        expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return({'id' => 2})
 
         event = Osm::Event.new(
           section_id: 1,
@@ -761,7 +761,7 @@ describe Osm::Event do
         expect(event.update($api)).to eq(true)
       end
 
-      describe "Badge links" do
+      describe 'Badge links' do
 
         before :each do
           @event = Osm::Event.new({
@@ -796,7 +796,7 @@ describe Osm::Event do
           })
         end
 
-        it "Added" do
+        it 'Added' do
           badge = Osm::Event::BadgeLink.new(
             badge_type: :activity,
             badge_section: :scouts,
@@ -813,7 +813,7 @@ describe Osm::Event do
           expect(@event.update($api)).to eq(true)
         end
 
-        it "Removed" do
+        it 'Removed' do
           post_data = {
             'section' => :scouts,
             'sectionid' => 1,
@@ -823,7 +823,7 @@ describe Osm::Event do
             'badge_version' => 2,
             'column_id' => 4,
           }
-          expect($api).to receive(:post_query).with('ext/badges/records/index.php?action=deleteBadgeLink&sectionid=1', post_data: post_data).and_return({"status" => true})
+          expect($api).to receive(:post_query).with('ext/badges/records/index.php?action=deleteBadgeLink&sectionid=1', post_data: post_data).and_return({'status' => true})
 
           @event.badges = []
           expect(@event.update($api)).to eq(true)
@@ -833,7 +833,7 @@ describe Osm::Event do
 
     end
 
-    it "Update (failed)" do
+    it 'Update (failed)' do
       expect($api).to receive(:post_query).exactly(1).times.and_return({})
 
       event = Osm::Event.new(
@@ -851,8 +851,8 @@ describe Osm::Event do
     end
 
 
-    it "Delete (succeded)" do
-      expect($api).to receive(:post_query).with('events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({"ok" => true})
+    it 'Delete (succeded)' do
+      expect($api).to receive(:post_query).with('events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({'ok' => true})
 
       event = Osm::Event.new(
         section_id: 1,
@@ -867,8 +867,8 @@ describe Osm::Event do
       expect(event.delete($api)).to eq(true)
     end
 
-    it "Delete (failed)" do
-      expect($api).to receive(:post_query).with('events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({"ok" => false})
+    it 'Delete (failed)' do
+      expect($api).to receive(:post_query).with('events.php?action=deleteEvent&sectionid=1&eventid=2').and_return({'ok' => false})
 
       event = Osm::Event.new(
         section_id: 1,
@@ -884,7 +884,7 @@ describe Osm::Event do
     end
 
 
-    it "Get attendance" do
+    it 'Get attendance' do
       attendance_body = {
       	'identifier' => 'scoutid',
 	      'eventid' => '2',
@@ -924,7 +924,7 @@ describe Osm::Event do
       expect(ea.row).to eq(0)
     end
 
-    it "Get attendance (no items)" do
+    it 'Get attendance (no items)' do
       attendance_body = {
       	'identifier' => 'scoutid',
 	      'eventid' => '2',
@@ -937,7 +937,7 @@ describe Osm::Event do
       expect(attendance).to eq([])
     end
 
-    it "Add column (succeded)" do
+    it 'Add column (succeded)' do
       post_data = {
         'columnName' => 'Test name',
         'parentLabel' => 'Test label',
@@ -958,8 +958,8 @@ describe Osm::Event do
       expect(column.label).to eq('Test label')
     end
 
-    it "Add column (failed)" do
-      expect($api).to receive(:post_query).and_return({"config" => "[]"})
+    it 'Add column (failed)' do
+      expect($api).to receive(:post_query).and_return({'config' => '[]'})
 
       event = Osm::Event.new(id: 2, section_id: 1)
       expect(event).not_to be_nil
@@ -969,16 +969,16 @@ describe Osm::Event do
   end # describe using the OSM API
 
 
-  describe "API Strangeness" do
+  describe 'API Strangeness' do
 
-    it "Handles a non existant array when no events" do
-      data = {"identifier" => "eventid", "label" => "name"}
+    it 'Handles a non existant array when no events' do
+      data = {'identifier' => 'eventid', 'label' => 'name'}
       expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(data)
       events = expect(Osm::Event.get_for_section(api: $api, section: 1)).to eq([])
     end
 
-    it "Handles missing config from OSM" do
-      events_body = {"identifier" => "eventid", "label" => "name", "items" => [{"eventid"=>"2","name"=>"An Event","startdate"=>"2001-02-03","enddate"=>"2001-02-05","starttime"=>"00:00:00","endtime"=>"12:00:00","cost"=>"0.00","location"=>"Somewhere","notes"=>"Notes","sectionid"=>1,"googlecalendar"=>nil,"archived"=>"0","confdate"=>nil,"allowchanges"=>"1","disablereminders"=>"1","attendancelimit"=>"3","limitincludesleaders"=>"1"}]}
+    it 'Handles missing config from OSM' do
+      events_body = {'identifier' => 'eventid', 'label' => 'name', 'items' => [{'eventid'=>'2','name'=>'An Event','startdate'=>'2001-02-03','enddate'=>'2001-02-05','starttime'=>'00:00:00','endtime'=>'12:00:00','cost'=>'0.00','location'=>'Somewhere','notes'=>'Notes','sectionid'=>1,'googlecalendar'=>nil,'archived'=>'0','confdate'=>nil,'allowchanges'=>'1','disablereminders'=>'1','attendancelimit'=>'3','limitincludesleaders'=>'1'}]}
       event_body = {
         'eventid' => '2',
         'name' => 'An Event',

@@ -1,6 +1,6 @@
 describe Osm::Sms::DeliveryReport do
 
-  it "Create" do
+  it 'Create' do
     report = Osm::Sms::DeliveryReport.new(
       sms_id: 1,
       user_id: 2,
@@ -33,7 +33,7 @@ describe Osm::Sms::DeliveryReport do
     expect(report.valid?).to eq(true)
   end # it create
 
-  describe "Status helpers" do
+  describe 'Status helpers' do
     statuses = [:sent, :not_sent, :delivered, :not_delivered, :invalid_destination_address, :invalid_source_address, :invalid_message_format, :route_not_available, :not_allowed]
     statuses.each do |status|
       it "For #{status}" do
@@ -45,30 +45,30 @@ describe Osm::Sms::DeliveryReport do
   end # describe status helpers
 
 
-  describe "Using the OSM API" do
+  describe 'Using the OSM API' do
 
-    it "Get from OSM" do
+    it 'Get from OSM' do
       data = {
-        "identifier" => "smsid",
-        "items" => [{
-          "smsid" => "2",
-          "userid" => "3",
-          "scoutid" => "4",
-          "sectionid" => "1",
-          "phone" => "442345678901",
-          "from" => "From Name  443456789012",
-          "message" => "Test message.",
-          "schedule" => "2000-01-02 03:04:05",
-          "status" => "DELIVERED",
-          "lastupdated" => "2000-01-02 03:04:06",
-          "credits" => "1",
-          "fromuser" => "From Name ",
-          "firstname" => "To",
-          "lastname" => "Name",
-          "to" => "To Name 441234567890"
+        'identifier' => 'smsid',
+        'items' => [{
+          'smsid' => '2',
+          'userid' => '3',
+          'scoutid' => '4',
+          'sectionid' => '1',
+          'phone' => '442345678901',
+          'from' => 'From Name  443456789012',
+          'message' => 'Test message.',
+          'schedule' => '2000-01-02 03:04:05',
+          'status' => 'DELIVERED',
+          'lastupdated' => '2000-01-02 03:04:06',
+          'credits' => '1',
+          'fromuser' => 'From Name ',
+          'firstname' => 'To',
+          'lastname' => 'Name',
+          'to' => 'To Name 441234567890'
         }]
       }
-      expect($api).to receive(:post_query).with("sms.php?action=deliveryReports&sectionid=1&dateFormat=generic"){ data }
+      expect($api).to receive(:post_query).with('sms.php?action=deliveryReports&sectionid=1&dateFormat=generic'){ data }
 
       reports = Osm::Sms::DeliveryReport.get_for_section(api: $api, section: 1)
       expect(reports.size).to eq(1)
