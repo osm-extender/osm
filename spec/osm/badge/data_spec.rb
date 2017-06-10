@@ -585,7 +585,7 @@ describe Osm::Badge::Data do
 
       expect($api).to receive(:post_query).twice.with('ext/badges/records/?action=overrideCompletion', post_data: awarded_post_data).and_return(awarded_body_data)
       allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 2, type: :beavers) }
-      allow(data).to receive(:earnt){ 1 }
+      allow(data).to receive(:earnt) { 1 }
 
       expect(data.mark_due($api, 1)).to eq(true)
       expect(data.mark_due($api)).to eq(true)

@@ -190,7 +190,7 @@ describe Osm::Event do
 
       it 'Handles no files being an empty array not a hash' do
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        expect{ @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
+        expect { @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
         expect(@event.files).to eq([])
       end
 
@@ -275,7 +275,7 @@ describe Osm::Event do
       it 'From OSM' do
         expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         events = Osm::Event.get_list(api: $api, section: 1)
-        expect(events.map{ |e| e[:id]}).to eq([2])
+        expect(events.map { |e| e[:id] }).to eq([2])
       end
 
       it 'From cache' do
@@ -292,7 +292,7 @@ describe Osm::Event do
         Osm::Event.get_for_section(api: $api, section: 1)
         expect($api).not_to receive(:post_query)
         events = Osm::Event.get_list(api: $api, section: 1)
-        expect(events.map{ |e| e[:id]}).to eq([2])
+        expect(events.map { |e| e[:id] }).to eq([2])
       end
 
     end # describe get events list for section

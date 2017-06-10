@@ -54,7 +54,7 @@ end
 
 # Require file for this gem
 require File.join(File.dirname(__FILE__), '..', 'version')
-Dir[File.join(File.dirname(__FILE__), '*_validator.rb')].each {|file| require file }
+Dir[File.join(File.dirname(__FILE__), '*_validator.rb')].each { |file| require file }
 # These must be included before the rest
 require File.join(File.dirname(__FILE__), 'osm', 'model')
 require File.join(File.dirname(__FILE__), 'osm', 'flexi_record')
@@ -77,7 +77,7 @@ require File.join(File.dirname(__FILE__), 'osm', 'badge', 'requirement_module.rb
 require File.join(File.dirname(__FILE__), 'osm', 'badge')
 
 # And finally the rest
-Dir[File.join(File.dirname(__FILE__), 'osm', '**', '*.rb')].each {|file| require file }
+Dir[File.join(File.dirname(__FILE__), 'osm', '**', '*.rb')].each { |file| require file }
 
 
 module Osm
@@ -170,7 +170,7 @@ module Osm
   def self.inspect_instance(instance, options={})
     replace_with = options[:replace_with] || {}
 
-    values = instance.attributes.sort.map{ |(k,v)|
+    values = instance.attributes.sort.map { |(k,v)|
       (replace_with.keys.include?(k) && !v.nil?) ? "#{k}.#{replace_with[k]}: #{v.try(replace_with[k]).inspect}" : "#{k}: #{v.inspect}"
     }
 

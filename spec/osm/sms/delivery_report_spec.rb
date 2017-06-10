@@ -68,7 +68,7 @@ describe Osm::Sms::DeliveryReport do
           'to' => 'To Name 441234567890'
         }]
       }
-      expect($api).to receive(:post_query).with('sms.php?action=deliveryReports&sectionid=1&dateFormat=generic'){ data }
+      expect($api).to receive(:post_query).with('sms.php?action=deliveryReports&sectionid=1&dateFormat=generic') { data }
 
       reports = Osm::Sms::DeliveryReport.get_for_section(api: $api, section: 1)
       expect(reports.size).to eq(1)

@@ -79,7 +79,7 @@ module Osm
           data = api.post_query("ext/finances/onlinepayments/?action=getSchemes&sectionid=#{section_id}")
           data = data.is_a?(Hash) ? data['items'] : nil
           data ||= []
-          data.map!{ |i| { id: Osm.to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
+          data.map! { |i| { id: Osm.to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
         end
       end
 
@@ -187,23 +187,23 @@ module Osm
       # Get unarchived payments for the schedule
       # @return [Array<Osm::OnlinePayment::Schedule::Payment>]
       def current_payments
-        payments.select{ |p| !p.archived? }
+        payments.select { |p| !p.archived? }
       end
       # Check if there are any unarchived payments for the schedule
       # @return true, false
       def current_payments?
-        payments.any?{ |p| !p.archived? }
+        payments.any? { |p| !p.archived? }
       end
 
       # Get archived payments for the schedule
       # @return [Array<Osm::OnlinePayment::Schedule::Payment>]
       def archived_payments
-        payments.select{ |p| p.archived? }
+        payments.select { |p| p.archived? }
       end
       # Check if there are any archived payments for the schedule
       # @return true, false
       def archived_payments?
-        payments.any?{ |p| p.archived? }
+        payments.any? { |p| p.archived? }
       end
 
       def to_s

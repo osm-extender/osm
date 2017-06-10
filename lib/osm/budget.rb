@@ -62,7 +62,7 @@ module Osm
         # The cached budgets for the section will be out of date - remove them
         cache_delete(api: api, key: ['budgets', section_id])
         budgets = Budget.get_for_section(api: api, section: section_id, no_read_cache: true)
-        budget = budgets.sort.select{ |b| b.name.eql?('** Unnamed **') }.last
+        budget = budgets.sort.select { |b| b.name.eql?('** Unnamed **') }.last
         return false if budget.nil? # a new blank budget was NOT created
         budget.name = name
         if budget.update(api)

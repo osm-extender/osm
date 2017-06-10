@@ -49,8 +49,8 @@ module Osm
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("users.php?action=register&sectionid=#{section_id}&termid=#{term_id}")
         dates_s = get_structure(api: api, section: section, term: term, no_read_cache: no_read_cache)
-        dates_s = dates_s.map{ |f| f.id }
-        dates_d = dates_s.map{ |d| Osm.parse_date(d) }
+        dates_s = dates_s.map { |f| f.id }
+        dates_d = dates_s.map { |d| Osm.parse_date(d) }
 
         to_return = []
         if data.is_a?(Hash) && data['items'].is_a?(Array)
@@ -100,7 +100,7 @@ module Osm
       Osm::Model.require_ability_to(api: api, to: :write, on: :register, section: section)
 
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
-      members = [*members].map{ |member| (member.is_a?(Integer) ? member : member.id).to_s } # Make sure it's an Array of Strings
+      members = [*members].map { |member| (member.is_a?(Integer) ? member : member.id).to_s } # Make sure it's an Array of Strings
 
       response = api.post_query("users.php?action=registerUpdate&sectionid=#{section.id}&termid=#{term_id}", post_data: {
         'scouts' => members.inspect,

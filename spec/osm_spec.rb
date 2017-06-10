@@ -37,12 +37,12 @@ describe Osm do
     end
 
     it 'ignores the epoch date if required' do
-      allow(Osm).to receive(:epoch_date?){ true }
+      allow(Osm).to receive(:epoch_date?) { true }
       expect(Osm.make_datetime(date: '1970-01-01', ignore_epoch: true)).to be_nil
     end
 
     it 'accepts the epoch date if required' do
-      allow(Osm).to receive(:epoch_date?){ true }
+      allow(Osm).to receive(:epoch_date?) { true }
       expect(Osm.make_datetime(date: '1970-01-01', ignore_epoch: false)).to eq(DateTime.new(1970, 1, 1))
     end
   end
@@ -84,12 +84,12 @@ describe Osm do
     end
 
     it 'ignores the epoch date if required' do
-      allow(Osm).to receive(:epoch_date?){ true }
+      allow(Osm).to receive(:epoch_date?) { true }
       expect(Osm.parse_date('1970-01-01', ignore_epoch: true)).to be_nil
     end
 
     it 'accepts the epoch date if required' do
-      allow(Osm).to receive(:epoch_date?){ true }
+      allow(Osm).to receive(:epoch_date?) { true }
       expect(Osm.parse_date('1970-01-01', ignore_epoch: false)).to eq(Date.new(1970, 1, 1))
     end
 

@@ -68,20 +68,20 @@ describe Osm::Email::DeliveryReport::Email do
 
       it "Didn't get a Hash" do
         expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return(nil)
-        expect{ Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Unexpected format for response - got a NilClass'
+        expect { Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Unexpected format for response - got a NilClass'
       end
 
       it 'Got an error from OSM' do
         expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return('success' => false, 'error' => 'Error message')
-        expect{ Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Error message'
+        expect { Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Error message'
       end
 
     end # describe Error getting meta data
 
     it 'Error getting body' do
       expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmail&section_id=1&email_id=2&email=&member_id=').and_return('data' => { 'to' => '1 Recipient', 'from' => '"From" <from@example.com>', 'subject' => 'Subject of email', 'sent' => '16/04/2016 13:45' }, 'status' => true, 'error' => nil, 'meta' => [])
-      expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').once{ raise Osm::Forbidden, 'Email not found' }
-      expect{ Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Email not found'
+      expect($api).to receive(:post_query).with('ext/settings/emails/?action=getSentEmailContent&section_id=1&email_id=2&email=&member_id=').once { raise Osm::Forbidden, 'Email not found' }
+      expect { Osm::Email::DeliveryReport::Email.fetch_from_osm(api: $api, section: 1, email: 2) }.to raise_error Osm::Error, 'Email not found'
     end
 
   end # describe Fetch email from OSM

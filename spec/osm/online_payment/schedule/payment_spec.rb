@@ -2,7 +2,7 @@ describe Osm::OnlinePayment::Schedule::Payment do
 
   it 'Create' do
     schedule = Osm::OnlinePayment::Schedule.new()
-    allow(schedule).to receive('valid?'){ true }
+    allow(schedule).to receive('valid?') { true }
     payment = Osm::OnlinePayment::Schedule::Payment.new(
       id:       1,
       amount:   '12.34',

@@ -26,7 +26,7 @@ module Osm
       # Convert member_ids to array of numbers
       members = [*members]
       fail ArgumentError, 'You must pass at least one member' if members.none?
-      members.map!{ |member| member.to_i }
+      members.map! { |member| member.to_i }
 
       data = api.post_query("/ext/members/email/?action=getSelectedEmailsFromContacts&sectionid=#{section.to_i}&scouts=#{members.join(',')}", post_data: {
         'contactGroups' => "[#{contacts.join(',')}]"

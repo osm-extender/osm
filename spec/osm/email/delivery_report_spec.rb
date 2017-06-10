@@ -71,7 +71,7 @@ describe Osm::Email::DeliveryReport do
     expect(report.section_id).to eq(1234)
 
     expect(report.recipients.count).to eq(3)
-    recipients = report.recipients.sort{ |a,b| a.id <=> b.id }
+    recipients = report.recipients.sort { |a,b| a.id <=> b.id }
     expect(recipients[0].delivery_report).to eq(report)
     expect(recipients[0].id).to eq(1)
     expect(recipients[0].member_id).to eq(12)

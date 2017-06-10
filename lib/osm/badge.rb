@@ -99,7 +99,7 @@ module Osm
       Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("ext/badges/stock/?action=getBadgeStock&section=#{section.type}&section_id=#{section.id}&term_id=#{term_id}")
         data = (data['items'] || [])
-        data.map!{ |i| [i['badge_id_level'], i['stock']] }
+        data.map! { |i| [i['badge_id_level'], i['stock']] }
         data.to_h
       end # cache fetch
     end
@@ -223,14 +223,14 @@ module Osm
             add_columns_to_module: Osm.to_i_or_nil(config['addcolumns']),
             level_requirement: Osm.to_i_or_nil(config['levels_column_id']),
             requires_modules: config['requires'],
-            other_requirements_required: (config['columnsRequired'] || []).map{ |i| { id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i } },
-            badges_required: (config['badgesRequired'] || []).map{ |i| { id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i } },
+            other_requirements_required: (config['columnsRequired'] || []).map { |i| { id: Osm.to_i_or_nil(i['id']), min: i['min'].to_i } },
+            badges_required: (config['badgesRequired'] || []).map { |i| { id: Osm.to_i_or_nil(i['id']), version: i['version'].to_i } },
             show_level_letters: !!config['shownumbers']
           )
 
           modules = module_completion_data(api: api, badge: badge, no_read_cache: no_read_cache)
           badge.modules = modules
-          modules = Hash[*modules.map{|m| [m.letter, m]}.flatten]
+          modules = Hash[*modules.map { |m| [m.letter, m] }.flatten]
 
           requirements = []
           ((structure[1] || {})['rows'] || []).each do |r|
@@ -276,7 +276,7 @@ module Osm
             member_id: Osm.to_i_or_nil(item['scout_id'])
           }
 
-          badge_data = Hash[item.to_a.select{ |k,v| !!k.match(/\d+_\d+/) }]
+          badge_data = Hash[item.to_a.select { |k,v| !!k.match(/\d+_\d+/) }]
           badge_data.each do |badge_identifier, status|
             if status.is_a?(String)
               # Possible statuses: 
@@ -336,7 +336,7 @@ module Osm
             due: d['completed'].to_i,
             awarded: d['awarded'].to_i,
             awarded_date: Osm.parse_date(d['awardeddate']),
-            requirements: d.map{ |k,v| [k.to_i, v] }.to_h.except(0),
+            requirements: d.map { |k,v| [k.to_i, v] }.to_h.except(0),
             section_id: section.id,
             badge: self
           )
@@ -355,24 +355,24 @@ module Osm
 
     def module_map
       @module_map ||= Hash[
-        *modules.map{ |m| 
+        *modules.map { |m| 
           [m.id, m.letter, m.letter, m.id]
         }.flatten
       ].except('z')
     end
 
     def needed_per_module
-      @needed_per_module ||= Hash[*modules.map{ |m|
+      @needed_per_module ||= Hash[*modules.map { |m|
         [m.id, m.min_required, m.letter, m.min_required]
       }.flatten].except('z')
     end
 
     def module_letters
-      @module_letters ||= modules.map{ |m| m.letter }.sort
+      @module_letters ||= modules.map { |m| m.letter }.sort
     end
 
     def module_ids
-      @module_ids ||= modules.map{ |m| m.id }.sort
+      @module_ids ||= modules.map { |m| m.id }.sort
     end
 
 
@@ -406,7 +406,7 @@ module Osm
       data = data[badge.version]
       fail ArgumentError, "That badge does't exist (bad version)." if data.nil?
 
-      data.each{ |i| i.badge = badge }
+      data.each { |i| i.badge = badge }
       data
     end
 

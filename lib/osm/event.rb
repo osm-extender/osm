@@ -399,9 +399,9 @@ module Osm
             attending: attending_values[item['attending']],
             payment_control: payment_values[item['payment']],
             fields: item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
-                           .inject({}){ |h,(k,v)| h[k[2..-1].to_i] = v; h },
+                           .inject({}) { |h,(k,v)| h[k[2..-1].to_i] = v; h },
             payments: item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
-                             .inject({}){ |h,(k,v)| h[k[1..-1].to_i] = v; h },
+                             .inject({}) { |h,(k,v)| h[k[1..-1].to_i] = v; h },
             row: index
           )
         end # each data

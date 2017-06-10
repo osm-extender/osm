@@ -188,7 +188,7 @@ describe Osm::Badge do
         it type.type.to_s.titleize do
           expect($api).to receive(:post_query).with(path).and_return(@badge_data)
           expect($api).to receive(:post_query).with('ext/badges/records/?action=_getModuleDetails').and_return(@module_data)
-          allow(Osm::Term).to receive(:get_current_term_for_section){ Osm::Term.new(id: 2) }
+          allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 2) }
 
           badges = type.get_badges_for_section(api: $api, section: Osm::Section.new(id: 1, type: :beavers))
           expect(badges.size).to eq(1)

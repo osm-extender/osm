@@ -14,22 +14,22 @@ describe Osm::Api do
   describe 'Initialize requires a' do
 
     it 'API ID' do
-      expect{ Osm::Api.new(api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, 'missing keyword: api_id')
-      expect{ Osm::Api.new(api_id: '', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, 'You must provide an api_id (get this by requesting one from OSM)')
+      expect { Osm::Api.new(api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, 'missing keyword: api_id')
+      expect { Osm::Api.new(api_id: '', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, 'You must provide an api_id (get this by requesting one from OSM)')
     end
 
     it 'API secret' do
-      expect{ Osm::Api.new(api_id: '1', name: 'name') }.to raise_error(ArgumentError, 'missing keyword: api_secret')
-      expect{ Osm::Api.new(api_id: '1', api_secret: '', name: 'name') }.to raise_error(ArgumentError, 'You must provide an api_secret (get this by requesting one from OSM)')
+      expect { Osm::Api.new(api_id: '1', name: 'name') }.to raise_error(ArgumentError, 'missing keyword: api_secret')
+      expect { Osm::Api.new(api_id: '1', api_secret: '', name: 'name') }.to raise_error(ArgumentError, 'You must provide an api_secret (get this by requesting one from OSM)')
     end
 
     it 'Name' do
-      expect{ Osm::Api.new(api_id: '1', api_secret: 'secret') }.to raise_error(ArgumentError, 'missing keyword: name')
-      expect{ Osm::Api.new(api_id: '1', api_secret: 'secret', name: '') }.to raise_error(ArgumentError, 'You must provide a name for your API (this should be what appears in OSM)')
+      expect { Osm::Api.new(api_id: '1', api_secret: 'secret') }.to raise_error(ArgumentError, 'missing keyword: name')
+      expect { Osm::Api.new(api_id: '1', api_secret: 'secret', name: '') }.to raise_error(ArgumentError, 'You must provide a name for your API (this should be what appears in OSM)')
     end
 
     it 'Valid site' do
-      expect{ Osm::Api.new(site: :invalid, api_id: '1', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, ':invalid is not a valid site (must be one of :osm, :osm_staging, :osm_migration)')
+      expect { Osm::Api.new(site: :invalid, api_id: '1', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, ':invalid is not a valid site (must be one of :osm, :osm_staging, :osm_migration)')
     end
 
   end # initialize requires a
@@ -94,13 +94,13 @@ describe Osm::Api do
 
   describe 'Requires a valid user' do
     it 'User is valid' do
-      allow($api).to receive(:has_valid_user?){ true }
+      allow($api).to receive(:has_valid_user?) { true }
       expect($api.require_valid_user!).to eq(nil)
     end
 
     it 'User is invalid' do
-      allow($api).to receive(:has_valid_user?){ false }
-      expect{ $api.require_valid_user! }.to raise_error(Osm::Api::UserInvalid, 'id: "2", secret: "USER-SECRET"')
+      allow($api).to receive(:has_valid_user?) { false }
+      expect { $api.require_valid_user! }.to raise_error(Osm::Api::UserInvalid, 'id: "2", secret: "USER-SECRET"')
     end
   end # describe Requires a valid user
 
@@ -109,7 +109,7 @@ describe Osm::Api do
 
     before :each do
       $response = Net::HTTPOK.new(1, 200, '')
-      allow($response).to receive(:content_type){ 'application/json' }
+      allow($response).to receive(:content_type) { 'application/json' }
       allow($response).to receive(:body) { '{}' }
       uri = URI('https://www.onlinescoutmanager.co.uk/path/to/load')
       $request = Net::HTTP::Post.new(uri)
@@ -176,7 +176,7 @@ describe Osm::Api do
         response.content_type = 'giberish/nothing-meaningful'
         allow(response).to receive(:body).and_return('body')
         expect($http).to receive(:request).with($request).and_return(response)
-        expect{$api.post_query('path/to/load')}.to raise_error(Osm::Error, 'Unhandled content-type: giberish/nothing-meaningful')
+        expect { $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Unhandled content-type: giberish/nothing-meaningful')
       end
     end
 
@@ -203,17 +203,17 @@ describe Osm::Api do
       it "Raises a connection error if the HTTP status code was not 'OK'" do
         response = Net::HTTPInternalServerError.new(1, 500, '')
         expect($http).to receive(:request).with($request).and_return(response)
-        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
+        expect { $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'HTTP Status code was 500')
       end
 
       it "Raises a connection error if it can't connect to OSM" do
-        expect($http).to receive(:request).with($request){ raise Errno::ENETUNREACH, 'Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)' }
-        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
+        expect($http).to receive(:request).with($request) { raise Errno::ENETUNREACH, 'Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)' }
+        expect { $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
       end
 
       it 'Raises a connection error if an SSL error occurs' do
-        expect($http).to receive(:request).with($request){ raise OpenSSL::SSL::SSLError, 'hostname "2.127.245.223" does not match the server certificate' }
-        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
+        expect($http).to receive(:request).with($request) { raise OpenSSL::SSL::SSLError, 'hostname "2.127.245.223" does not match the server certificate' }
+        expect { $api.post_query('path/to/load') }.to raise_error(Osm::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
       end
 
     end # Handles network errors
@@ -222,23 +222,23 @@ describe Osm::Api do
 
       it 'Raises an error if OSM returns an error (as a hash)' do
         expect($request).to receive(:set_form_data).with('apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET').and_return(nil)
-        allow($response).to receive(:body){ '{"error":"Error message"}' }
+        allow($response).to receive(:body) { '{"error":"Error message"}' }
         expect($http).to receive(:request).with($request).and_return($response)
-        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
+        expect { $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it 'Raises an error if OSM returns an error (as a hash in a hash)' do
         expect($request).to receive(:set_form_data).with('apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET').and_return(nil)
-        allow($response).to receive(:body){ '{"error":{"message":"Error message"}}' }
+        allow($response).to receive(:body) { '{"error":{"message":"Error message"}}' }
         expect($http).to receive(:request).with($request).and_return($response)
-        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
+        expect { $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
       it 'Raises an error if OSM returns an error (as a plain string)' do
         expect($request).to receive(:set_form_data).with('apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET').and_return(nil)
-        allow($response).to receive(:body){ 'Error message' }
+        allow($response).to receive(:body) { 'Error message' }
         expect($http).to receive(:request).with($request).and_return($response)
-        expect{ $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
+        expect { $api.post_query('path/to/load') }.to raise_error(Osm::Error, 'Error message')
       end
 
     end # Handles OSM errors
@@ -256,26 +256,26 @@ describe Osm::Api do
   describe 'Get user roles' do
 
     it 'Returns what OSM gives on success' do
-      expect($api).to receive(:post_query).with('api.php?action=getUserRoles'){ ['a', 'b'] }
+      expect($api).to receive(:post_query).with('api.php?action=getUserRoles') { ['a', 'b'] }
       expect($api.get_user_roles).to eq(['a', 'b'])
     end
 
     describe 'User has no roles in OSM' do
       it 'OSM returns false' do
-        expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice{ false }
-        expect{ $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
+        expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice { false }
+        expect { $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
         expect($api.get_user_roles).to eq([])
       end
       it 'OSM causes an exception to be raised' do
-        expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice{ fail Osm::Error, 'false' }
-        expect{ $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
+        expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice { fail Osm::Error, 'false' }
+        expect { $api.get_user_roles! }.to raise_error(Osm::NoActiveRoles)
         expect($api.get_user_roles).to eq([])
       end
     end
 
     it 'Reraises any other Osm::Error' do
-      expect($api).to receive(:post_query).with('api.php?action=getUserRoles'){ raise Osm::Error, 'Test' }
-      expect{ $api.get_user_roles }.to raise_error(Osm::Error, 'Test')
+      expect($api).to receive(:post_query).with('api.php?action=getUserRoles') { raise Osm::Error, 'Test' }
+      expect { $api.get_user_roles }.to raise_error(Osm::Error, 'Test')
     end
 
   end
@@ -313,12 +313,12 @@ describe Osm::Api do
   describe 'Converters' do
     describe 'to_s' do
       it 'Has a user' do
-        allow($api).to receive(:has_valid_user?){ true }
+        allow($api).to receive(:has_valid_user?) { true }
         expect($api.to_s).to eq('osm - 1 - API NAME - 2')
       end
 
       it "Doesn't have a user" do
-        allow($api).to receive(:has_valid_user?){ false }
+        allow($api).to receive(:has_valid_user?) { false }
         expect($api.to_s).to eq('osm - 1 - API NAME')
       end
 

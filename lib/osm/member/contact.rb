@@ -44,13 +44,13 @@ module Osm
       # @param seperator [String] What to split the contact's first name and last name with
       # @return [String] this scout's full name seperated by the optional seperator
       def name(seperator=' ')
-        [first_name, last_name].select{ |i| !i.blank? }.join(seperator)
+        [first_name, last_name].select { |i| !i.blank? }.join(seperator)
       end
 
       # Get an array of all phone numbers for the contact
       # @return [Array<String>]
       def all_phones
-        [phone_1, phone_2].select{ |n| !n.blank? }.map{ |n| n.gsub(/[^\d\+]/, '') }
+        [phone_1, phone_2].select { |n| !n.blank? }.map { |n| n.gsub(/[^\d\+]/, '') }
       end
 
       # Update the contact in OSM
@@ -83,12 +83,12 @@ module Osm
         } # our name => OSM name
 
         data = {}
-        attributes.keys.select{ |a| !['additional_information', 'additional_information_labels'].include?(a) }.select{ |a| force || changed_attributes.include?(a) }.each do |attr|
+        attributes.keys.select { |a| !['additional_information', 'additional_information_labels'].include?(a) }.select { |a| force || changed_attributes.include?(a) }.each do |attr|
           value = send(attr)
           value = 'yes' if value.eql?(true)
           data[attribute_map[attr]] = value
         end
-        additional_information.keys.select{ |a| force || additional_information.changes.keys.include?(a) }.each do |attr|
+        additional_information.keys.select { |a| force || additional_information.changes.keys.include?(a) }.each do |attr|
           data["data[#{attr}]"] = additional_information[attr]
         end
 

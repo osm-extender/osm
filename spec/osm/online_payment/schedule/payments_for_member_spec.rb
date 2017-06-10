@@ -127,50 +127,50 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
     describe 'Using update_payment_status method' do
       it 'Success' do
         expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: { 'sectionid' => 4,'schemeid' => 10,'scoutid' => 3,'paymentid' => 1,'giftaid' => false,'value' => 'Payment not required' })
-          .once{ { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Payment not required","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}' } }
+          .once { { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Payment not required","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}' } }
         expect(@p4m.update_payment_status(api: $api, payment: @payment, status: :not_required)).to eq(true)
       end
 
       describe 'Failure' do
         it 'No history for payment' do
           expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: { 'sectionid' => 4,'schemeid' => 10,'scoutid' => 3,'paymentid' => 1,'giftaid' => true,'value' => 'Paid manually' })
-            .once{ { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[]}' } }
+            .once { { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[]}' } }
           expect(@p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true)).to eq(false)
         end
 
         it 'No payment data' do
           expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: { 'sectionid' => 4,'schemeid' => 10,'scoutid' => 3,'paymentid' => 1,'giftaid' => true,'value' => 'Paid manually' })
-            .once{ { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled' } }
+            .once { { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled' } }
           expect(@p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true)).to eq(false)
         end
 
         it 'Latest status is not what we set' do
           expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: { 'sectionid' => 4,'schemeid' => 10,'scoutid' => 3,'paymentid' => 1,'giftaid' => true,'value' => 'Paid manually' })
-            .once{ { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Payment not required","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}' } }
+            .once { { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Payment not required","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}' } }
           expect(@p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true)).to eq(false)
         end
       end
 
       it 'Fails if payment is not in the schedule' do
-        expect{ @p4m.update_payment_status(api: $api, payment: 2, status: :paid_manually) }.to raise_error ArgumentError, '2 is not a valid payment for the schedule.'
+        expect { @p4m.update_payment_status(api: $api, payment: 2, status: :paid_manually) }.to raise_error ArgumentError, '2 is not a valid payment for the schedule.'
       end
 
       it 'Fails if given a bad status' do
-        expect{ @p4m.update_payment_status(api: $api, payment: 1, status: :invalid) }.to raise_error ArgumentError, 'status must be either :required, :not_required or :paid_manually. You passed in :invalid'
+        expect { @p4m.update_payment_status(api: $api, payment: 1, status: :invalid) }.to raise_error ArgumentError, 'status must be either :required, :not_required or :paid_manually. You passed in :invalid'
       end
 
       describe 'Ignores gift aid parameter if appropriate' do # pass in true and check if calls out with false
 
         it 'Schedule is a gift aid one' do
           expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: { 'sectionid' => 4,'schemeid' => 10,'scoutid' => 3,'paymentid' => 1,'giftaid' => true,'value' => 'Paid manually' })
-            .once{ { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Paid manually","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}' } }
+            .once { { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Paid manually","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}' } }
           expect(@p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true)).to eq(true)
         end
 
         it 'Schedule is NOT a gift aid one' do
           @schedule.gift_aid = false
           expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=updatePaymentStatus', post_data: { 'sectionid' => 4,'schemeid' => 10,'scoutid' => 3,'paymentid' => 1,'giftaid' => false,'value' => 'Paid manually' })
-            .once{ { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Paid manually","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}' } }
+            .once { { 'scoutid' => '3', 'firstname' => 'John', 'lastname' => 'Smith', 'patrolid' => '5', 'startdate' => '1970-01-01', 'directdebit' => 'cancelled', '1' => '{"status":[{"statusid":"6","scoutid":"3","schemeid":"4","paymentid":"1","statustimestamp":"01/02/2003 04:05","status":"Paid manually","details":"","editable":"0","latest":"1","who":"0","firstname":"System generated"}]}' } }
           expect(@p4m.update_payment_status(api: $api, payment: @payment, status: :paid_manually, gift_aid: true)).to eq(true)
         end
 
@@ -180,23 +180,23 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
 
     describe 'Using' do
       it 'mark_payment_required' do
-        expect(@p4m).to receive(:update_payment_status).with(api: $api, payment: @payment, status: :required).once{ true }
+        expect(@p4m).to receive(:update_payment_status).with(api: $api, payment: @payment, status: :required).once { true }
         expect(@p4m.mark_payment_required(api: $api, payment: @payment)).to eq(true)
       end
 
       it 'mark_payment_not_required' do
-        expect(@p4m).to receive(:update_payment_status).with(api: $api, payment: @payment, status: :not_required).once{ true }
+        expect(@p4m).to receive(:update_payment_status).with(api: $api, payment: @payment, status: :not_required).once { true }
         expect(@p4m.mark_payment_not_required(api: $api, payment: @payment)).to eq(true)
       end
 
       describe 'mark_payment_paid_manually' do
         it 'Updating gift aid' do
-          expect(@p4m).to receive(:update_payment_status).with(api: $api, payment: @payment, status: :paid_manually, gift_aid: true).once{ true }
+          expect(@p4m).to receive(:update_payment_status).with(api: $api, payment: @payment, status: :paid_manually, gift_aid: true).once { true }
           expect(@p4m.mark_payment_paid_manually(api: $api, payment: @payment, gift_aid: true)).to eq(true)
         end
 
         it 'Not updating gift aid' do
-          expect(@p4m).to receive(:update_payment_status).with(api: $api, payment: @payment, status: :paid_manually, gift_aid: false).once{ true }
+          expect(@p4m).to receive(:update_payment_status).with(api: $api, payment: @payment, status: :paid_manually, gift_aid: false).once { true }
           expect(@p4m.mark_payment_paid_manually(api: $api, payment: @payment, gift_aid: false)).to eq(true)
         end
       end # describe mark_payment_paid_manually

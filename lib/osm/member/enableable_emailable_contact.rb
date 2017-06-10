@@ -9,7 +9,7 @@ module Osm
         emails = []
         emails.push email_1 if receive_email_1
         emails.push email_2 if receive_email_2
-        emails.select{ |e| !e.blank? }
+        emails.select { |e| !e.blank? }
       end
 
       # Get an array of enabled emails for the contact in a format which includes their name
@@ -18,7 +18,7 @@ module Osm
         emails = []
         emails.push email_1 if receive_email_1
         emails.push email_2 if receive_email_2
-        emails.select{ |e| !e.blank? }.map{ |e| "\"#{name}\" <#{e}>" }
+        emails.select { |e| !e.blank? }.map { |e| "\"#{name}\" <#{e}>" }
       end
 
     end

@@ -97,7 +97,7 @@ module Osm
       if cache_exist?(api: api, key: [*cache_key, version], no_read_cache: no_read_cache)
         activity = cache_read(api, [*cache_key, version])
         if (activity.shared == 2) || (activity.user_id == api.user_id) ||  # Shared or owned by this user
-        Osm::Section.get_all(api: api).map{ |s| s.group_id }.uniq.include?(activity.group_id)  # user belomngs to the group owning the activity
+        Osm::Section.get_all(api: api).map { |s| s.group_id }.uniq.include?(activity.group_id)  # user belomngs to the group owning the activity
           return activity
         else
           return nil
@@ -226,12 +226,12 @@ module Osm
         'resources' => resources,
         'instructions' => instructions,
         'id' => id,
-        'files' => files.map{|f| f.id }.join(','),
+        'files' => files.map { |f| f.id }.join(','),
         'time' => running_time.to_s,
         'location' => location,
         'sections' => sections.to_json,
         'tags' => tags.to_json,
-        'links' => badges.map{ |b|
+        'links' => badges.map { |b|
           {
             'badge_id' => b.badge_id.to_s,
             'badge_version' => b.badge_version.to_s,
@@ -243,7 +243,7 @@ module Osm
             'data' => b.data,
             'section' => b.badge_section,
             'sectionLongName' => nil,
-            'sections' => sections.map{ |s| s.to_s },
+            'sections' => sections.map { |s| s.to_s },
             'badgetype' => b.badge_type.to_s,
             'badgetypeLongName' => nil
           }

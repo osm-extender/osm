@@ -59,7 +59,7 @@ describe Osm::Email::DeliveryReport::Recipient do
     it 'Fails with error message' do
       recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
       expect($api).to receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: { 'section_id' => 1, 'email' => 'a@example.com', 'email_id' => 2 }).and_return('status' => false, 'error' => 'Error message')
-      expect{ recipient.unblock_address($api) }.to raise_error(Osm::Error, 'Error message')
+      expect { recipient.unblock_address($api) }.to raise_error(Osm::Error, 'Error message')
     end
 
     it 'Fails without error message' do

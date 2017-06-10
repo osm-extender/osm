@@ -149,7 +149,7 @@ module Osm
         ] }
       ].freeze
 
-      VALID_TEMPLATE_KEYS = TEMPLATES.map{ |t| t[:id] }.freeze
+      VALID_TEMPLATE_KEYS = TEMPLATES.map { |t| t[:id] }.freeze
 
 
       # Get a template
@@ -185,9 +185,9 @@ module Osm
         require_ability_to(api: api, to: :write, on: :user, section: section)
 
         # Make sure required tags are present
-        tags = Osm::MyScout::Template::TEMPLATES.find{ |t| t[:id].eql?(key) }[:tags]
+        tags = Osm::MyScout::Template::TEMPLATES.find { |t| t[:id].eql?(key) }[:tags]
         fail Osm::Error, "Couldn't find tags for template" if tags.nil?
-        tags.select{ |tag| tag[:required] }.each do |tag|
+        tags.select { |tag| tag[:required] }.each do |tag|
           unless content.include?("[#{tag[:id]}]")
             message = "Required tag [#{tag[:id]}] not found in template content."
             fail ArgumentError, message

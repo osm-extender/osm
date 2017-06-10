@@ -112,8 +112,8 @@ module Osm
             # [['a'], ['b', 'c']] = a and (b or c)
             requires = badge.requires_modules.clone
             modules = modules_gained
-            requires.map!{ |a| a.map{ |b| modules.include?(b) } } # Replace letters with true/false
-            requires.map!{ |a| a.include?(true) } # Replace each combination with true/false
+            requires.map! { |a| a.map { |b| modules.include?(b) } } # Replace letters with true/false
+            requires.map! { |a| a.include?(true) } # Replace each combination with true/false
             return false if requires.include?(false) # Only earnt if all combinations are met
           end
           badge.other_requirements_required.each do |c|
@@ -288,7 +288,7 @@ module Osm
 
         # Update requirements that changed
         requirements_updated = true
-        editable_requirements = badge.requirements.select{ |r| r.editable }.map{ |r| r.id }
+        editable_requirements = badge.requirements.select { |r| r.editable }.map { |r| r.id }
         requirements.changes.each do |requirement, (was,now)|
           next unless editable_requirements.include?(requirement)
           result = api.post_query('ext/badges/records/?action=updateSingleRecord', post_data: {

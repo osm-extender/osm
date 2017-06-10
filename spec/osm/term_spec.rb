@@ -136,7 +136,7 @@ describe Osm::Term do
       it 'From OSM' do
         terms = Osm::Term.get_all($api)
         expect(terms.size).to eq(3)
-        expect(terms.map{ |i| i.id }).to eq([1, 2, 3])
+        expect(terms.map { |i| i.id }).to eq([1, 2, 3])
         term = terms[0]
         expect(term.is_a?(Osm::Term)).to eq(true)
         expect(term.id).to eq(1)
@@ -162,7 +162,7 @@ describe Osm::Term do
         ])
       terms = Osm::Term.get_for_section(api: $api, section: 10)
       expect(terms.size).to eq(2)
-      expect(terms.map{ |i| i.id }).to eq([2, 3])
+      expect(terms.map { |i| i.id }).to eq([2, 3])
     end
 
     describe 'Gets a term' do
@@ -200,7 +200,7 @@ describe Osm::Term do
         expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return(          '9' => [
             { 'termid' => '1', 'name' => 'Term 1', 'sectionid' => '9', 'startdate' => (Date.today + 31).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 31).strftime('%Y-%m-%d') }
           ])
-        expect{ Osm::Term.get_current_term_for_section(api: $api, section: 9) }.to raise_error do |error|
+        expect { Osm::Term.get_current_term_for_section(api: $api, section: 9) }.to raise_error do |error|
           expect(error).to be_a(Osm::Error::NoCurrentTerm)
           expect(error.message).to eq('There is no current term for the section.')
           expect(error.section_id).to eq(9)
@@ -281,7 +281,7 @@ describe Osm::Term do
 
     it 'Update a term (invalid term)' do
       term = Osm::Term.new
-      expect{ term.update($api) }.to raise_error(Osm::ObjectIsInvalid)
+      expect { term.update($api) }.to raise_error(Osm::ObjectIsInvalid)
     end
 
   end

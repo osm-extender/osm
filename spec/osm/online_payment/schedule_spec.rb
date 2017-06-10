@@ -85,14 +85,14 @@ describe Osm::OnlinePayment::Schedule do
   describe 'Using the OSM API' do
 
     it 'Gets summary list' do
-      expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getSchemes&sectionid=1'){ { 'items' => [{ 'schemeid' => '539','name' => 'Events' }] } }
+      expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getSchemes&sectionid=1') { { 'items' => [{ 'schemeid' => '539','name' => 'Events' }] } }
       result = Osm::OnlinePayment::Schedule.get_list_for_section(api: $api, section: 1)
       expect(result).to eq([{ id: 539, name: 'Events' }])
     end
 
     it 'Gets an individual schedule' do
       data = { 'schemeid' => '2','sectionid' => '1','accountid' => '3','name' => 'Schedule name','preauth_amount' => '12.34','description' => 'Schedule description','giftaid' => '1','defaulton' => '1','paynow' => '-1','archived' => '1','payments' => [{ 'paymentid' => '4','schemeid' => '2','date' => '2013-03-21','amount' => '1.23','name' => 'Payment name','archived' => '1' }] }
-      expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=1&schemeid=2&allpayments=true'){ data }
+      expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=1&schemeid=2&allpayments=true') { data }
       schedule = Osm::OnlinePayment::Schedule.get(api: $api, section: 1, schedule: 2)
       expect(schedule.id).to eq(2)
       expect(schedule.section_id).to eq(1)
@@ -117,9 +117,9 @@ describe Osm::OnlinePayment::Schedule do
     end
 
     it 'Gets all schedules for a section' do
-      expect(Osm::OnlinePayment::Schedule).to receive(:get_list_for_section).with(api: $api, section: 5, no_read_cache: false){ [{ id: 6, name: 'A' }, { id: 7, name: 'B' }] }
-      expect(Osm::OnlinePayment::Schedule).to receive(:get).with(api: $api, section: 5, schedule: 6, no_read_cache: false){ 'A' }
-      expect(Osm::OnlinePayment::Schedule).to receive(:get).with(api: $api, section: 5, schedule: 7, no_read_cache: false){ 'B' }
+      expect(Osm::OnlinePayment::Schedule).to receive(:get_list_for_section).with(api: $api, section: 5, no_read_cache: false) { [{ id: 6, name: 'A' }, { id: 7, name: 'B' }] }
+      expect(Osm::OnlinePayment::Schedule).to receive(:get).with(api: $api, section: 5, schedule: 6, no_read_cache: false) { 'A' }
+      expect(Osm::OnlinePayment::Schedule).to receive(:get).with(api: $api, section: 5, schedule: 7, no_read_cache: false) { 'B' }
       expect(Osm::OnlinePayment::Schedule.get_for_section(api: $api, section: 5)).to eq(['A', 'B'])
     end
 
@@ -137,7 +137,7 @@ describe Osm::OnlinePayment::Schedule do
           'startdate' => '2015-02-03',
           '4' => '{"status":[{"statusid":"7","scoutid":"6","schemeid":"1","paymentid":"8","statustimestamp":"03/02/2016 20:51","status":"Paid manually","details":"","editable":"1","latest":"1","who":"0","firstname":"System"}]}'
         } ] }
-        expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=2&schemeid=1&termid=3').once{ body }
+        expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=2&schemeid=1&termid=3').once { body }
       end
 
       it 'For a "collect all" schedule' do

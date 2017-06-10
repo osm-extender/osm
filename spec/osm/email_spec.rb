@@ -50,17 +50,17 @@ describe Osm::Email do
 
     it 'Requires at least one contact' do
       expect($api).not_to receive(:post_query)
-      expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [], members: [2]) }.to raise_error ArgumentError, 'You must pass at least one contact'
+      expect { Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [], members: [2]) }.to raise_error ArgumentError, 'You must pass at least one contact'
     end
 
     it 'Checks for invalid contacts' do
       expect($api).not_to receive(:post_query)
-      expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:invalid_contact], members: [2]) }.to raise_error ArgumentError, 'Invalid contact - :invalid_contact'
+      expect { Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:invalid_contact], members: [2]) }.to raise_error ArgumentError, 'Invalid contact - :invalid_contact'
     end
 
     it 'Requires at least one member' do
       expect($api).not_to receive(:post_query)
-      expect{ Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:primary], members: []) }.to raise_error ArgumentError, 'You must pass at least one member'
+      expect { Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: [:primary], members: []) }.to raise_error ArgumentError, 'You must pass at least one member'
     end
 
     it 'Handles no emails returned' do
@@ -86,7 +86,7 @@ describe Osm::Email do
         'from' => 'Sender <from@example.com>',
         'subject' => 'Subject of email',
         'body' => 'Body of email'
-      }){ { 'ok' => true } }
+      }) { { 'ok' => true } }
 
       expect(Osm::Email.send_email(
         api: $api,
@@ -108,7 +108,7 @@ describe Osm::Email do
         'from' => 'Sender <from@example.com>',
         'subject' => 'Subject of email',
         'body' => 'Body of email'
-      }){ { 'ok' => true } }
+      }) { { 'ok' => true } }
 
       expect(Osm::Email.send_email(
         api: $api,
@@ -129,7 +129,7 @@ describe Osm::Email do
         'from' => 'Sender <from@example.com>',
         'subject' => 'Subject of email',
         'body' => 'Body of email'
-      }){ { 'ok' => true } }
+      }) { { 'ok' => true } }
 
       expect(Osm::Email.send_email(
         api: $api,

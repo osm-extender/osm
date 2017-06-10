@@ -708,11 +708,11 @@ describe Osm::Member do
       end
 
       it 'Raises error if member is invalid' do
-        expect{ Osm::Member.new.create($api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
+        expect { Osm::Member.new.create($api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
       end
 
       it 'Raises error if member exists in OSM (has an ID)' do
-        expect{ Osm::Member.new(id: 12345).create($api) }.to raise_error(Osm::Error, 'the member already exists in OSM')
+        expect { Osm::Member.new(id: 12345).create($api) }.to raise_error(Osm::Error, 'the member already exists in OSM')
       end
 
     end
@@ -931,7 +931,7 @@ describe Osm::Member do
       end
 
       it 'Raises error if member is invalid' do
-        expect{ Osm::Member.new.create($api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
+        expect { Osm::Member.new.create($api) }.to raise_error(Osm::ObjectIsInvalid, 'member is invalid')
       end
 
       it 'Handles disabled contacts' do
@@ -963,7 +963,7 @@ describe Osm::Member do
 
         allow(Osm::Term).to receive(:get_for_section) { [] }
 
-        allow(@member).to receive('valid?'){ true }
+        allow(@member).to receive('valid?') { true }
         @member.first_name = ''
         @member.additional_information[123] = ''
         expect(@member.update($api)).to eq(true)

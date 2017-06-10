@@ -119,7 +119,7 @@ describe Osm::FlexiRecord::Column do
         editable: false
       )
       expect($api).not_to receive(:post_query)
-      expect{ col.update($api) }.to raise_error(Osm::Forbidden)
+      expect { col.update($api) }.to raise_error(Osm::Forbidden)
     end
 
   end # desxribe update
@@ -203,7 +203,7 @@ describe Osm::FlexiRecord::Column do
         editable: false
       )
       expect($api).not_to receive(:post_query)
-      expect{ col.delete($api) }.to raise_error(Osm::Forbidden)
+      expect { col.delete($api) }.to raise_error(Osm::Forbidden)
     end
 
   end # desxribe delete

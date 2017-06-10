@@ -68,7 +68,7 @@ module Osm
     def self.get_for_section(api:, section:, no_read_cache: false)
       require_access_to_section(api: api, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
-      get_all(api, no_read_cache: no_read_cache).select{ |term| term.section_id == section_id }
+      get_all(api, no_read_cache: no_read_cache).select { |term| term.section_id == section_id }
     end
 
     # Get a term

@@ -16,7 +16,7 @@ module Osm
       members = [*members]
       data = api.post_query("ext/members/sms/?action=sendText&sectionid=#{section.to_i}", post_data: {
         'msg' => message,
-        'scouts' => [*members.map{ |m| m.to_i }].join(','),
+        'scouts' => [*members.map { |m| m.to_i }].join(','),
         'source' => source_address,
         'type' => ''
       })
@@ -55,7 +55,7 @@ module Osm
 
       members = [*members]
       data = api.post_query("ext/members/sms/?action=getNumbers&sectionid=#{section.to_i}&type=", post_data: {
-        'scouts' => [*members.map{ |m| m.to_i }].join(',')
+        'scouts' => [*members.map { |m| m.to_i }].join(',')
       })
 
       Osm::Model.cache_write(api: api, key: ['sms_credits', section.to_i], data: data['sms_remaining'])

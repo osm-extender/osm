@@ -7,7 +7,7 @@ describe Osm::Register do
         { 'rows' => [{ 'name' => 'First name','field' => 'firstname','width' => '100px' },{ 'name' => 'Last name','field' => 'lastname','width' => '100px' },{ 'name' => 'Total','field' => 'total','width' => '60px' }],'noscroll' => true },
         { 'rows' => [{ 'field' => 'field1','name' => 'name1','tooltip' => 'tooltip1' }] }
       ]
-      expect($api).to receive(:post_query).with('users.php?action=registerStructure&sectionid=1&termid=2'){ data }
+      expect($api).to receive(:post_query).with('users.php?action=registerStructure&sectionid=1&termid=2') { data }
 
       register_structure = Osm::Register.get_structure(api: $api, section: 1, term: 2)
       expect(register_structure.is_a?(Array)).to eq(true)
@@ -65,7 +65,7 @@ describe Osm::Register do
         'sectionid' => 1,
         'completedBadges' => '[{"a":"A"},{"b":"B"}]'
       }
-      expect($api).to receive(:post_query).with('users.php?action=registerUpdate&sectionid=1&termid=2', post_data: post_data){ [] }
+      expect($api).to receive(:post_query).with('users.php?action=registerUpdate&sectionid=1&termid=2', post_data: post_data) { [] }
 
       expect(Osm::Register.update_attendance(
         api: $api,
@@ -99,7 +99,7 @@ describe Osm::Register do
           }
         ]
       }
-      expect($api).to receive(:post_query).with('users.php?action=register&sectionid=1&termid=2'){ data }
+      expect($api).to receive(:post_query).with('users.php?action=register&sectionid=1&termid=2') { data }
       allow(Osm::Register).to receive(:get_structure) { [] }
 
       register = Osm::Register.get_attendance(api: $api, section: 1, term: 2)

@@ -106,7 +106,7 @@ describe Osm::Meeting do
 
     it 'Fetch badge requirements for a meeting (from API)' do
       allow(Osm::Model).to receive('has_permission?').and_return(true)
-      allow(Osm::Section).to receive(:get){ Osm::Section.new(id: 3, type: :cubs) }
+      allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 3, type: :cubs) }
       badges_body = [{ 'a' => 'a' },{ 'a' => 'A' }]
       expect($api).to receive(:post_query).with('users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs').and_return(badges_body)
 
@@ -116,7 +116,7 @@ describe Osm::Meeting do
 
     it 'Fetch badge requirements for a meeting (iterating through activities)' do
       allow(Osm::Model).to receive('has_permission?').with(api: $api, to: :write, on: :badge, section: 3, no_read_cache: false).and_return(false)
-      allow(Osm::Section).to receive(:get){ Osm::Section.new(id: 3, type: :cubs) }
+      allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 3, type: :cubs) }
       allow(Osm::Activity).to receive(:get) { Osm::Activity.new(badges: [
         Osm::Activity::Badge.new(badge_type: :activity, badge_section: :beavers, requirement_label: 'label', data: 'data', badge_name: 'badge', badge_id: 2, badge_version: 0, requirement_id: 200)
       ]) }
@@ -242,7 +242,7 @@ describe Osm::Meeting do
 
     it 'Update a meeting (invalid meeting)' do
       meeting = Osm::Meeting.new
-      expect{ meeting.update($api) }.to raise_error(Osm::ObjectIsInvalid)
+      expect { meeting.update($api) }.to raise_error(Osm::ObjectIsInvalid)
     end
 
 

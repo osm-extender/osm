@@ -91,7 +91,7 @@ module Osm
       term_id = term.nil? ? Osm::Term.get_current_term_for_section(api, section).id : term.to_i
       section_id = section.to_i
 
-      members = [*members].map{ |member| member.to_i.to_s } # Make sure it's an Array of Strings
+      members = [*members].map { |member| member.to_i.to_s } # Make sure it's an Array of Strings
 
       response = api.post_query("giftaid.php?action=update&sectionid=#{section_id}&termid=#{term_id}", post_data: {
         'scouts' => members.inspect,

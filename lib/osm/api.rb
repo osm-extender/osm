@@ -34,7 +34,7 @@ module Osm
       fail ArgumentError, 'You must provide an api_id (get this by requesting one from OSM)' if api_id.to_s.empty?
       fail ArgumentError, 'You must provide an api_secret (get this by requesting one from OSM)' if api_secret.to_s.empty?
       fail ArgumentError, 'You must provide a name for your API (this should be what appears in OSM)' if name.to_s.empty?
-      fail ArgumentError, "#{site.inspect} is not a valid site (must be one of #{BASE_URLS.keys.map{ |i| i.inspect }.join(', ')})" unless BASE_URLS.keys.include?(site)
+      fail ArgumentError, "#{site.inspect} is not a valid site (must be one of #{BASE_URLS.keys.map { |i| i.inspect }.join(', ')})" unless BASE_URLS.keys.include?(site)
 
       @api_id = api_id.to_s.clone
       @api_secret = api_secret.to_s.clone
@@ -143,7 +143,7 @@ module Osm
       if debug?
         puts "Making #{'RAW' if raw} :#{site} API post request to #{uri}"
         hide_values_for = ['secret', 'token']
-        post_data_as_string = post_data.sort.map{ |key, value| "#{key} => #{hide_values_for.include?(key) ? 'PRESENT' : value.inspect}" }.join(', ')
+        post_data_as_string = post_data.sort.map { |key, value| "#{key} => #{hide_values_for.include?(key) ? 'PRESENT' : value.inspect}" }.join(', ')
         puts "{#{post_data_as_string}}"
       end
 

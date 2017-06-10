@@ -107,7 +107,7 @@ module Osm
     # Get a list of attributes which have changed
     # @return Array[String] the names of attributes which have changed
     def changed_attributes
-      attributes.keys.select{ |k| attributes[k] != @original_attributes[k] }
+      attributes.keys.select { |k| attributes[k] != @original_attributes[k] }
     end
 
     # Reset the list of attributes which have changed
@@ -136,7 +136,7 @@ module Osm
       fail ArgumentError, 'A block is required' unless block_given?
       return yield if no_cache? || no_read_cache
       key = cache_key(api: api, key: key)
-      @@cache.fetch(key, expires_in: ttl){ yield }
+      @@cache.fetch(key, expires_in: ttl) { yield }
     end
     def self.cache_read(api:, key:, no_read_cache: false)
       return nil if no_cache? || no_read_cache
@@ -309,7 +309,7 @@ module Osm
     end
 
     def cache_fetch(**options)
-      self.class.cache_fetch(**options){ yield }
+      self.class.cache_fetch(**options) { yield }
     end
 
 

@@ -94,7 +94,7 @@ module Osm
           unless our_activities.nil?
             our_activities.each do |activity_data|
               if activity_data.is_a?(Array)
-                activity_data = activity_data.find{ |a| a.is_a?(Hash) && a.has_key?('activityid') }
+                activity_data = activity_data.find { |a| a.is_a?(Hash) && a.has_key?('activityid') }
               end
               attributes[:activities].push Osm::Meeting::Activity.new(
                 activity_id: Osm.to_i_or_nil(activity_data['activityid']),
@@ -183,7 +183,7 @@ module Osm
         'games' => games,
         'leaders' => leaders,
         'activity' => activities_data.to_json,
-        'badgelinks' => badge_links.map{ |b|
+        'badgelinks' => badge_links.map { |b|
           {
             'badge_id' => b.badge_id.to_s,
             'badge_version' => b.badge_version.to_s,

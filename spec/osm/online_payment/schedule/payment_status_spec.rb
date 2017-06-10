@@ -2,7 +2,7 @@ describe Osm::OnlinePayment::Schedule::PaymentStatus do
 
   it 'Create' do
     payment = Osm::OnlinePayment::Schedule::Payment.new
-    allow(payment).to receive('valid?'){ true }
+    allow(payment).to receive('valid?') { true }
     status = Osm::OnlinePayment::Schedule::PaymentStatus.new(
       id:             1,
       payment:        payment,

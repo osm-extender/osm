@@ -31,7 +31,7 @@ describe Osm::MyScout::Template do
 
     it 'Missing a required tag' do
       expect($api).not_to receive(:post_query)
-      expect{ Osm::MyScout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: 'CONTENT') }.to raise_error ArgumentError, 'Required tag [DIRECT_LINK] not found in template content.'
+      expect { Osm::MyScout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: 'CONTENT') }.to raise_error ArgumentError, 'Required tag [DIRECT_LINK] not found in template content.'
     end
 
   end # desxribe update
