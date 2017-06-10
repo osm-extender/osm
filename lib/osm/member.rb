@@ -96,7 +96,7 @@ module Osm
     attribute :emergency_contact, type: Object
     attribute :doctor, type: Object
 
-    validates_numericality_of :id, only_integer: true, greater_than: 0, unless: Proc.new { |r| r.id.nil? }
+    validates_numericality_of :id, only_integer: true, greater_than: 0, unless: proc { |r| r.id.nil? }
     validates_numericality_of :section_id, only_integer: true, greater_than: 0
     validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
     validates_numericality_of :grouping_leader, only_integer: true, greater_than_or_equal_to: 0, less_than_or_equal_to: 14, allow_nil: true

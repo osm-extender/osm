@@ -122,21 +122,21 @@ describe Osm::Model do
       end
 
       it 'With cache' do
-        block = Proc.new{ 'ABC' }
+        block = proc{ 'ABC' }
         expect(OsmTest::Cache).to receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", expires_in: 600).and_yield { 'abc' }
         expect(ModelTester.cache_fetch(api: $api, key: 'key', &block)).to eq('ABC')
       end
 
       it 'Without cache' do
         ModelTester.cache = nil
-        block = Proc.new{ 'GHI' }
+        block = proc{ 'GHI' }
         expect(OsmTest::Cache).not_to receive('fetch')
         expect(ModelTester.cache_fetch(api: $api, key: 'key', &block)).to eq('GHI')
       end
 
       it 'Ignoring cache' do
         expect(OsmTest::Cache).not_to receive('read')
-        block = Proc.new{ 'GHI' }
+        block = proc{ 'GHI' }
         expect(ModelTester.cache_fetch(api: $api, key: 'key', no_read_cache: true, &block)).to eq('GHI')
       end
     end # describe fetches

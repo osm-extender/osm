@@ -23,7 +23,7 @@ module Osm
     attribute :archived, type: Boolean, default: false
     attribute :finalised, type: Boolean, default: false
 
-    validates_numericality_of :id, only_integer: true, greater_than: 0, unless: Proc.new { |r| r.id.nil? }
+    validates_numericality_of :id, only_integer: true, greater_than: 0, unless: proc { |r| r.id.nil? }
     validates_numericality_of :section_id, only_integer: true, greater_than: 0
     validates_presence_of :name
     validates_presence_of :date
