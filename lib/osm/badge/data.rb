@@ -194,9 +194,9 @@ module Osm
           levels = badge.levels                    # e.g. [0,1,2,3,4,5,10]
           return 0 if levels.include?(done)        # Has achieved a level (and not started next )
           return 0 if done >= levels.last          # No more levels to do
-          (1..(levels.size-1)).to_a.reverse_each do |i|  # indexes from last to 2nd
+          (1..(levels.size - 1)).to_a.reverse_each do |i|  # indexes from last to 2nd
             this_level = levels[i]
-            previous_level = levels[i-1]
+            previous_level = levels[i - 1]
             return this_level if (done < this_level && done > previous_level) # this_level has been started (and not finished)
           end
           return 0 # No reason we should ever get here

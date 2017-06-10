@@ -121,8 +121,8 @@ describe Osm::Event do
         'publicnotes' => 'public notepad',
         'config' => '[{"id":"f_1","name":"Name","pL":"Label","pR":"1"}]',
         'badgelinks' => [
-          { 'section'=>'cubs', 'badgetype'=>'activity', 'badge'=>'activity_athletics', 'columnname'=>'b', 'data'=>'Yes', 'badgeLongName'=>'Athletics', 'columnnameLongName'=>'B: Run', 'sectionLongName'=>'Cubs', 'badgetypeLongName'=>'Activity', 'badge_id'=>'179', 'badge_version'=>'0', 'column_id'=>'3' },
-          { 'section'=>'staged', 'badgetype'=>'staged', 'badge'=>'hikes', 'columnname'=>'custom', 'data'=>'1', 'badgeLongName'=>'Hikes', 'columnnameLongName'=>'C: Hike name = 1', 'sectionLongName'=>'Staged', 'badgetypeLongName'=>'Staged', 'badge_id'=>'197', 'badge_version'=>'0', 'column_id'=>'4' }
+          { 'section' => 'cubs', 'badgetype' => 'activity', 'badge' => 'activity_athletics', 'columnname' => 'b', 'data' => 'Yes', 'badgeLongName' => 'Athletics', 'columnnameLongName' => 'B: Run', 'sectionLongName' => 'Cubs', 'badgetypeLongName' => 'Activity', 'badge_id' => '179', 'badge_version' => '0', 'column_id' => '3' },
+          { 'section' => 'staged', 'badgetype' => 'staged', 'badge' => 'hikes', 'columnname' => 'custom', 'data' => '1', 'badgeLongName' => 'Hikes', 'columnnameLongName' => 'C: Hike name = 1', 'sectionLongName' => 'Staged', 'badgetypeLongName' => 'Staged', 'badge_id' => '197', 'badge_version' => '0', 'column_id' => '4' }
         ],
         'sectionid' => '1',
         'googlecalendar' => nil,
@@ -682,8 +682,8 @@ describe Osm::Event do
         }
 
         expect($api).to receive(:post_query).with('events.php?action=addEvent&sectionid=1', post_data: post_data).and_return('id' => 2)
-        expect($api).to receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: { 'eventid'=>2, 'notepad'=>'notepad' }).and_return({})
-        expect($api).to receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: { 'eventid'=>2, 'pnnotepad'=>'public notepad' }).and_return({})
+        expect($api).to receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: { 'eventid' => 2, 'notepad' => 'notepad' }).and_return({})
+        expect($api).to receive(:post_query).with('events.php?action=saveNotepad&sectionid=1', post_data: { 'eventid' => 2, 'pnnotepad' => 'public notepad' }).and_return({})
 
         event = Osm::Event.new(
           section_id: 1,
@@ -966,7 +966,7 @@ describe Osm::Event do
     end
 
     it 'Handles missing config from OSM' do
-      events_body = { 'identifier' => 'eventid', 'label' => 'name', 'items' => [{ 'eventid'=>'2','name'=>'An Event','startdate'=>'2001-02-03','enddate'=>'2001-02-05','starttime'=>'00:00:00','endtime'=>'12:00:00','cost'=>'0.00','location'=>'Somewhere','notes'=>'Notes','sectionid'=>1,'googlecalendar'=>nil,'archived'=>'0','confdate'=>nil,'allowchanges'=>'1','disablereminders'=>'1','attendancelimit'=>'3','limitincludesleaders'=>'1' }] }
+      events_body = { 'identifier' => 'eventid', 'label' => 'name', 'items' => [{ 'eventid' => '2','name' => 'An Event','startdate' => '2001-02-03','enddate' => '2001-02-05','starttime' => '00:00:00','endtime' => '12:00:00','cost' => '0.00','location' => 'Somewhere','notes' => 'Notes','sectionid' => 1,'googlecalendar' => nil,'archived' => '0','confdate' => nil,'allowchanges' => '1','disablereminders' => '1','attendancelimit' => '3','limitincludesleaders' => '1' }] }
       event_body = {
         'eventid' => '2',
         'name' => 'An Event',

@@ -200,7 +200,7 @@ module Osm
         'notes' => notes
       })
 
-      if (data == { 'result'=>0 })
+      if (data == { 'result' => 0 })
         # The cached activity will be out of date - remove it
         cache_delete(api: api, key: ['activity', id])
         return true
@@ -253,7 +253,7 @@ module Osm
         'secretEdit' => secret_update
       })
 
-      if (data == { 'result'=>true })
+      if (data == { 'result' => true })
         # The cached activity will be out of date - remove it
         cache_delete(api: api, key: ['activity', id])
         return true

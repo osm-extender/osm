@@ -81,7 +81,7 @@ describe Osm::Badge do
       Osm::Badge::RequirementModule.new(id: 1, letter: 'a')
     ])
 
-    expect(badge.module_map).to eq(1=>'a', 10=>'b', 2=>'c', 'a'=>1, 'b'=>10, 'c'=>2)
+    expect(badge.module_map).to eq(1 => 'a', 10 => 'b', 2 => 'c', 'a' => 1, 'b' => 10, 'c' => 2)
   end
 
   it 'Gets the number of requirements needed per module' do
@@ -91,7 +91,7 @@ describe Osm::Badge do
       Osm::Badge::RequirementModule.new(id: 1, letter: 'a', min_required: 3)
     ])
 
-    expect(badge.needed_per_module).to eq('a'=>3, 'b'=>4, 'c'=>5, 2=>5, 10=>4, 1=>3)
+    expect(badge.needed_per_module).to eq('a' => 3, 'b' => 4, 'c' => 5, 2 => 5, 10 => 4, 1 => 3)
   end
 
   it 'Produces a list of modules' do
@@ -156,7 +156,7 @@ describe Osm::Badge do
                 'noscroll' => true
                },{
                 'rows' => [
-                  { 'name' => 'r_name','field' => '2345','width' => '80px','formatter' => 'cellFormatter','tooltip' => 'r_description','editable' => 'true','module'=>'a' }
+                  { 'name' => 'r_name','field' => '2345','width' => '80px','formatter' => 'cellFormatter','tooltip' => 'r_description','editable' => 'true','module' => 'a' }
                 ]
               }
             ]
@@ -394,11 +394,11 @@ describe Osm::Badge do
 
       db = Osm::Badge.get_due_badges(api: $api, section: Osm::Section.new(id: 1, type: :cubs), term: 2)
       expect(db.empty?).to eq(false)
-      expect(db.badge_names).to eq('145_0_1'=>'Activity - Badge Name', '93_0_2'=>'Staged - Participation (Lvl 2)')
-      expect(db.by_member).to eq(1=>['93_0_2', '145_0_1'], 2=>['93_0_2'])
+      expect(db.badge_names).to eq('145_0_1' => 'Activity - Badge Name', '93_0_2' => 'Staged - Participation (Lvl 2)')
+      expect(db.by_member).to eq(1 => ['93_0_2', '145_0_1'], 2 => ['93_0_2'])
       expect(db.member_names).to eq(1 => 'John Doe', 2 => 'Jane Doe')
-      expect(db.badge_stock).to eq('93_0_2'=>20, '145_0_1'=>10)
-      expect(db.totals).to eq('93_0_2'=>2, '145_0_1'=>1)
+      expect(db.badge_stock).to eq('93_0_2' => 20, '145_0_1' => 10)
+      expect(db.totals).to eq('93_0_2' => 2, '145_0_1' => 1)
       expect(db.valid?).to eq(true)
     end
 

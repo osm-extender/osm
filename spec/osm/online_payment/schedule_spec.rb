@@ -85,13 +85,13 @@ describe Osm::OnlinePayment::Schedule do
   describe 'Using the OSM API' do
 
     it 'Gets summary list' do
-      expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getSchemes&sectionid=1'){ { 'items'=>[{ 'schemeid'=>'539','name'=>'Events' }] } }
+      expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getSchemes&sectionid=1'){ { 'items' => [{ 'schemeid' => '539','name' => 'Events' }] } }
       result = Osm::OnlinePayment::Schedule.get_list_for_section(api: $api, section: 1)
       expect(result).to eq([{ id: 539, name: 'Events' }])
     end
 
     it 'Gets an individual schedule' do
-      data = { 'schemeid'=>'2','sectionid'=>'1','accountid'=>'3','name'=>'Schedule name','preauth_amount'=>'12.34','description'=>'Schedule description','giftaid'=>'1','defaulton'=>'1','paynow'=>'-1','archived'=>'1','payments'=>[{ 'paymentid'=>'4','schemeid'=>'2','date'=>'2013-03-21','amount'=>'1.23','name'=>'Payment name','archived'=>'1' }] }
+      data = { 'schemeid' => '2','sectionid' => '1','accountid' => '3','name' => 'Schedule name','preauth_amount' => '12.34','description' => 'Schedule description','giftaid' => '1','defaulton' => '1','paynow' => '-1','archived' => '1','payments' => [{ 'paymentid' => '4','schemeid' => '2','date' => '2013-03-21','amount' => '1.23','name' => 'Payment name','archived' => '1' }] }
       expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=1&schemeid=2&allpayments=true'){ data }
       schedule = Osm::OnlinePayment::Schedule.get(api: $api, section: 1, schedule: 2)
       expect(schedule.id).to eq(2)
@@ -132,10 +132,10 @@ describe Osm::OnlinePayment::Schedule do
           section_id: 2,
           payments:   [@payment]
         )
-        body = { 'items'=>[ {
-          'directdebit'=>'Active', 'firstname'=>'John', 'lastname'=>'Snow', 'patrolid'=>'5', 'scoutid'=>'6',
-          'startdate'=>'2015-02-03',
-          '4'=>'{"status":[{"statusid":"7","scoutid":"6","schemeid":"1","paymentid":"8","statustimestamp":"03/02/2016 20:51","status":"Paid manually","details":"","editable":"1","latest":"1","who":"0","firstname":"System"}]}'
+        body = { 'items' => [ {
+          'directdebit' => 'Active', 'firstname' => 'John', 'lastname' => 'Snow', 'patrolid' => '5', 'scoutid' => '6',
+          'startdate' => '2015-02-03',
+          '4' => '{"status":[{"statusid":"7","scoutid":"6","schemeid":"1","paymentid":"8","statustimestamp":"03/02/2016 20:51","status":"Paid manually","details":"","editable":"1","latest":"1","who":"0","firstname":"System"}]}'
         } ] }
         expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentStatus&sectionid=2&schemeid=1&termid=3').once{ body }
       end

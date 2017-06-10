@@ -55,11 +55,11 @@ describe Osm::Email::DeliveryReport do
 
   it 'Fetch delivery reports from OSM' do
     expect($api).to receive(:post_query).with('ext/settings/emails/?action=getDeliveryReport&sectionid=1234').and_return([
-      { 'id'=>'0', 'name'=>'ALL', 'type'=>'all', 'count'=>47 },
-      { 'id'=>123, 'name'=>'01/02/2003 04:05 - Subject of email - 1', 'type'=>'email', 'parent'=>'0', 'hascontent'=>true, 'errors'=>0, 'opens'=>0, 'warnings'=>0 },
-      { 'id'=>'123-1', 'name'=>'a@example.com - delivered', 'type'=>'oneEmail', 'status'=>'delivered', 'email'=>'a@example.com', 'email_key'=>'aexamplecom', 'hascontent'=>true, 'member_id'=>'12', 'parent'=>123, 'status_raw'=>'delivered' },
-      { 'id'=>'123-2', 'name'=>'b@example.com - processed', 'type'=>'oneEmail', 'status'=>'processed', 'email'=>'b@example.com', 'email_key'=>'bexamplecom', 'hascontent'=>true, 'member_id'=>'23', 'parent'=>123, 'status_raw'=>'processed' },
-      { 'id'=>'123-3', 'name'=>'c@example.com - bounced', 'type'=>'oneEmail', 'status'=>'bounced', 'email'=>'c@example.com', 'email_key'=>'cexamplecom', 'hascontent'=>true, 'member_id'=>'34', 'parent'=>123, 'status_raw'=>'bounced' }
+      { 'id' => '0', 'name' => 'ALL', 'type' => 'all', 'count' => 47 },
+      { 'id' => 123, 'name' => '01/02/2003 04:05 - Subject of email - 1', 'type' => 'email', 'parent' => '0', 'hascontent' => true, 'errors' => 0, 'opens' => 0, 'warnings' => 0 },
+      { 'id' => '123-1', 'name' => 'a@example.com - delivered', 'type' => 'oneEmail', 'status' => 'delivered', 'email' => 'a@example.com', 'email_key' => 'aexamplecom', 'hascontent' => true, 'member_id' => '12', 'parent' => 123, 'status_raw' => 'delivered' },
+      { 'id' => '123-2', 'name' => 'b@example.com - processed', 'type' => 'oneEmail', 'status' => 'processed', 'email' => 'b@example.com', 'email_key' => 'bexamplecom', 'hascontent' => true, 'member_id' => '23', 'parent' => 123, 'status_raw' => 'processed' },
+      { 'id' => '123-3', 'name' => 'c@example.com - bounced', 'type' => 'oneEmail', 'status' => 'bounced', 'email' => 'c@example.com', 'email_key' => 'cexamplecom', 'hascontent' => true, 'member_id' => '34', 'parent' => 123, 'status_raw' => 'bounced' }
     ])
 
     reports = Osm::Email::DeliveryReport.get_for_section(api: $api, section: 1234)

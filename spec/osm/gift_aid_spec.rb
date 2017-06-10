@@ -49,7 +49,7 @@ describe Osm::GiftAid do
     it 'Update donation' do
       post_data = {
         'scouts' => '["3", "4"]',
-        'donatedate'=> '2000-01-02',
+        'donatedate' => '2000-01-02',
         'amount' => '1.23',
         'notes' => 'Note',
         'sectionid' => 1

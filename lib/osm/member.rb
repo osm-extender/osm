@@ -174,7 +174,7 @@ module Osm
             started_section: Osm.parse_date(item['joined']),
             finished_section: Osm.parse_date(item['end_date']),
             joined_movement: Osm.parse_date(item['started']),
-            gender: { 'male'=>:male, 'female'=>:female, 'other'=>:other, 'unspecified'=>:unspecified }[(floating_data[CID_GENDER] || '').downcase],
+            gender: { 'male' => :male, 'female' => :female, 'other' => :other, 'unspecified' => :unspecified }[(floating_data[CID_GENDER] || '').downcase],
             contact: member_contact.nil? ? nil : MemberContact.new(
               first_name: item['first_name'],
               last_name: item['last_name'],
@@ -370,7 +370,7 @@ module Osm
       updated = (contact.nil? || contact.update(api: api, member: self, force: force)) && updated
       updated = (primary_contact.nil? || primary_contact.update(api: api, member: self, force: force)) && updated
       updated = (secondary_contact.nil? || secondary_contact.update(api: api, member: self, force: force)) && updated
-      updated = (emergency_contact.nil? ||emergency_contact.update(api: api, member: self, force: force)) && updated
+      updated = (emergency_contact.nil? || emergency_contact.update(api: api, member: self, force: force)) && updated
       updated = (doctor.nil? || doctor.update(api: api, member: self, force: force)) && updated
 
       # Finish off

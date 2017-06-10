@@ -49,7 +49,7 @@ describe Osm::Meeting do
 
     it "Fetch the term's programme for a section" do
       body = {
-        'items' => [{ 'eveningid' => '5', 'sectionid' =>'3', 'title' => 'Weekly Meeting 1', 'notesforparents' => 'parents', 'games' => 'games', 'prenotes' => 'before', 'postnotes' => 'after', 'leaders' => 'leaders', 'meetingdate' => '2001-02-03', 'starttime' => '19:15:00', 'endtime' => '20:30:00', 'googlecalendar' => '' }],
+        'items' => [{ 'eveningid' => '5', 'sectionid' => '3', 'title' => 'Weekly Meeting 1', 'notesforparents' => 'parents', 'games' => 'games', 'prenotes' => 'before', 'postnotes' => 'after', 'leaders' => 'leaders', 'meetingdate' => '2001-02-03', 'starttime' => '19:15:00', 'endtime' => '20:30:00', 'googlecalendar' => '' }],
         'activities' => { '5' => [
           { 'activityid' => '6', 'title' => 'Activity 6', 'notes' => 'Some notes', 'eveningid' => '5' },
           { 'activityid' => '7', 'title' => 'Activity 7', 'notes' => '', 'eveningid' => '5' }
@@ -107,7 +107,7 @@ describe Osm::Meeting do
     it 'Fetch badge requirements for a meeting (from API)' do
       allow(Osm::Model).to receive('has_permission?').and_return(true)
       allow(Osm::Section).to receive(:get){ Osm::Section.new(id: 3, type: :cubs) }
-      badges_body = [{ 'a'=>'a' },{ 'a'=>'A' }]
+      badges_body = [{ 'a' => 'a' },{ 'a' => 'A' }]
       expect($api).to receive(:post_query).with('users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs').and_return(badges_body)
 
       meeting = Osm::Meeting.new(date: Date.new(2000, 1, 2), section_id: 3)
@@ -132,8 +132,8 @@ describe Osm::Meeting do
       )
 
       expect(meeting.get_badge_requirements($api)).to eq([
-        { 'badge'=>nil, 'badge_id'=>4, 'badge_version'=>1, 'column_id'=>400, 'badgeName'=>'badge 2', 'badgetype'=>:activity, 'columngroup'=>nil, 'columnname'=>nil, 'data'=>'data 2', 'eveningid'=>2, 'meetingdate'=>Date.new(2000, 1, 2), 'name'=>'label 2', 'section'=>:beavers, 'sectionid'=>3 },
-        { 'badge'=>nil, 'badge_id'=>2, 'badge_version'=>0, 'column_id'=>200, 'badgeName'=>'badge', 'badgetype'=>:activity, 'columngroup'=>nil, 'columnname'=>nil, 'data'=>'data', 'eveningid'=>2, 'meetingdate'=>Date.new(2000, 1, 2), 'name'=>'label', 'section'=>:beavers, 'sectionid'=>3 }
+        { 'badge' => nil, 'badge_id' => 4, 'badge_version' => 1, 'column_id' => 400, 'badgeName' => 'badge 2', 'badgetype' => :activity, 'columngroup' => nil, 'columnname' => nil, 'data' => 'data 2', 'eveningid' => 2, 'meetingdate' => Date.new(2000, 1, 2), 'name' => 'label 2', 'section' => :beavers, 'sectionid' => 3 },
+        { 'badge' => nil, 'badge_id' => 2, 'badge_version' => 0, 'column_id' => 200, 'badgeName' => 'badge', 'badgetype' => :activity, 'columngroup' => nil, 'columnname' => nil, 'data' => 'data', 'eveningid' => 2, 'meetingdate' => Date.new(2000, 1, 2), 'name' => 'label', 'section' => :beavers, 'sectionid' => 3 }
       ])
     end
 
@@ -145,7 +145,7 @@ describe Osm::Meeting do
         'starttime' => '11:11',
         'endtime' => '22:22',
         'title' => 'Title'
-      }).and_return('result'=>0)
+      }).and_return('result' => 0)
 
       term = Osm::Term.new(id: 2)
       allow(Osm::Term).to receive(:get_for_section) { [term] }
@@ -178,7 +178,7 @@ describe Osm::Meeting do
         'sectionid' => 1,
         'activityid' => 2,
         'notes' => 'Notes'
-      }).and_return('result'=>0)
+      }).and_return('result' => 0)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
       activity = Osm::Activity.new(id: 2, title: 'Title')
@@ -192,7 +192,7 @@ describe Osm::Meeting do
         'sectionid' => 1,
         'activityid' => 2,
         'notes' => 'Notes'
-      }).and_return('result'=>1)
+      }).and_return('result' => 1)
       activity = Osm::Activity.new(id: 2, title: 'Title')
       meeting = Osm::Meeting.new(section_id: 1, date: Date.new(2000, 1, 2))
       expect(meeting.add_activity(api: $api, activity: activity, notes: 'Notes')).to eq(false)
@@ -202,11 +202,11 @@ describe Osm::Meeting do
     it 'Update a meeting (succeded)' do
       expect($api).to receive(:post_query).with('programme.php?action=editEvening', post_data: {
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
-        'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
+        'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' => '', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '',
         'activity' => '[{"activityid":3,"notes":"Some notes"}]',
         'badgelinks' => '[{"badge_id":"181","badge_version":"0","column_id":"93384","badge":null,"badgeLongName":"Badge name","columnname":null,"columnnameLongName":"l","data":"","section":"beavers","sectionLongName":null,"badgetype":"activity","badgetypeLongName":null}]'
-      }).and_return('result'=>0)
+      }).and_return('result' => 0)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
       meeting = Osm::Meeting.new(
@@ -231,9 +231,9 @@ describe Osm::Meeting do
     it 'Update a meeting (failed)' do
       expect($api).to receive(:post_query).with('programme.php?action=editEvening', post_data: {
         'eveningid' => 1, 'sectionid' => 2, 'meetingdate' => '2000-01-02', 'starttime' => nil,
-        'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' =>'', 'prenotes' => '',
+        'endtime' => nil, 'title' => 'Unnamed meeting', 'notesforparents' => '', 'prenotes' => '',
         'postnotes' => '', 'games' => '', 'leaders' => '', 'activity' => '[]', 'badgelinks' => '[]'
-      }).and_return('result'=>1)
+      }).and_return('result' => 1)
       allow(Osm::Term).to receive(:get_for_section) { [] }
 
       meeting = Osm::Meeting.new(id: 1, section_id: 2, date: Date.new(2000, 01, 02))
@@ -259,7 +259,7 @@ describe Osm::Meeting do
   describe 'API Strangeness' do
     it 'Activity details is an Array [id, Hash]' do
       body = {
-        'items' => [{ 'eveningid' => '5', 'sectionid' =>'3', 'title' => 'Weekly Meeting 1', 'notesforparents' => 'parents', 'games' => 'games', 'prenotes' => 'before', 'postnotes' => 'after', 'leaders' => 'leaders', 'meetingdate' => '2001-02-03', 'starttime' => '19:15:00', 'endtime' => '20:30:00', 'googlecalendar' => '' }],
+        'items' => [{ 'eveningid' => '5', 'sectionid' => '3', 'title' => 'Weekly Meeting 1', 'notesforparents' => 'parents', 'games' => 'games', 'prenotes' => 'before', 'postnotes' => 'after', 'leaders' => 'leaders', 'meetingdate' => '2001-02-03', 'starttime' => '19:15:00', 'endtime' => '20:30:00', 'googlecalendar' => '' }],
         'activities' => { '5' => [
           ['6', { 'activityid' => '6', 'title' => 'Activity 6', 'notes' => 'Some notes', 'eveningid' => '5' }]
         ] },

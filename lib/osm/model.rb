@@ -78,7 +78,7 @@ module Osm
     def <=>(other)
       result = nil
       sort_by.each do |attribute|
-        a = b= nil
+        a = b = nil
         if attribute[0].eql?('-')
           # Reverse order
           a = other.try(attribute[1..-1])

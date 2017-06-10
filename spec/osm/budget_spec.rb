@@ -50,14 +50,14 @@ describe Osm::Budget do
       )
 
       expect(Osm::Budget).to receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(id: 3, section_id: 2, name: 'Existing budget'), Osm::Budget.new(id: 4, section_id: 2, :name => '** Unnamed **')])
-      expect($api).to receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return('ok'=>true)
+      expect($api).to receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return('ok' => true)
       expect($api).to receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 4,
         'column' => 'name',
         'value' => 'Budget Name',
         'section_id' => 2,
         'row' => 0
-      }).and_return('ok'=>true)
+      }).and_return('ok' => true)
 
       expect(budget.create($api)).to eq(true)
       expect(budget.id).to eq(4)
@@ -69,7 +69,7 @@ describe Osm::Budget do
         name: 'Budget Name'
       )
     
-      expect($api).to receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return('ok'=>true)
+      expect($api).to receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return('ok' => true)
       expect(Osm::Budget).to receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(id: 3, section_id: 2, name: 'Existing budget')])
 
       expect(budget.create($api)).to eq(false)
@@ -82,14 +82,14 @@ describe Osm::Budget do
       )
     
       expect(Osm::Budget).to receive(:get_for_section).with(api: $api, section: 2, no_read_cache: true).and_return([Osm::Budget.new(id: 3, section_id: 2, name: '** Unnamed **')])
-      expect($api).to receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return('ok'=>true)
+      expect($api).to receive(:post_query).with('finances.php?action=addCategory&sectionid=2').and_return('ok' => true)
       expect($api).to receive(:post_query).with('finances.php?action=updateCategory&sectionid=2', post_data: {
         'categoryid' => 3,
         'column' => 'name',
         'value' => 'Budget Name',
         'section_id' => 2,
         'row' => 0
-      }).and_return('ok'=>false)
+      }).and_return('ok' => false)
 
       expect(budget.create($api)).to eq(false)
     end
@@ -107,7 +107,7 @@ describe Osm::Budget do
         'value' => 'Budget Name',
         'section_id' => 2,
         'row' => 0
-      }).and_return('ok'=>true)
+      }).and_return('ok' => true)
     
       expect(budget.update($api)).to eq(true)
     end
@@ -125,7 +125,7 @@ describe Osm::Budget do
         'value' => 'Budget Name',
         'section_id' => 2,
         'row' => 0
-      }).and_return('ok'=>false)
+      }).and_return('ok' => false)
     
       expect(budget.update($api)).to eq(false)
     end
@@ -137,7 +137,7 @@ describe Osm::Budget do
         name: 'Budget Name'
       )
 
-      expect($api).to receive(:post_query).with('finances.php?action=deleteCategory&sectionid=2', post_data: { 'categoryid' => 1 }).and_return('ok'=>true)
+      expect($api).to receive(:post_query).with('finances.php?action=deleteCategory&sectionid=2', post_data: { 'categoryid' => 1 }).and_return('ok' => true)
 
       expect(budget.delete($api)).to eq(true)
     end
@@ -149,7 +149,7 @@ describe Osm::Budget do
         name: 'Budget Name'
       )
 
-      expect($api).to receive(:post_query).with('finances.php?action=deleteCategory&sectionid=2', post_data: { 'categoryid' => 1 }).and_return('ok'=>false)
+      expect($api).to receive(:post_query).with('finances.php?action=deleteCategory&sectionid=2', post_data: { 'categoryid' => 1 }).and_return('ok' => false)
     
       expect(budget.delete($api)).to eq(false)
     end

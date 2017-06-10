@@ -80,7 +80,7 @@ describe Osm::Sms do
   it 'Gets remaining credits' do
     expect($api).to receive(:post_query).with('ext/members/sms/?action=getNumbers&sectionid=4&type=', post_data: {
       'scouts' => '0'
-    }){ { 'members' => 0, 'numbers'=> 0, 'sms_remaining' => 5 } }
+    }){ { 'members' => 0, 'numbers' => 0, 'sms_remaining' => 5 } }
 
     expect(Osm::Sms.remaining_credits(api: $api, section: 4)).to eq(5)
   end

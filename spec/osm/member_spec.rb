@@ -369,7 +369,7 @@ describe Osm::Member do
             ]
           }
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
@@ -405,8 +405,8 @@ describe Osm::Member do
         expect(member.contact.receive_email_1).to eq(true)
         expect(member.contact.email_2).to eq('')
         expect(member.contact.receive_email_2).to eq(false)
-        expect(member.contact.additional_information).to eq(8446=>'Data for 8446')
-        expect(member.contact.additional_information_labels).to eq(8446=>'Label for 8446')
+        expect(member.contact.additional_information).to eq(8446 => 'Data for 8446')
+        expect(member.contact.additional_information_labels).to eq(8446 => 'Label for 8446')
         expect(member.primary_contact.first_name).to eq('Primary')
         expect(member.primary_contact.last_name).to eq('Contact')
         expect(member.primary_contact.address_1).to eq('Address 1')
@@ -422,8 +422,8 @@ describe Osm::Member do
         expect(member.primary_contact.receive_email_1).to eq(true)
         expect(member.primary_contact.email_2).to eq('')
         expect(member.primary_contact.receive_email_2).to eq(false)
-        expect(member.primary_contact.additional_information).to eq(8441=>'Data for 8441')
-        expect(member.primary_contact.additional_information_labels).to eq(8441=>'Label for 8441')
+        expect(member.primary_contact.additional_information).to eq(8441 => 'Data for 8441')
+        expect(member.primary_contact.additional_information_labels).to eq(8441 => 'Label for 8441')
         expect(member.secondary_contact.first_name).to eq('Secondary')
         expect(member.secondary_contact.last_name).to eq('Contact')
         expect(member.secondary_contact.address_1).to eq('Address 1')
@@ -439,8 +439,8 @@ describe Osm::Member do
         expect(member.secondary_contact.receive_email_1).to eq(true)
         expect(member.secondary_contact.email_2).to eq('')
         expect(member.secondary_contact.receive_email_2).to eq(false)
-        expect(member.secondary_contact.additional_information).to eq(8442=>'Data for 8442')
-        expect(member.secondary_contact.additional_information_labels).to eq(8442=>'Label for 8442')
+        expect(member.secondary_contact.additional_information).to eq(8442 => 'Data for 8442')
+        expect(member.secondary_contact.additional_information_labels).to eq(8442 => 'Label for 8442')
         expect(member.emergency_contact.first_name).to eq('Emergency')
         expect(member.emergency_contact.last_name).to eq('Contact')
         expect(member.emergency_contact.address_1).to eq('Address 1')
@@ -452,8 +452,8 @@ describe Osm::Member do
         expect(member.emergency_contact.phone_2).to eq('0987 654321')
         expect(member.emergency_contact.email_1).to eq('emergency@example.com')
         expect(member.emergency_contact.email_2).to eq('')
-        expect(member.emergency_contact.additional_information).to eq(8443=>'Data for 8443')
-        expect(member.emergency_contact.additional_information_labels).to eq(8443=>'Label for 8443')
+        expect(member.emergency_contact.additional_information).to eq(8443 => 'Data for 8443')
+        expect(member.emergency_contact.additional_information_labels).to eq(8443 => 'Label for 8443')
         expect(member.doctor.first_name).to eq('Doctor')
         expect(member.doctor.last_name).to eq('Contact')
         expect(member.doctor.surgery).to eq('Surgery')
@@ -464,8 +464,8 @@ describe Osm::Member do
         expect(member.doctor.postcode).to eq('Postcode')
         expect(member.doctor.phone_1).to eq('01234 567890')
         expect(member.doctor.phone_2).to eq('0987 654321')
-        expect(member.doctor.additional_information).to eq(8444=>'Data for 8444')
-        expect(member.doctor.additional_information_labels).to eq(8444=>'Label for 8444')
+        expect(member.doctor.additional_information).to eq(8444 => 'Data for 8444')
+        expect(member.doctor.additional_information_labels).to eq(8444 => 'Label for 8444')
         expect(member.valid?).to eq(true)
       end
 
@@ -509,7 +509,7 @@ describe Osm::Member do
             ]
           }
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
@@ -562,7 +562,7 @@ describe Osm::Member do
             ]
           }
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
@@ -611,7 +611,7 @@ describe Osm::Member do
             ]
           }
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
         members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
@@ -628,7 +628,7 @@ describe Osm::Member do
           'data' => [],
           'meta' => {}
         }
-        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id'=>1, 'term_id'=>2 }).and_return(body)
+        expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
         expect(Osm::Member.get_for_section(api: $api, section: 1, term: 2)).to eq([])
       end
@@ -672,7 +672,7 @@ describe Osm::Member do
           'dob' => '2000-01-02',
           'started' => '2006-01-02',
           'startedsection' => '2006-01-07'
-        }).and_return('result'=>'ok','scoutid'=>577743)
+        }).and_return('result' => 'ok','scoutid' => 577743)
 
         allow(@member).to receive(:update) { true }
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
@@ -683,7 +683,7 @@ describe Osm::Member do
       end
 
       it 'Failed the create stage in OSM' do
-        expect($api).to receive(:post_query).with('users.php?action=newMember', post_data: { 'firstname'=>'First', 'lastname'=>'Last', 'dob'=>'2000-01-02', 'started'=>'2006-01-02', 'startedsection'=>'2006-01-07', 'sectionid'=>2 }).and_return({})
+        expect($api).to receive(:post_query).with('users.php?action=newMember', post_data: { 'firstname' => 'First', 'lastname' => 'Last', 'dob' => '2000-01-02', 'started' => '2006-01-02', 'startedsection' => '2006-01-07', 'sectionid' => 2 }).and_return({})
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
         expect(@member).to_not receive(:cache_delete)
         expect(@member.create($api)).to eq(false)
@@ -697,7 +697,7 @@ describe Osm::Member do
           'dob' => '2000-01-02',
           'started' => '2006-01-02',
           'startedsection' => '2006-01-07'
-        }).and_return('result'=>'ok','scoutid'=>577743)
+        }).and_return('result' => 'ok','scoutid' => 577743)
 
         allow(@member).to receive(:update) { false }
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
@@ -753,7 +753,7 @@ describe Osm::Member do
           'scoutid' => 1,
           'column' => 'firstname',
           'value' => 'John'
-        }).and_return('ok'=>true)
+        }).and_return('ok' => true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           'context' => 'members',
@@ -762,7 +762,7 @@ describe Osm::Member do
           'group_id' => 7,
           'column_id' => 34,
           'value' => 'Unspecified'
-        }).and_return('data'=>{ 'value'=>'Unspecified' })
+        }).and_return('data' => { 'value' => 'Unspecified' })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -770,7 +770,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 6,
           'data[address1]' => 'Address 1'
-        }).and_return('status'=>true)
+        }).and_return('status' => true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -778,7 +778,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 1,
           'data[address2]' => 'Address 2'
-        }).and_return('status'=>true)
+        }).and_return('status' => true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -786,7 +786,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 2,
           'data[address3]' => 'Address 3'
-        }).and_return('status'=>true)
+        }).and_return('status' => true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -794,7 +794,7 @@ describe Osm::Member do
           'associated_id' => 1,
           'group_id' => 3,
           'data[address4]' => 'Address 4'
-        }).and_return('status'=>true)
+        }).and_return('status' => true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -803,7 +803,7 @@ describe Osm::Member do
           'group_id' => 4,
           'data[surgery]' => 'Surgery',
           'data[test_var]' => 'This is still a test'
-        }).and_return('status'=>true)
+        }).and_return('status' => true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           'context' => 'members',
@@ -812,7 +812,7 @@ describe Osm::Member do
           'group_id' => 5,
           'column_id' => 123,
           'value' => '321'
-        }).and_return('data'=>{ 'value'=>'321' })
+        }).and_return('data' => { 'value' => '321' })
 
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
         expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
@@ -830,13 +830,13 @@ describe Osm::Member do
       end
 
       it 'All fields' do
-        { 'firstname'=>'First', 'lastname'=>'Last', 'patrolid'=>3, 'patrolleader'=>0, 'dob'=>'2000-01-02', 'startedsection'=>'2006-01-07', 'started'=>'2006-01-02' }.each do |key, value|
+        { 'firstname' => 'First', 'lastname' => 'Last', 'patrolid' => 3, 'patrolleader' => 0, 'dob' => '2000-01-02', 'startedsection' => '2006-01-07', 'started' => '2006-01-02' }.each do |key, value|
           expect($api).to receive(:post_query).with('ext/members/contact/?action=update', post_data: {
             'sectionid' => 2,
             'scoutid' => 1,
             'column' => key,
             'value' => value
-          }).and_return('ok'=>true)
+          }).and_return('ok' => true)
         end
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
@@ -846,7 +846,7 @@ describe Osm::Member do
           'group_id' => 7,
           'column_id' => 34,
           'value' => 'Other'
-        }).and_return('data'=>{ 'value'=>'Other' })
+        }).and_return('data' => { 'value' => 'Other' })
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           'context' => 'members',
@@ -855,9 +855,9 @@ describe Osm::Member do
           'group_id' => 5,
           'column_id' => 123,
           'value' => '123'
-        }).and_return('data'=>{ 'value'=>'123' })
+        }).and_return('data' => { 'value' => '123' })
 
-        { 6=>'A', 1=>'B', 2=>'C' }.each do |group_id, postcode|
+        { 6 => 'A', 1 => 'B', 2 => 'C' }.each do |group_id, postcode|
           expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
             'context' => 'members',
             'associated_type' => 'member',
@@ -878,7 +878,7 @@ describe Osm::Member do
             'data[email2_leaders]' => false,
             'data[phone1_sms]' => false,
             'data[phone2_sms]' => false
-          }).and_return('status'=>true)
+          }).and_return('status' => true)
         end
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
@@ -897,7 +897,7 @@ describe Osm::Member do
           'data[phone2]' => nil,
           'data[email1]' => nil,
           'data[email2]' => nil
-        }).and_return('status'=>true)
+        }).and_return('status' => true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=update&section_id=2', post_data: {
           'context' => 'members',
@@ -915,7 +915,7 @@ describe Osm::Member do
           'data[phone1]' => nil,
           'data[phone2]' => nil,
           'data[test_var]' => 'This is a test'
-        }).and_return('status'=>true)
+        }).and_return('status' => true)
 
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
         expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
@@ -950,7 +950,7 @@ describe Osm::Member do
           'scoutid' => 1,
           'column' => 'firstname',
           'value' => ''
-        }).and_return('ok'=>true)
+        }).and_return('ok' => true)
 
         expect($api).to receive(:post_query).with('ext/customdata/?action=updateColumn&section_id=2', post_data: {
           'context' => 'members',
@@ -959,7 +959,7 @@ describe Osm::Member do
           'group_id' => 5,
           'column_id' => 123,
           'value' => ''
-        }).and_return('data'=>{ 'value'=>nil })
+        }).and_return('data' => { 'value' => nil })
 
         allow(Osm::Term).to receive(:get_for_section) { [] }
 
@@ -1024,7 +1024,7 @@ describe Osm::Member do
       end
 
       it 'Get the key' do
-        expect($api).to receive(:post_query).with('api.php?action=getMyScoutKey&sectionid=2&scoutid=1').and_return('ok'=>true,'key'=>'KEY-HERE')
+        expect($api).to receive(:post_query).with('api.php?action=getMyScoutKey&sectionid=2&scoutid=1').and_return('ok' => true,'key' => 'KEY-HERE')
         expect(@member.myscout_link_key($api)).to eq('KEY-HERE')
       end
 

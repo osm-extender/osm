@@ -70,7 +70,7 @@ module Osm
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("programme.php?action=getProgramme&sectionid=#{section_id}&termid=#{term_id}")
-        data = { 'items'=>[],'activities'=>{} } if data.is_a? Array
+        data = { 'items' => [],'activities' => {} } if data.is_a? Array
         items = data['items'] || []
         activities = data['activities'] || {}
         badge_links = data['badgelinks'] || {}

@@ -3,12 +3,12 @@ describe Osm::MyScout::Template do
   describe 'Get' do
 
     it 'Success' do
-      expect($api).to receive(:post_query).with('ext/settings/parents/?action=getTemplate&key=email-first&section_id=1').and_return('status'=>true, 'error'=>nil, 'data'=>'TEMPLATE GOES HERE', 'meta'=>[])
+      expect($api).to receive(:post_query).with('ext/settings/parents/?action=getTemplate&key=email-first&section_id=1').and_return('status' => true, 'error' => nil, 'data' => 'TEMPLATE GOES HERE', 'meta' => [])
       expect(Osm::MyScout::Template.get_template(api: $api, section: 1, key: 'email-first')).to eq('TEMPLATE GOES HERE')
     end
 
     it 'Failed' do
-      expect($api).to receive(:post_query).with('ext/settings/parents/?action=getTemplate&key=email-first&section_id=1').and_return('status'=>false, 'error'=>nil, 'data'=>'', 'meta'=>[])
+      expect($api).to receive(:post_query).with('ext/settings/parents/?action=getTemplate&key=email-first&section_id=1').and_return('status' => false, 'error' => nil, 'data' => '', 'meta' => [])
       expect(Osm::MyScout::Template.get_template(api: $api, section: 1, key: 'email-first')).to be_nil
     end
 
@@ -19,13 +19,13 @@ describe Osm::MyScout::Template do
 
     it 'Success' do
       template = 'CONTENT WHICH CONTAINS [DIRECT_LINK].'
-      expect($api).to receive(:post_query).with('ext/settings/parents/?action=updateTemplate', post_data: { 'section_id'=>1, 'key'=>'email-invitation', 'value'=>template }).and_return('status'=>true, 'error'=>nil, 'data'=>true, 'meta'=>[])
+      expect($api).to receive(:post_query).with('ext/settings/parents/?action=updateTemplate', post_data: { 'section_id' => 1, 'key' => 'email-invitation', 'value' => template }).and_return('status' => true, 'error' => nil, 'data' => true, 'meta' => [])
       expect(Osm::MyScout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: template)).to be true
     end
 
     it 'Failed' do
       template = 'CONTENT WHICH CONTAINS [DIRECT_LINK].'
-      expect($api).to receive(:post_query).with('ext/settings/parents/?action=updateTemplate', post_data: { 'section_id'=>1, 'key'=>'email-invitation', 'value'=>template }).and_return('status'=>false, 'error'=>nil, 'data'=>false, 'meta'=>[])
+      expect($api).to receive(:post_query).with('ext/settings/parents/?action=updateTemplate', post_data: { 'section_id' => 1, 'key' => 'email-invitation', 'value' => template }).and_return('status' => false, 'error' => nil, 'data' => false, 'meta' => [])
       expect(Osm::MyScout::Template.update_template(api: $api, section: 1, key: 'email-invitation', content: template)).to be false
     end
 
@@ -40,12 +40,12 @@ describe Osm::MyScout::Template do
   describe 'Restore' do
 
     it 'Success' do
-      expect($api).to receive(:post_query).with('ext/settings/parents/?action=restoreTemplate', post_data: { 'section_id'=>1, 'key'=>'email-first' }).and_return('status'=>true, 'error'=>nil, 'data'=>'TEMPLATE GOES HERE', 'meta'=>[])
+      expect($api).to receive(:post_query).with('ext/settings/parents/?action=restoreTemplate', post_data: { 'section_id' => 1, 'key' => 'email-first' }).and_return('status' => true, 'error' => nil, 'data' => 'TEMPLATE GOES HERE', 'meta' => [])
       expect(Osm::MyScout::Template.restore_template(api: $api, section: 1, key: 'email-first')).to eq('TEMPLATE GOES HERE')
     end
 
     it 'Failed' do
-      expect($api).to receive(:post_query).with('ext/settings/parents/?action=restoreTemplate', post_data: { 'section_id'=>1, 'key'=>'email-first' }).and_return('status'=>false, 'error'=>nil, 'data'=>'TEMPLATE GOES HERE', 'meta'=>[])
+      expect($api).to receive(:post_query).with('ext/settings/parents/?action=restoreTemplate', post_data: { 'section_id' => 1, 'key' => 'email-first' }).and_return('status' => false, 'error' => nil, 'data' => 'TEMPLATE GOES HERE', 'meta' => [])
       expect(Osm::MyScout::Template.restore_template(api: $api, section: 1, key: 'email-first')).to be_nil
     end
 

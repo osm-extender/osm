@@ -334,7 +334,7 @@ describe Osm::Model do
     describe 'has_access_to_section?' do
 
       before :each do
-        allow($api).to receive(:get_user_permissions).and_return( 1=>{} )
+        allow($api).to receive(:get_user_permissions).and_return( 1 => {} )
       end
 
       it 'Has access' do

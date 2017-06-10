@@ -96,7 +96,7 @@ module Osm
       response = api.post_query("giftaid.php?action=update&sectionid=#{section_id}&termid=#{term_id}", post_data: {
         'scouts' => members.inspect,
         'sectionid' => section_id,
-        'donatedate'=> date.strftime(Osm::OSM_DATE_FORMAT),
+        'donatedate' => date.strftime(Osm::OSM_DATE_FORMAT),
         'amount' => amount,
         'notes' => note
       })
