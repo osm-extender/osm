@@ -141,15 +141,15 @@ module Osm
         end
 
         levels_column = badge.level_requirement
-        unless badge.show_level_letters # It's a hikes, nights type badge
-          badge.levels.reverse_each do |level|
-            return level if requirements[levels_column].to_i >= level
-          end
-        else # It's an activity type badge
+        if badge.show_level_letters # It's a hikes, nights type badge
           modules = modules_gained
           letters = ('a'..'z').to_a
           (awarded..badge.levels.last).reverse_each do |level|
             return level if modules.include?(letters[level - 1])
+          end
+        else # It's an activity type badge
+          badge.levels.reverse_each do |level|
+            return level if requirements[levels_column].to_i >= level
           end
         end
         0
@@ -176,19 +176,7 @@ module Osm
         unless badge.has_levels?
           return started? ? 1 : 0
         end
-        unless badge.show_level_letters
-          # Nights, Hikes or Water
-          done = requirements[badge.level_requirement].to_i
-          levels = badge.levels                    # e.g. [0,1,2,3,4,5,10]
-          return 0 if levels.include?(done)        # Has achieved a level (and not started next )
-          return 0 if done >= levels.last          # No more levels to do
-          (1..(levels.size-1)).to_a.reverse_each do |i|  # indexes from last to 2nd
-            this_level = levels[i]
-            previous_level = levels[i-1]
-            return this_level if (done < this_level && done > previous_level) # this_level has been started (and not finished)
-          end
-          return 0 # No reason we should ever get here
-        else
+        if badge.show_level_letters
           # 'Normal' staged
           letters = ('a'..'z').to_a
           top_level = badge.levels.last
@@ -200,6 +188,18 @@ module Osm
             end
           end
           return 0 # No levels started
+        else
+          # Nights, Hikes or Water
+          done = requirements[badge.level_requirement].to_i
+          levels = badge.levels                    # e.g. [0,1,2,3,4,5,10]
+          return 0 if levels.include?(done)        # Has achieved a level (and not started next )
+          return 0 if done >= levels.last          # No more levels to do
+          (1..(levels.size-1)).to_a.reverse_each do |i|  # indexes from last to 2nd
+            this_level = levels[i]
+            previous_level = levels[i-1]
+            return this_level if (done < this_level && done > previous_level) # this_level has been started (and not finished)
+          end
+          return 0 # No reason we should ever get here
         end
       end
 
