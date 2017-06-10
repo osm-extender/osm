@@ -290,19 +290,18 @@ module Osm
         requirements_updated = true
         editable_requirements = badge.requirements.select{ |r| r.editable }.map{ |r| r.id }
         requirements.changes.each do |requirement, (was,now)|
-          if editable_requirements.include?(requirement)
-            result = api.post_query('ext/badges/records/?action=updateSingleRecord', post_data: {
-              'scoutid' => member_id,
-              'section_id' => section_id,
-              'badge_id' => badge.id,
-              'badge_version' => badge.version,
-              'field' => requirement,
-              'value' => now
-            })
-            requirements_updated = false unless result.is_a?(Hash) &&
-                                   (result['scoutid'].to_i == member_id) &&
-                                   (result[requirement.to_s].to_s == now.to_s)
-          end
+          next unless editable_requirements.include?(requirement)
+          result = api.post_query('ext/badges/records/?action=updateSingleRecord', post_data: {
+            'scoutid' => member_id,
+            'section_id' => section_id,
+            'badge_id' => badge.id,
+            'badge_version' => badge.version,
+            'field' => requirement,
+            'value' => now
+          })
+          requirements_updated = false unless result.is_a?(Hash) &&
+                                 (result['scoutid'].to_i == member_id) &&
+                                 (result[requirement.to_s].to_s == now.to_s)
         end
 
         if requirements_updated

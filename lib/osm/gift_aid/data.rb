@@ -71,27 +71,26 @@ module Osm
           ['tax_payer_postcode', 'postcode', tax_payer_postcode],
         ]
         fields.each do |field|
-          if changed_attributes.include?(field[0])
-            result = api.post_query('giftaid.php?action=updateScout', post_data: {
-              'scoutid' => member_id,
-              'termid' => term_id,
-              'column' => field[1],
-              'value' => field[2],
-              'sectionid' => section_id,
-              'row' => 0,
-            })
-            if result.is_a?(Hash)
-              (result['items'] || []).each do |i|
-                if i['scoutid'] == member_id.to_s
-                  updated = false unless i[field[1]] == field[2]
-                end
+          next unless changed_attributes.include?(field[0])
+          result = api.post_query('giftaid.php?action=updateScout', post_data: {
+            'scoutid' => member_id,
+            'termid' => term_id,
+            'column' => field[1],
+            'value' => field[2],
+            'sectionid' => section_id,
+            'row' => 0,
+          })
+          if result.is_a?(Hash)
+            (result['items'] || []).each do |i|
+              if i['scoutid'] == member_id.to_s
+                updated = false unless i[field[1]] == field[2]
               end
             end
           end
         end
         reset_changed_attributes if updated
 
-        donations.changes.each do |date, (was,now)|
+        donations.changes.each do |date, (_was,now)|
           date = date.strftime(Osm::OSM_DATE_FORMAT)
           result = api.post_query('giftaid.php?action=updateScout', post_data: {
             'scoutid' => member_id,
@@ -103,9 +102,8 @@ module Osm
           })
           if result.is_a?(Hash)
             (result['items'] || []).each do |i|
-              if i['scoutid'] == member_id.to_s
-                updated = false unless i[date] == now
-              end
+              next unless i['scoutid'].eql?(member_id.to_s)
+              updated = false unless i[date] == now
             end
           end
         end

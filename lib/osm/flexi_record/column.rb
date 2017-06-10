@@ -42,12 +42,11 @@ module Osm
 
         if (data.is_a?(Hash) && data.has_key?('config'))
           JSON.parse(data['config']).each do |f|
-            if (f['id'] == id) && (f['name'] == name)
-              reset_changed_attributes
-              # The cached columns for the flexi record will be out of date - remove them
-              cache_delete(api: api, key: ['flexi_record_columns', flexi_record.id])
-              return true
-            end
+            next unless (f['id'] == id) && (f['name'] == name)
+            reset_changed_attributes
+            # The cached columns for the flexi record will be out of date - remove them
+            cache_delete(api: api, key: ['flexi_record_columns', flexi_record.id])
+            return true
           end
         end
         false

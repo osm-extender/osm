@@ -55,11 +55,10 @@ module Osm
 
       if (data.is_a?(Hash) && data.has_key?('config'))
         JSON.parse(data['config']).each do |field|
-          if field['name'] == name
-            # The cached fields for the flexi record will be out of date - remove them
-            cache_delete(api: api, key: ['flexi_record_columns', id])
-            return true
-          end
+          next unless field['name'].eql?(name)
+          # The cached fields for the flexi record will be out of date - remove them
+          cache_delete(api: api, key: ['flexi_record_columns', id])
+          return true
         end
       end
       false
@@ -81,24 +80,23 @@ module Osm
 
         datas = []
         data['items'].each do |item|
-          unless item['scoutid'].to_i < 0  # It's a total row
-            fields = item.select { |key, value|
-              ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
-            }
-            fields.merge!(
-              'dob' => item['dob'].empty? ? nil : item['dob'],
-              'total' => item['total'].to_s.empty? ? nil : item['total'],
-              'completed' => item['completed'].to_s.empty? ? nil : item['completed'],
-              'age' => item['age'].empty? ? nil : item['age']
-            )
-  
-            datas.push Osm::FlexiRecord::Data.new(
-              member_id: Osm.to_i_or_nil(item['scoutid']),
-              grouping_id: Osm.to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
-              fields: fields,
-              flexi_record: self
-            )
-          end # unless a total row
+          next if item['scoutid'].to_i < 0  # It's a total row
+          fields = item.select { |key, value|
+            ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
+          }
+          fields.merge!(
+            'dob' => item['dob'].empty? ? nil : item['dob'],
+            'total' => item['total'].to_s.empty? ? nil : item['total'],
+            'completed' => item['completed'].to_s.empty? ? nil : item['completed'],
+            'age' => item['age'].empty? ? nil : item['age']
+          )
+
+          datas.push Osm::FlexiRecord::Data.new(
+            member_id: Osm.to_i_or_nil(item['scoutid']),
+            grouping_id: Osm.to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+            fields: fields,
+            flexi_record: self
+          )
         end # each item in data
         datas
       end # cache fetch

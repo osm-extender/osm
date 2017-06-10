@@ -41,16 +41,14 @@ module Osm
         })
 
         (JSON.parse(data['config']) || []).each do |i|
-          if i['id'] == id
-            if i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label)) && (i['pR'].eql?('1') == parent_required)
-              reset_changed_attributes
-                # The cached event will be out of date - remove it
-                cache_delete(api: api, key: ['event', event.id])
-                # The cached event attedance will be out of date
-                cache_delete(api: api, key: ['event_attendance', event.id])
-              return true
-            end
-          end
+          next unless i['id'].eql?(id)
+          next unless i['name'].eql?(name) && (i['pL'].nil? || i['pL'].eql?(label)) && (i['pR'].eql?('1') == parent_required)
+          reset_changed_attributes
+          # The cached event will be out of date - remove it
+          cache_delete(api: api, key: ['event', event.id])
+          # The cached event attedance will be out of date
+          cache_delete(api: api, key: ['event_attendance', event.id])
+          return true
         end
         false
       end

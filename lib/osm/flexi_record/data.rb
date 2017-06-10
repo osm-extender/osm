@@ -46,25 +46,24 @@ module Osm
 
         updated = true
         editable_fields = flexi_record.get_columns(api).select{ |c| c.editable }.map{ |i| i.id }
-        fields.changes.each do |field, (was,now)|
-          if editable_fields.include?(field)
-            data = api.post_query('extras.php?action=updateScout', post_data: {
-              'termid' => term_id,
-              'scoutid' => member_id,
-              'column' => field,
-              'value' => now,
-              'sectionid' => flexi_record.section_id,
-              'extraid' => flexi_record.id,
-            })
-            if (data.is_a?(Hash) && data['items'].is_a?(Array))
-              data['items'].each do |item|
-                if item['scoutid'] == member_id.to_s  # Find this member from the list of all members
-                  updated = false unless item[field] == now
-                end
+        fields.changes.each do |field, (_was,now)|
+          next unless editable_fields.include?(field)
+          data = api.post_query('extras.php?action=updateScout', post_data: {
+            'termid' => term_id,
+            'scoutid' => member_id,
+            'column' => field,
+            'value' => now,
+            'sectionid' => flexi_record.section_id,
+            'extraid' => flexi_record.id,
+          })
+          if (data.is_a?(Hash) && data['items'].is_a?(Array))
+            data['items'].each do |item|
+              if item['scoutid'] == member_id.to_s  # Find this member from the list of all members
+                updated = false unless item[field] == now
               end
-            else
-              updated = false
             end
+          else
+            updated = false
           end
         end
 
