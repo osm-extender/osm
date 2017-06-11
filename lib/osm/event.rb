@@ -153,7 +153,7 @@ module Osm
         if cache_exist?(api: api, key: events_cache_key)
           ids = cache_read(api: api, key: events_cache_key)
           events = get_from_ids(api: api, ids: ids, key_base: 'event', method: :get_for_section).map do |e|
-            e.attributes.symbolize_keys.select do |k, v|
+            e.attributes.symbolize_keys.select do |k, _v|
               LIST_ATTRIBUTES.include?(k)
             end
           end
@@ -222,7 +222,7 @@ module Osm
         'allowbooking' => event.allow_booking ? 'true' : 'false'
       })
 
-      return nil unless data.is_a?(Hash) && data.has_key?('id')
+      return nil unless data.is_a?(Hash) && data.key?('id')
       event.id = data['id'].to_i
 
       # The cached events for the section will be out of date - remove them
@@ -248,11 +248,11 @@ module Osm
     # @return true, false whether the update succedded (will return true if no updates needed to be made)
     def update(api)
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
-       updated = true
+      updated = true
 
       # Update main attributes
       update_main_attributes = false
-      %w{ id name location start finish cost cost_tbc notes confirm_by_date allow_changes reminders attendance_limit attendance_limit_includes_leaders allow_booking }.each do |a|
+      %w{id name location start finish cost cost_tbc notes confirm_by_date allow_changes reminders attendance_limit attendance_limit_includes_leaders allow_booking}.each do |a|
         if changed_attributes.include?(a)
           update_main_attributes = true
           break # no use checking the others
@@ -305,9 +305,7 @@ module Osm
         # Deleted badges
         badges_to_delete = []
         original_badges.each do |badge|
-          unless badges.include?(badge)
-            badges_to_delete.push badge
-          end
+          badges_to_delete.push badge unless badges.include?(badge)
         end
         badges_to_delete.each do |badge|
           data = api.post_query("ext/badges/records/index.php?action=deleteBadgeLink&sectionid=#{section_id}", post_data: {
@@ -391,10 +389,10 @@ module Osm
             date_of_birth: item['dob'].nil? ? nil : Osm.parse_date(item['dob'], ignore_epoch: true),
             attending: attending_values[item['attending']],
             payment_control: payment_values[item['payment']],
-            fields: item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
-                           .inject({}) { |h, (k, v)| h[k[2..-1].to_i] = v; h },
-            payments: item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
-                             .inject({}) { |h, (k, v)| h[k[1..-1].to_i] = v; h },
+            fields:   item.select { |key, _value| key.to_s.match(/\Af_\d+\Z/) }
+                          .each_with_object({}) { |(key, val), hash| hash[key[2..-1].to_i] = val },
+            payments: item.select { |key, _value| key.to_s.match(/\Ap\d+\Z/) }
+                          .each_with_object({}) { |(key, val), hash| hash[key[1..-1].to_i] = val },
             row: index
           )
         end # each data
@@ -485,15 +483,7 @@ module Osm
     end
 
 
-    private
-
-    def attendees(api)
-      attendees = 0
-      get_attendance(api: api).each do |a|
-        attendees += 1 unless attendance_limit_includes_leaders && (a.grouping_id == -2)
-      end
-      attendees
-    end
+    protected
 
     def self.attributes_from_data(event_data)
       {
@@ -549,6 +539,16 @@ module Osm
       event.badges = badges
 
       event
+    end
+
+    private
+
+    def attendees(api)
+      attendees = 0
+      get_attendance(api: api).each do |a|
+        attendees += 1 unless attendance_limit_includes_leaders && (a.grouping_id == -2)
+      end
+      attendees
     end
 
     def sort_by
