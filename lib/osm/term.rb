@@ -81,17 +81,14 @@ module Osm
       cache_key = ['term', id]
 
       if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
-        term = cache_read(api: api, key: cache_key)
-        return term
+        return cache_read(api: api, key: cache_key)
       end
 
       terms = get_all(api, no_read_cache: no_read_cache)
       return nil unless terms.is_a? Array
 
       terms.each do |term|
-        if term.id == id
-          return term
-        end
+        return term if term.id.eql?(id)
       end
       nil
     end
