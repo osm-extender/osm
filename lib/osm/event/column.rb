@@ -78,7 +78,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options = { replace_with: { 'event' => :id } })
+        Osm.inspect_instance(self, replace_with: { 'event' => :id })
       end
 
       private

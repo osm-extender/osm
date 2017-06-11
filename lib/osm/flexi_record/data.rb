@@ -77,7 +77,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options = { replace_with: { 'flexi_record' => :id } })
+        Osm.inspect_instance(self, replace_with: { 'flexi_record' => :id })
       end
 
       private def sort_by
