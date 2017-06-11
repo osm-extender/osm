@@ -32,32 +32,19 @@ module Osm
     def self.get_all(api, no_read_cache: false)
       cache_key = ['terms', api.user_id]
 
-      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
-        ids = cache_read(api: api, key: cache_key)
-        return get_from_ids(api: api, ids: ids, key_base: 'term', method: :get_all, no_read_cache: no_read_cache)
-      end
-
-      data = api.post_query('api.php?action=getTerms')
-
-      terms = []
-      ids = []
-      data.each_key do |key|
-        data[key].each do |term_data|
-          term = Osm::Term.new(
-            id: Osm.to_i_or_nil(term_data['termid']),
-            section_id: Osm.to_i_or_nil(term_data['sectionid']),
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query('api.php?action=getTerms')
+        # data is of the form {"section_id_1" => [[term_data_1],[term_data_2], "section_id_3" => [term_data_3]}}
+        data.values.flatten.map do |term_data|
+          Osm::Term.new(
+            id: term_data.fetch('termid').to_i,
+            section_id: term_data.fetch('sectionid').to_i,
             name: term_data['name'],
             start: Osm.parse_date(term_data['startdate']),
             finish: Osm.parse_date(term_data['enddate'])
           )
-          terms.push term
-          ids.push term.id
-          cache_write(api: api, key: ['term', term.id], data: term)
         end
-      end
-
-      cache_write(api: api, key: cache_key, data: ids)
-      terms
+      end # cache_fetch
     end
 
     # Get the terms that the OSM user can access for a given section
@@ -65,10 +52,9 @@ module Osm
     # @param section [Integer] The section (or its ID) of the section to get terms for
     # @!macro options_get
     # @return [Array<Osm::Term>, nil] An array of terms or nil if the user can not access that section
-    def self.get_for_section(api:, section:, no_read_cache: false)
-      require_access_to_section(api: api, section: section, no_read_cache: no_read_cache)
+    def self.get_for_section(section:, api:, **options)
       section_id = section.to_i
-      get_all(api, no_read_cache: no_read_cache).select { |term| term.section_id == section_id }
+      get_all(api, **options).select { |term| term.section_id == section_id }
     end
 
     # Get a term
@@ -77,20 +63,9 @@ module Osm
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that term
     # @return [Osm::Term]
-    def self.get(api:, id:, no_read_cache: false)
-      cache_key = ['term', id]
-
-      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
-        return cache_read(api: api, key: cache_key)
-      end
-
-      terms = get_all(api, no_read_cache: no_read_cache)
-      return nil unless terms.is_a? Array
-
-      terms.each do |term|
-        return term if term.id.eql?(id)
-      end
-      nil
+    def self.get(id:, api:, **options)
+      term_id = id.to_i
+      get_all(api, **options).find { |term| term.id == term_id }
     end
 
     # Get the current term for a given section

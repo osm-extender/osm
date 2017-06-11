@@ -274,29 +274,6 @@ module Osm
     end
 
 
-    # Get a list of items given a list of item IDs
-    # @param api [Osm::Api] The api to use to make the query
-    # @param ids [Array<Integer>] The ids of the items to get
-    # @param key_base [String] The base of the key for getting an item from the cache (the key [key_base, id] is generated)
-    # @param method [Symbol] The method to get all items (either :get_all or :get_for_section)
-    # @param arguments [Hash] The arguments to pass to get_all
-    # @!macro options_get
-    # @return [Array] An array of the items
-    def self.get_from_ids(api:, ids:, key_base:, method:, no_read_cache: false, arguments: {})
-      fail ArgumentError, 'method is invalid' unless [:get_all, :get_for_section].include?(method)
-      items = []
-      ids.each do |id|
-        if cache_exist?(api: api, key: [*key_base, id], no_read_cache: no_read_cache)
-          items.push cache_read(api: api, key: [*key_base, id])
-        else
-          # At least this one item is not in the cache - we might as well refresh the lot
-          return send(method, api: api, no_read_cache: true, **arguments)
-        end
-      end
-      items
-    end
-
-
     # Make selected class methods instance methods too
     %w{
       cache_read cache_write cache_exist? cache_delete require_access_to_section

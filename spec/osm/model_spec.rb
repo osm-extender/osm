@@ -12,11 +12,6 @@ describe Osm::Model do
       }
     end
 
-    def self.test_get_all(api, keys, key)
-      ids = cache_read(api: api, key: keys)
-      get_from_ids(api: api, ids: ids, key_base: key, method: :get_all)
-    end
-
     protected def sort_by
       ['id', '-data']
     end
@@ -168,25 +163,6 @@ describe Osm::Model do
       end
     end
   end # describe Converts
-
-
-  describe 'Get items from ids' do
-
-    it 'All items in cache' do
-      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-items", [1, 2])
-      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-1", '1')
-      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-2", '2')
-      expect(ModelTester.test_get_all($api, 'items', 'item')).to eq(['1', '2'])
-    end
-
-    it 'An item not in cache' do
-      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-items", [1, 2])
-      OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-1", '1')
-      allow(ModelTester).to receive(:get_all) { ['A', 'B'] }
-      expect(ModelTester.test_get_all($api, 'items', 'item')).to eq(['A', 'B'])
-    end
-
-  end
 
 
   it 'Track attribute changes' do

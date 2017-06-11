@@ -45,32 +45,18 @@ module Osm
     def self.get_for_section(api:, section:, include_archived: false, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
-      cache_key = ['invoice_ids', section_id]
-      invoices = nil
+      cache_key = ['invoices', section_id]
 
-      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
-        ids = cache_read(api: api, key: cache_key)
-        invoices = get_from_ids(api: api, ids: ids, key_base: 'invoice', arguments: [section], method: :get_for_section, no_read_cache: no_read_cache)
-      end
-
-      if invoices.nil?
+      invoices = cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("finances.php?action=getInvoices&sectionid=#{section_id}&showArchived=true")
-        invoices = []
-        ids = []
-        unless data['items'].nil?
-          data['items'].map { |i| i['invoiceid'].to_i }.each do |invoice_id|
-            invoice_data = api.post_query("finances.php?action=getInvoice&sectionid=#{section_id}&invoiceid=#{invoice_id}")
-            invoice = new_invoice_from_data(invoice_data)
-            invoices.push invoice
-            ids.push invoice.id
-            cache_write(api: api, key: ['invoice', invoice.id], data: invoice)
-          end
+        datas = data['items'] || []
+        datas.map { |i| i.fetch('invoiceid').to_i }.map do |invoice_id|
+          invoice_data = api.post_query("finances.php?action=getInvoice&sectionid=#{section_id}&invoiceid=#{invoice_id}")
+          new_invoice_from_data invoice_data
         end
-        cache_write(api: api, key: cache_key, data: ids)
-      end
+      end # cache_fetch
 
-      return invoices if include_archived
-      invoices.reject(&:archived?)
+      include_archived ? invoices : invoices.reject(&:archived?)
     end
 
     # Get an invoice
@@ -79,18 +65,9 @@ module Osm
     # @param id [Integer, #to_i] The id of the invoice to get
     # @!macro options_get
     # @return [Osm::Invoice, nil] the invoice (or nil if it couldn't be found
-    def self.get(api:, section:, id:, no_read_cache: false)
-      require_ability_to(api: api, to: :read, on: :events, section: section, no_read_cache: no_read_cache)
-      section_id = section.to_i
-      id = id.to_i
-      cache_key = ['invoice', id]
-
-      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
-        return cache_read(api: api, key: cache_key)
-      end
-
-      invoice_data = api.post_query("finances.php?action=getInvoice&sectionid=#{section_id}&invoiceid=#{id}")
-      new_invoice_from_data(invoice_data)
+    def self.get(id:, **options)
+      invoices = get_for_section(**options)
+      invoices.find { |invoice| invoice.id.eql?(id) }
     end
 
 

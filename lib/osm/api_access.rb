@@ -28,42 +28,32 @@ module Osm
       section_id = section.to_i
       cache_key = ['api_access', api.user_id, section_id]
 
-      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
-        ids = cache_read(api: api, key: cache_key)
-        return get_from_ids(api: api, ids: ids, key_base: cache_key, method: :get_all)
-      end
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        data = api.post_query("ext/settings/access/?action=getAPIAccess&sectionid=#{section_id}")
 
-      data = api.post_query("ext/settings/access/?action=getAPIAccess&sectionid=#{section_id}")
+        permissions_map = {
+          10  => [:read],
+          20  => [:read, :write],
+          100 => [:read, :write, :administer]
+        }
 
-      permissions_map = {
-        10  => [:read],
-        20  => [:read, :write],
-        100 => [:read, :write, :administer]
-      }
-      result = []
-      ids = []
-      data['apis'].each do |item|
-        attributes = {}
-        attributes[:id] = item['apiid'].to_i
-        attributes[:name] = item['name']
-        attributes[:permissions] = item['permissions'].is_a?(Hash) ? item['permissions'] : {}
+        data['apis'].map do |item|
+          attributes = {}
+          attributes[:id] = item['apiid'].to_i
+          attributes[:name] = item['name']
+          attributes[:permissions] = item['permissions'].is_a?(Hash) ? item['permissions'] : {}
 
-        # Rubyify permissions hash
-        attributes[:permissions].keys.each do |old_key|
-          new_key = (old_key.to_sym rescue old_key)    # Get symbol of the key
-          attributes[:permissions][new_key] = attributes[:permissions].delete(old_key)  # Change the key
-          attributes[:permissions][new_key] = permissions_map[attributes[:permissions][new_key].to_i] || [] # Translate permissions value
-        end
-        attributes[:permissions].freeze
+          # Rubyify permissions hash
+          attributes[:permissions].keys.each do |old_key|
+            new_key = (old_key.to_sym rescue old_key)    # Get symbol of the key
+            attributes[:permissions][new_key] = attributes[:permissions].delete(old_key)  # Change the key
+            attributes[:permissions][new_key] = permissions_map[attributes[:permissions][new_key].to_i] || [] # Translate permissions value
+          end
+          attributes[:permissions].freeze
 
-        this_item = new(attributes)
-        result.push this_item
-        ids.push this_item.id
-        cache_write(api: api, key: [*cache_key, this_item.id], data: this_item)
-      end
-      cache_write(api: api, key: cache_key, data: ids)
-
-      result
+          new attributes
+        end # data.map
+      end # cache_fetch
     end
 
 

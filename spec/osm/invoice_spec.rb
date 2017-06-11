@@ -129,39 +129,14 @@ describe Osm::Invoice do
       end
 
       it 'Get' do
-        invoices_body = {
-          'identifier' => 'invoiceid',
-          'label' => 'name',
-          'items' => [
-            { 'invoiceid' => '1', 'name' => 'Invoice 1' }
-          ]
-        }
-
-        invoice1_body = {
-          'invoice' => {
-            'invoiceid' => '1',
-            'sectionid' => '3',
-            'name' => 'Invoice 1',
-            'extra' => 'Some more details',
-            'entrydate' => '2010-01-01',
-            'archived' => '0',
-            'finalised' => '0'
-          },
-          'people' => [
-            'Person 1',
-            'Person 2',
-            ''
-          ],
-          'categories' => [
-            'Default',
-            'A Budget'
-          ]
-        }
-        expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(invoice1_body)
-
-        invoice = Osm::Invoice.get(api: $api, section: 3, id: 1)
+        expect(described_class).to receive(:get_for_section).with(api: $api, section: 3).and_return([
+          described_class.new(id: 1),
+          described_class.new(id: 2),
+          described_class.new(id: 3),
+        ])
+        invoice = Osm::Invoice.get(api: $api, section: 3, id: 2)
         expect(invoice).not_to be_nil
-        expect(invoice.id).to eq(1)
+        expect(invoice.id).to eq(2)
       end
 
       it 'Create (success)' do

@@ -189,16 +189,20 @@ describe Osm::Event do
       end
 
       it 'Handles no files being an empty array not a hash' do
+        expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        expect { @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
-        expect(@event.files).to eq([])
+        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return([])
+        event = Osm::Event.get_for_section(api: $api, section: 1)
+        expect(event.first.files).to eq([])
       end
 
       it 'Handles a blank config' do
         @event_body['config'] = ''
+        expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(@events_body)
         expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
-        expect { @event = Osm::Event.get(api: $api, section: 1, id: 2) }.to_not raise_error
-        expect(@event.columns).to eq([])
+        expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return('files' => [])
+        event = Osm::Event.get_for_section(api: $api, section: 1)
+        expect(event.first.columns).to eq([])
       end
 
       it 'Handles cost of "-1" for TBC' do
@@ -299,11 +303,15 @@ describe Osm::Event do
 
 
     it 'Get event' do
-      expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(@event_body)
+      expect(described_class).to receive(:get_for_section).with(api: $api, section: 1).and_return([
+        described_class.new(id: 1),
+        described_class.new(id: 2)
+      ])
       event = Osm::Event.get(api: $api, section: 1, id: 2)
       expect(event).not_to be_nil
       expect(event.id).to eq(2)
     end
+
 
     describe 'Tells if there are spaces' do
 
@@ -999,11 +1007,12 @@ describe Osm::Event do
         'limitincludesleaders' => '1'
       }
 
+      expect($api).to receive(:post_query).with('events.php?action=getEvents&sectionid=1&showArchived=true').and_return(events_body)
       expect($api).to receive(:post_query).with('events.php?action=getEvent&sectionid=1&eventid=2').and_return(event_body)
-
+      expect($api).to receive(:post_query).with('ext/uploads/events/?action=listAttachments&sectionid=1&eventid=2').and_return('files' => [])
       allow(Osm::Model).to receive(:get_user_permissions) { { events: [:read, :write] } }
 
-      event = Osm::Event.get(api: $api, section: 1, id: 2)
+      event = Osm::Event.get_for_section(api: $api, section: 1).first
       expect(event).not_to be_nil
       expect(event.id).to eq(2)
       expect(event.columns).to eq([])

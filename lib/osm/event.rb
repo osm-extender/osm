@@ -99,36 +99,22 @@ module Osm
       require_ability_to(api: api, to: :read, on: :events, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
       cache_key = ['events', section_id]
-      events = nil
 
-      if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
-        ids = cache_read(api: api, key: cache_key)
-        events = get_from_ids(api: api, ids: ids, key_base: 'event', method: :get_for_section)
-      end
-
-      if events.nil?
+      events = cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
-        events = []
-        ids = []
-        unless data['items'].nil?
-          data['items'].map { |i| i['eventid'].to_i }.each do |event_id|
-            event_data = api.post_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
-            files_data = api.post_query("ext/uploads/events/?action=listAttachments&sectionid=#{section_id}&eventid=#{event_id}")
-            files = files_data.is_a?(Hash) ? files_data['files'] : files_data
-            files = [] unless files.is_a?(Array)
+        data['items'] ||= []
+        data['items'].map { |i| i['eventid'].to_i }.map do |event_id|
+          event_data = api.post_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
+          files_data = api.post_query("ext/uploads/events/?action=listAttachments&sectionid=#{section_id}&eventid=#{event_id}")
+          files = files_data.is_a?(Hash) ? files_data['files'] : files_data
+          files = [] unless files.is_a?(Array)
+          event = new_event_from_data(event_data)
+          event.files = files
+          event
+        end # map event_id
+      end # cache_fetch
 
-            event = new_event_from_data(event_data)
-            event.files = files
-            events.push event
-            ids.push event.id
-            cache_write(api: api, key: ['event', event.id], data: event)
-          end
-        end
-        cache_write(api: api, key: cache_key, data: ids)
-      end
-
-      return events if include_archived
-      events.reject(&:archived?)
+      include_archived ? events : events.reject(&:archived?)
     end
 
     # Get event list for a section (not all details for each event)
@@ -141,39 +127,31 @@ module Osm
       section_id = section.to_i
       cache_key = ['events_list', section_id]
       events_cache_key = ['events', section_id]
-      events = nil
 
-      unless no_read_cache
-        # Try getting from cache
-        if cache_exist?(api: api, key: cache_key)
-          return cache_read(api: api, key: cache_key)
-        end
+      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        list = []
 
-        # Try generating from cached events
-        if cache_exist?(api: api, key: events_cache_key)
-          ids = cache_read(api: api, key: events_cache_key)
-          events = get_from_ids(api: api, ids: ids, key_base: 'event', method: :get_for_section).map do |e|
-            e.attributes.symbolize_keys.select do |k, _v|
+        # If events are cached generate from those
+        if cache_exist?(api: api, key: events_cache_key, no_read_cache: no_read_cache)
+          list = get_for_section(api: api, section: section, no_read_cache: no_read_cache).map do |event|
+            event.attributes.symbolize_keys.select do |k, _v|
               LIST_ATTRIBUTES.include?(k)
             end
-          end
-          return events
-        end
-      end # unless no_read_cache
+          end # map events for section
+        end # if cache_exist?
 
-      # Fetch from OSM
-      if events.nil?
-        data = api.post_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
-        events = []
-        unless data['items'].nil?
-          data['items'].map do |event_data|
-            events.push(attributes_from_data(event_data))
-          end
+        # Get from OSM
+        if list.empty?
+          data = api.post_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
+          unless data['items'].nil?
+            data['items'].each do |item|
+              list.push attributes_from_data(item)
+            end # each item in items
+          end # unless items is nil
         end
-      end
 
-      cache_write(api: api, key: cache_key, data: events)
-      events
+        list
+      end # cache_fetch
     end
 
     # Get an event
@@ -182,15 +160,8 @@ module Osm
     # @param id [Integer, #to_i] The id of the event to get
     # @!macro options_get
     # @return [Osm::Event, nil] the event (or nil if it couldn't be found
-    def self.get(api:, section:, id:, no_read_cache: false)
-      require_ability_to(api: api, to: :read, on: :events, section: section, no_read_cache: no_read_cache)
-      section_id = section.to_i
-      event_id = id.to_i
-      cache_key = ['event', event_id]
-
-      cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-        new_event_from_data(api.post_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}"))
-      end
+    def self.get(id:, **options)
+      get_for_section(**options).find { |event| event.id == id }
     end
 
 
