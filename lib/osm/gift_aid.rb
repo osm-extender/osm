@@ -51,26 +51,25 @@ module Osm
           data = data['items']
           data.each do |item|
             next unless item.is_a?(Hash)
-            unless item['scoutid'].to_i < 0  # It's a total row
-              donations = {}
-              item.each do |key, value|
-                if key.match(Osm::OSM_DATE_REGEX)
-                  donations[Osm.parse_date(key)] = value
-                end
+            next if item['scoutid'].to_i < 0  # It's a total row
+            donations = {}
+            item.each do |key, value|
+              if key.match(Osm::OSM_DATE_REGEX)
+                donations[Osm.parse_date(key)] = value
               end
-              to_return.push Osm::GiftAid::Data.new(
-                member_id: Osm.to_i_or_nil(item['scoutid']),
-                grouping_id: Osm.to_i_or_nil(item ['patrolid']),
-                section_id: section_id,
-                first_name: item['firstname'],
-                last_name: item['lastname'],
-                tax_payer_name: item['parentname'],
-                tax_payer_address: item['address'],
-                tax_payer_postcode: item['postcode'],
-                total: item['total'],
-                donations: donations
-              )
             end
+            to_return.push Osm::GiftAid::Data.new(
+              member_id: Osm.to_i_or_nil(item['scoutid']),
+              grouping_id: Osm.to_i_or_nil(item ['patrolid']),
+              section_id: section_id,
+              first_name: item['firstname'],
+              last_name: item['lastname'],
+              tax_payer_name: item['parentname'],
+              tax_payer_address: item['address'],
+              tax_payer_postcode: item['postcode'],
+              total: item['total'],
+              donations: donations
+            )
           end # each item in data
         end # if
         to_return
