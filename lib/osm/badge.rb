@@ -436,8 +436,8 @@ module Osm
     def self.type
       nil
     end
-    def type
-      self.class.type
+    def self.type_id
+      nil
     end
 
     protected
@@ -448,14 +448,20 @@ module Osm
 
     private
 
+    def type
+      self.class.type
+    end
+
     def self.subscription_required
       :bronze
     end
+
     def subscription_required
       self.class.subscription_required
     end
 
-    private_class_method :module_completion_data, :get_module_completion_data, :subscription_required
+    private_class_method :module_completion_data, :get_module_completion_data,
+                         :subscription_required, :type, :type_id
 
   end
 end

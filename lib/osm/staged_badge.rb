@@ -1,8 +1,6 @@
 module Osm
   class StagedBadge < Osm::Badge
 
-    private
-
     def self.type
       :staged
     end
