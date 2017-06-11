@@ -37,9 +37,11 @@ describe Osm::Model do
     )
 
     config = ModelTester.test_get_config
-    expect(config).to eq(      cache: OsmTest::Cache,
+    expect(config).to eq(
+      cache: OsmTest::Cache,
       cache_ttl: 100,
-      prepend_to_cache_key: 'Hi')
+      prepend_to_cache_key: 'Hi'
+    )
   end
 
   it 'Configure (bad arguments)' do

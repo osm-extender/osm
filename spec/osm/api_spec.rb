@@ -331,13 +331,15 @@ describe Osm::Api do
     it 'to_h' do
       hash = $api.to_h
 
-      expect(hash).to eq(        api_id:       '1',
+      expect(hash).to eq(
+        api_id:       '1',
         api_secret:   'API-SECRET',
         name:         'API NAME',
         debug:        false,
         site:         :osm,
         user_id:      '2',
-        user_secret:  'USER-SECRET')
+        user_secret:  'USER-SECRET'
+      )
 
       expect(hash[:name].object_id).not_to eq($api.name.object_id)
       expect(hash[:api_id].object_id).not_to eq($api.api_id.object_id)

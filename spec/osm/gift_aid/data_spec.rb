@@ -25,7 +25,7 @@ describe Osm::GiftAid::Data do
     expect(d.tax_payer_address).to eq('D')
     expect(d.tax_payer_postcode).to eq('E')
     expect(d.total).to eq('2.34')
-    expect(d.donations).to eq(      Date.new(2012, 1, 2) => '1.23')
+    expect(d.donations).to eq(Date.new(2012, 1, 2) => '1.23')
     expect(d.valid?).to eq(true)
   end
 

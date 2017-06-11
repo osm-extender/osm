@@ -35,7 +35,7 @@ describe Osm::GiftAid do
       expect(data.is_a?(Array)).to eq(true)
       expect(data.size).to eq(1)
       data = data[0]
-      expect(data.donations).to eq(        Date.new(2000, 1, 2) => '1.23')
+      expect(data.donations).to eq(Date.new(2000, 1, 2) => '1.23')
       expect(data.first_name).to eq('First')
       expect(data.last_name).to eq('Last')
       expect(data.tax_payer_name).to eq('Tax')

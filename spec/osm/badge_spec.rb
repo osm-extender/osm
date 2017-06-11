@@ -292,7 +292,8 @@ describe Osm::Badge do
       expect($api).to receive(:post_query).with('ext/badges/records/summary/?action=get&mode=verbose&section=beavers&sectionid=1&termid=2').and_return(data)
       summary = Osm::Badge.get_summary_for_section(api: $api, section: Osm::Section.new(id: 1, type: :beavers), term: 2)
       expect(summary.size).to eq(1)
-      expect(summary[0]).to eq(        first_name: 'First',
+      expect(summary[0]).to eq(
+        first_name: 'First',
         last_name: 'Last',
         name: 'First Last',
         member_id: 1,
@@ -307,7 +308,8 @@ describe Osm::Badge do
         '97_0_date' => Date.new(2003, 2, 1),
         '98_0' => :awarded,
         '98_0_date' => Date.new(2004, 3, 2),
-        '98_0_level' => 1)
+        '98_0_level' => 1
+      )
     end
 
     it 'Get due badges' do

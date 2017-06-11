@@ -315,7 +315,8 @@ describe Osm::Event do
       end
 
       it 'Under limit' do
-        expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return(          'identifier' => 'scoutid',
+        expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return(
+          'identifier' => 'scoutid',
           'eventid' => '1',
           'items' => [
             {
@@ -327,7 +328,8 @@ describe Osm::Event do
               'patrolid' => '2',
               'f_1' => 'a'
             }
-          ])
+          ]
+        )
         allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 3) }
 
         event = Osm::Event.new(attendance_limit: 2, id: 1, section_id: 2)
@@ -336,7 +338,8 @@ describe Osm::Event do
       end
 
       it 'Over limit' do
-        expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return(          'identifier' => 'scoutid',
+        expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return(
+          'identifier' => 'scoutid',
           'eventid' => '1',
           'items' => [
             {
@@ -364,7 +367,8 @@ describe Osm::Event do
               'patrolid' => '2',
               'f_1' => 'a'
             }
-          ])
+          ]
+        )
         allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 3) }
 
         event = Osm::Event.new(attendance_limit: 2, id: 1, section_id: 2)
@@ -373,7 +377,8 @@ describe Osm::Event do
       end
 
       it 'At limit' do
-        expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return(          'identifier' => 'scoutid',
+        expect($api).to receive(:post_query).with('events.php?action=getEventAttendance&eventid=1&sectionid=2&termid=3').and_return(
+          'identifier' => 'scoutid',
           'eventid' => '1',
           'items' => [
             {
@@ -393,7 +398,8 @@ describe Osm::Event do
               'patrolid' => '2',
               'f_1' => 'a'
             }
-          ])
+          ]
+        )
         allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 3) }
 
         event = Osm::Event.new(attendance_limit: 2, id: 1, section_id: 2)
@@ -758,7 +764,8 @@ describe Osm::Event do
       describe 'Badge links' do
 
         before :each do
-          @event = Osm::Event.new(            id: 2,
+          @event = Osm::Event.new(
+            id: 2,
             section_id: 1,
             name: 'Test event',
             start: DateTime.new(2000, 1, 2, 3, 4, 5),
@@ -785,7 +792,8 @@ describe Osm::Event do
             attendance_limit: 3,
             attendance_limit_includes_leaders: true,
             attendance_reminder: 1,
-            allow_booking: true)
+            allow_booking: true
+          )
         end
 
         it 'Added' do
@@ -907,8 +915,8 @@ describe Osm::Event do
       expect(ea.last_name).to eq('Last')
       expect(ea.date_of_birth).to eq(Date.new(1980, 1, 2))
       expect(ea.attending).to eq(:yes)
-      expect(ea.fields).to eq(        1 => 'a')
-      expect(ea.payments).to eq(        1 => '')
+      expect(ea.fields).to eq(1 => 'a')
+      expect(ea.payments).to eq(1 => '')
       expect(ea.row).to eq(0)
     end
 

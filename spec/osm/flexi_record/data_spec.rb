@@ -19,14 +19,16 @@ describe Osm::FlexiRecord::Data do
 
     expect(rd.member_id).to eq(1)
     expect(rd.grouping_id).to eq(2)
-    expect(rd.fields).to eq(      'firstname' => 'First',
+    expect(rd.fields).to eq(
+      'firstname' => 'First',
       'lastname' => 'Last',
       'dob' => Date.new(1899, 11, 30),
       'total' => 3,
       'completed' => nil,
       'age' => nil,
       'f_1' => 'a',
-      'f_2' => 'b')
+      'f_2' => 'b'
+    )
     expect(rd.valid?).to eq(true)
   end
 

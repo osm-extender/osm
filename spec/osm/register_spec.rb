@@ -44,9 +44,11 @@ describe Osm::Register do
       expect(register.is_a?(Array)).to eq(true)
       expect(register.size).to eq(1)
       reg = register[0]
-      expect(reg.attendance).to eq(        Date.new(2000, 1, 1) => :yes,
+      expect(reg.attendance).to eq(
+        Date.new(2000, 1, 1) => :yes,
         Date.new(2000, 1, 2) => :advised_absent,
-        Date.new(2000, 1, 3) => :unadvised_absent)
+        Date.new(2000, 1, 3) => :unadvised_absent
+      )
       expect(reg.first_name).to eq('First')
       expect(reg.last_name).to eq('Last')
       expect(reg.grouping_id).to eq(3)
