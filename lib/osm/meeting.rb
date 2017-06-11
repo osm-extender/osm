@@ -90,7 +90,7 @@ module Osm
           attributes[:date] = Osm.parse_date(item['meetingdate'])
 
           our_activities = activities[item['eveningid']]
-          attributes[:activities] = Array.new
+          attributes[:activities] = []
           unless our_activities.nil?
             our_activities.each do |activity_data|
               if activity_data.is_a?(Array)
@@ -105,7 +105,7 @@ module Osm
           end # unless our_activities.nil?
 
           our_badge_links = badge_links[item['eveningid']]
-          attributes[:badge_links] = Array.new
+          attributes[:badge_links] = []
           unless our_badge_links.nil?
             our_badge_links.each do |badge_data|
               attributes[:badge_links].push Osm::Meeting::BadgeLink.new(
@@ -161,7 +161,7 @@ module Osm
       fail Osm::ObjectIsInvalid, 'meeting is invalid' unless valid?
       require_ability_to(api: api, to: :write, on: :programme, section: section_id)
 
-      activities_data = Array.new
+      activities_data = []
       activities.each do |activity|
         this_activity = {
           'activityid' => activity.activity_id,

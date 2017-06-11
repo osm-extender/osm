@@ -232,7 +232,7 @@ module Osm
       cache_key = ['permissions', user_id]
 
       Osm::Model.cache_fetch(api: self, key: cache_key, no_read_cache: no_read_cache) do
-        all_permissions = Hash.new
+        all_permissions = {}
         get_user_roles(no_read_cache: no_read_cache).each do |item|
           unless item['section'].eql?('discount')  # It's not an actual section
             all_permissions.merge!(Osm.to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))

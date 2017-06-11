@@ -108,8 +108,8 @@ module Osm
 
       if events.nil?
         data = api.post_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
-        events = Array.new
-        ids = Array.new
+        events = []
+        ids = []
         unless data['items'].nil?
           data['items'].map { |i| i['eventid'].to_i }.each do |event_id|
             event_data = api.post_query("events.php?action=getEvent&sectionid=#{section_id}&eventid=#{event_id}")
@@ -164,7 +164,7 @@ module Osm
       # Fetch from OSM
       if events.nil?
         data = api.post_query("events.php?action=getEvents&sectionid=#{section_id}&showArchived=true")
-        events = Array.new
+        events = []
         unless data['items'].nil?
           data['items'].map do |event_data|
             events.push(attributes_from_data(event_data))

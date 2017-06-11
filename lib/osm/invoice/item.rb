@@ -92,7 +92,7 @@ module Osm
         fail Osm::ObjectIsInvalid, 'invoice item is invalid' unless valid?
 
         updated = true
-        to_update = Array.new
+        to_update = []
         to_update.push ['amount', amount] if changed_attributes.include?('amount')
         to_update.push ['comments', description] if changed_attributes.include?('description')
         to_update.push ['type', type.to_s.titleize] if changed_attributes.include?('type')

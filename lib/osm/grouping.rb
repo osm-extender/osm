@@ -38,7 +38,7 @@ module Osm
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("users.php?action=getPatrols&sectionid=#{section_id}")
 
-        result = Array.new
+        result = []
         if data.is_a?(Hash) && data['patrols'].is_a?(Array)
           data['patrols'].each do |item|
             result.push Osm::Grouping.new(              id: Osm.to_i_or_nil(item['patrolid']),

@@ -284,7 +284,7 @@ module Osm
     # @return [Array] An array of the items
     def self.get_from_ids(api:, ids:, key_base:, method:, no_read_cache: false, arguments: {})
       fail ArgumentError, 'method is invalid' unless [:get_all, :get_for_section].include?(method)
-      items = Array.new
+      items = []
       ids.each do |id|
         if cache_exist?(api: api, key: [*key_base, id], no_read_cache: no_read_cache)
           items.push cache_read(api: api, key: [*key_base, id])

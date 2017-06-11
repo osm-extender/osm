@@ -40,8 +40,8 @@ module Osm
         20  => [:read, :write],
         100 => [:read, :write, :administer]
       }
-      result = Array.new
-      ids = Array.new
+      result = []
+      ids = []
       data['apis'].each do |item|
         attributes = {}
         attributes[:id] = item['apiid'].to_i

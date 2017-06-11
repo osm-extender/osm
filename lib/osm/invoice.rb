@@ -55,8 +55,8 @@ module Osm
 
       if invoices.nil?
         data = api.post_query("finances.php?action=getInvoices&sectionid=#{section_id}&showArchived=true")
-        invoices = Array.new
-        ids = Array.new
+        invoices = []
+        ids = []
         unless data['items'].nil?
           data['items'].map { |i| i['invoiceid'].to_i }.each do |invoice_id|
             invoice_data = api.post_query("finances.php?action=getInvoice&sectionid=#{section_id}&invoiceid=#{invoice_id}")

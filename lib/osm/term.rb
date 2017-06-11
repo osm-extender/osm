@@ -39,8 +39,8 @@ module Osm
 
       data = api.post_query('api.php?action=getTerms')
 
-      terms = Array.new
-      ids = Array.new
+      terms = []
+      ids = []
       data.each_key do |key|
         data[key].each do |term_data|
           term = Osm::Term.new(

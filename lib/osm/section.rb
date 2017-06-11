@@ -140,9 +140,9 @@ module Osm
         return get_from_ids(api: api, ids: ids, key_base: 'section', no_read_cache: no_read_cache, method: :get_all)
       end
 
-      result = Array.new
-      ids = Array.new
-      permissions = Hash.new
+      result = []
+      ids = []
+      permissions = {}
       api.get_user_roles(no_read_cache: no_read_cache).each do |role_data|
         next if role_data['section'].eql?('discount')  # It's not an actual section
         next if role_data['sectionConfig'].nil? # No config for the section = user hasn't got access
