@@ -82,7 +82,7 @@ module Osm
     def self.get(api:, section:, id:, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :events, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
-      invoice_id = invoice_id.to_i
+      id = id.to_i
       cache_key = ['invoice', id]
 
       if cache_exist?(api: api, key: cache_key, no_read_cache: no_read_cache)
@@ -253,6 +253,8 @@ module Osm
     def sort_by
       ['section_id', 'name', 'date']
     end
+
+    private_class_method :new_invoice_from_data
 
   end
 end
