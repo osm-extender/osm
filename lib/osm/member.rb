@@ -147,17 +147,17 @@ module Osm
 
         data.map do |item|
           item_data = item['custom_data'].map { |k, v| [k.to_i, v] }.to_h
-          member_contact = item_data[GID_MEMBER_CONTACT].nil? ? nil : item_data[GID_MEMBER_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, v| CORE_FIELD_IDS.include?(k) }.to_h
-          member_custom = item_data[GID_MEMBER_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_MEMBER_CONTACT].select { |k, v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
-          primary_contact = item_data[GID_PRIMARY_CONTACT].nil? ? nil : item_data[GID_PRIMARY_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, v| CORE_FIELD_IDS.include?(k) }.to_h
-          primary_custom = item_data[GID_PRIMARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_PRIMARY_CONTACT].select { |k, v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
-          secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : item_data[GID_SECONDARY_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, v| CORE_FIELD_IDS.include?(k) }.to_h
-          secondary_custom = item_data[GID_SECONDARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_SECONDARY_CONTACT].select { |k, v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
-          emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : item_data[GID_EMERGENCY_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, v| CORE_FIELD_IDS.include?(k) }.to_h
-          emergency_custom = item_data[GID_EMERGENCY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].select { |k, v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
-          doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : item_data[GID_DOCTOR_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, v| CORE_FIELD_IDS.include?(k) }.to_h
-          doctor_custom = item_data[GID_DOCTOR_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_DOCTOR_CONTACT].select { |k, v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
-          floating_data = item_data[GID_FLOATING].nil? ? {} : item_data[GID_FLOATING].map { |k, v| [k.to_i, v] }.select { |k, v| CORE_FIELD_IDS.include?(k) }.to_h
+          member_contact = item_data[GID_MEMBER_CONTACT].nil? ? nil : item_data[GID_MEMBER_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
+          member_custom = item_data[GID_MEMBER_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_MEMBER_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
+          primary_contact = item_data[GID_PRIMARY_CONTACT].nil? ? nil : item_data[GID_PRIMARY_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
+          primary_custom = item_data[GID_PRIMARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_PRIMARY_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
+          secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : item_data[GID_SECONDARY_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
+          secondary_custom = item_data[GID_SECONDARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_SECONDARY_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
+          emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : item_data[GID_EMERGENCY_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
+          emergency_custom = item_data[GID_EMERGENCY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
+          doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : item_data[GID_DOCTOR_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
+          doctor_custom = item_data[GID_DOCTOR_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_DOCTOR_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
+          floating_data = item_data[GID_FLOATING].nil? ? {} : item_data[GID_FLOATING].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
           custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map { |k, v| [k.to_i, v] } ]
 
           new(
@@ -325,7 +325,7 @@ module Osm
         ['started_section', 'startedsection', started_section.strftime(Osm::OSM_DATE_FORMAT)],
         ['joined_movement', 'started', joined_movement.strftime(Osm::OSM_DATE_FORMAT)]
       ] # our name => OSM name
-      attribute_map.select { |attr, col, val| force || changed_attributes.include?(attr) }.each do |attr, col, val|
+      attribute_map.select { |attr, _col, _val| force || changed_attributes.include?(attr) }.each do |_attr, col, val|
         data = api.post_query('ext/members/contact/?action=update', post_data: {
           'scoutid' => id,
           'column' => col,

@@ -81,7 +81,7 @@ module Osm
         datas = []
         data['items'].each do |item|
           next if item['scoutid'].to_i < 0  # It's a total row
-          fields = item.select do |key, value|
+          fields = item.select do |key, _value|
             ['firstname', 'lastname', 'dob', 'total', 'completed', 'age'].include?(key) || key.to_s.match(/\Af_\d+\Z/)
           end
           fields.merge!(
