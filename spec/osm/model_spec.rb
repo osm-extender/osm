@@ -320,7 +320,7 @@ describe Osm::Model do
       end
 
       describe 'Otherwise returns false' do
-        [ [true,false], [false, true], [false, false] ].each do |user, api|
+        [ [true, false], [false, true], [false, false] ].each do |user, api|
           it "User #{user ? 'can' : "can't"} and #{api ? 'has' : "hasn't"} given access" do
             allow(Osm::Model).to receive('user_has_permission?').and_return(user)
             allow(Osm::Model).to receive('api_has_permission?').and_return(api)

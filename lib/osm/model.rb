@@ -113,7 +113,7 @@ module Osm
     # Reset the list of attributes which have changed
     def reset_changed_attributes
       classes_to_clone = [Array, Hash]
-      attributes_now = attributes.map do |k,v|
+      attributes_now = attributes.map do |k, v|
         [k, (classes_to_clone.include?(v.class) ? v.clone : v)]
       end # Deep(ish) clone
       @original_attributes = attributes_now.to_h

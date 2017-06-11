@@ -4,8 +4,8 @@ describe Osm::Register do
 
     it 'Fetch the register structure for a section' do
       data = [
-        { 'rows' => [{ 'name' => 'First name','field' => 'firstname','width' => '100px' },{ 'name' => 'Last name','field' => 'lastname','width' => '100px' },{ 'name' => 'Total','field' => 'total','width' => '60px' }],'noscroll' => true },
-        { 'rows' => [{ 'field' => 'field1','name' => 'name1','tooltip' => 'tooltip1' }] }
+        { 'rows' => [{ 'name' => 'First name', 'field' => 'firstname', 'width' => '100px' }, { 'name' => 'Last name', 'field' => 'lastname', 'width' => '100px' }, { 'name' => 'Total', 'field' => 'total', 'width' => '60px' }], 'noscroll' => true },
+        { 'rows' => [{ 'field' => 'field1', 'name' => 'name1', 'tooltip' => 'tooltip1' }] }
       ]
       expect($api).to receive(:post_query).with('users.php?action=registerStructure&sectionid=1&termid=2') { data }
 
@@ -89,7 +89,7 @@ describe Osm::Register do
             'firstname' => 'First',
             'lastname' => 'Last',
             'patrolid' => '3'
-          },{
+          }, {
             'total' => 119,
             '2000-01-01' => 8,
             'scoutid' => -1,

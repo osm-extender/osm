@@ -258,30 +258,30 @@ describe Osm::Badge::Data do
         Osm::Badge::Requirement.new(badge: badge, mod: Osm::Badge::RequirementModule.new(letter: 'c', id: 3), id: 31)
       ]
 
-      requirements = { 10 => '',11 => '',20 => '',21 => '',30 => '',31 => '' }
+      requirements = { 10 => '', 11 => '', 20 => '', 21 => '', 30 => '', 31 => '' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(0)
 
-      requirements = { 10 => 'y',11 => '',20 => '',21 => '',30 => '',31 => '' }
+      requirements = { 10 => 'y', 11 => '', 20 => '', 21 => '', 30 => '', 31 => '' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(1)
 
-      requirements = { 10 => 'y',11 => '',20 => '',21 => 'y',30 => '',31 => '' }
+      requirements = { 10 => 'y', 11 => '', 20 => '', 21 => 'y', 30 => '', 31 => '' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(2)
 
-      requirements = { 10 => '',11 => '',20 => '',21 => 'y',30 => '',31 => '' }
+      requirements = { 10 => '', 11 => '', 20 => '', 21 => 'y', 30 => '', 31 => '' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(2)
 
-      requirements = { 10 => 'y',11 => '',20 => 'y',21 => '',30 => 'y',31 => '' }
+      requirements = { 10 => 'y', 11 => '', 20 => 'y', 21 => '', 30 => 'y', 31 => '' }
       data = Osm::Badge::Data.new(requirements: requirements, badge: badge)
       expect(data.earnt).to eq(3)
     end
 
     it 'Staged (count)' do
       badge = Osm::StagedBadge.new(
-        levels: [0,1,2,3,4,5,10,15,20],
+        levels: [0, 1, 2, 3, 4, 5, 10, 15, 20],
         show_level_letters: false,
         level_requirement: 3000,
         requirements: []
@@ -313,7 +313,7 @@ describe Osm::Badge::Data do
     # Staged Activity Badge
     expect(Osm::Badge::Data.new(
       badge: Osm::StagedBadge.new(
-        levels: [0,1,2],
+        levels: [0, 1, 2],
         show_level_letters: true,
         requirements: [
           Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'a'), id: 1000),
@@ -327,13 +327,13 @@ describe Osm::Badge::Data do
 
     # Staged Count Badge
     expect(Osm::Badge::Data.new(
-      badge: Osm::StagedBadge.new(levels: [0,1,2,3,4,5,10,15,20], show_level_letters: false, level_requirement: 1000),
+      badge: Osm::StagedBadge.new(levels: [0, 1, 2, 3, 4, 5, 10, 15, 20], show_level_letters: false, level_requirement: 1000),
       requirements: { 1000 => 5, 2000 => '5', 3000 => '' },
       due: 5,
       awarded: 4
     ).started?).to eq(false) # Finished lvl 5 & not started lvl 10
     expect(Osm::Badge::Data.new(
-      badge: Osm::StagedBadge.new(levels: [0,1,2,3,4,5,10,15,20], show_level_letters: false, level_requirement: 1000),
+      badge: Osm::StagedBadge.new(levels: [0, 1, 2, 3, 4, 5, 10, 15, 20], show_level_letters: false, level_requirement: 1000),
       requirements: { 1000 => 6, 2000 => '6', 3000 => '' },
       due: 5,
       awarded: 3
@@ -350,7 +350,7 @@ describe Osm::Badge::Data do
 
     # Staged Activity
     staged_activity = Osm::StagedBadge.new(
-      levels: [0,1,2],
+      levels: [0, 1, 2],
       show_level_letters: true,
       requirements: [
         Osm::Badge::Requirement.new(mod: Osm::Badge::RequirementModule.new(letter: 'a'), id: 100),
@@ -383,7 +383,7 @@ describe Osm::Badge::Data do
 
     # Staged count
     staged_count = Osm::StagedBadge.new(
-      levels: [0,1,2,3,4,5,10,15,20],
+      levels: [0, 1, 2, 3, 4, 5, 10, 15, 20],
       show_level_letters: false,
       level_requirement: 3000,
       requirements: []

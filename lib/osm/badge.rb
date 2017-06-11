@@ -276,7 +276,7 @@ module Osm
             member_id: Osm.to_i_or_nil(item['scout_id'])
           }
 
-          badge_data = Hash[item.to_a.select { |k,v| !!k.match(/\d+_\d+/) }]
+          badge_data = Hash[item.to_a.select { |k, v| !!k.match(/\d+_\d+/) }]
           badge_data.each do |badge_identifier, status|
             if status.is_a?(String)
               # Possible statuses: 
@@ -336,7 +336,7 @@ module Osm
             due: d['completed'].to_i,
             awarded: d['awarded'].to_i,
             awarded_date: Osm.parse_date(d['awardeddate']),
-            requirements: d.map { |k,v| [k.to_i, v] }.to_h.except(0),
+            requirements: d.map { |k, v| [k.to_i, v] }.to_h.except(0),
             section_id: section.id,
             badge: self
           )

@@ -39,14 +39,14 @@ describe Osm::FlexiRecord do
         'structure' => [
           {
             'rows' => [
-              { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
+              { 'name' => 'First name', 'field' => 'firstname', 'width' => '150px' },
+              { 'name' => 'Last name', 'field' => 'lastname', 'width' => '150px' }
             ],
             'noscroll' => true
           },
           { 'rows' => [
-            { 'name' => 'Field 1','field' => 'f_1','width' => '150px','editable' => true },
-            { 'name' => 'Filed 2','field' => 'f_2','width' => '150px','editable' => true }
+            { 'name' => 'Field 1', 'field' => 'f_1', 'width' => '150px', 'editable' => true },
+            { 'name' => 'Filed 2', 'field' => 'f_2', 'width' => '150px', 'editable' => true }
           ] }
         ]
       }
@@ -76,13 +76,13 @@ describe Osm::FlexiRecord do
         'structure' => [
           {
             'rows' => [
-              { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
+              { 'name' => 'First name', 'field' => 'firstname', 'width' => '150px' },
+              { 'name' => 'Last name', 'field' => 'lastname', 'width' => '150px' }
             ],
             'noscroll' => true
           },
           { 'rows' => [
-            { 'name' => 'name','field' => 'f_1','width' => '150px','editable' => true }
+            { 'name' => 'name', 'field' => 'f_1', 'width' => '150px', 'editable' => true }
           ] }
         ]
       }
@@ -102,8 +102,8 @@ describe Osm::FlexiRecord do
         'structure' => [
           {
             'rows' => [
-              { 'name' => 'First name','field' => 'firstname','width' => '150px' },
-              { 'name' => 'Last name','field' => 'lastname','width' => '150px' }
+              { 'name' => 'First name', 'field' => 'firstname', 'width' => '150px' },
+              { 'name' => 'Last name', 'field' => 'lastname', 'width' => '150px' }
             ],
             'noscroll' => true
           },
@@ -170,7 +170,7 @@ describe Osm::FlexiRecord do
           'f_2' => 75,
           'age' => '',
           'patrol' => ''
-        },{
+        }, {
           'scoutid' => '1',
           'firstname' => 'First',
           'lastname' => 'Last',

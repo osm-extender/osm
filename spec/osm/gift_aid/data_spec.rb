@@ -74,7 +74,7 @@ describe Osm::GiftAid::Data do
         body_data = {
           'items' => [
             { 'parentname' => 'n', 'address' => 'a', 'postcode' => 'pc', 'scoutid' => '1' },
-            { 'firstname' => 'TOTAL','lastname' => '','scoutid' => -1,'patrolid' => -1,'parentname' => '','total' => 0 }
+            { 'firstname' => 'TOTAL', 'lastname' => '', 'scoutid' => -1, 'patrolid' => -1, 'parentname' => '', 'total' => 0 }
           ]
         }
         expect($api).to receive(:post_query).with('giftaid.php?action=updateScout', post_data: post_data.merge('column' => 'parentname', 'value' => 'n')).and_return(body_data)
@@ -98,8 +98,8 @@ describe Osm::GiftAid::Data do
         }
         body_data = {
           'items' => [
-            { '2012-01-03' => '3.45','scoutid' => '1' },
-            { 'firstname' => 'TOTAL','lastname' => '','scoutid' => -1,'patrolid' => -1,'parentname' => '','total' => 0 }
+            { '2012-01-03' => '3.45', 'scoutid' => '1' },
+            { 'firstname' => 'TOTAL', 'lastname' => '', 'scoutid' => -1, 'patrolid' => -1, 'parentname' => '', 'total' => 0 }
           ]
         }
         url = 'https://www.onlinescoutmanager.co.uk/'

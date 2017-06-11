@@ -153,7 +153,7 @@ module Osm
         if cache_exist?(api: api, key: events_cache_key)
           ids = cache_read(api: api, key: events_cache_key)
           events = get_from_ids(api: api, ids: ids, key_base: 'event', method: :get_for_section).map do |e|
-            e.attributes.symbolize_keys.select do |k,v|
+            e.attributes.symbolize_keys.select do |k, v|
               LIST_ATTRIBUTES.include?(k)
             end
           end
@@ -397,9 +397,9 @@ module Osm
             attending: attending_values[item['attending']],
             payment_control: payment_values[item['payment']],
             fields: item.select { |key, value| key.to_s.match(/\Af_\d+\Z/) }
-                           .inject({}) { |h,(k,v)| h[k[2..-1].to_i] = v; h },
+                           .inject({}) { |h, (k, v)| h[k[2..-1].to_i] = v; h },
             payments: item.select { |key, value| key.to_s.match(/\Ap\d+\Z/) }
-                             .inject({}) { |h,(k,v)| h[k[1..-1].to_i] = v; h },
+                             .inject({}) { |h, (k, v)| h[k[1..-1].to_i] = v; h },
             row: index
           )
         end # each data

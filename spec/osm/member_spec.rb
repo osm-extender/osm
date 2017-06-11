@@ -672,7 +672,7 @@ describe Osm::Member do
           'dob' => '2000-01-02',
           'started' => '2006-01-02',
           'startedsection' => '2006-01-07'
-        }).and_return('result' => 'ok','scoutid' => 577743)
+        }).and_return('result' => 'ok', 'scoutid' => 577743)
 
         allow(@member).to receive(:update) { true }
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
@@ -697,7 +697,7 @@ describe Osm::Member do
           'dob' => '2000-01-02',
           'started' => '2006-01-02',
           'startedsection' => '2006-01-07'
-        }).and_return('result' => 'ok','scoutid' => 577743)
+        }).and_return('result' => 'ok', 'scoutid' => 577743)
 
         allow(@member).to receive(:update) { false }
         allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
@@ -1024,7 +1024,7 @@ describe Osm::Member do
       end
 
       it 'Get the key' do
-        expect($api).to receive(:post_query).with('api.php?action=getMyScoutKey&sectionid=2&scoutid=1').and_return('ok' => true,'key' => 'KEY-HERE')
+        expect($api).to receive(:post_query).with('api.php?action=getMyScoutKey&sectionid=2&scoutid=1').and_return('ok' => true, 'key' => 'KEY-HERE')
         expect(@member.myscout_link_key($api)).to eq('KEY-HERE')
       end
 

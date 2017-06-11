@@ -28,14 +28,14 @@ describe Osm::Email do
             'lastname' => 'Smith'
           },
           '3' => {
-            'emails' => ['jane@example.com','jane2@example.com'],
+            'emails' => ['jane@example.com', 'jane2@example.com'],
             'firstname' => 'Jane',
             'lastname' => 'Smith'
           }
         },
         'count' => 3)
 
-      result = Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: :member, members: [2,3])
+      result = Osm::Email.get_emails_for_contacts(api: $api, section: 1, contacts: :member, members: [2, 3])
       expect(result).to eq(        '2' => {
           'emails' => ['john@example.com'],
           'firstname' => 'John',
@@ -134,7 +134,7 @@ describe Osm::Email do
       expect(Osm::Email.send_email(
         api: $api,
         section: 1,
-        to: { '2' => { 'firstname' => 'John', 'lastname' => 'Smith', 'emails' => ['john@example.com'] },'3' => { 'firstname' => 'Jane', 'lastname' => 'Smith', 'emails' => ['jane@example.com'] } },
+        to: { '2' => { 'firstname' => 'John', 'lastname' => 'Smith', 'emails' => ['john@example.com'] }, '3' => { 'firstname' => 'Jane', 'lastname' => 'Smith', 'emails' => ['jane@example.com'] } },
         from: 'Sender <from@example.com>',
         subject: 'Subject of email',
         body: 'Body of email'

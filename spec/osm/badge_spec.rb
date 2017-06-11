@@ -147,16 +147,16 @@ describe Osm::Badge do
             '123_0' => [
               {
                 'rows' => [
-                  { 'name' => 'First name','field' => 'firstname','width' => '120px' },
-                  { 'name' => 'Last name','field' => 'lastname','width' => '120px' },
-                  { 'name' => 'Done','field' => 'completed','width' => '70px','formatter' => 'doneFormatter' },
-                  { 'name' => 'Awarded','field' => 'awardeddate','width' => '100px','formatter' => 'dueFormatter' }
+                  { 'name' => 'First name', 'field' => 'firstname', 'width' => '120px' },
+                  { 'name' => 'Last name', 'field' => 'lastname', 'width' => '120px' },
+                  { 'name' => 'Done', 'field' => 'completed', 'width' => '70px', 'formatter' => 'doneFormatter' },
+                  { 'name' => 'Awarded', 'field' => 'awardeddate', 'width' => '100px', 'formatter' => 'dueFormatter' }
                 ],
                 'numactivities' => '23',
                 'noscroll' => true
-               },{
+               }, {
                 'rows' => [
-                  { 'name' => 'r_name','field' => '2345','width' => '80px','formatter' => 'cellFormatter','tooltip' => 'r_description','editable' => 'true','module' => 'a' }
+                  { 'name' => 'r_name', 'field' => '2345', 'width' => '80px', 'formatter' => 'cellFormatter', 'tooltip' => 'r_description', 'editable' => 'true', 'module' => 'a' }
                 ]
               }
             ]

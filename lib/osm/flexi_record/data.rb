@@ -46,7 +46,7 @@ module Osm
 
         updated = true
         editable_fields = flexi_record.get_columns(api).select(&:editable).map(&:id)
-        fields.changes.each do |field, (_was,now)|
+        fields.changes.each do |field, (_was, now)|
           next unless editable_fields.include?(field)
           data = api.post_query('extras.php?action=updateScout', post_data: {
             'termid' => term_id,

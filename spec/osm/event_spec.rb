@@ -5,7 +5,7 @@ describe Osm::Event do
       id: 1,
       section_id: 2,
       name: 'Event name',
-      start: DateTime.new(2001, 1, 2, 12,0,0),
+      start: DateTime.new(2001, 1, 2, 12, 0, 0),
       finish: nil,
       cost: '1.23',
       location: 'Somewhere',
@@ -239,7 +239,7 @@ describe Osm::Event do
             'sectionid' => 1,
             'googlecalendar' => nil,
             'archived' => '0'
-          },{
+          }, {
             'eventid' => '2',
             'name' => 'An Archived Event',
             'startdate' => '2001-02-03',
@@ -347,7 +347,7 @@ describe Osm::Event do
               'dob' => '1980-01-02',
               'patrolid' => '2',
               'f_1' => 'a'
-            },{
+            }, {
               'scoutid' => '5',
               'attending' => 'Yes',
               'firstname' => 'First',
@@ -355,7 +355,7 @@ describe Osm::Event do
               'dob' => '1980-01-02',
               'patrolid' => '2',
               'f_1' => 'a'
-            },{
+            }, {
               'scoutid' => '6',
               'attending' => 'Yes',
               'firstname' => 'First',
@@ -384,7 +384,7 @@ describe Osm::Event do
               'dob' => '1980-01-02',
               'patrolid' => '2',
               'f_1' => 'a'
-            },{
+            }, {
               'scoutid' => '5',
               'attending' => 'Yes',
               'firstname' => 'First',
@@ -966,7 +966,7 @@ describe Osm::Event do
     end
 
     it 'Handles missing config from OSM' do
-      events_body = { 'identifier' => 'eventid', 'label' => 'name', 'items' => [{ 'eventid' => '2','name' => 'An Event','startdate' => '2001-02-03','enddate' => '2001-02-05','starttime' => '00:00:00','endtime' => '12:00:00','cost' => '0.00','location' => 'Somewhere','notes' => 'Notes','sectionid' => 1,'googlecalendar' => nil,'archived' => '0','confdate' => nil,'allowchanges' => '1','disablereminders' => '1','attendancelimit' => '3','limitincludesleaders' => '1' }] }
+      events_body = { 'identifier' => 'eventid', 'label' => 'name', 'items' => [{ 'eventid' => '2', 'name' => 'An Event', 'startdate' => '2001-02-03', 'enddate' => '2001-02-05', 'starttime' => '00:00:00', 'endtime' => '12:00:00', 'cost' => '0.00', 'location' => 'Somewhere', 'notes' => 'Notes', 'sectionid' => 1, 'googlecalendar' => nil, 'archived' => '0', 'confdate' => nil, 'allowchanges' => '1', 'disablereminders' => '1', 'attendancelimit' => '3', 'limitincludesleaders' => '1' }] }
       event_body = {
         'eventid' => '2',
         'name' => 'An Event',

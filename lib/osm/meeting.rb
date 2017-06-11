@@ -70,7 +70,7 @@ module Osm
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("programme.php?action=getProgramme&sectionid=#{section_id}&termid=#{term_id}")
-        data = { 'items' => [],'activities' => {} } if data.is_a? Array
+        data = { 'items' => [], 'activities' => {} } if data.is_a? Array
         items = data['items'] || []
         activities = data['activities'] || {}
         badge_links = data['badgelinks'] || {}
@@ -278,14 +278,14 @@ module Osm
 
           badges = []
           links.each do |badge|
-            badges.push(              'badge' => nil,#"activity_animalcarer",
+            badges.push(              'badge' => nil, #"activity_animalcarer",
               'badge_id' => badge.badge_id,
               'badge_version' => badge.badge_version,
               'column_id' => badge.requirement_id,
               'badgeName' => badge.badge_name,
               'badgetype' => badge.badge_type,
-              'columngroup' => nil,#"A",
-              'columnname' => nil,#"a",
+              'columngroup' => nil, #"A",
+              'columnname' => nil, #"a",
               'data' => badge.data,
               'eveningid' => id,
               'meetingdate' => date,

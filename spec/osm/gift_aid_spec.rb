@@ -5,11 +5,11 @@ describe Osm::GiftAid do
     it 'Fetch the donations for a section' do
       data = [
     	  { 'rows' => [
-          { 'name' => 'First name','field' => 'firstname','width' => '100px','formatter' => 'boldFormatter' },
-          { 'name' => 'Last name','field' => 'lastname','width' => '100px','formatter' => 'boldFormatter' },
-          { 'name' => "Tax payer's name",'field' => 'parentname','width' => '150px','editable' => true,'formatter' => 'boldFormatter' },
-          { 'name' => 'Total','field' => 'total','width' => '60px','formatter' => 'boldFormatter' }
-	      ],'noscroll' => true },
+          { 'name' => 'First name', 'field' => 'firstname', 'width' => '100px', 'formatter' => 'boldFormatter' },
+          { 'name' => 'Last name', 'field' => 'lastname', 'width' => '100px', 'formatter' => 'boldFormatter' },
+          { 'name' => "Tax payer's name", 'field' => 'parentname', 'width' => '150px', 'editable' => true, 'formatter' => 'boldFormatter' },
+          { 'name' => 'Total', 'field' => 'total', 'width' => '60px', 'formatter' => 'boldFormatter' }
+	      ], 'noscroll' => true },
 	      { 'rows' => [
           { 'name' => '2000-01-02', 'field' => '2000-01-02', 'width' => '110px', 'editable' => true, 'formatter' => 'boldFormatter' }
       	] }
@@ -26,7 +26,7 @@ describe Osm::GiftAid do
 	      'label' => 'name',
 	      'items' => [
 	        { '2000-01-02' => '1.23', 'total' => 2.34, 'scoutid' => '2', 'firstname' => 'First', 'lastname' => 'Last', 'patrolid' => '3', 'parentname' => 'Tax' },
-	        { '2000-01-02' => 1.23,'firstname' => 'TOTAL','lastname' => '','scoutid' => -1,'patrolid' => -1,'parentname' => '','total' => 1.23 }
+	        { '2000-01-02' => 1.23, 'firstname' => 'TOTAL', 'lastname' => '', 'scoutid' => -1, 'patrolid' => -1, 'parentname' => '', 'total' => 1.23 }
 	      ]
       }
       expect($api).to receive(:post_query).with('giftaid.php?action=getGrid&sectionid=1&termid=2').and_return(data)

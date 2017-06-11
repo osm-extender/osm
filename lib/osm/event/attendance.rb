@@ -82,7 +82,7 @@ module Osm
         }
 
         updated = true
-        fields.changes.each do |field, (was,now)|
+        fields.changes.each do |field, (was, now)|
           data = api.post_query('events.php?action=updateScout', post_data: {
             'scoutid' => member_id,
             'column' => "f_#{field}",

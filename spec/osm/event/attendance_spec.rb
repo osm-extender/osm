@@ -83,13 +83,13 @@ describe Osm::Event::Attendance do
 
     it 'Get audit trail' do
       data = [
-      	{ 'date' => '10/06/2013 19:17','updatedby' => 'My.SCOUT','type' => 'detail','desc' => "Set 'Test' to 'Test data'" },
-      	{ 'date' => '10/06/2013 19:16','updatedby' => 'My.SCOUT','type' => 'attendance','desc' => 'Attendance: Yes' },
-	      { 'date' => '10/06/2013 19:15','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Reserved' },
-	      { 'date' => '10/06/2013 19:14','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: No' },
-	      { 'date' => '10/06/2013 19:13','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Yes' },
-	      { 'date' => '10/06/2013 19:12','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Invited' },
-	      { 'date' => '10/06/2013 19:11','updatedby' => 'A Leader ','type' => 'attendance','desc' => 'Attendance: Show in My.SCOUT' }
+      	{ 'date' => '10/06/2013 19:17', 'updatedby' => 'My.SCOUT', 'type' => 'detail', 'desc' => "Set 'Test' to 'Test data'" },
+      	{ 'date' => '10/06/2013 19:16', 'updatedby' => 'My.SCOUT', 'type' => 'attendance', 'desc' => 'Attendance: Yes' },
+	      { 'date' => '10/06/2013 19:15', 'updatedby' => 'A Leader ', 'type' => 'attendance', 'desc' => 'Attendance: Reserved' },
+	      { 'date' => '10/06/2013 19:14', 'updatedby' => 'A Leader ', 'type' => 'attendance', 'desc' => 'Attendance: No' },
+	      { 'date' => '10/06/2013 19:13', 'updatedby' => 'A Leader ', 'type' => 'attendance', 'desc' => 'Attendance: Yes' },
+	      { 'date' => '10/06/2013 19:12', 'updatedby' => 'A Leader ', 'type' => 'attendance', 'desc' => 'Attendance: Invited' },
+	      { 'date' => '10/06/2013 19:11', 'updatedby' => 'A Leader ', 'type' => 'attendance', 'desc' => 'Attendance: Show in My.SCOUT' }
       ]
 
       expect($api).to receive(:post_query).with('events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3').and_return(data)

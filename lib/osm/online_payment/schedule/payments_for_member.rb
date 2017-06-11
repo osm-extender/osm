@@ -27,7 +27,7 @@ module Osm
         # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @return true, false
         def latest_status_for(payment)
-          @latest_status ||= payments.map { |k,v| [k, v.sort.first] }.to_h
+          @latest_status ||= payments.map { |k, v| [k, v.sort.first] }.to_h
           @latest_status[payment.to_i]
         end
 

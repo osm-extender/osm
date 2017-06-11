@@ -90,7 +90,7 @@ module Osm
         end
         reset_changed_attributes if updated
 
-        donations.changes.each do |date, (_was,now)|
+        donations.changes.each do |date, (_was, now)|
           date = date.strftime(Osm::OSM_DATE_FORMAT)
           result = api.post_query('giftaid.php?action=updateScout', post_data: {
             'scoutid' => member_id,

@@ -107,7 +107,7 @@ describe Osm::Meeting do
     it 'Fetch badge requirements for a meeting (from API)' do
       allow(Osm::Model).to receive('has_permission?').and_return(true)
       allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 3, type: :cubs) }
-      badges_body = [{ 'a' => 'a' },{ 'a' => 'A' }]
+      badges_body = [{ 'a' => 'a' }, { 'a' => 'A' }]
       expect($api).to receive(:post_query).with('users.php?action=getActivityRequirements&date=2000-01-02&sectionid=3&section=cubs').and_return(badges_body)
 
       meeting = Osm::Meeting.new(date: Date.new(2000, 1, 2), section_id: 3)

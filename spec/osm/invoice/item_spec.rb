@@ -45,8 +45,8 @@ describe Osm::Invoice::Item do
   describe 'Using the OSM API' do
 
     it 'Get for invoice' do
-      data = { 'identifier' => 'id','items' => [
-        { 'id' => '1','invoiceid' => '2','recordid' => '3','sectionid' => '4','entrydate' => '2012-01-02','amount' => '1.23','type' => 'Expense','payto_userid' => 'John Smith','comments' => 'Comment','categoryid' => 'Default','firstname' => 'John Smith' }
+      data = { 'identifier' => 'id', 'items' => [
+        { 'id' => '1', 'invoiceid' => '2', 'recordid' => '3', 'sectionid' => '4', 'entrydate' => '2012-01-02', 'amount' => '1.23', 'type' => 'Expense', 'payto_userid' => 'John Smith', 'comments' => 'Comment', 'categoryid' => 'Default', 'firstname' => 'John Smith' }
       ] }
       expect($api).to receive(:post_query).with('finances.php?action=getInvoiceRecords&invoiceid=2&sectionid=4&dateFormat=generic').and_return(data)
 

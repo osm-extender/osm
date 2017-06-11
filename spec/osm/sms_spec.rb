@@ -53,7 +53,7 @@ describe Osm::Sms do
         'scouts' => '4',
         'source' => '441234567890',
         'type' => ''
-      }) { { 'result' => false,'config' => {} } }
+      }) { { 'result' => false, 'config' => {} } }
 
       result = Osm::Sms.send_sms(
         api:     $api,
