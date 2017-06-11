@@ -118,14 +118,14 @@ module Osm
           end
           badge.other_requirements_required.each do |c|
             # {id: ###, min: #}
-            if requirements.has_key?(c[:id]) # Only check it if the data is in the requirements Hash
+            if requirements.key?(c[:id]) # Only check it if the data is in the requirements Hash
               return false unless requirement_met?(c[:id])
               return false if requirements[c[:id]].to_i < c[:min]
             end
           end
           badge.badges_required.each do |b|
             # {id: ###, version: #}
-            #TODO
+            # TODO
           end
           true
         end
@@ -159,11 +159,9 @@ module Osm
       # Check if this badge has been started
       # @return true, false whether the badge has been started by the member (always false if the badge has been completed)
       def started?
-        if badge.has_levels?
-          return (started > due)
-        end
+        return (started > due) if badge.has_levels?
         return false if due?
-        requirements.each do |key, value|
+        requirements.each do |key, _value|
           return true if requirement_met?(key)
         end
         false
@@ -234,8 +232,8 @@ module Osm
                   (result['awardeddate'] == date_formatted)
 
         if updated
-          awarded = level
-          awarded_date = date
+          self.awarded = level
+          self.awarded_date = date
         end
         updated
       end
@@ -289,7 +287,7 @@ module Osm
         # Update requirements that changed
         requirements_updated = true
         editable_requirements = badge.requirements.select(&:editable).map(&:id)
-        requirements.changes.each do |requirement, (was, now)|
+        requirements.changes.each do |requirement, (_was, now)|
           next unless editable_requirements.include?(requirement)
           result = api.post_query('ext/badges/records/?action=updateSingleRecord', post_data: {
             'scoutid' => member_id,
