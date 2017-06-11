@@ -57,24 +57,23 @@ module Osm
           data = data['items']
           data.each do |item|
             next unless item.is_a?(Hash)
-            unless item['scoutid'].to_i < 0  # It's a total row
-              attendance = {}
-              dates_d.each_with_index do |date, index|
-                item_attendance = item[dates_s[index]]
-                attendance[date] = :unadvised_absent
-                attendance[date] = :yes if item_attendance.eql?('Yes')
-                attendance[date] = :advised_absent if item_attendance.eql?('No')
-              end
-              to_return.push Osm::Register::Attendance.new(
-                member_id: Osm.to_i_or_nil(item['scoutid']),
-                grouping_id: Osm.to_i_or_nil(item ['patrolid']),
-                section_id: section_id,
-                first_name: item['firstname'],
-                last_name: item['lastname'],
-                total: item['total'].to_i,
-                attendance: attendance
-              )
+            next if item['scoutid'].to_i < 0  # It's a total row
+            attendance = {}
+            dates_d.each_with_index do |date, index|
+              item_attendance = item[dates_s[index]]
+              attendance[date] = :unadvised_absent
+              attendance[date] = :yes if item_attendance.eql?('Yes')
+              attendance[date] = :advised_absent if item_attendance.eql?('No')
             end
+            to_return.push Osm::Register::Attendance.new(
+              member_id: Osm.to_i_or_nil(item['scoutid']),
+              grouping_id: Osm.to_i_or_nil(item ['patrolid']),
+              section_id: section_id,
+              first_name: item['firstname'],
+              last_name: item['lastname'],
+              total: item['total'].to_i,
+              attendance: attendance
+            )
           end
         end
         to_return
