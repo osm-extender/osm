@@ -236,7 +236,7 @@ module Osm
     # @return true, false true
     def delete(api)
       require_ability_to(api: api, to: :write, on: :programme, section: section_id)
-      data = api.post_query("programme.php?action=deleteEvening&eveningid=#{id}&sectionid=#{section_id}")
+      api.post_query("programme.php?action=deleteEvening&eveningid=#{id}&sectionid=#{section_id}")
 
       # The cached programmes for the section will be out of date - remove them
       Osm::Term.get_for_section(api, section_id).each do |term|
@@ -276,20 +276,21 @@ module Osm
           badges = []
           links.each do |badge|
             badges.push(
-              'badge' => nil, #"activity_animalcarer",
+              'badge' => nil, # "activity_animalcarer",
               'badge_id' => badge.badge_id,
               'badge_version' => badge.badge_version,
               'column_id' => badge.requirement_id,
               'badgeName' => badge.badge_name,
               'badgetype' => badge.badge_type,
-              'columngroup' => nil, #"A",
-              'columnname' => nil, #"a",
+              'columngroup' => nil, # "A",
+              'columnname' => nil, # "a",
               'data' => badge.data,
               'eveningid' => id,
               'meetingdate' => date,
               'name' => badge.requirement_label,
               'section' => badge.badge_section,
-              'sectionid' => section_id)
+              'sectionid' => section_id
+            )
           end
         end # if to pick which method to use to get the data from OSM
 
