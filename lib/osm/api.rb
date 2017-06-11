@@ -129,10 +129,8 @@ module Osm
 
       # Add required attributes for user authentication
       if has_valid_user?
-        post_data.merge!(
-          'userid' => user_id,
-          'secret' => user_secret
-        )
+        post_data['userid'] = user_id
+        post_data['secret'] = user_secret
       end
 
       uri = URI("#{BASE_URLS[site]}/#{path}")
@@ -189,11 +187,9 @@ module Osm
     # @!macro options_get
     # @return [Array<Hash>] data returned by OSM
     def get_user_roles(**args)
-      begin
-        get_user_roles!(**args)
+      get_user_roles!(**args)
       rescue Osm::NoActiveRoles
         return []
-      end
     end
 
     # Get API user's roles in OSM
@@ -211,7 +207,6 @@ module Osm
             # false equates to no roles
             fail Osm::NoActiveRoles, 'You do not have any active roles in OSM.'
           end
-
         rescue Osm::Error => e
           if e.message.eql?('false')
             fail Osm::NoActiveRoles, 'You do not have any active roles in OSM.'
