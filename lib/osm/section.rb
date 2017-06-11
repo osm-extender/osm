@@ -188,7 +188,7 @@ module Osm
           myscout_programme: myscout_data['programme'] == 1,
           myscout_payments: myscout_data['payments'] == 1,
           myscout_details: myscout_data['details'] == 1,
-          myscout_emails: (myscout_data['emails'] || {}).inject({}) { |n, (k, v)| n[k.to_sym] = v.eql?('true'); n },
+          myscout_emails: (myscout_data['emails'] || {}).each_with_object({}) { |(key, val), hash| hash[key.to_sym] = val.eql?('true') },
           myscout_email_address_from: myscout_data['emailAddress'] ? myscout_data['emailAddress'] : '',
           myscout_email_address_copy: myscout_data['emailAddressCopy'] ? myscout_data['emailAddressCopy'] : '',
           myscout_badges_partial: myscout_data['badgesPartial'] == 1,
