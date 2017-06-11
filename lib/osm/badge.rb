@@ -276,7 +276,7 @@ module Osm
             member_id: Osm.to_i_or_nil(item['scout_id'])
           }
 
-          badge_data = Hash[item.to_a.select { |k, v| !!k.match(/\d+_\d+/) }]
+          badge_data = Hash[item.to_a.select { |k, _v| k.match(/\d+_\d+/) }]
           badge_data.each do |badge_identifier, status|
             if status.is_a?(String)
               # Possible statuses:
@@ -341,7 +341,7 @@ module Osm
             badge: self
           )
         end
-      end #cache fetch
+      end # cache fetch
     end
 
 
@@ -375,15 +375,6 @@ module Osm
       @module_ids ||= modules.map(&:id).sort
     end
 
-
-    protected
-
-    def sort_by
-      ['name', 'id', '-version']
-    end
-
-
-    private
 
     # return an array of hashes representing the modules of the badge
     def self.module_completion_data(api:, badge:, no_read_cache: false)
@@ -420,13 +411,15 @@ module Osm
           [
             Osm.to_i_or_nil(i['badge_id']),
             Osm.to_i_or_nil(i['badge_version']),
-            Osm::Badge::RequirementModule.new(              id: Osm.to_i_or_nil(i['module_id']),
+            Osm::Badge::RequirementModule.new(
+              id: Osm.to_i_or_nil(i['module_id']),
               letter: i['module_letter'],
               min_required: i['num_required'].to_i,
               custom_columns: i['custom_columns'].to_i,
               completed_into_column: i['completed_into_column_id'].to_i.eql?(0) ? nil : i['completed_into_column_id'].to_i,
               numeric_into_column: i['numeric_into_column_id'].to_i.eql?(0) ? nil : i['numeric_into_column_id'].to_i,
-              add_column_id_to_numeric: i['add_column_id_to_numeric'].to_i.eql?(0) ? nil : i['add_column_id_to_numeric'].to_i)
+              add_column_id_to_numeric: i['add_column_id_to_numeric'].to_i.eql?(0) ? nil : i['add_column_id_to_numeric'].to_i
+            )
           ]
         end # osm_data.map!
 
@@ -440,13 +433,17 @@ module Osm
       end # cache fetch
     end
 
-    public
-
     def self.type
       nil
     end
     def type
       self.class.type
+    end
+
+    protected
+
+    def sort_by
+      ['name', 'id', '-version']
     end
 
     private
@@ -457,6 +454,8 @@ module Osm
     def subscription_required
       self.class.subscription_required
     end
+
+    private_class_method :module_completion_data, :get_module_completion_data, :subscription_required
 
   end
 end
