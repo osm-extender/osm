@@ -46,9 +46,9 @@ module Osm
 
       # Calculate the total number of badges needed
       # @return [Hash] the total number of each badge which is due
-      def totals()
+      def totals
         totals = {}
-        by_member.each do |member_name, badges|
+        by_member.each do |_member_name, badges|
           badges.each do |badge|
             totals[badge] ||= 0
             totals[badge] += 1
