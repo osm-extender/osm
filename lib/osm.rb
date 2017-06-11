@@ -34,9 +34,9 @@ module Osm
   OSM_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'.freeze
   OSM_DATE_FORMAT_HUMAN = '%d/%m/%Y'.freeze
   OSM_DATETIME_FORMAT_HUMAN = '%d/%m/%Y %H:%M:%S'.freeze
-  OSM_TIME_REGEX = /\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z/
-  OSM_DATE_REGEX_UNANCHORED = /(?:[1-9]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1]))|(?:(?:0?[1-9]|[1-2][0-9]|3[0-1])\/(?:0?[1-9]|1[0-2])\/(?:\d{2}|[1-9]\d{3}))/
-  OSM_DATE_REGEX = /\A#{Osm::OSM_DATE_REGEX_UNANCHORED.to_s}\Z/
+  OSM_TIME_REGEX = %r{\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z}
+  OSM_DATE_REGEX_UNANCHORED = %r{(?:[1-9]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1]))|(?:(?:0?[1-9]|[1-2][0-9]|3[0-1])/(?:0?[1-9]|1[0-2])/(?:\d{2}|[1-9]\d{3}))}
+  OSM_DATE_REGEX = %r{\A#{Osm::OSM_DATE_REGEX_UNANCHORED.to_s}\Z}
   subscription_level_names = {
     1 => 'Bronze',
     bronze: 'Bronze',

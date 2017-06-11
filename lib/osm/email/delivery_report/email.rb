@@ -28,7 +28,7 @@ module Osm
 
 
         def to_s
-          "To: #{to}\nFrom: #{from}\n\n#{subject}\n\n#{body.gsub(/<\/?[^>]*>/, '')}"
+          "To: #{to}\nFrom: #{from}\n\n#{subject}\n\n#{body.gsub(%r{</?[^>]*>}, '')}"
         end
 
         protected

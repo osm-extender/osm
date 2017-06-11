@@ -105,7 +105,7 @@ module Osm
     validates_presence_of :date_of_birth
     validates_presence_of :started_section
     validates_presence_of :joined_movement
-    validates_format_of :age, with: /\A[0-9]{1,3} \/ (?:0?[0-9]|1[012])\Z/, message: 'age is not in the correct format (yy / mm)', allow_blank: true
+    validates_format_of :age, with: %r{\A[0-9]{1,3} / (?:0?[0-9]|1[012])\Z}, message: 'age is not in the correct format (yy / mm)', allow_blank: true
     validates_inclusion_of :gender, in: [:male, :female, :other, :unspecified], allow_nil: true
     validates :contact, validity: { allow_nil: true }
     validates :primary_contact, validity: { allow_nil: true }
