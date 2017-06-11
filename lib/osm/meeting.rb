@@ -94,7 +94,7 @@ module Osm
           unless our_activities.nil?
             our_activities.each do |activity_data|
               if activity_data.is_a?(Array)
-                activity_data = activity_data.find { |a| a.is_a?(Hash) && a.has_key?('activityid') }
+                activity_data = activity_data.find { |a| a.is_a?(Hash) && a.key?('activityid') }
               end
               attributes[:activities].push Osm::Meeting::Activity.new(
                 activity_id: Osm.to_i_or_nil(activity_data['activityid']),

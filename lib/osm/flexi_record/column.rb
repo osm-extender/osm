@@ -40,7 +40,7 @@ module Osm
           'columnName' => name
         })
 
-        if data.is_a?(Hash) && data.has_key?('config')
+        if data.is_a?(Hash) && data.key?('config')
           JSON.parse(data['config']).each do |f|
             next unless (f['id'] == id) && (f['name'] == name)
             reset_changed_attributes
@@ -64,7 +64,7 @@ module Osm
           'columnId' => id
         })
 
-        if data.is_a?(Hash) && data.has_key?('config')
+        if data.is_a?(Hash) && data.key?('config')
           JSON.parse(data['config']).each do |f|
             if f['id'] == id
               # It wasn't deleted
