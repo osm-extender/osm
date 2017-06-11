@@ -167,20 +167,20 @@ module Osm
 
       return nil if response.body.empty?
       case response.content_type
-        when 'application/json', 'text/html'
-          begin
-            decoded = JSON.parse(response.body)
-            if osm_error = get_osm_error(decoded)
-              fail Osm::Error, osm_error if osm_error
-            end
-            return decoded
-          rescue JSON::ParserError
-            fail Osm::Error, response.body
+      when 'application/json', 'text/html'
+        begin
+          decoded = JSON.parse(response.body)
+          if osm_error = get_osm_error(decoded)
+            fail Osm::Error, osm_error if osm_error
           end
-        when 'image/jpeg'
-          return response.body
-        else
-          fail Osm::Error, "Unhandled content-type: #{response.content_type}"
+          return decoded
+        rescue JSON::ParserError
+          fail Osm::Error, response.body
+        end
+      when 'image/jpeg'
+        return response.body
+      else
+        fail Osm::Error, "Unhandled content-type: #{response.content_type}"
       end
     end
 
