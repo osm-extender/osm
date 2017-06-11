@@ -41,7 +41,7 @@ module Osm
       validates_numericality_of :grouping_id, only_integer: true, greater_than_or_equal_to: -2
       validates :fields, hash: { key_type: Integer, value_type: String }
       validates :payments, hash: { key_type: Integer, value_type: String }
-      validates_each :event do |record, attr, value|
+      validates_each :event do |record, _attr, _value|
         record.event.valid?
       end
       validates_presence_of :first_name
@@ -82,7 +82,7 @@ module Osm
         }
 
         updated = true
-        fields.changes.each do |field, (was, now)|
+        fields.changes.each do |field, (_was, now)|
           data = api.post_query('events.php?action=updateScout', post_data: {
             'scoutid' => member_id,
             'column' => "f_#{field}",
@@ -205,7 +205,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, options = { replace_with: { 'event' => :id } })
+        Osm.inspect_instance(self, options: { replace_with: { 'event' => :id } })
       end
 
       private
