@@ -61,13 +61,13 @@ end
 module OsmTest
   class Cache
     @@cache = {}
-    def self.write(key, data, options={})
+    def self.write(key, data, _options={})
       @@cache[key] = data
     end
     def self.read(key)
       @@cache[key]
     end
-    def self.fetch(key, options={})
+    def self.fetch(key, _options={})
       value = read(key)
       return value unless value.nil?
       write(key, yield)
