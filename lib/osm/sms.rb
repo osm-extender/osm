@@ -11,7 +11,7 @@ module Osm
     # @raise [Osm::Error] if the section doesn't have enough credits to send the message
     def self.send_sms(api:, section:, members:, source_address:, message:)
       Osm::Model.require_access_to_section(api: api, section: section)
-      fail Osm::Error, 'You do not have enough credits to send that message.' if number_selected(api: api, section: section, members: members) > remaining_credits(api: api, section: section) 
+      fail Osm::Error, 'You do not have enough credits to send that message.' if number_selected(api: api, section: section, members: members) > remaining_credits(api: api, section: section)
 
       members = [*members]
       data = api.post_query("ext/members/sms/?action=sendText&sectionid=#{section.to_i}", post_data: {
@@ -51,7 +51,7 @@ module Osm
     # @param members [Array<Osm::Member, Integer, #to_i>, Osm::Member, Integer, #to_i] the members (or their IDs) to send the message to
     # @return [Integer] the number of SMS credits which will be used
     def self.number_selected(api:, section:, members:)
-      Osm::Model.require_access_to_section(api: api, section: section) 
+      Osm::Model.require_access_to_section(api: api, section: section)
 
       members = [*members]
       data = api.post_query("ext/members/sms/?action=getNumbers&sectionid=#{section.to_i}&type=", post_data: {

@@ -45,7 +45,7 @@ describe Osm::ApiAccess do
     describe 'Get All' do
       it 'From OSM' do
         api_accesses = Osm::ApiAccess.get_all(api: $api, section: 1)
-  
+
         expect(api_accesses.size).to eq(2)
         api_access = api_accesses[0]
         expect(api_access.id).to eq(1)

@@ -117,5 +117,5 @@ module Osm
       response.is_a?(Array)
     end
 
-  end  
+  end
 end

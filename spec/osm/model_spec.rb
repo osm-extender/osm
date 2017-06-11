@@ -176,7 +176,7 @@ describe Osm::Model do
       OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-2", '2')
       expect(ModelTester.test_get_all($api, 'items', 'item')).to eq(['1', '2'])
     end
-    
+
     it 'An item not in cache' do
       OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-items", [1, 2])
       OsmTest::Cache.write("OSMAPI-#{Osm::VERSION}-osm-item-1", '1')
@@ -343,7 +343,7 @@ describe Osm::Model do
 
       it "Doesn't have access" do
         expect(Osm::Model.has_access_to_section?(api: $api, section: 2)).to eq(false)
-      end 
+      end
 
     end
 

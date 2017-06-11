@@ -195,7 +195,7 @@ describe Osm::Term do
           ])
         expect(Osm::Term.get_current_term_for_section(api: $api, section: 9).id).to eq(2)
       end
-    
+
       it 'Raises an error if there is no current term' do
         expect($api).to receive(:post_query).with('api.php?action=getTerms').and_return(          '9' => [
             { 'termid' => '1', 'name' => 'Term 1', 'sectionid' => '9', 'startdate' => (Date.today + 31).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 31).strftime('%Y-%m-%d') }

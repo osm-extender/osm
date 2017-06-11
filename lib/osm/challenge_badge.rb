@@ -7,7 +7,7 @@ module Osm
       :challenge
     end
 
-    def self.type_id 
+    def self.type_id
       1
     end
 

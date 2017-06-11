@@ -47,7 +47,7 @@ module Osm
         attributes[:id] = item['apiid'].to_i
         attributes[:name] = item['name']
         attributes[:permissions] = item['permissions'].is_a?(Hash) ? item['permissions'] : {}
-  
+
         # Rubyify permissions hash
         attributes[:permissions].keys.each do |old_key|
           new_key = (old_key.to_sym rescue old_key)    # Get symbol of the key

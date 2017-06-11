@@ -48,7 +48,7 @@ module Osm
     # @!attribute [rw] grouping_leader_label
     #   @return [String] whether the member is the grouping leader
     # @!attribute [rw] age
-    #   @return [String] the member's current age (yy/mm) 
+    #   @return [String] the member's current age (yy/mm)
     # @!attribute [rw] gender
     #   @return [Symbol] the member's gender (:male, :female, :other or :unspecified)
     # @!attribute [rw] date_of_birth

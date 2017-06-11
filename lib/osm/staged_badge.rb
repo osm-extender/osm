@@ -7,7 +7,7 @@ module Osm
       :staged
     end
 
-    def self.type_id 
+    def self.type_id
       3
     end
 

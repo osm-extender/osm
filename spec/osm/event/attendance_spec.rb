@@ -14,7 +14,7 @@ describe Osm::Event::Attendance do
       event: Osm::Event.new(id: 1, section_id: 1, name: 'Name', columns: [])
     }
 
-    ea = Osm::Event::Attendance.new(data)  
+    ea = Osm::Event::Attendance.new(data)
     expect(ea.member_id).to eq(1)
     expect(ea.grouping_id).to eq(2)
     expect(ea.fields).to eq({})

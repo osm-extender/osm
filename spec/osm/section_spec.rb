@@ -41,7 +41,7 @@ describe Osm::Section do
     section = Osm::Section.new(@attributes)
 
     expect(section.id).to eq(1)
-    expect(section.name).to eq('Name') 
+    expect(section.name).to eq('Name')
     expect(section.subscription_level).to eq(2)
     expect(section.subscription_expires).to eq(Date.today + 60)
     expect(section.type).to eq(:cubs)
@@ -102,10 +102,10 @@ describe Osm::Section do
       it 'From OSM' do
         sections = Osm::Section.get_all(api: $api)
         expect(sections.map(&:id)).to eq([1, 2])
-  
+
         section = sections[0]
         expect(section.id).to eq(1)
-        expect(section.name).to eq('Section 1') 
+        expect(section.name).to eq('Section 1')
         expect(section.subscription_level).to eq(1)
         expect(section.subscription_expires).to eq(Date.new(2013, 1, 5))
         expect(section.type).to eq(:beavers)
@@ -145,7 +145,7 @@ describe Osm::Section do
         expect(Osm::Section.get_all(api: $api)).to eq(sections)
       end
     end
-  
+
     describe 'Gets a section' do
       it 'From OSM' do
         section = Osm::Section.get(api: $api, id: 1)
@@ -331,8 +331,8 @@ describe Osm::Section do
       expect(section.subscription_at_least?(:gold_plus)).to eq(false)
       expect(section.subscription_at_least?(1)).to eq(true)
       expect(section.subscription_at_least?(2)).to eq(true)
-      expect(section.subscription_at_least?(3)).to eq(false) 
-      expect(section.subscription_at_least?(4)).to eq(false) 
+      expect(section.subscription_at_least?(3)).to eq(false)
+      expect(section.subscription_at_least?(4)).to eq(false)
     end
 
     it 'Gold' do
@@ -343,8 +343,8 @@ describe Osm::Section do
       expect(section.subscription_at_least?(:gold_plus)).to eq(false)
       expect(section.subscription_at_least?(1)).to eq(true)
       expect(section.subscription_at_least?(2)).to eq(true)
-      expect(section.subscription_at_least?(3)).to eq(true) 
-      expect(section.subscription_at_least?(4)).to eq(false) 
+      expect(section.subscription_at_least?(3)).to eq(true)
+      expect(section.subscription_at_least?(4)).to eq(false)
     end
 
     it 'Gold+' do
@@ -355,8 +355,8 @@ describe Osm::Section do
       expect(section.subscription_at_least?(:gold_plus)).to eq(true)
       expect(section.subscription_at_least?(1)).to eq(true)
       expect(section.subscription_at_least?(2)).to eq(true)
-      expect(section.subscription_at_least?(3)).to eq(true) 
-      expect(section.subscription_at_least?(4)).to eq(true) 
+      expect(section.subscription_at_least?(3)).to eq(true)
+      expect(section.subscription_at_least?(4)).to eq(true)
     end
 
     it 'Unknown' do
@@ -367,8 +367,8 @@ describe Osm::Section do
       expect(section.subscription_at_least?(:gold_plus)).to eq(false)
       expect(section.subscription_at_least?(1)).to eq(false)
       expect(section.subscription_at_least?(2)).to eq(false)
-      expect(section.subscription_at_least?(3)).to eq(false) 
-      expect(section.subscription_at_least?(4)).to eq(false) 
+      expect(section.subscription_at_least?(3)).to eq(false)
+      expect(section.subscription_at_least?(4)).to eq(false)
     end
 
   end # describe

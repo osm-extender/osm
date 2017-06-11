@@ -6,7 +6,7 @@ describe Osm::MyScout::ParentLoginHistory do
       { 'scoutid' => '3', 'firstname' => 'Jane', 'lastname' => 'Jones', 'numlogins' => 1, 'lastlogin' => '10/11/2015 14:21' }
     ] }
     expect($api).to receive(:post_query).with('ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=1').and_return(data)
-    
+
     histories = Osm::MyScout::ParentLoginHistory.get_for_section(api: $api, section: 1)
     expect(histories.size).to eq(2)
     expect(histories[0].member_id).to eq(2)
@@ -27,7 +27,7 @@ describe Osm::MyScout::ParentLoginHistory do
     ] }
 
     expect($api).to receive(:post_query).with('ext/settings/parents/loginhistory/?action=getLoginHistory&sectionid=1').and_return(data)
-    
+
     history = Osm::MyScout::ParentLoginHistory.get_for_section(api: $api, section: 1)[0]
     expect(history.last_login).to be_nil
   end

@@ -99,7 +99,7 @@ module Osm
     # Get the current term for a given section
     # @param api [Osm::Api] The api to use to make the request
     # @param section [Osm::Section, Integer, #to_i] The section (or its ID)  to get terms for
-    # @!macro options_get 
+    # @!macro options_get
     # @return [Osm::Term, nil] The current term or nil if the user can not access that section
     # @raise [Osm::Error::NoCurrentTerm] If the Section doesn't have a Term which is current
     def self.get_current_term_for_section(api:, section:, no_read_cache: false)

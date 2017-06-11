@@ -67,7 +67,7 @@ describe Osm::Invoice::Item do
     end
 
     describe 'Create' do
- 
+
       it 'Success' do
         invoice = Osm::Invoice.new(id: 3, section_id: 2)
         item = Osm::Invoice::Item.new(

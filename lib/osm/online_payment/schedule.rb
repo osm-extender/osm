@@ -209,7 +209,7 @@ module Osm
       def to_s
         "#{id} -> #{name}"
       end
-      
+
       def sort_by
         [:section_id, :name, :id]
       end

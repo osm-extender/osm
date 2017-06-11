@@ -279,7 +279,7 @@ module Osm
           badge_data = Hash[item.to_a.select { |k, v| !!k.match(/\d+_\d+/) }]
           badge_data.each do |badge_identifier, status|
             if status.is_a?(String)
-              # Possible statuses: 
+              # Possible statuses:
               # 'Started',
               # 'Due', 'Due Lvl 2'
               # 'Awarded', 'Awarded Lvl 2', '01/02/2003', '02/03/2004 (Lvl 2)'
@@ -355,7 +355,7 @@ module Osm
 
     def module_map
       @module_map ||= Hash[
-        *modules.map { |m| 
+        *modules.map { |m|
           [m.id, m.letter, m.letter, m.id]
         }.flatten
       ].except('z')

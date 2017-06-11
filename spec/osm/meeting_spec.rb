@@ -120,7 +120,7 @@ describe Osm::Meeting do
       allow(Osm::Activity).to receive(:get) { Osm::Activity.new(badges: [
         Osm::Activity::Badge.new(badge_type: :activity, badge_section: :beavers, requirement_label: 'label', data: 'data', badge_name: 'badge', badge_id: 2, badge_version: 0, requirement_id: 200)
       ]) }
-  
+
       meeting = Osm::Meeting.new(
         id: 2,
         date: Date.new(2000, 1, 2),

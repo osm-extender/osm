@@ -7,7 +7,7 @@ module Osm
       :activity
     end
 
-    def self.type_id 
+    def self.type_id
       2
     end
 

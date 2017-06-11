@@ -13,7 +13,7 @@ module Osm
     @@cache = nil
     @@prepend_to_cache_key = 'OSMAPI'
     @@cache_ttl = 600
-    
+
 
     # Configure the options used by all models
     # @param cache [Class, nil] An instance of a cache class, must provide the methods (exist?, delete, write, read, fetch), for details see Rails.cache. Set to nil to disable caching.

@@ -148,7 +148,7 @@ module Osm
         if cache_exist?(api: api, key: cache_key)
           return cache_read(api: api, key: cache_key)
         end
-  
+
         # Try generating from cached events
         if cache_exist?(api: api, key: events_cache_key)
           ids = cache_read(api: api, key: events_cache_key)

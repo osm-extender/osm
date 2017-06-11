@@ -314,7 +314,7 @@ module Osm
           due_updated = mark_due(api, due)
         end
 
-        # Update awarded if it changed 
+        # Update awarded if it changed
         awarded_updated = true
         if changed_attributes.include?('awarded') || changed_attributes.include?('awarded_date')
           awarded_updated = mark_awarded(api, awarded_date, awarded)

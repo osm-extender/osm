@@ -23,7 +23,7 @@ module Osm
       #   @return [Hash] keys are the payment's id, values are the payment state
       # @!attribute [rw] payment_control
       #   @return [Symbol] whether payments are done manually or automatically (either :manual, :automatic or nil)
-  
+
       attribute :row, type: Integer
       attribute :member_id, type: Integer
       attribute :grouping_id, type: Integer

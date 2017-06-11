@@ -19,7 +19,7 @@ describe Osm::Activity do
 
 
   describe 'Using The API' do
-  
+
     it 'Get One' do
       body = {
           'details' => {
@@ -79,7 +79,7 @@ describe Osm::Activity do
       expect($api).to receive(:post_query).with('programme.php?action=getActivity&id=1').and_return(body)
 
       activity = Osm::Activity.get(api: $api, id: 1)
-  
+
       expect(activity.id).to eq(1)
       expect(activity.version).to eq(0)
       expect(activity.group_id).to eq(2)
@@ -115,8 +115,8 @@ describe Osm::Activity do
       expect(activity.badges[0].data).to eq('Yes')
       expect(activity.valid?).to eq(true)
     end
-  
-  
+
+
     it 'Add activity to programme (succeded)' do
       post_data = {
         'meetingdate' => '2000-01-02',
@@ -125,11 +125,11 @@ describe Osm::Activity do
         'notes' => 'Notes'
       }
       expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return('result' => 0)
-  
+
       activity = Osm::Activity.new(id: 2)
       expect(activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes')).to eq(true)
     end
-  
+
     it 'Add activity to programme (failed)' do
       post_data = {
         'meetingdate' => '2000-01-02',
@@ -142,8 +142,8 @@ describe Osm::Activity do
       activity = Osm::Activity.new(id: 2)
       expect(activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes')).to eq(false)
     end
-  
-  
+
+
     it 'Update activity in OSM (succeded)' do
       post_data = {
         'title' => 'title',
@@ -161,9 +161,9 @@ describe Osm::Activity do
         'sectionid' => 1,
         'secretEdit' => true
       }
-  
+
       expect($api).to receive(:post_query).with('programme.php?action=update', post_data: post_data).and_return('result' => true)
-  
+
       activity = Osm::Activity.new(
         id: 2,
         title: 'title',
@@ -190,7 +190,7 @@ describe Osm::Activity do
       )
       expect(activity.update(api: $api, section: 1, secret_update: true)).to eq(true)
     end
-  
+
     it 'Update activity in OSM (failed)' do
       activity = Osm::Activity.new(
         id: 2,
@@ -204,7 +204,7 @@ describe Osm::Activity do
       expect($api).to receive(:post_query).and_return('result' => false)
       expect(activity.update(api: $api, section: 1, secret_update: true)).to eq(false)
     end
-  
+
   end
 
 end

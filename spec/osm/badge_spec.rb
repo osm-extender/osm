@@ -59,7 +59,7 @@ describe Osm::Badge do
       expect(badge.level_requirement).to be_nil
       expect(badge.valid?).to eq(true)
     end
-    
+
     it 'Valid with nil for add_columns_to_module' do
       badge = Osm::Badge.new(@badge_options.merge(add_columns_to_module: nil))
       expect(badge.add_columns_to_module).to be_nil
