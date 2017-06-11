@@ -7,7 +7,7 @@ module Osm
         phones = []
         phones.push phone_1.gsub(/[^\d\+]/, '') if receive_phone_1
         phones.push phone_2.gsub(/[^\d\+]/, '') if receive_phone_2
-        phones.select { |n| !n.blank? }.map { |n| n }
+        phones.reject { |n| n.blank? }.map { |n| n }
       end
 
     end
