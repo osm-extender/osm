@@ -178,7 +178,7 @@ module Osm
           flexi_records: flexi_records.sort,
           group_id: role_data['groupid'],
           group_name: role_data['groupname'],
-          gocardless: (section_data['gocardless'] || 'false').downcase.eql?('true'),
+          gocardless: (section_data['gocardless'] || 'false').casecmp('true').eql?(0),
           myscout_events_expires: Osm.parse_date(portal_expires['events']),
           myscout_badges_expires: Osm.parse_date(portal_expires['badges']),
           myscout_programme_expires: Osm.parse_date(portal_expires['programme']),

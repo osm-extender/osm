@@ -336,7 +336,7 @@ module Osm
       def requirement_met?(requirement_id)
         data = requirements[requirement_id.to_i].to_s
         return false if data == '0'
-        !(data.blank? || data[0].downcase.eql?('x'))
+        !(data.blank? || data[0].casecmp('x').eql?(0))
       end
 
       protected
