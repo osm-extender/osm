@@ -136,7 +136,7 @@ module Osm
 
         data = api_response['data'].is_a?(Hash) ? api_response['data'].values : []
         structure = (api_response['meta'] || {})['structure'] || []
-        structure = structure.map { |i| [i['group_id'].to_i, i ] }.to_h # Make a hash of identifier to group data hash
+        structure = structure.map { |i| [i['group_id'].to_i, i] }.to_h # Make a hash of identifier to group data hash
 
         custom_labels = {}
         key_key = 'column_id'   # the key in the data from OSM to use as the key in additional_information and labels hashes
@@ -148,15 +148,15 @@ module Osm
         data.map do |item|
           item_data = item['custom_data'].map { |k, v| [k.to_i, v] }.to_h
           member_contact = item_data[GID_MEMBER_CONTACT].nil? ? nil : item_data[GID_MEMBER_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
-          member_custom = item_data[GID_MEMBER_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_MEMBER_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
+          member_custom = item_data[GID_MEMBER_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_MEMBER_CONTACT].reject { |k, _v| CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
           primary_contact = item_data[GID_PRIMARY_CONTACT].nil? ? nil : item_data[GID_PRIMARY_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
           primary_custom = item_data[GID_PRIMARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_PRIMARY_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
           secondary_contact = item_data[GID_SECONDARY_CONTACT].nil? ? nil : item_data[GID_SECONDARY_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
-          secondary_custom = item_data[GID_SECONDARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_SECONDARY_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
+          secondary_custom = item_data[GID_SECONDARY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_SECONDARY_CONTACT].reject { |k, _v| CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
           emergency_contact = item_data[GID_EMERGENCY_CONTACT].nil? ? nil : item_data[GID_EMERGENCY_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
-          emergency_custom = item_data[GID_EMERGENCY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
+          emergency_custom = item_data[GID_EMERGENCY_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_EMERGENCY_CONTACT].reject { |k, _v| CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
           doctor_contact = item_data[GID_DOCTOR_CONTACT].nil? ? nil : item_data[GID_DOCTOR_CONTACT].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
-          doctor_custom = item_data[GID_DOCTOR_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_DOCTOR_CONTACT].select { |k, _v| !CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
+          doctor_custom = item_data[GID_DOCTOR_CONTACT].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_DOCTOR_CONTACT].reject { |k, _v| CORE_FIELD_IDS.include?(k.to_i) }.map { |k, v| [k.to_i, v] } ]
           floating_data = item_data[GID_FLOATING].nil? ? {} : item_data[GID_FLOATING].map { |k, v| [k.to_i, v] }.select { |k, _v| CORE_FIELD_IDS.include?(k) }.to_h
           custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map { |k, v| [k.to_i, v] } ]
 
@@ -301,7 +301,7 @@ module Osm
       end
       # Now it's created we need to give OSM the rest of the data
       updated = update(api, true)
-      return updated ? true : nil
+      updated ? true : nil
     end
 
     # Update the member in OSM
@@ -398,7 +398,7 @@ module Osm
     # @param seperatpr [String] What to split the member's first name and last name with
     # @return [String] this scout's full name seperated by the optional seperator
     def name(seperator=' ')
-      [first_name, last_name].select { |i| !i.blank? }.join(seperator)
+      [first_name, last_name].reject { |i| i.blank? }.join(seperator)
     end
 
     # Check if the member is in the leaders grouping
@@ -459,7 +459,7 @@ module Osm
         items = []
         [:contact, :primary_contact, :secondary_contact].each do |contact|
           contact = send(contact)
-          items.push *contact.send(meth) unless contact.nil?
+          items.push(*contact.send(meth)) unless contact.nil?
         end
         return items
       end
