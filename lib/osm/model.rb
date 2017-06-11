@@ -107,7 +107,7 @@ module Osm
     # Get a list of attributes which have changed
     # @return Array[String] the names of attributes which have changed
     def changed_attributes
-      attributes.keys.select { |k| attributes[k] != @original_attributes[k] }
+      attributes.keys.reject { |k| attributes[k].eql?(@original_attributes[k]) }
     end
 
     # Reset the list of attributes which have changed
