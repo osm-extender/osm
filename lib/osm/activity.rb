@@ -228,7 +228,7 @@ module Osm
         'location' => location,
         'sections' => sections.to_json,
         'tags' => tags.to_json,
-        'links' => badges.map { |b|
+        'links' => badges.map do |b|
           {
             'badge_id' => b.badge_id.to_s,
             'badge_version' => b.badge_version.to_s,
@@ -244,7 +244,7 @@ module Osm
             'badgetype' => b.badge_type.to_s,
             'badgetypeLongName' => nil
           }
-        }.to_json,
+        end.to_json,
         'shared' => shared,
         'sectionid' => section.to_i,
         'secretEdit' => secret_update

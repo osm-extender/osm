@@ -170,9 +170,9 @@ module Osm
   def self.inspect_instance(instance, options={})
     replace_with = options[:replace_with] || {}
 
-    values = instance.attributes.sort.map { |(k, v)|
+    values = instance.attributes.sort.map do |(k, v)|
       (replace_with.keys.include?(k) && !v.nil?) ? "#{k}.#{replace_with[k]}: #{v.try(replace_with[k]).inspect}" : "#{k}: #{v.inspect}"
-    }
+    end
 
     "#<#{instance.class.name} #{values.join(', ')} >"
   end

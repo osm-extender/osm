@@ -355,16 +355,16 @@ module Osm
 
     def module_map
       @module_map ||= Hash[
-        *modules.map { |m|
+        *modules.map do |m|
           [m.id, m.letter, m.letter, m.id]
-        }.flatten
+        end.flatten
       ].except('z')
     end
 
     def needed_per_module
-      @needed_per_module ||= Hash[*modules.map { |m|
+      @needed_per_module ||= Hash[*modules.map do |m|
         [m.id, m.min_required, m.letter, m.min_required]
-      }.flatten].except('z')
+      end.flatten].except('z')
     end
 
     def module_letters

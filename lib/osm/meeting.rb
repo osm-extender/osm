@@ -183,7 +183,7 @@ module Osm
         'games' => games,
         'leaders' => leaders,
         'activity' => activities_data.to_json,
-        'badgelinks' => badge_links.map { |b|
+        'badgelinks' => badge_links.map do |b|
           {
             'badge_id' => b.badge_id.to_s,
             'badge_version' => b.badge_version.to_s,
@@ -198,7 +198,7 @@ module Osm
             'badgetype' => b.badge_type.to_s,
             'badgetypeLongName' => nil
           }
-        }.to_json
+        end.to_json
       }
       response = api.post_query('programme.php?action=editEvening', post_data: api_data)
 
