@@ -200,13 +200,10 @@ module Osm
         'notes' => notes
       })
 
-      if (data == { 'result' => 0 })
-        # The cached activity will be out of date - remove it
-        cache_delete(api: api, key: ['activity', id])
-        return true
-      else
-        return false
-      end
+      return false unless data == { 'result' => 0 }
+      # The cached activity will be out of date - remove it
+      cache_delete(api: api, key: ['activity', id])
+      true
     end
 
     # Update this activity in OSM
@@ -253,13 +250,10 @@ module Osm
         'secretEdit' => secret_update
       })
 
-      if (data == { 'result' => true })
-        # The cached activity will be out of date - remove it
-        cache_delete(api: api, key: ['activity', id])
-        return true
-      else
-        return false
-      end
+      return false unless (data == { 'result' => true })
+      # The cached activity will be out of date - remove it
+      cache_delete(api: api, key: ['activity', id])
+      true
     end
 
 

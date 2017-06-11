@@ -154,14 +154,11 @@ module Osm
         'termid' => id
       })
 
-      if data.is_a?(Hash) && data['terms'].is_a?(Hash)
-        reset_changed_attributes
-        # The cached term will be out of date - remove it
-        cache_delete(api: api, key: ['term', id])
-        return true
-      else
-        return false
-      end
+      return false unless data.is_a?(Hash) && data['terms'].is_a?(Hash)
+      reset_changed_attributes
+      # The cached term will be out of date - remove it
+      cache_delete(api: api, key: ['term', id])
+      true
     end
 
 

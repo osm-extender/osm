@@ -108,14 +108,11 @@ module Osm
 
       return nil unless data.is_a?(Hash)
 
-      if valid_user?(id: data['userid'], secret: ['secret'])
-        return {
-          user_id: data['userid'],
-          user_secret: data['secret']
-        }
-      else
-        return nil
-      end
+      return nil unless valid_user?(id: data['userid'], secret: ['secret'])
+      return {
+        user_id: data['userid'],
+        user_secret: data['secret']
+      }
     end
 
 
@@ -277,8 +274,10 @@ module Osm
         debug:      @debug
       }
       if has_valid_user?
-        attributes.merge!(          user_id:      @user_id.clone,
-          user_secret:  @user_secret.clone)
+        attributes.merge!(
+          user_id: @user_id.clone,
+          user_secret: @user_secret.clone
+        )
       end
     end
 

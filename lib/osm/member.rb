@@ -293,18 +293,15 @@ module Osm
         'sectionid' => section_id
       })
 
-      if (data.is_a?(Hash) && (data['result'] == 'ok') && (data['scoutid'].to_i > 0))
-        self.id = data['scoutid'].to_i
-        # The cached members for the section will be out of date - remove them
-        Osm::Term.get_for_section(api: api, section: section_id).each do |term|
-          cache_delete(api: api, key: ['members', section_id, term.id])
-        end
-        # Now it's created we need to give OSM the rest of the data
-        updated = update(api, true)
-        return updated ? true : nil
-      else
-        return false
+      return false unless (data.is_a?(Hash) && (data['result'] == 'ok') && (data['scoutid'].to_i > 0))
+      self.id = data['scoutid'].to_i
+      # The cached members for the section will be out of date - remove them
+      Osm::Term.get_for_section(api: api, section: section_id).each do |term|
+        cache_delete(api: api, key: ['members', section_id, term.id])
       end
+      # Now it's created we need to give OSM the rest of the data
+      updated = update(api, true)
+      return updated ? true : nil
     end
 
     # Update the member in OSM

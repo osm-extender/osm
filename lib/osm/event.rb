@@ -222,27 +222,24 @@ module Osm
         'allowbooking' => event.allow_booking ? 'true' : 'false'
       })
 
-      if (data.is_a?(Hash) && data.has_key?('id'))
-        event.id = data['id'].to_i
+      return nil unless data.is_a?(Hash) && data.has_key?('id')
+      event.id = data['id'].to_i
 
-        # The cached events for the section will be out of date - remove them
-        cache_delete(api: api, key: ['events', event.section_id])
+      # The cached events for the section will be out of date - remove them
+      cache_delete(api: api, key: ['events', event.section_id])
 
-        # Add badge links to OSM
-        badges_created = true
-        event.badges.each do |badge|
-          badges_created &= event.add_badge_link(api: api, link: badge)
-        end
+      # Add badge links to OSM
+      badges_created = true
+      event.badges.each do |badge|
+        badges_created &= event.add_badge_link(api: api, link: badge)
+      end
 
-        if badges_created
-          cache_write(api: api, key: ['event', event.id], data: event)
-          return event
-        else
-          # Someting went wrong adding badges so return what OSM has
-          return get(api: api, section: event.section_id, id: event.id)
-        end
+      if badges_created
+        cache_write(api: api, key: ['event', event.id], data: event)
+        return event
       else
-        return nil
+        # Someting went wrong adding badges so return what OSM has
+        return get(api: api, section: event.section_id, id: event.id, no_read_cache: true)
       end
     end
 
@@ -337,10 +334,8 @@ module Osm
         reset_changed_attributes
         # The cached event will be out of date - remove it
         cache_delete(api: api, key: ['event', id])
-        return true
-      else
-        return false
       end
+      updated
     end
 
     # Delete event from OSM

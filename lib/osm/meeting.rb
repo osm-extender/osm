@@ -202,16 +202,13 @@ module Osm
       }
       response = api.post_query('programme.php?action=editEvening', post_data: api_data)
 
-      if response.is_a?(Hash) && response['result'].zero?
-        reset_changed_attributes
-        # The cached programmes for the section will be out of date - remove them
-        Osm::Term.get_for_section(api, section_id).each do |term|
-          cache_delete(api: api, key: ['programme', section_id, term.id]) if term.contains_date?(date)
-        end
-        return true
-      else
-        return false
+      return false unless response.is_a?(Hash) && response['result'].zero?
+      reset_changed_attributes
+      # The cached programmes for the section will be out of date - remove them
+      Osm::Term.get_for_section(api, section_id).each do |term|
+        cache_delete(api: api, key: ['programme', section_id, term.id]) if term.contains_date?(date)
       end
+      true
     end
 
     # Add an activity to this meeting in OSM
