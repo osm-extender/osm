@@ -293,7 +293,7 @@ module Osm
         'sectionid' => section_id
       })
 
-      return false unless (data.is_a?(Hash) && (data['result'] == 'ok') && (data['scoutid'].to_i > 0))
+      return false unless data.is_a?(Hash) && (data['result'] == 'ok') && (data['scoutid'].to_i > 0)
       self.id = data['scoutid'].to_i
       # The cached members for the section will be out of date - remove them
       Osm::Term.get_for_section(api: api, section: section_id).each do |term|

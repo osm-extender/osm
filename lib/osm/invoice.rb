@@ -152,7 +152,7 @@ module Osm
       data = api.post_query("finances.php?action=deleteInvoice&sectionid=#{section_id}", post_data: {
         'invoiceid' => id
       })
-      if (data.is_a?(Hash) && data['ok'].eql?(true))
+      if data.is_a?(Hash) && data['ok'].eql?(true)
         # The cached invoices for the section will be out of date - remove them
         cache_delete(api: api, key: ['invoice_ids', section_id])
         cache_delete(api: api, key: ['invoice', id])
@@ -175,7 +175,7 @@ module Osm
         'invoiceid' => id,
         'archived' => 1
       })
-      if (data.is_a?(Hash) && data['ok'].eql?(true))
+      if data.is_a?(Hash) && data['ok'].eql?(true)
         self.archived = true
         # The cached invoice for the section will be out of date - remove it
         cache_delete(api: api, key: ['invoice', id])
@@ -195,7 +195,7 @@ module Osm
       return false if finalised?
 
       data = api.post_query("finances.php?action=finaliseInvoice&sectionid=#{section_id}&invoiceid=#{id}")
-      if (data.is_a?(Hash) && data['ok'].eql?(true))
+      if data.is_a?(Hash) && data['ok'].eql?(true)
         self.finalised = true
         # The cached invoice for the section will be out of date - remove it
         cache_delete(api: api, key: ['invoice', id])

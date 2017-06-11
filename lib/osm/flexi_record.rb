@@ -53,7 +53,7 @@ module Osm
         'columnName' => name
       })
 
-      if (data.is_a?(Hash) && data.has_key?('config'))
+      if data.is_a?(Hash) && data.has_key?('config')
         JSON.parse(data['config']).each do |field|
           next unless field['name'].eql?(name)
           # The cached fields for the flexi record will be out of date - remove them

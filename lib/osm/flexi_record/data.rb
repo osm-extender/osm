@@ -56,7 +56,7 @@ module Osm
             'sectionid' => flexi_record.section_id,
             'extraid' => flexi_record.id
           })
-          if (data.is_a?(Hash) && data['items'].is_a?(Array))
+          if data.is_a?(Hash) && data['items'].is_a?(Array)
             data['items'].each do |item|
               if item['scoutid'] == member_id.to_s  # Find this member from the list of all members
                 updated = false unless item[field] == now

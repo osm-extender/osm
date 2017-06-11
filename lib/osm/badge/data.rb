@@ -99,8 +99,8 @@ module Osm
         if badge.has_levels?
           earnt > awarded
         else
-          return false if (due.eql?(1) && awarded.eql?(1))
-          return true if (due.eql?(1) && awarded.eql?(0))
+          return false if due.eql?(1) && awarded.eql?(1)
+          return true if due.eql?(1) && awarded.eql?(0)
 
           if badge.min_modules_required > 0
             return false unless modules_gained.size >= badge.min_modules_required
@@ -197,7 +197,7 @@ module Osm
           (1..(levels.size - 1)).to_a.reverse_each do |i|  # indexes from last to 2nd
             this_level = levels[i]
             previous_level = levels[i - 1]
-            return this_level if (done < this_level && done > previous_level) # this_level has been started (and not finished)
+            return this_level if done < this_level && done > previous_level # this_level has been started (and not finished)
           end
           return 0 # No reason we should ever get here
         end

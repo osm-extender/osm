@@ -88,7 +88,7 @@ module Osm
         'section_id' => section_id,
         'row' => 0
       })
-      if (data.is_a?(Hash) && data['ok'].eql?(true))
+      if data.is_a?(Hash) && data['ok'].eql?(true)
         # The cached budgets for the section will be out of date - remove them
         cache_delete(api: api, key: ['budgets', section_id])
         return true
@@ -105,7 +105,7 @@ module Osm
       data = api.post_query("finances.php?action=deleteCategory&sectionid=#{section_id}", post_data: {
         'categoryid' => id
       })
-      if (data.is_a?(Hash) && data['ok'].eql?(true))
+      if data.is_a?(Hash) && data['ok'].eql?(true)
         # The cached budgets for the section will be out of date - remove them
         cache_delete(api: api, key: ['budgets', section_id])
         return true

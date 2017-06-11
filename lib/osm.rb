@@ -87,7 +87,7 @@ module Osm
   def self.make_datetime(date: nil, time: nil, ignore_epoch: false)
     date = nil if date.nil? || date.empty? || (ignore_epoch && epoch_date?(date))
     time = nil if time.nil? || time.empty?
-    if (!date.nil? && !time.nil?)
+    if !date.nil? && !time.nil?
       begin
         return DateTime.strptime((date + ' ' + time), OSM_DATETIME_FORMAT)
       rescue ArgumentError

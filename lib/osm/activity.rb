@@ -250,7 +250,7 @@ module Osm
         'secretEdit' => secret_update
       })
 
-      return false unless (data == { 'result' => true })
+      return false unless data == { 'result' => true }
       # The cached activity will be out of date - remove it
       cache_delete(api: api, key: ['activity', id])
       true
