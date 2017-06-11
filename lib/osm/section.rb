@@ -149,7 +149,7 @@ module Osm
 
         section_data = role_data['sectionConfig'].is_a?(String) ? JSON.parse(role_data['sectionConfig']) : role_data['sectionConfig']
         myscout_data = section_data['portal'] || {}
-        section_data['portalExpires'] ||= {}
+        portal_expires = section_data['portalExpires'] ||= {}
         section_id = Osm.to_i_or_nil(role_data['sectionid'])
 
         # Make sense of flexi records
@@ -179,10 +179,10 @@ module Osm
           group_id: role_data['groupid'],
           group_name: role_data['groupname'],
           gocardless: (section_data['gocardless'] || 'false').downcase.eql?('true'),
-          myscout_events_expires: Osm.parse_date(section_data['portalExpires']['events']),
-          myscout_badges_expires: Osm.parse_date(section_data['portalExpires']['badges']),
-          myscout_programme_expires: Osm.parse_date(section_data['portalExpires']['programme']),
-          myscout_details_expires: Osm.parse_date(section_data['portalExpires']['details']),
+          myscout_events_expires: Osm.parse_date(portal_expires['events']),
+          myscout_badges_expires: Osm.parse_date(portal_expires['badges']),
+          myscout_programme_expires: Osm.parse_date(portal_expires['programme']),
+          myscout_details_expires: Osm.parse_date(portal_expires['details']),
           myscout_events: myscout_data['events'] == 1,
           myscout_badges: myscout_data['badges'] == 1,
           myscout_programme: myscout_data['programme'] == 1,

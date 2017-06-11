@@ -110,20 +110,21 @@ module Osm
       else
         data = api.post_query("programme.php?action=getActivity&id=#{id}&version=#{version}")
       end
+      details = data.fetch('details')
 
       attributes = {}
-      attributes[:id] = Osm.to_i_or_nil(data['details']['activityid'])
-      attributes[:version] = data['details']['version'].to_i
-      attributes[:group_id] = Osm.to_i_or_nil(data['details']['groupid'])
-      attributes[:user_id] = Osm.to_i_or_nil(data['details']['userid'])
-      attributes[:title] = data['details']['title']
-      attributes[:description] = data['details']['description']
-      attributes[:resources] = data['details']['resources']
-      attributes[:instructions] = data['details']['instructions']
-      attributes[:running_time] = Osm.to_i_or_nil(data['details']['runningtime'])
-      attributes[:location] = data['details']['location'].to_sym
-      attributes[:shared] = Osm.to_i_or_nil(data['details']['shared'])
-      attributes[:rating] = data['details']['rating'].to_i
+      attributes[:id] = details.fetch('activityid').to_i
+      attributes[:version] = details.fetch('version').to_i
+      attributes[:group_id] = details.fetch('groupid').to_i
+      attributes[:user_id] = details.fetch('userid').to_i
+      attributes[:title] = details.fetch('title')
+      attributes[:description] = details.fetch('description')
+      attributes[:resources] = details.fetch('resources')
+      attributes[:instructions] = details.fetch('instructions')
+      attributes[:running_time] = details.fetch('runningtime').to_i
+      attributes[:location] = details.fetch('location').to_sym
+      attributes[:shared] = details.fetch('shared').to_i
+      attributes[:rating] = details.fetch('rating').to_i
       attributes[:editable] = data['editable']
       attributes[:deletable] = data['deletable'] ? true : false
       attributes[:used] = data['used'].to_i
