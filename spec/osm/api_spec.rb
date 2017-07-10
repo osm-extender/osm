@@ -72,24 +72,24 @@ describe Osm::Api do
 
   describe 'Checks for valid/invalid user' do
     it 'Has a valid user' do
-      expect($api.has_valid_user?).to eq(true)
-      expect($api.has_invalid_user?).to eq(false)
+      expect($api.valid_user?).to eq(true)
+      expect($api.invalid_user?).to eq(false)
     end
 
-    describe 'Has an invalid user' do
+    context 'Has an invalid user' do
       it 'Bad id' do
         api = $api.clone_with_different_user(id: nil, secret: 'NEW USER SECRET')
-        expect(api.has_valid_user?).to eq(false)
-        expect(api.has_invalid_user?).to eq(true)
+        expect(api.valid_user?).to eq(false)
+        expect(api.invalid_user?).to eq(true)
       end
 
       it 'Bad secret' do
         api = $api.clone_with_different_user(id: '3', secret: nil)
-        expect(api.has_valid_user?).to eq(false)
-        expect(api.has_invalid_user?).to eq(true)
+        expect(api.valid_user?).to eq(false)
+        expect(api.invalid_user?).to eq(true)
       end
     end
-  end # describe Checks for valid/invalid user
+  end # context Checks for valid/invalid user
 
 
   describe 'Requires a valid user' do
@@ -99,7 +99,7 @@ describe Osm::Api do
     end
 
     it 'User is invalid' do
-      allow($api).to receive(:has_valid_user?) { false }
+      allow($api).to receive(:valid_user?) { false }
       expect { $api.require_valid_user! }.to raise_error(Osm::Api::UserInvalid, 'id: "2", secret: "USER-SECRET"')
     end
   end # describe Requires a valid user

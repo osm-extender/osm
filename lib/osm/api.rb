@@ -73,22 +73,21 @@ module Osm
 
     # Checks if this API has valid looking user credentials
     # @return true, false
-    def has_valid_user?
-      valid_user?(id: user_id, secret: user_secret)
+    def valid_user?
+      !user_id.nil? && !user_secret.nil?
     end
 
     # Checks if this API has invalid looking user credentials
     # @return true, false
-    def has_invalid_user?
-      !has_valid_user?
+    def invalid_user?
+      !valid_user?
     end
 
     # Requires the API to have valid looking user credentials
     # @raise [Osm::Api::UserInvalid]
     # @return [nil]
     def require_valid_user!
-      fail UserInvalid, "id: #{user_id.inspect}, secret: #{user_secret.inspect}" if has_invalid_user?
-      nil
+      fail UserInvalid, "id: #{user_id.inspect}, secret: #{user_secret.inspect}" if invalid_user?
     end
 
 
@@ -108,7 +107,7 @@ module Osm
 
       return nil unless data.is_a?(Hash)
 
-      return nil unless valid_user?(id: data['userid'], secret: ['secret'])
+      return nil unless data['userid'] && ['secret']
       return {
         user_id: data['userid'],
         user_secret: data['secret']
@@ -128,7 +127,7 @@ module Osm
       )
 
       # Add required attributes for user authentication
-      if has_valid_user?
+      if valid_user?
         post_data['userid'] = user_id
         post_data['secret'] = user_secret
       end
@@ -268,7 +267,7 @@ module Osm
         api_secret: @api_secret.clone,
         debug:      @debug
       }
-      if has_valid_user?
+      if valid_user?
         attributes.merge!(
           user_id: @user_id.clone,
           user_secret: @user_secret.clone
@@ -292,14 +291,6 @@ module Osm
       @http_user_agent || "#{name} (using osm gem version #{Osm::VERSION})"
     end
 
-
-    # Check if the passed id and secret look valid
-    # @param id [String]
-    # @param secret [String]
-    # @return true, false
-    private def valid_user?(id:, secret:)
-      !id.nil? && !secret.nil?
-    end
 
     # Get the error returned by OSM
     # @param data what OSM gave us
