@@ -81,7 +81,7 @@ module Osm
         return term if term.current?
       end
 
-      fail Osm::Error::NoCurrentTerm.new('There is no current term for the section.', section)
+      fail Osm::OSMError::NoCurrentTerm.new('There is no current term for the section.', section)
     end
 
     # Create a term in OSM
@@ -116,7 +116,7 @@ module Osm
     # @return true, false if the operation suceeded or not
     # @raise [Osm::ObjectIsInvalid] If the Term is invalid
     def update(api)
-      fail Osm::ObjectIsInvalid, 'term is invalid' unless valid?
+      fail Osm::Error::InvalidObject, 'term is invalid' unless valid?
       require_access_to_section(api: api, section: section_id)
 
       data = api.post_query("users.php?action=addTerm&sectionid=#{section_id}", post_data: {

@@ -59,7 +59,7 @@ module Osm
           })
 
           if data.is_a?(Hash)
-            fail Osm::Error, data['error'].to_s unless data['error'].nil?
+            fail Osm::OSMError, data['error'].to_s unless data['error'].nil?
             return !!data['status']
           end
           false

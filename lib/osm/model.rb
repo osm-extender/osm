@@ -180,7 +180,7 @@ module Osm
     # @raise [Osm::Forbidden] If the Api user can not access the section
     def self.require_access_to_section(api:, section:, **options)
       unless has_access_to_section?(api: api, section: section, **options)
-        fail Osm::Forbidden, 'You do not have access to that section'
+        fail Osm::OSMError::Forbidden, 'You do not have access to that section'
       end
     end
 
@@ -236,10 +236,10 @@ module Osm
       section = Osm::Section.get(api, section.to_i, **options) unless section.is_a?(Osm::Section)
       section_name = section.try(:name)
       unless user_has_permission?(api: api, to: to, on: on, section: section, **options)
-        fail Osm::Forbidden, "Your OSM user does not have permission to #{to} on #{on} for #{section_name}."
+        fail Osm::OSMError::Forbidden, "Your OSM user does not have permission to #{to} on #{on} for #{section_name}."
       end
       unless api_has_permission?(api: api, to: to, on: on, section: section, **options)
-        fail Osm::Forbidden, "You have not granted the #{to} permissions on #{on} to the #{api.name} API for #{section_name}."
+        fail Osm::OSMError::Forbidden, "You have not granted the #{to} permissions on #{on} to the #{api.name} API for #{section_name}."
       end
     end
 
@@ -252,7 +252,7 @@ module Osm
     def self.require_subscription(api:, level:, section:, **options)
       section = Osm::Section.get(api, section, **options) unless section.is_a?(Osm::Section)
       if section.nil? || !section.subscription_at_least?(level)
-        fail Osm::Forbidden, "Insufficent OSM subscription level (#{Osm::SUBSCRIPTION_LEVEL_NAMES[level]} required for #{section.name})."
+        fail Osm::OSMError::Forbidden, "Insufficent OSM subscription level (#{Osm::SUBSCRIPTION_LEVEL_NAMES[level]} required for #{section.name})."
       end
     end
 

@@ -45,12 +45,12 @@ module Osm
           Osm::Model.require_access_to_section(api: api, section: section)
 
           data = api.post_query("ext/settings/emails/?action=getSentEmail&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
-          fail Osm::Error, "Unexpected format for response - got a #{data.class}" unless data.is_a?(Hash)
-          fail Osm::Error, data['error'].to_s unless data['status']
-          fail Osm::Error, "Unexpected format for meta data - got a #{data.class}" unless data['data'].is_a?(Hash)
+          fail Osm::OSMError, "Unexpected format for response - got a #{data.class}" unless data.is_a?(Hash)
+          fail Osm::OSMError, data['error'].to_s unless data['status']
+          fail Osm::OSMError, "Unexpected format for meta data - got a #{data.class}" unless data['data'].is_a?(Hash)
 
           body = api.post_query("ext/settings/emails/?action=getSentEmailContent&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
-          fail Osm::Error, data if data.eql?('Email not found')
+          fail Osm::OSMError::NotFound, data if data.eql?('Email not found')
 
           email_data = data['data']
           new(

@@ -280,8 +280,8 @@ module Osm
     # @raise [Osm::ObjectIsInvalid] If the Member is invalid
     # @raise [Osm::Error] If the member already exists in OSM
     def create(api)
-      fail Osm::Error, 'the member already exists in OSM' unless id.nil?
-      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail Osm::OSMError, 'the member already exists in OSM' unless id.nil?
+      fail Osm::Error::InvalidObject, 'member is invalid' unless valid?
       require_ability_to(api, :write, :member, section_id)
 
       data = api.post_query('users.php?action=newMember', post_data: {

@@ -158,7 +158,7 @@ module Osm
     # @return true, false if the operation suceeded or not
     # @raise [Osm::ObjectIsInvalid] If the Meeting is invalid
     def update(api)
-      fail Osm::ObjectIsInvalid, 'meeting is invalid' unless valid?
+      fail Osm::Error::InvalidObject, 'meeting is invalid' unless valid?
       require_ability_to(api: api, to: :write, on: :programme, section: section_id)
 
       activities_data = []

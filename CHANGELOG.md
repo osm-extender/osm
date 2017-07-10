@@ -1,5 +1,18 @@
 ## Version 2.0.0
 
+  * Error hierarchy changed:
+    * APIError < RuntimeError
+      * InvalidUser
+      * ConnectionError
+      * UnexpectedType
+    * OSMError < RuntimeError
+      * Forbidden
+      * ReadOnly
+      * NoActiveRoles
+      * NoCurrentTerm
+      * NotFound
+    * Error < RuntimeError
+      * InvalidObject < RuntimeError
   * Remove support for ruby <= 2.2.5, jruby, rails < 4
   * Add support for ruby 2.4.0
   * Remove dependancy on active_support and httparty gems

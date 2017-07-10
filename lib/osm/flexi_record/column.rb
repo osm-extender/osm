@@ -33,7 +33,7 @@ module Osm
       def update(api)
         fail Osm::ObjectIsInvalid, 'column is invalid' unless valid?
         require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
-        fail Osm::Forbidden, 'this column is not editable' unless editable
+        fail Osm::OSMError::ReadOnly, 'this column is not editable' unless editable
 
         data = api.post_query("extras.php?action=renameColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
           'columnId' => id,
@@ -58,7 +58,7 @@ module Osm
       # @raise [Osm::Forbidden] If this Column is not editable
       def delete(api)
         require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
-        fail Osm::Forbidden, 'this column is not editable' unless editable
+        fail Osm::OSMError::ReadOnly, 'this column is not editable' unless editable
 
         data = api.post_query("extras.php?action=deleteColumn&sectionid=#{flexi_record.section_id}&extraid=#{flexi_record.id}", post_data: {
           'columnId' => id

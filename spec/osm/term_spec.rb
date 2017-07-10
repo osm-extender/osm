@@ -211,7 +211,7 @@ describe Osm::Term do
           ]
         )
         expect { Osm::Term.get_current_term_for_section(api: $api, section: 9) }.to raise_error do |error|
-          expect(error).to be_a(Osm::Error::NoCurrentTerm)
+          expect(error).to be_a(Osm::OSMError::NoCurrentTerm)
           expect(error.message).to eq('There is no current term for the section.')
           expect(error.section_id).to eq(9)
         end
@@ -291,7 +291,7 @@ describe Osm::Term do
 
     it 'Update a term (invalid term)' do
       term = Osm::Term.new
-      expect { term.update($api) }.to raise_error(Osm::ObjectIsInvalid)
+      expect { term.update($api) }.to raise_error(Osm::Error::InvalidObject)
     end
 
   end

@@ -12,20 +12,28 @@ require 'time'
 
 module Osm
   # Declare exceptions
-  class Error < Exception; end
-  class ConnectionError < Error; end
-  class Forbidden < Osm::Error; end
-  class NoActiveRoles < Osm::Error; end
-  class ArgumentIsInvalid < ArgumentError; end
-  class ObjectIsInvalid < Error; end
-  class Osm::Error::NoCurrentTerm < Osm::Error
-    # @!attribute [r] section_id
-    #   @return [Integer] the id of the section causing the error
-    attr_reader :section_id
-    def initialize(message = nil, section_id = nil)
-      super(message)
-      @section_id = section_id
-    end
+  class APIError < RuntimeError
+    class ConnectionError < APIError; end
+    class InvalidUser < APIError; end
+    class UnexpectedType < APIError; end
+  end # class APIError
+  class OSMError < RuntimeError
+    class Forbidden < OSMError; end
+    class ReadOnly < OSMError; end
+    class NoActiveRoles < OSMError; end
+    class NoCurrentTerm < OSMError
+      # @!attribute [r] section_id
+      #   @return [Integer] the id of the section causing the error
+      attr_reader :section_id
+      def initialize(message = nil, section_id = nil)
+        super(message)
+        @section_id = section_id
+      end
+    end # class NoCurrentTerm
+    class NotFound < OSMError; end
+  end # class OSMError
+  class Error < RuntimeError
+    class InvalidObject < Error; end
   end
 
   # Set constants

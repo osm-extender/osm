@@ -242,7 +242,7 @@ describe Osm::Meeting do
 
     it 'Update a meeting (invalid meeting)' do
       meeting = Osm::Meeting.new
-      expect { meeting.update($api) }.to raise_error(Osm::ObjectIsInvalid)
+      expect { meeting.update($api) }.to raise_error(Osm::Error::InvalidObject)
     end
 
 

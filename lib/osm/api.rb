@@ -1,8 +1,6 @@
 module Osm
   class Api
 
-    class UserInvalid < Osm::Error; end
-
     # @!attribute [r] site
     #   @return [Symbol] the 'flavour' of OSM to use - :osm, :osm_staging or :osm_migration (default :osm)
     # @!attribute [r] name
@@ -87,7 +85,7 @@ module Osm
     # @raise [Osm::Api::UserInvalid]
     # @return [nil]
     def require_valid_user!
-      fail UserInvalid, "id: #{user_id.inspect}, secret: #{user_secret.inspect}" if invalid_user?
+      fail APIError::InvalidUser, "id: #{user_id.inspect}, secret: #{user_secret.inspect}" if invalid_user?
     end
 
 
@@ -149,11 +147,11 @@ module Osm
         http.use_ssl = uri.scheme.eql?('https')
         response = http.request(request)
       rescue => e
-        raise Osm::ConnectionError, "#{e.class}: #{e.message}"
+        raise Osm::APIError::ConnectionError, "#{e.class}: #{e.message}"
       end
       unless response.is_a?(Net::HTTPOK)
         # Connection error occured
-        fail Osm::ConnectionError, "HTTP Status code was #{response.code}"
+        fail Osm::APIError::ConnectionError, "HTTP Status code was #{response.code}"
       end
 
       if debug?
@@ -168,16 +166,16 @@ module Osm
         begin
           decoded = JSON.parse(response.body)
           if osm_error = get_osm_error(decoded)
-            fail Osm::Error, osm_error if osm_error
+            fail Osm::OSMError, osm_error if osm_error
           end
           return decoded
         rescue JSON::ParserError
-          fail Osm::Error, response.body
+          fail Osm::OSMError, response.body
         end
       when 'image/jpeg'
         return response.body
       else
-        fail Osm::Error, "Unhandled content-type: #{response.content_type}"
+        fail Osm::APIError::UnexpectedType, "Got a: #{response.content_type}"
       end
     end
 
@@ -187,7 +185,7 @@ module Osm
     # @return [Array<Hash>] data returned by OSM
     def get_user_roles(**args)
       get_user_roles!(**args)
-      rescue Osm::NoActiveRoles
+      rescue OSMError::NoActiveRoles
         return []
     end
 
@@ -204,11 +202,11 @@ module Osm
           user_roles = post_query('api.php?action=getUserRoles')
           if user_roles.eql?(false)
             # false equates to no roles
-            fail Osm::NoActiveRoles, 'You do not have any active roles in OSM.'
+            fail OSMError::NoActiveRoles, 'You do not have any active roles in OSM.'
           end
-        rescue Osm::Error => e
+        rescue Osm::OSMError => e
           if e.message.eql?('false')
-            fail Osm::NoActiveRoles, 'You do not have any active roles in OSM.'
+            fail OSMError::NoActiveRoles, 'You do not have any active roles in OSM.'
           else
             raise e
           end
