@@ -1,6 +1,6 @@
-module Osm
+module OSM
 
-  class ApiAccess < Osm::Model
+  class ApiAccess < OSM::Model
 
     # @!attribute [rw] id
     #   @return [Integer] the id for the API
@@ -20,10 +20,10 @@ module Osm
 
 
     # Get API access details for a given section
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the details for
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the details for
     # @!macro options_get
-    # @return [Array<Osm::ApiAccess>]
+    # @return [Array<OSM::ApiAccess>]
     def self.get_all(api:, section:, no_read_cache: false)
       section_id = section.to_i
       cache_key = ['api_access', api.user_id, section_id]
@@ -58,21 +58,21 @@ module Osm
 
 
     # Get our API access details for a given section
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the details for
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the details for
     # @!macro options_get
-    # @return [Osm::ApiAccess]
+    # @return [OSM::ApiAccess]
     def self.get_ours(api:, section:, no_read_cache: false)
       get(api: api, section: section, for_api: api.api_id, no_read_cache: no_read_cache)
     end
 
 
     # Get API Access for a given API
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the details for
-    # @param for_api [Osm::Api] The api (or its ID) to get access for
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the details for
+    # @param for_api [OSM::Api] The api (or its ID) to get access for
     # @!macro options_get
-    # @return [Osm::ApiAccess]
+    # @return [OSM::ApiAccess]
     def self.get(api:, section:, for_api:, no_read_cache: false)
       section_id = section.to_i
       for_api_id = for_api.to_i

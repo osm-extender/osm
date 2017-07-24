@@ -1,4 +1,4 @@
-describe Osm::Event::Attendance do
+describe OSM::Event::Attendance do
 
   it 'Create' do
     data = {
@@ -11,10 +11,10 @@ describe Osm::Event::Attendance do
       date_of_birth: Date.new(2000, 1, 2),
       fields: {},
       payments: {},
-      event: Osm::Event.new(id: 1, section_id: 1, name: 'Name', columns: [])
+      event: OSM::Event.new(id: 1, section_id: 1, name: 'Name', columns: [])
     }
 
-    ea = Osm::Event::Attendance.new(data)
+    ea = OSM::Event::Attendance.new(data)
     expect(ea.member_id).to eq(1)
     expect(ea.grouping_id).to eq(2)
     expect(ea.fields).to eq({})
@@ -28,9 +28,9 @@ describe Osm::Event::Attendance do
   end
 
   it 'Sorts by event ID then row' do
-    ea1 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 1), row: 1)
-    ea2 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 2), row: 1)
-    ea3 = Osm::Event::Attendance.new(event: Osm::Event.new(id: 2), row: 2)
+    ea1 = OSM::Event::Attendance.new(event: OSM::Event.new(id: 1), row: 1)
+    ea2 = OSM::Event::Attendance.new(event: OSM::Event.new(id: 2), row: 1)
+    ea3 = OSM::Event::Attendance.new(event: OSM::Event.new(id: 2), row: 2)
     event_attendances = [ea3, ea2, ea1]
 
     expect(event_attendances.sort).to eq([ea1, ea2, ea3])
@@ -40,7 +40,7 @@ describe Osm::Event::Attendance do
   describe 'Using to OSM API' do
 
     it 'Update attendance (succeded)' do
-      ea = Osm::Event::Attendance.new(row: 0, member_id: 4, fields: { 1 => 'old value', 2 => 'another old value' }, event: Osm::Event.new(id: 2, :section_id => 1))
+      ea = OSM::Event::Attendance.new(row: 0, member_id: 4, fields: { 1 => 'old value', 2 => 'another old value' }, event: OSM::Event.new(id: 2, :section_id => 1))
 
       ea.fields[1] = 'value'
       expect($api).to receive(:post_query).with(
@@ -94,8 +94,8 @@ describe Osm::Event::Attendance do
 
       expect($api).to receive(:post_query).with('events.php?action=getEventAudit&sectionid=1&scoutid=2&eventid=3').and_return(data)
 
-      ea = Osm::Event::Attendance.new(
-        event: Osm::Event.new(id: 3, section_id: 1),
+      ea = OSM::Event::Attendance.new(
+        event: OSM::Event.new(id: 3, section_id: 1),
         member_id: 2
       )
       expect(ea.get_audit_trail($api)).to eq([

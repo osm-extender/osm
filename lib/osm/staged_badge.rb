@@ -1,5 +1,5 @@
-module Osm
-  class StagedBadge < Osm::Badge
+module OSM
+  class StagedBadge < OSM::Badge
 
     def self.type
       :staged

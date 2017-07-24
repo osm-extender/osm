@@ -1,5 +1,5 @@
-module Osm
-  class Activity < Osm::Model
+module OSM
+  class Activity < OSM::Model
     class Version
       include ActiveAttr::Model
 

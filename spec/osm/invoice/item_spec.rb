@@ -1,9 +1,9 @@
-describe Osm::Invoice::Item do
+describe OSM::Invoice::Item do
 
   it 'Create' do
-    ii = Osm::Invoice::Item.new(
+    ii = OSM::Invoice::Item.new(
       id: 1,
-      invoice: Osm::Invoice.new,
+      invoice: OSM::Invoice.new,
       record_id: 3,
       date: Date.new(2002, 3, 4),
       amount: '5.00',
@@ -14,7 +14,7 @@ describe Osm::Invoice::Item do
     )
 
     expect(ii.id).to eq(1)
-    expect(ii.invoice).to eq(Osm::Invoice.new)
+    expect(ii.invoice).to eq(OSM::Invoice.new)
     expect(ii.record_id).to eq(3)
     expect(ii.date).to eq(Date.new(2002, 3, 4))
     expect(ii.amount).to eq('5.00')
@@ -26,19 +26,19 @@ describe Osm::Invoice::Item do
   end
 
   it 'Sorts by Invoice then Date' do
-    i1 = Osm::Invoice.new(section_id: 1, name: 'a', date: Date.new(2000, 1, 2))
-    i2 = Osm::Invoice.new(section_id: 2, name: 'a', date: Date.new(2000, 1, 2))
-    ii1 = Osm::Invoice::Item.new(invoice: i1, date: Date.new(2000, 1, 1))
-    ii2 = Osm::Invoice::Item.new(invoice: i2, date: Date.new(2000, 1, 1))
-    ii3 = Osm::Invoice::Item.new(invoice: i2, date: Date.new(2000, 1, 2))
+    i1 = OSM::Invoice.new(section_id: 1, name: 'a', date: Date.new(2000, 1, 2))
+    i2 = OSM::Invoice.new(section_id: 2, name: 'a', date: Date.new(2000, 1, 2))
+    ii1 = OSM::Invoice::Item.new(invoice: i1, date: Date.new(2000, 1, 1))
+    ii2 = OSM::Invoice::Item.new(invoice: i2, date: Date.new(2000, 1, 1))
+    ii3 = OSM::Invoice::Item.new(invoice: i2, date: Date.new(2000, 1, 2))
 
     data = [ii2, ii3, ii1]
     expect(data.sort).to eq([ii1, ii2, ii3])
   end
 
   it 'Calculates value for easy summing' do
-    expect(Osm::Invoice::Item.new(type: :income, amount: '1.00').value).to eq(1.00)
-    expect(Osm::Invoice::Item.new(type: :expense, amount: '2.00').value).to eq(-2.00)
+    expect(OSM::Invoice::Item.new(type: :income, amount: '1.00').value).to eq(1.00)
+    expect(OSM::Invoice::Item.new(type: :expense, amount: '2.00').value).to eq(-2.00)
   end
 
 
@@ -50,7 +50,7 @@ describe Osm::Invoice::Item do
       ] }
       expect($api).to receive(:post_query).with('finances.php?action=getInvoiceRecords&invoiceid=2&sectionid=4&dateFormat=generic').and_return(data)
 
-      invoice = Osm::Invoice.new(id: 2, section_id: 4)
+      invoice = OSM::Invoice.new(id: 2, section_id: 4)
       items = invoice.get_items($api)
       expect(items.size).to eq(1)
       item = items[0]
@@ -69,8 +69,8 @@ describe Osm::Invoice::Item do
     describe 'Create' do
 
       it 'Success' do
-        invoice = Osm::Invoice.new(id: 3, section_id: 2)
-        item = Osm::Invoice::Item.new(
+        invoice = OSM::Invoice.new(id: 3, section_id: 2)
+        item = OSM::Invoice::Item.new(
           invoice: invoice,
           amount: '1.23',
           type: :expense,
@@ -82,11 +82,11 @@ describe Osm::Invoice::Item do
         expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return('ok' => true)
 
         data1 = [
-          Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default')
+          OSM::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default')
         ]
         data2 = [
-          Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
-          Osm::Invoice::Item.new(id: 2, invoice: invoice, record_id: 4, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => '', :budget_name => 'Default')
+          OSM::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default'),
+          OSM::Invoice::Item.new(id: 2, invoice: invoice, record_id: 4, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => '', :budget_name => 'Default')
         ]
         expect(invoice).to receive(:get_items).with($api, no_read_cache: true).and_return(data1, data2)
 
@@ -115,8 +115,8 @@ describe Osm::Invoice::Item do
       end
 
       it 'Failure to create' do
-        invoice = Osm::Invoice.new(id: 3, section_id: 2)
-        item = Osm::Invoice::Item.new(
+        invoice = OSM::Invoice.new(id: 3, section_id: 2)
+        item = OSM::Invoice::Item.new(
           invoice: invoice,
           amount: '1.23',
           type: :expense,
@@ -128,7 +128,7 @@ describe Osm::Invoice::Item do
         expect($api).to receive(:post_query).with('finances.php?action=addRecord&invoiceid=3&sectionid=2').and_return('ok' => false)
 
         data = [
-          Osm::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default')
+          OSM::Invoice::Item.new(id: 1, invoice: invoice, record_id: 3, date: Date.new(2012, 1, 2), amount: '1.23', :type => :expense, :payto => 'John Smith', :description => 'Comment', :budget_name => 'Default')
         ]
         expect(invoice).to receive(:get_items).with($api, no_read_cache: true).and_return(data)
         expect(item.create($api)).to eq(false)
@@ -140,9 +140,9 @@ describe Osm::Invoice::Item do
     describe 'Update' do
 
       it 'Success' do
-        item = Osm::Invoice::Item.new(
+        item = OSM::Invoice::Item.new(
           id: 1,
-          invoice: Osm::Invoice.new(id: 3, section_id: 2),
+          invoice: OSM::Invoice.new(id: 3, section_id: 2),
           record_id: 4
         )
         item.amount = '1.23'
@@ -175,9 +175,9 @@ describe Osm::Invoice::Item do
       end
 
       it 'Failure' do
-        item = Osm::Invoice::Item.new(
+        item = OSM::Invoice::Item.new(
           id: 1,
-          invoice: Osm::Invoice.new(id: 3, section_id: 2),
+          invoice: OSM::Invoice.new(id: 3, section_id: 2),
           record_id: 4,
           amount: '1.23',
           type: :expense,
@@ -205,7 +205,7 @@ describe Osm::Invoice::Item do
     describe 'Delete' do
 
       it 'Success' do
-        item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 3, section_id: 2))
+        item = OSM::Invoice::Item.new(id: 1, invoice: OSM::Invoice.new(id: 3, section_id: 2))
         expect($api).to receive(:post_query).with('finances.php?action=deleteEntry&sectionid=2', post_data: {
           'id' => 1
         }).and_return('ok' => true)
@@ -214,7 +214,7 @@ describe Osm::Invoice::Item do
       end
 
       it 'Failure' do
-        item = Osm::Invoice::Item.new(id: 1, invoice: Osm::Invoice.new(id: 2, section_id: 4))
+        item = OSM::Invoice::Item.new(id: 1, invoice: OSM::Invoice.new(id: 2, section_id: 4))
         expect($api).to receive(:post_query).with('finances.php?action=deleteEntry&sectionid=4', post_data: {
           'id' => 1
         }).and_return('ok' => false)

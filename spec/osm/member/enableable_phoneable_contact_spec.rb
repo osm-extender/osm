@@ -1,2 +1,2 @@
-describe Osm::Member::EnableablePhoneableContact do
+describe OSM::Member::EnableablePhoneableContact do
 end

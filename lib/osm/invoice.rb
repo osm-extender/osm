@@ -1,5 +1,5 @@
-module Osm
-  class Invoice < Osm::Model
+module OSM
+  class Invoice < OSM::Model
     # @!attribute [rw] id
     #   @return [Integer] The OSM ID for the invoice
     # @!attribute [rw] section_id
@@ -37,11 +37,11 @@ module Osm
 
 
     # Get invoices for a section
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the invoices for
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the invoices for
     # @!macro options_get
     # @option options true, false :include_archived (optional) if true then archived invoices will also be returned
-    # @return [Array<Osm::Invoice>]
+    # @return [Array<OSM::Invoice>]
     def self.get_for_section(api:, section:, include_archived: false, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
@@ -60,11 +60,11 @@ module Osm
     end
 
     # Get an invoice
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the events for
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the events for
     # @param id [Integer, #to_i] The id of the invoice to get
     # @!macro options_get
-    # @return [Osm::Invoice, nil] the invoice (or nil if it couldn't be found
+    # @return [OSM::Invoice, nil] the invoice (or nil if it couldn't be found
     def self.get(id:, **options)
       invoices = get_for_section(**options)
       invoices.find { |invoice| invoice.id.eql?(id) }
@@ -72,19 +72,19 @@ module Osm
 
 
     # Create the invoice in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false Whether the invoice was created in OSM
-    # @raise [Osm::ObjectIsInvalid] If the Invoice is invalid
-    # @raise [Osm::Error] If the invoice already exists in OSM
+    # @raise [OSM::ObjectIsInvalid] If the Invoice is invalid
+    # @raise [OSM::Error] If the invoice already exists in OSM
     def create(api)
-      fail Osm::Error, 'the invoice already exists in OSM' unless id.nil?
-      fail Osm::ObjectIsInvalid, 'invoice is invalid' unless valid?
-      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
+      fail OSM::Error, 'the invoice already exists in OSM' unless id.nil?
+      fail OSM::ObjectIsInvalid, 'invoice is invalid' unless valid?
+      OSM::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
       data = api.post_query("finances.php?action=addInvoice&sectionid=#{section_id}", post_data: {
         'name' => name,
         'extra' => extra_details,
-        'date' => date.strftime(Osm::OSM_DATE_FORMAT)
+        'date' => date.strftime(OSM::OSM_DATE_FORMAT)
       })
       if data.is_a?(Hash) && !data['id'].nil?
         # The cached invoices for the section will be out of date - remove them
@@ -96,18 +96,18 @@ module Osm
     end
 
     # Update the invoice in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return [Boolan] whether the invoice was successfully updated or not
-    # @raise [Osm::ObjectIsInvalid] If the Invoice is invalid
+    # @raise [OSM::ObjectIsInvalid] If the Invoice is invalid
     def update(api)
-      fail Osm::ObjectIsInvalid, 'invoice is invalid' unless valid?
+      fail OSM::ObjectIsInvalid, 'invoice is invalid' unless valid?
       require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
       data = api.post_query("finances.php?action=addInvoice&sectionid=#{section_id}", post_data: {
         'invoiceid' => id,
         'name' => name,
         'extra' => extra_details,
-        'date' => date.strftime(Osm::OSM_DATE_FORMAT)
+        'date' => date.strftime(OSM::OSM_DATE_FORMAT)
       })
 
       if data.is_a?(Hash) && data['ok'].eql?(true)
@@ -120,10 +120,10 @@ module Osm
     end
 
     # Delete the invoice from OSM
-    # @param api [Osm::Api] The api to use for the query
+    # @param api [OSM::Api] The api to use for the query
     # @return true, false Whether the invoice was deleted from OSM
     def delete(api)
-      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
+      OSM::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
       return false if finalised?
 
       data = api.post_query("finances.php?action=deleteInvoice&sectionid=#{section_id}", post_data: {
@@ -140,12 +140,12 @@ module Osm
 
     # Archive the invoice in OSM, updating the archived attribute if successful.
     # If the archived attribute is true then nothing happens and false is returned.
-    # @param api [Osm::Api] The api to use for the request
+    # @param api [OSM::Api] The api to use for the request
     # @return true, false Whether the invoice was archived in OSM
-    # @raise [Osm::Error] If the invoice does not already exist in OSM
+    # @raise [OSM::Error] If the invoice does not already exist in OSM
     def archive(api)
-      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
-      fail Osm::Error, 'the invoice does not already exist in OSM' if id.nil?
+      OSM::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
+      fail OSM::Error, 'the invoice does not already exist in OSM' if id.nil?
       return false if archived?
 
       data = api.post_query("finances.php?action=deleteInvoice&sectionid=#{section_id}", post_data: {
@@ -163,12 +163,12 @@ module Osm
 
     # Finalise the invoice in OSM, updating the finalised attribute if successful.
     # If the finalised attribute is true then nothing happens and false is returned.
-    # @param api [Osm::Api] The api to use for the query
+    # @param api [OSM::Api] The api to use for the query
     # @return true, false Whether the invoice was finalised in OSM
-    # @raise [Osm::Error] If the invoice does not already exist in OSM
+    # @raise [OSM::Error] If the invoice does not already exist in OSM
     def finalise(api)
-      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
-      fail Osm::Error, 'the invoice does not already exist in OSM' if id.nil?
+      OSM::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
+      fail OSM::Error, 'the invoice does not already exist in OSM' if id.nil?
       return false if finalised?
 
       data = api.post_query("finances.php?action=finaliseInvoice&sectionid=#{section_id}&invoiceid=#{id}")
@@ -182,9 +182,9 @@ module Osm
     end
 
     # Get items for the invoice
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @!macro options_get
-    # @return [Array<Osm::Invoice::Item>]
+    # @return [Array<OSM::Invoice::Item>]
     def get_items(api, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :finance, section: section_id, no_read_cache: no_read_cache)
       cache_key = ['invoice_items', id]
@@ -192,11 +192,11 @@ module Osm
       items = cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("finances.php?action=getInvoiceRecords&invoiceid=#{id}&sectionid=#{section_id}&dateFormat=generic")
         data['items'].map do |item|
-          Osm::Invoice::Item.new(
-            id: Osm.to_i_or_nil(item['id']),
+          OSM::Invoice::Item.new(
+            id: OSM.to_i_or_nil(item['id']),
             invoice: self,
-            record_id: Osm.to_i_or_nil(item['recordid']),
-            date: Osm.parse_date(item['entrydate']),
+            record_id: OSM.to_i_or_nil(item['recordid']),
+            date: OSM.parse_date(item['entrydate']),
             amount: item['amount'],
             type: item['type'].to_s.downcase.to_sym,
             payto: item['payto_userid'].to_s.strip,
@@ -216,12 +216,12 @@ module Osm
     def self.new_invoice_from_data(invoice_data)
       invoice_data = invoice_data['invoice']
       return nil unless invoice_data.is_a?(Hash)
-      Osm::Invoice.new(
-        id: Osm.to_i_or_nil(invoice_data['invoiceid']),
-        section_id: Osm.to_i_or_nil(invoice_data['sectionid']),
+      OSM::Invoice.new(
+        id: OSM.to_i_or_nil(invoice_data['invoiceid']),
+        section_id: OSM.to_i_or_nil(invoice_data['sectionid']),
         name: invoice_data['name'],
         extra_details: invoice_data['extra'],
-        date: Osm.parse_date(invoice_data['entrydate']),
+        date: OSM.parse_date(invoice_data['entrydate']),
         archived: invoice_data['archived'].eql?('1'),
         finalised: invoice_data['finalised'].eql?('1')
       )

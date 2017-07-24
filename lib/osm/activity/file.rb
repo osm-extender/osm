@@ -1,5 +1,5 @@
-module Osm
-  class Activity < Osm::Model
+module OSM
+  class Activity < OSM::Model
     class File
       include ActiveAttr::Model
 

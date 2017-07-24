@@ -1,6 +1,6 @@
-module Osm
-  class FlexiRecord < Osm::Model
-    class Data < Osm::Model
+module OSM
+  class FlexiRecord < OSM::Model
+    class Data < OSM::Model
       # @!attribute [rw] flexi_record
       #   @return true, false The FlexiRecord this column belongs to
       # @!attribute [rw] member_id
@@ -35,14 +35,14 @@ module Osm
 
 
       # Update data in OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @return true, false whether the data was updated in OSM
-      # @raise [Osm::ObjectIsInvalid] If the Data is invalid
+      # @raise [OSM::ObjectIsInvalid] If the Data is invalid
       def update(api)
-        fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
+        fail OSM::ObjectIsInvalid, 'data is invalid' unless valid?
         require_ability_to(api: api, to: :write, on: :flexi, section: flexi_record.section_id)
 
-        term_id = Osm::Term.get_current_term_for_section(api: api, section: flexi_record.section_id).id
+        term_id = OSM::Term.get_current_term_for_section(api: api, section: flexi_record.section_id).id
 
         updated = true
         editable_fields = flexi_record.get_columns(api).select(&:editable).map(&:id)
@@ -77,7 +77,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, replace_with: { 'flexi_record' => :id })
+        OSM.inspect_instance(self, replace_with: { 'flexi_record' => :id })
       end
 
       private def sort_by

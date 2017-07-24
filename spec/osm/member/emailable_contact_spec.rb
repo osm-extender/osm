@@ -1,2 +1,2 @@
-describe Osm::Member::EmailableContact do
+describe OSM::Member::EmailableContact do
 end

@@ -1,6 +1,6 @@
-module Osm
-  class Badge < Osm::Model
-    class Due < Osm::Model
+module OSM
+  class Badge < OSM::Model
+    class Due < OSM::Model
       # @!attribute [rw] badge_names
       #   @return [Hash] name to display for each of the badges
       # @!attribute [rw] by_member

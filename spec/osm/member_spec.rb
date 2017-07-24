@@ -1,4 +1,4 @@
-describe Osm::Member do
+describe OSM::Member do
 
   it 'Create' do
     attributes = {
@@ -18,13 +18,13 @@ describe Osm::Member do
       finished_section: '2007-12-31',
       additional_information: { '12_3' => '123' },
       additional_information_labels: { '12_3' => 'Label for 123' },
-      contact: Osm::Member::MemberContact.new(postcode: 'A'),
-      primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
-      secondary_contact: Osm::Member::PrimaryContact.new(postcode: 'C'),
-      emergency_contact: Osm::Member::EmergencyContact.new(postcode: 'D'),
-      doctor: Osm::Member::DoctorContact.new(postcode: 'E')
+      contact: OSM::Member::MemberContact.new(postcode: 'A'),
+      primary_contact: OSM::Member::PrimaryContact.new(postcode: 'B'),
+      secondary_contact: OSM::Member::PrimaryContact.new(postcode: 'C'),
+      emergency_contact: OSM::Member::EmergencyContact.new(postcode: 'D'),
+      doctor: OSM::Member::DoctorContact.new(postcode: 'E')
     }
-    member = Osm::Member.new(attributes)
+    member = OSM::Member.new(attributes)
 
     expect(member.id).to eq(1)
     expect(member.section_id).to eq(2)
@@ -52,84 +52,84 @@ describe Osm::Member do
 
 
   it 'Provides full name' do
-    expect(Osm::Member.new(first_name: 'First').name).to eq('First')
-    expect(Osm::Member.new(last_name: 'Last').name).to eq('Last')
-    expect(Osm::Member.new(first_name: 'First', last_name: 'Last').name).to eq('First Last')
-    expect(Osm::Member.new(first_name: 'First', last_name: 'Last').name('*')).to eq('First*Last')
+    expect(OSM::Member.new(first_name: 'First').name).to eq('First')
+    expect(OSM::Member.new(last_name: 'Last').name).to eq('Last')
+    expect(OSM::Member.new(first_name: 'First', last_name: 'Last').name).to eq('First Last')
+    expect(OSM::Member.new(first_name: 'First', last_name: 'Last').name('*')).to eq('First*Last')
   end
 
 
   it 'Tells if member is a leader' do
-    expect(Osm::Member.new(grouping_id: -2).leader?).to eq(true)  # In the leader grouping
-    expect(Osm::Member.new(grouping_id: 2).leader?).to eq(false)  # In a youth grouping
-    expect(Osm::Member.new(grouping_id: 0).leader?).to eq(false)  # Not in a grouping
+    expect(OSM::Member.new(grouping_id: -2).leader?).to eq(true)  # In the leader grouping
+    expect(OSM::Member.new(grouping_id: 2).leader?).to eq(false)  # In a youth grouping
+    expect(OSM::Member.new(grouping_id: 0).leader?).to eq(false)  # Not in a grouping
   end
 
   it 'Tells if member is a youth member' do
-    expect(Osm::Member.new(grouping_id: -2).youth?).to eq(false)  # In the leader grouping
-    expect(Osm::Member.new(grouping_id: 2).youth?).to eq(true)  # In a youth grouping
-    expect(Osm::Member.new(grouping_id: 0).youth?).to eq(false)  # Not in a grouping
+    expect(OSM::Member.new(grouping_id: -2).youth?).to eq(false)  # In the leader grouping
+    expect(OSM::Member.new(grouping_id: 2).youth?).to eq(true)  # In a youth grouping
+    expect(OSM::Member.new(grouping_id: 0).youth?).to eq(false)  # Not in a grouping
   end
 
   it 'Provides each part of age' do
     data = {
       age: '06/07'
     }
-    member = Osm::Member.new(data)
+    member = OSM::Member.new(data)
 
     expect(member.age_years).to eq(6)
     expect(member.age_months).to eq(7)
   end
 
   it 'Tells if the member is male' do
-    expect(Osm::Member.new(gender: :male).male?).to eq(true)
-    expect(Osm::Member.new(gender: :female).male?).to eq(false)
-    expect(Osm::Member.new(gender: :other).male?).to eq(false)
-    expect(Osm::Member.new(gender: :unspecified).male?).to eq(false)
-    expect(Osm::Member.new(gender: nil).male?).to eq(false)
+    expect(OSM::Member.new(gender: :male).male?).to eq(true)
+    expect(OSM::Member.new(gender: :female).male?).to eq(false)
+    expect(OSM::Member.new(gender: :other).male?).to eq(false)
+    expect(OSM::Member.new(gender: :unspecified).male?).to eq(false)
+    expect(OSM::Member.new(gender: nil).male?).to eq(false)
   end
 
   it 'Tells if the member is female' do
-    expect(Osm::Member.new(gender: :female).female?).to eq(true)
-    expect(Osm::Member.new(gender: :male).female?).to eq(false)
-    expect(Osm::Member.new(gender: :other).female?).to eq(false)
-    expect(Osm::Member.new(gender: :unspecified).female?).to eq(false)
-    expect(Osm::Member.new(gender: nil).female?).to eq(false)
+    expect(OSM::Member.new(gender: :female).female?).to eq(true)
+    expect(OSM::Member.new(gender: :male).female?).to eq(false)
+    expect(OSM::Member.new(gender: :other).female?).to eq(false)
+    expect(OSM::Member.new(gender: :unspecified).female?).to eq(false)
+    expect(OSM::Member.new(gender: nil).female?).to eq(false)
   end
 
 
   describe 'Tells if the member is currently in the section' do
     it 'Today' do
-      expect(Osm::Member.new(started_section: Date.yesterday).current?).to eq(true)
-      expect(Osm::Member.new(started_section: Date.today).current?).to eq(true)
-      expect(Osm::Member.new(started_section: Date.tomorrow).current?).to eq(false)
-      expect(Osm::Member.new(started_section: Date.yesterday, finished_section: Date.yesterday).current?).to eq(false)
-      expect(Osm::Member.new(started_section: Date.yesterday, finished_section: Date.today).current?).to eq(true)
-      expect(Osm::Member.new(started_section: Date.yesterday, finished_section: Date.tomorrow).current?).to eq(true)
+      expect(OSM::Member.new(started_section: Date.yesterday).current?).to eq(true)
+      expect(OSM::Member.new(started_section: Date.today).current?).to eq(true)
+      expect(OSM::Member.new(started_section: Date.tomorrow).current?).to eq(false)
+      expect(OSM::Member.new(started_section: Date.yesterday, finished_section: Date.yesterday).current?).to eq(false)
+      expect(OSM::Member.new(started_section: Date.yesterday, finished_section: Date.today).current?).to eq(true)
+      expect(OSM::Member.new(started_section: Date.yesterday, finished_section: Date.tomorrow).current?).to eq(true)
     end
 
     it 'Another date' do
       yesterday = Date.new(2014, 10, 15)
       today = Date.new(2014, 10, 16)
       tomorrow = Date.new(2014, 10, 17)
-      expect(Osm::Member.new(started_section: yesterday).current?(today)).to eq(true)
-      expect(Osm::Member.new(started_section: today).current?(today)).to eq(true)
-      expect(Osm::Member.new(started_section: tomorrow).current?(today)).to eq(false)
-      expect(Osm::Member.new(started_section: yesterday, finished_section: yesterday).current?(today)).to eq(false)
-      expect(Osm::Member.new(started_section: yesterday, finished_section: today).current?(today)).to eq(true)
-      expect(Osm::Member.new(started_section: yesterday, finished_section: tomorrow).current?(today)).to eq(true)
+      expect(OSM::Member.new(started_section: yesterday).current?(today)).to eq(true)
+      expect(OSM::Member.new(started_section: today).current?(today)).to eq(true)
+      expect(OSM::Member.new(started_section: tomorrow).current?(today)).to eq(false)
+      expect(OSM::Member.new(started_section: yesterday, finished_section: yesterday).current?(today)).to eq(false)
+      expect(OSM::Member.new(started_section: yesterday, finished_section: today).current?(today)).to eq(true)
+      expect(OSM::Member.new(started_section: yesterday, finished_section: tomorrow).current?(today)).to eq(true)
     end
   end
 
 
   it 'Sorts by section_id, grouping_id, grouping_leader (descending), last_name then first_name' do
-    m1 = Osm::Member.new(section_id: 1, grouping_id: 1, grouping_leader: 1, last_name: 'a', first_name: 'a')
-    m2 = Osm::Member.new(section_id: 2, grouping_id: 1, grouping_leader: 1, last_name: 'a', first_name: 'a')
-    m3 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 1, last_name: 'a', first_name: 'a')
-    m4 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'a', first_name: 'a')
-    m5 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'a', first_name: 'a')
-    m6 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'b', first_name: 'a')
-    m7 = Osm::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'b', first_name: 'b')
+    m1 = OSM::Member.new(section_id: 1, grouping_id: 1, grouping_leader: 1, last_name: 'a', first_name: 'a')
+    m2 = OSM::Member.new(section_id: 2, grouping_id: 1, grouping_leader: 1, last_name: 'a', first_name: 'a')
+    m3 = OSM::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 1, last_name: 'a', first_name: 'a')
+    m4 = OSM::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'a', first_name: 'a')
+    m5 = OSM::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'a', first_name: 'a')
+    m6 = OSM::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'b', first_name: 'a')
+    m7 = OSM::Member.new(section_id: 2, grouping_id: 2, grouping_leader: 0, last_name: 'b', first_name: 'b')
 
     data = [m4, m2, m3, m1, m7, m6, m5]
     expect(data.sort).to eq([m1, m2, m3, m4, m5, m6, m7])
@@ -137,10 +137,10 @@ describe Osm::Member do
 
   describe 'Get contact details' do
     before :each do
-      @member = Osm::Member.new(
+      @member = OSM::Member.new(
         first_name: 'A',
         last_name:  'Member',
-        contact:    Osm::Member::MemberContact.new(
+        contact:    OSM::Member::MemberContact.new(
           first_name: 'A',
           last_name: 'Member',
           email_1:  'enabled.member@example.com',
@@ -152,7 +152,7 @@ describe Osm::Member do
           receive_phone_1: true,
           receive_phone_2: false
         ),
-        primary_contact: Osm::Member::PrimaryContact.new(
+        primary_contact: OSM::Member::PrimaryContact.new(
           first_name: 'Primary',
           last_name:  'Contact',
           email_1:    'enabled.primary@example.com',
@@ -164,7 +164,7 @@ describe Osm::Member do
           receive_phone_1: true,
           receive_phone_2: false
         ),
-        secondary_contact: Osm::Member::SecondaryContact.new(
+        secondary_contact: OSM::Member::SecondaryContact.new(
           first_name: 'Secondary',
           last_name:  'Contact',
           email_1:    'enabled.secondary@example.com',
@@ -176,20 +176,20 @@ describe Osm::Member do
           receive_phone_1: true,
           receive_phone_2: false
         ),
-        emergency_contact: Osm::Member::EmergencyContact.new(
+        emergency_contact: OSM::Member::EmergencyContact.new(
           first_name: 'Emergency',
           last_name:  'Contact',
           email_1:    'emergency@example.com',
           phone_1:    '7777777'
         ),
-        doctor_contact: Osm::Member::DoctorContact.new(
+        doctor_contact: OSM::Member::DoctorContact.new(
           first_name: 'Doctor',
           last_name:  'Contact',
           email_1:    'doctor@example.com',
           phone_1:    '8888888'
         )
       )
-      @member_nil_contacts = Osm::Member.new(
+      @member_nil_contacts = OSM::Member.new(
         first_name: 'A',
         last_name:  'Member',
         contact:    nil,
@@ -371,7 +371,7 @@ describe Osm::Member do
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
-        members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
+        members = OSM::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
         member = members[0]
         expect(member.id).to eq(123)
@@ -511,7 +511,7 @@ describe Osm::Member do
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
-        members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
+        members = OSM::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
         member = members[0]
         expect(member.id).to eq(123)
@@ -564,7 +564,7 @@ describe Osm::Member do
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
-        members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
+        members = OSM::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
         member = members[0]
         expect(member.id).to eq(123)
@@ -613,7 +613,7 @@ describe Osm::Member do
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
-        members = Osm::Member.get_for_section(api: $api, section: 1, term: 2)
+        members = OSM::Member.get_for_section(api: $api, section: 1, term: 2)
         expect(members.size).to eq(1)
         member = members[0]
         expect(member.id).to eq(123)
@@ -630,7 +630,7 @@ describe Osm::Member do
         }
         expect($api).to receive(:post_query).with('ext/members/contact/grid/?action=getMembers', post_data: { 'section_id' => 1, 'term_id' => 2 }).and_return(body)
 
-        expect(Osm::Member.get_for_section(api: $api, section: 1, term: 2)).to eq([])
+        expect(OSM::Member.get_for_section(api: $api, section: 1, term: 2)).to eq([])
       end
 
     end
@@ -655,13 +655,13 @@ describe Osm::Member do
           finished_section: '2007-12-31',
           additional_information: { '12_3' => '123' },
           additional_information_labels: { '12_3' => 'Label for 123' },
-          contact: Osm::Member::MemberContact.new(postcode: 'A'),
-          primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
-          secondary_contact: Osm::Member::PrimaryContact.new(postcode: 'C'),
-          emergency_contact: Osm::Member::EmergencyContact.new(postcode: 'D'),
-          doctor: Osm::Member::DoctorContact.new(postcode: 'E')
+          contact: OSM::Member::MemberContact.new(postcode: 'A'),
+          primary_contact: OSM::Member::PrimaryContact.new(postcode: 'B'),
+          secondary_contact: OSM::Member::PrimaryContact.new(postcode: 'C'),
+          emergency_contact: OSM::Member::EmergencyContact.new(postcode: 'D'),
+          doctor: OSM::Member::DoctorContact.new(postcode: 'E')
         }
-        @member = Osm::Member.new(attributes)
+        @member = OSM::Member.new(attributes)
       end
 
       it 'Success' do
@@ -675,7 +675,7 @@ describe Osm::Member do
         }).and_return('result' => 'ok', 'scoutid' => 577743)
 
         allow(@member).to receive(:update) { true }
-        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        allow(OSM::Term).to receive(:get_for_section) { [OSM::Term.new(id: 3)] }
         expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
 
         expect(@member.create($api)).to eq(true)
@@ -684,7 +684,7 @@ describe Osm::Member do
 
       it 'Failed the create stage in OSM' do
         expect($api).to receive(:post_query).with('users.php?action=newMember', post_data: { 'firstname' => 'First', 'lastname' => 'Last', 'dob' => '2000-01-02', 'started' => '2006-01-02', 'startedsection' => '2006-01-07', 'sectionid' => 2 }).and_return({})
-        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        allow(OSM::Term).to receive(:get_for_section) { [OSM::Term.new(id: 3)] }
         expect(@member).to_not receive(:cache_delete)
         expect(@member.create($api)).to eq(false)
       end
@@ -700,7 +700,7 @@ describe Osm::Member do
         }).and_return('result' => 'ok', 'scoutid' => 577743)
 
         allow(@member).to receive(:update) { false }
-        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        allow(OSM::Term).to receive(:get_for_section) { [OSM::Term.new(id: 3)] }
         expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
 
         expect(@member.create($api)).to eq(nil)
@@ -708,11 +708,11 @@ describe Osm::Member do
       end
 
       it 'Raises error if member is invalid' do
-        expect { Osm::Member.new.create($api) }.to raise_error(Osm::Error::InvalidObject, 'member is invalid')
+        expect { OSM::Member.new.create($api) }.to raise_error(OSM::Error::InvalidObject, 'member is invalid')
       end
 
       it 'Raises error if member exists in OSM (has an ID)' do
-        expect { Osm::Member.new(id: 12345).create($api) }.to raise_error(Osm::OSMError, 'the member already exists in OSM')
+        expect { OSM::Member.new(id: 12345).create($api) }.to raise_error(OSM::OSMError, 'the member already exists in OSM')
       end
 
     end
@@ -738,13 +738,13 @@ describe Osm::Member do
           finished_section: '2007-12-31',
           additional_information: DirtyHashy[ 123, '123' ],
           additional_information_labels: { 123 => 'Label for 123' },
-          contact: Osm::Member::MemberContact.new(postcode: 'A'),
-          primary_contact: Osm::Member::PrimaryContact.new(postcode: 'B'),
-          secondary_contact: Osm::Member::SecondaryContact.new(postcode: 'C'),
-          emergency_contact: Osm::Member::EmergencyContact.new(postcode: 'D'),
-          doctor: Osm::Member::DoctorContact.new(postcode: 'E', additional_information: DirtyHashy['test_var', 'This is a test'])
+          contact: OSM::Member::MemberContact.new(postcode: 'A'),
+          primary_contact: OSM::Member::PrimaryContact.new(postcode: 'B'),
+          secondary_contact: OSM::Member::SecondaryContact.new(postcode: 'C'),
+          emergency_contact: OSM::Member::EmergencyContact.new(postcode: 'D'),
+          doctor: OSM::Member::DoctorContact.new(postcode: 'E', additional_information: DirtyHashy['test_var', 'This is a test'])
         }
-        @member = Osm::Member.new(attributes)
+        @member = OSM::Member.new(attributes)
       end
 
       it 'Only updated fields' do
@@ -814,7 +814,7 @@ describe Osm::Member do
           'value' => '321'
         }).and_return('data' => { 'value' => '321' })
 
-        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        allow(OSM::Term).to receive(:get_for_section) { [OSM::Term.new(id: 3)] }
         expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
 
         @member.first_name = 'John'
@@ -917,7 +917,7 @@ describe Osm::Member do
           'data[test_var]' => 'This is a test'
         }).and_return('status' => true)
 
-        allow(Osm::Term).to receive(:get_for_section) { [Osm::Term.new(id: 3)] }
+        allow(OSM::Term).to receive(:get_for_section) { [OSM::Term.new(id: 3)] }
         expect(@member).to receive(:cache_delete).with(api: $api, key: ['members', 2, 3])
 
         expect(@member.update($api, force: true)).to eq(true)
@@ -931,7 +931,7 @@ describe Osm::Member do
       end
 
       it 'Raises error if member is invalid' do
-        expect { Osm::Member.new.create($api) }.to raise_error(Osm::Error::InvalidObject, 'member is invalid')
+        expect { OSM::Member.new.create($api) }.to raise_error(OSM::Error::InvalidObject, 'member is invalid')
       end
 
       it 'Handles disabled contacts' do
@@ -961,7 +961,7 @@ describe Osm::Member do
           'value' => ''
         }).and_return('data' => { 'value' => nil })
 
-        allow(Osm::Term).to receive(:get_for_section) { [] }
+        allow(OSM::Term).to receive(:get_for_section) { [] }
 
         allow(@member).to receive('valid?') { true }
         @member.first_name = ''
@@ -972,7 +972,7 @@ describe Osm::Member do
     end
 
     it 'Get Photo link' do
-      member = Osm::Member.new(
+      member = OSM::Member.new(
         id: 1,
         section_id: 2,
         first_name: 'First',
@@ -986,11 +986,11 @@ describe Osm::Member do
         grouping_leader_label: '',
         additional_information: {},
         additional_information_labels: {},
-        contact: Osm::Member::MemberContact.new(),
-        primary_contact: Osm::Member::PrimaryContact.new(),
-        secondary_contact: Osm::Member::PrimaryContact.new(),
-        emergency_contact: Osm::Member::EmergencyContact.new(),
-        doctor: Osm::Member::DoctorContact.new()
+        contact: OSM::Member::MemberContact.new(),
+        primary_contact: OSM::Member::PrimaryContact.new(),
+        secondary_contact: OSM::Member::PrimaryContact.new(),
+        emergency_contact: OSM::Member::EmergencyContact.new(),
+        doctor: OSM::Member::DoctorContact.new()
       )
       allow($api).to receive(:post_query).with('ext/members/contact/images/member.php?sectionid=2&scoutid=1&bw=false').and_return('abcdef')
 
@@ -1001,7 +1001,7 @@ describe Osm::Member do
     describe 'Get My.SCOUT link' do
 
       before :each do
-        @member = Osm::Member.new(
+        @member = OSM::Member.new(
           id: 1,
           section_id: 2,
           first_name: 'First',
@@ -1015,11 +1015,11 @@ describe Osm::Member do
           grouping_leader_label: '',
           additional_information: {},
           additional_information_labels: {},
-          contact: Osm::Member::MemberContact.new(),
-          primary_contact: Osm::Member::PrimaryContact.new(),
-          secondary_contact: Osm::Member::PrimaryContact.new(),
-          emergency_contact: Osm::Member::EmergencyContact.new(),
-          doctor: Osm::Member::DoctorContact.new()
+          contact: OSM::Member::MemberContact.new(),
+          primary_contact: OSM::Member::PrimaryContact.new(),
+          secondary_contact: OSM::Member::PrimaryContact.new(),
+          emergency_contact: OSM::Member::EmergencyContact.new(),
+          doctor: OSM::Member::DoctorContact.new()
         )
       end
 

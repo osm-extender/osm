@@ -1,7 +1,7 @@
-describe Osm::Invoice do
+describe OSM::Invoice do
 
   it 'Create Invoice' do
-    i = Osm::Invoice.new(
+    i = OSM::Invoice.new(
       id: 1,
       section_id: 2,
       name: 'Name',
@@ -22,10 +22,10 @@ describe Osm::Invoice do
   end
 
   it 'Sorts Invoice by Section ID, Name then Date' do
-    i1 = Osm::Invoice.new(section_id: 1, name: 'a', date: Date.new(2000, 1, 2))
-    i2 = Osm::Invoice.new(section_id: 2, name: 'a', date: Date.new(2000, 1, 2))
-    i3 = Osm::Invoice.new(section_id: 2, name: 'b', date: Date.new(2000, 1, 2))
-    i4 = Osm::Invoice.new(section_id: 2, name: 'b', date: Date.new(2000, 1, 3))
+    i1 = OSM::Invoice.new(section_id: 1, name: 'a', date: Date.new(2000, 1, 2))
+    i2 = OSM::Invoice.new(section_id: 2, name: 'a', date: Date.new(2000, 1, 2))
+    i3 = OSM::Invoice.new(section_id: 2, name: 'b', date: Date.new(2000, 1, 2))
+    i4 = OSM::Invoice.new(section_id: 2, name: 'b', date: Date.new(2000, 1, 3))
 
     data = [i2, i4, i1, i3]
     expect(data.sort).to eq([i1, i2, i3, i4])
@@ -94,7 +94,7 @@ describe Osm::Invoice do
           expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
           expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
 
-          invoices = Osm::Invoice.get_for_section(api: $api, section: 3)
+          invoices = OSM::Invoice.get_for_section(api: $api, section: 3)
           expect(invoices.size).to eq(1)
           invoice = invoices[0]
           expect(invoice.id).to eq(1)
@@ -112,7 +112,7 @@ describe Osm::Invoice do
           expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
           expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
 
-          invoices = Osm::Invoice.get_for_section(api: $api, section: 3, include_archived: true)
+          invoices = OSM::Invoice.get_for_section(api: $api, section: 3, include_archived: true)
           expect(invoices.size).to eq(2)
         end
 
@@ -121,9 +121,9 @@ describe Osm::Invoice do
           expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=1').and_return(@invoice1_body)
           expect($api).to receive(:post_query).with('finances.php?action=getInvoice&sectionid=3&invoiceid=2').and_return(@invoice2_body)
 
-          invoices = Osm::Invoice.get_for_section(api: $api, section: 3)
+          invoices = OSM::Invoice.get_for_section(api: $api, section: 3)
           expect($api).not_to receive(:post_query)
-          expect(Osm::Invoice.get_for_section(api: $api, section: 3)).to eq(invoices)
+          expect(OSM::Invoice.get_for_section(api: $api, section: 3)).to eq(invoices)
         end
 
       end
@@ -134,13 +134,13 @@ describe Osm::Invoice do
           described_class.new(id: 2),
           described_class.new(id: 3),
         ])
-        invoice = Osm::Invoice.get(api: $api, section: 3, id: 2)
+        invoice = OSM::Invoice.get(api: $api, section: 3, id: 2)
         expect(invoice).not_to be_nil
         expect(invoice.id).to eq(2)
       end
 
       it 'Create (success)' do
-        invoice = Osm::Invoice.new(
+        invoice = OSM::Invoice.new(
           section_id: 1,
           name: 'Invoice name',
           extra_details: '',
@@ -158,7 +158,7 @@ describe Osm::Invoice do
       end
 
       it 'Create (failure)' do
-        invoice = Osm::Invoice.new(
+        invoice = OSM::Invoice.new(
           section_id: 1,
           name: 'Invoice name',
           extra_details: '',
@@ -176,7 +176,7 @@ describe Osm::Invoice do
       end
 
       it 'Update (success)' do
-        invoice = Osm::Invoice.new(
+        invoice = OSM::Invoice.new(
           id: 1,
           section_id: 2,
           name: 'Invoice name',
@@ -195,7 +195,7 @@ describe Osm::Invoice do
       end
 
       it 'Update (failure)' do
-        invoice = Osm::Invoice.new(
+        invoice = OSM::Invoice.new(
           id: 1,
           section_id: 2,
           name: 'Invoice name',
@@ -214,7 +214,7 @@ describe Osm::Invoice do
       end
 
       it 'Delete (success)' do
-        invoice = Osm::Invoice.new(id: 1, section_id: 2)
+        invoice = OSM::Invoice.new(id: 1, section_id: 2)
 
         expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1
@@ -224,7 +224,7 @@ describe Osm::Invoice do
       end
 
       it 'Delete (failure)' do
-        invoice = Osm::Invoice.new(id: 1, section_id: 2)
+        invoice = OSM::Invoice.new(id: 1, section_id: 2)
 
         expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1
@@ -234,7 +234,7 @@ describe Osm::Invoice do
       end
 
       it 'Finalise invoice (success)' do
-        invoice = Osm::Invoice.new(id: 1, section_id: 2)
+        invoice = OSM::Invoice.new(id: 1, section_id: 2)
 
         expect($api).to receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return('ok' => true)
 
@@ -243,7 +243,7 @@ describe Osm::Invoice do
       end
 
       it 'Finalise invoice (failure)' do
-        invoice = Osm::Invoice.new(id: 1, section_id: 2)
+        invoice = OSM::Invoice.new(id: 1, section_id: 2)
 
         expect($api).to receive(:post_query).with('finances.php?action=finaliseInvoice&sectionid=2&invoiceid=1').and_return('ok' => false)
 
@@ -252,7 +252,7 @@ describe Osm::Invoice do
       end
 
       it 'Finalise invoice (already finalised)' do
-        invoice = Osm::Invoice.new(id: 1, section_id: 2, finalised: true)
+        invoice = OSM::Invoice.new(id: 1, section_id: 2, finalised: true)
 
         expect($api).not_to receive(:post_query)
 
@@ -261,7 +261,7 @@ describe Osm::Invoice do
       end
 
       it 'Archive invoice (success)' do
-        invoice = Osm::Invoice.new(id: 1, section_id: 2)
+        invoice = OSM::Invoice.new(id: 1, section_id: 2)
 
         expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
@@ -273,7 +273,7 @@ describe Osm::Invoice do
       end
 
       it 'Archive invoice (failure)' do
-        invoice = Osm::Invoice.new(id: 1, section_id: 2)
+        invoice = OSM::Invoice.new(id: 1, section_id: 2)
 
         expect($api).to receive(:post_query).with('finances.php?action=deleteInvoice&sectionid=2', post_data: {
           'invoiceid' => 1,
@@ -285,7 +285,7 @@ describe Osm::Invoice do
       end
 
       it 'Archive invoice (already archived)' do
-        invoice = Osm::Invoice.new(id: 1, section_id: 2, archived: true)
+        invoice = OSM::Invoice.new(id: 1, section_id: 2, archived: true)
 
         expect($api).not_to receive(:post_query)
 

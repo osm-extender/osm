@@ -1,6 +1,6 @@
-module Osm
+module OSM
 
-  class Meeting < Osm::Model
+  class Meeting < OSM::Model
     # @!attribute [rw] id
     #   @return [Integer] the id of the meeting
     # @!attribute [rw] section_id
@@ -46,10 +46,10 @@ module Osm
     validates_numericality_of :section_id, only_integer: true, greater_than: 0
     validates_presence_of :title
     validates_presence_of :date
-    validates_format_of :start_time, with: Osm::OSM_TIME_REGEX, message: 'is not in the correct format (HH:MM)', allow_blank: true
-    validates_format_of :finish_time, with: Osm::OSM_TIME_REGEX, message: 'is not in the correct format (HH:MM)', allow_blank: true
-    validates :activities, array_of: { item_type: Osm::Meeting::Activity, item_valid: true }
-    validates :badge_links, array_of: { item_type: Osm::Meeting::BadgeLink, item_valid: true }
+    validates_format_of :start_time, with: OSM::OSM_TIME_REGEX, message: 'is not in the correct format (HH:MM)', allow_blank: true
+    validates_format_of :finish_time, with: OSM::OSM_TIME_REGEX, message: 'is not in the correct format (HH:MM)', allow_blank: true
+    validates :activities, array_of: { item_type: OSM::Meeting::Activity, item_valid: true }
+    validates :badge_links, array_of: { item_type: OSM::Meeting::BadgeLink, item_valid: true }
 
     # @!method initialize
     #   Initialize a new Meeting
@@ -57,15 +57,15 @@ module Osm
 
 
     # Get the programme for a given term
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the programme for
-    # @param term [Osm::term, Integer, nil] The term (or its ID) to get the programme for, passing nil causes the current term to be used
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the programme for
+    # @param term [OSM::term, Integer, nil] The term (or its ID) to get the programme for, passing nil causes the current term to be used
     # @!macro options_get
-    # @return [Array<Osm::Meeting>]
+    # @return [Array<OSM::Meeting>]
     def self.get_for_section(api:, section:, term: nil, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :programme, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
+      term_id = term.nil? ? OSM::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
       cache_key = ['programme', section_id, term_id]
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
@@ -77,8 +77,8 @@ module Osm
 
         items.map do |item|
           attributes = {}
-          attributes[:id] = Osm.to_i_or_nil(item['eveningid'])
-          attributes[:section_id] = Osm.to_i_or_nil(item['sectionid'])
+          attributes[:id] = OSM.to_i_or_nil(item['eveningid'])
+          attributes[:section_id] = OSM.to_i_or_nil(item['sectionid'])
           attributes[:title] = item['title'] || 'Unnamed meeting'
           attributes[:notes_for_parents] = item['notesforparents'] || ''
           attributes[:games] = item['games'] || ''
@@ -87,7 +87,7 @@ module Osm
           attributes[:leaders] = item['leaders'] || ''
           attributes[:start_time] = item['starttime'].nil? ? nil : item['starttime'][0..4]
           attributes[:finish_time] = item['endtime'].nil? ? nil : item['endtime'][0..4]
-          attributes[:date] = Osm.parse_date(item['meetingdate'])
+          attributes[:date] = OSM.parse_date(item['meetingdate'])
 
           our_activities = activities[item['eveningid']]
           attributes[:activities] = []
@@ -96,8 +96,8 @@ module Osm
               if activity_data.is_a?(Array)
                 activity_data = activity_data.find { |a| a.is_a?(Hash) && a.key?('activityid') }
               end
-              attributes[:activities].push Osm::Meeting::Activity.new(
-                activity_id: Osm.to_i_or_nil(activity_data['activityid']),
+              attributes[:activities].push OSM::Meeting::Activity.new(
+                activity_id: OSM.to_i_or_nil(activity_data['activityid']),
                 title: activity_data['title'],
                 notes: activity_data['notes']
               )
@@ -108,13 +108,13 @@ module Osm
           attributes[:badge_links] = []
           unless our_badge_links.nil?
             our_badge_links.each do |badge_data|
-              attributes[:badge_links].push Osm::Meeting::BadgeLink.new(
+              attributes[:badge_links].push OSM::Meeting::BadgeLink.new(
                 badge_type: badge_data['badgetype'].to_sym,
                 badge_section: badge_data['section'].to_sym,
                 badge_name: badge_data['badgeLongName'],
-                badge_id: Osm.to_i_or_nil(badge_data['badge_id']),
-                badge_version: Osm.to_i_or_nil(badge_data['badge_version']),
-                requirement_id: Osm.to_i_or_nil(badge_data['column_id']),
+                badge_id: OSM.to_i_or_nil(badge_data['badge_id']),
+                badge_version: OSM.to_i_or_nil(badge_data['badge_version']),
+                requirement_id: OSM.to_i_or_nil(badge_data['column_id']),
                 requirement_label: badge_data['columnnameLongName'],
                 data: badge_data['data']
               )
@@ -127,25 +127,25 @@ module Osm
 
 
     # Create a meeting in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param **attributes [] The attributes for the meeting to create
-    # @return [Osm::Meeting, nil] the created meeting, nil if failed
+    # @return [OSM::Meeting, nil] the created meeting, nil if failed
     def self.create(api, **attributes)
       require_ability_to(api: api, to: :write, on: :programme, section: attributes[:section_id])
       meeting = new(**attributes)
 
       data = api.post_query('programme.php?action=addActivityToProgramme', post_data: {
-        'meetingdate' => meeting.date.strftime(Osm::OSM_DATE_FORMAT),
+        'meetingdate' => meeting.date.strftime(OSM::OSM_DATE_FORMAT),
         'sectionid' => meeting.section_id,
         'activityid' => -1,
-        'start' => meeting.date.strftime(Osm::OSM_DATE_FORMAT),
+        'start' => meeting.date.strftime(OSM::OSM_DATE_FORMAT),
         'starttime' => meeting.start_time,
         'endtime' => meeting.finish_time,
         'title' => meeting.title
       })
 
       # The cached programmes for the section will be out of date - remove them
-      Osm::Term.get_for_section(api, meeting.section_id).each do |term|
+      OSM::Term.get_for_section(api, meeting.section_id).each do |term|
         cache_delete(api: api, cache_key: ['programme', meeting.section_id, term.id])
       end
 
@@ -154,11 +154,11 @@ module Osm
 
 
     # Update a meeting in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false if the operation suceeded or not
-    # @raise [Osm::ObjectIsInvalid] If the Meeting is invalid
+    # @raise [OSM::ObjectIsInvalid] If the Meeting is invalid
     def update(api)
-      fail Osm::Error::InvalidObject, 'meeting is invalid' unless valid?
+      fail OSM::Error::InvalidObject, 'meeting is invalid' unless valid?
       require_ability_to(api: api, to: :write, on: :programme, section: section_id)
 
       activities_data = []
@@ -173,7 +173,7 @@ module Osm
       api_data = {
         'eveningid' => id,
         'sectionid' => section_id,
-        'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
+        'meetingdate' => date.strftime(OSM::OSM_DATE_FORMAT),
         'starttime' => start_time,
         'endtime' => finish_time,
         'title' => title,
@@ -205,23 +205,23 @@ module Osm
       return false unless response.is_a?(Hash) && response['result'].zero?
       reset_changed_attributes
       # The cached programmes for the section will be out of date - remove them
-      Osm::Term.get_for_section(api, section_id).each do |term|
+      OSM::Term.get_for_section(api, section_id).each do |term|
         cache_delete(api: api, key: ['programme', section_id, term.id]) if term.contains_date?(date)
       end
       true
     end
 
     # Add an activity to this meeting in OSM
-    # @param api [Osm::Api] The api to use to make the request
-    # @param activity [Osm::Activity] The Activity to add to the Meeting
+    # @param api [OSM::Api] The api to use to make the request
+    # @param activity [OSM::Activity] The Activity to add to the Meeting
     # @param notes [String] The notes which should appear for this Activity on this Meeting
     # @return true, false Whether the activity ws successfully added
     def add_activity(api:, activity:, notes: '')
       if activity.add_to_programme(api: api, section: section_id, date: date, notes: notes)
-        activities.push Osm::Meeting::Activity.new(activity_id: activity.id, notes: notes, title: activity.title)
+        activities.push OSM::Meeting::Activity.new(activity_id: activity.id, notes: notes, title: activity.title)
 
         # The cached programmes for the section will be out of date - remove them
-        Osm::Term.get_for_section(api, section_id).each do |term|
+        OSM::Term.get_for_section(api, section_id).each do |term|
           cache_delete(api: api, key: ['programme', section_id, term.id]) if term.contains_date?(date)
         end
 
@@ -232,14 +232,14 @@ module Osm
     end
 
     # Delete meeting from OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false true
     def delete(api)
       require_ability_to(api: api, to: :write, on: :programme, section: section_id)
       api.post_query("programme.php?action=deleteEvening&eveningid=#{id}&sectionid=#{section_id}")
 
       # The cached programmes for the section will be out of date - remove them
-      Osm::Term.get_for_section(api, section_id).each do |term|
+      OSM::Term.get_for_section(api, section_id).each do |term|
         cache_delete(api: api, key: ['programme', section_id, term.id]) if term.contains_date?(date)
       end
 
@@ -250,12 +250,12 @@ module Osm
     # Get the badge requirements met on a specific meeting
     # Requires either write permission to badges (prefered as it's one OSM query)
     # or read permission to programme.
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @!macro options_get
     # @return [Array<Hash>] hashes ready to pass into the update_register method
     # @return [nil] if something went wrong
     def get_badge_requirements(api, no_read_cache: false)
-      section = Osm::Section.get(api: api, id: section_id)
+      section = OSM::Section.get(api: api, id: section_id)
       cache_key = ['badge_requirements', section.id, id]
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
@@ -263,13 +263,13 @@ module Osm
 
         if has_permission?(api: api, to: :write, on: :badge, section: section_id, no_read_cache: no_read_cache)
           # We can shortcut and do it in one query
-          badges = api.post_query("users.php?action=getActivityRequirements&date=#{date.strftime(Osm::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
+          badges = api.post_query("users.php?action=getActivityRequirements&date=#{date.strftime(OSM::OSM_DATE_FORMAT)}&sectionid=#{section.id}&section=#{section.type}")
         else
           # We'll have to iterate through the activities
           require_ability_to(api: api, to: :read, on: :programme, section: section_id, no_read_cache: no_read_cache)
           links = badge_links
           activities.each do |activity|
-            activity = Osm::Activity.get(api: api, id: activity.activity_id, no_read_cache: no_read_cache)
+            activity = OSM::Activity.get(api: api, id: activity.activity_id, no_read_cache: no_read_cache)
             links += activity.badges
           end
 

@@ -1,4 +1,4 @@
-module Osm
+module OSM
   class Api
 
     # @!attribute [r] site
@@ -16,7 +16,7 @@ module Osm
     # @!attribute [rw] debug
     #   @return true, false whether debugging output should be displayed (default false)
     # @!attribute [rw] http_user_agent
-    #   @return [String, #to_s, nil] what to send as the user-agent when making requests to OSM (default "#{name} (using osm gem version #{Osm::VERSION})")
+    #   @return [String, #to_s, nil] what to send as the user-agent when making requests to OSM (default "#{name} (using osm gem version #{OSM::VERSION})")
 
     attr_reader :api_id, :api_secret, :name, :site, :debug, :user_id, :user_secret
 
@@ -44,17 +44,17 @@ module Osm
       @user_secret = user_secret.to_s.clone unless user_secret.nil?
     end
 
-    # Create a new Osm::Api based on the current one but with a different user
+    # Create a new OSM::Api based on the current one but with a different user
     # @param id [String] The ID of the user, given by OSM
     # @param secret [String] The secret for the user, given by OSM
-    # @return [Osm::Api]
+    # @return [OSM::Api]
     def clone_with_different_user(id:, secret:)
       clone_with_changes(user_id: id, user_secret: secret)
     end
 
-    # Create a new Osm::Api based on the current
+    # Create a new OSM::Api based on the current
     # @param attributes [Hash] the attributes to set differently in the clone
-    # @return [Osm::Api]
+    # @return [OSM::Api]
     def clone_with_changes(**attributes)
       attributes = {
         api_id:       api_id.clone,
@@ -65,7 +65,7 @@ module Osm
         user_id:      user_id.clone,
         user_secret:  user_secret.clone
       }.merge(attributes)
-      Osm::Api.new(attributes)
+      OSM::Api.new(attributes)
     end
 
 
@@ -82,7 +82,7 @@ module Osm
     end
 
     # Requires the API to have valid looking user credentials
-    # @raise [Osm::Api::UserInvalid]
+    # @raise [OSM::Api::UserInvalid]
     # @return [nil]
     def require_valid_user!
       fail APIError::InvalidUser, "id: #{user_id.inspect}, secret: #{user_secret.inspect}" if invalid_user?
@@ -147,11 +147,11 @@ module Osm
         http.use_ssl = uri.scheme.eql?('https')
         response = http.request(request)
       rescue => e
-        raise Osm::APIError::ConnectionError, "#{e.class}: #{e.message}"
+        raise OSM::APIError::ConnectionError, "#{e.class}: #{e.message}"
       end
       unless response.is_a?(Net::HTTPOK)
         # Connection error occured
-        fail Osm::APIError::ConnectionError, "HTTP Status code was #{response.code}"
+        fail OSM::APIError::ConnectionError, "HTTP Status code was #{response.code}"
       end
 
       if debug?
@@ -166,16 +166,16 @@ module Osm
         begin
           decoded = JSON.parse(response.body)
           if osm_error = get_osm_error(decoded)
-            fail Osm::OSMError, osm_error if osm_error
+            fail OSM::OSMError, osm_error if osm_error
           end
           return decoded
         rescue JSON::ParserError
-          fail Osm::OSMError, response.body
+          fail OSM::OSMError, response.body
         end
       when 'image/jpeg'
         return response.body
       else
-        fail Osm::APIError::UnexpectedType, "Got a: #{response.content_type}"
+        fail OSM::APIError::UnexpectedType, "Got a: #{response.content_type}"
       end
     end
 
@@ -192,11 +192,11 @@ module Osm
     # Get API user's roles in OSM
     # @!macro options_get
     # @return [Array<Hash>] data returned by OSM
-    # @raises Osm::NoActiveRoles
+    # @raises OSM::NoActiveRoles
     def get_user_roles!(no_read_cache: false)
       cache_key = ['user_roles', user_id]
 
-      Osm::Model.cache_fetch(api: self, key: cache_key, no_read_cache: no_read_cache) do
+      OSM::Model.cache_fetch(api: self, key: cache_key, no_read_cache: no_read_cache) do
         user_roles = {}
         begin
           user_roles = post_query('api.php?action=getUserRoles')
@@ -204,7 +204,7 @@ module Osm
             # false equates to no roles
             fail OSMError::NoActiveRoles, 'You do not have any active roles in OSM.'
           end
-        rescue Osm::OSMError => e
+        rescue OSM::OSMError => e
           if e.message.eql?('false')
             fail OSMError::NoActiveRoles, 'You do not have any active roles in OSM.'
           else
@@ -223,11 +223,11 @@ module Osm
     def get_user_permissions(no_read_cache: false)
       cache_key = ['permissions', user_id]
 
-      Osm::Model.cache_fetch(api: self, key: cache_key, no_read_cache: no_read_cache) do
+      OSM::Model.cache_fetch(api: self, key: cache_key, no_read_cache: no_read_cache) do
         all_permissions = {}
         get_user_roles(no_read_cache: no_read_cache).each do |item|
           unless item['section'].eql?('discount')  # It's not an actual section
-            all_permissions.merge!(Osm.to_i_or_nil(item['sectionid']) => Osm.make_permissions_hash(item['permissions']))
+            all_permissions.merge!(OSM.to_i_or_nil(item['sectionid']) => OSM.make_permissions_hash(item['permissions']))
           end
         end
         all_permissions
@@ -235,13 +235,13 @@ module Osm
     end
 
     # Set access permission for an API user for a given Section
-    # @param [Osm::Api::Configuration] configuration The configuration detailing how to talk to OSM
+    # @param [OSM::Api::Configuration] configuration The configuration detailing how to talk to OSM
     # @param [Section, Integer] section The Section to set permissions for
     # @param [Hash] permissions The permissions Hash
     def set_user_permissions(section:, permissions:)
       key = ['permissions', user_id]
       permissions = get_user_permissions.merge(section.to_i => permissions)
-      Osm::Model.cache_write(api: self, key: key, data: permissions)
+      OSM::Model.cache_write(api: self, key: key, data: permissions)
     end
 
 
@@ -286,7 +286,7 @@ module Osm
       @http_user_agent = value.empty? ? nil : value
     end
     def http_user_agent
-      @http_user_agent || "#{name} (using osm gem version #{Osm::VERSION})"
+      @http_user_agent || "#{name} (using osm gem version #{OSM::VERSION})"
     end
 
 

@@ -1,6 +1,6 @@
-module Osm
-  class Event < Osm::Model
-    class Column < Osm::Model
+module OSM
+  class Event < OSM::Model
+    class Column < OSM::Model
       # @!attribute [rw] id
       #   @return [String] OSM id for the column
       # @!attribute [rw] name
@@ -10,7 +10,7 @@ module Osm
       # @!attribute [rw] parent_required
       #   @return true, false whether the parent is required to enter something
       # @!attriute [rw] event
-      #   @return [Osm::Event] the event that this column belongs to
+      #   @return [OSM::Event] the event that this column belongs to
 
       attribute :id, type: String
       attribute :name, type: String
@@ -28,7 +28,7 @@ module Osm
 
 
       # Update event column in OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @return true, false if the operation suceeded or not
       def update(api)
         require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
@@ -54,7 +54,7 @@ module Osm
       end
 
       # Delete event column from OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @return true, false whether the delete succedded
       def delete(api)
         require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
@@ -78,7 +78,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, replace_with: { 'event' => :id })
+        OSM.inspect_instance(self, replace_with: { 'event' => :id })
       end
 
       private

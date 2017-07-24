@@ -1,6 +1,6 @@
-module Osm
+module OSM
 
-  class Term < Osm::Model
+  class Term < OSM::Model
     # @!attribute [rw] id
     #   @return [Integer] the id for the term
     # @!attribute [rw] section_id
@@ -26,9 +26,9 @@ module Osm
 
 
     # Get the terms that the OSM user can access
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @!macro options_get
-    # @return [Array<Osm::Term>]
+    # @return [Array<OSM::Term>]
     def self.get_all(api, no_read_cache: false)
       cache_key = ['terms', api.user_id]
 
@@ -36,44 +36,44 @@ module Osm
         data = api.post_query('api.php?action=getTerms')
         # data is of the form {"section_id_1" => [[term_data_1],[term_data_2], "section_id_3" => [term_data_3]}}
         data.values.flatten.map do |term_data|
-          Osm::Term.new(
+          OSM::Term.new(
             id: term_data.fetch('termid').to_i,
             section_id: term_data.fetch('sectionid').to_i,
             name: term_data['name'],
-            start: Osm.parse_date(term_data['startdate']),
-            finish: Osm.parse_date(term_data['enddate'])
+            start: OSM.parse_date(term_data['startdate']),
+            finish: OSM.parse_date(term_data['enddate'])
           )
         end
       end # cache_fetch
     end
 
     # Get the terms that the OSM user can access for a given section
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param section [Integer] The section (or its ID) of the section to get terms for
     # @!macro options_get
-    # @return [Array<Osm::Term>, nil] An array of terms or nil if the user can not access that section
+    # @return [Array<OSM::Term>, nil] An array of terms or nil if the user can not access that section
     def self.get_for_section(section:, api:, **options)
       section_id = section.to_i
       get_all(api, **options).select { |term| term.section_id == section_id }
     end
 
     # Get a term
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param id [Integer] The id of the required term
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that term
-    # @return [Osm::Term]
+    # @return [OSM::Term]
     def self.get(id:, api:, **options)
       term_id = id.to_i
       get_all(api, **options).find { |term| term.id == term_id }
     end
 
     # Get the current term for a given section
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID)  to get terms for
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID)  to get terms for
     # @!macro options_get
-    # @return [Osm::Term, nil] The current term or nil if the user can not access that section
-    # @raise [Osm::Error::NoCurrentTerm] If the Section doesn't have a Term which is current
+    # @return [OSM::Term, nil] The current term or nil if the user can not access that section
+    # @raise [OSM::Error::NoCurrentTerm] If the Section doesn't have a Term which is current
     def self.get_current_term_for_section(api:, section:, no_read_cache: false)
       terms = get_for_section(api: api, section: section, no_read_cache: no_read_cache)
       return nil if terms.nil?
@@ -81,12 +81,12 @@ module Osm
         return term if term.current?
       end
 
-      fail Osm::OSMError::NoCurrentTerm.new('There is no current term for the section.', section)
+      fail OSM::OSMError::NoCurrentTerm.new('There is no current term for the section.', section)
     end
 
     # Create a term in OSM
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer] (required) section or section_id to add the term to
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer] (required) section or section_id to add the term to
     # @param name [String] (required) the name for the term
     # @param start [Date, #strftime] (required) the date for the start of term
     # @param finish [Date, #strftime] (required) the date for the finish of term
@@ -96,8 +96,8 @@ module Osm
 
       data = api.post_query("users.php?action=addTerm&sectionid=#{section.to_i}", post_data: {
         'term' => name,
-        'start' => start.strftime(Osm::OSM_DATE_FORMAT),
-        'end' => finish.strftime(Osm::OSM_DATE_FORMAT),
+        'start' => start.strftime(OSM::OSM_DATE_FORMAT),
+        'end' => finish.strftime(OSM::OSM_DATE_FORMAT),
         'termid' => '0'
       })
 
@@ -112,17 +112,17 @@ module Osm
 
 
     # Update a term in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false if the operation suceeded or not
-    # @raise [Osm::ObjectIsInvalid] If the Term is invalid
+    # @raise [OSM::ObjectIsInvalid] If the Term is invalid
     def update(api)
-      fail Osm::Error::InvalidObject, 'term is invalid' unless valid?
+      fail OSM::Error::InvalidObject, 'term is invalid' unless valid?
       require_access_to_section(api: api, section: section_id)
 
       data = api.post_query("users.php?action=addTerm&sectionid=#{section_id}", post_data: {
         'term' => name,
-        'start' => start.strftime(Osm::OSM_DATE_FORMAT),
-        'end' => finish.strftime(Osm::OSM_DATE_FORMAT),
+        'start' => start.strftime(OSM::OSM_DATE_FORMAT),
+        'end' => finish.strftime(OSM::OSM_DATE_FORMAT),
         'termid' => id
       })
 

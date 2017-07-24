@@ -1,5 +1,5 @@
-module Osm
-  class CoreBadge < Osm::Badge
+module OSM
+  class CoreBadge < OSM::Badge
 
     def self.type
       :core

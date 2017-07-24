@@ -1,2 +1,2 @@
-describe Osm::Badge::Due do
+describe OSM::Badge::Due do
 end

@@ -1,8 +1,8 @@
-describe Osm::OnlinePayment::Schedule do
+describe OSM::OnlinePayment::Schedule do
 
 
   it 'Create' do
-    schedule = Osm::OnlinePayment::Schedule.new(
+    schedule = OSM::OnlinePayment::Schedule.new(
       id:             1,
       section_id:     2,
       account_id:     3,
@@ -30,16 +30,16 @@ describe Osm::OnlinePayment::Schedule do
   end
 
   it 'Provides current payments' do
-    payment1 = Osm::OnlinePayment::Schedule::Payment.new(id: 1, archived: false)
-    payment2 = Osm::OnlinePayment::Schedule::Payment.new(id: 2, archived: true)
-    schedule = Osm::OnlinePayment::Schedule.new(payments: [payment1, payment2])
+    payment1 = OSM::OnlinePayment::Schedule::Payment.new(id: 1, archived: false)
+    payment2 = OSM::OnlinePayment::Schedule::Payment.new(id: 2, archived: true)
+    schedule = OSM::OnlinePayment::Schedule.new(payments: [payment1, payment2])
     expect(schedule.current_payments).to eq([payment1])
   end
 
   it 'Checks for current payments' do
-    payment1 = Osm::OnlinePayment::Schedule::Payment.new(id: 1, archived: false)
-    payment2 = Osm::OnlinePayment::Schedule::Payment.new(id: 2, archived: true)
-    schedule = Osm::OnlinePayment::Schedule.new()
+    payment1 = OSM::OnlinePayment::Schedule::Payment.new(id: 1, archived: false)
+    payment2 = OSM::OnlinePayment::Schedule::Payment.new(id: 2, archived: true)
+    schedule = OSM::OnlinePayment::Schedule.new()
 
     schedule.payments = [payment1]
     expect(schedule.current_payments?).to eq(true)
@@ -49,16 +49,16 @@ describe Osm::OnlinePayment::Schedule do
   end
 
   it 'Provides archived payments' do
-    payment1 = Osm::OnlinePayment::Schedule::Payment.new(id: 1, archived: false)
-    payment2 = Osm::OnlinePayment::Schedule::Payment.new(id: 2, archived: true)
-    schedule = Osm::OnlinePayment::Schedule.new(payments: [payment1, payment2])
+    payment1 = OSM::OnlinePayment::Schedule::Payment.new(id: 1, archived: false)
+    payment2 = OSM::OnlinePayment::Schedule::Payment.new(id: 2, archived: true)
+    schedule = OSM::OnlinePayment::Schedule.new(payments: [payment1, payment2])
     expect(schedule.archived_payments).to eq([payment2])
   end
 
   it 'Checks for archived payments' do
-    payment1 = Osm::OnlinePayment::Schedule::Payment.new(id: 1, archived: false)
-    payment2 = Osm::OnlinePayment::Schedule::Payment.new(id: 2, archived: true)
-    schedule = Osm::OnlinePayment::Schedule.new()
+    payment1 = OSM::OnlinePayment::Schedule::Payment.new(id: 1, archived: false)
+    payment2 = OSM::OnlinePayment::Schedule::Payment.new(id: 2, archived: true)
+    schedule = OSM::OnlinePayment::Schedule.new()
 
     schedule.payments = [payment2]
     expect(schedule.archived_payments?).to eq(true)
@@ -68,16 +68,16 @@ describe Osm::OnlinePayment::Schedule do
   end
 
   it 'Sorts by section_id, name then id' do
-    schedule1 = Osm::OnlinePayment::Schedule.new(section_id: 1, name: 'A', id: 1)
-    schedule2 = Osm::OnlinePayment::Schedule.new(section_id: 2, name: 'A', id: 1)
-    schedule3 = Osm::OnlinePayment::Schedule.new(section_id: 2, name: 'B', id: 1)
-    schedule4 = Osm::OnlinePayment::Schedule.new(section_id: 2, name: 'B', id: 2)
+    schedule1 = OSM::OnlinePayment::Schedule.new(section_id: 1, name: 'A', id: 1)
+    schedule2 = OSM::OnlinePayment::Schedule.new(section_id: 2, name: 'A', id: 1)
+    schedule3 = OSM::OnlinePayment::Schedule.new(section_id: 2, name: 'B', id: 1)
+    schedule4 = OSM::OnlinePayment::Schedule.new(section_id: 2, name: 'B', id: 2)
     schedules = [schedule3, schedule2, schedule4, schedule1]
     expect(schedules.sort).to eq([schedule1, schedule2, schedule3, schedule4])
   end
 
   it 'Converts to a string' do
-    schedule = Osm::OnlinePayment::Schedule.new(id: 1, name: 'Name')
+    schedule = OSM::OnlinePayment::Schedule.new(id: 1, name: 'Name')
     expect(schedule.to_s).to eq('1 -> Name')
   end
 
@@ -86,14 +86,14 @@ describe Osm::OnlinePayment::Schedule do
 
     it 'Gets summary list' do
       expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getSchemes&sectionid=1') { { 'items' => [{ 'schemeid' => '539', 'name' => 'Events' }] } }
-      result = Osm::OnlinePayment::Schedule.get_list_for_section(api: $api, section: 1)
+      result = OSM::OnlinePayment::Schedule.get_list_for_section(api: $api, section: 1)
       expect(result).to eq([{ id: 539, name: 'Events' }])
     end
 
     it 'Gets an individual schedule' do
       data = { 'schemeid' => '2', 'sectionid' => '1', 'accountid' => '3', 'name' => 'Schedule name', 'preauth_amount' => '12.34', 'description' => 'Schedule description', 'giftaid' => '1', 'defaulton' => '1', 'paynow' => '-1', 'archived' => '1', 'payments' => [{ 'paymentid' => '4', 'schemeid' => '2', 'date' => '2013-03-21', 'amount' => '1.23', 'name' => 'Payment name', 'archived' => '1' }] }
       expect($api).to receive(:post_query).with('ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=1&schemeid=2&allpayments=true') { data }
-      schedule = Osm::OnlinePayment::Schedule.get(api: $api, section: 1, schedule: 2)
+      schedule = OSM::OnlinePayment::Schedule.get(api: $api, section: 1, schedule: 2)
       expect(schedule.id).to eq(2)
       expect(schedule.section_id).to eq(1)
       expect(schedule.account_id).to eq(3)
@@ -117,17 +117,17 @@ describe Osm::OnlinePayment::Schedule do
     end
 
     it 'Gets all schedules for a section' do
-      expect(Osm::OnlinePayment::Schedule).to receive(:get_list_for_section).with(api: $api, section: 5, no_read_cache: false) { [{ id: 6, name: 'A' }, { id: 7, name: 'B' }] }
-      expect(Osm::OnlinePayment::Schedule).to receive(:get).with(api: $api, section: 5, schedule: 6, no_read_cache: false) { 'A' }
-      expect(Osm::OnlinePayment::Schedule).to receive(:get).with(api: $api, section: 5, schedule: 7, no_read_cache: false) { 'B' }
-      expect(Osm::OnlinePayment::Schedule.get_for_section(api: $api, section: 5)).to eq(['A', 'B'])
+      expect(OSM::OnlinePayment::Schedule).to receive(:get_list_for_section).with(api: $api, section: 5, no_read_cache: false) { [{ id: 6, name: 'A' }, { id: 7, name: 'B' }] }
+      expect(OSM::OnlinePayment::Schedule).to receive(:get).with(api: $api, section: 5, schedule: 6, no_read_cache: false) { 'A' }
+      expect(OSM::OnlinePayment::Schedule).to receive(:get).with(api: $api, section: 5, schedule: 7, no_read_cache: false) { 'B' }
+      expect(OSM::OnlinePayment::Schedule.get_for_section(api: $api, section: 5)).to eq(['A', 'B'])
     end
 
     describe "Gets member's payments" do
 
       before :each do
-        @payment = Osm::OnlinePayment::Schedule::Payment.new(id: 4)
-        @schedule = Osm::OnlinePayment::Schedule.new(
+        @payment = OSM::OnlinePayment::Schedule::Payment.new(id: 4)
+        @schedule = OSM::OnlinePayment::Schedule.new(
           id:         1,
           section_id: 2,
           payments:   [@payment]
@@ -172,9 +172,9 @@ describe Osm::OnlinePayment::Schedule do
       end
 
       it 'When it needs to fetch a term' do
-        section = Osm::Section.new(id: 2)
-        allow(Osm::Term).to receive(:get_current_term_for_section).and_return(Osm::Term.new(id: 3))
-        allow(Osm::Section).to receive(:get).and_return(section)
+        section = OSM::Section.new(id: 2)
+        allow(OSM::Term).to receive(:get_current_term_for_section).and_return(OSM::Term.new(id: 3))
+        allow(OSM::Section).to receive(:get).and_return(section)
         p4m = @schedule.get_payments_for_members(api: $api)[0]
         expect(p4m.member_id).to eq(6)
         expect(p4m.valid?).to eq(true)

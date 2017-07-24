@@ -1,6 +1,6 @@
-module Osm
-  class Member < Osm::Model
-    module Osm::Member::EmailableContact
+module OSM
+  class Member < OSM::Model
+    module OSM::Member::EmailableContact
 
       # Get an array of all emails for the contact
       # @return [Array<String>]

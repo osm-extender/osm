@@ -1,7 +1,7 @@
-module Osm
+module OSM
   module OnlinePayment
-    class Schedule < Osm::Model
-      class PaymentStatus < Osm::Model
+    class Schedule < OSM::Model
+      class PaymentStatus < OSM::Model
         VALID_STATUSES = [:required, :not_required, :initiated, :paid, :received, :paid_manually].freeze
 
         attribute :id, type: Integer
@@ -54,7 +54,7 @@ module Osm
         end
 
         def inspect
-          Osm.inspect_instance(self, replace_with: { 'payment' => :id })
+          OSM.inspect_instance(self, replace_with: { 'payment' => :id })
         end
 
         protected
@@ -76,7 +76,7 @@ module Osm
 
           data.map! do |item|
             new(
-              id:             Osm.to_i_or_nil(item['statusid']),
+              id:             OSM.to_i_or_nil(item['statusid']),
               payment:        payment,
               timestamp:      Time.strptime(item['statustimestamp'], '%d/%m/%Y %H:%M'),
               status:         status_map[item['status']],

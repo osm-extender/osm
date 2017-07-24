@@ -1,10 +1,10 @@
-module Osm
-  class Invoice < Osm::Model
-    class Item < Osm::Model
+module OSM
+  class Invoice < OSM::Model
+    class Item < OSM::Model
       # @!attribute [rw] id
       #   @return [Integer] The OSM ID for the invoice item
       # @!attribute [rw] invoice
-      #   @return [Osm::Invoice] The Osm::Invoice the item belongs to
+      #   @return [OSM::Invoice] The OSM::Invoice the item belongs to
       # @!attribute [rw] record_id
       #   @return [Integer] The id of the item within the invoice
       # @!attribute [rw] date
@@ -47,14 +47,14 @@ module Osm
 
 
       # Create the item in OSM
-      # @param api [Osm::Api] The api to use for the query
+      # @param api [OSM::Api] The api to use for the query
       # @return true, false Whether the item was created in OSM
-      # @raise [Osm::ObjectIsInvalid] If the Item is invalid
-      # @raise [Osm::Error] If the invoice item already exists in OSM
+      # @raise [OSM::ObjectIsInvalid] If the Item is invalid
+      # @raise [OSM::Error] If the invoice item already exists in OSM
       def create(api)
-        fail Osm::Error, 'the invoice item already exists in OSM' unless id.nil?
-        fail Osm::ObjectIsInvalid, 'invoice item is invalid' unless valid?
-        Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: invoice.section_id)
+        fail OSM::Error, 'the invoice item already exists in OSM' unless id.nil?
+        fail OSM::ObjectIsInvalid, 'invoice item is invalid' unless valid?
+        OSM::Model.require_ability_to(api: api, to: :write, on: :finance, section: invoice.section_id)
 
         last_item = invoice.get_items(api, no_read_cache: true).sort_by(&:record_id).last
 
@@ -67,7 +67,7 @@ module Osm
             self.id = new_item.id
             self.record_id = new_item.record_id
             # Update attributes in OSM
-            [['amount', amount], ['comments', description], ['type', type.to_s.titleize], ['payto_userid', payto], ['categoryid', budget_name], ['entrydate', date.strftime(Osm::OSM_DATE_FORMAT)]].each do |osm_name, value|
+            [['amount', amount], ['comments', description], ['type', type.to_s.titleize], ['payto_userid', payto], ['categoryid', budget_name], ['entrydate', date.strftime(OSM::OSM_DATE_FORMAT)]].each do |osm_name, value|
               api.post_query("finances.php?action=updateRecord&sectionid=#{invoice.section_id}&dateFormat=generic", post_data: {
                 'section_id' => invoice.section_id,
                 'invoiceid' => invoice.id,
@@ -84,12 +84,12 @@ module Osm
       end
 
       # Update invoice item in OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @return true, false whether the update succedded
-      # @raise [Osm::ObjectIsInvalid] If the Invoice is invalid
+      # @raise [OSM::ObjectIsInvalid] If the Invoice is invalid
       def update(api)
         require_ability_to(api: api, to: :write, on: :finance, section: invoice.section_id)
-        fail Osm::ObjectIsInvalid, 'invoice item is invalid' unless valid?
+        fail OSM::ObjectIsInvalid, 'invoice item is invalid' unless valid?
 
         updated = true
         to_update = []
@@ -98,7 +98,7 @@ module Osm
         to_update.push ['type', type.to_s.titleize] if changed_attributes.include?('type')
         to_update.push ['payto_userid', payto] if changed_attributes.include?('payto')
         to_update.push ['categoryid', budget_name] if changed_attributes.include?('budget_name')
-        to_update.push ['entrydate', date.strftime(Osm::OSM_DATE_FORMAT)] if changed_attributes.include?('date')
+        to_update.push ['entrydate', date.strftime(OSM::OSM_DATE_FORMAT)] if changed_attributes.include?('date')
         to_update.each do |osm_name, value|
           data = api.post_query("finances.php?action=updateRecord&sectionid=#{invoice.section_id}&dateFormat=generic", post_data: {
             'section_id' => invoice.section_id,
@@ -122,7 +122,7 @@ module Osm
       end
 
       # Delete invoice item from OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @return true, false whether the delete succedded
       def delete(api)
         require_ability_to(api: api, to: :write, on: :finance, section: invoice.section_id)

@@ -1,7 +1,7 @@
-describe Osm::Register::Field do
+describe OSM::Register::Field do
 
   it 'Create' do
-    field = Osm::Register::Field.new(
+    field = OSM::Register::Field.new(
       name: 'Human name',
       id: 'machine_name',
       tooltip: 'Tooltip'
@@ -14,8 +14,8 @@ describe Osm::Register::Field do
   end
 
   it 'Sorts by id' do
-    a1 = Osm::Register::Field.new(id: 'a')
-    a2 = Osm::Register::Field.new(id: 'a')
+    a1 = OSM::Register::Field.new(id: 'a')
+    a2 = OSM::Register::Field.new(id: 'a')
 
     data = [a2, a1]
     expect(data.sort).to eq([a1, a2])

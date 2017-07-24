@@ -1,6 +1,6 @@
-module Osm
+module OSM
   class Email
-    class DeliveryReport < Osm::Model
+    class DeliveryReport < OSM::Model
       TIME_FORMAT = '%d/%m/%Y %H:%M'.freeze
       VALID_STATUSES = [:processed, :delivered, :bounced].freeze
 
@@ -11,7 +11,7 @@ module Osm
       # @!attribute [rw] subject
       #   @return [String] the subject line of the email
       # @!attribute [rw] recipients
-      #   @return [Array<Osm::DeliveryReport::Email::Recipient>]
+      #   @return [Array<OSM::DeliveryReport::Email::Recipient>]
       # @!attribute [rw] section_id
       #   @return [Integer] the id of the section which sent the email
 
@@ -25,7 +25,7 @@ module Osm
       validates_numericality_of :section_id, only_integer: true, greater_than: 0
       validates_presence_of :sent_at
       validates_presence_of :subject
-      validates :recipients, array_of: { item_type: Osm::Email::DeliveryReport::Recipient, item_valid: true }
+      validates :recipients, array_of: { item_type: OSM::Email::DeliveryReport::Recipient, item_valid: true }
 
 
       # @!method initialize
@@ -34,16 +34,16 @@ module Osm
 
 
       # Get delivery reports
-      # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the reports for
+      # @param api [OSM::Api] The api to use to make the request
+      # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the reports for
       # @!macro options_get
-      # @return [Array<Osm::Email::DeliveryReport>]
+      # @return [Array<OSM::Email::DeliveryReport>]
       def self.get_for_section(api:, section:, no_read_cache: false)
-        Osm::Model.require_access_to_section(api: api, section: section, no_read_cache: no_read_cache)
+        OSM::Model.require_access_to_section(api: api, section: section, no_read_cache: no_read_cache)
         section_id = section.to_i
         cache_key = ['email_delivery_reports', section_id]
 
-        Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+        OSM::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
           reports = []
           recipients = {}
           data = api.post_query("ext/settings/emails/?action=getDeliveryReport&sectionid=#{section_id}")
@@ -51,10 +51,10 @@ module Osm
             case item['type']
 
             when 'email'
-              # Create an Osm::Email::DeliveryReport in reports array
-              id = Osm.to_i_or_nil(item['id'])
+              # Create an OSM::Email::DeliveryReport in reports array
+              id = OSM.to_i_or_nil(item['id'])
               sent_at_str, subject = item['name'].to_s.split(' - ', 2).map { |i| i.to_s.strip }
-              reports.push Osm::Email::DeliveryReport.new(
+              reports.push OSM::Email::DeliveryReport.new(
                 id:         id,
                 sent_at:    Time.strptime(sent_at_str, TIME_FORMAT),
                 subject:    subject,
@@ -63,12 +63,12 @@ module Osm
               recipients[id] = []
 
             when 'oneEmail'
-              # Create an Osm::Email::DeliveryReport::Email::Recipient in recipients[email_id] array
-              report_id, id = item['id'].to_s.strip.split('-').map { |i| Osm.to_i_or_nil(i) }
+              # Create an OSM::Email::DeliveryReport::Email::Recipient in recipients[email_id] array
+              report_id, id = item['id'].to_s.strip.split('-').map { |i| OSM.to_i_or_nil(i) }
               status = item['status_raw'].to_sym
               status = :bounced if status.eql?(:bounce)
-              member_id = Osm.to_i_or_nil(item['member_id'])
-              recipients[report_id].push Osm::Email::DeliveryReport::Recipient.new(
+              member_id = OSM.to_i_or_nil(item['member_id'])
+              recipients[report_id].push OSM::Email::DeliveryReport::Recipient.new(
                 id:         id,
                 address:    item['email'],
                 status:     status,
@@ -91,33 +91,33 @@ module Osm
       end
 
       # Get email contents for this report
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @!macro options_get
-      # @return [Osm::Email::DeliveryReport::Email]
+      # @return [OSM::Email::DeliveryReport::Email]
       def get_email(api, no_read_cache: false)
-        Osm::Model.require_access_to_section(api: api, section: section_id, no_read_cache: no_read_cache)
+        OSM::Model.require_access_to_section(api: api, section: section_id, no_read_cache: no_read_cache)
         cache_key = ['email_delivery_reports_email', section_id, id]
 
-        Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-          Osm::Email::DeliveryReport::Email.fetch_from_osm(api: api, section: section_id, email: id)
+        OSM::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+          OSM::Email::DeliveryReport::Email.fetch_from_osm(api: api, section: section_id, email: id)
         end
       end
 
       # @!method processed_recipients
       #   The recipients of the message with a status of :processed
-      #   @return (Array<Osm::Email::DeliveryReport::Recipient>)
+      #   @return (Array<OSM::Email::DeliveryReport::Recipient>)
       # @!method processed_recipients?
       #   Whether there are recipients of the message with a status of :processed
       #   @return (Boolean)
       # @!method delivered_recipients
       #   Count the recipients of the message with a status of :delivered
-      #   @return (Array<Osm::Email::DeliveryReport::Recipient>)
+      #   @return (Array<OSM::Email::DeliveryReport::Recipient>)
       # @!method delivered_recipients?
       #   Whether there are recipients of the message with a status of :delivered
       #   @return (Boolean)
       # @!method bounced_recipients
       #   Count the recipients of the message with a status of :bounced
-      #   @return (Array<Osm::Email::DeliveryReport::Recipient>)
+      #   @return (Array<OSM::Email::DeliveryReport::Recipient>)
       # @!method bounced_recipients?
       #   Whether there are recipients of the message with a status of :bounced
       #   @return (Boolean)

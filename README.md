@@ -42,18 +42,18 @@ Configure the gem to use a cache during the initalization of the app (e.g. if us
 
 ```ruby
 ActionDispatch::Callbacks.to_prepare do
-  Osm::Model.cache = OsmTest::Cache
+  OSM::Model.cache = OSMTest::Cache
 end
 ```
 
 
 ## Use
 
-In order to use the OSM API you first need to authorize the api to be used by the user, to do this use the {Osm::Api#authorize} method to get a userid and secret.
+In order to use the OSM API you first need to authorize the api to be used by the user, to do this use the {OSM::Api#authorize} method to get a userid and secret.
 
 ```ruby
 # Authorise your API to act as the user
-api = Osm::Api.new(api_id: id_you_got_from_osm, api_secret: token_you_got_from_osm, name: "A name for your API")
+api = OSM::Api.new(api_id: id_you_got_from_osm, api_secret: token_you_got_from_osm, name: "A name for your API")
 user_credentials = api.authorize(users_email_address, users_osm_password)
 
 # Now login to OSM and give your API some permissions
@@ -62,7 +62,7 @@ user_credentials = api.authorize(users_email_address, users_osm_password)
 api = api.clone_with_different_user(user_credentials)
 ```
 
-Once you have done this you should store the userid and secret somewhere, you can then create an {Osm::Api} object to start acting as the user.
+Once you have done this you should store the userid and secret somewhere, you can then create an {OSM::Api} object to start acting as the user.
 
 
 

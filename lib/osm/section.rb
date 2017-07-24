@@ -1,6 +1,6 @@
-module Osm
+module OSM
 
-  class Section < Osm::Model
+  class Section < OSM::Model
     # @!attribute [rw] id
     #   @return [Integer] the id for the section
     # @!attribute [rw] name
@@ -120,7 +120,7 @@ module Osm
     validates_inclusion_of :myscout_programme_show, in: [-2, -1, 0, 5, 10, 15, 20]
 
     validates :myscout_emails, hash: { key_in: [:email1, :email2, :email3, :email4], value_in: [true, false] }
-    validates :flexi_records, array_of: { item_type: Osm::FlexiRecord, item_valid: true }
+    validates :flexi_records, array_of: { item_type: OSM::FlexiRecord, item_valid: true }
 
 
     # @!method initialize
@@ -129,9 +129,9 @@ module Osm
 
 
     # Get the user's sections
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @!macro options_get
-    # @return [Array<Osm::Section>]
+    # @return [Array<OSM::Section>]
     def self.get_all(api:, no_read_cache: false)
       cache_key = ['sections', api.user_id]
 
@@ -155,32 +155,32 @@ module Osm
             # Expect item to be: {name:String, extraid:Integer}
             # Sometimes get item as: [String, {"name"=>String, "extraid"=>Integer}]
             record_data = record_data[1] if record_data.is_a?(Array)
-            flexi_records.push Osm::FlexiRecord.new(
-              id: Osm.to_i_or_nil(record_data['extraid']),
+            flexi_records.push OSM::FlexiRecord.new(
+              id: OSM.to_i_or_nil(record_data['extraid']),
               name: record_data['name'],
               section_id: section_id
             )
           end
 
           # Record permisssions for this section in the api
-          api.set_user_permissions(section: section_id, permissions: Osm.make_permissions_hash(role_data['permissions']))
+          api.set_user_permissions(section: section_id, permissions: OSM.make_permissions_hash(role_data['permissions']))
 
           # Actually create the section
           sections.push new(
             id: section_id,
             name: role_data['sectionname'],
-            subscription_level: Osm.to_i_or_nil(section_data['subscription_level']),
-            subscription_expires: Osm.parse_date(section_data['subscription_expires']),
+            subscription_level: OSM.to_i_or_nil(section_data['subscription_level']),
+            subscription_expires: OSM.parse_date(section_data['subscription_expires']),
             type: !section_data['sectionType'].nil? ? section_data['sectionType'].to_sym : (!section_data['section'].nil? ? section_data['section'].to_sym : :unknown),
             num_scouts: section_data['numscouts'],
             flexi_records: flexi_records.sort,
             group_id: role_data['groupid'],
             group_name: role_data['groupname'],
             gocardless: (section_data['gocardless'] || 'false').casecmp('true').eql?(0),
-            myscout_events_expires: Osm.parse_date(portal_expires['events']),
-            myscout_badges_expires: Osm.parse_date(portal_expires['badges']),
-            myscout_programme_expires: Osm.parse_date(portal_expires['programme']),
-            myscout_details_expires: Osm.parse_date(portal_expires['details']),
+            myscout_events_expires: OSM.parse_date(portal_expires['events']),
+            myscout_badges_expires: OSM.parse_date(portal_expires['badges']),
+            myscout_programme_expires: OSM.parse_date(portal_expires['programme']),
+            myscout_details_expires: OSM.parse_date(portal_expires['details']),
             myscout_events: myscout_data['events'] == 1,
             myscout_badges: myscout_data['badges'] == 1,
             myscout_programme: myscout_data['programme'] == 1,
@@ -206,18 +206,18 @@ module Osm
 
 
     # Get a section
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param id [Integer] The section id of the required section
     # @!macro options_get
     # @return nil if an error occured or the user does not have access to that section
-    # @return [Osm::Section]
+    # @return [OSM::Section]
     def self.get(id:, **options)
       get_all(**options).find { |section| section.id == id }
     end
 
 
     # Get the section's notepad from OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @!macro options_get
     # @return [String] the section's notepad
     def get_notepad(api, **options)
@@ -241,7 +241,7 @@ module Osm
     end
 
     # Set the section's notepad in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param content [String] The content of the notepad
     # @return true, false whether the notepad was sucessfully updated
     def set_notepad(api:, content:)
@@ -324,7 +324,7 @@ module Osm
     # @!method gold_plus?
     #   Check if this has a Gold+ level subscription
     #   @return (Boolean)
-    Osm::SUBSCRIPTION_LEVELS[1..-1].each_with_index do |attribute, index|
+    OSM::SUBSCRIPTION_LEVELS[1..-1].each_with_index do |attribute, index|
       define_method "#{attribute}?" do
         subscription_level == (index + 1)
       end

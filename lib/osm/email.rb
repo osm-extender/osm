@@ -1,12 +1,12 @@
-module Osm
+module OSM
   class Email
     TAGS = [{ id: 'FIRSTNAME', description: "Member's first name" }, { id: 'LASTNAME', description: "Member's last name" }].freeze
 
     # Get a list of selected email address for selected members ready to pass to send_email method
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to send the message to
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to send the message to
     # @param contacts [Array<Symbol>, Symbol] The contacts to get for members (:primary, :secondary and/or :member)
-    # @param members [Array<Osm::Member, Integer, #to_i>] The members (or their IDs) to get the email addresses for
+    # @param members [Array<OSM::Member, Integer, #to_i>] The members (or their IDs) to get the email addresses for
     # @return [Hash] member_id -> {firstname [String], lastname [String], emails [Array<String>]}
     def self.get_emails_for_contacts(api:, section:, contacts:, members:)
       # Convert contacts into OSM's format
@@ -39,8 +39,8 @@ module Osm
     end
 
     # Get a list of selected email address for selected members ready to pass to send_email method
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to send the message to
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to send the message to
     # @param to [Hash] Email addresses to send the email to: member_id -> {firstname [String], lastname [String], emails [Array<String>]}
     # @param cc [String, nil] Email address (if any) to cc
     # @param from [String] Email address to send the email from

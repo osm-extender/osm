@@ -1,6 +1,6 @@
-module Osm
+module OSM
   module MyScout
-    class ParentLoginHistory < Osm::Model
+    class ParentLoginHistory < OSM::Model
       # @!attribute [rw] member_id
       #   @return [Integer] the id for the member
       # @!attribute [rw] first_name
@@ -30,10 +30,10 @@ module Osm
 
 
       # Get parent login history
-      # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get login history for
+      # @param api [OSM::Api] The api to use to make the request
+      # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get login history for
       # @!macro options_get
-      # @return [Array<Osm::Myscout::ParentLoginHistory>]
+      # @return [Array<OSM::Myscout::ParentLoginHistory>]
       def self.get_for_section(api:, section:, no_read_cache: false)
         section_id = section.to_i
         require_ability_to(api: api, to: :read, on: :member, section: section, no_read_cache: no_read_cache)
@@ -47,10 +47,10 @@ module Osm
 
           data.map do |item|
             new(
-              member_id:    Osm.to_i_or_nil(item['scoutid']),
+              member_id:    OSM.to_i_or_nil(item['scoutid']),
               first_name:   item['firstname'],
               last_name:    item['lastname'],
-              logins:       Osm.to_i_or_nil(item['numlogins']),
+              logins:       OSM.to_i_or_nil(item['numlogins']),
               last_login:   get_last_login_date(item['lastlogin'])
             )
           end

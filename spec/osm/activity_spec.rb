@@ -1,7 +1,7 @@
-describe Osm::Activity do
+describe OSM::Activity do
 
   it 'Get OSM link' do
-    activity = Osm::Activity.new(
+    activity = OSM::Activity.new(
       id: 1,
       running_time: 10,
       title: 'Title',
@@ -14,7 +14,7 @@ describe Osm::Activity do
   end
 
   it 'Sorts by id then version' do
-    expect(Osm::Activity.new.send(:sort_by)).to eq(['id', 'version'])
+    expect(OSM::Activity.new.send(:sort_by)).to eq(['id', 'version'])
   end
 
 
@@ -78,7 +78,7 @@ describe Osm::Activity do
       }
       expect($api).to receive(:post_query).with('programme.php?action=getActivity&id=1').and_return(body)
 
-      activity = Osm::Activity.get(api: $api, id: 1)
+      activity = OSM::Activity.get(api: $api, id: 1)
 
       expect(activity.id).to eq(1)
       expect(activity.version).to eq(0)
@@ -126,7 +126,7 @@ describe Osm::Activity do
       }
       expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return('result' => 0)
 
-      activity = Osm::Activity.new(id: 2)
+      activity = OSM::Activity.new(id: 2)
       expect(activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes')).to eq(true)
     end
 
@@ -139,7 +139,7 @@ describe Osm::Activity do
       }
       expect($api).to receive(:post_query).with('programme.php?action=addActivityToProgramme', post_data: post_data).and_return('result' => 1)
 
-      activity = Osm::Activity.new(id: 2)
+      activity = OSM::Activity.new(id: 2)
       expect(activity.add_to_programme(api: $api, section: 1, date: Date.new(2000, 1, 2), notes: 'Notes')).to eq(false)
     end
 
@@ -164,18 +164,18 @@ describe Osm::Activity do
 
       expect($api).to receive(:post_query).with('programme.php?action=update', post_data: post_data).and_return('result' => true)
 
-      activity = Osm::Activity.new(
+      activity = OSM::Activity.new(
         id: 2,
         title: 'title',
         description: 'description',
         resources: 'resources',
         instructions: 'instructions',
-        files: [Osm::Activity::File.new(id: 3, activity_id: 2, file_name: 'fn', name: 'n'), Osm::Activity::File.new(:id => 4, :activity_id => 2, :file_name => 'fn2', :name => 'n2')],
+        files: [OSM::Activity::File.new(id: 3, activity_id: 2, file_name: 'fn', name: 'n'), OSM::Activity::File.new(:id => 4, :activity_id => 2, :file_name => 'fn2', :name => 'n2')],
         running_time: 5,
         location: :indoors,
         sections: [:beavers, :cubs],
         tags: ['tag1', 'tag2'],
-        badges: [Osm::Activity::Badge.new(
+        badges: [OSM::Activity::Badge.new(
           badge_type: :activity,
           badge_section: :beavers,
           requirement_label: 'l',
@@ -192,7 +192,7 @@ describe Osm::Activity do
     end
 
     it 'Update activity in OSM (failed)' do
-      activity = Osm::Activity.new(
+      activity = OSM::Activity.new(
         id: 2,
         title: 'title',
         description: 'description',

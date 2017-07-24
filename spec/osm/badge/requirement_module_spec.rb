@@ -1,8 +1,8 @@
-describe Osm::Badge::RequirementModule do
+describe OSM::Badge::RequirementModule do
 
   it 'Create' do
-    b = Osm::Badge.new
-    m = Osm::Badge::RequirementModule.new(
+    b = OSM::Badge.new
+    m = OSM::Badge::RequirementModule.new(
       badge: b,
       id: 567,
       letter: 'a',
@@ -25,10 +25,10 @@ describe Osm::Badge::RequirementModule do
   end
 
   it 'Compare by badge then letter then id' do
-    b1 = Osm::Badge::RequirementModule.new(badge: Osm::Badge.new(name: 'A'), letter: 'a', id: 1)
-    b2 = Osm::Badge::RequirementModule.new(badge: Osm::Badge.new(name: 'B'), letter: 'a', id: 1)
-    b3 = Osm::Badge::RequirementModule.new(badge: Osm::Badge.new(name: 'B'), letter: 'b', id: 1)
-    b4 = Osm::Badge::RequirementModule.new(badge: Osm::Badge.new(name: 'B'), letter: 'b', id: 2)
+    b1 = OSM::Badge::RequirementModule.new(badge: OSM::Badge.new(name: 'A'), letter: 'a', id: 1)
+    b2 = OSM::Badge::RequirementModule.new(badge: OSM::Badge.new(name: 'B'), letter: 'a', id: 1)
+    b3 = OSM::Badge::RequirementModule.new(badge: OSM::Badge.new(name: 'B'), letter: 'b', id: 1)
+    b4 = OSM::Badge::RequirementModule.new(badge: OSM::Badge.new(name: 'B'), letter: 'b', id: 2)
     badges = [b3, b4, b1, b2]
     expect(badges.sort).to eq([b1, b2, b3, b4])
   end

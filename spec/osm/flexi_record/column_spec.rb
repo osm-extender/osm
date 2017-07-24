@@ -1,11 +1,11 @@
-describe Osm::FlexiRecord::Column do
+describe OSM::FlexiRecord::Column do
 
   it 'Create' do
-    field = Osm::FlexiRecord::Column.new(
+    field = OSM::FlexiRecord::Column.new(
       id: 'f_1',
       name: 'Field Name',
       editable: true,
-      flexi_record: Osm::FlexiRecord.new()
+      flexi_record: OSM::FlexiRecord.new()
     )
 
     expect(field.id).to eq('f_1')
@@ -15,11 +15,11 @@ describe Osm::FlexiRecord::Column do
   end
 
   it 'Sorts by flexirecord then id (system first then user)' do
-    frc1 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 1), id: 'f_1')
-    frc2 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), id: 'a')
-    frc3 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), id: 'b')
-    frc4 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), id: 'f_1')
-    frc5 = Osm::FlexiRecord::Column.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), id: 'f_2')
+    frc1 = OSM::FlexiRecord::Column.new(flexi_record: OSM::FlexiRecord.new(section_id: 1), id: 'f_1')
+    frc2 = OSM::FlexiRecord::Column.new(flexi_record: OSM::FlexiRecord.new(section_id: 2), id: 'a')
+    frc3 = OSM::FlexiRecord::Column.new(flexi_record: OSM::FlexiRecord.new(section_id: 2), id: 'b')
+    frc4 = OSM::FlexiRecord::Column.new(flexi_record: OSM::FlexiRecord.new(section_id: 2), id: 'f_1')
+    frc5 = OSM::FlexiRecord::Column.new(flexi_record: OSM::FlexiRecord.new(section_id: 2), id: 'f_2')
 
     # Compare section 1 > section 2
     expect(frc1 <=> frc2).to eq(-1)
@@ -40,7 +40,7 @@ describe Osm::FlexiRecord::Column do
   describe 'Update' do
 
     before :each do
-      @flexi_record = Osm::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
+      @flexi_record = OSM::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
     end
 
     it 'Success' do
@@ -71,7 +71,7 @@ describe Osm::FlexiRecord::Column do
       }
       expect($api).to receive(:post_query).with('extras.php?action=renameColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
 
-      col = Osm::FlexiRecord::Column.new(
+      col = OSM::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
         id: 'f_1',
         name: 'name',
@@ -102,7 +102,7 @@ describe Osm::FlexiRecord::Column do
       }
       expect($api).to receive(:post_query).and_return(data)
 
-      col = Osm::FlexiRecord::Column.new(
+      col = OSM::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
         id: 'f_1',
         name: 'name',
@@ -112,14 +112,14 @@ describe Osm::FlexiRecord::Column do
     end
 
     it 'Uneditable' do
-      col = Osm::FlexiRecord::Column.new(
+      col = OSM::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
         id: 'f_1',
         name: 'name',
         editable: false
       )
       expect($api).not_to receive(:post_query)
-      expect { col.update($api) }.to raise_error(Osm::OSMError::ReadOnly)
+      expect { col.update($api) }.to raise_error(OSM::OSMError::ReadOnly)
     end
 
   end # desxribe update
@@ -128,7 +128,7 @@ describe Osm::FlexiRecord::Column do
   describe 'Delete' do
 
     before :each do
-      @flexi_record = Osm::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
+      @flexi_record = OSM::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
     end
 
     it 'Success' do
@@ -155,7 +155,7 @@ describe Osm::FlexiRecord::Column do
       }
       expect($api).to receive(:post_query).with('extras.php?action=deleteColumn&sectionid=1&extraid=2', post_data: post_data).and_return(data)
 
-      col = Osm::FlexiRecord::Column.new(
+      col = OSM::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
         id: 'f_1',
         name: 'name',
@@ -186,7 +186,7 @@ describe Osm::FlexiRecord::Column do
       }
       expect($api).to receive(:post_query).and_return(data)
 
-      col = Osm::FlexiRecord::Column.new(
+      col = OSM::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
         id: 'f_1',
         name: 'name',
@@ -196,14 +196,14 @@ describe Osm::FlexiRecord::Column do
     end
 
     it 'Uneditable' do
-      col = Osm::FlexiRecord::Column.new(
+      col = OSM::FlexiRecord::Column.new(
         flexi_record: @flexi_record,
         id: 'f_1',
         name: 'name',
         editable: false
       )
       expect($api).not_to receive(:post_query)
-      expect { col.delete($api) }.to raise_error(Osm::OSMError::ReadOnly)
+      expect { col.delete($api) }.to raise_error(OSM::OSMError::ReadOnly)
     end
 
   end # desxribe delete

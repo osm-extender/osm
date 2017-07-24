@@ -1,2 +1,2 @@
-describe Osm::Activity::Badge do
+describe OSM::Activity::Badge do
 end

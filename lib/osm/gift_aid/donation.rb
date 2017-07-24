@@ -1,6 +1,6 @@
-module Osm
+module OSM
   class GiftAid
-    class Donation < Osm::Model
+    class Donation < OSM::Model
       # @!attribute [rw] donation_date
       #   @return [Date] When the payment was made
 

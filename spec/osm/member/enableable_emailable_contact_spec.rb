@@ -1,2 +1,2 @@
-describe Osm::Member::EnableableEmailableContact do
+describe OSM::Member::EnableableEmailableContact do
 end

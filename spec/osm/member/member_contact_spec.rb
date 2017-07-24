@@ -1,2 +1,2 @@
-describe Osm::Member::MemberContact do
+describe OSM::Member::MemberContact do
 end

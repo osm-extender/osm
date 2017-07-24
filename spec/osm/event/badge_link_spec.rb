@@ -1,7 +1,7 @@
-describe Osm::Event::BadgeLink do
+describe OSM::Event::BadgeLink do
 
   it 'Create' do
-    bl = Osm::Event::BadgeLink.new(
+    bl = OSM::Event::BadgeLink.new(
       badge_type: :activity,
       badge_section: :cubs,
       requirement_label: 'A: Poster',

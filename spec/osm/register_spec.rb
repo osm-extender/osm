@@ -1,4 +1,4 @@
-describe Osm::Register do
+describe OSM::Register do
 
   describe 'Using the API' do
 
@@ -9,7 +9,7 @@ describe Osm::Register do
       ]
       expect($api).to receive(:post_query).with('users.php?action=registerStructure&sectionid=1&termid=2') { data }
 
-      register_structure = Osm::Register.get_structure(api: $api, section: 1, term: 2)
+      register_structure = OSM::Register.get_structure(api: $api, section: 1, term: 2)
       expect(register_structure.is_a?(Array)).to eq(true)
       expect(register_structure.size).to eq(1)
       expect(register_structure[0].id).to eq('field1')
@@ -34,13 +34,13 @@ describe Osm::Register do
         ]
       }
       expect($api).to receive(:post_query).with('users.php?action=register&sectionid=1&termid=2') { data }
-      allow(Osm::Register).to receive(:get_structure) { [
-        Osm::Register::Field.new(id: '2000-01-01', name: 'Name', tooltip: 'Tooltip'),
-        Osm::Register::Field.new(id: '2000-01-02', name: 'Name', tooltip: 'Tooltip'),
-        Osm::Register::Field.new(id: '2000-01-03', name: 'Name', tooltip: 'Tooltip')
+      allow(OSM::Register).to receive(:get_structure) { [
+        OSM::Register::Field.new(id: '2000-01-01', name: 'Name', tooltip: 'Tooltip'),
+        OSM::Register::Field.new(id: '2000-01-02', name: 'Name', tooltip: 'Tooltip'),
+        OSM::Register::Field.new(id: '2000-01-03', name: 'Name', tooltip: 'Tooltip')
       ] }
 
-      register = Osm::Register.get_attendance(api: $api, section: 1, term: 2)
+      register = OSM::Register.get_attendance(api: $api, section: 1, term: 2)
       expect(register.is_a?(Array)).to eq(true)
       expect(register.size).to eq(1)
       reg = register[0]
@@ -69,9 +69,9 @@ describe Osm::Register do
       }
       expect($api).to receive(:post_query).with('users.php?action=registerUpdate&sectionid=1&termid=2', post_data: post_data) { [] }
 
-      expect(Osm::Register.update_attendance(
+      expect(OSM::Register.update_attendance(
         api: $api,
-        section: Osm::Section.new(id: 1, type: :cubs),
+        section: OSM::Section.new(id: 1, type: :cubs),
         term: 2,
         date: Date.new(2000, 1, 2),
         attendance: :yes,
@@ -102,9 +102,9 @@ describe Osm::Register do
         ]
       }
       expect($api).to receive(:post_query).with('users.php?action=register&sectionid=1&termid=2') { data }
-      allow(Osm::Register).to receive(:get_structure) { [] }
+      allow(OSM::Register).to receive(:get_structure) { [] }
 
-      register = Osm::Register.get_attendance(api: $api, section: 1, term: 2)
+      register = OSM::Register.get_attendance(api: $api, section: 1, term: 2)
       expect(register.is_a?(Array)).to eq(true)
       expect(register.size).to eq(1)
       reg = register[0]
@@ -114,7 +114,7 @@ describe Osm::Register do
 
     it 'Handles no data getting structure' do
       expect($api).to receive(:post_query).with('users.php?action=registerStructure&sectionid=1&termid=2') { nil }
-      register_structure = Osm::Register.get_structure(api: $api, section: 1, term: 2)
+      register_structure = OSM::Register.get_structure(api: $api, section: 1, term: 2)
       expect(register_structure.is_a?(Array)).to eq(true)
       expect(register_structure.size).to eq(0)
     end

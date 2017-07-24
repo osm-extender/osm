@@ -1,6 +1,6 @@
-module Osm
+module OSM
   module MyScout
-    class Template < Osm::Model
+    class Template < OSM::Model
       TEMPLATES = [
         { title: 'First payment email', id: 'email-first', description: 'This email is sent to the parents the first time that you request a payment from them. The message should introduce the system to them, explain the benefits that the parents and you get, and provide account details (by using the tags).', tags: [
           { id: 'DIRECT_LINK', required: true, description: 'A direct link to the payments page that avoids the need for the parents to login.' },
@@ -153,8 +153,8 @@ module Osm
 
 
       # Get a template
-      # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get login history for
+      # @param api [OSM::Api] The api to use to make the request
+      # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get login history for
       # @param key [String] The key of the template to get
       # @!macro options_get
       # @return [String, nil]
@@ -173,8 +173,8 @@ module Osm
       end
 
       # Update a template in OSM
-      # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get login history for
+      # @param api [OSM::Api] The api to use to make the request
+      # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get login history for
       # @param key [String] The key of the template to get
       # @param content [String] The new content of the template
       # @return true, false Wheter OSM reported the template as updated
@@ -185,8 +185,8 @@ module Osm
         require_ability_to(api: api, to: :write, on: :user, section: section)
 
         # Make sure required tags are present
-        tags = Osm::MyScout::Template::TEMPLATES.find { |t| t[:id].eql?(key) }[:tags]
-        fail Osm::Error, "Couldn't find tags for template" if tags.nil?
+        tags = OSM::MyScout::Template::TEMPLATES.find { |t| t[:id].eql?(key) }[:tags]
+        fail OSM::Error, "Couldn't find tags for template" if tags.nil?
         tags.select { |tag| tag[:required] }.each do |tag|
           unless content.include?("[#{tag[:id]}]")
             message = "Required tag [#{tag[:id]}] not found in template content."
@@ -210,8 +210,8 @@ module Osm
       end
 
       # Restore a template to OSM's default for it
-      # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get login history for
+      # @param api [OSM::Api] The api to use to make the request
+      # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get login history for
       # @param key [String] The key of the template to get
       # @param content [String] The new content of the template
       # @return [String, nil] The content of the template (nil if not restored)

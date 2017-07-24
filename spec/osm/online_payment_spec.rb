@@ -1,4 +1,4 @@
-describe Osm::OnlinePayment do
+describe OSM::OnlinePayment do
 
 
 

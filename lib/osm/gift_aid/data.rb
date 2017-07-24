@@ -1,6 +1,6 @@
-module Osm
+module OSM
   class GiftAid
-    class Data < Osm::Model
+    class Data < OSM::Model
       # @!attribute [rw] member_id
       #   @return [Integer] The OSM ID for the member
       # @!attribute [rw] grouping_id
@@ -56,13 +56,13 @@ module Osm
 
 
       # Update data in OSM
-      # @param [Osm::Api] api The api to use to make the request
+      # @param [OSM::Api] api The api to use to make the request
       # @return true, false whether the data was updated in OSM
-      # @raise [Osm::ObjectIsInvalid] If the Data is invalid
+      # @raise [OSM::ObjectIsInvalid] If the Data is invalid
       def update(api)
-        fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
+        fail OSM::ObjectIsInvalid, 'data is invalid' unless valid?
         require_ability_to(api: api, to: :write, on: :finance, section: section_id)
-        term_id = Osm::Term.get_current_term_for_section(api, section_id).id
+        term_id = OSM::Term.get_current_term_for_section(api, section_id).id
 
         updated = true
         fields = [
@@ -91,7 +91,7 @@ module Osm
         reset_changed_attributes if updated
 
         donations.changes.each do |date, (_was, now)|
-          date = date.strftime(Osm::OSM_DATE_FORMAT)
+          date = date.strftime(OSM::OSM_DATE_FORMAT)
           result = api.post_query('giftaid.php?action=updateScout', post_data: {
             'scoutid' => member_id,
             'termid' => term_id,
@@ -109,7 +109,7 @@ module Osm
         end
         donations.clean_up! if updated
 
-        Osm::Model.cache_delete(api: api, key: ['gift_aid_data', section_id, term_id]) if updated
+        OSM::Model.cache_delete(api: api, key: ['gift_aid_data', section_id, term_id]) if updated
 
         updated
       end

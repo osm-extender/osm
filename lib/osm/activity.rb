@@ -1,5 +1,5 @@
-module Osm
-  class Activity < Osm::Model
+module OSM
+  class Activity < OSM::Model
     # @!attribute [rw] id
     #   @return [Integer] the id for the activity
     # @!attribute [rw] version
@@ -31,15 +31,15 @@ module Osm
     # @!attribute [rw] used
     #   @return [Integer] How many times this activity has been used (total accross all of OSM)
     # @!attribute [rw] versions
-    #   @return [Array<Osm::Activity::Version>]
+    #   @return [Array<OSM::Activity::Version>]
     # @!attribute [rw] sections
     #   @return [Array<Symbol>] the sections the activity is appropriate for
     # @!attribute [rw] tags
     #   @return [Array<String>] the tags attached to the activity
     # @!attribute [rw] files
-    #   @return [Array<Osm::Activity::File>
+    #   @return [Array<OSM::Activity::File>
     # @!attribute [rw] badges
-    #   @return [Array<Osm::Activity::Badge>
+    #   @return [Array<OSM::Activity::Badge>
 
     attribute :id, type: Integer
     attribute :version, type: Integer
@@ -80,24 +80,24 @@ module Osm
 
     validates :sections, array_of: { item_type: Symbol }
     validates :tags, array_of: { item_type: String }
-    validates :badges, array_of: { item_type: Osm::Activity::Badge, item_valid: true }
-    validates :files, array_of: { item_type: Osm::Activity::File, item_valid: true }
-    validates :versions, array_of: { item_type: Osm::Activity::Version, item_valid: true }
+    validates :badges, array_of: { item_type: OSM::Activity::Badge, item_valid: true }
+    validates :files, array_of: { item_type: OSM::Activity::File, item_valid: true }
+    validates :versions, array_of: { item_type: OSM::Activity::Version, item_valid: true }
 
 
     # Get activity details
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param id [Integer] The activity ID
     # @param version [Integer] The version of the activity to retreive, if nil the latest version will be assumed
     # @!macro options_get
-    # @return [Osm::Activity]
+    # @return [OSM::Activity]
     def self.get(api:, id:, version: nil, no_read_cache: false)
       cache_key = ['activity', id]
 
       if cache_exist?(api: api, key: [*cache_key, version], no_read_cache: no_read_cache)
         activity = cache_read(api, [*cache_key, version])
         if (activity.shared == 2) || (activity.user_id == api.user_id) ||  # Shared or owned by this user
-        Osm::Section.get_all(api: api).map(&:group_id).uniq.include?(activity.group_id)  # user belomngs to the group owning the activity
+        OSM::Section.get_all(api: api).map(&:group_id).uniq.include?(activity.group_id)  # user belomngs to the group owning the activity
           return activity
         else
           return nil
@@ -137,8 +137,8 @@ module Osm
       # Populate Arrays
       (data['files'].is_a?(Array) ? data['files'] : []).each do |file_data|
         attributes[:files].push File.new(
-          id: Osm.to_i_or_nil(file_data['fileid']),
-          activity_id: Osm.to_i_or_nil(file_data['activityid']),
+          id: OSM.to_i_or_nil(file_data['fileid']),
+          activity_id: OSM.to_i_or_nil(file_data['activityid']),
           file_name: file_data['filename'],
           name: file_data['name']
         )
@@ -148,23 +148,23 @@ module Osm
           badge_type: badge_data['badgetype'].to_sym,
           badge_section: badge_data['section'].to_sym,
           badge_name: badge_data['badgeLongName'],
-          badge_id: Osm.to_i_or_nil(badge_data['badge_id']),
-          badge_version: Osm.to_i_or_nil(badge_data['badge_version']),
-          requirement_id: Osm.to_i_or_nil(badge_data['column_id']),
+          badge_id: OSM.to_i_or_nil(badge_data['badge_id']),
+          badge_version: OSM.to_i_or_nil(badge_data['badge_version']),
+          requirement_id: OSM.to_i_or_nil(badge_data['column_id']),
           requirement_label: badge_data['columnnameLongName'],
           data: badge_data['data']
         )
       end
       (data['versions'].is_a?(Array) ? data['versions'] : []).each do |version_data|
         attributes[:versions].push Version.new(
-          version: Osm.to_i_or_nil(version_data['value']),
-          created_by: Osm.to_i_or_nil(version_data['userid']),
+          version: OSM.to_i_or_nil(version_data['value']),
+          created_by: OSM.to_i_or_nil(version_data['userid']),
           created_by_name: version_data['firstname'],
           label: version_data['label']
         )
       end
 
-      activity = Osm::Activity.new(attributes)
+      activity = OSM::Activity.new(attributes)
 
       cache_write(api: api, key: [*cache_key, nil], data: activity) if version.nil?
       cache_write(api: api, key: [*cache_key, version], data: activity)
@@ -179,15 +179,15 @@ module Osm
 
     # Get the link to display this activity in OSM
     # @return [String] the link for this member's My.SCOUT
-    # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
+    # @raise [OSM::ObjectIsInvalid] If the Activity is invalid
     def osm_link
-      fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
+      fail OSM::ObjectIsInvalid, 'activity is invalid' unless valid?
       "https://www.onlinescoutmanager.co.uk/?l=p#{id}"
     end
 
     # Add this activity to the programme in OSM
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The Section (or it's ID) to add the Activity to
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The Section (or it's ID) to add the Activity to
     # @param date [Date, DateTime] The date of the Evening to add the Activity to (OSM will create the Evening if it doesn't already exist)
     # @param notes [String] The notes which should appear for this Activity on this Evening
     # @return true, false Whether the activity was successfully added
@@ -195,7 +195,7 @@ module Osm
       require_ability_to(api: api, to: :write, on: :programme, section: section)
 
       data = api.post_query('programme.php?action=addActivityToProgramme', post_data: {
-        'meetingdate' => date.strftime(Osm::OSM_DATE_FORMAT),
+        'meetingdate' => date.strftime(OSM::OSM_DATE_FORMAT),
         'activityid' => id,
         'sectionid' => section.to_i,
         'notes' => notes
@@ -208,15 +208,15 @@ module Osm
     end
 
     # Update this activity in OSM
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The Section (or it's ID)
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The Section (or it's ID)
     # @param secret_update true, false Whether this is a secret update
     # @return true, false Whether the activity was successfully added
-    # @raise [Osm::ObjectIsInvalid] If the Activity is invalid
-    # @raise [Osm::Forbidden] If the Activity is not editable
+    # @raise [OSM::ObjectIsInvalid] If the Activity is invalid
+    # @raise [OSM::Forbidden] If the Activity is not editable
     def update(api:, section:, secret_update: false)
-      fail Osm::ObjectIsInvalid, 'activity is invalid' unless valid?
-      fail Osm::Forbidden, 'You are not allowed to update this activity' unless editable
+      fail OSM::ObjectIsInvalid, 'activity is invalid' unless valid?
+      fail OSM::Forbidden, 'You are not allowed to update this activity' unless editable
 
       data = api.post_query('programme.php?action=update', post_data: {
         'title' => title,

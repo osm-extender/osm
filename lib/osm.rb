@@ -10,7 +10,7 @@ require 'net/http'
 require 'time'
 
 
-module Osm
+module OSM
   # Declare exceptions
   class APIError < RuntimeError
     class ConnectionError < APIError; end
@@ -44,7 +44,7 @@ module Osm
   OSM_DATETIME_FORMAT_HUMAN = '%d/%m/%Y %H:%M:%S'.freeze
   OSM_TIME_REGEX = %r{\A(?:[0-1][0-9]|2[0-3]):[0-5][0-9]\Z}
   OSM_DATE_REGEX_UNANCHORED = %r{(?:[1-9]\d{3}-(?:0[1-9]|1[0-2])-(?:0[1-9]|[1-2][0-9]|3[0-1]))|(?:(?:0?[1-9]|[1-2][0-9]|3[0-1])/(?:0?[1-9]|1[0-2])/(?:\d{2}|[1-9]\d{3}))}
-  OSM_DATE_REGEX = %r{\A#{Osm::OSM_DATE_REGEX_UNANCHORED.to_s}\Z}
+  OSM_DATE_REGEX = %r{\A#{OSM::OSM_DATE_REGEX_UNANCHORED.to_s}\Z}
   subscription_level_names = {
     1 => 'Bronze',
     bronze: 'Bronze',
@@ -88,7 +88,7 @@ require File.join(File.dirname(__FILE__), 'osm', 'badge')
 Dir[File.join(File.dirname(__FILE__), 'osm', '**', '*.rb')].each { |file| require file }
 
 
-module Osm
+module OSM
 
   private
 

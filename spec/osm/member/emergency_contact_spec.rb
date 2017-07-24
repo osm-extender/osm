@@ -1,2 +1,2 @@
-describe Osm::Member::EmergencyContact do
+describe OSM::Member::EmergencyContact do
 end

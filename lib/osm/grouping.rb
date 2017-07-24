@@ -1,6 +1,6 @@
-module Osm
+module OSM
 
-  class Grouping < Osm::Model
+  class Grouping < OSM::Model
     # @!attribute [rw] id
     #   @return [Integer] the id for grouping
     # @!attribute [rw] section_id
@@ -26,10 +26,10 @@ module Osm
 
 
     # Get the groupings that a section has
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param section [Integer] The section (or its ID) of the section to get groupings for
     # @!macro options_get
-    # @return [Array<Osm::Grouping>, nil] An array of groupings or nil if the user can not access that section
+    # @return [Array<OSM::Grouping>, nil] An array of groupings or nil if the user can not access that section
     def self.get_for_section(api:, section:, no_read_cache: false)
       section_id = section.to_i
       require_ability_to(api: api, to: :read, on: :member, sevtion: section_id)
@@ -41,8 +41,8 @@ module Osm
         result = []
         if data.is_a?(Hash) && data['patrols'].is_a?(Array)
           data['patrols'].each do |item|
-            result.push Osm::Grouping.new(
-              id: Osm.to_i_or_nil(item['patrolid']),
+            result.push OSM::Grouping.new(
+              id: OSM.to_i_or_nil(item['patrolid']),
               section_id: section_id,
               name: item['name'],
               active: item['active'].eql?(1),
@@ -61,11 +61,11 @@ module Osm
 
 
     # Update the grouping in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return [Boolan] whether the member was successfully updated or not
-    # @raise [Osm::ObjectIsInvalid] If the Grouping is invalid
+    # @raise [OSM::ObjectIsInvalid] If the Grouping is invalid
     def update(api)
-      fail Osm::ObjectIsInvalid, 'grouping is invalid' unless valid?
+      fail OSM::ObjectIsInvalid, 'grouping is invalid' unless valid?
       require_ability_to(api: api, to: :read, on: :member, section: section_id)
 
       to_update = changed_attributes
@@ -91,7 +91,7 @@ module Osm
       if result
         reset_changed_attributes
         # The cached groupings for the section will be out of date - remove them
-        Osm::Model.cache_delete(api: api, key: ['groupings', section_id])
+        OSM::Model.cache_delete(api: api, key: ['groupings', section_id])
       end
 
       result

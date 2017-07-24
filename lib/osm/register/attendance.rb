@@ -1,6 +1,6 @@
-module Osm
+module OSM
   class Register
-    class Attendance < Osm::Model
+    class Attendance < OSM::Model
       # @!attribute [rw] member_id
       #   @return [Integer] The OSM ID for the member
       # @!attribute [rw] grouping_id

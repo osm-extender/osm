@@ -1,4 +1,4 @@
-describe Osm::ApiAccess do
+describe OSM::ApiAccess do
 
   it 'Create' do
     data = {
@@ -6,7 +6,7 @@ describe Osm::ApiAccess do
       name: 'Name',
       permissions: { permission: [:read] }
     }
-    api_access = Osm::ApiAccess.new(data)
+    api_access = OSM::ApiAccess.new(data)
 
     expect(api_access.id).to eq(1)
     expect(api_access.name).to eq('Name')
@@ -15,8 +15,8 @@ describe Osm::ApiAccess do
   end
 
   it 'Sorts by id' do
-    a1 = Osm::ApiAccess.new(id: 1)
-    a2 = Osm::ApiAccess.new(id: 2)
+    a1 = OSM::ApiAccess.new(id: 1)
+    a2 = OSM::ApiAccess.new(id: 2)
 
     data = [a2, a1]
     expect(data.sort).to eq([a1, a2])
@@ -44,7 +44,7 @@ describe Osm::ApiAccess do
 
     describe 'Get All' do
       it 'From OSM' do
-        api_accesses = Osm::ApiAccess.get_all(api: $api, section: 1)
+        api_accesses = OSM::ApiAccess.get_all(api: $api, section: 1)
 
         expect(api_accesses.size).to eq(2)
         api_access = api_accesses[0]
@@ -54,19 +54,19 @@ describe Osm::ApiAccess do
       end
 
       it 'From cache' do
-        api_accesses = Osm::ApiAccess.get_all(api: $api, section: 1)
+        api_accesses = OSM::ApiAccess.get_all(api: $api, section: 1)
         expect($api).not_to receive(:post_query)
-        expect(Osm::ApiAccess.get_all(api: $api, section: 1)).to eq(api_accesses)
+        expect(OSM::ApiAccess.get_all(api: $api, section: 1)).to eq(api_accesses)
       end
     end
 
     it 'Get One' do
-      api_access = Osm::ApiAccess.get(api: $api, section: 1, for_api: 2)
+      api_access = OSM::ApiAccess.get(api: $api, section: 1, for_api: 2)
       expect(api_access.id).to eq(2)
     end
 
     it 'Get Ours' do
-      api_access = Osm::ApiAccess.get_ours(api: $api, section: 1)
+      api_access = OSM::ApiAccess.get_ours(api: $api, section: 1)
       expect(api_access.id).to eq(1)
     end
 

@@ -1,7 +1,7 @@
-module Osm
+module OSM
   module OnlinePayment
-    class Schedule < Osm::Model
-      class PaymentsForMember < Osm::Model
+    class Schedule < OSM::Model
+      class PaymentsForMember < OSM::Model
         attribute :first_name, type: String
         attribute :last_name, type: String
         attribute :member_id, type: Integer
@@ -24,7 +24,7 @@ module Osm
 
 
         # Get the most recent status for a member's payment
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
+        # @param payment [OSM::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @return true, false
         def latest_status_for(payment)
           @latest_status ||= payments.map { |k, v| [k, v.sort.first] }.to_h
@@ -32,7 +32,7 @@ module Osm
         end
 
         # Check if the status of a member's payment is considered paid
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
+        # @param payment [OSM::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @return [Boolean, nil]
         def paid?(payment)
           status = latest_status_for(payment.to_i)
@@ -41,7 +41,7 @@ module Osm
         end
 
         # Check if the status of a member's payment is considered unpaid
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
+        # @param payment [OSM::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @return [Boolean, nil]
         def unpaid?(payment)
           status = latest_status_for(payment.to_i)
@@ -50,7 +50,7 @@ module Osm
         end
 
         # Check if a payment is over due (or will be over due on the passed date)
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
+        # @param payment [OSM::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to check
         # @param date [Date] The date to check for (defaults to today)
         # @return true, false whether the member's payment is unpaid and the payment's due date has passed
         def over_due?(payment, date=nil)
@@ -64,8 +64,8 @@ module Osm
         end
 
         # Update the status of a payment for the member in OSM
-        # @param api [Osm::Api] The api to use to make the request
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
+        # @param api [OSM::Api] The api to use to make the request
+        # @param payment [OSM::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
         # @param status [Symbol] What to update the status to (:required, :not_required or :paid_manually)
         # @param gift_aid true, false Whether to update the gift aid record too (only relevant when setting to :paid_manually)
         # @return true, false whether the update was made in OSM
@@ -101,24 +101,24 @@ module Osm
         end
 
         # Mark a payment as required by the member
-        # @param api [Osm::Api] The api to use to make the request
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
+        # @param api [OSM::Api] The api to use to make the request
+        # @param payment [OSM::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
         # @return true, false whether the update was made in OSM
         def mark_payment_required(api:, payment:)
           update_payment_status(api: api, payment: payment, status: :required)
         end
 
         # Mark a payment as not required by the member
-        # @param api [Osm::Api] The api to use to make the request
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
+        # @param api [OSM::Api] The api to use to make the request
+        # @param payment [OSM::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
         # @return true, false whether the update was made in OSM
         def mark_payment_not_required(api:, payment:)
           update_payment_status(api: api, payment: payment, status: :not_required)
         end
 
         # Mark a payment as paid by the member
-        # @param api [Osm::Api] The api to use to make the request
-        # @param payment [Osm::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
+        # @param api [OSM::Api] The api to use to make the request
+        # @param payment [OSM::OnlinePayment::Schedule::Payment, Integer, #to_i] The payment (or it's ID) to update
         # @param gift_aid true, false Whether to update the gift aid record too
         # @return true, false whether the update was made in OSM
         def mark_payment_paid_manually(api:, payment:, gift_aid: false)

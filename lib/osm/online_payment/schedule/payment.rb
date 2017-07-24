@@ -1,7 +1,7 @@
-module Osm
+module OSM
   module OnlinePayment
-    class Schedule < Osm::Model
-      class Payment < Osm::Model
+    class Schedule < OSM::Model
+      class Payment < OSM::Model
         # @!attribute [rw] id
         #   @return [FixNum] the payment's ID
         # @!attribute [rw] amount
@@ -13,7 +13,7 @@ module Osm
         # @!attribute [rw] date
         #   @return [Date] the payment's due date
         # @!attribute [rw] schedule
-        #   @return [Osm::OnlnePayment::Schedule] the schedule the payment belongs to
+        #   @return [OSM::OnlnePayment::Schedule] the schedule the payment belongs to
 
         attribute :id, type: Integer
         attribute :amount, type: String
@@ -43,7 +43,7 @@ module Osm
         end
 
         def inspect
-          Osm.inspect_instance(self, replace_with: { 'schedule' => :to_s })
+          OSM.inspect_instance(self, replace_with: { 'schedule' => :to_s })
         end
 
       end

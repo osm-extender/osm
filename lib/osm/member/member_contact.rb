@@ -1,10 +1,10 @@
-module Osm
-  class Member < Osm::Model
-    class MemberContact < Osm::Member::Contact
+module OSM
+  class Member < OSM::Model
+    class MemberContact < OSM::Member::Contact
       include EnableableEmailableContact
       include EnableablePhoneableContact
 
-      GROUP_ID = Osm::Member::GID_MEMBER_CONTACT
+      GROUP_ID = OSM::Member::GID_MEMBER_CONTACT
 
       # @!attribute [rw] email_1
       #   @return [String] the primary email address for the member

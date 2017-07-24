@@ -36,9 +36,9 @@ RSpec.configure do |config|
   end
 
   config.before(:each) do
-    OsmTest::Cache.clear
+    OSMTest::Cache.clear
 
-    $api = Osm::Api.new(
+    $api = OSM::Api.new(
       site:             :osm,
       api_id:           '1',
       api_secret:       'API-SECRET',
@@ -49,17 +49,17 @@ RSpec.configure do |config|
       user_secret:      'USER-SECRET'
     )
 
-    Osm::Model.cache = OsmTest::Cache
-    Osm::Model.prepend_to_cache_key = 'OSMAPI'
-    Osm::Model.cache_ttl = 600
+    OSM::Model.cache = OSMTest::Cache
+    OSM::Model.prepend_to_cache_key = 'OSMAPI'
+    OSM::Model.cache_ttl = 600
 
-    allow(Osm::Model).to receive(:require_ability_to).and_return(nil)
-    allow(Osm::Model).to receive(:require_access_to_section).and_return(nil)
+    allow(OSM::Model).to receive(:require_ability_to).and_return(nil)
+    allow(OSM::Model).to receive(:require_access_to_section).and_return(nil)
   end
 end
 
 
-module OsmTest
+module OSMTest
   class Cache
     @@cache = {}
     def self.write(key, data, _options={})
@@ -86,4 +86,4 @@ module OsmTest
       @@cache.inspect
     end
   end # class Cache
-end # module OsmTest
+end # module OSMTest

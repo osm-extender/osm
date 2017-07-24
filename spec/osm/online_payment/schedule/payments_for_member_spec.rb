@@ -1,8 +1,8 @@
-describe Osm::OnlinePayment::Schedule::PaymentsForMember do
+describe OSM::OnlinePayment::Schedule::PaymentsForMember do
 
   it 'Create' do
-    schedule = Osm::OnlinePayment::Schedule.new
-    p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(
+    schedule = OSM::OnlinePayment::Schedule.new
+    p4m = OSM::OnlinePayment::Schedule::PaymentsForMember.new(
       first_name:     'John',
       last_name:      'Smith',
       member_id:      1,
@@ -23,27 +23,27 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
 
   it 'Gets most recent status for a payment' do
     payments = {
-      1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 1, timestamp: Time.new(2016, 1, 2, 3, 4))],
-      2 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 2, timestamp: Time.new(2016, 1, 2, 3, 4))],
-      3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 3, timestamp: Time.new(2016, 1, 2, 3, 4)), Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 4, timestamp: Time.new(2016, 1, 2, 3, 5))]
+      1 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(id: 1, timestamp: Time.new(2016, 1, 2, 3, 4))],
+      2 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(id: 2, timestamp: Time.new(2016, 1, 2, 3, 4))],
+      3 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(id: 3, timestamp: Time.new(2016, 1, 2, 3, 4)), OSM::OnlinePayment::Schedule::PaymentStatus.new(id: 4, timestamp: Time.new(2016, 1, 2, 3, 5))]
     }
-    p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
+    p4m = OSM::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
 
     expect(p4m.latest_status_for(1).id).to eq(1)
-    expect(p4m.latest_status_for(Osm::OnlinePayment::Schedule::Payment.new(id: 2)).id).to eq(2)
+    expect(p4m.latest_status_for(OSM::OnlinePayment::Schedule::Payment.new(id: 2)).id).to eq(2)
     expect(p4m.latest_status_for(3).id).to eq(4)
   end
 
   it 'Works out if a payment is paid' do
     payments = {
-      1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :required)],
-      2 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :not_required)],
-      3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :initiated)],
-      4 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid)],
-      5 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :received)],
-      6 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)]
+      1 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :required)],
+      2 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :not_required)],
+      3 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :initiated)],
+      4 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :paid)],
+      5 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :received)],
+      6 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)]
     }
-    p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
+    p4m = OSM::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
 
     expect(p4m.paid?(1)).to eq(false)
     expect(p4m.paid?(2)).to eq(false)
@@ -56,14 +56,14 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
 
   it 'Works out if a payment is unpaid' do
     payments = {
-      1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :required)],
-      2 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :not_required)],
-      3 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :initiated)],
-      4 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid)],
-      5 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :received)],
-      6 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)]
+      1 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :required)],
+      2 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :not_required)],
+      3 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :initiated)],
+      4 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :paid)],
+      5 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :received)],
+      6 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :paid_manually)]
     }
-    p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
+    p4m = OSM::OnlinePayment::Schedule::PaymentsForMember.new(payments: payments)
 
     expect(p4m.unpaid?(1)).to eq(true)
     expect(p4m.unpaid?(2)).to eq(false)
@@ -75,21 +75,21 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
   end
 
   it 'Tells if the user has an active direct debit' do
-    p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(direct_debit: :active)
+    p4m = OSM::OnlinePayment::Schedule::PaymentsForMember.new(direct_debit: :active)
     expect(p4m.active_direct_debit?).to eq(true)
 
-    p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(direct_debit: :inactive)
+    p4m = OSM::OnlinePayment::Schedule::PaymentsForMember.new(direct_debit: :inactive)
     expect(p4m.active_direct_debit?).to eq(false)
   end
 
   describe 'Works out if a payment is over due' do
 
     before :each do
-      @payment = Osm::OnlinePayment::Schedule::Payment.new(id: 1, due_date: Date.new(2016, 1, 2))
-      paid_payments = { 1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :paid, payment: @payment)] }
-      @paid = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: paid_payments)
-      unpaid_payments = { 1 => [Osm::OnlinePayment::Schedule::PaymentStatus.new(status: :required, payment: @payment)] }
-      @unpaid = Osm::OnlinePayment::Schedule::PaymentsForMember.new(payments: unpaid_payments)
+      @payment = OSM::OnlinePayment::Schedule::Payment.new(id: 1, due_date: Date.new(2016, 1, 2))
+      paid_payments = { 1 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :paid, payment: @payment)] }
+      @paid = OSM::OnlinePayment::Schedule::PaymentsForMember.new(payments: paid_payments)
+      unpaid_payments = { 1 => [OSM::OnlinePayment::Schedule::PaymentStatus.new(status: :required, payment: @payment)] }
+      @unpaid = OSM::OnlinePayment::Schedule::PaymentsForMember.new(payments: unpaid_payments)
     end
 
     it 'Due date in over' do
@@ -117,11 +117,11 @@ describe Osm::OnlinePayment::Schedule::PaymentsForMember do
   describe 'Update a payment in OSM' do
 
     before :each do
-      @schedule = Osm::OnlinePayment::Schedule.new(id: 10, section_id: 4, gift_aid: true)
-      @payment = Osm::OnlinePayment::Schedule::Payment.new(id: 1, schedule: @schedule)
+      @schedule = OSM::OnlinePayment::Schedule.new(id: 10, section_id: 4, gift_aid: true)
+      @payment = OSM::OnlinePayment::Schedule::Payment.new(id: 1, schedule: @schedule)
       @schedule.payments = [@payment]
-      @status = Osm::OnlinePayment::Schedule::PaymentStatus.new(id: 2, payment: @payment)
-      @p4m = Osm::OnlinePayment::Schedule::PaymentsForMember.new(member_id: 3, payments: { 1 => [@status] }, schedule: @schedule)
+      @status = OSM::OnlinePayment::Schedule::PaymentStatus.new(id: 2, payment: @payment)
+      @p4m = OSM::OnlinePayment::Schedule::PaymentsForMember.new(member_id: 3, payments: { 1 => [@status] }, schedule: @schedule)
     end
 
     describe 'Using update_payment_status method' do

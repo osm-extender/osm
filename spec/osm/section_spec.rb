@@ -1,4 +1,4 @@
-describe Osm::Section do
+describe OSM::Section do
 
   before :each do
     @attributes = {
@@ -38,7 +38,7 @@ describe Osm::Section do
 
 
   it 'Create' do
-    section = Osm::Section.new(@attributes)
+    section = OSM::Section.new(@attributes)
 
     expect(section.id).to eq(1)
     expect(section.name).to eq('Name')
@@ -75,7 +75,7 @@ describe Osm::Section do
 
 
   it 'Create has sensible defaults' do
-    section = Osm::Section.new
+    section = OSM::Section.new
 
     expect(section.subscription_level).to eq(1)
     expect(section.subscription_expires).to be_nil
@@ -100,7 +100,7 @@ describe Osm::Section do
 
     describe 'Gets all sections' do
       it 'From OSM' do
-        sections = Osm::Section.get_all(api: $api)
+        sections = OSM::Section.get_all(api: $api)
         expect(sections.map(&:id)).to eq([1, 2])
 
         section = sections[0]
@@ -140,24 +140,24 @@ describe Osm::Section do
       end
 
       it 'From cache' do
-        sections = Osm::Section.get_all(api: $api)
+        sections = OSM::Section.get_all(api: $api)
         expect($api).not_to receive(:post_query)
-        expect(Osm::Section.get_all(api: $api)).to eq(sections)
+        expect(OSM::Section.get_all(api: $api)).to eq(sections)
       end
     end
 
     describe 'Gets a section' do
       it 'From OSM' do
-        section = Osm::Section.get(api: $api, id: 1)
+        section = OSM::Section.get(api: $api, id: 1)
         expect(section).not_to be_nil
         expect(section.id).to eq(1)
         expect(section.valid?).to eq(true)
       end
 
       it 'From cache' do
-        section = Osm::Section.get(api: $api, id: 1)
+        section = OSM::Section.get(api: $api, id: 1)
         expect($api).not_to receive(:post_query)
-        expect(Osm::Section.get(api: $api, id: 1)).to eq(section)
+        expect(OSM::Section.get(api: $api, id: 1)).to eq(section)
       end
     end
 
@@ -165,13 +165,13 @@ describe Osm::Section do
     describe "Gets the section's notepad" do
       it 'From OSM' do
         expect($api).to receive(:post_query).with('api.php?action=getNotepads').and_return('1' => 'Section 1', '2' => 'Section 2')
-        section = Osm::Section.new(id: 1)
+        section = OSM::Section.new(id: 1)
         expect(section.get_notepad($api)).to eq('Section 1')
       end
 
       it 'From cache' do
         expect($api).to receive(:post_query).with('api.php?action=getNotepads').and_return('1' => 'Section 1', '2' => 'Section 2')
-        section = Osm::Section.new(id: 1)
+        section = OSM::Section.new(id: 1)
         expect(section.get_notepad($api)).to eq('Section 1')
         expect($api).not_to receive(:post_query).with('api.php?action=getNotepads')
         expect(section.get_notepad($api)).to eq('Section 1')
@@ -180,13 +180,13 @@ describe Osm::Section do
 
     it "Sets the section's notepad (success)" do
       expect($api).to receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: { 'value' => 'content' }).and_return('ok' => true)
-      section = Osm::Section.new(id: 1)
+      section = OSM::Section.new(id: 1)
       expect(section.set_notepad(api: $api, content: 'content')).to eq(true)
     end
 
     it "Sets the section's notepad (fail)" do
       expect($api).to receive(:post_query).with('users.php?action=updateNotepad&sectionid=1', post_data: { 'value' => 'content' }).and_return('ok' => false)
-      section = Osm::Section.new(id: 1)
+      section = OSM::Section.new(id: 1)
       expect(section.set_notepad(api: $api, content: 'content')).to eq(false)
     end
 
@@ -196,15 +196,15 @@ describe Osm::Section do
   describe 'Compare two sections' do
 
     it 'They match' do
-      section1 = Osm::Section.new(@attributes)
-      section2 = Osm::Section.new(@attributes)
+      section1 = OSM::Section.new(@attributes)
+      section2 = OSM::Section.new(@attributes)
 
       expect(section1).to eq(section2)
     end
 
     it "They don't match" do
-      section1 = Osm::Section.new(@attributes)
-      section2 = Osm::Section.new(@attributes.merge(id: 2))
+      section1 = OSM::Section.new(@attributes)
+      section2 = OSM::Section.new(@attributes.merge(id: 2))
 
       expect(section1).not_to eq(section2)
     end
@@ -213,10 +213,10 @@ describe Osm::Section do
 
 
   it 'Sorts by Group Name, section type (age order) then name' do
-    section1 = Osm::Section.new(@attributes.merge(group_id: 1, group_name: '1st Somewhere', type: :beavers, name: 'a'))
-    section2 = Osm::Section.new(@attributes.merge(group_id: 2, group_name: '2nd Somewhere', type: :beavers, name: 'a'))
-    section3 = Osm::Section.new(@attributes.merge(group_id: 2, group_name: '2nd Somewhere', type: :cubs, name: 'a'))
-    section4 = Osm::Section.new(@attributes.merge(group_id: 2, group_name: '2nd Somewhere', type: :cubs, name: 'b'))
+    section1 = OSM::Section.new(@attributes.merge(group_id: 1, group_name: '1st Somewhere', type: :beavers, name: 'a'))
+    section2 = OSM::Section.new(@attributes.merge(group_id: 2, group_name: '2nd Somewhere', type: :beavers, name: 'a'))
+    section3 = OSM::Section.new(@attributes.merge(group_id: 2, group_name: '2nd Somewhere', type: :cubs, name: 'a'))
+    section4 = OSM::Section.new(@attributes.merge(group_id: 2, group_name: '2nd Somewhere', type: :cubs, name: 'b'))
 
     data = [section2, section4, section3, section1]
     expect(data.sort).to eq([section1, section2, section3, section4])
@@ -224,14 +224,14 @@ describe Osm::Section do
 
 
   describe 'Correctly works out the section type' do
-    unknown   = Osm::Section.new(type: :abc)
-    beavers   = Osm::Section.new(type: :beavers)
-    cubs      = Osm::Section.new(type: :cubs)
-    scouts    = Osm::Section.new(type: :scouts)
-    explorers = Osm::Section.new(type: :explorers)
-    network   = Osm::Section.new(type: :network)
-    adults    = Osm::Section.new(type: :adults)
-    waiting   = Osm::Section.new(type: :waiting)
+    unknown   = OSM::Section.new(type: :abc)
+    beavers   = OSM::Section.new(type: :beavers)
+    cubs      = OSM::Section.new(type: :cubs)
+    scouts    = OSM::Section.new(type: :scouts)
+    explorers = OSM::Section.new(type: :explorers)
+    network   = OSM::Section.new(type: :network)
+    adults    = OSM::Section.new(type: :adults)
+    waiting   = OSM::Section.new(type: :waiting)
 
     { beavers: beavers, cubs: cubs, scouts: scouts, explorers: explorers, network: network, :adults => adults, :waiting => waiting, :unknown => unknown }.each do |section_type, section|
       it "For a #{section_type} section" do
@@ -244,14 +244,14 @@ describe Osm::Section do
 
 
   describe 'Correctly works out if the section is a youth section' do
-    unknown =   Osm::Section.new(type: :abc)
-    beavers =   Osm::Section.new(type: :beavers)
-    cubs =      Osm::Section.new(type: :cubs)
-    scouts =    Osm::Section.new(type: :scouts)
-    explorers = Osm::Section.new(type: :explorers)
-    network =   Osm::Section.new(type: :network)
-    adults =    Osm::Section.new(type: :adults)
-    waiting =   Osm::Section.new(type: :waiting)
+    unknown =   OSM::Section.new(type: :abc)
+    beavers =   OSM::Section.new(type: :beavers)
+    cubs =      OSM::Section.new(type: :cubs)
+    scouts =    OSM::Section.new(type: :scouts)
+    explorers = OSM::Section.new(type: :explorers)
+    network =   OSM::Section.new(type: :network)
+    adults =    OSM::Section.new(type: :adults)
+    waiting =   OSM::Section.new(type: :waiting)
 
     [beavers, cubs, scouts, explorers].each do |section|
       it "For a #{section.type} section" do
@@ -268,7 +268,7 @@ describe Osm::Section do
   describe 'Corretly works out the subscription level' do
 
     it 'Bronze' do
-      section = Osm::Section.new(subscription_level: 1)
+      section = OSM::Section.new(subscription_level: 1)
       expect(section.bronze?).to eq(true)
       expect(section.silver?).to eq(false)
       expect(section.gold?).to eq(false)
@@ -276,7 +276,7 @@ describe Osm::Section do
     end
 
     it 'Silver' do
-      section = Osm::Section.new(subscription_level: 2)
+      section = OSM::Section.new(subscription_level: 2)
       expect(section.bronze?).to eq(false)
       expect(section.silver?).to eq(true)
       expect(section.gold?).to eq(false)
@@ -284,7 +284,7 @@ describe Osm::Section do
     end
 
     it 'Gold' do
-      section = Osm::Section.new(subscription_level: 3)
+      section = OSM::Section.new(subscription_level: 3)
       expect(section.bronze?).to eq(false)
       expect(section.silver?).to eq(false)
       expect(section.gold?).to eq(true)
@@ -292,7 +292,7 @@ describe Osm::Section do
     end
 
     it 'Gold+' do
-      section = Osm::Section.new(subscription_level: 4)
+      section = OSM::Section.new(subscription_level: 4)
       expect(section.bronze?).to eq(false)
       expect(section.silver?).to eq(false)
       expect(section.gold?).to eq(false)
@@ -300,7 +300,7 @@ describe Osm::Section do
     end
 
     it 'Unknown' do
-      section = Osm::Section.new(subscription_level: 0)
+      section = OSM::Section.new(subscription_level: 0)
       expect(section.bronze?).to eq(false)
       expect(section.silver?).to eq(false)
       expect(section.gold?).to eq(false)
@@ -312,7 +312,7 @@ describe Osm::Section do
   describe 'Correctly works out if a section has a subscription of at least' do
 
     it 'Bronze' do
-      section = Osm::Section.new(subscription_level: 1)
+      section = OSM::Section.new(subscription_level: 1)
       expect(section.subscription_at_least?(:bronze)).to eq(true)
       expect(section.subscription_at_least?(:silver)).to eq(false)
       expect(section.subscription_at_least?(:gold)).to eq(false)
@@ -324,7 +324,7 @@ describe Osm::Section do
     end
 
     it 'Silver' do
-      section = Osm::Section.new(subscription_level: 2)
+      section = OSM::Section.new(subscription_level: 2)
       expect(section.subscription_at_least?(:bronze)).to eq(true)
       expect(section.subscription_at_least?(:silver)).to eq(true)
       expect(section.subscription_at_least?(:gold)).to eq(false)
@@ -336,7 +336,7 @@ describe Osm::Section do
     end
 
     it 'Gold' do
-      section = Osm::Section.new(subscription_level: 3)
+      section = OSM::Section.new(subscription_level: 3)
       expect(section.subscription_at_least?(:bronze)).to eq(true)
       expect(section.subscription_at_least?(:silver)).to eq(true)
       expect(section.subscription_at_least?(:gold)).to eq(true)
@@ -348,7 +348,7 @@ describe Osm::Section do
     end
 
     it 'Gold+' do
-      section = Osm::Section.new(subscription_level: 4)
+      section = OSM::Section.new(subscription_level: 4)
       expect(section.subscription_at_least?(:bronze)).to eq(true)
       expect(section.subscription_at_least?(:silver)).to eq(true)
       expect(section.subscription_at_least?(:gold)).to eq(true)
@@ -360,7 +360,7 @@ describe Osm::Section do
     end
 
     it 'Unknown' do
-      section = Osm::Section.new(subscription_level: 0)
+      section = OSM::Section.new(subscription_level: 0)
       expect(section.subscription_at_least?(:bronze)).to eq(false)
       expect(section.subscription_at_least?(:silver)).to eq(false)
       expect(section.subscription_at_least?(:gold)).to eq(false)
@@ -383,7 +383,7 @@ describe 'Online Scout Manager API Strangeness' do
     body = [{ 'sectionConfig' => "{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member\'s Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member\'s Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[{\"name\":\"Subs\",\"extraid\":\"529\"}],\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}", 'groupname' => '1st Somewhere', 'groupid' => '1', 'groupNormalised' => '1', 'sectionid' => '1', 'sectionname' => 'Section 1', 'section' => 'cubs', 'isDefault' => '1', 'permissions' => { 'badge' => 100, 'member' => 100, 'user' => 100, 'register' => 100, 'contact' => 100, 'programme' => 100, 'originator' => 1, 'events' => 100, 'finance' => 100, 'flexi' => 100 } }]
     allow($api).to receive(:post_query).with('api.php?action=getUserRoles') { body }
 
-    sections = Osm::Section.get_all(api: $api)
+    sections = OSM::Section.get_all(api: $api)
     expect(sections.size).to eq(1)
     section = sections[0]
     expect(section).not_to be_nil
@@ -394,7 +394,7 @@ describe 'Online Scout Manager API Strangeness' do
     body = [{ 'sectionConfig' => "{\"subscription_level\":3,\"subscription_expires\":\"2013-01-05\",\"sectionType\":\"cubs\",\"columnNames\":{\"phone1\":\"Home Phone\",\"phone2\":\"Parent 1 Phone\",\"address\":\"Member\'s Address\",\"phone3\":\"Parent 2 Phone\",\"address2\":\"Address 2\",\"phone4\":\"Alternate Contact Phone\",\"subs\":\"Gender\",\"email1\":\"Parent 1 Email\",\"medical\":\"Medical / Dietary\",\"email2\":\"Parent 2 Email\",\"ethnicity\":\"Gift Aid\",\"email3\":\"Member\'s Email\",\"religion\":\"Religion\",\"email4\":\"Email 4\",\"school\":\"School\"},\"numscouts\":10,\"hasUsedBadgeRecords\":true,\"hasProgramme\":true,\"extraRecords\":[[\"1\",{\"name\":\"Subs\",\"extraid\":\"529\"}],[\"2\",{\"name\":\"Subs 2\",\"extraid\":\"530\"}]],\"wizard\":\"false\",\"fields\":{\"email1\":true,\"email2\":true,\"email3\":true,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":true,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":true,\"saved\":true},\"intouch\":{\"address\":true,\"address2\":false,\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"medical\":false},\"mobFields\":{\"email1\":false,\"email2\":false,\"email3\":false,\"email4\":false,\"address\":true,\"address2\":false,\"phone1\":true,\"phone2\":true,\"phone3\":true,\"phone4\":true,\"school\":false,\"religion\":false,\"ethnicity\":true,\"medical\":true,\"patrol\":true,\"subs\":false}}", 'groupname' => '1st Somewhere', 'groupid' => '1', 'groupNormalised' => '1', 'sectionid' => '1', 'sectionname' => 'Section 1', 'section' => 'cubs', 'isDefault' => '1', 'permissions' => { 'badge' => 100, 'member' => 100, 'user' => 100, 'register' => 100, 'contact' => 100, 'programme' => 100, 'originator' => 1, 'events' => 100, 'finance' => 100, 'flexi' => 100 } }]
     allow($api).to receive(:post_query).with('api.php?action=getUserRoles') { body }
 
-    sections = Osm::Section.get_all(api: $api)
+    sections = OSM::Section.get_all(api: $api)
     expect(sections.size).to eq(1)
     expect(sections[0]).not_to be_nil
   end
@@ -404,7 +404,7 @@ describe 'Online Scout Manager API Strangeness' do
     allow($api).to receive(:post_query).with('api.php?action=getUserRoles') { body }
     allow($api).to receive(:post_query).with('api.php?action=getNotepads') { [] }
 
-    section = Osm::Section.get(api: $api, id: 1)
+    section = OSM::Section.get(api: $api, id: 1)
     expect(section).not_to be_nil
     expect(section.get_notepad($api)).to eq('')
   end
@@ -416,7 +416,7 @@ describe 'Online Scout Manager API Strangeness' do
     ]
     allow($api).to receive(:post_query).with('api.php?action=getUserRoles') { body }
 
-    sections = Osm::Section.get_all(api: $api)
+    sections = OSM::Section.get_all(api: $api)
     expect(sections.size).to eq(1)
     section = sections[0]
     expect(section).not_to be_nil
@@ -430,7 +430,7 @@ describe 'Online Scout Manager API Strangeness' do
     ]
     allow($api).to receive(:post_query).with('api.php?action=getUserRoles') { body }
 
-    sections = Osm::Section.get_all(api: $api)
+    sections = OSM::Section.get_all(api: $api)
     expect(sections.size).to eq(2)
     expect(sections[0]).not_to be_nil
     expect(sections[1]).not_to be_nil
@@ -439,7 +439,7 @@ describe 'Online Scout Manager API Strangeness' do
   it 'Handles user having access to no sections' do
     allow($api).to receive(:post_query).with('api.php?action=getUserRoles') { [{ 'isDefault' => '1' }] }
 
-    sections = Osm::Section.get_all(api: $api)
+    sections = OSM::Section.get_all(api: $api)
     expect(sections).to eq([])
   end
 

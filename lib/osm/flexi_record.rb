@@ -1,5 +1,5 @@
-module Osm
-  class FlexiRecord < Osm::Model
+module OSM
+  class FlexiRecord < OSM::Model
     # @!attribute [rw] id
     #   @return [Integer] the id for the flexi_record
     # @!attribute [rw] section_id
@@ -17,19 +17,19 @@ module Osm
 
 
     # Get structure for the flexi record
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @!macro options_get
-    # @return [Array<Osm::FlexiRecordColumn>] representing the columns of the flexi record
+    # @return [Array<OSM::FlexiRecordColumn>] representing the columns of the flexi record
     def get_columns(api, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :flexi, section: section_id, no_read_cache: no_read_cache)
       cache_key = ['flexi_record_columns', id]
 
-      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+      OSM::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("extras.php?action=getExtra&sectionid=#{section_id}&extraid=#{id}")
         structure = []
         data['structure'].each do |item|
           item['rows'].each do |row|
-            structure.push Osm::FlexiRecord::Column.new(
+            structure.push OSM::FlexiRecord::Column.new(
               id: row['field'],
               name: row['name'],
               editable: row['editable'] || false,
@@ -42,7 +42,7 @@ module Osm
     end
 
     # Add a column in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param name [String] The name for the created column
     # @return true, false whether the column was created in OSM
     def add_column(api:, name:)
@@ -65,17 +65,17 @@ module Osm
     end
 
     # Get data for flexi record
-    # @param api [Osm::Api] The api to use to make the request
-    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
+    # @param api [OSM::Api] The api to use to make the request
+    # @param term [OSM::Term, Integer, #to_i, nil] The term (or its ID) to get the register for, passing nil causes the current term to be used
     # @!macro options_get
     # @return [Array<FlexiRecordData>]
     def get_data(api:, term: nil, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :flexi, section: section_id, no_read_cache: no_read_cache)
-      section = Osm::Section.get(api: api, id: section_id)
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
+      section = OSM::Section.get(api: api, id: section_id)
+      term_id = term.nil? ? OSM::Term.get_current_term_for_section(api: api, section: section).id : term.to_i
       cache_key = ['flexi_record_data', id, term_id]
 
-      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+      OSM::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("extras.php?action=getExtraRecords&sectionid=#{section.id}&extraid=#{id}&termid=#{term_id}&section=#{section.type}")
 
         datas = []
@@ -91,9 +91,9 @@ module Osm
             'age' => item['age'].empty? ? nil : item['age']
           )
 
-          datas.push Osm::FlexiRecord::Data.new(
-            member_id: Osm.to_i_or_nil(item['scoutid']),
-            grouping_id: Osm.to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+          datas.push OSM::FlexiRecord::Data.new(
+            member_id: OSM.to_i_or_nil(item['scoutid']),
+            grouping_id: OSM.to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
             fields: fields,
             flexi_record: self
           )

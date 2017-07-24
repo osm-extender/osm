@@ -1,7 +1,7 @@
-module Osm
+module OSM
   class Email
-    class DeliveryReport < Osm::Model
-      class Email < Osm::Model
+    class DeliveryReport < OSM::Model
+      class Email < OSM::Model
         # @!attribute [rw] to
         #   @return [String] who the email was sent to (possibly nil)
         # @!attribute [rw] from
@@ -34,23 +34,23 @@ module Osm
         protected
 
         # Get email contents
-        # @param api [Osm::Api] The api to use to make the request
+        # @param api [OSM::Api] The api to use to make the request
         # @param section [Integer, #to_i]
         # @param email [Integer, #to_i]
         # @param member [Integer, #to_i, nil]
         # @param address [String]
-        # @return [Osm::Email::DeliveryReport::Email]
+        # @return [OSM::Email::DeliveryReport::Email]
         def self.fetch_from_osm(api:, section:, email:, member: nil, address: '')
           member = member.to_i unless member.nil?
-          Osm::Model.require_access_to_section(api: api, section: section)
+          OSM::Model.require_access_to_section(api: api, section: section)
 
           data = api.post_query("ext/settings/emails/?action=getSentEmail&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
-          fail Osm::OSMError, "Unexpected format for response - got a #{data.class}" unless data.is_a?(Hash)
-          fail Osm::OSMError, data['error'].to_s unless data['status']
-          fail Osm::OSMError, "Unexpected format for meta data - got a #{data.class}" unless data['data'].is_a?(Hash)
+          fail OSM::OSMError, "Unexpected format for response - got a #{data.class}" unless data.is_a?(Hash)
+          fail OSM::OSMError, data['error'].to_s unless data['status']
+          fail OSM::OSMError, "Unexpected format for meta data - got a #{data.class}" unless data['data'].is_a?(Hash)
 
           body = api.post_query("ext/settings/emails/?action=getSentEmailContent&section_id=#{section.to_i}&email_id=#{email.to_i}&email=#{address}&member_id=#{member}")
-          fail Osm::OSMError::NotFound, data if data.eql?('Email not found')
+          fail OSM::OSMError::NotFound, data if data.eql?('Email not found')
 
           email_data = data['data']
           new(

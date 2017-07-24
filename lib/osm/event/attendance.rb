@@ -1,6 +1,6 @@
-module Osm
-  class Event < Osm::Model
-    class Attendance < Osm::Model
+module OSM
+  class Event < OSM::Model
+    class Attendance < OSM::Model
       # @!attribute [rw] member_id
       #   @return [Integer] OSM id for the member
       # @!attribute [rw] grouping__id
@@ -10,7 +10,7 @@ module Osm
       # @!attribute [rw] row
       #   @return [Integer] part of the OSM API
       # @!attriute [rw] event
-      #   @return [Osm::Event] the event that this attendance applies to
+      #   @return [OSM::Event] the event that this attendance applies to
       # @!attribute [rw] first_name
       #   @return [String] the member's first name
       # @!attribute [rw] last_name
@@ -64,7 +64,7 @@ module Osm
 
 
       # Update event attendance
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @return true, false if the operation suceeded or not
       def update(api)
         require_ability_to(api: api, to: :write, on: :events, section: event.section_id)
@@ -127,7 +127,7 @@ module Osm
       end
 
       # Get audit trail
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @!macro options_get
       # @return [Array<Hash>]
       def get_audit_trail(api, no_read_cache: false)
@@ -205,7 +205,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, replace_with: { 'event' => :id })
+        OSM.inspect_instance(self, replace_with: { 'event' => :id })
       end
 
       private

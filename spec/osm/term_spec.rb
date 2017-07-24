@@ -1,4 +1,4 @@
-describe Osm::Term do
+describe OSM::Term do
 
   before :each do
     @attributes = {
@@ -11,7 +11,7 @@ describe Osm::Term do
   end
 
   it 'Create' do
-    term = Osm::Term.new(@attributes)
+    term = OSM::Term.new(@attributes)
 
     expect(term.id).to eq(1)
     expect(term.section_id).to eq(2)
@@ -22,32 +22,32 @@ describe Osm::Term do
   end
 
   it 'Compares two matching terms' do
-    term1 = Osm::Term.new(@attributes)
-    term2 = Osm::Term.new(@attributes)
+    term1 = OSM::Term.new(@attributes)
+    term2 = OSM::Term.new(@attributes)
     expect(term1).to eq(term2)
   end
 
   it 'Compares two non-matching terms' do
-    term = Osm::Term.new(@attributes)
+    term = OSM::Term.new(@attributes)
 
-    expect(term).not_to eq(Osm::Term.new(@attributes.merge(id: 3)))
+    expect(term).not_to eq(OSM::Term.new(@attributes.merge(id: 3)))
   end
 
   it 'Sorts by Section ID, Start date and then Term ID' do
-    term1 = Osm::Term.new(@attributes.merge(section_id: 1, term: 11, start: (Date.today - 60), finish: (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(section_id: 1, term: 12, start: (Date.today -  0), finish: (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(section_id: 1, term: 13, start: (Date.today +  1), finish: (Date.today + 60)))
-    term4 = Osm::Term.new(@attributes.merge(section_id: 2, term: 1, start: (Date.today +  1), finish: (Date.today + 60)))
-    term5 = Osm::Term.new(@attributes.merge(section_id: 2, term: 2, start: (Date.today +  1), finish: (Date.today + 60)))
+    term1 = OSM::Term.new(@attributes.merge(section_id: 1, term: 11, start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = OSM::Term.new(@attributes.merge(section_id: 1, term: 12, start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = OSM::Term.new(@attributes.merge(section_id: 1, term: 13, start: (Date.today +  1), finish: (Date.today + 60)))
+    term4 = OSM::Term.new(@attributes.merge(section_id: 2, term: 1, start: (Date.today +  1), finish: (Date.today + 60)))
+    term5 = OSM::Term.new(@attributes.merge(section_id: 2, term: 2, start: (Date.today +  1), finish: (Date.today + 60)))
 
     data = [term5, term3, term2, term4, term1]
     expect(data.sort).to eq([term1, term2, term3, term4, term5])
   end
 
   it 'Works out if it is completly before a date' do
-    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
+    term1 = OSM::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = OSM::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = OSM::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     expect(term1.before?(Date.today)).to eq(true)
     expect(term2.before?(Date.today)).to eq(false)
@@ -55,9 +55,9 @@ describe Osm::Term do
   end
 
   it 'Works out if it is completly after a date' do
-    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
+    term1 = OSM::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = OSM::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = OSM::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     expect(term1.after?(Date.today)).to eq(false)
     expect(term2.after?(Date.today)).to eq(false)
@@ -65,9 +65,9 @@ describe Osm::Term do
   end
 
   it 'Works out if it has passed' do
-    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
+    term1 = OSM::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = OSM::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = OSM::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     expect(term1.past?()).to eq(true)
     expect(term2.past?()).to eq(false)
@@ -75,9 +75,9 @@ describe Osm::Term do
   end
 
   it 'Works out if it is in the future' do
-    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
+    term1 = OSM::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = OSM::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = OSM::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     expect(term1.future?()).to eq(false)
     expect(term2.future?()).to eq(false)
@@ -85,9 +85,9 @@ describe Osm::Term do
   end
 
   it 'Works out if it is the current term' do
-    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
+    term1 = OSM::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = OSM::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = OSM::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     expect(term1.current?()).to eq(false)
     expect(term2.current?()).to eq(true)
@@ -95,9 +95,9 @@ describe Osm::Term do
   end
 
   it 'Works out if it contains a date' do
-    term1 = Osm::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
-    term2 = Osm::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
-    term3 = Osm::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
+    term1 = OSM::Term.new(@attributes.merge(start: (Date.today - 60), finish: (Date.today - 1)))
+    term2 = OSM::Term.new(@attributes.merge(start: (Date.today -  0), finish: (Date.today + 0)))
+    term3 = OSM::Term.new(@attributes.merge(start: (Date.today +  1), finish: (Date.today + 60)))
 
     expect(term1.contains_date?(Date.today)).to eq(false)
     expect(term2.contains_date?(Date.today)).to eq(true)
@@ -105,7 +105,7 @@ describe Osm::Term do
   end
 
   it 'Date helpers return false for nil dates' do
-    term = Osm::Term.new
+    term = OSM::Term.new
     expect(term.before?(Date.today)).to eq(false)
     expect(term.after?(Date.today)).to eq(false)
     expect(term.past?).to eq(false)
@@ -136,11 +136,11 @@ describe Osm::Term do
       end
 
       it 'From OSM' do
-        terms = Osm::Term.get_all($api)
+        terms = OSM::Term.get_all($api)
         expect(terms.size).to eq(3)
         expect(terms.map(&:id)).to eq([1, 2, 3])
         term = terms[0]
-        expect(term.is_a?(Osm::Term)).to eq(true)
+        expect(term.is_a?(OSM::Term)).to eq(true)
         expect(term.id).to eq(1)
         expect(term.name).to eq('Term 1')
         expect(term.start).to eq(Date.today + 31)
@@ -148,9 +148,9 @@ describe Osm::Term do
       end
 
       it 'From cache' do
-        terms = Osm::Term.get_all($api)
+        terms = OSM::Term.get_all($api)
         expect($api).not_to receive(:post_query)
-        expect(Osm::Term.get_all($api)).to eq(terms)
+        expect(OSM::Term.get_all($api)).to eq(terms)
       end
     end # Get all terms
 
@@ -164,7 +164,7 @@ describe Osm::Term do
           { 'termid' => '3', 'name' => 'Term 3', 'sectionid' => '10', 'startdate' => (Date.today + 91).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 180).strftime('%Y-%m-%d') }
         ]
       )
-      terms = Osm::Term.get_for_section(api: $api, section: 10)
+      terms = OSM::Term.get_for_section(api: $api, section: 10)
       expect(terms.size).to eq(2)
       expect(terms.map(&:id)).to eq([2, 3])
     end
@@ -180,15 +180,15 @@ describe Osm::Term do
       end
 
       it 'From OSM' do
-        term = Osm::Term.get(api: $api, id: 2)
-        expect(term.is_a?(Osm::Term)).to eq(true)
+        term = OSM::Term.get(api: $api, id: 2)
+        expect(term.is_a?(OSM::Term)).to eq(true)
         expect(term.id).to eq(2)
       end
 
       it 'From cache' do
-        Osm::Term.get(api: $api, id: 2)
+        OSM::Term.get(api: $api, id: 2)
         expect($api).to_not receive(:post_query).with('api.php?action=getTerms')
-        expect(Osm::Term.get(api: $api, id: 3).id).to eq(3)
+        expect(OSM::Term.get(api: $api, id: 3).id).to eq(3)
       end
     end
 
@@ -201,7 +201,7 @@ describe Osm::Term do
             { 'termid' => '3', 'name' => 'Term 3', 'sectionid' => '9', 'startdate' => (Date.today + 31).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 90).strftime('%Y-%m-%d') }
           ]
         )
-        expect(Osm::Term.get_current_term_for_section(api: $api, section: 9).id).to eq(2)
+        expect(OSM::Term.get_current_term_for_section(api: $api, section: 9).id).to eq(2)
       end
 
       it 'Raises an error if there is no current term' do
@@ -210,8 +210,8 @@ describe Osm::Term do
             { 'termid' => '1', 'name' => 'Term 1', 'sectionid' => '9', 'startdate' => (Date.today + 31).strftime('%Y-%m-%d'), 'enddate' => (Date.today + 31).strftime('%Y-%m-%d') }
           ]
         )
-        expect { Osm::Term.get_current_term_for_section(api: $api, section: 9) }.to raise_error do |error|
-          expect(error).to be_a(Osm::OSMError::NoCurrentTerm)
+        expect { OSM::Term.get_current_term_for_section(api: $api, section: 9) }.to raise_error do |error|
+          expect(error).to be_a(OSM::OSMError::NoCurrentTerm)
           expect(error.message).to eq('There is no current term for the section.')
           expect(error.section_id).to eq(9)
         end
@@ -226,13 +226,13 @@ describe Osm::Term do
         'termid' => '0'
       }
 
-      allow(Osm::Term).to receive(:get_all) { [Osm::Term.new(id: 1, section_id: 1), Osm::Term.new(id: 9, section_id: 9)] }
+      allow(OSM::Term).to receive(:get_all) { [OSM::Term.new(id: 1, section_id: 1), OSM::Term.new(id: 9, section_id: 9)] }
       expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return('terms' => {})
-      expect(Osm::Term).to receive(:cache_delete).with(api: $api, key: ['term', 1])
-      expect(Osm::Term).to_not receive(:cache_delete).with(api: $api, key: ['term', 9])
-      expect(Osm::Term).to receive(:cache_delete).with(api: $api, key: ['terms', $api.user_id])
+      expect(OSM::Term).to receive(:cache_delete).with(api: $api, key: ['term', 1])
+      expect(OSM::Term).to_not receive(:cache_delete).with(api: $api, key: ['term', 9])
+      expect(OSM::Term).to receive(:cache_delete).with(api: $api, key: ['terms', $api.user_id])
 
-      expect(Osm::Term.create(
+      expect(OSM::Term.create(
         api: $api,
         section: 1,
         name: 'A Term',
@@ -249,10 +249,10 @@ describe Osm::Term do
         'termid' => '0'
       }
 
-      allow(Osm::Term).to receive(:get_all) { [] }
+      allow(OSM::Term).to receive(:get_all) { [] }
       expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
 
-      expect(Osm::Term.create(
+      expect(OSM::Term.create(
         api: $api,
         section: 1,
         name: 'A Term',
@@ -268,10 +268,10 @@ describe Osm::Term do
         'end' => '2010-12-31',
         'termid' => 2
       }
-      allow(Osm::Term).to receive(:get_all) { [] }
+      allow(OSM::Term).to receive(:get_all) { [] }
       expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return('terms' => {})
 
-      term = Osm::Term.new(id: 2, section_id: 1, name: 'A Term', start: Date.new(2010, 01, 01), finish: Date.new(2010, 12, 31))
+      term = OSM::Term.new(id: 2, section_id: 1, name: 'A Term', start: Date.new(2010, 01, 01), finish: Date.new(2010, 12, 31))
       expect(term.update($api)).to eq(true)
     end
 
@@ -282,16 +282,16 @@ describe Osm::Term do
         'end' => '2010-12-31',
         'termid' => 2
       }
-      allow(Osm::Term).to receive(:get_all) { [] }
+      allow(OSM::Term).to receive(:get_all) { [] }
       expect($api).to receive(:post_query).with('users.php?action=addTerm&sectionid=1', post_data: post_data).and_return({})
 
-      term = Osm::Term.new(id: 2, section_id: 1, name: 'A Term', start: Date.new(2010, 01, 01), finish: Date.new(2010, 12, 31))
+      term = OSM::Term.new(id: 2, section_id: 1, name: 'A Term', start: Date.new(2010, 01, 01), finish: Date.new(2010, 12, 31))
       expect(term.update($api)).to eq(false)
     end
 
     it 'Update a term (invalid term)' do
-      term = Osm::Term.new
-      expect { term.update($api) }.to raise_error(Osm::Error::InvalidObject)
+      term = OSM::Term.new
+      expect { term.update($api) }.to raise_error(OSM::Error::InvalidObject)
     end
 
   end

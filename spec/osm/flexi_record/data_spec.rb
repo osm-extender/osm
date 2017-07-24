@@ -1,7 +1,7 @@
-describe Osm::FlexiRecord::Data do
+describe OSM::FlexiRecord::Data do
 
   it 'Create' do
-    rd = Osm::FlexiRecord::Data.new(
+    rd = OSM::FlexiRecord::Data.new(
       member_id: 1,
       grouping_id: 2,
       fields: {
@@ -14,7 +14,7 @@ describe Osm::FlexiRecord::Data do
         'f_1' => 'a',
         'f_2' => 'b'
       },
-      flexi_record: Osm::FlexiRecord.new()
+      flexi_record: OSM::FlexiRecord.new()
     )
 
     expect(rd.member_id).to eq(1)
@@ -33,10 +33,10 @@ describe Osm::FlexiRecord::Data do
   end
 
   it 'Sorts by flexirecord, grouping_id then member_id' do
-    frd1 = Osm::FlexiRecord::Data.new(flexi_record: Osm::FlexiRecord.new(section_id: 1), grouping_id: 1, member_id: 1)
-    frd2 = Osm::FlexiRecord::Data.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), grouping_id: 1, member_id: 1)
-    frd3 = Osm::FlexiRecord::Data.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), grouping_id: 2, member_id: 1)
-    frd4 = Osm::FlexiRecord::Data.new(flexi_record: Osm::FlexiRecord.new(section_id: 2), grouping_id: 2, member_id: 2)
+    frd1 = OSM::FlexiRecord::Data.new(flexi_record: OSM::FlexiRecord.new(section_id: 1), grouping_id: 1, member_id: 1)
+    frd2 = OSM::FlexiRecord::Data.new(flexi_record: OSM::FlexiRecord.new(section_id: 2), grouping_id: 1, member_id: 1)
+    frd3 = OSM::FlexiRecord::Data.new(flexi_record: OSM::FlexiRecord.new(section_id: 2), grouping_id: 2, member_id: 1)
+    frd4 = OSM::FlexiRecord::Data.new(flexi_record: OSM::FlexiRecord.new(section_id: 2), grouping_id: 2, member_id: 2)
 
     datas = [frd3, frd2, frd1, frd4]
     expect(datas.sort).to eq([frd1, frd2, frd3, frd4])
@@ -61,11 +61,11 @@ describe Osm::FlexiRecord::Data do
         ]
       }
       expect($api).to receive(:post_query).with('extras.php?action=updateScout', post_data: post_data).and_return(data)
-      allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 3) }
+      allow(OSM::Term).to receive(:get_current_term_for_section) { OSM::Term.new(id: 3) }
 
-      fr = Osm::FlexiRecord.new(section_id: 1, id: 2)
-      allow(fr).to receive(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: true)] }
-      fr_data = Osm::FlexiRecord::Data.new(
+      fr = OSM::FlexiRecord.new(section_id: 1, id: 2)
+      allow(fr).to receive(:get_columns) { [OSM::FlexiRecord::Column.new(id: 'f_1', editable: true)] }
+      fr_data = OSM::FlexiRecord::Data.new(
         flexi_record: fr,
         member_id: 4,
         grouping_id: 5,
@@ -83,12 +83,12 @@ describe Osm::FlexiRecord::Data do
       }
 
       expect($api).to receive(:post_query).and_return(data)
-      allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 1) }
+      allow(OSM::Term).to receive(:get_current_term_for_section) { OSM::Term.new(id: 1) }
 
-      fr = Osm::FlexiRecord.new(section_id: 1, id: 2)
-      allow(fr).to receive(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: true)] }
+      fr = OSM::FlexiRecord.new(section_id: 1, id: 2)
+      allow(fr).to receive(:get_columns) { [OSM::FlexiRecord::Column.new(id: 'f_1', editable: true)] }
 
-      fr_data = Osm::FlexiRecord::Data.new(
+      fr_data = OSM::FlexiRecord::Data.new(
         flexi_record: fr,
         member_id: 4,
         grouping_id: 5,
@@ -99,12 +99,12 @@ describe Osm::FlexiRecord::Data do
     end
 
     it 'Uneditable field' do
-      allow(Osm::Term).to receive(:get_current_term_for_section) { Osm::Term.new(id: 1) }
-      fr = Osm::FlexiRecord.new(section_id: 1, id: 2)
-      allow(fr).to receive(:get_columns) { [Osm::FlexiRecord::Column.new(id: 'f_1', editable: false)] }
+      allow(OSM::Term).to receive(:get_current_term_for_section) { OSM::Term.new(id: 1) }
+      fr = OSM::FlexiRecord.new(section_id: 1, id: 2)
+      allow(fr).to receive(:get_columns) { [OSM::FlexiRecord::Column.new(id: 'f_1', editable: false)] }
       expect($api).not_to receive(:post_query)
 
-      fr_data = Osm::FlexiRecord::Data.new(
+      fr_data = OSM::FlexiRecord::Data.new(
         flexi_record: fr,
         member_id: 4,
         grouping_id: 5,

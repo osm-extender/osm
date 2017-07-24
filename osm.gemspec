@@ -5,7 +5,7 @@ require File.join(File.dirname(__FILE__), 'version')
 Gem::Specification.new do |s|
   s.name        = 'osm'
   s.license     = 'BSD 3 clause'
-  s.version     = Osm::VERSION
+  s.version     = OSM::VERSION
   s.authors     = ['Robert Gauld']
   s.email       = ['robert@robertgauld.co.uk']
   s.homepage    = 'https://github.com/robertgauld/osm'

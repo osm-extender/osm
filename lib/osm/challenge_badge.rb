@@ -1,5 +1,5 @@
-module Osm
-  class ChallengeBadge < Osm::Badge
+module OSM
+  class ChallengeBadge < OSM::Badge
 
     def self.type
       :challenge

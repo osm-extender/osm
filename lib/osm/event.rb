@@ -1,5 +1,5 @@
-module Osm
-  class Event < Osm::Model
+module OSM
+  class Event < OSM::Model
     LIST_ATTRIBUTES = [:id, :section_id, :name, :start, :finish, :cost, :location, :notes, :archived, :public_notepad, :confirm_by_date, :allow_changes, :reminders, :attendance_limit, :attendance_limit_includes_leaders, :attendance_reminder, :allow_booking].freeze
     EXTRA_ATTRIBUTES = [:notepad, :columns, :badges].freeze
     private_constant :LIST_ATTRIBUTES, :EXTRA_ATTRIBUTES
@@ -23,11 +23,11 @@ module Osm
     # @!attribute [rw] archived
     #   @return true, false if the event has been archived
     # @!attribute [rw] badges
-    #   @return [Array<Osm::Event::BadgeLink>] the badge links for the event
+    #   @return [Array<OSM::Event::BadgeLink>] the badge links for the event
     # @!attribute [rw] files
     #   @return [Array<String>] the files attached to this event
     # @!attribute [rw] columns
-    #   @return [Array<Osm::Event::Column>] the custom columns for the event
+    #   @return [Array<OSM::Event::Column>] the custom columns for the event
     # @!attribute [rw] notepad
     #   @return [String] notepad for the event
     # @!attribute [rw] public_notepad
@@ -73,8 +73,8 @@ module Osm
     validates_numericality_of :section_id, only_integer: true, greater_than: 0
     validates_numericality_of :attendance_limit, only_integer: true, greater_than_or_equal_to: 0
     validates_presence_of :name
-    validates :badges, array_of: { item_type: Osm::Event::BadgeLink, item_valid: true }
-    validates :columns, array_of: { item_type: Osm::Event::Column, item_valid: true }
+    validates :badges, array_of: { item_type: OSM::Event::BadgeLink, item_valid: true }
+    validates :columns, array_of: { item_type: OSM::Event::Column, item_valid: true }
     validates :files, array_of: { item_type: String }
     validates_inclusion_of :allow_changes, in: [true, false]
     validates_inclusion_of :reminders, in: [true, false]
@@ -90,11 +90,11 @@ module Osm
 
 
     # Get events for a section
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the events for
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the events for
     # @param include_archived true, false whether to include archived events
     # @!macro options_get
-    # @return [Array<Osm::Event>]
+    # @return [Array<OSM::Event>]
     def self.get_for_section(api:, section:, include_archived: false, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :events, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
@@ -118,8 +118,8 @@ module Osm
     end
 
     # Get event list for a section (not all details for each event)
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the events for
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the events for
     # @!macro options_get
     # @return [Array<Hash>]
     def self.get_list(api:, section:, no_read_cache: false)
@@ -155,11 +155,11 @@ module Osm
     end
 
     # Get an event
-    # @param api [Osm::Api] api The to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the events for
+    # @param api [OSM::Api] api The to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the events for
     # @param id [Integer, #to_i] The id of the event to get
     # @!macro options_get
-    # @return [Osm::Event, nil] the event (or nil if it couldn't be found
+    # @return [OSM::Event, nil] the event (or nil if it couldn't be found
     def self.get(id:, **options)
       get_for_section(**options).find { |event| event.id == id }
     end
@@ -167,24 +167,24 @@ module Osm
 
     # Create an event in OSM
     # If something goes wrong adding badges to OSM then the event returned will have been read from OSM
-    # @param api [Osm::Api] The api to use to make the request
-    # @return [Osm::Event, nil] the created event, nil if failed
-    # @raise [Osm::ObjectIsInvalid] If the Event is invalid
+    # @param api [OSM::Api] The api to use to make the request
+    # @return [OSM::Event, nil] the created event, nil if failed
+    # @raise [OSM::ObjectIsInvalid] If the Event is invalid
     def self.create(api:, **parameters)
       require_ability_to(api: api, to: :write, on: :events, section: parameters[:section_id])
       event = new(parameters)
-      fail Osm::ObjectIsInvalid, 'event is invalid' unless event.valid?
+      fail OSM::ObjectIsInvalid, 'event is invalid' unless event.valid?
 
       data = api.post_query("events.php?action=addEvent&sectionid=#{event.section_id}", post_data: {
         'name' => event.name,
         'location' => event.location,
-        'startdate' => event.start? ? event.start.strftime(Osm::OSM_DATE_FORMAT) : '',
-        'enddate' => event.finish? ? event.finish.strftime(Osm::OSM_DATE_FORMAT) : '',
+        'startdate' => event.start? ? event.start.strftime(OSM::OSM_DATE_FORMAT) : '',
+        'enddate' => event.finish? ? event.finish.strftime(OSM::OSM_DATE_FORMAT) : '',
         'cost' => event.cost_tbc? ? '-1' : event.cost,
         'notes' => event.notes,
-        'starttime' => event.start? ? event.start.strftime(Osm::OSM_TIME_FORMAT) : '',
-        'endtime' => event.finish? ? event.finish.strftime(Osm::OSM_TIME_FORMAT) : '',
-        'confdate' => event.confirm_by_date? ? event.confirm_by_date.strftime(Osm::OSM_DATE_FORMAT) : '',
+        'starttime' => event.start? ? event.start.strftime(OSM::OSM_TIME_FORMAT) : '',
+        'endtime' => event.finish? ? event.finish.strftime(OSM::OSM_TIME_FORMAT) : '',
+        'confdate' => event.confirm_by_date? ? event.confirm_by_date.strftime(OSM::OSM_DATE_FORMAT) : '',
         'allowChanges' => event.allow_changes ? 'true' : 'false',
         'disablereminders' => !event.reminders ? 'true' : 'false',
         'attendancelimit' => event.attendance_limit,
@@ -215,7 +215,7 @@ module Osm
     end
 
     # Update event in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false whether the update succedded (will return true if no updates needed to be made)
     def update(api)
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
@@ -234,13 +234,13 @@ module Osm
           'eventid' => id,
           'name' => name,
           'location' => location,
-          'startdate' => start? ? start.strftime(Osm::OSM_DATE_FORMAT) : '',
-          'enddate' => finish? ? finish.strftime(Osm::OSM_DATE_FORMAT) : '',
+          'startdate' => start? ? start.strftime(OSM::OSM_DATE_FORMAT) : '',
+          'enddate' => finish? ? finish.strftime(OSM::OSM_DATE_FORMAT) : '',
           'cost' => cost_tbc? ? '-1' : cost,
           'notes' => notes,
-          'starttime' => start? ? start.strftime(Osm::OSM_TIME_FORMAT) : '',
-          'endtime' => finish? ? finish.strftime(Osm::OSM_TIME_FORMAT) : '',
-          'confdate' => confirm_by_date? ? confirm_by_date.strftime(Osm::OSM_DATE_FORMAT) : '',
+          'starttime' => start? ? start.strftime(OSM::OSM_TIME_FORMAT) : '',
+          'endtime' => finish? ? finish.strftime(OSM::OSM_TIME_FORMAT) : '',
+          'confdate' => confirm_by_date? ? confirm_by_date.strftime(OSM::OSM_DATE_FORMAT) : '',
           'allowChanges' => allow_changes ? 'true' : 'false',
           'disablereminders' => !reminders ? 'true' : 'false',
           'attendancelimit' => attendance_limit,
@@ -308,7 +308,7 @@ module Osm
     end
 
     # Delete event from OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false whether the delete succedded
     def delete(api)
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
@@ -324,14 +324,14 @@ module Osm
 
 
     # Get event attendance
-    # @param api [Osm::Api] The api to use to make the request
-    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param api [OSM::Api] The api to use to make the request
+    # @param term [OSM::Term, Integer, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
     # @option options true, false :include_archived (optional) if true then archived activities will also be returned
-    # @return [Array<Osm::Event::Attendance>]
+    # @return [Array<OSM::Event::Attendance>]
     def get_attendance(api:, term: nil, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :events, section: section_id, no_read_cache: no_read_cache)
-      term_id = term.nil? ? Osm::Term.get_current_term_for_section(api: api, section: section_id, no_read_cache: no_read_cache).id : term.to_i
+      term_id = term.nil? ? OSM::Term.get_current_term_for_section(api: api, section: section_id, no_read_cache: no_read_cache).id : term.to_i
       cache_key = ['event_attendance', id, term_id]
 
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
@@ -351,13 +351,13 @@ module Osm
         }
 
         data.each_with_index.map do |item, index|
-          Osm::Event::Attendance.new(
+          OSM::Event::Attendance.new(
             event: self,
-            member_id: Osm.to_i_or_nil(item['scoutid']),
-            grouping_id: Osm.to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
+            member_id: OSM.to_i_or_nil(item['scoutid']),
+            grouping_id: OSM.to_i_or_nil(item['patrolid'].eql?('') ? nil : item['patrolid']),
             first_name: item['firstname'],
             last_name: item['lastname'],
-            date_of_birth: item['dob'].nil? ? nil : Osm.parse_date(item['dob'], ignore_epoch: true),
+            date_of_birth: item['dob'].nil? ? nil : OSM.parse_date(item['dob'], ignore_epoch: true),
             attending: attending_values[item['attending']],
             payment_control: payment_values[item['payment']],
             fields:   item.select { |key, _value| key.to_s.match(/\Af_\d+\Z/) }
@@ -371,11 +371,11 @@ module Osm
     end
 
     # Add a badge link to the event in OSM
-    # @param api [Osm::Api] The api to use to make the request
-    # @param link [Osm::Event::BadgeLink] The badge link to add, if column_id is nil then a new column is created with requirement_label as the name
+    # @param api [OSM::Api] The api to use to make the request
+    # @param link [OSM::Event::BadgeLink] The badge link to add, if column_id is nil then a new column is created with requirement_label as the name
     # @return true, false whether the update succedded
     def add_badge_link(api:, link:)
-      fail Osm::ObjectIsInvalid, 'link is invalid' unless link.valid?
+      fail OSM::ObjectIsInvalid, 'link is invalid' unless link.valid?
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
 
       data = api.post_query("ext/badges/records/index.php?action=linkBadgeToItem&sectionid=#{section_id}", post_data: {
@@ -393,15 +393,15 @@ module Osm
     end
 
     # Add a column to the event in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param label [String] The label for the field in OSM
     # @param name [String] The label for the field in My.SCOUT (if this is blank then parents can't edit it)
     # @param required true, false Whether the parent is required to enter something
     # @return true, false whether the update succedded
-    # @raise [Osm::ArgumentIsInvalid] If the name is blank
+    # @raise [OSM::ArgumentIsInvalid] If the name is blank
     def add_column(api:, name:, label: '', required: false)
       require_ability_to(api: api, to: :write, on: :events, section: section_id)
-      fail Osm::ArgumentIsInvalid, 'name is invalid' if name.blank?
+      fail OSM::ArgumentIsInvalid, 'name is invalid' if name.blank?
 
       data = api.post_query("events.php?action=addColumn&sectionid=#{section_id}&eventid=#{id}", post_data: {
         'columnName' => name,
@@ -426,7 +426,7 @@ module Osm
     end
 
     # Whether there are spaces left for the event
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false whether there are spaces left for the event
     def spaces?(api)
       return true unless limited_attendance?
@@ -434,7 +434,7 @@ module Osm
     end
 
     # Get the number of spaces left for the event
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return [Integer, nil] the number of spaces left (nil if there is no attendance limit)
     def spaces(api)
       return nil unless limited_attendance?
@@ -458,17 +458,17 @@ module Osm
 
     def self.attributes_from_data(event_data)
       {
-        id: Osm.to_i_or_nil(event_data['eventid']),
-        section_id: Osm.to_i_or_nil(event_data['sectionid']),
+        id: OSM.to_i_or_nil(event_data['eventid']),
+        section_id: OSM.to_i_or_nil(event_data['sectionid']),
         name: event_data['name'],
-        start: Osm.make_datetime(date: event_data['startdate'], time: event_data['starttime']),
-        finish: Osm.make_datetime(date: event_data['enddate'], time: event_data['endtime']),
+        start: OSM.make_datetime(date: event_data['startdate'], time: event_data['starttime']),
+        finish: OSM.make_datetime(date: event_data['enddate'], time: event_data['endtime']),
         cost: event_data['cost'].eql?('-1') ? 'TBC' : event_data['cost'],
         location: event_data['location'],
         notes: event_data['notes'],
         archived: event_data['archived'].eql?('1'),
         public_notepad: event_data['publicnotes'],
-        confirm_by_date: Osm.parse_date(event_data['confdate']),
+        confirm_by_date: OSM.parse_date(event_data['confdate']),
         allow_changes: event_data['allowchanges'].eql?('1'),
         reminders: !event_data['disablereminders'].eql?('1'),
         attendance_limit: event_data['attendancelimit'].to_i,
@@ -479,7 +479,7 @@ module Osm
     end
 
     def self.new_event_from_data(event_data)
-      event = Osm::Event.new(attributes_from_data(event_data))
+      event = OSM::Event.new(attributes_from_data(event_data))
       event.notepad = event_data['notepad']
 
       columns = []

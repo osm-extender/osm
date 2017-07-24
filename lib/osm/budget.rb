@@ -1,6 +1,6 @@
-module Osm
+module OSM
 
-  class Budget < Osm::Model
+  class Budget < OSM::Model
     # @!attribute [rw] id
     #   @return [Integer] The OSM ID for the budget
     # @!attribute [rw] section_id
@@ -23,23 +23,23 @@ module Osm
 
 
     # Get budgets for a section
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the structure for
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the structure for
     # @!macro options_get
-    # @return [Array<Osm::Budget>] representing the donations made
+    # @return [Array<OSM::Budget>] representing the donations made
     def self.get_for_section(api:, section:, no_read_cache: false)
-      Osm::Model.require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
+      OSM::Model.require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
       section_id = section.to_i
       cache_key = ['budgets', section_id]
 
-      Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+      OSM::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
         data = api.post_query("finances.php?action=getCategories&sectionid=#{section_id}")
 
         data = data['items']
         data.map do |budget|
           Budget.new(
-            id: Osm.to_i_or_nil(budget['categoryid']),
-            section_id: Osm.to_i_or_nil(budget['sectionid']),
+            id: OSM.to_i_or_nil(budget['categoryid']),
+            section_id: OSM.to_i_or_nil(budget['sectionid']),
             name: budget['name']
           )
         end # data.map
@@ -48,14 +48,14 @@ module Osm
 
 
     # Create the budget in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false whether the budget was created
-    # @raise [Osm::ObjectIsInvalid] If the Budget is invalid
-    # @raise [Osm::Error] If the budget already exists in OSM
+    # @raise [OSM::ObjectIsInvalid] If the Budget is invalid
+    # @raise [OSM::Error] If the budget already exists in OSM
     def create(api)
-      fail Osm::Error, 'the budget already exists in OSM' unless id.nil?
-      fail Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
-      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
+      fail OSM::Error, 'the budget already exists in OSM' unless id.nil?
+      fail OSM::ObjectIsInvalid, 'budget is invalid' unless valid?
+      OSM::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
       data = api.post_query("finances.php?action=addCategory&sectionid=#{section_id}")
       if data.is_a?(Hash) && data['ok'].eql?(true)
@@ -74,12 +74,12 @@ module Osm
     end
 
     # Update budget in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false whether the budget was updated
-    # @raise [Osm::ObjectIsInvalid] If the Budget is invalid
+    # @raise [OSM::ObjectIsInvalid] If the Budget is invalid
     def update(api)
-      fail Osm::ObjectIsInvalid, 'budget is invalid' unless valid?
-      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
+      fail OSM::ObjectIsInvalid, 'budget is invalid' unless valid?
+      OSM::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
       data = api.post_query("finances.php?action=updateCategory&sectionid=#{section_id}", post_data: {
         'categoryid' => id,
@@ -97,10 +97,10 @@ module Osm
     end
 
     # Delete budget from OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return true, false whether the budget was deleted
     def delete(api)
-      Osm::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
+      OSM::Model.require_ability_to(api: api, to: :write, on: :finance, section: section_id)
 
       data = api.post_query("finances.php?action=deleteCategory&sectionid=#{section_id}", post_data: {
         'categoryid' => id

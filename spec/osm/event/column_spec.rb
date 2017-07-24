@@ -1,4 +1,4 @@
-describe Osm::Event::Column do
+describe OSM::Event::Column do
 
   describe 'Using to OSM API' do
 
@@ -15,8 +15,8 @@ describe Osm::Event::Column do
       }
       expect($api).to receive(:post_query).with('events.php?action=renameColumn&sectionid=1&eventid=2', post_data: post_data).and_return(body)
 
-      event = Osm::Event.new(id: 2, section_id: 1)
-      event.columns = [Osm::Event::Column.new(id: 'f_1', event: event)]
+      event = OSM::Event.new(id: 2, section_id: 1)
+      event.columns = [OSM::Event::Column.new(id: 'f_1', event: event)]
       column = event.columns[0]
       column.name = 'New name'
       column.label = 'New label'
@@ -33,8 +33,8 @@ describe Osm::Event::Column do
     it 'Update column (failed)' do
       expect($api).to receive(:post_query).and_return('config' => '[]')
 
-      event = Osm::Event.new(id: 2, section_id: 1)
-      column = Osm::Event::Column.new(id: 'f_1', event: event)
+      event = OSM::Event.new(id: 2, section_id: 1)
+      column = OSM::Event::Column.new(id: 'f_1', event: event)
       event.columns = [column]
       expect(column.update($api)).to eq(false)
     end
@@ -46,8 +46,8 @@ describe Osm::Event::Column do
 
       expect($api).to receive(:post_query).with('events.php?action=deleteColumn&sectionid=1&eventid=2', post_data: post_data).and_return('eventid' => '2', 'config' => '[]')
 
-      event = Osm::Event.new(id: 2, section_id: 1)
-      column = Osm::Event::Column.new(id: 'f_1', event: event)
+      event = OSM::Event.new(id: 2, section_id: 1)
+      column = OSM::Event::Column.new(id: 'f_1', event: event)
       event.columns = [column]
 
       expect(column.delete($api)).to eq(true)
@@ -57,8 +57,8 @@ describe Osm::Event::Column do
     it 'Delete column (failed)' do
       expect($api).to receive(:post_query).and_return('config' => '[{"id":"f_1"}]')
 
-      event = Osm::Event.new(id: 2, section_id: 1)
-      column = Osm::Event::Column.new(id: 'f_1', event: event)
+      event = OSM::Event.new(id: 2, section_id: 1)
+      column = OSM::Event::Column.new(id: 'f_1', event: event)
       event.columns = [column]
       expect(column.delete($api)).to eq(false)
     end

@@ -1,6 +1,6 @@
 module ArrayOfValidatorSpec
 
-  class IntegerTestModel < Osm::Model
+  class IntegerTestModel < OSM::Model
     attribute :array
     validates :array, array_of: { item_type: Integer }
   end
@@ -14,17 +14,17 @@ module ArrayOfValidatorSpec
     end
   end
 
-  class ValidTestModel < Osm::Model
+  class ValidTestModel < OSM::Model
     attribute :array
     validates :array, array_of: { item_type: TestItem, item_valid: true }
   end
 
-  class InvalidTestModel < Osm::Model
+  class InvalidTestModel < OSM::Model
     attribute :array
     validates :array, array_of: { item_type: TestItem, item_valid: false }
   end
 
-  class NovalidTestModel < Osm::Model
+  class NovalidTestModel < OSM::Model
     attribute :array
     validates :array, array_of: { item_type: TestItem }
   end

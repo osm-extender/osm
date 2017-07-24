@@ -1,10 +1,10 @@
-module Osm
-  class Badge < Osm::Model
+module OSM
+  class Badge < OSM::Model
     class Requirement
       include ActiveAttr::Model
 
       # @!attribute [rw] badge
-      #   @return [Osm::Badge] the badge the requirement belongs to
+      #   @return [OSM::Badge] the badge the requirement belongs to
       # @!attribute [rw] name
       #   @return [String] the name of the badge requirement
       # @!attribute [rw] description
@@ -12,7 +12,7 @@ module Osm
       # @!attribute [rw] id
       #   @return [Integer] the id for the requirement (passed to OSM)
       # @!attribute [rw] mod
-      #   @return [Osm::Badge::RequirementModule] the module the requirement belongs to
+      #   @return [OSM::Badge::RequirementModule] the module the requirement belongs to
       # @!attribute [rw] editable
       #   @return true, false
 
@@ -42,7 +42,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, replace_with: { 'badge' => :identifier })
+        OSM.inspect_instance(self, replace_with: { 'badge' => :identifier })
       end
 
     end

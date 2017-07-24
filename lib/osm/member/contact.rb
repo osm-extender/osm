@@ -1,6 +1,6 @@
-module Osm
-  class Member < Osm::Model
-    class Contact < Osm::Model
+module OSM
+  class Member < OSM::Model
+    class Contact < OSM::Model
       # @!attribute [rw] first_name
       #   @return [String] the contact's first name
       # @!attribute [rw] last_name
@@ -54,13 +54,13 @@ module Osm
       end
 
       # Update the contact in OSM
-      # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Member] The member to update the contact for
+      # @param api [OSM::Api] The api to use to make the request
+      # @param section [OSM::Member] The member to update the contact for
       # @param force true, false Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
       # @return true, false whether the member was successfully updated or not
-      # @raise [Osm::ObjectIsInvalid] If the Contact is invalid
+      # @raise [OSM::ObjectIsInvalid] If the Contact is invalid
       def update(api:, member:, force: false)
-        fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+        fail OSM::ObjectIsInvalid, 'member is invalid' unless valid?
         require_ability_to(api, :write, :member, member.section_id)
 
         attribute_map = {

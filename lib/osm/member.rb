@@ -1,6 +1,6 @@
-module Osm
+module OSM
 
-  class Member < Osm::Model
+  class Member < OSM::Model
     # Constants for group id
     GID_PRIMARY_CONTACT = 1
     GID_SECONDARY_CONTACT = 2
@@ -64,15 +64,15 @@ module Osm
     # @!attribute [rw] additional_information_labels
     #   @return [DirtyHashy] the labels for the additional information (key is OSM's variable name, value is the label)
     # @!attribute [rw] contact
-    #   @return [Osm::Member::MemberContact, nil] the member's contact details (nil if hidden in OSM)
+    #   @return [OSM::Member::MemberContact, nil] the member's contact details (nil if hidden in OSM)
     # @!attribute [rw] primary_contact
-    #   @return [Osm::Member::PrimaryContact, nil] the member's primary contact (primary contact 1 in OSM) (nil if hidden in OSM)
+    #   @return [OSM::Member::PrimaryContact, nil] the member's primary contact (primary contact 1 in OSM) (nil if hidden in OSM)
     # @!attribute [rw] secondary_contact
-    #   @return [Osm::Member::SecondaryContact, nil] the member's secondary contact (primary contact 2 in OSM) (nil if hidden in OSM)
+    #   @return [OSM::Member::SecondaryContact, nil] the member's secondary contact (primary contact 2 in OSM) (nil if hidden in OSM)
     # @!attribute [rw] emergency_contact
-    #   @return [Osm::Member::EmergencyContact, nil] the member's emergency contact (nil if hidden in OSM)
+    #   @return [OSM::Member::EmergencyContact, nil] the member's emergency contact (nil if hidden in OSM)
     # @!attribute [rw] doctor
-    #   @return [Osm::Member::DoctorContact, nil] the member's doctor (nil if hidden in OSM)
+    #   @return [OSM::Member::DoctorContact, nil] the member's doctor (nil if hidden in OSM)
 
     attribute :id, type: Integer
     attribute :section_id, type: Integer
@@ -115,16 +115,16 @@ module Osm
 
 
     # Get members for a section
-    # @param api [Osm::Api] The api to use to make the request
-    # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the members for
-    # @param term [Osm::Term, Integer, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
+    # @param api [OSM::Api] The api to use to make the request
+    # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the members for
+    # @param term [OSM::Term, Integer, #to_i, nil] The term (or its ID) to get the members for, passing nil causes the current term to be used
     # @!macro options_get
-    # @return [Array<Osm::Member>]
+    # @return [Array<OSM::Member>]
     def self.get_for_section(api:, section:, term: nil, no_read_cache: false)
       require_ability_to(api: api, to: :read, on: :member, section: section, no_read_cache: no_read_cache)
       if term.nil?
-        section = Osm::Section.get(api: api, id: section) if section.is_a?(Integer)
-        term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api: api, section: section)
+        section = OSM::Section.get(api: api, id: section) if section.is_a?(Integer)
+        term = section.waiting? ? -1 : OSM::Term.get_current_term_for_section(api: api, section: section)
       end
       cache_key = ['members', section.to_i, term.to_i]
 
@@ -161,19 +161,19 @@ module Osm
           custom_data = item_data[GID_CUSTOM].nil? ? DirtyHashy.new : DirtyHashy[ item_data[GID_CUSTOM].map { |k, v| [k.to_i, v] } ]
 
           new(
-            id: Osm.to_i_or_nil(item['member_id']),
-            section_id: Osm.to_i_or_nil(item['section_id']),
+            id: OSM.to_i_or_nil(item['member_id']),
+            section_id: OSM.to_i_or_nil(item['section_id']),
             first_name: item['first_name'],
             last_name: item['last_name'],
-            grouping_id: Osm.to_i_or_nil(item['patrol_id']),
+            grouping_id: OSM.to_i_or_nil(item['patrol_id']),
             grouping_label: item['patrol'],
             grouping_leader: item['patrol_role_level'],
             grouping_leader_label: item['patrol_role_level_label'],
             age: item['age'],
-            date_of_birth: Osm.parse_date(item['date_of_birth'], ignore_epoch: true),
-            started_section: Osm.parse_date(item['joined']),
-            finished_section: Osm.parse_date(item['end_date']),
-            joined_movement: Osm.parse_date(item['started']),
+            date_of_birth: OSM.parse_date(item['date_of_birth'], ignore_epoch: true),
+            started_section: OSM.parse_date(item['joined']),
+            finished_section: OSM.parse_date(item['end_date']),
+            joined_movement: OSM.parse_date(item['started']),
             gender: { 'male' => :male, 'female' => :female, 'other' => :other, 'unspecified' => :unspecified }[(floating_data[CID_GENDER] || '').downcase],
             contact: member_contact.nil? ? nil : MemberContact.new(
               first_name: item['first_name'],
@@ -275,28 +275,28 @@ module Osm
 
 
     # Create the user in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return [Boolan, nil] whether the member was successfully added or not (nil is returned if the user was created but not with all the data)
-    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
-    # @raise [Osm::Error] If the member already exists in OSM
+    # @raise [OSM::ObjectIsInvalid] If the Member is invalid
+    # @raise [OSM::Error] If the member already exists in OSM
     def create(api)
-      fail Osm::OSMError, 'the member already exists in OSM' unless id.nil?
-      fail Osm::Error::InvalidObject, 'member is invalid' unless valid?
+      fail OSM::OSMError, 'the member already exists in OSM' unless id.nil?
+      fail OSM::Error::InvalidObject, 'member is invalid' unless valid?
       require_ability_to(api, :write, :member, section_id)
 
       data = api.post_query('users.php?action=newMember', post_data: {
         'firstname' => first_name,
         'lastname' => last_name,
-        'dob' => date_of_birth.strftime(Osm::OSM_DATE_FORMAT),
-        'started' => joined_movement.strftime(Osm::OSM_DATE_FORMAT),
-        'startedsection' => started_section.strftime(Osm::OSM_DATE_FORMAT),
+        'dob' => date_of_birth.strftime(OSM::OSM_DATE_FORMAT),
+        'started' => joined_movement.strftime(OSM::OSM_DATE_FORMAT),
+        'startedsection' => started_section.strftime(OSM::OSM_DATE_FORMAT),
         'sectionid' => section_id
       })
 
       return false unless data.is_a?(Hash) && (data['result'] == 'ok') && (data['scoutid'].to_i > 0)
       self.id = data['scoutid'].to_i
       # The cached members for the section will be out of date - remove them
-      Osm::Term.get_for_section(api: api, section: section_id).each do |term|
+      OSM::Term.get_for_section(api: api, section: section_id).each do |term|
         cache_delete(api: api, key: ['members', section_id, term.id])
       end
       # Now it's created we need to give OSM the rest of the data
@@ -305,12 +305,12 @@ module Osm
     end
 
     # Update the member in OSM
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param force true, false Whether to force updates (ie tell OSM every attribute changed even if we don't think it did)
     # @return true, false whether the member was successfully updated or not
-    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
+    # @raise [OSM::ObjectIsInvalid] If the Member is invalid
     def update(api, force: false)
-      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail OSM::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api: api, to: :write, on: :member, section: section_id)
 
       updated = true
@@ -321,9 +321,9 @@ module Osm
         ['last_name', 'lastname', last_name],
         ['grouping_id', 'patrolid', grouping_id],
         ['grouping_leader', 'patrolleader', grouping_leader],
-        ['date_of_birth', 'dob', date_of_birth.strftime(Osm::OSM_DATE_FORMAT)],
-        ['started_section', 'startedsection', started_section.strftime(Osm::OSM_DATE_FORMAT)],
-        ['joined_movement', 'started', joined_movement.strftime(Osm::OSM_DATE_FORMAT)]
+        ['date_of_birth', 'dob', date_of_birth.strftime(OSM::OSM_DATE_FORMAT)],
+        ['started_section', 'startedsection', started_section.strftime(OSM::OSM_DATE_FORMAT)],
+        ['joined_movement', 'started', joined_movement.strftime(OSM::OSM_DATE_FORMAT)]
       ] # our name => OSM name
       attribute_map.select { |attr, _col, _val| force || changed_attributes.include?(attr) }.each do |_attr, col, val|
         data = api.post_query('ext/members/contact/?action=update', post_data: {
@@ -375,7 +375,7 @@ module Osm
         reset_changed_attributes
         additional_information.clean_up!
         # The cached columns for the members will be out of date - remove them
-        Osm::Term.get_for_section(api: api, section: section_id).each do |term|
+        OSM::Term.get_for_section(api: api, section: section_id).each do |term|
           cache_delete(api: api, key: ['members', section_id, term.id])
         end
       end
@@ -466,18 +466,18 @@ module Osm
     end
 
     # Get the Key to use in My.SCOUT links for this member
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @return [String] the key
-    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
-    # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
+    # @raise [OSM::ObjectIsInvalid] If the Member is invalid
+    # @raise [OSM::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
     def myscout_link_key(api)
-      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail OSM::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api: api, to: :read, on: :member, section: section_id)
-      fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
+      fail OSM::Error, 'the member does not already exist in OSM' if id.nil?
 
       if @myscout_link_key.nil?
         data = api.post_query("api.php?action=getMyScoutKey&sectionid=#{section_id}&scoutid=#{id}")
-        fail Osm::Error, 'Could not retrieve the key for the link from OSM' unless data['ok']
+        fail OSM::Error, 'Could not retrieve the key for the link from OSM' unless data['ok']
         @myscout_link_key = data['key']
       end
 
@@ -485,15 +485,15 @@ module Osm
     end
 
     # Get the member's photo
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param black_and_white true, false Whether you want the photo in blank and white (defaults to false unless the member is not active)
     # @!macro options_get
-    # @raise [Osm:Error] if the member doesn't exist in OSM
+    # @raise [OSM:Error] if the member doesn't exist in OSM
     # @return the photo of the member
     def get_photo(api, black_and_white: !current?, no_read_cache: false)
-      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail OSM::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api, :read, :member, section_id)
-      fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
+      fail OSM::Error, 'the member does not already exist in OSM' if id.nil?
 
       cache_key = ['member_photo', id, black_and_white]
       cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
@@ -502,20 +502,20 @@ module Osm
     end
 
     # Get the My.SCOUT link for this member
-    # @param api [Osm::Api] The api to use to make the request
+    # @param api [OSM::Api] The api to use to make the request
     # @param link_to [Symbol] The page in My.SCOUT to link to (:payments, :events, :programme, :badges, :notice, :details, :census or :giftaid)
     # @param item_id [#to_i] Allows you to link to a specfic item (only for :events)
     # @return [String] the URL for this member's My.SCOUT
-    # @raise [Osm::ObjectIsInvalid] If the Member is invalid
-    # @raise [Osm::ArgumentIsInvalid] If link_to is not an allowed Symbol
-    # @raise [Osm::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
+    # @raise [OSM::ObjectIsInvalid] If the Member is invalid
+    # @raise [OSM::ArgumentIsInvalid] If link_to is not an allowed Symbol
+    # @raise [OSM::Error] if the member does not already exist in OSM or the member's My.SCOUT key could not be retrieved from OSM
     def myscout_link(api, link_to: :badges, item_id: nil)
-      fail Osm::ObjectIsInvalid, 'member is invalid' unless valid?
+      fail OSM::ObjectIsInvalid, 'member is invalid' unless valid?
       require_ability_to(api: api, to: :read, on: :member, section: section_id)
-      fail Osm::Error, 'the member does not already exist in OSM' if id.nil?
-      fail Osm::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice, :details, :census, :giftaid].include?(link_to)
+      fail OSM::Error, 'the member does not already exist in OSM' if id.nil?
+      fail OSM::ArgumentIsInvalid, 'link_to is invalid' unless [:payments, :events, :programme, :badges, :notice, :details, :census, :giftaid].include?(link_to)
 
-      link = "#{Osm::Api::BASE_URLS[api.site]}/parents/#{link_to}.php?sc=#{id}&se=#{section_id}&c=#{myscout_link_key(api)}"
+      link = "#{OSM::Api::BASE_URLS[api.site]}/parents/#{link_to}.php?sc=#{id}&se=#{section_id}&c=#{myscout_link_key(api)}"
       link += "&e=#{item_id.to_i}" if item_id && link_to.eql?(:events)
       link
     end

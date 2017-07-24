@@ -1,4 +1,4 @@
-describe Osm::Api do
+describe OSM::Api do
 
   it 'Create' do
     expect($api).not_to be_nil
@@ -14,22 +14,22 @@ describe Osm::Api do
   describe 'Initialize requires a' do
 
     it 'API ID' do
-      expect { Osm::Api.new(api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, 'missing keyword: api_id')
-      expect { Osm::Api.new(api_id: '', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, 'You must provide an api_id (get this by requesting one from OSM)')
+      expect { OSM::Api.new(api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, 'missing keyword: api_id')
+      expect { OSM::Api.new(api_id: '', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, 'You must provide an api_id (get this by requesting one from OSM)')
     end
 
     it 'API secret' do
-      expect { Osm::Api.new(api_id: '1', name: 'name') }.to raise_error(ArgumentError, 'missing keyword: api_secret')
-      expect { Osm::Api.new(api_id: '1', api_secret: '', name: 'name') }.to raise_error(ArgumentError, 'You must provide an api_secret (get this by requesting one from OSM)')
+      expect { OSM::Api.new(api_id: '1', name: 'name') }.to raise_error(ArgumentError, 'missing keyword: api_secret')
+      expect { OSM::Api.new(api_id: '1', api_secret: '', name: 'name') }.to raise_error(ArgumentError, 'You must provide an api_secret (get this by requesting one from OSM)')
     end
 
     it 'Name' do
-      expect { Osm::Api.new(api_id: '1', api_secret: 'secret') }.to raise_error(ArgumentError, 'missing keyword: name')
-      expect { Osm::Api.new(api_id: '1', api_secret: 'secret', name: '') }.to raise_error(ArgumentError, 'You must provide a name for your API (this should be what appears in OSM)')
+      expect { OSM::Api.new(api_id: '1', api_secret: 'secret') }.to raise_error(ArgumentError, 'missing keyword: name')
+      expect { OSM::Api.new(api_id: '1', api_secret: 'secret', name: '') }.to raise_error(ArgumentError, 'You must provide a name for your API (this should be what appears in OSM)')
     end
 
     it 'Valid site' do
-      expect { Osm::Api.new(site: :invalid, api_id: '1', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, ':invalid is not a valid site (must be one of :osm, :osm_staging, :osm_migration)')
+      expect { OSM::Api.new(site: :invalid, api_id: '1', api_secret: 'secret', name: 'name') }.to raise_error(ArgumentError, ':invalid is not a valid site (must be one of :osm, :osm_staging, :osm_migration)')
     end
 
   end # initialize requires a
@@ -100,7 +100,7 @@ describe Osm::Api do
 
     it 'User is invalid' do
       allow($api).to receive(:valid_user?) { false }
-      expect { $api.require_valid_user! }.to raise_error(Osm::APIError::InvalidUser, 'id: "2", secret: "USER-SECRET"')
+      expect { $api.require_valid_user! }.to raise_error(OSM::APIError::InvalidUser, 'id: "2", secret: "USER-SECRET"')
     end
   end # describe Requires a valid user
 
@@ -122,7 +122,7 @@ describe Osm::Api do
     it 'Without user credentials' do
       expect($request).to receive(:set_form_data).with('apiid' => '1', 'token' => 'API-SECRET').and_return(nil)
       expect($http).to receive(:request).with($request).and_return($response)
-      api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
+      api = OSM::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
       expect(api.post_query('path/to/load')).to eq({})
     end
 
@@ -176,15 +176,15 @@ describe Osm::Api do
         response.content_type = 'giberish/nothing-meaningful'
         allow(response).to receive(:body).and_return('body')
         expect($http).to receive(:request).with($request).and_return(response)
-        expect { $api.post_query('path/to/load') }.to raise_error(Osm::APIError::UnexpectedType, 'Got a: giberish/nothing-meaningful')
+        expect { $api.post_query('path/to/load') }.to raise_error(OSM::APIError::UnexpectedType, 'Got a: giberish/nothing-meaningful')
       end
     end
 
     describe 'User-Agent header' do
 
       it 'Default' do
-        api = Osm::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
-        expect($request).to receive('[]=').with('User-Agent', "name (using osm gem version #{Osm::VERSION})").and_return(nil)
+        api = OSM::Api.new(name: 'name', api_id: '1', api_secret: 'API-SECRET')
+        expect($request).to receive('[]=').with('User-Agent', "name (using osm gem version #{OSM::VERSION})").and_return(nil)
         expect($http).to receive(:request).with($request).and_return($response)
         api.post_query('path/to/load')
       end
@@ -203,17 +203,17 @@ describe Osm::Api do
       it "Raises a connection error if the HTTP status code was not 'OK'" do
         response = Net::HTTPInternalServerError.new(1, 500, '')
         expect($http).to receive(:request).with($request).and_return(response)
-        expect { $api.post_query('path/to/load') }.to raise_error(Osm::APIError::ConnectionError, 'HTTP Status code was 500')
+        expect { $api.post_query('path/to/load') }.to raise_error(OSM::APIError::ConnectionError, 'HTTP Status code was 500')
       end
 
       it "Raises a connection error if it can't connect to OSM" do
         expect($http).to receive(:request).with($request) { raise Errno::ENETUNREACH, 'Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)' }
-        expect { $api.post_query('path/to/load') }.to raise_error(Osm::APIError::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
+        expect { $api.post_query('path/to/load') }.to raise_error(OSM::APIError::ConnectionError, 'Errno::ENETUNREACH: Network is unreachable - Failed to open TCP connection to 2.127.245.223:80 (Network is unreachable - connect(2) for "2.127.245.223" port 80)')
       end
 
       it 'Raises a connection error if an SSL error occurs' do
         expect($http).to receive(:request).with($request) { raise OpenSSL::SSL::SSLError, 'hostname "2.127.245.223" does not match the server certificate' }
-        expect { $api.post_query('path/to/load') }.to raise_error(Osm::APIError::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
+        expect { $api.post_query('path/to/load') }.to raise_error(OSM::APIError::ConnectionError, 'OpenSSL::SSL::SSLError: hostname "2.127.245.223" does not match the server certificate')
       end
 
     end # Handles network errors
@@ -224,21 +224,21 @@ describe Osm::Api do
         expect($request).to receive(:set_form_data).with('apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET').and_return(nil)
         allow($response).to receive(:body) { '{"error":"Error message"}' }
         expect($http).to receive(:request).with($request).and_return($response)
-        expect { $api.post_query('path/to/load') }.to raise_error(Osm::OSMError, 'Error message')
+        expect { $api.post_query('path/to/load') }.to raise_error(OSM::OSMError, 'Error message')
       end
 
       it 'Raises an error if OSM returns an error (as a hash in a hash)' do
         expect($request).to receive(:set_form_data).with('apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET').and_return(nil)
         allow($response).to receive(:body) { '{"error":{"message":"Error message"}}' }
         expect($http).to receive(:request).with($request).and_return($response)
-        expect { $api.post_query('path/to/load') }.to raise_error(Osm::OSMError, 'Error message')
+        expect { $api.post_query('path/to/load') }.to raise_error(OSM::OSMError, 'Error message')
       end
 
       it 'Raises an error if OSM returns an error (as a plain string)' do
         expect($request).to receive(:set_form_data).with('apiid' => '1', 'token' => 'API-SECRET', 'userid' => '2', 'secret' => 'USER-SECRET').and_return(nil)
         allow($response).to receive(:body) { 'Error message' }
         expect($http).to receive(:request).with($request).and_return($response)
-        expect { $api.post_query('path/to/load') }.to raise_error(Osm::OSMError, 'Error message')
+        expect { $api.post_query('path/to/load') }.to raise_error(OSM::OSMError, 'Error message')
       end
 
     end # Handles OSM errors
@@ -263,19 +263,19 @@ describe Osm::Api do
     describe 'User has no roles in OSM' do
       it 'OSM returns false' do
         expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice { false }
-        expect { $api.get_user_roles! }.to raise_error(Osm::OSMError::NoActiveRoles)
+        expect { $api.get_user_roles! }.to raise_error(OSM::OSMError::NoActiveRoles)
         expect($api.get_user_roles).to eq([])
       end
       it 'OSM causes an exception to be raised' do
-        expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice { fail Osm::OSMError, 'false' }
-        expect { $api.get_user_roles! }.to raise_error(Osm::OSMError::NoActiveRoles)
+        expect($api).to receive(:post_query).with('api.php?action=getUserRoles').twice { fail OSM::OSMError, 'false' }
+        expect { $api.get_user_roles! }.to raise_error(OSM::OSMError::NoActiveRoles)
         expect($api.get_user_roles).to eq([])
       end
     end
 
-    it 'Reraises any other Osm::Error' do
-      expect($api).to receive(:post_query).with('api.php?action=getUserRoles') { raise Osm::OSMError, 'Test' }
-      expect { $api.get_user_roles }.to raise_error(Osm::OSMError, 'Test')
+    it 'Reraises any other OSM::Error' do
+      expect($api).to receive(:post_query).with('api.php?action=getUserRoles') { raise OSM::OSMError, 'Test' }
+      expect { $api.get_user_roles }.to raise_error(OSM::OSMError, 'Test')
     end
 
   end
@@ -285,7 +285,7 @@ describe Osm::Api do
 
     it 'Get from cache' do
       permissions = { 1 => { a: [:read, :write] }, 2 => { a: [:read] } }
-      expect(OsmTest::Cache).to receive('fetch').and_return(permissions)
+      expect(OSMTest::Cache).to receive('fetch').and_return(permissions)
       expect($api.get_user_permissions).to eq(permissions)
     end
 
@@ -294,8 +294,8 @@ describe Osm::Api do
         { 'sectionid' => '1', 'permissions' => { 'badge' => 10 } }
       ]
 
-      expect(OsmTest::Cache).not_to receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
-      expect(OsmTest::Cache).not_to receive('read').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2")
+      expect(OSMTest::Cache).not_to receive('exist?').with("OSMAPI-#{OSM::VERSION}-osm-permissions-2")
+      expect(OSMTest::Cache).not_to receive('read').with("OSMAPI-#{OSM::VERSION}-osm-permissions-2")
       expect($api).to receive(:post_query).with('api.php?action=getUserRoles') { data }
       expect($api.get_user_permissions(no_read_cache: true)).to eq(1 => { badge: [:read] })
     end
@@ -303,7 +303,7 @@ describe Osm::Api do
     it 'Set' do
       permissions = { 1 => { a: [:read, :write] }, 2 => { a: [:read] } }
       expect($api).to receive('get_user_permissions').and_return(permissions)
-      expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-permissions-2", permissions.merge(3 => { a: [:read] }), expires_in: 600) { true }
+      expect(OSMTest::Cache).to receive('write').with("OSMAPI-#{OSM::VERSION}-osm-permissions-2", permissions.merge(3 => { a: [:read] }), expires_in: 600) { true }
       $api.set_user_permissions(section: 3, permissions: { a: [:read] })
     end
 

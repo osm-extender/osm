@@ -1,6 +1,6 @@
-module Osm
-  class Member < Osm::Model
-    module Osm::Member::EnableablePhoneableContact
+module OSM
+  class Member < OSM::Model
+    module OSM::Member::EnableablePhoneableContact
 
       # Get an array of enabled phone numbers for the contact
       def enabled_phones

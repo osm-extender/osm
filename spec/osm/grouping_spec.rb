@@ -1,9 +1,9 @@
-describe Osm::Grouping do
+describe OSM::Grouping do
 
   it 'Sorts by section_id then name' do
-    g1 = Osm::Grouping.new(section_id: 1, name: 'a')
-    g2 = Osm::Grouping.new(section_id: 2, name: 'a')
-    g3 = Osm::Grouping.new(section_id: 2, name: 'b')
+    g1 = OSM::Grouping.new(section_id: 1, name: 'a')
+    g2 = OSM::Grouping.new(section_id: 2, name: 'a')
+    g3 = OSM::Grouping.new(section_id: 2, name: 'b')
 
     data = [g3, g1, g2]
     expect(data.sort).to eq([g1, g2, g3])
@@ -20,7 +20,7 @@ describe Osm::Grouping do
       }] }
       expect($api).to receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(data)
 
-      patrols = Osm::Grouping.get_for_section(api: $api, section: 2)
+      patrols = OSM::Grouping.get_for_section(api: $api, section: 2)
       expect(patrols.size).to eq(1)
       patrol = patrols[0]
       expect(patrol.id).to eq(1)
@@ -33,13 +33,13 @@ describe Osm::Grouping do
 
     it 'Handles no data' do
       expect($api).to receive(:post_query).with('users.php?action=getPatrols&sectionid=2').and_return(nil)
-      patrols = Osm::Grouping.get_for_section(api: $api, section: 2)
+      patrols = OSM::Grouping.get_for_section(api: $api, section: 2)
       expect(patrols.size).to eq(0)
     end
 
 
     it 'Update in OSM (succeded)' do
-      grouping = Osm::Grouping.new(
+      grouping = OSM::Grouping.new(
         id: 1,
         section_id: 2,
         active: true,
@@ -58,7 +58,7 @@ describe Osm::Grouping do
     end
 
     it 'Update points in OSM (succeded)' do
-      grouping = Osm::Grouping.new(
+      grouping = OSM::Grouping.new(
         id: 1,
         section_id: 2,
         active: true,
@@ -76,7 +76,7 @@ describe Osm::Grouping do
     end
 
     it 'Update in OSM (failed)' do
-      grouping = Osm::Grouping.new(
+      grouping = OSM::Grouping.new(
         id: 1,
         section_id: 2,
         points: 3
@@ -90,7 +90,7 @@ describe Osm::Grouping do
     end
 
     it 'Update points in OSM (failed)' do
-      grouping = Osm::Grouping.new(
+      grouping = OSM::Grouping.new(
         id: 1,
         section_id: 2,
         name: 'Name',

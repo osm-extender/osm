@@ -1,6 +1,6 @@
-module Osm
+module OSM
   class Sms
-    class DeliveryReport < Osm::Model
+    class DeliveryReport < OSM::Model
       VALID_STATUSES = [:sent, :not_sent, :delivered, :not_delivered, :invalid_destination_address, :invalid_source_address, :invalid_message_format, :route_not_available, :not_allowed].freeze
 
       # @!attribute [rw] sms_id
@@ -65,10 +65,10 @@ module Osm
 
 
       # Get delivery reports
-      # @param api [Osm::Api] the api to use to make the request
-      # @param section [Osm::Section, Integer, #to_i] the section (or its ID) to get the reports for
+      # @param api [OSM::Api] the api to use to make the request
+      # @param section [OSM::Section, Integer, #to_i] the section (or its ID) to get the reports for
       # @!macro options_get
-      # @return [Array<Osm::Sms::DeliveryReport>]
+      # @return [Array<OSM::Sms::DeliveryReport>]
       def self.get_for_section(api:, section:, no_read_cache: false)
         require_access_to_section(ai: api, section: section, no_read_cache: no_read_cache)
         section_id = section.to_i
@@ -82,18 +82,18 @@ module Osm
             from = report['from'].match(get_name_number_regex)
             to = report['to'].match(get_name_number_regex)
             reports.push new(
-              sms_id: Osm.to_i_or_nil(report['smsid']),
-              user_id: Osm.to_i_or_nil(report['userid']),
-              member_id: Osm.to_i_or_nil(report['scoutid']),
-              section_id: Osm.to_i_or_nil(report['sectionid']),
+              sms_id: OSM.to_i_or_nil(report['smsid']),
+              user_id: OSM.to_i_or_nil(report['userid']),
+              member_id: OSM.to_i_or_nil(report['scoutid']),
+              section_id: OSM.to_i_or_nil(report['sectionid']),
               from_name: from[:name],
               from_number: "+#{from[:number]}",
               to_name: to[:name],
               to_number: "+#{to[:number]}",
               message: report['message'],
-              scheduled: Osm.parse_datetime(report['schedule']),
-              last_updated: Osm.parse_datetime(report['lastupdated']),
-              credits: Osm.to_i_or_nil(report['credits']),
+              scheduled: OSM.parse_datetime(report['schedule']),
+              last_updated: OSM.parse_datetime(report['lastupdated']),
+              credits: OSM.to_i_or_nil(report['credits']),
               status: (report['status'] || 'error').downcase.to_sym
             )
           end

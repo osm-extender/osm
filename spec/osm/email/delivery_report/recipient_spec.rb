@@ -1,13 +1,13 @@
-describe Osm::Email::DeliveryReport::Recipient do
+describe OSM::Email::DeliveryReport::Recipient do
 
   describe 'Attribute validity -' do
 
     before :each do
-      @recipient = Osm::Email::DeliveryReport::Recipient.new(
+      @recipient = OSM::Email::DeliveryReport::Recipient.new(
         id:             1,
         member_id:      1,
         address:        'someone@example.com',
-        delivery_report: Osm::Email::DeliveryReport.new,
+        delivery_report: OSM::Email::DeliveryReport.new,
         status:         :processed
       )
     end
@@ -40,36 +40,36 @@ describe Osm::Email::DeliveryReport::Recipient do
 
 
   it 'Fetch email from OSM' do
-    email = Osm::Email::DeliveryReport::Email.new
-    report = Osm::Email::DeliveryReport.new(id: 3, section_id: 4)
-    recipient = Osm::Email::DeliveryReport::Recipient.new(member_id: 456, address: 'd@example.com', delivery_report: report)
+    email = OSM::Email::DeliveryReport::Email.new
+    report = OSM::Email::DeliveryReport.new(id: 3, section_id: 4)
+    recipient = OSM::Email::DeliveryReport::Recipient.new(member_id: 456, address: 'd@example.com', delivery_report: report)
 
-    expect(Osm::Email::DeliveryReport::Email).to receive(:fetch_from_osm).with(api: $api, section: 4, email: 3, member: 456, address: 'd@example.com').and_return(email)
+    expect(OSM::Email::DeliveryReport::Email).to receive(:fetch_from_osm).with(api: $api, section: 4, email: 3, member: 456, address: 'd@example.com').and_return(email)
     expect(recipient.get_email($api)).to eq(email)
   end
 
 
   describe 'Unblock address in OSM' do
     it 'Success' do
-      recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
+      recipient = OSM::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: OSM::Email::DeliveryReport.new(id: 2, section_id: 1))
       expect($api).to receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: { 'section_id' => 1, 'email' => 'a@example.com', 'email_id' => 2 }).and_return('status' => true)
       expect(recipient.unblock_address($api)).to eq(true)
     end
 
     it 'Fails with error message' do
-      recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
+      recipient = OSM::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: OSM::Email::DeliveryReport.new(id: 2, section_id: 1))
       expect($api).to receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: { 'section_id' => 1, 'email' => 'a@example.com', 'email_id' => 2 }).and_return('status' => false, 'error' => 'Error message')
-      expect { recipient.unblock_address($api) }.to raise_error(Osm::OSMError, 'Error message')
+      expect { recipient.unblock_address($api) }.to raise_error(OSM::OSMError, 'Error message')
     end
 
     it 'Fails without error message' do
-      recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
+      recipient = OSM::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: OSM::Email::DeliveryReport.new(id: 2, section_id: 1))
       expect($api).to receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: { 'section_id' => 1, 'email' => 'a@example.com', 'email_id' => 2 }).and_return('status' => false)
       expect(recipient.unblock_address($api)).to eq(false)
     end
 
     it 'Gets something other than a hash' do
-      recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
+      recipient = OSM::Email::DeliveryReport::Recipient.new(address: 'a@example.com', status: :bounced, delivery_report: OSM::Email::DeliveryReport.new(id: 2, section_id: 1))
       expect($api).to receive(:post_query).with('ext/settings/emails/?action=unBlockEmail', post_data: { 'section_id' => 1, 'email' => 'a@example.com', 'email_id' => 2 }).and_return([])
       expect(recipient.unblock_address($api)).to eq(false)
     end
@@ -77,11 +77,11 @@ describe Osm::Email::DeliveryReport::Recipient do
     describe "Doesn't try to unblock when status is" do
 
       before :each do
-        @recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'a@example.com', delivery_report: Osm::Email::DeliveryReport.new(id: 2, section_id: 1))
+        @recipient = OSM::Email::DeliveryReport::Recipient.new(address: 'a@example.com', delivery_report: OSM::Email::DeliveryReport.new(id: 2, section_id: 1))
         expect($api).not_to receive(:post_query)
       end
 
-      (Osm::Email::DeliveryReport::VALID_STATUSES - [:bounced]).each do |status|
+      (OSM::Email::DeliveryReport::VALID_STATUSES - [:bounced]).each do |status|
         it status do
           @recipient.status = status
           expect(@recipient.unblock_address($api)).to eq(true)
@@ -94,9 +94,9 @@ describe Osm::Email::DeliveryReport::Recipient do
 
   describe 'Check status helpers -' do
     before :each do
-      @processed_recipient = Osm::Email::DeliveryReport::Recipient.new(status: :processed)
-      @delivered_recipient = Osm::Email::DeliveryReport::Recipient.new(status: :delivered)
-      @bounced_recipient = Osm::Email::DeliveryReport::Recipient.new(status: :bounced)
+      @processed_recipient = OSM::Email::DeliveryReport::Recipient.new(status: :processed)
+      @delivered_recipient = OSM::Email::DeliveryReport::Recipient.new(status: :delivered)
+      @bounced_recipient = OSM::Email::DeliveryReport::Recipient.new(status: :bounced)
     end
 
     it 'processed?' do
@@ -121,17 +121,17 @@ describe Osm::Email::DeliveryReport::Recipient do
 
 
   it 'Converts to a string' do
-    recipient = Osm::Email::DeliveryReport::Recipient.new(address: 'recipient@example.com', status: :delivered)
+    recipient = OSM::Email::DeliveryReport::Recipient.new(address: 'recipient@example.com', status: :delivered)
     expect(recipient.to_s).to eq('recipient@example.com - delivered')
   end
 
   it 'Sorts by delivery_report then id' do
-    report1 = Osm::Email::DeliveryReport.new(id: 1)
-    report2 = Osm::Email::DeliveryReport.new(id: 2)
+    report1 = OSM::Email::DeliveryReport.new(id: 1)
+    report2 = OSM::Email::DeliveryReport.new(id: 2)
 
-    recipient1 = Osm::Email::DeliveryReport::Recipient.new(delivery_report: report1, id: 1)
-    recipient2 = Osm::Email::DeliveryReport::Recipient.new(delivery_report: report2, id: 1)
-    recipient3 = Osm::Email::DeliveryReport::Recipient.new(delivery_report: report2, id: 2)
+    recipient1 = OSM::Email::DeliveryReport::Recipient.new(delivery_report: report1, id: 1)
+    recipient2 = OSM::Email::DeliveryReport::Recipient.new(delivery_report: report2, id: 1)
+    recipient3 = OSM::Email::DeliveryReport::Recipient.new(delivery_report: report2, id: 2)
 
     recipients = [recipient3, recipient1, recipient2]
     expect(recipients.sort).to eq([recipient1, recipient2, recipient3])

@@ -1,4 +1,4 @@
-describe Osm::MyScout do
+describe OSM::MyScout do
 
 
 

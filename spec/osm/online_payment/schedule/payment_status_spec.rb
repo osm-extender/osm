@@ -1,9 +1,9 @@
-describe Osm::OnlinePayment::Schedule::PaymentStatus do
+describe OSM::OnlinePayment::Schedule::PaymentStatus do
 
   it 'Create' do
-    payment = Osm::OnlinePayment::Schedule::Payment.new
+    payment = OSM::OnlinePayment::Schedule::Payment.new
     allow(payment).to receive('valid?') { true }
-    status = Osm::OnlinePayment::Schedule::PaymentStatus.new(
+    status = OSM::OnlinePayment::Schedule::PaymentStatus.new(
       id:             1,
       payment:        payment,
       details:        'Details',
@@ -23,10 +23,10 @@ describe Osm::OnlinePayment::Schedule::PaymentStatus do
   end
 
   it 'Sorts by timestamp (desc), payment then id' do
-    status1 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 6), payment: 1, id: 1)
-    status2 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 1, id: 1)
-    status3 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 2, id: 1)
-    status4 = Osm::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 2, id: 2)
+    status1 = OSM::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 6), payment: 1, id: 1)
+    status2 = OSM::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 1, id: 1)
+    status3 = OSM::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 2, id: 1)
+    status4 = OSM::OnlinePayment::Schedule::PaymentStatus.new(timestamp: Time.new(2016, 1, 2, 3, 5), payment: 2, id: 2)
     statuses = [status3, status1, status4, status2]
     expect(statuses.sort).to eq([status1, status2, status3, status4])
   end
@@ -34,18 +34,18 @@ describe Osm::OnlinePayment::Schedule::PaymentStatus do
   describe 'Has status checking method for' do
     before :each do
       @payments = []
-      Osm::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES.each do |status|
-        payment = Osm::OnlinePayment::Schedule::PaymentStatus.new(status: status)
+      OSM::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES.each do |status|
+        payment = OSM::OnlinePayment::Schedule::PaymentStatus.new(status: status)
         @payments.push payment
         instance_variable_set("@#{status}_payment", payment)
       end
     end
 
-    Osm::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES.each do |status|
+    OSM::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES.each do |status|
       it status.to_s do
         payment = instance_variable_get("@#{status}_payment")
         expect(payment.send("#{status}?")).to eq(true)
-        (Osm::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES - [status]).each do |i|
+        (OSM::OnlinePayment::Schedule::PaymentStatus::VALID_STATUSES - [status]).each do |i|
           expect(payment.send("#{i}?")).to eq(false)
         end
       end

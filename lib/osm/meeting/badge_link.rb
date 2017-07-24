@@ -1,5 +1,5 @@
-module Osm
-  class Meeting < Osm::Model
+module OSM
+  class Meeting < OSM::Model
     class BadgeLink
       include ActiveAttr::Model
 

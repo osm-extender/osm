@@ -1,6 +1,6 @@
-describe Osm::Model do
+describe OSM::Model do
 
-  class ModelTester < Osm::Model
+  class ModelTester < OSM::Model
     attribute :id
     attribute :data
 
@@ -19,33 +19,33 @@ describe Osm::Model do
 
 
   it 'Create' do
-    model = Osm::Model.new
+    model = OSM::Model.new
     expect(model).not_to be_nil
   end
 
 
   it 'Configure' do
-    Osm::Model.configure(
-      cache: OsmTest::Cache,
+    OSM::Model.configure(
+      cache: OSMTest::Cache,
       cache_ttl: 100,
       prepend_to_cache_key: 'Hi'
     )
 
     config = ModelTester.test_get_config
     expect(config).to eq(
-      cache: OsmTest::Cache,
+      cache: OSMTest::Cache,
       cache_ttl: 100,
       prepend_to_cache_key: 'Hi'
     )
   end
 
   it 'Configure (bad arguments)' do
-    expect { Osm::Model.configure(prepend_to_cache_key: :invalid) }.to raise_error(ArgumentError, 'prepend_to_cache_key must be a String')
+    expect { OSM::Model.configure(prepend_to_cache_key: :invalid) }.to raise_error(ArgumentError, 'prepend_to_cache_key must be a String')
 
-    expect { Osm::Model.configure(cache_ttl: :invalid) }.to raise_error(ArgumentError, 'cache_ttl must be a FixNum greater than 0')
-    expect { Osm::Model.configure(cache_ttl: 0) }.to raise_error(ArgumentError, 'cache_ttl must be a FixNum greater than 0')
+    expect { OSM::Model.configure(cache_ttl: :invalid) }.to raise_error(ArgumentError, 'cache_ttl must be a FixNum greater than 0')
+    expect { OSM::Model.configure(cache_ttl: 0) }.to raise_error(ArgumentError, 'cache_ttl must be a FixNum greater than 0')
 
-    expect { Osm::Model.configure(cache: String) }.to raise_error(ArgumentError, 'cache must have a exist? method')
+    expect { OSM::Model.configure(cache: String) }.to raise_error(ArgumentError, 'cache must have a exist? method')
   end
 
 
@@ -53,62 +53,62 @@ describe Osm::Model do
 
     describe 'Checks for existance' do
       it 'With cache' do
-        expect(OsmTest::Cache).to receive('exist?').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
+        expect(OSMTest::Cache).to receive('exist?').with("OSMAPI-#{OSM::VERSION}-osm-key") { true }
         expect(ModelTester.cache_exist?(api: $api, key: 'key')).to eq(true)
       end
 
       it 'Without cache' do
-        expect(OsmTest::Cache).not_to receive('exist?')
-        Osm::Model.cache = nil
+        expect(OSMTest::Cache).not_to receive('exist?')
+        OSM::Model.cache = nil
         expect(ModelTester.cache_exist?(api: $api, key: 'key')).to eq(false)
       end
 
       it 'Ignoring cache' do
-        expect(OsmTest::Cache).not_to receive('exist?')
+        expect(OSMTest::Cache).not_to receive('exist?')
         expect(ModelTester.cache_exist?(api: $api, key: 'key', no_read_cache: true)).to eq(false)
       end
     end # describe Checks for existance
 
     describe 'Reads' do
       it 'With cache' do
-        expect(OsmTest::Cache).to receive('read').with("OSMAPI-#{Osm::VERSION}-osm-key") { 'data' }
+        expect(OSMTest::Cache).to receive('read').with("OSMAPI-#{OSM::VERSION}-osm-key") { 'data' }
         expect(ModelTester.cache_read(api: $api, key: 'key')).to eq('data')
       end
 
       it 'Without cache' do
-        expect(OsmTest::Cache).not_to receive('read')
-        Osm::Model.cache = nil
+        expect(OSMTest::Cache).not_to receive('read')
+        OSM::Model.cache = nil
         expect(ModelTester.cache_read(api: $api, key: 'key')).to eq(nil)
       end
 
       it 'Ignoring cache' do
-        expect(OsmTest::Cache).not_to receive('read')
+        expect(OSMTest::Cache).not_to receive('read')
         expect(ModelTester.cache_read(api: $api, key: 'key', no_read_cache: true)).to eq(nil)
       end
     end # describe Reads
 
     describe 'Writes' do
       it 'With cache' do
-        expect(OsmTest::Cache).to receive('write').with("OSMAPI-#{Osm::VERSION}-osm-key", 'data', expires_in: 600) { true }
+        expect(OSMTest::Cache).to receive('write').with("OSMAPI-#{OSM::VERSION}-osm-key", 'data', expires_in: 600) { true }
         expect(ModelTester.cache_write(api: $api, key: 'key', data: 'data')).to eq(true)
       end
 
       it 'Without cache' do
-        expect(OsmTest::Cache).not_to receive('write')
-        Osm::Model.cache = nil
+        expect(OSMTest::Cache).not_to receive('write')
+        OSM::Model.cache = nil
         expect(ModelTester.cache_write(api: $api, key: 'key', data: 'data')).to eq(false)
       end
     end # describe Writes
 
     describe 'Deletes' do
       it 'With cache' do
-        expect(OsmTest::Cache).to receive('delete').with("OSMAPI-#{Osm::VERSION}-osm-key") { true }
+        expect(OSMTest::Cache).to receive('delete').with("OSMAPI-#{OSM::VERSION}-osm-key") { true }
         expect(ModelTester.cache_delete(api: $api, key: 'key')).to eq(true)
       end
 
       it 'Without cache' do
-        expect(OsmTest::Cache).not_to receive('delete')
-        Osm::Model.cache = nil
+        expect(OSMTest::Cache).not_to receive('delete')
+        OSM::Model.cache = nil
         expect(ModelTester.cache_delete(api: $api, key: 'key')).to eq(true)
       end
     end # describe Deletes
@@ -120,26 +120,26 @@ describe Osm::Model do
 
       it 'With cache' do
         block = proc { 'ABC' }
-        expect(OsmTest::Cache).to receive('fetch').with("OSMAPI-#{Osm::VERSION}-osm-key", expires_in: 600).and_yield { 'abc' }
+        expect(OSMTest::Cache).to receive('fetch').with("OSMAPI-#{OSM::VERSION}-osm-key", expires_in: 600).and_yield { 'abc' }
         expect(ModelTester.cache_fetch(api: $api, key: 'key', &block)).to eq('ABC')
       end
 
       it 'Without cache' do
         ModelTester.cache = nil
         block = proc { 'GHI' }
-        expect(OsmTest::Cache).not_to receive('fetch')
+        expect(OSMTest::Cache).not_to receive('fetch')
         expect(ModelTester.cache_fetch(api: $api, key: 'key', &block)).to eq('GHI')
       end
 
       it 'Ignoring cache' do
-        expect(OsmTest::Cache).not_to receive('read')
+        expect(OSMTest::Cache).not_to receive('read')
         block = proc { 'GHI' }
         expect(ModelTester.cache_fetch(api: $api, key: 'key', no_read_cache: true, &block)).to eq('GHI')
       end
     end # describe fetches
 
     it 'Builds a key from an array' do
-      expect(ModelTester.cache_key(api: $api, key: ['a', 'b'])).to eq("OSMAPI-#{Osm::VERSION}-osm-a-b")
+      expect(ModelTester.cache_key(api: $api, key: ['a', 'b'])).to eq("OSMAPI-#{OSM::VERSION}-osm-a-b")
     end
 
   end
@@ -249,15 +249,15 @@ describe Osm::Model do
       end
 
       it 'Has permission' do
-        expect(Osm::Model.user_has_permission?(api: $api, to: :bar, on: :foo, section: 1)).to eq(true)
+        expect(OSM::Model.user_has_permission?(api: $api, to: :bar, on: :foo, section: 1)).to eq(true)
       end
 
       it "Doesn't have the level of permission" do
-        expect(Osm::Model.user_has_permission?(api: $api, to: :barbar, on: :foo, section: 1)).to eq(false)
+        expect(OSM::Model.user_has_permission?(api: $api, to: :barbar, on: :foo, section: 1)).to eq(false)
       end
 
       it "Doesn't have access to section" do
-        expect(Osm::Model.user_has_permission?(api: $api, to: :bar, on: :foo, section: 2)).to eq(false)
+        expect(OSM::Model.user_has_permission?(api: $api, to: :bar, on: :foo, section: 2)).to eq(false)
       end
 
     end
@@ -265,7 +265,7 @@ describe Osm::Model do
     describe 'api_has_permission?' do
 
       before :each do
-        allow(Osm::ApiAccess).to receive(:get_ours).and_return(Osm::ApiAccess.new(
+        allow(OSM::ApiAccess).to receive(:get_ours).and_return(OSM::ApiAccess.new(
           id: $api.api_id,
           name: $api.name,
           permissions: { foo: [:bar] }
@@ -273,16 +273,16 @@ describe Osm::Model do
       end
 
       it 'Has permission' do
-        expect(Osm::Model.api_has_permission?(api: $api, to: :bar, on: :foo, section: 1)).to eq(true)
+        expect(OSM::Model.api_has_permission?(api: $api, to: :bar, on: :foo, section: 1)).to eq(true)
       end
 
       it "Doesn't have the level of permission" do
-        expect(Osm::Model.api_has_permission?(api: $api, to: :barbar, on: :foo, section: 1)).to eq(false)
+        expect(OSM::Model.api_has_permission?(api: $api, to: :barbar, on: :foo, section: 1)).to eq(false)
       end
 
       it "Doesn't have access to the section" do
-        allow(Osm::ApiAccess).to receive(:get_ours).and_return(nil)
-        expect(Osm::Model.api_has_permission?(api: $api, to: :bar, on: :foo, section: 2)).to eq(false)
+        allow(OSM::ApiAccess).to receive(:get_ours).and_return(nil)
+        expect(OSM::Model.api_has_permission?(api: $api, to: :bar, on: :foo, section: 2)).to eq(false)
       end
 
     end
@@ -290,19 +290,19 @@ describe Osm::Model do
     describe 'has_permission?' do
 
       it 'Only returns true if the user can and they have granted the api permission' do
-        section = Osm::Section.new
+        section = OSM::Section.new
         options = { foo: :bar }
-        expect(Osm::Model).to receive('user_has_permission?').with(api: $api, to: :can_do, on: :can_to, section: section, **options).and_return(true)
-        expect(Osm::Model).to receive('api_has_permission?').with(api: $api, to: :can_do, on: :can_to, section: section, **options).and_return(true)
-        expect(Osm::Model.has_permission?(api: $api, to: :can_do, on: :can_to, section: section, **options)).to eq(true)
+        expect(OSM::Model).to receive('user_has_permission?').with(api: $api, to: :can_do, on: :can_to, section: section, **options).and_return(true)
+        expect(OSM::Model).to receive('api_has_permission?').with(api: $api, to: :can_do, on: :can_to, section: section, **options).and_return(true)
+        expect(OSM::Model.has_permission?(api: $api, to: :can_do, on: :can_to, section: section, **options)).to eq(true)
       end
 
       describe 'Otherwise returns false' do
         [ [true, false], [false, true], [false, false] ].each do |user, api|
           it "User #{user ? 'can' : "can't"} and #{api ? 'has' : "hasn't"} given access" do
-            allow(Osm::Model).to receive('user_has_permission?').and_return(user)
-            allow(Osm::Model).to receive('api_has_permission?').and_return(api)
-            expect(Osm::Model.has_permission?(api: $api, to: :can_do, on: :can_to, section: Osm::Section.new)).to eq(false)
+            allow(OSM::Model).to receive('user_has_permission?').and_return(user)
+            allow(OSM::Model).to receive('api_has_permission?').and_return(api)
+            expect(OSM::Model.has_permission?(api: $api, to: :can_do, on: :can_to, section: OSM::Section.new)).to eq(false)
           end
         end
       end
@@ -316,11 +316,11 @@ describe Osm::Model do
       end
 
       it 'Has access' do
-        expect(Osm::Model.has_access_to_section?(api: $api, section: 1)).to eq(true)
+        expect(OSM::Model.has_access_to_section?(api: $api, section: 1)).to eq(true)
       end
 
       it "Doesn't have access" do
-        expect(Osm::Model.has_access_to_section?(api: $api, section: 2)).to eq(false)
+        expect(OSM::Model.has_access_to_section?(api: $api, section: 2)).to eq(false)
       end
 
     end
@@ -328,17 +328,17 @@ describe Osm::Model do
     describe 'require_access_to_section' do
 
       before :each do
-        allow(Osm::Model).to receive(:require_access_to_section).and_call_original
+        allow(OSM::Model).to receive(:require_access_to_section).and_call_original
       end
 
       it 'Does nothing when access is allowed' do
-        allow(Osm::Model).to receive('has_access_to_section?') { true }
-        expect { Osm::Model.require_access_to_section(api: $api, section: 5) }.not_to raise_error
+        allow(OSM::Model).to receive('has_access_to_section?') { true }
+        expect { OSM::Model.require_access_to_section(api: $api, section: 5) }.not_to raise_error
       end
 
       it 'Raises exception when access is not allowed' do
-        allow(Osm::Model).to receive('has_access_to_section?') { false }
-        expect { Osm::Model.require_access_to_section(api: $api, section: 5) }.to raise_error(Osm::OSMError::Forbidden, 'You do not have access to that section')
+        allow(OSM::Model).to receive('has_access_to_section?') { false }
+        expect { OSM::Model.require_access_to_section(api: $api, section: 5) }.to raise_error(OSM::OSMError::Forbidden, 'You do not have access to that section')
       end
 
     end
@@ -346,24 +346,24 @@ describe Osm::Model do
     describe 'require_permission' do
 
       it 'Does nothing when access is allowed' do
-        allow(Osm::Model).to receive('user_has_permission?').and_return(true)
-        allow(Osm::Model).to receive('api_has_permission?').and_return(true)
-        section = Osm::Section.new(name: 'A SECTION')
-        expect { Osm::Model.require_permission(api: $api, to: :can_do, on: :can_on, section: section) }.not_to raise_error
+        allow(OSM::Model).to receive('user_has_permission?').and_return(true)
+        allow(OSM::Model).to receive('api_has_permission?').and_return(true)
+        section = OSM::Section.new(name: 'A SECTION')
+        expect { OSM::Model.require_permission(api: $api, to: :can_do, on: :can_on, section: section) }.not_to raise_error
       end
 
       it "Raises exception when user doesn't have access" do
-        allow(Osm::Model).to receive('user_has_permission?').and_return(false)
-        allow(Osm::Model).to receive('api_has_permission?').and_return(true)
-        section = Osm::Section.new(name: 'A SECTION')
-        expect { Osm::Model.require_permission(api: $api, to: :can_do, on: :can_on, section: section) }.to raise_error(Osm::OSMError::Forbidden, 'Your OSM user does not have permission to can_do on can_on for A SECTION.')
+        allow(OSM::Model).to receive('user_has_permission?').and_return(false)
+        allow(OSM::Model).to receive('api_has_permission?').and_return(true)
+        section = OSM::Section.new(name: 'A SECTION')
+        expect { OSM::Model.require_permission(api: $api, to: :can_do, on: :can_on, section: section) }.to raise_error(OSM::OSMError::Forbidden, 'Your OSM user does not have permission to can_do on can_on for A SECTION.')
       end
 
       it "Raises exception when api doesn't have access" do
-        allow(Osm::Model).to receive('user_has_permission?').and_return(true)
-        allow(Osm::Model).to receive('api_has_permission?').and_return(false)
-        section = Osm::Section.new(name: 'A SECTION')
-        expect { Osm::Model.require_permission(api: $api, to: :can_do, on: :can_on, section: section) }.to raise_error(Osm::OSMError::Forbidden, 'You have not granted the can_do permissions on can_on to the API NAME API for A SECTION.')
+        allow(OSM::Model).to receive('user_has_permission?').and_return(true)
+        allow(OSM::Model).to receive('api_has_permission?').and_return(false)
+        section = OSM::Section.new(name: 'A SECTION')
+        expect { OSM::Model.require_permission(api: $api, to: :can_do, on: :can_on, section: section) }.to raise_error(OSM::OSMError::Forbidden, 'You have not granted the can_do permissions on can_on to the API NAME API for A SECTION.')
       end
 
     end
@@ -371,57 +371,57 @@ describe Osm::Model do
     describe 'require_subscription' do
 
       it 'Checks against a number' do
-        section1 = Osm::Section.new(subscription_level: 1, name: 'NAME') # Bronze
-        section2 = Osm::Section.new(subscription_level: 2, name: 'NAME') # Silver
-        section3 = Osm::Section.new(subscription_level: 3, name: 'NAME') # Gold
-        section4 = Osm::Section.new(subscription_level: 4, name: 'NAME') # Gold+
+        section1 = OSM::Section.new(subscription_level: 1, name: 'NAME') # Bronze
+        section2 = OSM::Section.new(subscription_level: 2, name: 'NAME') # Silver
+        section3 = OSM::Section.new(subscription_level: 3, name: 'NAME') # Gold
+        section4 = OSM::Section.new(subscription_level: 4, name: 'NAME') # Gold+
 
-        expect { Osm::Model.require_subscription(api: $api, level: 1, section: section1) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: 2, section: section1) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Silver required for NAME).')
-        expect { Osm::Model.require_subscription(api: $api, level: 3, section: section1) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold required for NAME).')
-        expect { Osm::Model.require_subscription(api: $api, level: 4, section: section1) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: 1, section: section1) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 2, section: section1) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Silver required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: 3, section: section1) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: 4, section: section1) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
 
-        expect { Osm::Model.require_subscription(api: $api, level: 1, section: section2) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: 2, section: section2) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: 3, section: section2) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold required for NAME).')
-        expect { Osm::Model.require_subscription(api: $api, level: 4, section: section2) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: 1, section: section2) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 2, section: section2) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 3, section: section2) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: 4, section: section2) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
 
-        expect { Osm::Model.require_subscription(api: $api, level: 1, section: section3) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: 2, section: section3) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: 3, section: section3) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: 4, section: section3) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: 1, section: section3) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 2, section: section3) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 3, section: section3) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 4, section: section3) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
 
-        expect { Osm::Model.require_subscription(api: $api, level: 1, section: section4) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: 2, section: section4) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: 3, section: section4) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: 4, section: section4) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 1, section: section4) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 2, section: section4) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 3, section: section4) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: 4, section: section4) }.not_to raise_error
       end
 
       it 'Checks against a symbol' do
-        section1 = Osm::Section.new(subscription_level: 1, name: 'NAME') # Bronze
-        section2 = Osm::Section.new(subscription_level: 2, name: 'NAME') # Silver
-        section3 = Osm::Section.new(subscription_level: 3, name: 'NAME') # Gold
-        section4 = Osm::Section.new(subscription_level: 4, name: 'NAME') # Gold+
+        section1 = OSM::Section.new(subscription_level: 1, name: 'NAME') # Bronze
+        section2 = OSM::Section.new(subscription_level: 2, name: 'NAME') # Silver
+        section3 = OSM::Section.new(subscription_level: 3, name: 'NAME') # Gold
+        section4 = OSM::Section.new(subscription_level: 4, name: 'NAME') # Gold+
 
-        expect { Osm::Model.require_subscription(api: $api, level: :bronze, section: section1) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: :silver, section: section1) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Silver required for NAME).')
-        expect { Osm::Model.require_subscription(api: $api, level: :gold, section: section1) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold required for NAME).')
-        expect { Osm::Model.require_subscription(api: $api, level: :gold_plus, section: section1) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: :bronze, section: section1) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :silver, section: section1) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Silver required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: :gold, section: section1) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: :gold_plus, section: section1) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
 
-        expect { Osm::Model.require_subscription(api: $api, level: :bronze, section: section2) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: :silver, section: section2) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: :gold, section: section2) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold required for NAME).')
-        expect { Osm::Model.require_subscription(api: $api, level: :gold_plus, section: section2) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: :bronze, section: section2) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :silver, section: section2) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :gold, section: section2) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: :gold_plus, section: section2) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
 
-        expect { Osm::Model.require_subscription(api: $api, level: :bronze, section: section3) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: :silver, section: section3) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: :gold, section: section3) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: :gold_plus, section: section3) }.to raise_error(Osm::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
+        expect { OSM::Model.require_subscription(api: $api, level: :bronze, section: section3) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :silver, section: section3) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :gold, section: section3) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :gold_plus, section: section3) }.to raise_error(OSM::OSMError::Forbidden, 'Insufficent OSM subscription level (Gold+ required for NAME).')
 
-        expect { Osm::Model.require_subscription(api: $api, level: :bronze, section: section4) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: :silver, section: section4) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: :gold, section: section4) }.not_to raise_error
-        expect { Osm::Model.require_subscription(api: $api, level: :gold_plus, section: section4) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :bronze, section: section4) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :silver, section: section4) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :gold, section: section4) }.not_to raise_error
+        expect { OSM::Model.require_subscription(api: $api, level: :gold_plus, section: section4) }.not_to raise_error
       end
 
     end
@@ -429,36 +429,36 @@ describe Osm::Model do
     describe 'Require_abillity_to' do
 
       before :each do
-        allow(Osm::Model).to receive(:require_ability_to).and_call_original
+        allow(OSM::Model).to receive(:require_ability_to).and_call_original
       end
 
       it 'Requires permission' do
-        section = Osm::Section.new(type: :waiting)
+        section = OSM::Section.new(type: :waiting)
         options = { foo: 'bar' }
-        expect(Osm::Model).to receive(:require_permission).with(api: $api, to: :can_do, on: :can_on, section: section, **options).and_return(true)
-        expect(Osm::Model).not_to receive(:require_subscription)
-        expect { Osm::Model.require_ability_to(api: $api, to: :can_do, on: :can_on, section: section, **options) }.not_to raise_error
+        expect(OSM::Model).to receive(:require_permission).with(api: $api, to: :can_do, on: :can_on, section: section, **options).and_return(true)
+        expect(OSM::Model).not_to receive(:require_subscription)
+        expect { OSM::Model.require_ability_to(api: $api, to: :can_do, on: :can_on, section: section, **options) }.not_to raise_error
       end
 
       describe 'Requires the right subscription level for' do
 
         before :each do
-          @section = Osm::Section.new(type: :beavers)
+          @section = OSM::Section.new(type: :beavers)
           @options = { bar: 'foo' }
-          allow(Osm::Model).to receive(:require_permission).and_return(nil)
+          allow(OSM::Model).to receive(:require_permission).and_return(nil)
         end
 
         [:register, :contact, :events, :flexi].each do |can_on|
           it ":#{can_on.to_s} (Silver)" do
-            expect(Osm::Model).to receive(:require_subscription).with(api: $api, level: :silver, section: @section, **@options).and_return(true)
-            expect { Osm::Model.require_ability_to(api: $api, to: :read, on: can_on, section: @section, **@options) }.to_not raise_error
+            expect(OSM::Model).to receive(:require_subscription).with(api: $api, level: :silver, section: @section, **@options).and_return(true)
+            expect { OSM::Model.require_ability_to(api: $api, to: :read, on: can_on, section: @section, **@options) }.to_not raise_error
           end
         end
 
         [:finance].each do |can_on|
           it ":#{can_on.to_s} (Gold)" do
-            expect(Osm::Model).to receive(:require_subscription).with(api: $api, level: :gold, section: @section, **@options).and_return(true)
-            expect { Osm::Model.require_ability_to(api: $api, to: :read, on: can_on, section: @section, **@options) }.to_not raise_error
+            expect(OSM::Model).to receive(:require_subscription).with(api: $api, level: :gold, section: @section, **@options).and_return(true)
+            expect { OSM::Model.require_ability_to(api: $api, to: :read, on: can_on, section: @section, **@options) }.to_not raise_error
           end
         end
 

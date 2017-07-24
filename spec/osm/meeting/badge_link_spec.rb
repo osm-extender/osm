@@ -1,2 +1,2 @@
-describe Osm::Meeting::BadgeLink do
+describe OSM::Meeting::BadgeLink do
 end

@@ -1,7 +1,7 @@
-describe Osm::Sms::DeliveryReport do
+describe OSM::Sms::DeliveryReport do
 
   it 'Create' do
-    report = Osm::Sms::DeliveryReport.new(
+    report = OSM::Sms::DeliveryReport.new(
       sms_id: 1,
       user_id: 2,
       member_id: 3,
@@ -38,7 +38,7 @@ describe Osm::Sms::DeliveryReport do
     statuses.each do |status|
       it "For #{status}" do
         statuses.each do |test_status|
-          expect(Osm::Sms::DeliveryReport.new(status: status).send("status_#{test_status}?")).to eq(status == test_status)
+          expect(OSM::Sms::DeliveryReport.new(status: status).send("status_#{test_status}?")).to eq(status == test_status)
         end
       end
     end
@@ -70,7 +70,7 @@ describe Osm::Sms::DeliveryReport do
       }
       expect($api).to receive(:post_query).with('sms.php?action=deliveryReports&sectionid=1&dateFormat=generic') { data }
 
-      reports = Osm::Sms::DeliveryReport.get_for_section(api: $api, section: 1)
+      reports = OSM::Sms::DeliveryReport.get_for_section(api: $api, section: 1)
       expect(reports.size).to eq(1)
       report = reports[0]
       expect(report.sms_id).to eq(2)

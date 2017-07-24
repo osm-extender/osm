@@ -1,5 +1,6 @@
 ## Version 2.0.0
 
+  * Osm module is now OSM
   * Error hierarchy changed:
     * APIError < RuntimeError
       * InvalidUser

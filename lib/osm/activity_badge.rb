@@ -1,5 +1,5 @@
-module Osm
-  class ActivityBadge < Osm::Badge
+module OSM
+  class ActivityBadge < OSM::Badge
 
     def self.type
       :activity

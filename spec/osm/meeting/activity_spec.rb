@@ -1,7 +1,7 @@
-describe Osm::Meeting::Activity do
+describe OSM::Meeting::Activity do
 
     it 'Create' do
-      ea = Osm::Meeting::Activity.new(
+      ea = OSM::Meeting::Activity.new(
         activity_id: 2,
         title: 'Activity Name',
         notes: 'Notes'
@@ -14,9 +14,9 @@ describe Osm::Meeting::Activity do
     end
 
     it 'Sorts by title then activity_id' do
-      a1 = Osm::Meeting::Activity.new(title: 'a', activity_id: 1)
-      a2 = Osm::Meeting::Activity.new(title: 'b', activity_id: 1)
-      a3 = Osm::Meeting::Activity.new(title: 'b', activity_id: 2)
+      a1 = OSM::Meeting::Activity.new(title: 'a', activity_id: 1)
+      a2 = OSM::Meeting::Activity.new(title: 'b', activity_id: 1)
+      a3 = OSM::Meeting::Activity.new(title: 'b', activity_id: 2)
 
       data = [a2, a3, a1]
       expect(data.sort).to eq([a1, a2, a3])

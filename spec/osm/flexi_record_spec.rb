@@ -1,7 +1,7 @@
-describe Osm::FlexiRecord do
+describe OSM::FlexiRecord do
 
   it 'Create' do
-    fr = Osm::FlexiRecord.new(
+    fr = OSM::FlexiRecord.new(
       id: 1,
       section_id: 2,
       name: 'name'
@@ -13,9 +13,9 @@ describe Osm::FlexiRecord do
   end
 
   it 'Sorts by section ID then name' do
-    fr1 = Osm::FlexiRecord.new(section_id: 1, name: 'A')
-    fr2 = Osm::FlexiRecord.new(section_id: 2, name: 'B')
-    fr3 = Osm::FlexiRecord.new(section_id: 2, name: 'C')
+    fr1 = OSM::FlexiRecord.new(section_id: 1, name: 'A')
+    fr2 = OSM::FlexiRecord.new(section_id: 2, name: 'B')
+    fr3 = OSM::FlexiRecord.new(section_id: 2, name: 'C')
     records = [fr2, fr1, fr3]
 
     expect(records.sort).to eq([fr1, fr2, fr3])
@@ -25,7 +25,7 @@ describe Osm::FlexiRecord do
   describe 'Using the API' do
 
     before :each do
-      @flexi_record = Osm::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
+      @flexi_record = OSM::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
     end
 
     it 'Fetch Fields' do
@@ -135,7 +135,7 @@ describe Osm::FlexiRecord do
         }]
       }
       expect($api).to receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
-      allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 1, type: :cubs) }
+      allow(OSM::Section).to receive(:get) { OSM::Section.new(id: 1, type: :cubs) }
 
       records = @flexi_record.get_data(api: $api, term: 3)
       expect(records.is_a?(Array)).to eq(true)
@@ -187,7 +187,7 @@ describe Osm::FlexiRecord do
         }]
       }
       expect($api).to receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
-      allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 1, type: :cubs) }
+      allow(OSM::Section).to receive(:get) { OSM::Section.new(id: 1, type: :cubs) }
 
       records = @flexi_record.get_data(api: $api, term: 3)
       expect(records.is_a?(Array)).to eq(true)
@@ -222,9 +222,9 @@ describe Osm::FlexiRecord do
         }]
       }
       expect($api).to receive(:post_query).with('extras.php?action=getExtraRecords&sectionid=1&extraid=2&termid=3&section=cubs').and_return(data)
-      allow(Osm::Section).to receive(:get) { Osm::Section.new(id: 1, type: :cubs) }
+      allow(OSM::Section).to receive(:get) { OSM::Section.new(id: 1, type: :cubs) }
 
-      flexi_record = Osm::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
+      flexi_record = OSM::FlexiRecord.new(section_id: 1, id: 2, name: 'A Flexi Record')
       records = flexi_record.get_data(api: $api, term: 3)
       record = records[0]
       expect(record.fields['total']).to eq(3)

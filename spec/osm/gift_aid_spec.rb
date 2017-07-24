@@ -1,4 +1,4 @@
-describe Osm::GiftAid do
+describe OSM::GiftAid do
 
   describe 'Using the API' do
 
@@ -16,8 +16,8 @@ describe Osm::GiftAid do
       ]
       expect($api).to receive(:post_query).with('giftaid.php?action=getStructure&sectionid=1&termid=2').and_return(data)
 
-      donations = Osm::GiftAid.get_donations(api: $api, section: 1, term: 2)
-      expect(donations).to eq([Osm::GiftAid::Donation.new(donation_date: Date.new(2000, 1, 2))])
+      donations = OSM::GiftAid.get_donations(api: $api, section: 1, term: 2)
+      expect(donations).to eq([OSM::GiftAid::Donation.new(donation_date: Date.new(2000, 1, 2))])
     end
 
     it 'Fetch the data for a section' do
@@ -31,7 +31,7 @@ describe Osm::GiftAid do
       }
       expect($api).to receive(:post_query).with('giftaid.php?action=getGrid&sectionid=1&termid=2').and_return(data)
 
-      data = Osm::GiftAid.get_data(api: $api, section: 1, term: 2)
+      data = OSM::GiftAid.get_data(api: $api, section: 1, term: 2)
       expect(data.is_a?(Array)).to eq(true)
       expect(data.size).to eq(1)
       data = data[0]
@@ -56,7 +56,7 @@ describe Osm::GiftAid do
       }
       expect($api).to receive(:post_query).with('giftaid.php?action=update&sectionid=1&termid=2', post_data: post_data).and_return([])
 
-      expect(Osm::GiftAid.update_donation(
+      expect(OSM::GiftAid.update_donation(
         api: $api,
         section: 1,
         term: 2,

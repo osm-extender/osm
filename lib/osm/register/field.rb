@@ -1,6 +1,6 @@
-module Osm
+module OSM
   class Register
-    class Field < Osm::Model
+    class Field < OSM::Model
       # @!attribute [rw] id
       #   @return [String] OSM identifier for the field
       # @!attribute [rw] name

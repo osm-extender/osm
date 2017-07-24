@@ -1,5 +1,5 @@
-module Osm
-  class Member < Osm::Model
+module OSM
+  class Member < OSM::Model
     module EnableableEmailableContact
       include EmailableContact
 

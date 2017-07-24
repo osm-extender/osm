@@ -1,7 +1,7 @@
-describe Osm::Activity::File do
+describe OSM::Activity::File do
 
   it 'Sorts by activity_id then name' do
-    expect(Osm::Activity::File.new.send(:sort_by)).to eq(['activity_id', 'name'])
+    expect(OSM::Activity::File.new.send(:sort_by)).to eq(['activity_id', 'name'])
   end
 
 end

@@ -1,2 +1,2 @@
-describe Osm::Member::SecondaryContact do
+describe OSM::Member::SecondaryContact do
 end

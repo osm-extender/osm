@@ -1,6 +1,6 @@
-module Osm
-  class Badge < Osm::Model
-    class Data < Osm::Model
+module OSM
+  class Badge < OSM::Model
+    class Data < OSM::Model
       # @!attribute [rw] member_id
       #   @return [Integer] ID of the member this data relates to
       # @!attribute [rw] first_name
@@ -18,7 +18,7 @@ module Osm
       # @!attribute [rw] section_id
       #   @return [Integer] the ID of the section the member belongs to
       # @!attribute [rw] badge
-      #   @return [Osm::Badge] the badge that the data belongs to
+      #   @return [OSM::Badge] the badge that the data belongs to
 
       attribute :member_id, type: Integer
       attribute :first_name, type: String
@@ -203,17 +203,17 @@ module Osm
 
 
       # Mark the badge as awarded in OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @param date [Date] The date to mark the badge as awarded
       # @param level [Integer] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return true, false whether the data was updated in OSM
       def mark_awarded(api:, date: Date.today, level: due)
         fail ArgumentError, 'date is not a Date' unless date.is_a?(Date)
         fail ArgumentError, 'level can not be negative' if level < 0
-        section = Osm::Section.get(api: api, section: section_id)
+        section = OSM::Section.get(api: api, section: section_id)
         require_ability_to(api, :write, :badge, section)
 
-        date_formatted = date.strftime(Osm::OSM_DATE_FORMAT)
+        date_formatted = date.strftime(OSM::OSM_DATE_FORMAT)
         entries = [{
           'badge_id' => badge.id.to_s,
           'badge_version' => badge.version.to_s,
@@ -239,7 +239,7 @@ module Osm
       end
 
       # Mark the badge as not awarded in OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @return true, false whether the data was updated in OSM
       def mark_not_awarded(api)
         mark_awarded(api, Date.today, 0)
@@ -247,12 +247,12 @@ module Osm
 
 
       # Mark the badge as due in OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @param level [Integer] The level of the badge to award (1 for non-staged badges), setting the level to 0 unawards the badge
       # @return true, false whether the data was updated in OSM
       def mark_due(api, level=earnt)
         fail ArgumentError, 'level can not be negative' if level < 0
-        section = Osm::Section.get(api: api, section: section_id)
+        section = OSM::Section.get(api: api, section: section_id)
         require_ability_to(api, :write, :badge, section)
 
         result = api.post_query('ext/badges/records/?action=overrideCompletion', post_data: {
@@ -269,19 +269,19 @@ module Osm
       end
 
       # Mark the badge as not due in OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @return true, false whether the data was updated in OSM
       def mark_not_due(api)
         mark_due(api, 0)
       end
 
       # Update data in OSM
-      # @param api [Osm::Api] The api to use to make the request
+      # @param api [OSM::Api] The api to use to make the request
       # @return true, false whether the data was updated in OSM
-      # @raise [Osm::ObjectIsInvalid] If the Data is invalid
+      # @raise [OSM::ObjectIsInvalid] If the Data is invalid
       def update(api)
-        fail Osm::ObjectIsInvalid, 'data is invalid' unless valid?
-        section = Osm::Section.get(api: api, section: section_id)
+        fail OSM::ObjectIsInvalid, 'data is invalid' unless valid?
+        section = OSM::Section.get(api: api, section: section_id)
         require_ability_to(api, :write, :badge, section)
 
         # Update requirements that changed
@@ -327,7 +327,7 @@ module Osm
       end
 
       def inspect
-        Osm.inspect_instance(self, replace_with: { 'badge' => :name })
+        OSM.inspect_instance(self, replace_with: { 'badge' => :name })
       end
 
       # Work out if the requirmeent has been met

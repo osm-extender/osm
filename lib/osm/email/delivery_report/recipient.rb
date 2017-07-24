@@ -1,13 +1,13 @@
-module Osm
+module OSM
   class Email
-    class DeliveryReport < Osm::Model
-      class Recipient < Osm::Model
+    class DeliveryReport < OSM::Model
+      class Recipient < OSM::Model
         VALID_STATUSES = [:processed, :delivered, :bounced].freeze
 
         # @!attribute [rw] id
         #   @return [Integer] the id of the email recipient
         # @!attribute [rw] delivery_report
-        #   @return [Osm::Email::DeliveryReport] the report this recipient belongs to
+        #   @return [OSM::Email::DeliveryReport] the report this recipient belongs to
         # @!attribute [rw] address
         #   @return [String] the email address of the recipient
         # @!attribute [rw] status
@@ -34,20 +34,20 @@ module Osm
 
 
         # Get email contents for this recipient
-        # @param api [Osm::Api] The api to use to make the request
+        # @param api [OSM::Api] The api to use to make the request
         # @!macro options_get
-        # @return [Osm::Email::DeliveryReport::Email]
+        # @return [OSM::Email::DeliveryReport::Email]
         def get_email(api, no_read_cache: false)
-          Osm::Model.require_access_to_section(api: api, section: delivery_report.section_id, no_read_cache: no_read_cache)
+          OSM::Model.require_access_to_section(api: api, section: delivery_report.section_id, no_read_cache: no_read_cache)
           cache_key = ['email_delivery_reports_email', delivery_report.section_id, delivery_report.id, id]
 
-          Osm::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
-            Osm::Email::DeliveryReport::Email.fetch_from_osm(api: api, section: delivery_report.section_id, email: delivery_report.id, member: member_id, address: address)
+          OSM::Model.cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
+            OSM::Email::DeliveryReport::Email.fetch_from_osm(api: api, section: delivery_report.section_id, email: delivery_report.id, member: member_id, address: address)
           end
         end
 
         # Unblock email address from being sent emails
-        # @param api [Osm::Api] The api to use to make the request
+        # @param api [OSM::Api] The api to use to make the request
         # @param true, false whether removal was successful
         def unblock_address(api)
           return true unless bounced?
@@ -59,7 +59,7 @@ module Osm
           })
 
           if data.is_a?(Hash)
-            fail Osm::OSMError, data['error'].to_s unless data['error'].nil?
+            fail OSM::OSMError, data['error'].to_s unless data['error'].nil?
             return !!data['status']
           end
           false
@@ -85,7 +85,7 @@ module Osm
         end
 
         def inspect
-          Osm.inspect_instance(self, replace_with: { 'delivery_report' => :id })
+          OSM.inspect_instance(self, replace_with: { 'delivery_report' => :id })
         end
 
         private def sort_by

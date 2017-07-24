@@ -1,6 +1,6 @@
-module Osm
+module OSM
   module OnlinePayment
-    class Schedule < Osm::Model
+    class Schedule < OSM::Model
       PAY_NOW_OPTIONS = {
         -1 => 'Allowed at all times',
         0  => 'Permanently disabled',
@@ -57,7 +57,7 @@ module Osm
       validates_inclusion_of :archived, in: [true, false]
       validates_inclusion_of :gift_aid, in: [true, false]
       validates_inclusion_of :require_all, in: [true, false]
-      validates :payments, array_of: { item_type: Osm::OnlinePayment::Schedule::Payment, item_valid: true }
+      validates :payments, array_of: { item_type: OSM::OnlinePayment::Schedule::Payment, item_valid: true }
 
 
       # @!method initialize
@@ -66,8 +66,8 @@ module Osm
 
 
       # Get a simple list of schedules for a section
-      # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
+      # @param api [OSM::Api] The api to use to make the request
+      # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the due badges for
       # @!macro options_get
       # @return [Array<Hash>]
       def self.get_list_for_section(api:, section:, no_read_cache: false)
@@ -79,16 +79,16 @@ module Osm
           data = api.post_query("ext/finances/onlinepayments/?action=getSchemes&sectionid=#{section_id}")
           data = data.is_a?(Hash) ? data['items'] : nil
           data ||= []
-          data.map! { |i| { id: Osm.to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
+          data.map! { |i| { id: OSM.to_i_or_nil(i['schemeid']), name: i['name'].to_s } }
         end
       end
 
 
       # Get all payment schedules for a section
-      # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
+      # @param api [OSM::Api] The api to use to make the request
+      # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the due badges for
       # @!macro options_get
-      # @return [Array<Osm::OnlinePayment::Schedule>]
+      # @return [Array<OSM::OnlinePayment::Schedule>]
       def self.get_for_section(api:, section:, no_read_cache: false)
         require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
 
@@ -99,11 +99,11 @@ module Osm
 
 
       # Get a payment schedules for a section
-      # @param api [Osm::Api] The api to use to make the request
-      # @param section [Osm::Section, Integer, #to_i] The section (or its ID) to get the due badges for
-      # @param schedule [Osm::OnlinePayment::Schedule, Integer, #to_i] The ID of the payment schedule to get
+      # @param api [OSM::Api] The api to use to make the request
+      # @param section [OSM::Section, Integer, #to_i] The section (or its ID) to get the due badges for
+      # @param schedule [OSM::OnlinePayment::Schedule, Integer, #to_i] The ID of the payment schedule to get
       # @!macro options_get
-      # @return [Array<Osm::OnlinePayment::Schedule>]
+      # @return [Array<OSM::OnlinePayment::Schedule>]
       def self.get(api:, section:, schedule:, no_read_cache: false)
         require_ability_to(api: api, to: :read, on: :finance, section: section, no_read_cache: no_read_cache)
         section_id = section.to_i
@@ -113,9 +113,9 @@ module Osm
         cache_fetch(api: api, key: cache_key, no_read_cache: no_read_cache) do
           data = api.post_query("ext/finances/onlinepayments/?action=getPaymentSchedule&sectionid=#{section_id}&schemeid=#{schedule_id}&allpayments=true")
           schedule = new(
-            id:            Osm.to_i_or_nil(data['schemeid']),
+            id:            OSM.to_i_or_nil(data['schemeid']),
             section_id:    section_id,
-            account_id:    Osm.to_i_or_nil(data['accountid']),
+            account_id:    OSM.to_i_or_nil(data['accountid']),
             name:          data['name'],
             description:   data['description'],
             archived:      data['archived'].eql?('1'),
@@ -129,9 +129,9 @@ module Osm
             payment = Payment.new(
               amount:   payment_data['amount'],
               archived: payment_data['archived'].eql?('1'),
-              due_date: Osm.parse_date(payment_data['date']),
+              due_date: OSM.parse_date(payment_data['date']),
               name:     payment_data['name'].to_s,
-              id:       Osm.to_i_or_nil(payment_data['paymentid']),
+              id:       OSM.to_i_or_nil(payment_data['paymentid']),
               schedule: schedule
             )
             schedule.payments.push payment
@@ -142,16 +142,16 @@ module Osm
 
 
       # Get payments made by members for the schedule
-      # @param api [Osm::Api] The api to use to make the request
-      # @param term [Osm::Term, Integer, #to_i] The term (or it's id) to get details for (defaults to current term)
+      # @param api [OSM::Api] The api to use to make the request
+      # @param term [OSM::Term, Integer, #to_i] The term (or it's id) to get details for (defaults to current term)
       # @!macro options_get
-      # @return [Array<Osm::OnlinePayment::Schedule::PaymentsForMember>]
+      # @return [Array<OSM::OnlinePayment::Schedule::PaymentsForMember>]
       def get_payments_for_members(api:, term: nil, no_read_cache: false)
         require_ability_to(api: api, to: :read, on: :finance, section: section_id, no_read_cache: no_read_cache)
 
         if term.nil?
-          section = Osm::Section.get(api: api, section: section_id, no_read_cache: no_read_cache)
-          term = section.waiting? ? -1 : Osm::Term.get_current_term_for_section(api: api, section: section)
+          section = OSM::Section.get(api: api, section: section_id, no_read_cache: no_read_cache)
+          term = section.waiting? ? -1 : OSM::Term.get_current_term_for_section(api: api, section: section)
         end
 
         cache_key = ['online_payments', 'for_members', id, term.to_i]
@@ -167,12 +167,12 @@ module Osm
             end
 
             PaymentsForMember.new(
-              member_id:      Osm.to_i_or_nil(item['scoutid']),
+              member_id:      OSM.to_i_or_nil(item['scoutid']),
               section_id:     section_id,
-              grouping_id:    Osm.to_i_or_nil(item['patrolid']),
+              grouping_id:    OSM.to_i_or_nil(item['patrolid']),
               first_name:     item['firstname'],
               last_name:      item['lastname'],
-              start_date:     require_all ? Osm.parse_date(item['startdate']) : nil,
+              start_date:     require_all ? OSM.parse_date(item['startdate']) : nil,
               direct_debit:   item['directdebit'].downcase.to_sym,
               payments:       payments_data,
               schedule:       self
@@ -185,7 +185,7 @@ module Osm
 
 
       # Get unarchived payments for the schedule
-      # @return [Array<Osm::OnlinePayment::Schedule::Payment>]
+      # @return [Array<OSM::OnlinePayment::Schedule::Payment>]
       def current_payments
         payments.select { |p| !p.archived? }
       end
@@ -196,7 +196,7 @@ module Osm
       end
 
       # Get archived payments for the schedule
-      # @return [Array<Osm::OnlinePayment::Schedule::Payment>]
+      # @return [Array<OSM::OnlinePayment::Schedule::Payment>]
       def archived_payments
         payments.select(&:archived?)
       end
