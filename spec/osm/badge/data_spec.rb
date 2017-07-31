@@ -124,7 +124,7 @@ describe OSM::Badge::Data do
 
   describe 'Works out if the badge has been earnt' do
     it 'Staged' do
-      badge = OSM::StagedBadge.new(levels: [0, 1, 2, 3])
+      badge = OSM::Badge::StagedActivity.new(levels: [0, 1, 2, 3])
       data = OSM::Badge::Data.new(awarded: 2, badge: badge)
 
       allow(data).to receive(:earnt) { 1 }
@@ -138,7 +138,7 @@ describe OSM::Badge::Data do
     end
 
     it 'Non staged' do
-      badge = OSM::ActivityBadge.new(
+      badge = OSM::Badge::Activity.new(
         min_modules_required: 0,
         min_requirements_required: 0,
         modules: [
@@ -238,7 +238,7 @@ describe OSM::Badge::Data do
   describe 'Works out what level of a badge has been earnt' do
 
     it 'Staged (activity)' do
-      badge = OSM::StagedBadge.new(
+      badge = OSM::Badge::StagedActivity.new(
         levels: [0, 1, 2, 3],
         min_modules_required: 0,
         min_requirements_completed: 0,
@@ -280,7 +280,7 @@ describe OSM::Badge::Data do
     end
 
     it 'Staged (count)' do
-      badge = OSM::StagedBadge.new(
+      badge = OSM::Badge::StagedActivity.new(
         levels: [0, 1, 2, 3, 4, 5, 10, 15, 20],
         show_level_letters: false,
         level_requirement: 3000,
@@ -294,7 +294,7 @@ describe OSM::Badge::Data do
     end
 
     it 'Non staged' do
-      data = OSM::Badge::Data.new(badge: OSM::ActivityBadge.new)
+      data = OSM::Badge::Data.new(badge: OSM::Badge::Activity.new)
 
       allow(data).to receive(:earnt?) { true }
       expect(data.earnt).to eq(1)
@@ -305,14 +305,14 @@ describe OSM::Badge::Data do
   end
 
   it 'Works out if the badge has been started' do
-    expect(OSM::Badge::Data.new(badge: OSM::CoreBadge.new, requirements: { 1 => 'Yes', 2 => '' }).started?).to eq(true)
-    expect(OSM::Badge::Data.new(badge: OSM::CoreBadge.new, requirements: { 1 => 'Yes', 2 => '' }, due: 1).started?).to eq(false)
-    expect(OSM::Badge::Data.new(badge: OSM::CoreBadge.new, requirements: { 1 => 'xNo', 2 => '' }).started?).to eq(false)
-    expect(OSM::Badge::Data.new(badge: OSM::CoreBadge.new, requirements: { 1 => '', 2 => '' }).started?).to eq(false)
+    expect(OSM::Badge::Data.new(badge: OSM::Badge::Core.new, requirements: { 1 => 'Yes', 2 => '' }).started?).to eq(true)
+    expect(OSM::Badge::Data.new(badge: OSM::Badge::Core.new, requirements: { 1 => 'Yes', 2 => '' }, due: 1).started?).to eq(false)
+    expect(OSM::Badge::Data.new(badge: OSM::Badge::Core.new, requirements: { 1 => 'xNo', 2 => '' }).started?).to eq(false)
+    expect(OSM::Badge::Data.new(badge: OSM::Badge::Core.new, requirements: { 1 => '', 2 => '' }).started?).to eq(false)
 
     # Staged Activity Badge
     expect(OSM::Badge::Data.new(
-      badge: OSM::StagedBadge.new(
+      badge: OSM::Badge::StagedActivity.new(
         levels: [0, 1, 2],
         show_level_letters: true,
         requirements: [
@@ -327,13 +327,13 @@ describe OSM::Badge::Data do
 
     # Staged Count Badge
     expect(OSM::Badge::Data.new(
-      badge: OSM::StagedBadge.new(levels: [0, 1, 2, 3, 4, 5, 10, 15, 20], show_level_letters: false, level_requirement: 1000),
+      badge: OSM::Badge::StagedActivity.new(levels: [0, 1, 2, 3, 4, 5, 10, 15, 20], show_level_letters: false, level_requirement: 1000),
       requirements: { 1000 => 5, 2000 => '5', 3000 => '' },
       due: 5,
       awarded: 4
     ).started?).to eq(false) # Finished lvl 5 & not started lvl 10
     expect(OSM::Badge::Data.new(
-      badge: OSM::StagedBadge.new(levels: [0, 1, 2, 3, 4, 5, 10, 15, 20], show_level_letters: false, level_requirement: 1000),
+      badge: OSM::Badge::StagedActivity.new(levels: [0, 1, 2, 3, 4, 5, 10, 15, 20], show_level_letters: false, level_requirement: 1000),
       requirements: { 1000 => 6, 2000 => '6', 3000 => '' },
       due: 5,
       awarded: 3
@@ -342,14 +342,14 @@ describe OSM::Badge::Data do
 
   it 'Works out what stage of the badge has been started' do
     # Non-Staged badges (0 or 1)
-    expect(OSM::Badge::Data.new(badge: OSM::CoreBadge.new, requirements: { 10 => 'Yes', 11 => '' }).started).to eq(1)
-    expect(OSM::Badge::Data.new(badge: OSM::CoreBadge.new, requirements: { 10 => 'Yes', 11 => '' }, due: 1).started).to eq(0)
-    expect(OSM::Badge::Data.new(badge: OSM::CoreBadge.new, requirements: { 10 => 'xNo', 11 => '' }).started).to eq(0)
-    expect(OSM::Badge::Data.new(badge: OSM::CoreBadge.new, requirements: { 10 => '', 11 => '' }).started).to eq(0)
+    expect(OSM::Badge::Data.new(badge: OSM::Badge::Core.new, requirements: { 10 => 'Yes', 11 => '' }).started).to eq(1)
+    expect(OSM::Badge::Data.new(badge: OSM::Badge::Core.new, requirements: { 10 => 'Yes', 11 => '' }, due: 1).started).to eq(0)
+    expect(OSM::Badge::Data.new(badge: OSM::Badge::Core.new, requirements: { 10 => 'xNo', 11 => '' }).started).to eq(0)
+    expect(OSM::Badge::Data.new(badge: OSM::Badge::Core.new, requirements: { 10 => '', 11 => '' }).started).to eq(0)
 
 
     # Staged Activity
-    staged_activity = OSM::StagedBadge.new(
+    staged_activity = OSM::Badge::StagedActivity.new(
       levels: [0, 1, 2],
       show_level_letters: true,
       requirements: [
@@ -382,7 +382,7 @@ describe OSM::Badge::Data do
 
 
     # Staged count
-    staged_count = OSM::StagedBadge.new(
+    staged_count = OSM::Badge::StagedActivity.new(
       levels: [0, 1, 2, 3, 4, 5, 10, 15, 20],
       show_level_letters: false,
       level_requirement: 3000,
@@ -423,7 +423,7 @@ describe OSM::Badge::Data do
           last_name: 'ln',
           section_id: 2,
           requirements: { 2345 => '1', 6789 => '2' },
-          badge: OSM::CoreBadge.new(
+          badge: OSM::Badge::Core.new(
             id: 123,
             version: 0,
             requirements: [
@@ -551,7 +551,7 @@ describe OSM::Badge::Data do
       data = OSM::Badge::Data.new(
         member_id: 1,
         section_id: 2,
-        badge: OSM::CoreBadge.new(
+        badge: OSM::Badge::Core.new(
           id: 123,
           version: 0
         )
@@ -577,7 +577,7 @@ describe OSM::Badge::Data do
       data = OSM::Badge::Data.new(
         member_id: 1,
         section_id: 2,
-        badge: OSM::CoreBadge.new(
+        badge: OSM::Badge::Core.new(
           id: 123,
           version: 0
         )

@@ -179,10 +179,10 @@ describe OSM::Badge do
       end
 
       urls = {
-        OSM::CoreBadge =>      'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=4&term_id=2&section_id=1',
-        OSM::ChallengeBadge => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=1&term_id=2&section_id=1',
-        OSM::StagedBadge =>    'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=3&term_id=2&section_id=1',
-        OSM::ActivityBadge =>  'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=2&term_id=2&section_id=1'
+        OSM::Badge::Core => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=4&term_id=2&section_id=1',
+        OSM::Badge::Challenge => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=1&term_id=2&section_id=1',
+        OSM::Badge::StagedActivity => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=3&term_id=2&section_id=1',
+        OSM::Badge::Activity => 'ext/badges/records/?action=getBadgeStructureByType&section=beavers&type_id=2&term_id=2&section_id=1'
       }
       urls.each do |type, path|
         it type.type.to_s.titleize do
@@ -252,7 +252,7 @@ describe OSM::Badge do
       }
 
       expect($api).to receive(:post_query).with('ext/badges/records/?action=getBadgeRecords&term_id=2&section=beavers&badge_id=123&section_id=1&badge_version=0').and_return(data)
-      datas = OSM::CoreBadge.new(id: 123, version: 0).get_data_for_section(api: $api, section: OSM::Section.new(id: 1, type: :beavers), term: 2)
+      datas = OSM::Badge::Core.new(id: 123, version: 0).get_data_for_section(api: $api, section: OSM::Section.new(id: 1, type: :beavers), term: 2)
       expect(datas.size).to eq(1)
       data = datas[0]
       expect(data.member_id).to eq(3)

@@ -14,6 +14,12 @@
       * NotFound
     * Error < RuntimeError
       * InvalidObject < RuntimeError
+  * Badge classes added to a hierarchy:
+    * OSM::Badge
+      * Core
+      * Challenge
+      * Activity
+      * StagedActivity
   * Remove support for ruby <= 2.2.5, jruby, rails < 4
   * Add support for ruby 2.4.0
   * Remove dependancy on active_support and httparty gems
