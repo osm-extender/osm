@@ -22,6 +22,8 @@ This gem supports the following versions of ruby, it may work on other versions 
 
   * 2.3.0
   * 2.3.1
+  * 2.3.2
+  * 2.3.3
   * 2.4.0
 
 

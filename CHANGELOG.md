@@ -25,6 +25,7 @@
   * Osm::Api instances now have an http_user_agent attribute
   * no_cache option is now no_read_cache
   * Osm::Badges stuff has moved to Osm::Badge
+  * Add rubies 2.3.2 and 2.3.3 to travis config
 
 ## Version 1.3.0
 
