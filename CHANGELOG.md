@@ -1,6 +1,8 @@
 ## Version 1.3.1
 
-  * 
+  * Fix "undefined method '<=' for nil:NilClass" when testing if member is current
+  * Update httparty gem (CVE 2013-1801)
+  
 
 ## Version 1.3.0
 
