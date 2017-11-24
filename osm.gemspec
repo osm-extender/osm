@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.executables   = `git ls-files -- bin/*`.split("\n").map { |f| File.basename(f) }
   s.require_paths = ['lib']
 
+  s.add_runtime_dependency 'httparty', '~> 0.10'            # Used to make web requests to the API
   s.add_runtime_dependency 'active_attr', '~> 0.8'
   s.add_runtime_dependency 'activemodel', '>= 4', '< 5'
   s.add_runtime_dependency 'dirty_hashy', '~> 0.2.1'        # Used to track changed data in Badge::Data and FlexiRecord::Data

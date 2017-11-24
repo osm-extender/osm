@@ -33,6 +33,11 @@
   * Osm::Badges stuff has moved to Osm::Badge
   * Add rubies 2.3.2, 2.3.3, 2.4.1 and 2.4.2 to travis config
 
+## Version 1.3.1
+
+  * Fix "undefined method '<=' for nil:NilClass" when testing if member is current
+  * Update httparty gem (CVE 2013-1801)
+
 ## Version 1.3.0
 
   * Add fetching of file names for events (unable to download)
