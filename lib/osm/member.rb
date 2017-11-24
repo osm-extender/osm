@@ -429,8 +429,11 @@ module OSM
     # @param date [Date] The date to check membership status for
     # @return true, false
     def current?(date=Date.today)
+      return nil if started_section.nil? and finished_section.nil?
       if finished_section.nil?
-        (started_section <= date)
+        started_section <= date
+      elsif started_section.nil?
+        finished_section >= date
       else
         (started_section <= date) && (finished_section >= date)
       end
