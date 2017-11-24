@@ -452,13 +452,16 @@ module Osm
     end
 
     # Check if this is a current member of the section they were retrieved for
-    # @param [Date] date The date to check membership status for
-    # @return [Boolean]
+    # @param date [Date] The date to check membership status for
+    # @return true, false
     def current?(date=Date.today)
+      return nil if started_section.nil? and finished_section.nil?
       if finished_section.nil?
-        return (started_section <= date)
+        started_section <= date
+      elsif started_section.nil?
+        finished_section >= date
       else
-        return (started_section <= date) && (finished_section >= date)
+        (started_section <= date) && (finished_section >= date)
       end
     end
 

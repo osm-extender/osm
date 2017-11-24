@@ -112,28 +112,52 @@ describe "Member" do
   end
 
 
-  describe "Tells if the member is currently in the section" do
-    it "Today" do
-      Osm::Member.new(started_section: Date.yesterday).current?.should == true
-      Osm::Member.new(started_section: Date.today).current?.should == true
-      Osm::Member.new(started_section: Date.tomorrow).current?.should == false
-      Osm::Member.new(started_section: Date.yesterday, finished_section: Date.yesterday).current?.should == false
-      Osm::Member.new(started_section: Date.yesterday, finished_section: Date.today).current?.should == true
-      Osm::Member.new(started_section: Date.yesterday, finished_section: Date.tomorrow).current?.should == true
+  describe 'Tells if the member is currently in the section' do
+    context 'Using the current date' do
+      it 'Has a started_section and a finished_section date' do
+        expect(Osm::Member.new(started_section: Date.yesterday, finished_section: Date.yesterday).current?).to eq(false)
+        expect(Osm::Member.new(started_section: Date.yesterday, finished_section: Date.today).current?).to eq(true)
+        expect(Osm::Member.new(started_section: Date.yesterday, finished_section: Date.tomorrow).current?).to eq(true)
+      end
+      it 'Only has a started_section date' do
+        expect(Osm::Member.new(started_section: Date.yesterday).current?).to eq(true)
+        expect(Osm::Member.new(started_section: Date.today).current?).to eq(true)
+        expect(Osm::Member.new(started_section: Date.tomorrow).current?).to eq(false)
+      end
+      it 'Only has a finished_section date' do
+        expect(Osm::Member.new(finished_section: Date.yesterday).current?).to eq(false)
+        expect(Osm::Member.new(finished_section: Date.today).current?).to eq(true)
+        expect(Osm::Member.new(finished_section: Date.tomorrow).current?).to eq(true)
+      end
+      it 'Has neither a started_section or finished_section date' do
+        expect(Osm::Member.new().current?).to be_nil
+      end
     end
 
-    it "Another date" do
-      yesterday = Date.new(2014, 10, 15)
-      today = Date.new(2014, 10, 16)
-      tomorrow = Date.new(2014, 10, 17)
-      Osm::Member.new(started_section: yesterday).current?(today).should == true
-      Osm::Member.new(started_section: today).current?(today).should == true
-      Osm::Member.new(started_section: tomorrow).current?(today).should == false
-      Osm::Member.new(started_section: yesterday, finished_section: yesterday).current?(today).should == false
-      Osm::Member.new(started_section: yesterday, finished_section: today).current?(today).should == true
-      Osm::Member.new(started_section: yesterday, finished_section: tomorrow).current?(today).should == true
-    end
-  end
+    context 'Using another date' do
+      let(:yesterday) { Date.new(2014, 10, 15) }
+      let(:today) { Date.new(2014, 10, 16) }
+      let(:tomorrow) { Date.new(2014, 10, 17) }
+      it 'Has a started_section and a finished_section date' do
+        expect(Osm::Member.new(started_section: yesterday, finished_section: yesterday).current?(today)).to eq(false)
+        expect(Osm::Member.new(started_section: yesterday, finished_section: today).current?(today)).to eq(true)
+        expect(Osm::Member.new(started_section: yesterday, finished_section: tomorrow).current?(today)).to eq(true)
+      end
+      it 'Only has a started_section date' do
+        expect(Osm::Member.new(started_section: yesterday).current?(today)).to eq(true)
+        expect(Osm::Member.new(started_section: today).current?(today)).to eq(true)
+        expect(Osm::Member.new(started_section: tomorrow).current?(today)).to eq(false)
+      end
+      it 'Only has a finished_section date' do
+        expect(Osm::Member.new(finished_section: yesterday).current?(today)).to eq(false)
+        expect(Osm::Member.new(finished_section: today).current?(today)).to eq(true)
+        expect(Osm::Member.new(finished_section: tomorrow).current?(today)).to eq(true)
+      end
+      it 'Has neither a started_section or finished_section date' do
+        expect(Osm::Member.new().current?(today)).to be_nil
+      end
+    end # context Using another date
+  end # describe Tells if the member is currently in the section
 
 
   it "Sorts by section_id, grouping_id, grouping_leader (descending), last_name then first_name" do
