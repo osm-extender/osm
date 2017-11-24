@@ -83,9 +83,10 @@ require File.join(File.dirname(__FILE__), 'osm', 'activity', 'version')
 require File.join(File.dirname(__FILE__), 'osm', 'badge', 'requirement.rb')
 require File.join(File.dirname(__FILE__), 'osm', 'badge', 'requirement_module.rb')
 require File.join(File.dirname(__FILE__), 'osm', 'badge')
+require File.join(File.dirname(__FILE__), 'osm', 'online_payment', 'schedule', 'payment')
 
 # And finally the rest
-Dir[File.join(File.dirname(__FILE__), 'osm', '**', '*.rb')].each { |file| require file }
+Dir[File.join(File.dirname(__FILE__), 'osm', '**', '*.rb')].sort.each { |file| require file }
 
 
 module OSM
