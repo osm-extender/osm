@@ -21,7 +21,6 @@ rvm:
   - 2.4.1
   - 2.4.2
   - 2.4.3
-  - jruby-1.7.20.1
 gemfile:
   - Gemfile
 branches:
