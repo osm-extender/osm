@@ -1,6 +1,6 @@
 ## Version 1.3.2
 
-  * 
+  * Add travis testing against new ruby versions (CVE-2017-17405)
 
 ## Version 1.3.1
 
