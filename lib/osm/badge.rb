@@ -387,7 +387,7 @@ module OSM
       end
 
       data = @module_completion_data[badge.id]
-      fail ArgumentError, "That badge does't exist (bad ID)." if data.nil?
+      fail ArgumentError, "That badge doesn't exist (bad ID)." if data.nil?
 
       if data[badge.version].nil? && !fetched_this_time
         @module_completion_data = get_module_completion_data(api, no_read_cache: no_read_cache)
@@ -395,7 +395,7 @@ module OSM
         fetched_this_time = true
       end
       data = data[badge.version]
-      fail ArgumentError, "That badge does't exist (bad version)." if data.nil?
+      fail ArgumentError, "That badge doesn't exist (bad version)." if data.nil?
 
       data.each { |i| i.badge = badge }
       data
