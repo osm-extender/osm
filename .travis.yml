@@ -31,3 +31,6 @@ branches:
     - /dev_ver_\d+\.\d+/
 before_install: gem update bundler
 script: bundle exec rspec
+notifications:
+  slack:
+    secure: SIgV9OYZYskwEJfUJQBh+fDtaa0vIhSwMZZ6DfVu6EyrHh61NlTzPwf9n9uYT14VeQ9lMNWNDB2Gu7AI+HDQF8YbUZxfINR506BLuXYXkDiPPTWN61BP+UjC0v+w3fQrvGrLsvRPyQfBRwVqKrsavzX9ubxQbs2iosfX9K8I2Mo=
