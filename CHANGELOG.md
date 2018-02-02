@@ -1,3 +1,8 @@
+## Version 1.3.2
+
+  * Add travis testing against new ruby versions (CVE-2017-17405)
+  * Add more information to exceptions raised when badge requirement modules can't be found
+
 ## Version 1.3.1
 
   * Fix "undefined method '<=' for nil:NilClass" when testing if member is current
