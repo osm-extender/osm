@@ -1,3 +1,7 @@
+## Version 1.3.4
+
+  * 
+
 ## Version 1.3.3
 
   * Fix due to OSM's API changing data returned when getting a section's notepad.
