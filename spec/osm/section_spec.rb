@@ -167,7 +167,7 @@ describe "Section" do
         'userid' => 'user_id',
         'secret' => 'secret',
       }
-      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>{"1" => "Section 1", "2" => "Section 2"}.to_json}) }
+      HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>{"1" => {"raw" => "Section 1", "html" => "<p>Section 1</p>"}, "2" => {"raw" => "Section 2", "html" => "<p>Section 2</p>"}}.to_json}) }
       section = Osm::Section.new(:id => 1)
       section.get_notepad(@api).should == 'Section 1'
     end
@@ -179,7 +179,7 @@ describe "Section" do
         'token' => @CONFIGURATION[:api][:osm][:token],
         'userid' => 'user_id',
         'secret' => 'secret',
-        'value' => 'content'
+        'raw' => 'content'
       }
       HTTParty.should_receive(:post).with(url, {:body => post_data}) { OsmTest::DummyHttpResult.new(:response=>{:code=>'200', :body=>'{"ok":true}'}) }
       section = Osm::Section.new(:id => 1)

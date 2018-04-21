@@ -1,3 +1,7 @@
+## Version 1.3.3
+
+  * Fix due to OSM's API changing data returned when getting a section's notepad.
+
 ## Version 1.3.2
 
   * Add travis testing against new ruby versions (CVE-2017-17405)

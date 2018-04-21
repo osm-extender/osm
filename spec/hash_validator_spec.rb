@@ -6,7 +6,7 @@ module HashValidatorSpec
   class KeyTypeTestModel
     include ActiveAttr::Model
     attribute :hash_attr
-    validates :hash_attr, :hash => {:key_type => Fixnum}
+    validates :hash_attr, :hash => {:key_type => Integer}
   end
 
   class KeyInTestModel
@@ -18,7 +18,7 @@ module HashValidatorSpec
   class ValueTypeTestModel
     include ActiveAttr::Model
     attribute :hash_attr
-    validates :hash_attr, :hash => {:value_type => Fixnum}
+    validates :hash_attr, :hash => {:value_type => Integer}
   end
 
   class ValueInTestModel
@@ -43,14 +43,14 @@ module HashValidatorSpec
         model = KeyTypeTestModel.new(hash_attr: {1=>'1', 2=>'2', '3'=>'3'})
         model.valid?.should == false
         model.errors.count.should == 1
-        model.errors.messages.should == {hash_attr: ['keys must be a Fixnum ("3" is not).']}
+        model.errors.messages.should == {hash_attr: ['keys must be a Integer ("3" is not).']}
       end
 
       it "Has several incorrect keys" do
         model = KeyTypeTestModel.new(hash_attr: {1=>'1', 2=>'2', '3'=>'3', '4'=>'4'})
         model.valid?.should == false
         model.errors.count.should == 2
-        model.errors.messages.should == {hash_attr: ['keys must be a Fixnum ("3" is not).', 'keys must be a Fixnum ("4" is not).']}
+        model.errors.messages.should == {hash_attr: ['keys must be a Integer ("3" is not).', 'keys must be a Integer ("4" is not).']}
       end
 
     end
@@ -93,14 +93,14 @@ module HashValidatorSpec
         model = ValueTypeTestModel.new(hash_attr: {'1'=>1, '2'=>2, '3'=>'3'})
         model.valid?.should == false
         model.errors.count.should == 1
-        model.errors.messages.should == {hash_attr: ['values must be a Fixnum ("3" for key "3" is not).']}
+        model.errors.messages.should == {hash_attr: ['values must be a Integer ("3" for key "3" is not).']}
       end
 
       it "Has several incorrect keys" do
         model = ValueTypeTestModel.new(hash_attr: {'1'=>1, '2'=>2, '3'=>'3', '4'=>'4'})
         model.valid?.should == false
         model.errors.count.should == 2
-        model.errors.messages.should == {hash_attr: ['values must be a Fixnum ("3" for key "3" is not).', 'values must be a Fixnum ("4" for key "4" is not).']}
+        model.errors.messages.should == {hash_attr: ['values must be a Integer ("3" for key "3" is not).', 'values must be a Integer ("4" for key "4" is not).']}
       end
 
     end

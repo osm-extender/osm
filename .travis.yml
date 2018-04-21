@@ -1,32 +1,36 @@
 language: ruby
 rvm:
-  - 1.9.3
-  - 2.0.0
-  - 2.2.1
-  - 2.2.2
-  - 2.2.3
-  - 2.2.4
-  - 2.2.5
-  - 2.2.6
-  - 2.2.7
-  - 2.2.8
-  - 2.2.9
-  - 2.3.0
-  - 2.3.1
-  - 2.3.2
-  - 2.3.3
-  - 2.3.4
-  - 2.3.5
-  - 2.3.6
-  - jruby-1.7.20.1
+- 1.9.3
+- 2.0.0
+- 2.2.1
+- 2.2.2
+- 2.2.3
+- 2.2.4
+- 2.2.5
+- 2.2.6
+- 2.2.7
+- 2.2.8
+- 2.2.9
+- 2.3.0
+- 2.3.1
+- 2.3.2
+- 2.3.3
+- 2.3.4
+- 2.3.5
+- 2.3.6
+- jruby-1.7.20.1
 gemfile:
-  - Gemfile
-  - gemfiles/rails3
+- Gemfile
+- gemfiles/rails3
 branches:
   only:
-    - master
-    - staging
-    - /gh(?:\d)+(?:-.+)?/
-    - /dev_ver_\d+\.\d+/
+  - master
+  - staging
+  - "/gh(?:\\d)+(?:-.+)?/"
+  - "/dev_ver_\\d+\\.\\d+/"
 before_install: gem update bundler
 script: rake ci:travis
+notifications:
+  slack:
+    on_success: always
+    secure: SIgV9OYZYskwEJfUJQBh+fDtaa0vIhSwMZZ6DfVu6EyrHh61NlTzPwf9n9uYT14VeQ9lMNWNDB2Gu7AI+HDQF8YbUZxfINR506BLuXYXkDiPPTWN61BP+UjC0v+w3fQrvGrLsvRPyQfBRwVqKrsavzX9ubxQbs2iosfX9K8I2Mo=
