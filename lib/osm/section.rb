@@ -269,8 +269,9 @@ module Osm
 
       notepad = ''
       notepads.each do |key, value|
-        cache_write(api, ['notepad', key.to_i], value)
-        notepad = value if key.to_i == id
+        raw_value = value.fetch('raw', '')
+        cache_write(api, ['notepad', key.to_i], raw_value)
+        notepad = raw_value if key.to_i == id
       end
 
       return notepad
@@ -282,7 +283,7 @@ module Osm
     # @return [Boolean] whether the notepad was sucessfully updated
     def set_notepad(api, content)
       require_access_to_section(api, self)
-      data = api.perform_query("users.php?action=updateNotepad&sectionid=#{id}", {'value' => content})
+      data = api.perform_query("users.php?action=updateNotepad&sectionid=#{id}", {'raw' => content})
 
       if data.is_a?(Hash) && data['ok'] # Success
         cache_write(api, ['notepad', id], content)
