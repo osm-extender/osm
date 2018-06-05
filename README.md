@@ -1,5 +1,4 @@
 [![Gem Version](https://badge.fury.io/rb/osm.png)](http://badge.fury.io/rb/osm)
-[![Dependency Status](https://gemnasium.com/robertgauld/osm.png)](https://gemnasium.com/robertgauld/osm)
 
 Master branch:
 [![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=master)](http://travis-ci.org/robertgauld/osm)
