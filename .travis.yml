@@ -34,4 +34,6 @@ script: bundle exec rspec
 notifications:
   slack:
     on_success: always
-    secure: "F/wN7aMLwR14sLVhz5AZtQNpVQ1hi4ttW5OzvRxS7Oe0pQJtNhyGayx0SCqQ5FbDrwKUsZTHXByLUUG1eUacUwbjtlrr2d0PW1jByLlI7G4alu533mk7uKkBYCWoEa6gwSta1Ac5TYFnz/iHrkIDwh2iIiRZTM+MF9AnNIhwjE8="
+    on_failure: always
+    rooms:
+    - secure: VxFEOknGE8gcsGk8yE/iogjSogR6fs/IO3keCOHQl/krrGJGy3Lj6lxOdSQ2he+qMaoJs4HgSJRSedpJ3++U26FDtYbhv4S4TUVZ6wo8baVabhU0jCTvG2DNRiDnHTdFWagehanwcFo76hoPxvEAaQcifbVoQQ9/ZYwX9lk9nBo=
