@@ -1,5 +1,5 @@
 ==Copyright
-Copyright (c) 2011-2017, Robert Gauld. All rights reserved.
+Copyright (c) 2011-2018, Robert Gauld. All rights reserved.
 
 
 ==License
