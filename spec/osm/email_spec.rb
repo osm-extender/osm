@@ -184,7 +184,7 @@ describe "Email" do
         it "Empty array allowed" do
           @report.recipients = []
           @report.valid?.should == true
-          @report.errors.messages[:recipients].should == nil
+          @report.errors.messages[:recipients].to_a.should be_empty
         end
 
         it "Invalid item in array not allowed" do
