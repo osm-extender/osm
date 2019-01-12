@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency 'httparty', '~> 0.10'            # Used to make web requests to the API
   s.add_runtime_dependency 'active_attr', '~> 0.8'
-  s.add_runtime_dependency 'activemodel', '>= 4', '< 5'
+  s.add_runtime_dependency 'activemodel', '>= 4', '< 6'
   s.add_runtime_dependency 'dirty_hashy', '~> 0.2.1'        # Used to track changed data in Badge::Data and FlexiRecord::Data
 
   s.add_development_dependency 'rake', '~> 12.0'

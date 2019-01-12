@@ -12,7 +12,8 @@ rvm:
   - 2.4.2
   - 2.4.3
 gemfile:
-  - Gemfile
+  - gemfiles/rails4
+  - gemfiles/rails5
 branches:
   only:
     - master

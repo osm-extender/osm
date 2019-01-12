@@ -33,7 +33,7 @@ describe OSM::Email::DeliveryReport do
       it 'Empty array allowed' do
         @report.recipients = []
         expect(@report.valid?).to eq(true)
-        expect(@report.errors.messages[:recipients]).to eq(nil)
+        expect(@report.errors.messages[:recipients].to_a).to be_empty
       end
 
       it 'Invalid item in array not allowed' do
