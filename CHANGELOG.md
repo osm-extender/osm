@@ -1,3 +1,7 @@
+## Version 1.3.4
+
+  * Update dependancies to allow using with a rails 5 app (rails 4 & rails 3 are still tested against by travis)
+
 ## Version 1.3.3
 
   * Fix due to OSM's API changing data returned when getting a section's notepad.

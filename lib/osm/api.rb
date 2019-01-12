@@ -289,7 +289,7 @@ module Osm
               fail Osm::Error, osm_error if osm_error
             end
             return decoded
-          rescue ActiveModel::VERSION::MAJOR.eql?(4) ? JSON::ParserError : MultiJson::ParseError
+          rescue ActiveModel::VERSION::MAJOR >= 4 ? JSON::ParserError : MultiJson::ParseError
             fail Osm::Error, result.response.body
           end
         when 'image/jpeg'
