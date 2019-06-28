@@ -1,6 +1,6 @@
 ## Version 1.3.5
 
-  * ...
+  * Fix to fetching members - not correctly interpreting enabledness of phone numbers and emails.
 
 ## Version 1.3.4
 
