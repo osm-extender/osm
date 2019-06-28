@@ -1,3 +1,7 @@
+## Version 1.3.5
+
+  * Fix to fetching members - not correctly interpreting enabledness of phone numbers and emails.
+
 ## Version 1.3.4
 
   * Update dependancies to allow using with a rails 5 app (rails 4 & rails 3 are still tested against by travis)
