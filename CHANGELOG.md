@@ -1,6 +1,6 @@
 ## Version 1.3.6
 
-  * ...
+  * OSM gem is no longer supported. See UNSUPPORTED.md for more details.
 
 ## Version 1.3.5
 
