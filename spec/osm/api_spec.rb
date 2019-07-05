@@ -10,6 +10,11 @@ describe "API" do
     @api.api_name.should == @CONFIGURATION[:api][:osm][:name]
   end
 
+  it "Raises errors on trying to configure if abandonment is not acknowledged" do
+    expect { Osm::Api.configure default_site: :osm, osm: { id: nil, token: nil, name: nil } }
+      .to raise_error Osm::Error, /^The OSM gem is now unsupported. To continue using it append "i_know: :unsupported" to your passed options. See .+ for more details.$/
+  end
+
   it "Raises errors on bad arguments to configure" do
     expect{ Osm::Api.configure(@CONFIGURATION[:api].select{ |k,v| (k != :default_site)}) }.to raise_error(ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm')
     expect{ Osm::Api.configure(@CONFIGURATION[:api].merge(:default_site => :invalid)) }.to raise_error(ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm')

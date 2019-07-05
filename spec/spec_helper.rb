@@ -57,13 +57,14 @@ RSpec.configure do |config|
           :token => 'API TOKEN 2',
           :name => 'API NAME 2',
         },
+        :i_know => :unsupported
       },
       :cache => {
         :cache => OsmTest::Cache,
       },
     }
     Osm::configure(@CONFIGURATION)
-    
+
     @api = Osm::Api.new('user_id', 'secret')
     Osm::Model.stub(:require_ability_to).and_return(nil)
     Osm::Model.stub(:require_access_to_section).and_return(nil)

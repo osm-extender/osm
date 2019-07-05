@@ -31,14 +31,21 @@ module Osm
     # @option options [Boolean] :debug if true debugging info is output (optional, default = false)
     # @return nil
     def self.configure(options)
+      unless options[:i_know].eql?(:unsupported)
+        raise Osm::Error, 'The OSM gem is now unsupported. ' \
+                          'To continue using it append "i_know: :unsupported" to your passed options. ' \
+                          "See #{File.expand_path(File.join(File.dirname(__FILE__), '..', '..', 'UNSUPPORTED.md'))} for more details."
+      end
+
       raise ArgumentError, ':default_site does not exist in options hash or is invalid, this should be set to either :osm or :ogm' unless Osm::Api::BASE_URLS.keys.include?(options[:default_site])
       raise ArgumentError, ":#{options[:default_site]} does not exist in options hash" if options[options[:default_site]].nil?
+
       Osm::Api::BASE_URLS.keys.each do |api_key|
         if options[api_key]
           api_data = options[api_key]
           raise ArgumentError, ":#{api_key} must be a Hash" unless api_data.is_a?(Hash)
           [:id, :token, :name].each do |key|
-            raise ArgumentError, ":#{api_key} must contain a key :#{key}" if api_data[key].nil?
+            raise ArgumentError, ":#{api_key} must contain a key :#{key}" unless api_data.key?(key)
           end
         end
       end
