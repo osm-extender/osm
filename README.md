@@ -4,14 +4,13 @@
 [![Gem Version](https://badge.fury.io/rb/osm.png)](http://badge.fury.io/rb/osm)
 
 Master branch:
-[![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=master)](http://travis-ci.org/robertgauld/osm)
-[![Coveralls Status](https://coveralls.io/repos/robertgauld/osm/badge.png?branch=master)](https://coveralls.io/r/robertgauld/osm)
-[![Code Climate](https://codeclimate.com/github/robertgauld/osm.png?branch=master)](https://codeclimate.com/github/robertgauld/osm)
+[![Build Status](https://secure.travis-ci.org/osm-extender/osm.png?branch=master)](http://travis-ci.org/osm-extender/osm)
+[![Coveralls Status](https://coveralls.io/repos/osm-extender/osm/badge.png?branch=master)](https://coveralls.io/r/osm-extender/osm)
+[![Code Climate](https://codeclimate.com/github/osm-extender/osm.png?branch=master)](https://codeclimate.com/github/osm-extender/osm)
 
 Staging branch:
-[![Build Status](https://secure.travis-ci.org/robertgauld/osm.png?branch=staging)](http://travis-ci.org/robertgauld/osm)
-[![Coveralls Status](https://coveralls.io/repos/robertgauld/osm/badge.png?branch=master)](https://coveralls.io/r/robertgauld/osm)
-[![Code Climate](https://codeclimate.com/github/robertgauld/osm.png?branch=staging)](https://codeclimate.com/github/robertgauld/osm)
+[![Build Status](https://secure.travis-ci.org/osm-extender/osm.png?branch=staging)](http://travis-ci.org/osm-extender/osm)
+[![Coveralls Status](https://coveralls.io/repos/osm-extender/osm/badge.png?branch=master)](https://coveralls.io/r/osm-extender/osm)
 
 
 ## Build State
@@ -83,7 +82,7 @@ api_for_this_user = Osm::Api.new(userid, secret)
 
 ## Documentation & Versioning
 
-Documentation can be found on [rubydoc.info](http://rubydoc.info/github/robertgauld/osm/master/frames)
+Documentation can be found on [rubydoc.info](http://rubydoc.info/github/osm-extender/osm/master/frames)
 
 We follow the [Semantic Versioning](http://semver.org/) concept,
 however it should be noted that when the OSM API adds a feature it can be difficult to decide Whether to bump the patch or minor version number up. A smaller change (such as adding score into the grouping object) will bump the patch whereas a larger change wil bump the minor version.
@@ -180,7 +179,7 @@ however it should be noted that when the OSM API adds a feature it can be diffic
 
 ## Parts of the OSM API currently NOT supported (may not be an exhaustive list):
 
-See the [Roadmap page in the wiki](https://github.com/robertgauld/osm/wiki/Roadmap) for more details.
+See the [Roadmap page in the wiki](https://github.com/osm-extender/osm/wiki/Roadmap) for more details.
 
   * MyScout (Everything)
   * Adult Section Specific Stuff
